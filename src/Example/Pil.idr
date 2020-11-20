@@ -79,6 +79,16 @@ public export
 (!!=) : (n : Name) -> Expression ctx ty -> Statement ctx $ ((n, ty) :: ctx)
 n !!= v = var n ty *> n |= relaxExprCtx v
 
+namespace AlternativeDefineAndAssign
+
+  public export
+  (|=) : (p : (Name, Type)) -> Expression ctx (snd p) -> Statement ctx $ (p :: ctx)
+  (n, _) |= v = n !!= v
+
+  public export
+  (.) : a -> b -> (b, a)
+  (.) a b = (b, a)
+
 -------------------------
 --- Examples of usage ---
 -------------------------
@@ -101,7 +111,9 @@ lost_block : Statement ctx ctx
 lost_block = block $ do
                var "x" Int
                "x" |= i 2
+               Int. "y" |= V "x"
+               Int. "z" |= C 3
 
 some_for : Statement ctx ctx
-some_for = for (do "x" !!= i 0; "y" !!= i 0) (V "x" < i 5) ("x" |= V "x" + i 1) $ do
+some_for = for (do Int. "x" |= i 0; Int. "y" |= i 0) (V "x" < i 5) ("x" |= V "x" + i 1) $ do
              "y" |= V "y" + V "x" + i 1
