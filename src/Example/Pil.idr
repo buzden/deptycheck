@@ -60,14 +60,14 @@ data Expression : (ctx : Context) -> (res : Type) -> Type where
   -- Binary operation over the results of two another expressions
   B : (f : a -> b -> c) -> Expression ctx a -> Expression ctx b -> Expression ctx c
 
-infix 2 |=, !!=
+infix 2 #=, ?#=
 infixr 1 *>
 
 public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
   nop  : Statement ctx ctx
   (.)  : (0 ty : Type) -> (n : Name) -> {0 ctx : Context} -> Statement ctx $ (n, ty)::ctx
-  (|=) : (n : Name) -> (0 ty : Lookup n ctx) => (v : Expression ctx $ found ty) -> Statement ctx ctx
+  (#=) : (n : Name) -> (0 ty : Lookup n ctx) => (v : Expression ctx $ found ty) -> Statement ctx ctx
   for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool)
       -> (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body)
       -> Statement outer_ctx outer_ctx
@@ -84,14 +84,14 @@ if_ c t = if__ c t nop
 
 -- Define with derived type and assign immediately
 public export
-(!!=) : (n : Name) -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
-n !!= v = ty. n *> n |= v
+(?#=) : (n : Name) -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
+n ?#= v = ty. n *> n #= v
 
 namespace AlternativeDefineAndAssign
 
   public export
-  (|=) : (p : (Name, Type)) -> Expression ((fst p, snd p)::ctx) (snd p) -> Statement ctx $ p::ctx
-  (n, _) |= v = n !!= v
+  (#=) : (p : (Name, Type)) -> Expression ((fst p, snd p)::ctx) (snd p) -> Statement ctx $ p::ctx
+  (n, _) #= v = n ?#= v
 
   public export
   (.) : a -> b -> (b, a)
@@ -123,23 +123,23 @@ show = U show
 simple_ass : Statement ctx $ ("x", Int)::ctx
 simple_ass = do
   Int. "x"
-  "x" |= C 2
+  "x" #= C 2
 
 lost_block : Statement ctx ctx
 lost_block = block $ do
                Int. "x"
-               "x" |= C 2
-               Int. "y" |= V "x"
-               Int. "z" |= C 3
+               "x" #= C 2
+               Int. "y" #= V "x"
+               Int. "z" #= C 3
                print $ V "y" + V "z" + V "x"
 
 some_for : Statement ctx ctx
-some_for = for (do Int. "x" |= C 0; Int. "y" |= C 0) (V "x" < C 5) ("x" |= V "x" + C 1) $ do
-             "y" |= V "y" + V "x" + C 1
+some_for = for (do Int. "x" #= C 0; Int. "y" #= C 0) (V "x" < C 5) ("x" #= V "x" + C 1) $ do
+             "y" #= V "y" + V "x" + C 1
 
 name_shadowing : Statement ctx ctx
 name_shadowing = block $ do
-  Int. "x" |= C 3
-  Int. "y" |= V "x" + C 2
-  String. "x" |= C "foo"
+  Int. "x" #= C 3
+  Int. "y" #= V "x" + C 2
+  String. "x" #= C "foo"
   print $ V "x" ++ C "bar" ++ show (V "y")
