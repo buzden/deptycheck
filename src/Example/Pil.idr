@@ -61,14 +61,14 @@ infixr 1 *>
 
 public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
-  nop : Statement ctx ctx
-  var : (n : Name) -> (0 ty : Type) -> {0 ctx : Context} -> Statement ctx $ ((n, ty) :: ctx)
+  nop  : Statement ctx ctx
+  var  : (n : Name) -> (0 ty : Type) -> {0 ctx : Context} -> Statement ctx $ ((n, ty) :: ctx)
   (|=) : (n : Name) -> (v : Expression ctx ty) -> (0 _ : n `hasType` ty $ ctx) => Statement ctx ctx
-  for : (init : Statement outer_ctx inside_for)
-     -> (cond : Expression inside_for Bool)
-     -> (upd  : Statement inside_for inside_for)
-     -> (body : Statement inside_for after_body)
-     -> Statement outer_ctx outer_ctx
+  for  : (init : Statement outer_ctx inside_for)
+      -> (cond : Expression inside_for Bool)
+      -> (upd  : Statement inside_for inside_for)
+      -> (body : Statement inside_for after_body)
+      -> Statement outer_ctx outer_ctx
   if__ : (cond : Expression ctx Bool) -> Statement ctx ctx_then -> Statement ctx ctx_else -> Statement ctx ctx
   (*>) : Statement pre mid -> Statement mid post -> Statement pre post
   block : Statement outer inside -> Statement outer outer
