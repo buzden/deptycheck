@@ -20,10 +20,9 @@ FromString Name where
 
 --- Static context in terms of which we are formulating an invariant ---
 
-export
-record Context where
-  constructor Ctx
-  vars : List (Name, Type)
+public export
+Context : Type
+Context = List (Name, Type)
 
 %name Context ctx
 
@@ -31,7 +30,7 @@ infix 6 `hasType`
 
 public export
 hasType : Name -> Type -> Context -> Type
-hasType n ty ctx = Elem (n, ty) ctx.vars
+hasType n ty = Elem (n, ty)
 
 -- TODO `hasType` should consider only leftmost tuple with the given name.
 
@@ -54,7 +53,7 @@ infix 2 :-
 
 public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
-  var : (n : Name) -> (ty : Type) -> {0 ctx : Context} -> Statement ctx $ Ctx ((n, ty) :: ctx.vars) -- records update doesn't work somewhy
+  var : (n : Name) -> (ty : Type) -> {0 ctx : Context} -> Statement ctx $ ((n, ty) :: ctx)
   (:-) : (n : Name) -> (v : Expression exp_pre ty) -> (0 _ : n `hasType` ty $ ctx) => Statement ctx ctx
   for : (init : Statement outer_ctx inside_for)
      -> (cond : Expression inside_for Bool)
