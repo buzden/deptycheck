@@ -62,7 +62,7 @@ infixr 1 *>
 public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
   nop  : Statement ctx ctx
-  var  : (n : Name) -> (0 ty : Type) -> {0 ctx : Context} -> Statement ctx $ ((n, ty) :: ctx)
+  var  : (n : Name) -> (0 ty : Type) -> {0 ctx : Context} -> Statement ctx $ (n, ty)::ctx
   (|=) : (n : Name) -> (v : Expression ctx ty) -> (0 _ : n `hasType` ty $ ctx) => Statement ctx ctx
   for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool)
       -> (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body)
@@ -79,13 +79,13 @@ if_ c t = if__ c t nop
 
 -- Define and assign immediately
 public export
-(!!=) : (n : Name) -> Expression ctx ty -> Statement ctx $ ((n, ty) :: ctx)
+(!!=) : (n : Name) -> Expression ctx ty -> Statement ctx $ (n, ty)::ctx
 n !!= v = var n ty *> n |= relaxExprCtx v
 
 namespace AlternativeDefineAndAssign
 
   public export
-  (|=) : (p : (Name, Type)) -> Expression ctx (snd p) -> Statement ctx $ (p :: ctx)
+  (|=) : (p : (Name, Type)) -> Expression ctx (snd p) -> Statement ctx $ p::ctx
   (n, _) |= v = n !!= v
 
   public export
