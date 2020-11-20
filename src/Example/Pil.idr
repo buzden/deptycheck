@@ -36,7 +36,8 @@ Context = List (Name, Type)
 --- List lookup with propositional equality ---
 -----------------------------------------------
 
-data Lookup : a -> List (a, b) -> Type where
+data Lookup : (x : a) -> List (a, b) -> Type where
+  [search x]
   Here : (y : b) -> Lookup x $ (x, y)::xys
   There : Lookup z xys -> Lookup z $ (x, y)::xys
 
