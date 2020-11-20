@@ -1,7 +1,9 @@
 -- Primitive Imperative Language --
 module Example.Pil
 
+import Data.List
 import Data.List.Elem
+import Data.Maybe
 
 %default total
 
@@ -18,6 +20,10 @@ export
 FromString Name where
   fromString = MkName
 
+export
+Eq Name where
+  MkName n == MkName m = n == m
+
 --- Static context in terms of which we are formulating an invariant ---
 
 public export
@@ -26,13 +32,17 @@ Context = List (Name, Type)
 
 %name Context ctx
 
-infix 6 `hasType`
+-----------------------------------------------
+--- List lookup with propositional equality ---
+-----------------------------------------------
 
-public export
-hasType : Name -> Type -> Context -> Type
-hasType n ty = Elem (n, ty)
+data Lookup : a -> List (a, b) -> Type where
+  Here : (y : b) -> Lookup x $ (x, y)::xys
+  There : Lookup z xys -> Lookup z $ (x, y)::xys
 
--- TODO `hasType` should consider only leftmost tuple with the given name.
+found : Lookup {b} x xys -> b
+found (Here y) = y
+found (There subl) = found subl
 
 -----------------------------------
 --- The main language structure ---
@@ -43,18 +53,11 @@ data Expression : (ctx : Context) -> (res : Type) -> Type where
   -- Constant expression
   C : (x : ty) -> Expression ctx ty
   -- Value of the variable
-  V : (n : Name) -> (0 _ : n `hasType` ty $ ctx) => Expression ctx ty
+  V : (n : Name) -> (0 ty : Lookup n ctx) => Expression ctx $ found ty
   -- Unary operation over the result of another expression
   U : (f : a -> b) -> Expression ctx a -> Expression ctx b
   -- Binary operation over the results of two another expressions
   B : (f : a -> b -> c) -> Expression ctx a -> Expression ctx b -> Expression ctx c
-
-export
-relaxExprCtx : Expression ctx a -> Expression (add::ctx) a
-relaxExprCtx (C x)     = C x
-relaxExprCtx (V n)     = V n
-relaxExprCtx (U f x)   = U f (relaxExprCtx x)
-relaxExprCtx (B f x y) = B f (relaxExprCtx x) (relaxExprCtx y)
 
 infix 2 |=, !!=
 infixr 1 *>
@@ -63,7 +66,7 @@ public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
   nop  : Statement ctx ctx
   var  : (n : Name) -> (0 ty : Type) -> {0 ctx : Context} -> Statement ctx $ (n, ty)::ctx
-  (|=) : (n : Name) -> (v : Expression ctx ty) -> (0 _ : n `hasType` ty $ ctx) => Statement ctx ctx
+  (|=) : (n : Name) -> (0 ty : Lookup n ctx) => (v : Expression ctx $ found ty) -> Statement ctx ctx
   for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool)
       -> (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body)
       -> Statement outer_ctx outer_ctx
@@ -79,13 +82,13 @@ if_ c t = if__ c t nop
 
 -- Define and assign immediately
 public export
-(!!=) : (n : Name) -> Expression ctx ty -> Statement ctx $ (n, ty)::ctx
-n !!= v = var n ty *> n |= relaxExprCtx v
+(!!=) : (n : Name) -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
+n !!= v = var n ty *> n |= v
 
 namespace AlternativeDefineAndAssign
 
   public export
-  (|=) : (p : (Name, Type)) -> Expression ctx (snd p) -> Statement ctx $ p::ctx
+  (|=) : (p : (Name, Type)) -> Expression ((fst p, snd p)::ctx) (snd p) -> Statement ctx $ p::ctx
   (n, _) |= v = n !!= v
 
   public export
@@ -102,21 +105,18 @@ namespace AlternativeDefineAndAssign
 (<) : Expression ctx Int -> Expression ctx Int -> Expression ctx Bool
 (<) = B (<)
 
-i : Int -> Expression ctx Int
-i = C
-
 simple_ass : Statement ctx $ ("x", Int)::ctx
 simple_ass = do
   var "x" Int
-  "x" |= i 2
+  "x" |= C 2
 
 lost_block : Statement ctx ctx
 lost_block = block $ do
                var "x" Int
-               "x" |= i 2
+               "x" |= C 2
                Int. "y" |= V "x"
                Int. "z" |= C 3
 
 some_for : Statement ctx ctx
-some_for = for (do Int. "x" |= i 0; Int. "y" |= i 0) (V "x" < i 5) ("x" |= V "x" + i 1) $ do
-             "y" |= V "y" + V "x" + i 1
+some_for = for (do Int. "x" |= C 0; Int. "y" |= C 0) (V "x" < C 5) ("x" |= V "x" + C 1) $ do
+             "y" |= V "y" + V "x" + C 1
