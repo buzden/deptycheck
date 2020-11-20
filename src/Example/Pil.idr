@@ -68,10 +68,10 @@ public export
 data Statement : (pre : Context -> Type) -> (eff : Context -> Context) -> Type where
   var : (n : Name) -> (ty : Type) -> Statement Always record {vars $= ((n, ty) ::)}
   (:-) : (n : Name) -> (v : Expression exp_pre ty) -> Statement (exp_pre && n `hasType` ty) id
-  for : (init : Statement i_pre i_eff)
+  for : (init : Statement ini_pre ini_eff)
      -> (cond : Expression exp_pre Bool)
      -> (upd  : Statement upd_pre id)
-     -> (body : Statement bd_pre id)
+     -> (body : Statement body_pre id)
      -> Statement (ini_pre && (cond_pre && upd_pre && body_pre) . ini_eff) id
   (>>=) : Statement l_pre l_eff -> Statement r_pre r_eff -> Statement (l_pre && r_pre . l_eff) (r_eff . l_eff)
   block : {0 eff : Context -> Context} -> Statement pre eff -> Statement pre id
