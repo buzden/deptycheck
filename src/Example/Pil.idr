@@ -65,7 +65,7 @@ infixr 1 *>
 public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
   nop  : Statement ctx ctx
-  var  : (n : Name) -> (0 ty : Type) -> {0 ctx : Context} -> Statement ctx $ (n, ty)::ctx
+  (.)  : (0 ty : Type) -> (n : Name) -> {0 ctx : Context} -> Statement ctx $ (n, ty)::ctx
   (|=) : (n : Name) -> (0 ty : Lookup n ctx) => (v : Expression ctx $ found ty) -> Statement ctx ctx
   for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool)
       -> (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body)
@@ -83,7 +83,7 @@ if_ c t = if__ c t nop
 -- Define and assign immediately
 public export
 (!!=) : (n : Name) -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
-n !!= v = var n ty *> n |= v
+n !!= v = ty. n *> n |= v
 
 namespace AlternativeDefineAndAssign
 
@@ -107,12 +107,12 @@ namespace AlternativeDefineAndAssign
 
 simple_ass : Statement ctx $ ("x", Int)::ctx
 simple_ass = do
-  var "x" Int
+  Int. "x"
   "x" |= C 2
 
 lost_block : Statement ctx ctx
 lost_block = block $ do
-               var "x" Int
+               Int. "x"
                "x" |= C 2
                Int. "y" |= V "x"
                Int. "z" |= C 3
