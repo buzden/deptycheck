@@ -56,13 +56,13 @@ relaxExprCtx (V n)     = V n
 relaxExprCtx (U f x)   = U f (relaxExprCtx x)
 relaxExprCtx (B f x y) = B f (relaxExprCtx x) (relaxExprCtx y)
 
-infix 2 :-, ::-
+infix 2 |=, !!=
 infixr 1 *>
 
 public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
   var : (n : Name) -> (0 ty : Type) -> {0 ctx : Context} -> Statement ctx $ ((n, ty) :: ctx)
-  (:-) : (n : Name) -> (v : Expression ctx ty) -> (0 _ : n `hasType` ty $ ctx) => Statement ctx ctx
+  (|=) : (n : Name) -> (v : Expression ctx ty) -> (0 _ : n `hasType` ty $ ctx) => Statement ctx ctx
   for : (init : Statement outer_ctx inside_for)
      -> (cond : Expression inside_for Bool)
      -> (upd  : Statement inside_for inside_for)
@@ -76,8 +76,8 @@ a >>= f = a *> f ()
 
 -- Define and assign immediately
 public export
-(::-) : (n : Name) -> Expression ctx ty -> Statement ctx $ ((n, ty) :: ctx)
-n ::- v = var n ty *> n :- relaxExprCtx v
+(!!=) : (n : Name) -> Expression ctx ty -> Statement ctx $ ((n, ty) :: ctx)
+n !!= v = var n ty *> n |= relaxExprCtx v
 
 -------------------------
 --- Examples of usage ---
@@ -95,13 +95,13 @@ i = C
 simple_ass : Statement ctx $ ("x", Int)::ctx
 simple_ass = do
   var "x" Int
-  "x" :- i 2
+  "x" |= i 2
 
 lost_block : Statement ctx ctx
 lost_block = block $ do
                var "x" Int
-               "x" :- i 2
+               "x" |= i 2
 
 some_for : Statement ctx ctx
-some_for = for (do "x" ::- i 0; "y" ::- i 0) (V "x" < i 5) ("x" :- V "x" + i 1) $ do
-             "y" :- V "y" + V "x" + i 1
+some_for = for (do "x" !!= i 0; "y" !!= i 0) (V "x" < i 5) ("x" |= V "x" + i 1) $ do
+             "y" |= V "y" + V "x" + i 1
