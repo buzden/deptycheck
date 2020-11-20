@@ -49,7 +49,7 @@ data Expression : (ctx : Context) -> (res : Type) -> Type where
   -- Binary operation over the results of two another expressions
   B : (f : a -> b -> c) -> Expression ctx a -> Expression ctx b -> Expression ctx c
 
-infix 2 :-
+infix 2 :-, ::-
 
 public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
@@ -62,6 +62,11 @@ data Statement : (pre : Context) -> (post : Context) -> Type where
      -> Statement outer_ctx outer_ctx
   (>>=) : Statement pre mid -> Statement mid post -> Statement pre post
   block : Statement outer inside -> Statement outer outer
+
+-- Define and assign immediately
+public export
+(::-) : (n : Name) -> Expression ((n, ty)::ctx) ty -> Statement ctx $ ((n, ty) :: ctx)
+n ::- v = var n ty >>= n :- v
 
 -------------------------
 --- Examples of usage ---
