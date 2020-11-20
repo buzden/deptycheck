@@ -125,6 +125,7 @@ lost_block = block $ do
                "x" |= C 2
                Int. "y" |= V "x"
                Int. "z" |= C 3
+               print $ V "y" + V "z" + V "x"
 
 some_for : Statement ctx ctx
 some_for = for (do Int. "x" |= C 0; Int. "y" |= C 0) (V "x" < C 5) ("x" |= V "x" + C 1) $ do
