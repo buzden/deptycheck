@@ -49,6 +49,13 @@ data Expression : (ctx : Context) -> (res : Type) -> Type where
   -- Binary operation over the results of two another expressions
   B : (f : a -> b -> c) -> Expression ctx a -> Expression ctx b -> Expression ctx c
 
+export
+relaxExprCtx : Expression ctx a -> Expression (add::ctx) a
+relaxExprCtx (C x)     = C x
+relaxExprCtx (V n)     = V n
+relaxExprCtx (U f x)   = U f (relaxExprCtx x)
+relaxExprCtx (B f x y) = B f (relaxExprCtx x) (relaxExprCtx y)
+
 infix 2 :-, ::-
 
 public export
@@ -65,8 +72,8 @@ data Statement : (pre : Context) -> (post : Context) -> Type where
 
 -- Define and assign immediately
 public export
-(::-) : (n : Name) -> Expression ((n, ty)::ctx) ty -> Statement ctx $ ((n, ty) :: ctx)
-n ::- v = var n ty >>= n :- v
+(::-) : (n : Name) -> Expression ctx ty -> Statement ctx $ ((n, ty) :: ctx)
+n ::- v = var n ty >>= n :- relaxExprCtx v
 
 -------------------------
 --- Examples of usage ---
