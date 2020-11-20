@@ -36,8 +36,7 @@ Context = List (Name, Type)
 --- List lookup with propositional equality ---
 -----------------------------------------------
 
-data Lookup : (x : a) -> List (a, b) -> Type where
-  [search x]
+data Lookup : a -> List (a, b) -> Type where
   Here : (y : b) -> Lookup x $ (x, y)::xys
   There : Lookup z xys -> Lookup z $ (x, y)::xys
 
@@ -134,7 +133,7 @@ lost_block = block $ do
                print $ V "y" + V "z" + V "x"
 
 some_for : Statement ctx ctx
-some_for = for (do Int. "x" #= C 0; Int. "y" #= C 0) (V "x" < C 5) ("x" #= V "x" + C 1) $ do
+some_for = for (do Int. "x" #= C 0; Int. "y" #= C 0) (V "x" < C 5 && V "y" < C 10) ("x" #= V "x" + C 1) $ do
              "y" #= V "y" + V "x" + C 1
 
 name_shadowing : Statement ctx ctx
@@ -142,4 +141,4 @@ name_shadowing = block $ do
   Int. "x" #= C 3
   Int. "y" #= V "x" + C 2
   String. "x" #= C "foo"
-  print $ V "x" ++ C "bar" ++ show (V "y")
+  --print $ V "x" ++ C "bar" ++ show (V "y") -- addition of [search x] to `Lookup` fixes this but breaks `There` cases in other places (e.g. `V "y"` above).
