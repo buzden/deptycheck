@@ -54,7 +54,7 @@ infix 2 :-
 public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
   var : (n : Name) -> (ty : Type) -> {0 ctx : Context} -> Statement ctx $ ((n, ty) :: ctx)
-  (:-) : (n : Name) -> (v : Expression exp_pre ty) -> (0 _ : n `hasType` ty $ ctx) => Statement ctx ctx
+  (:-) : (n : Name) -> (v : Expression ctx ty) -> (0 _ : n `hasType` ty $ ctx) => Statement ctx ctx
   for : (init : Statement outer_ctx inside_for)
      -> (cond : Expression inside_for Bool)
      -> (upd  : Statement inside_for inside_for)
