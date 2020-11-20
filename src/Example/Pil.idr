@@ -68,6 +68,8 @@ data Statement : (pre : Context) -> (post : Context) -> Type where
      -> (upd  : Statement inside_for inside_for)
      -> (body : Statement inside_for after_body)
      -> Statement outer_ctx outer_ctx
+  if_  : (cond : Expression ctx Bool) -> Statement ctx ctx_then -> Statement ctx ctx
+  if__ : (cond : Expression ctx Bool) -> Statement ctx ctx_then -> Statement ctx ctx_else -> Statement ctx ctx
   (*>) : Statement pre mid -> Statement mid post -> Statement pre post
   block : Statement outer inside -> Statement outer outer
 
