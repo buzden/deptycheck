@@ -112,6 +112,12 @@ namespace AlternativeDefineAndAssign
 (&&) : Expression ctx Bool -> Expression ctx Bool -> Expression ctx Bool
 (&&) = B (\a, b => a && b) -- recoded because of laziness
 
+(++) : Expression ctx String -> Expression ctx String -> Expression ctx String
+(++) = B (++)
+
+show : Show ty => Expression ctx ty -> Expression ctx String
+show = U show
+
 --- Example functions ---
 
 simple_ass : Statement ctx $ ("x", Int)::ctx
@@ -130,3 +136,10 @@ lost_block = block $ do
 some_for : Statement ctx ctx
 some_for = for (do Int. "x" |= C 0; Int. "y" |= C 0) (V "x" < C 5) ("x" |= V "x" + C 1) $ do
              "y" |= V "y" + V "x" + C 1
+
+name_shadowing : Statement ctx ctx
+name_shadowing = block $ do
+  Int. "x" |= C 3
+  Int. "y" |= V "x" + C 2
+  String. "x" |= C "foo"
+  print $ V "x" ++ C "bar" ++ show (V "y")
