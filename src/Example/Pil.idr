@@ -36,13 +36,15 @@ Context = List (Name, Type)
 --- List lookup with propositional equality ---
 -----------------------------------------------
 
+public export
 data Lookup : a -> List (a, b) -> Type where
   Here : (y : b) -> Lookup x $ (x, y)::xys
   There : Lookup z xys -> Lookup z $ (x, y)::xys
 
-found : Lookup {b} x xys -> b
-found (Here y) = y
-found (There subl) = found subl
+public export
+reveal : Lookup {b} x xys -> b
+reveal (Here y) = y
+reveal (There subl) = reveal subl
 
 -----------------------------------
 --- The main language structure ---
@@ -53,7 +55,7 @@ data Expression : (ctx : Context) -> (res : Type) -> Type where
   -- Constant expression
   C : (x : ty) -> Expression ctx ty
   -- Value of the variable
-  V : (n : Name) -> (0 ty : Lookup n ctx) => Expression ctx $ found ty
+  V : (n : Name) -> (0 ty : Lookup n ctx) => Expression ctx $ reveal ty
   -- Unary operation over the result of another expression
   U : (f : a -> b) -> Expression ctx a -> Expression ctx b
   -- Binary operation over the results of two another expressions
@@ -65,8 +67,8 @@ infixr 1 *>
 public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
   nop  : Statement ctx ctx
-  (.)  : (0 ty : Type) -> (n : Name) -> {0 ctx : Context} -> Statement ctx $ (n, ty)::ctx
-  (#=) : (n : Name) -> (0 ty : Lookup n ctx) => (v : Expression ctx $ found ty) -> Statement ctx ctx
+  (.)  : (0 ty : Type) -> (n : Name) -> Statement ctx $ (n, ty)::ctx
+  (#=) : (n : Name) -> (0 ty : Lookup n ctx) => (v : Expression ctx $ reveal ty) -> Statement ctx ctx
   for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool)
       -> (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body)
       -> Statement outer_ctx outer_ctx
@@ -75,24 +77,26 @@ data Statement : (pre : Context) -> (post : Context) -> Type where
   block : Statement outer inside -> Statement outer outer
   print : Show ty => Expression ctx ty -> Statement ctx ctx
 
+public export %inline
 (>>=) : Statement pre mid -> (Unit -> Statement mid post) -> Statement pre post
 a >>= f = a *> f ()
 
+public export %inline
 if_  : (cond : Expression ctx Bool) -> Statement ctx ctx_then -> Statement ctx ctx
 if_ c t = if__ c t nop
 
 -- Define with derived type and assign immediately
-public export
+public export %inline
 (?#=) : (n : Name) -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
 n ?#= v = ty. n *> n #= v
 
 namespace AlternativeDefineAndAssign
 
-  public export
+  public export %inline
   (#=) : (p : (Name, Type)) -> Expression ((fst p, snd p)::ctx) (snd p) -> Statement ctx $ p::ctx
   (n, _) #= v = n ?#= v
 
-  public export
+  public export %inline
   (.) : a -> b -> (b, a)
   (.) a b = (b, a)
 
@@ -100,24 +104,29 @@ namespace AlternativeDefineAndAssign
 --- Examples of usage ---
 -------------------------
 
---- Function lifted to the expression level ---
+--- Functions lifted to the expression level ---
 
+export %inline
 (+) : Expression ctx Int -> Expression ctx Int -> Expression ctx Int
 (+) = B (+)
 
+export %inline
 (<) : Expression ctx Int -> Expression ctx Int -> Expression ctx Bool
 (<) = B (<)
 
+export %inline
 (&&) : Expression ctx Bool -> Expression ctx Bool -> Expression ctx Bool
 (&&) = B (\a, b => a && b) -- recoded because of laziness
 
+export %inline
 (++) : Expression ctx String -> Expression ctx String -> Expression ctx String
 (++) = B (++)
 
+export %inline
 show : Show ty => Expression ctx ty -> Expression ctx String
 show = U show
 
---- Example functions ---
+--- Example statements ---
 
 simple_ass : Statement ctx $ ("x", Int)::ctx
 simple_ass = do
