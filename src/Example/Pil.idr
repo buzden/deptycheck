@@ -73,6 +73,7 @@ data Statement : (pre : Context) -> (post : Context) -> Type where
   if__ : (cond : Expression ctx Bool) -> Statement ctx ctx_then -> Statement ctx ctx_else -> Statement ctx ctx
   (*>) : Statement pre mid -> Statement mid post -> Statement pre post
   block : Statement outer inside -> Statement outer outer
+  print : Show ty => Expression ctx ty -> Statement ctx ctx
 
 (>>=) : Statement pre mid -> (Unit -> Statement mid post) -> Statement pre post
 a >>= f = a *> f ()
