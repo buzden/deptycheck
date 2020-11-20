@@ -35,57 +35,41 @@ hasType n ty ctx = Elem (n, ty) ctx.vars
 
 -- TODO `hasType` should consider only leftmost tuple with the given name.
 
---------------------------------------
---- Nicely named logic definitions ---
---------------------------------------
-
-public export
-Always : a -> Type
-Always = const Unit
-
-public export
-(&&) : (a -> Type) -> (a -> Type) -> a -> Type
-(&&) f g = \x => (f x, g x)
-
 -----------------------------------
 --- The main language structure ---
 -----------------------------------
 
 public export
-data Expression : (pre : Context -> Type) -> (res : Type) -> Type where
+data Expression : (ctx : Context) -> (res : Type) -> Type where
   -- Constant expression
-  C : (x : ty) -> Expression Always ty
+  C : (x : ty) -> Expression ctx ty
   -- Value of the variable
-  V : (n : Name) -> Expression (n `hasType` ty) ty
+  V : (n : Name) -> (0 _ : n `hasType` ty $ ctx) => Expression ctx ty
   -- Unary operation over the result of another expression
-  U : (f : a -> b) -> Expression pre a -> Expression pre b
+  U : (f : a -> b) -> Expression ctx a -> Expression ctx b
   -- Binary operation over the results of two another expressions
-  B : (f : a -> b -> c) -> Expression pre_a a -> Expression pre_b b -> Expression (pre_a && pre_b) c
+  B : (f : a -> b -> c) -> Expression ctx a -> Expression ctx b -> Expression ctx c
 
 infix 2 :-
 
 public export
-data Statement : (pre : Context -> Type) -> (eff : Context -> Context) -> Type where
-  var : (n : Name) -> (ty : Type) -> Statement Always record {vars $= ((n, ty) ::)}
-  (:-) : (n : Name) -> (v : Expression exp_pre ty) -> Statement (exp_pre && n `hasType` ty) id
-  for : (init : Statement ini_pre ini_eff)
-     -> (cond : Expression exp_pre Bool)
-     -> (upd  : Statement upd_pre id)
-     -> (body : Statement body_pre id)
-     -> Statement (ini_pre && (cond_pre && upd_pre && body_pre) . ini_eff) id
-  (>>=) : Statement l_pre l_eff -> Statement r_pre r_eff -> Statement (l_pre && r_pre . l_eff) (r_eff . l_eff)
-  block : {0 eff : Context -> Context} -> Statement pre eff -> Statement pre id
+data Statement : (pre : Context) -> (post : Context) -> Type where
+  var : (n : Name) -> (ty : Type) -> {0 ctx : Context} -> Statement ctx $ Ctx ((n, ty) :: ctx.vars) -- records update doesn't work somewhy
+  (:-) : (n : Name) -> (v : Expression exp_pre ty) -> (0 _ : n `hasType` ty $ ctx) => Statement ctx ctx
+  for : (init : Statement outer_ctx inside_for)
+     -> (cond : Expression inside_for Bool)
+     -> (upd  : Statement inside_for inside_for)
+     -> (body : Statement inside_for after_body)
+     -> Statement outer_ctx outer_ctx
+  (>>=) : Statement pre mid -> Statement mid post -> Statement pre post
+  block : Statement outer inside -> Statement outer outer
 
-  -- actually, if context could be more than defined variables, then instead of `id`s we'd write something like `(\ctx => record {vars = ctx.vars} (eff ctx))`
+-------------------------
+--- Examples of usage ---
+-------------------------
 
-0 alternative_tupling : {0 ini_pre, cond_pre, upd_pre, body_pre  : Context -> Type} -> {0 ini_eff : Context -> Context}
-            -> ini_pre && (cond_pre && upd_pre && body_pre) . ini_eff
-                 =
-               \original_ctx => let working_ctx = ini_eff original_ctx in
-                 (ini_pre original_ctx, cond_pre working_ctx, upd_pre working_ctx, body_pre working_ctx)
-alternative_tupling = Refl
+(+) : Expression ctx Int -> Expression ctx Int -> Expression ctx Int
+(+) = B (+)
 
-
--- Example of lifting the binary function into the `Expression` world.
---(+) : Expression pa Int -> Expression pb Int -> Expression (pa && pb) Int
---(+) = B (+)
+(<) : Expression ctx Int -> Expression ctx Int -> Expression ctx Bool
+(<) = B (<)
