@@ -77,3 +77,16 @@ n ::- v = var n ty >>= n :- v
 
 (<) : Expression ctx Int -> Expression ctx Int -> Expression ctx Bool
 (<) = B (<)
+
+i : Int -> Expression ctx Int
+i = C
+
+simple_ass : Statement ctx $ ("x", Int)::ctx
+simple_ass = var "x" Int >>= "x" :- i 2
+
+lost_block : Statement ctx ctx
+lost_block = block $ var "x" Int >>= "x" :- i 2
+
+some_for : Statement ctx ctx
+some_for = for ("x" ::- i 0 >>= "y" ::- i 0) (V "x" < i 5) ("x" :- V "x" + i 1)
+             ("y" :- V "y" + V "x" + i 1)
