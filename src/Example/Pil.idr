@@ -74,6 +74,9 @@ data Statement : (pre : Context -> Type) -> (eff : Context -> Context) -> Type w
      -> (body : Statement bd_pre id)
      -> Statement (ini_pre && (cond_pre && upd_pre && body_pre) . ini_eff) id
   (>>=) : Statement l_pre l_eff -> Statement r_pre r_eff -> Statement (l_pre && r_pre . l_eff) (r_eff . l_eff)
+  block : {0 eff : Context -> Context} -> Statement pre eff -> Statement pre id
+
+  -- actually, if context could be more than defined variables, then instead of `id`s we'd write something like `(\ctx => record {vars = ctx.vars} (eff ctx))`
 
 0 alternative_tupling : {0 ini_pre, cond_pre, upd_pre, body_pre  : Context -> Type} -> {0 ini_eff : Context -> Context}
             -> ini_pre && (cond_pre && upd_pre && body_pre) . ini_eff
