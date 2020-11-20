@@ -80,7 +80,7 @@ a >>= f = a *> f ()
 if_  : (cond : Expression ctx Bool) -> Statement ctx ctx_then -> Statement ctx ctx
 if_ c t = if__ c t nop
 
--- Define and assign immediately
+-- Define with derived type and assign immediately
 public export
 (!!=) : (n : Name) -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
 n !!= v = ty. n *> n |= v
