@@ -100,11 +100,18 @@ namespace AlternativeDefineAndAssign
 --- Examples of usage ---
 -------------------------
 
+--- Function lifted to the expression level ---
+
 (+) : Expression ctx Int -> Expression ctx Int -> Expression ctx Int
 (+) = B (+)
 
 (<) : Expression ctx Int -> Expression ctx Int -> Expression ctx Bool
 (<) = B (<)
+
+(&&) : Expression ctx Bool -> Expression ctx Bool -> Expression ctx Bool
+(&&) = B (\a, b => a && b) -- recoded because of laziness
+
+--- Example functions ---
 
 simple_ass : Statement ctx $ ("x", Int)::ctx
 simple_ass = do
