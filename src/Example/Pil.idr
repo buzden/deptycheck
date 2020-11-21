@@ -93,7 +93,7 @@ n ?#= v = ty. n *> n #= v
 namespace AlternativeDefineAndAssign
 
   public export %inline
-  (#=) : (p : (Name, Type)) -> Expression ((fst p, snd p)::ctx) (snd p) -> Statement ctx $ p::ctx
+  (#=) : (p : (Name, Type)) -> Expression (p::ctx) (snd p) -> Statement ctx $ p::ctx
   (n, _) #= v = n ?#= v
 
   public export %inline
