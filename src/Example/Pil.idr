@@ -154,16 +154,23 @@ simple_ass = do
   "x" #= C 2
 
 lost_block : Statement ctx ctx
-lost_block = block $ do
-               Int. "x"
-               "x" #= C 2
-               Int. "y" #= V "x"
-               Int. "z" #= C 3
-               print $ V "y" + V "z" + V "x"
+lost_block = do
+  block $ do
+    Int. "x"
+    "x" #= C 2
+    Int. "y" #= V "x"
+    Int. "z" #= C 3
+    print $ V "y" + V "z" + V "x"
 
 some_for : Statement ctx ctx
 some_for = for (do Int. "x" #= C 0; Int. "y" #= C 0) (V "x" < C 5 && V "y" < C 10) ("x" #= V "x" + C 1) $ do
              "y" #= V "y" + V "x" + C 1
+
+--bad_for : Statement ctx ctx
+--bad_for = for (do Int. "x" #= C 0; Int. "y" #= C 0)
+--                (V "y")
+--                  ("x" #= V "x" + C 1) $ do
+--             "y" #= V "y" `div` V "x" + C 1
 
 euc : {0 ctx : Context} -> let c = ("a", Int)::("b", Int)::ctx in Statement c $ ("res", Int)::c
 euc = do
