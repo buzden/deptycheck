@@ -5,6 +5,8 @@ import public Data.Vect
 
 import public Example.Random
 
+%default total
+
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
@@ -39,6 +41,14 @@ Monad Gen where
 ---------------------------------
 --- Particular general `Gen`s ---
 ---------------------------------
+
+export
+covering
+suchThat : Gen a -> (a -> Bool) -> Gen a
+suchThat (MkGen f) p = MkGen \r => findOrDie r where
+  findOrDie : Seed -> a
+  findOrDie r = let v = f r in
+                if p v then v else findOrDie $ snd $ next r
 
 export
 chooseAny : Random a => Gen a
