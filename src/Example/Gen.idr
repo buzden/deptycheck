@@ -1,8 +1,5 @@
 module Example.Gen
 
-import public Control.Monad.Identity
-import public Control.Monad.Reader
-
 import Data.List
 import public Data.Vect
 
@@ -18,16 +15,26 @@ Seed = StdGen
 
 -- No "size" parameter in this definition unlike the quickcheck's `Gen`!
 public export
-Gen : Type -> Type
-Gen = Reader Seed
+record Gen a where
+  constructor MkGen
+  unGen : Seed -> a
 
-public export %inline
-MkGen : (Seed -> a) -> Gen a
-MkGen g = MkReaderT $ Id . g
+export
+Functor Gen where
+  map f (MkGen gena) = MkGen $ f . gena
 
-public export %inline
-unGen : Gen a -> Seed -> a
-unGen = flip runReader
+export
+Applicative Gen where
+  pure x = MkGen $ const x
+  (MkGen f) <*> (MkGen x) = MkGen $ \r =>
+    let (r1, r2) = bimap (snd . next) (snd . next) $ split r in
+    f r1 $ x r2
+
+export
+Monad Gen where
+  (MkGen l) >>= f = MkGen $ \r =>
+    let (r1, r2) = bimap (snd . next) (snd . next) $ split r in
+    unGen (f $ l r1) r2
 
 ---------------------------------
 --- Particular general `Gen`s ---
