@@ -78,10 +78,9 @@ mutual
   export
   covering
   noDeclStmtGen : (ctx : Context) ->
-                  (genTy : Gen Type) =>
-                  (genName : Gen Name) =>
-                  (genExpr : ({a : Type} -> {ctx : Context} -> Gen (Expression ctx a))) =>
-                  (genStr : Gen String) =>
+                  Gen Type =>
+                  Gen Name =>
+                  (genExpr : {a : Type} -> {ctx : Context} -> Gen (Expression ctx a)) =>
                   Gen (Statement ctx ctx)
   noDeclStmtGen ctx = oneOf
     [ pure nop
@@ -103,8 +102,7 @@ mutual
   stmtGen : (pre : Context) ->
             (genTy : Gen Type) =>
             (genName : Gen Name) =>
-            (genExpr : ({a : Type} -> {ctx : Context} -> Gen (Expression ctx a))) =>
-            (genStr : Gen String) =>
+            ({a : Type} -> {ctx : Context} -> Gen (Expression ctx a)) =>
             Gen (post ** Statement pre post)
   stmtGen pre = oneOf
     [ do s <- noDeclStmtGen pre
