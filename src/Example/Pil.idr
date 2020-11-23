@@ -85,6 +85,10 @@ public export %inline
 if_  : (cond : Expression ctx Bool) -> Statement ctx ctx_then -> Statement ctx ctx
 if_ c t = if__ c t nop
 
+public export %inline
+while : Expression ctx Bool -> Statement ctx after_body -> Statement ctx ctx
+while cond = for nop cond nop
+
 -- Define with derived type and assign immediately
 public export %inline
 (?#=) : (n : Name) -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
@@ -174,7 +178,7 @@ some_for = for (do Int. "x" #= C 0; Int. "y" #= C 0) (V "x" < C 5 && V "y" < C 1
 
 euc : {0 ctx : Context} -> let c = ("a", Int)::("b", Int)::ctx in Statement c $ ("res", Int)::c
 euc = do
-  for nop (V "a" /= C 0 && V "b" /= C 0) nop $ do
+  while (V "a" /= C 0 && V "b" /= C 0) $ do
     if__ (V "a" > V "b")
       ("a" #= V "a" `mod` V "b")
       ("b" #= V "b" `mod` V "a")
