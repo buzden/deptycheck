@@ -1,12 +1,12 @@
 module Example.Gen
 
-import Control.Monad.Identity
-import Control.Monad.Reader
+import public Control.Monad.Identity
+import public Control.Monad.Reader
 
 import Data.List
-import Data.Vect
+import public Data.Vect
 
-import Example.Random
+import public Example.Random
 
 -------------------------------
 --- Definition of the `Gen` ---
@@ -17,7 +17,7 @@ Seed : Type
 Seed = StdGen
 
 -- No "size" parameter in this definition unlike the quickcheck's `Gen`!
-export
+public export
 Gen : Type -> Type
 Gen = Reader Seed
 
