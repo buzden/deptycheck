@@ -3,6 +3,8 @@ module Example.Gen
 import Control.Monad.Identity
 import Control.Monad.Reader
 
+import Data.Vect
+
 import Example.Random
 
 -------------------------------
@@ -30,12 +32,15 @@ unGen = flip runReader
 --- Particular general `Gen`s ---
 ---------------------------------
 
+export
 chooseAny : Random a => Gen a
 chooseAny = MkGen $ fst . random
 
+export
 choose : Random a => (a, a) -> Gen a
 choose bounds = MkGen $ fst . randomR bounds
 
+export
 variant : Nat -> Gen a -> Gen a
 variant v gen = MkGen (\r => unGen gen $ getV (S v) r)
   where
@@ -43,5 +48,10 @@ variant v gen = MkGen (\r => unGen gen $ getV (S v) r)
     getV Z     r = r
     getV (S n) r = getV n $ snd $ split r
 
+export
 promote : (a -> Gen b) -> Gen (a -> b)
 promote f = MkGen (\r, x => unGen (f x) r)
+
+export
+oneof : {n : Nat} -> Vect (S n) (Gen a) -> Gen a
+oneof v = index !chooseAny v
