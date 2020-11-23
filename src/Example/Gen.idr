@@ -3,6 +3,7 @@ module Example.Gen
 import Control.Monad.Identity
 import Control.Monad.Reader
 
+import Data.List
 import Data.Vect
 
 import Example.Random
@@ -55,3 +56,11 @@ promote f = MkGen (\r, x => unGen (f x) r)
 export
 oneof : {n : Nat} -> Vect (S n) (Gen a) -> Gen a
 oneof v = index !chooseAny v
+
+export
+listOf : Gen a -> Gen (List a)
+listOf g = sequence $ replicate !chooseAny g
+
+export
+vectOf : Gen a -> (n : Nat) -> Gen (Vect n a)
+vectOf g n = sequence $ replicate n g
