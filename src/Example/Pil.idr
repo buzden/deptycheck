@@ -111,8 +111,28 @@ export %inline
 (+) = B (+)
 
 export %inline
+div : Expression ctx Int -> Expression ctx Int -> Expression ctx Int
+div = B div
+
+export %inline
+mod : Expression ctx Int -> Expression ctx Int -> Expression ctx Int
+mod = B mod
+
+export %inline
 (<) : Expression ctx Int -> Expression ctx Int -> Expression ctx Bool
 (<) = B (<)
+
+export %inline
+(>) : Expression ctx Int -> Expression ctx Int -> Expression ctx Bool
+(>) = B (>)
+
+export %inline
+(==) : Eq a => Expression ctx a -> Expression ctx a -> Expression ctx Bool
+(==) = B (==)
+
+export %inline
+(/=) : Eq a => Expression ctx a -> Expression ctx a -> Expression ctx Bool
+(/=) = B (/=)
 
 export %inline
 (&&) : Expression ctx Bool -> Expression ctx Bool -> Expression ctx Bool
@@ -144,6 +164,14 @@ lost_block = block $ do
 some_for : Statement ctx ctx
 some_for = for (do Int. "x" #= C 0; Int. "y" #= C 0) (V "x" < C 5 && V "y" < C 10) ("x" #= V "x" + C 1) $ do
              "y" #= V "y" + V "x" + C 1
+
+euc : {0 ctx : Context} -> let c = ("a", Int)::("b", Int)::ctx in Statement c $ ("res", Int)::c
+euc = do
+  for nop (V "a" /= C 0 && V "b" /= C 0) nop $ do
+    if__ (V "a" > V "b")
+      ("a" #= V "a" `mod` V "b")
+      ("b" #= V "b" `mod` V "a")
+  Int. "res" #= V "a" + V "b"
 
 name_shadowing : Statement ctx ctx
 name_shadowing = block $ do
