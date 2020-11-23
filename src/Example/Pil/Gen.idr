@@ -1,5 +1,7 @@
 module Example.Pil.Gen
 
+import Data.List
+
 import Decidable.Equality
 
 import Example.Gen
@@ -63,6 +65,14 @@ exprGen (S n) g gg ggg = oneOf [ exprGen (assert_smaller (S n) Z) g gg ggg
 
 --- Statements ---
 
+lookupGen : (ctx : Context) -> NonEmpty ctx => Gen (n : Name ** Lookup n ctx)
+lookupGen ctx = let (lks@(_::_) ** _) = mapLk ctx in
+                oneOf $ map pure $ fromList lks
+  where
+    mapLk : (ctx : Context) -> NonEmpty ctx => (l : List (n : Name ** Lookup n ctx) ** NonEmpty l)
+    mapLk [(n, ty)] = ( [(n ** Here ty)] ** IsNonEmpty )
+    mapLk ((n, ty)::xs@(_::_)) = ( (n ** Here ty) :: map (\(n ** lk) => (n ** There lk)) (fst $ mapLk xs) ** IsNonEmpty )
+
 mutual
 
   export
@@ -75,8 +85,10 @@ mutual
                   Gen (Statement ctx ctx)
   noDeclStmtGen ctx = oneOf
     [ pure nop
-    -- TODO to add assignment
-    --  (#=) : (n : Name) -> (0 ty : Lookup n ctx) => (v : Expression ctx $ reveal ty) -> Statement ctx ctx
+    , case ctx of
+      []     => pure nop -- this is returned because `oneOf` requires `Vect`, thus all cases must have equal size.
+      (_::_) => do (n ** _) <- lookupGen ctx
+                   pure $ n #= !genExpr
     , do (inside_for ** init) <- stmtGen ctx
          (_ ** body) <- stmtGen inside_for
          pure $ for init !genExpr !(noDeclStmtGen inside_for) body
