@@ -54,8 +54,8 @@ promote : (a -> Gen b) -> Gen (a -> b)
 promote f = MkGen (\r, x => unGen (f x) r)
 
 export
-oneof : {n : Nat} -> Vect (S n) (Gen a) -> Gen a
-oneof v = index !chooseAny v
+oneOf : {n : Nat} -> Vect (S n) (Gen a) -> Gen a
+oneOf v = index !chooseAny v
 
 export
 pairOf : Gen a -> Gen b -> Gen (a, b)
