@@ -63,4 +63,44 @@ exprGen (S n) g gg ggg = oneOf [ exprGen (assert_smaller (S n) Z) g gg ggg
 
 --- Statements ---
 
+mutual
 
+  export
+  covering
+  noDeclStmtGen : (ctx : Context) ->
+                  (genTy : Gen Type) =>
+                  (genName : Gen Name) =>
+                  (genExpr : ({a : Type} -> {ctx : Context} -> Gen (Expression ctx a))) =>
+                  (genStr : Gen String) =>
+                  Gen (Statement ctx ctx)
+  noDeclStmtGen ctx = oneOf
+    [ pure nop
+    -- TODO to add assignment
+    --  (#=) : (n : Name) -> (0 ty : Lookup n ctx) => (v : Expression ctx $ reveal ty) -> Statement ctx ctx
+    , do (inside_for ** init) <- stmtGen ctx
+         (_ ** body) <- stmtGen inside_for
+         pure $ for init !genExpr !(noDeclStmtGen inside_for) body
+    , pure $ if__ !genExpr (snd !(stmtGen ctx)) (snd !(stmtGen ctx))
+    , pure $ !(noDeclStmtGen ctx) *> !(noDeclStmtGen ctx)
+    , pure $ block $ snd !(stmtGen ctx)
+    , pure $ print !(genExpr {a=String})
+    ]
+
+  export
+  covering
+  stmtGen : (pre : Context) ->
+            (genTy : Gen Type) =>
+            (genName : Gen Name) =>
+            (genExpr : ({a : Type} -> {ctx : Context} -> Gen (Expression ctx a))) =>
+            (genStr : Gen String) =>
+            Gen (post ** Statement pre post)
+  stmtGen pre = oneOf
+    [ do s <- noDeclStmtGen pre
+         pure (pre ** s)
+    , do ty <- genTy
+         n <- genName
+         pure ((n, ty)::pre ** ty. n)
+    , do (mid ** l) <- stmtGen pre
+         (post ** r) <- stmtGen mid
+         pure (post ** l *> r)
+    ]
