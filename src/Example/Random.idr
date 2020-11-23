@@ -24,6 +24,10 @@ export
 data StdGen = MkStdGen Int Int
 
 export
+someStdGen : StdGen
+someStdGen = MkStdGen 23462 254334222987
+
+export
 Show StdGen where
   show (MkStdGen i j) = "MkStdGen " ++ show i ++ " " ++ show j
 

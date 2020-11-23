@@ -51,5 +51,9 @@ interestingExpr : {a : Type} -> {ctx : Context} -> Gen (Expression ctx a)
 interestingExpr = exprGen 3 simpleValue uniFunction biFunction
 
 partial
-statement : Gen (post ** Statement [] post)
-statement = stmtGen []
+someStatementGen : Gen (post ** Statement [] post)
+someStatementGen = stmtGen []
+
+partial
+someStatement : (post ** Statement [] post)
+someStatement = unGen someStatementGen someStdGen
