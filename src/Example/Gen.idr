@@ -58,9 +58,13 @@ oneof : {n : Nat} -> Vect (S n) (Gen a) -> Gen a
 oneof v = index !chooseAny v
 
 export
+pairOf : Gen a -> Gen b -> Gen (a, b)
+pairOf l r = (,) <$> l <*> r
+
+export
 listOf : Gen a -> Gen (List a)
 listOf g = sequence $ replicate !chooseAny g
 
 export
-vectOf : Gen a -> (n : Nat) -> Gen (Vect n a)
-vectOf g n = sequence $ replicate n g
+vectOf : Gen a -> {n : Nat} -> Gen (Vect n a)
+vectOf g = sequence $ replicate n g
