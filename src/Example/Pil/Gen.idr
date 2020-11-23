@@ -2,8 +2,7 @@ module Example.Pil.Gen
 
 import Data.List
 
-import Decidable.Equality
-
+import public Example.DecEq'
 import public Example.Gen
 import public Example.Pil
 
@@ -24,7 +23,7 @@ maybeToList (Just x) = [x]
 maybeToList Nothing = []
 
 export
-varExprGen' : {a : Type} -> {ctx : Context} -> DecEq Type => List (Expression ctx a)
+varExprGen' : {a : Type} -> {ctx : Context} -> DecEq' Type => List (Expression ctx a)
 varExprGen' = varExpressions {- this could be `oneOf $ map pure (fromList varExpressions)` if `Gen` could fail (contain zero) -} where
   varExpressions : List (Expression ctx a)
   varExpressions = map varExpr varsOfType where
@@ -43,9 +42,9 @@ varExprGen' = varExpressions {- this could be `oneOf $ map pure (fromList varExp
         varsOfTypeOfCtx [] = []
         varsOfTypeOfCtx ((n ** ty ** lk ** lk_ty)::xs) = maybeToList varX ++ varsOfTypeOfCtx xs where
           varX : Maybe (n : Name ** lk : Lookup n ctx ** reveal lk = a)
-          varX = case decEq ty a of
+          varX = case decEq' ty a of
             (Yes ty_a) => Just (n ** lk ** trans lk_ty ty_a)
-            (No _) => Nothing
+            No => Nothing
 
 export
 unaryExprGen : Gen (a -> a) -> Gen (Expression ctx a) -> Gen (Expression ctx a)
@@ -56,7 +55,7 @@ binaryExprGen : Gen (a -> a -> a) -> Gen (Expression ctx a) -> Gen (Expression c
 binaryExprGen ggg sub = B <$> ggg <*> sub <*> sub
 
 export
-exprGen : (szBound : Nat) -> {a : Type} -> Gen a -> Gen (a -> a) -> Gen (a -> a -> a) -> {ctx : Context} -> DecEq Type => Gen (Expression ctx a)
+exprGen : (szBound : Nat) -> {a : Type} -> Gen a -> Gen (a -> a) -> Gen (a -> a -> a) -> {ctx : Context} -> DecEq' Type => Gen (Expression ctx a)
 exprGen Z g _ _ = oneOf $ [constExprGen g] ++ map pure (fromList varExprGen')
 exprGen (S n) g gg ggg = oneOf [ exprGen (assert_smaller (S n) Z) g gg ggg
                                , unaryExprGen gg (exprGen n g gg ggg)
