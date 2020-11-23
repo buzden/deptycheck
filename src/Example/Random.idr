@@ -124,3 +124,24 @@ export
 {n : Nat} -> Random (Fin (S n)) where
   randomR (lo, hi) gen = mapFst (intToFin n) $ randomR (finToInt lo, finToInt hi) gen
   random = mapFst (intToFin n) . random
+
+--- Random Char ---
+
+export
+Random Char where
+  randomR (lo, hi) = mapFst chr . randomR (ord lo, ord hi)
+  random = mapFst chr . random
+
+--- Random Bool ---
+
+boolToInt : Bool -> Int
+boolToInt True = 1
+boolToInt False = 0
+
+intToBoolUni : Int -> Bool
+intToBoolUni x = x `mod` 2 == 0
+
+export
+Random Bool where
+  randomR (lo, hi) = mapFst intToBoolUni . randomR (boolToInt lo, boolToInt hi)
+  random = mapFst intToBoolUni . random
