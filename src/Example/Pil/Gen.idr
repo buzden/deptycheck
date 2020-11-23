@@ -4,8 +4,8 @@ import Data.List
 
 import Decidable.Equality
 
-import Example.Gen
-import Example.Pil
+import public Example.Gen
+import public Example.Pil
 
 %default total
 
@@ -110,7 +110,7 @@ mutual
     [ do s <- noDeclStmtGen pre
          pure (pre ** s)
     , do ty <- genTy
-         n <- genName
+         n <- genName `suchThat` \nm => case lookup nm pre of Just _ => False; Nothing => True
          pure ((n, ty)::pre ** ty. n)
     , do (mid ** l) <- stmtGen pre
          (post ** r) <- stmtGen mid
