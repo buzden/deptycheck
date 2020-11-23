@@ -2,6 +2,8 @@
 
 module Example.Random
 
+import Data.Fin
+
 %default total
 
 --------------------------------
@@ -63,6 +65,8 @@ interface Random a where
   randomR : RandomGen g => (a, a) -> g -> (a, g)
   random : RandomGen g => g -> (a, g)
 
+--- Random Int ---
+
 export
 Random Int where
   random gen = next gen
@@ -91,15 +95,32 @@ Random Int where
         -- We shift over the random bits generated thusfar (* b) and add in the new ones.
         f (assert_smaller n' $ n' - 1) (x + acc * b) g'
 
+--- Random Nat ---
+
 intToNat : Int -> Nat
 intToNat = fromInteger . cast
 
 export
 Random Nat where
-  randomR (lo, hi) gen = mapFst intToNat $ randomR (cast lo, cast hi) gen
-  random gen = mapFst intToNat $ next gen
+  randomR (lo, hi) = mapFst intToNat . randomR (cast lo, cast hi)
+  random = mapFst intToNat . random
+
+--- Random Unit ---
 
 export
-Random () where
+Random Unit where
   randomR ((), ()) gen = ((), snd $ next gen)
   random gen = ((), snd $ next gen)
+
+--- Random Fin ---
+
+finToInt : Fin n -> Int
+finToInt = fromInteger . cast
+
+intToFin : (n : Nat) -> Int -> Fin (S n)
+intToFin n = restrict n . cast
+
+export
+{n : Nat} -> Random (Fin (S n)) where
+  randomR (lo, hi) gen = mapFst (intToFin n) $ randomR (finToInt lo, finToInt hi) gen
+  random = mapFst (intToFin n) . random
