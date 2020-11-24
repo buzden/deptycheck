@@ -38,8 +38,9 @@ Context = List (Name, Type)
 
 public export
 data Lookup : a -> List (a, b) -> Type where
-  Here : (y : b) -> Lookup x $ (x, y)::xys
   There : Lookup z xys -> Lookup z $ (x, y)::xys
+  Here : (y : b) -> Lookup x $ (x, y)::xys
+  -- !!! Idris searches from the bottom !!!
 
 public export
 reveal : Lookup {b} x xys -> b
@@ -189,4 +190,4 @@ name_shadowing = block $ do
   Int. "x" #= C 3
   Int. "y" #= V "x" + C 2
   String. "x" #= C "foo"
-  --print $ V "x" ++ C "bar" ++ show (V "y") -- addition of [search x] to `Lookup` fixes this but breaks `There` cases in other places (e.g. `V "y"` above).
+  print $ V "x" ++ C "bar" ++ show (V "y")
