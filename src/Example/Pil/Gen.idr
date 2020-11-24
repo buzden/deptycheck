@@ -75,6 +75,27 @@ lookupGen ctx = let (lks@(_::_) ** _) = mapLk ctx in
     mapLk [(n, ty)] = ( [(n ** Here ty)] ** IsNonEmpty )
     mapLk ((n, ty)::xs@(_::_)) = ( (n ** Here ty) :: map (\(n ** lk) => (n ** There lk)) (fst $ mapLk xs) ** IsNonEmpty )
 
+noDeclsNoRec : (ctx : Context) ->
+               (genExpr : {a : Type} -> {ctx : Context} -> Gen (Expression ctx a)) =>
+               Vect 3 $ Gen (Statement ctx ctx)
+noDeclsNoRec ctx =
+  [ pure nop
+  , case ctx of
+    []     => pure nop -- this is returned because `oneOf` requires `Vect`, thus all cases must have equal size.
+    (_::_) => do (n ** _) <- lookupGen ctx
+                 pure $ n #= !genExpr
+  , do pure $ print !(genExpr {a=String})
+  ]
+
+declsNoRec : (pre : Context) ->
+             (genTy : Gen Type) =>
+             (genName : Gen Name) =>
+             Gen (post ** Statement pre post)
+declsNoRec pre = do
+  ty <- genTy
+  n <- genName
+  pure ((n, ty)::pre ** ty. n)
+
 mutual
 
   export
@@ -84,19 +105,14 @@ mutual
                   Gen Name =>
                   (genExpr : {a : Type} -> {ctx : Context} -> Gen (Expression ctx a)) =>
                   Gen (Statement ctx ctx)
-  noDeclStmtGen ctx = oneOf
-    [ pure nop
-    , case ctx of
-      []     => pure nop -- this is returned because `oneOf` requires `Vect`, thus all cases must have equal size.
-      (_::_) => do (n ** _) <- lookupGen ctx
-                   pure $ n #= !genExpr
-    , do (inside_for ** init) <- stmtGen ctx
+  noDeclStmtGen ctx = oneOf $
+    noDeclsNoRec ctx ++
+    [ do (inside_for ** init) <- stmtGen ctx
          (_ ** body) <- stmtGen inside_for
          pure $ for init !genExpr !(noDeclStmtGen inside_for) body
     , pure $ if__ !genExpr (snd !(stmtGen ctx)) (snd !(stmtGen ctx))
     , pure $ !(noDeclStmtGen ctx) *> !(noDeclStmtGen ctx)
     , pure $ block $ snd !(stmtGen ctx)
-    , pure $ print !(genExpr {a=String})
     ]
 
   export
@@ -106,12 +122,9 @@ mutual
             (genName : Gen Name) =>
             ({a : Type} -> {ctx : Context} -> Gen (Expression ctx a)) =>
             Gen (post ** Statement pre post)
-  stmtGen pre = oneOf
-    [ do s <- noDeclStmtGen pre
-         pure (pre ** s)
-    , do ty <- genTy
-         n <- genName
-         pure ((n, ty)::pre ** ty. n)
+  stmtGen pre = oneOf $
+    [declsNoRec pre] ++
+    [ pure (pre ** !(noDeclStmtGen pre))
     , do (mid ** l) <- stmtGen pre
          (post ** r) <- stmtGen mid
          pure (post ** l *> r)
