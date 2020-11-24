@@ -99,33 +99,35 @@ declsNoRec pre = do
 mutual
 
   export
-  covering
-  noDeclStmtGen : (ctx : Context) ->
+  noDeclStmtGen : (bound : Nat) ->
+                  (ctx : Context) ->
                   Gen Type =>
                   Gen Name =>
                   (genExpr : {a : Type} -> {ctx : Context} -> Gen (Expression ctx a)) =>
                   Gen (Statement ctx ctx)
-  noDeclStmtGen ctx = oneOf $
+  noDeclStmtGen Z     ctx = oneOf $ noDeclsNoRec ctx
+  noDeclStmtGen (S n) ctx = oneOf $
     noDeclsNoRec ctx ++
-    [ do (inside_for ** init) <- stmtGen ctx
-         (_ ** body) <- stmtGen inside_for
-         pure $ for init !genExpr !(noDeclStmtGen inside_for) body
-    , pure $ if__ !genExpr (snd !(stmtGen ctx)) (snd !(stmtGen ctx))
-    , pure $ !(noDeclStmtGen ctx) *> !(noDeclStmtGen ctx)
-    , pure $ block $ snd !(stmtGen ctx)
+    [ do (inside_for ** init) <- stmtGen n ctx
+         (_ ** body) <- stmtGen n inside_for
+         pure $ for init !genExpr !(noDeclStmtGen n inside_for) body
+    , pure $ if__ !genExpr (snd !(stmtGen n ctx)) (snd !(stmtGen n ctx))
+    , pure $ !(noDeclStmtGen n ctx) *> !(noDeclStmtGen n ctx)
+    , pure $ block $ snd !(stmtGen n ctx)
     ]
 
   export
-  covering
-  stmtGen : (pre : Context) ->
+  stmtGen : (bound : Nat) ->
+            (pre : Context) ->
             (genTy : Gen Type) =>
             (genName : Gen Name) =>
             ({a : Type} -> {ctx : Context} -> Gen (Expression ctx a)) =>
             Gen (post ** Statement pre post)
-  stmtGen pre = oneOf $
+  stmtGen Z     pre = oneOf $ [declsNoRec pre, pure (pre ** !(noDeclStmtGen Z pre))]
+  stmtGen (S n) pre = oneOf $
     [declsNoRec pre] ++
-    [ pure (pre ** !(noDeclStmtGen pre))
-    , do (mid ** l) <- stmtGen pre
-         (post ** r) <- stmtGen mid
+    [ pure (pre ** !(noDeclStmtGen n pre))
+    , do (mid ** l) <- stmtGen n pre
+         (post ** r) <- stmtGen n mid
          pure (post ** l *> r)
     ]

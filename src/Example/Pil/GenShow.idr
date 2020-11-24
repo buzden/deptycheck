@@ -52,7 +52,7 @@ interestingExpr = exprGen 3 simpleValue uniFunction biFunction
 
 partial
 someStatementGen : Gen (post ** Statement [] post)
-someStatementGen = stmtGen []
+someStatementGen = stmtGen 5 []
 
 partial
 someStatement : (post ** Statement [] post)
