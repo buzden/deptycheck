@@ -107,7 +107,7 @@ mutual
     [ do s <- noDeclStmtGen pre
          pure (pre ** s)
     , do ty <- genTy
-         n <- genName `suchThat` \nm => case lookup nm pre of Just _ => False; Nothing => True
+         n <- genName
          pure ((n, ty)::pre ** ty. n)
     , do (mid ** l) <- stmtGen pre
          (post ** r) <- stmtGen mid
