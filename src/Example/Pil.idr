@@ -187,7 +187,10 @@ euc = do
 
 name_shadowing : Statement ctx ctx
 name_shadowing = block $ do
-  Int. "x" #= C 3
-  Int. "y" #= V "x" + C 2
-  String. "x" #= C "foo"
-  print $ V "x" ++ C "bar" ++ show (V "y")
+  Int. "x" #= C 0
+  block $ do
+    Int. "x" #= C 3
+    Int. "y" #= V "x" + C 2
+    String. "x" #= C "foo"
+    print $ V "x" ++ C "bar" ++ show (V "y")
+  Int. "z" #= V "x" + C 2
