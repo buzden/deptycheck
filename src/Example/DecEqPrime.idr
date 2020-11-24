@@ -1,4 +1,4 @@
-module Example.DecEq'
+module Example.DecEqPrime
 
 public export
 data Dec' : Type -> Type where

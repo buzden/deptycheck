@@ -2,7 +2,7 @@ module Example.Pil.Gen
 
 import Data.List
 
-import public Example.DecEq'
+import public Example.DecEqPrime
 import public Example.Gen
 import public Example.Pil
 
