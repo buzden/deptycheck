@@ -1,5 +1,5 @@
 -- Primitive Imperative Language --
-module Example.Pil
+module Example.Pil.Lang
 
 import Data.List
 import Data.List.Elem

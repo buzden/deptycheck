@@ -4,7 +4,7 @@ import Data.List
 
 import public Example.DecEqPrime
 import public Example.Gen
-import public Example.Pil
+import public Example.Pil.Lang
 
 %default total
 

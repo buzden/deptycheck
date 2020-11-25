@@ -1,6 +1,6 @@
 package primitive-imperative-language
 
-modules = Example.Pil
+modules = Example.Pil.Lang
 
 depends = contrib
 

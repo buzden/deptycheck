@@ -1,4 +1,4 @@
-module Example.Pil.GenShow
+module Example.Pil.DemoGen
 
 import Data.List
 
@@ -25,7 +25,7 @@ alphaString = map pack $ sequence $ replicate !(choose (1, 3)) alphaChar
 
 %hint
 varName : Gen Name
-varName = MkName <$> alphaString
+varName = fromString <$> alphaString
 
 partial
 simpleValue : {a : Type} -> Gen a
