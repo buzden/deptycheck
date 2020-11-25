@@ -48,11 +48,11 @@ varExprGen' = varExpressions {- this could be `oneOf $ map pure (fromList varExp
 
 export
 unaryExprGen : Gen (a -> a) -> Gen (Expression ctx a) -> Gen (Expression ctx a)
-unaryExprGen gg sub = U <$> gg <*> sub
+unaryExprGen gg sub = [| U gg sub |]
 
 export
 binaryExprGen : Gen (a -> a -> a) -> Gen (Expression ctx a) -> Gen (Expression ctx a)
-binaryExprGen ggg sub = B <$> ggg <*> sub <*> sub
+binaryExprGen ggg sub = [| B ggg sub sub |]
 
 commonGens : {a : Type} -> {ctx : Context} -> Gen a -> DecEq' Type => (n ** Vect n $ Gen $ Expression ctx a)
 commonGens g = ( _ ** [constExprGen g] ++ map pure (fromList varExprGen') )
