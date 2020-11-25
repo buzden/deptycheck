@@ -14,10 +14,6 @@ import public Example.Pil.Lang
 
 --- Expressions ---
 
-export
-constExprGen : Gen a -> Gen (Expression ctx a)
-constExprGen = map C
-
 maybeToList : Maybe a -> List a
 maybeToList (Just x) = [x]
 maybeToList Nothing = []
@@ -46,23 +42,15 @@ varExprGen' = varExpressions {- this could be `oneOf $ map pure (fromList varExp
             (Yes ty_a) => Just (n ** lk ** trans lk_ty ty_a)
             No => Nothing
 
-export
-unaryExprGen : Gen (a -> a) -> Gen (Expression ctx a) -> Gen (Expression ctx a)
-unaryExprGen gg sub = [| U gg sub |]
-
-export
-binaryExprGen : Gen (a -> a -> a) -> Gen (Expression ctx a) -> Gen (Expression ctx a)
-binaryExprGen ggg sub = [| B ggg sub sub |]
-
 commonGens : {a : Type} -> {ctx : Context} -> Gen a -> DecEq' Type => (n ** Vect n $ Gen $ Expression ctx a)
-commonGens g = ( _ ** [constExprGen g] ++ map pure (fromList varExprGen') )
+commonGens g = ( _ ** [C <$> g] ++ map pure (fromList varExprGen') )
 
 export
 exprGen : (szBound : Nat) -> {a : Type} -> Gen a -> Gen (a -> a) -> Gen (a -> a -> a) -> {ctx : Context} -> DecEq' Type => Gen (Expression ctx a)
 exprGen Z g _ _ = oneOf $ snd $ commonGens g
 exprGen (S n) g gg ggg = oneOf $ snd (commonGens g) ++
-                               [ unaryExprGen gg (exprGen n g gg ggg)
-                               , binaryExprGen ggg (exprGen n g gg ggg)
+                               [ [| U gg (exprGen n g gg ggg) |]
+                               , let s = exprGen n g gg ggg in [| B ggg s s |]
                                ]
 
 --- Statements ---
