@@ -75,6 +75,10 @@ oneOf : {n : Nat} -> Vect (S n) (Gen a) -> Gen a
 oneOf v = index !chooseAny v
 
 export
+oneOf' : (l : List (Gen a)) -> NonEmpty l => Gen a
+oneOf' l@(_::_) = oneOf $ fromList l
+
+export
 pairOf : Gen a -> Gen b -> Gen (a, b)
 pairOf l r = (,) <$> l <*> r
 
