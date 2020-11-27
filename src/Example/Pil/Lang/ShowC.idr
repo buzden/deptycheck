@@ -29,8 +29,11 @@ Show (Expression ctx a) where
   show (C {ty=Int'}    x) = show x
   show (C {ty=String'} x) = show x
   show (V n)              = show n
-  show (U _ e)            = "? (" ++ show e ++ ")"
-  show (B _ l r)          = "(" ++ show l ++ ") ?? (" ++ show r ++ ")"
+  show (U _ e)            = "?fun(" ++ show e ++ ")"
+  show (B _ l r)          = wr l ++ " ?? " ++ wr r where
+    wr : Expression ctx x -> String
+    wr e@(B _ _ _) = "(" ++ show e ++ ")"
+    wr e           = show e
 
 export
 Show Type' where
@@ -64,7 +67,7 @@ showInd i (for init cond upd body) = if isNopDeeply init -- TODO to add a situat
         showInd (n i) body ++ ";\n" ++
         (if isNopDeeply upd then ""
           else showInd (n i) upd ++ ";\n") ++
-      indent i "}\n"
+      indent i "}"
 showInd i (if__ cond x y) = indent i "if (" ++ show cond ++ ") {\n" ++
                               showInd (n i) x ++ ";\n" ++
                             indent i "}" ++ if isNopDeeply y then ""
