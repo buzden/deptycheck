@@ -84,7 +84,7 @@ data Expression : (ctx : Context) -> (res : Type') -> Type where
   -- Constant expression
   C : (x : idrTypeOf ty) -> Expression ctx ty
   -- Value of the variable
-  V : (n : Name) -> (0 ty : Lookup n ctx) => Expression ctx $ reveal ty
+  V : (n : Name) -> (0 lk : Lookup n ctx) => Expression ctx $ reveal lk
   -- Unary operation over the result of another expression
   U : (f : idrTypeOf a -> idrTypeOf b) -> Expression ctx a -> Expression ctx b
   -- Binary operation over the results of two another expressions
@@ -97,7 +97,7 @@ public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
   nop  : Statement ctx ctx
   (.)  : (0 ty : Type') -> (n : Name) -> Statement ctx $ (n, ty)::ctx
-  (#=) : (n : Name) -> (0 ty : Lookup n ctx) => (v : Expression ctx $ reveal ty) -> Statement ctx ctx
+  (#=) : (n : Name) -> (0 lk : Lookup n ctx) => (v : Expression ctx $ reveal lk) -> Statement ctx ctx
   for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool')
       -> (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body)
       -> Statement outer_ctx outer_ctx
