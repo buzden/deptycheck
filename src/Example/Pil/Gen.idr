@@ -2,7 +2,8 @@ module Example.Pil.Gen
 
 import Data.List
 
-import public Example.DecEqPrime
+import Decidable.Equality
+
 import public Example.Gen
 import public Example.Pil.Lang
 
@@ -19,7 +20,7 @@ maybeToList (Just x) = [x]
 maybeToList Nothing = []
 
 export
-varExprGen' : {a : Type} -> {ctx : Context} -> DecEq' Type => List (Expression ctx a)
+varExprGen' : {a : Type'} -> {ctx : Context} -> List (Expression ctx a)
 varExprGen' = varExpressions {- this could be `oneOf $ map pure (fromList varExpressions)` if `Gen` could fail (contain zero) -} where
   varExpressions : List (Expression ctx a)
   varExpressions = map varExpr varsOfType where
@@ -29,24 +30,28 @@ varExprGen' = varExpressions {- this could be `oneOf $ map pure (fromList varExp
     varsOfType : List (n : Name ** lk : Lookup n ctx ** reveal lk = a)
     varsOfType = varsOfTypeOfCtx $ addLookups ctx
       where
-        addLookups : (ctx : Context) -> List (n : Name ** ty : Type ** lk : Lookup n ctx ** reveal lk = ty)
+        addLookups : (ctx : Context) -> List (n : Name ** ty : Type' ** lk : Lookup n ctx ** reveal lk = ty)
         addLookups [] = []
         addLookups ((n, ty)::xs) = (n ** ty ** Here ty ** Refl) ::
                                    map (\(n ** ty ** lk ** lk_ty) => (n ** ty ** There lk ** lk_ty)) (addLookups xs)
 
-        varsOfTypeOfCtx : List (n : Name ** ty : Type ** lk : Lookup n ctx ** reveal lk = ty) -> List (n : Name ** lk : Lookup n ctx ** reveal lk = a)
+        varsOfTypeOfCtx : List (n : Name ** ty : Type' ** lk : Lookup n ctx ** reveal lk = ty) -> List (n : Name ** lk : Lookup n ctx ** reveal lk = a)
         varsOfTypeOfCtx [] = []
         varsOfTypeOfCtx ((n ** ty ** lk ** lk_ty)::xs) = maybeToList varX ++ varsOfTypeOfCtx xs where
           varX : Maybe (n : Name ** lk : Lookup n ctx ** reveal lk = a)
-          varX = case decEq' ty a of
+          varX = case decEq ty a of
             (Yes ty_a) => Just (n ** lk ** trans lk_ty ty_a)
-            No => Nothing
+            (No _)     => Nothing
 
-commonGens : {a : Type} -> {ctx : Context} -> Gen a -> DecEq' Type => (n ** Vect n $ Gen $ Expression ctx a)
+commonGens : {a : Type'} -> {ctx : Context} -> Gen (idrTypeOf a) -> (n ** Vect n $ Gen $ Expression ctx a)
 commonGens g = ( _ ** [C <$> g] ++ map pure (fromList varExprGen') )
 
 export
-exprGen : (szBound : Nat) -> {a : Type} -> Gen a -> Gen (a -> a) -> Gen (a -> a -> a) -> {ctx : Context} -> DecEq' Type => Gen (Expression ctx a)
+exprGen : (szBound : Nat) ->
+          {a : Type'} ->
+          Gen (idrTypeOf a) -> Gen (idrTypeOf a -> idrTypeOf a) -> Gen (idrTypeOf a -> idrTypeOf a -> idrTypeOf a) ->
+          {ctx : Context} ->
+          Gen (Expression ctx a)
 exprGen Z g _ _ = oneOf $ snd $ commonGens g
 exprGen (S n) g gg ggg = oneOf $ snd (commonGens g) ++
                                [ [| U gg (exprGen n g gg ggg) |]
@@ -64,7 +69,7 @@ lookupGen ctx = let (lks@(_::_) ** _) = mapLk ctx in
     mapLk ((n, ty)::xs@(_::_)) = ( (n ** Here ty) :: map (\(n ** lk) => (n ** There lk)) (fst $ mapLk xs) ** IsNonEmpty )
 
 noDeclsNoRec : (ctx : Context) ->
-               (genExpr : {a : Type} -> {ctx : Context} -> Gen (Expression ctx a)) =>
+               (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
                Vect 3 $ Gen (Statement ctx ctx)
 noDeclsNoRec ctx =
   [ pure nop
@@ -72,11 +77,11 @@ noDeclsNoRec ctx =
     []     => pure nop -- this is returned because `oneOf` requires `Vect`, thus all cases must have equal size.
     (_::_) => do (n ** _) <- lookupGen ctx
                  pure $ n #= !genExpr
-  , do pure $ print !(genExpr {a=String})
+  , do pure $ print !(genExpr {a=String'})
   ]
 
 declsNoRec : (pre : Context) ->
-             (genTy : Gen Type) =>
+             (genTy : Gen Type') =>
              (genName : Gen Name) =>
              Gen (post ** Statement pre post)
 declsNoRec pre = do
@@ -89,9 +94,9 @@ mutual
   export
   noDeclStmtGen : (bound : Nat) ->
                   (ctx : Context) ->
-                  Gen Type =>
+                  Gen Type' =>
                   Gen Name =>
-                  (genExpr : {a : Type} -> {ctx : Context} -> Gen (Expression ctx a)) =>
+                  (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
                   Gen (Statement ctx ctx)
   noDeclStmtGen Z     ctx = oneOf $ noDeclsNoRec ctx
   noDeclStmtGen (S n) ctx = oneOf $
@@ -107,9 +112,9 @@ mutual
   export
   stmtGen : (bound : Nat) ->
             (pre : Context) ->
-            (genTy : Gen Type) =>
+            (genTy : Gen Type') =>
             (genName : Gen Name) =>
-            ({a : Type} -> {ctx : Context} -> Gen (Expression ctx a)) =>
+            ({a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
             Gen (post ** Statement pre post)
   stmtGen Z     pre = oneOf $ [declsNoRec pre, pure (pre ** !(noDeclStmtGen Z pre))]
   stmtGen (S n) pre = oneOf $
