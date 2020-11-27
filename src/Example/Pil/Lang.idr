@@ -82,7 +82,7 @@ reveal (There subl) = reveal subl
 public export
 data Expression : (ctx : Context) -> (res : Type') -> Type where
   -- Constant expression
-  C : (x : idrTypeOf ty) -> Expression ctx ty
+  C : {ty : Type'} -> (x : idrTypeOf ty) -> Expression ctx ty
   -- Value of the variable
   V : (n : Name) -> (0 lk : Lookup n ctx) => Expression ctx $ reveal lk
   -- Unary operation over the result of another expression
