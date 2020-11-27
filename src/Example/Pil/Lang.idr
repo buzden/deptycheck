@@ -96,7 +96,7 @@ infixr 1 *>
 public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
   nop  : Statement ctx ctx
-  (.)  : (0 ty : Type') -> (n : Name) -> Statement ctx $ (n, ty)::ctx
+  (.)  : (ty : Type') -> (n : Name) -> Statement ctx $ (n, ty)::ctx
   (#=) : (n : Name) -> (0 lk : Lookup n ctx) => (v : Expression ctx $ reveal lk) -> Statement ctx ctx
   for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool')
       -> (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body)
@@ -120,7 +120,7 @@ while cond = for nop cond nop
 
 -- Define with derived type and assign immediately
 public export %inline
-(?#=) : (n : Name) -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
+(?#=) : (n : Name) -> {ty : Type'} -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
 n ?#= v = ty. n *> n #= v
 
 namespace AlternativeDefineAndAssign
