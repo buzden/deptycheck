@@ -40,8 +40,10 @@ biFunction {a=Bool'}   = oneOf $ map pure $ [ (\x, y => x && y), (\x, y => x || 
 interestingExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)
 interestingExpr = exprGen 3 simpleValue uniFunction biFunction
 
+export
 someStatementGen : Gen (post ** Statement [] post)
 someStatementGen = stmtGen 5 []
 
-someStatement : (post ** Statement [] post)
-someStatement = unGen someStatementGen someStdGen
+export
+someStatement : Nat -> (post ** Statement [] post)
+someStatement n = unGen (variant n $ someStatementGen) someStdGen
