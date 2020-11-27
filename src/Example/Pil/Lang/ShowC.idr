@@ -20,8 +20,8 @@ export
 show' : (ex : Expression ctx a) -> (shows : allShows ex) => String
 show' (C x) = show x
 show' (V n) = show n
-show' (U f e) = "?(" ++ show' e ++ ")"
-show' (B f e1 e2) = "(" ++ show' e1 {shows = fst shows} ++ ") ?? (" ++ show' e2 {shows = snd shows} ++ ")"
+show' (U {opName} f e) = opName ++ "(" ++ show' e ++ ")"
+show' (B {opName} f e1 e2) = "(" ++ show' e1 {shows = fst shows} ++ ") " ++ opName ++ " (" ++ show' e2 {shows = snd shows} ++ ")"
 
 export
 Show (Expression ctx a) where
@@ -29,8 +29,8 @@ Show (Expression ctx a) where
   show (C {ty=Int'}    x) = show x
   show (C {ty=String'} x) = show x
   show (V n)              = show n
-  show (U _ e)            = "?fun(" ++ show e ++ ")"
-  show (B _ l r)          = wr l ++ " ?? " ++ wr r where
+  show (U {opName} _ e)            = opName ++ "(" ++ show e ++ ")"
+  show (B {opName} _ l r)          = wr l ++ " " ++ opName ++ " " ++ wr r where
     wr : Expression ctx x -> String
     wr e@(B _ _ _) = "(" ++ show e ++ ")"
     wr e           = show e

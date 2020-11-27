@@ -86,9 +86,9 @@ data Expression : (ctx : Context) -> (res : Type') -> Type where
   -- Value of the variable
   V : (n : Name) -> (0 lk : Lookup n ctx) => Expression ctx $ reveal lk
   -- Unary operation over the result of another expression
-  U : (f : idrTypeOf a -> idrTypeOf b) -> Expression ctx a -> Expression ctx b
+  U : {default "?func" opName : String} -> (f : idrTypeOf a -> idrTypeOf b) -> Expression ctx a -> Expression ctx b
   -- Binary operation over the results of two another expressions
-  B : (f : idrTypeOf a -> idrTypeOf b -> idrTypeOf c) -> Expression ctx a -> Expression ctx b -> Expression ctx c
+  B : {default "??" opName : String} -> (f : idrTypeOf a -> idrTypeOf b -> idrTypeOf c) -> Expression ctx a -> Expression ctx b -> Expression ctx c
 
 infix 2 #=, ?#=
 infixr 1 *>
