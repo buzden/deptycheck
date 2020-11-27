@@ -52,31 +52,31 @@ n = (+ 2)
 
 showInd : (indent : Nat) -> Statement pre post -> String
 showInd i Example.Pil.Lang.nop = ""
-showInd i (ty . n) = indent i $ show ty ++ " " ++ show n
-showInd i (Example.Pil.Lang.(#=) n v) = indent i $ show n ++ " = " ++ show v
+showInd i (ty . n) = indent i $ show ty ++ " " ++ show n ++ ";"
+showInd i (Example.Pil.Lang.(#=) n v) = indent i $ show n ++ " = " ++ show v ++ ";"
 showInd i (for init cond upd body) = if isNopDeeply init -- TODO to add a situation when we can use normal C's `for`
   then showWhile i
   else indent i "{\n" ++
-         showInd (n i) init ++ ";\n" ++
+         showInd (n i) init ++ "\n" ++
          showWhile (n i) ++ "\n" ++
        indent i "}"
   where
     showWhile : Nat -> String
     showWhile i =
       indent i ("while (" ++ show cond ++ ") {\n") ++
-        showInd (n i) body ++ ";\n" ++
+        showInd (n i) body ++ "\n" ++
         (if isNopDeeply upd then ""
-          else showInd (n i) upd ++ ";\n") ++
+          else showInd (n i) upd ++ "\n") ++
       indent i "}"
 showInd i (if__ cond x y) = indent i "if (" ++ show cond ++ ") {\n" ++
-                              showInd (n i) x ++ ";\n" ++
+                              showInd (n i) x ++ "\n" ++
                             indent i "}" ++ if isNopDeeply y then ""
                               else " else {\n" ++
-                                showInd (n i) y ++ ";\n" ++
+                                showInd (n i) y ++ "\n" ++
                                 indent i "}"
-showInd i (x *> y) = showInd i x ++ ";\n" ++ showInd i y
+showInd i (x *> y) = showInd i x ++ "\n" ++ showInd i y
 showInd i (block x) = indent i "{\n" ++ showInd (n i) x ++ "\n" ++ indent i "}"
-showInd i (print x) = indent i $ "print (" ++ show x ++ ")"
+showInd i (print x) = indent i $ "print (" ++ show x ++ ");"
 
 export
 Show (Statement pre post) where
