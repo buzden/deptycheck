@@ -1,8 +1,10 @@
 module Example.Pil.DemoGen
 
 import Data.List
+import Data.Strings
 
 import Example.Pil.Gen
+import Example.Pil.Lang.ShowC
 
 %default total
 
@@ -47,3 +49,7 @@ someStatementGen = stmtGen 5 []
 export
 someStatement : Nat -> (post ** Statement [] post)
 someStatement n = unGen (variant n $ someStatementGen) someStdGen
+
+export
+someStatements : String
+someStatements = unlines $ intersperse "----" $ map (\n => show $ snd $ someStatement n) [0 .. 10]
