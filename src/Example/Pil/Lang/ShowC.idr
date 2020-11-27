@@ -8,7 +8,7 @@ Show Name where
 
 public export
 0 allShows : Expression ctx a -> Type
-allShows (C _) = Show a
+allShows (C _) = Show $ idrTypeOf a
 allShows (V n) = ()
 allShows (U _ e) = allShows e
 allShows (B _ e1 e2) = (allShows e1, allShows e2)
