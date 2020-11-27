@@ -23,8 +23,8 @@ show' (B f e1 e2) = "(" ++ show' e1 {shows = fst shows} ++ ") ?? (" ++ show' e2 
 
 export
 Show (Expression ctx a) where
-  show (C {ty=Bool'} x)   = show x
-  show (C {ty=Int'} x)    = show x
+  show (C {ty=Bool'}   x) = show x
+  show (C {ty=Int'}    x) = show x
   show (C {ty=String'} x) = show x
   show (V n)              = show n
   show (U _ e)            = "? (" ++ show e ++ ")"
