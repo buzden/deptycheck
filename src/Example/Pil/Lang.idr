@@ -141,43 +141,43 @@ namespace AlternativeDefineAndAssign
 
 export %inline
 (+) : Expression ctx Int' -> Expression ctx Int' -> Expression ctx Int'
-(+) = B (+)
+(+) = B (+) {opName="+"}
 
 export %inline
 div : Expression ctx Int' -> Expression ctx Int' -> Expression ctx Int'
-div = B div
+div = B div {opName="/"}
 
 export %inline
 mod : Expression ctx Int' -> Expression ctx Int' -> Expression ctx Int'
-mod = B mod
+mod = B mod {opName="%"}
 
 export %inline
 (<) : Expression ctx Int' -> Expression ctx Int' -> Expression ctx Bool'
-(<) = B (<)
+(<) = B (<) {opName="<"}
 
 export %inline
 (>) : Expression ctx Int' -> Expression ctx Int' -> Expression ctx Bool'
-(>) = B (>)
+(>) = B (>) {opName=">"}
 
 export %inline
 (==) : Eq (idrTypeOf a) => Expression ctx a -> Expression ctx a -> Expression ctx Bool'
-(==) = B (==)
+(==) = B (==) {opName="=="}
 
 export %inline
 (/=) : Eq (idrTypeOf a) => Expression ctx a -> Expression ctx a -> Expression ctx Bool'
-(/=) = B (/=)
+(/=) = B (/=) {opName="!="}
 
 export %inline
 (&&) : Expression ctx Bool' -> Expression ctx Bool' -> Expression ctx Bool'
-(&&) = B (\a, b => a && b) -- recoded because of laziness
+(&&) = B (\a, b => a && b) {opName="&&"} -- recoded because of laziness
 
 export %inline
 (++) : Expression ctx String' -> Expression ctx String' -> Expression ctx String'
-(++) = B (++)
+(++) = B (++) {opName="??concat??"}
 
 export %inline
 show : Show (idrTypeOf ty) => Expression ctx ty -> Expression ctx String'
-show = U show
+show = U show {opName="toString"}
 
 --- Example statements ---
 
