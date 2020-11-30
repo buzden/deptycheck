@@ -23,14 +23,24 @@ show' (V n) = show n
 show' (U {opName} f e) = opName ++ "(" ++ show' e ++ ")"
 show' (B {opName} f e1 e2) = "(" ++ show' e1 {shows = fst shows} ++ ") " ++ opName ++ " (" ++ show' e2 {shows = snd shows} ++ ")"
 
+looksLikeInfixOperator : String -> Bool
+looksLikeInfixOperator =
+  flip elem ["+", "-", "*", "/", "%", "==", "!=", "<", ">", ">=", "<=", "&&", "||", "&", "|", "^", "<<", ">>"]
+
+makeFuncName : String -> String
+makeFuncName = pack . map (\k => if isAlphaNum k then k else '_') . unpack
+
 export
 Show (Expression ctx a) where
   show (C {ty=Bool'}   x) = show x
   show (C {ty=Int'}    x) = show x
   show (C {ty=String'} x) = show x
   show (V n)              = show n
-  show (U {opName} _ e)            = opName ++ "(" ++ show e ++ ")"
-  show (B {opName} _ l r)          = wr l ++ " " ++ opName ++ " " ++ wr r where
+  show (U {opName} _ e)   = opName ++ "(" ++ show e ++ ")"
+  show (B {opName} _ l r) = if looksLikeInfixOperator opName
+      then wr l ++ " " ++ opName ++ " " ++ wr r
+      else makeFuncName opName ++ "(" ++ show l ++ ", " ++ show r ++ ")"
+    where
     wr : Expression ctx x -> String
     wr e@(B _ _ _) = "(" ++ show e ++ ")"
     wr e           = show e
