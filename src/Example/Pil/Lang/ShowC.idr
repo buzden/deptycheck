@@ -71,7 +71,7 @@ showInd i (if__ cond x y) = indent i "if (" ++ show cond ++ ") {\n" ++
                                 indent i "}"
 showInd i (x *> y) = (if isNopDeeply x then "" else showInd i x ++ "\n") ++ showInd i y
 showInd i (block x) = indent i "{\n" ++ showInd (n i) x ++ "\n" ++ indent i "}"
-showInd i (print x) = indent i $ "print (" ++ show x ++ ");"
+showInd i (print x) = indent i $ "puts(" ++ show x ++ ");"
 
 export
 Show (Statement pre post) where
