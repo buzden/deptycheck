@@ -43,8 +43,9 @@ varExprGen' = varExpressions {- this could be `oneOf $ map pure (fromList varExp
             (Yes ty_a) => Just (n ** lk ** trans lk_ty ty_a)
             (No _)     => Nothing
 
-commonGens : {a : Type'} -> {ctx : Context} -> Gen (idrTypeOf a) -> (n ** Vect n $ Gen $ Expression ctx a)
-commonGens g = ( _ ** [C <$> g] ++ map pure (fromList varExprGen') )
+||| Generator of non-recursive expressions (thus those that can be used with zero recursion bound).
+nonRec_exprGen : {a : Type'} -> {ctx : Context} -> Gen (idrTypeOf a) -> (n ** Vect n $ Gen $ Expression ctx a)
+nonRec_exprGen g = ( _ ** [C <$> g] ++ map pure (fromList varExprGen') )
 
 export
 exprGen : (szBound : Nat) ->
@@ -52,8 +53,8 @@ exprGen : (szBound : Nat) ->
           Gen (idrTypeOf a) -> Gen (idrTypeOf a -> idrTypeOf a) -> Gen (idrTypeOf a -> idrTypeOf a -> idrTypeOf a) ->
           {ctx : Context} ->
           Gen (Expression ctx a)
-exprGen Z g _ _ = oneOf $ snd $ commonGens g
-exprGen (S n) g gg ggg = oneOf $ snd (commonGens g) ++
+exprGen Z g _ _ = oneOf $ snd $ nonRec_exprGen g
+exprGen (S n) g gg ggg = oneOf $ snd (nonRec_exprGen g) ++
                                [ [| U gg (exprGen n g gg ggg) |]
                                , let s = exprGen n g gg ggg in [| B ggg s s |]
                                ]
@@ -68,10 +69,11 @@ lookupGen ctx = let (lks@(_::_) ** _) = mapLk ctx in
     mapLk [(n, ty)] = ( [(n ** Here ty)] ** IsNonEmpty )
     mapLk ((n, ty)::xs@(_::_)) = ( (n ** Here ty) :: map (\(n ** lk) => (n ** There lk)) (fst $ mapLk xs) ** IsNonEmpty )
 
-noDeclsNoRec : (ctx : Context) ->
-               (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
-               Vect 3 $ Gen (Statement ctx ctx)
-noDeclsNoRec ctx =
+||| Statements generator of those that do not change the context and those that are not recursive.
+noCtxChange_noRec_stmtGen : (ctx : Context) ->
+                            (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
+                            Vect 3 $ Gen (Statement ctx ctx)
+noCtxChange_noRec_stmtGen ctx =
   [ pure nop
   , case ctx of
     []     => pure nop -- this is returned because `oneOf` requires `Vect`, thus all cases must have equal size.
@@ -80,32 +82,34 @@ noDeclsNoRec ctx =
   , do pure $ print !(genExpr {a=String'})
   ]
 
-declsNoRec : (pre : Context) ->
-             (genTy : Gen Type') =>
-             (genName : Gen Name) =>
-             Gen (post ** Statement pre post)
-declsNoRec pre = do
+||| Statements generator of those that can change the context and those that are not recursive.
+ctxChanging_noRec_stmtGen : (pre : Context) ->
+                            (genTy : Gen Type') =>
+                            (genName : Gen Name) =>
+                            Gen (post ** Statement pre post)
+ctxChanging_noRec_stmtGen pre = do
   ty <- genTy
   n <- genName
   pure ((n, ty)::pre ** ty. n)
 
 mutual
 
+  ||| Statements generator of those statements that can't change the context.
   export
-  noDeclStmtGen : (bound : Nat) ->
-                  (ctx : Context) ->
-                  Gen Type' =>
-                  Gen Name =>
-                  (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
-                  Gen (Statement ctx ctx)
-  noDeclStmtGen Z     ctx = oneOf $ noDeclsNoRec ctx
-  noDeclStmtGen (S n) ctx = oneOf $
-    noDeclsNoRec ctx ++
+  noCtxChange_stmtGen : (bound : Nat) ->
+                        (ctx : Context) ->
+                        Gen Type' =>
+                        Gen Name =>
+                        (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
+                        Gen (Statement ctx ctx)
+  noCtxChange_stmtGen Z     ctx = oneOf $ noCtxChange_noRec_stmtGen ctx
+  noCtxChange_stmtGen (S n) ctx = oneOf $
+    noCtxChange_noRec_stmtGen ctx ++
     [ do (inside_for ** init) <- stmtGen n ctx
          (_ ** body) <- stmtGen n inside_for
-         pure $ for init !genExpr !(noDeclStmtGen n inside_for) body
+         pure $ for init !genExpr !(noCtxChange_stmtGen n inside_for) body
     , pure $ if__ !genExpr (snd !(stmtGen n ctx)) (snd !(stmtGen n ctx))
-    , pure $ !(noDeclStmtGen n ctx) *> !(noDeclStmtGen n ctx)
+    , pure $ !(noCtxChange_stmtGen n ctx) *> !(noCtxChange_stmtGen n ctx)
     , pure $ block $ snd !(stmtGen n ctx)
     ]
 
@@ -116,10 +120,10 @@ mutual
             (genName : Gen Name) =>
             ({a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
             Gen (post ** Statement pre post)
-  stmtGen Z     pre = oneOf $ [declsNoRec pre, pure (pre ** !(noDeclStmtGen Z pre))]
+  stmtGen Z     pre = oneOf $ [ctxChanging_noRec_stmtGen pre, pure (pre ** !(noCtxChange_stmtGen Z pre))]
   stmtGen (S n) pre = oneOf $
-    [declsNoRec pre] ++
-    [ pure (pre ** !(noDeclStmtGen n pre))
+    [ctxChanging_noRec_stmtGen pre] ++
+    [ pure (pre ** !(noCtxChange_stmtGen n pre))
     , do (mid ** l) <- stmtGen n pre
          (post ** r) <- stmtGen n mid
          pure (post ** l *> r)
