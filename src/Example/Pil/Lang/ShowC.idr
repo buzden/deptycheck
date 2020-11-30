@@ -8,20 +8,12 @@ export
 Show Name where
   show (MkName n) = n
 
-public export
-0 allShows : Expression ctx a -> Type
-allShows (C _) = Show $ idrTypeOf a
-allShows (V n) = ()
-allShows (U _ e) = allShows e
-allShows (B _ e1 e2) = (allShows e1, allShows e2)
+looksLikeInfixOperator : String -> Bool
+looksLikeInfixOperator =
+  flip elem ["+", "-", "*", "/", "%", "==", "!=", "<", ">", ">=", "<=", "&&", "||", "&", "|", "^", "<<", ">>"]
 
--- More an exercise of precise dependent requirements on function.
-export
-show' : (ex : Expression ctx a) -> (shows : allShows ex) => String
-show' (C x) = show x
-show' (V n) = show n
-show' (U {opName} f e) = opName ++ "(" ++ show' e ++ ")"
-show' (B {opName} f e1 e2) = "(" ++ show' e1 {shows = fst shows} ++ ") " ++ opName ++ " (" ++ show' e2 {shows = snd shows} ++ ")"
+makeFuncName : String -> String
+makeFuncName = pack . map (\k => if isAlphaNum k then k else '_') . unpack
 
 export
 Show (Expression ctx a) where
@@ -29,8 +21,11 @@ Show (Expression ctx a) where
   show (C {ty=Int'}    x) = show x
   show (C {ty=String'} x) = show x
   show (V n)              = show n
-  show (U {opName} _ e)            = opName ++ "(" ++ show e ++ ")"
-  show (B {opName} _ l r)          = wr l ++ " " ++ opName ++ " " ++ wr r where
+  show (U {opName} _ e)   = opName ++ "(" ++ show e ++ ")"
+  show (B {opName} _ l r) = if looksLikeInfixOperator opName
+      then wr l ++ " " ++ opName ++ " " ++ wr r
+      else makeFuncName opName ++ "(" ++ show l ++ ", " ++ show r ++ ")"
+    where
     wr : Expression ctx x -> String
     wr e@(B _ _ _) = "(" ++ show e ++ ")"
     wr e           = show e
@@ -76,7 +71,7 @@ showInd i (if__ cond x y) = indent i "if (" ++ show cond ++ ") {\n" ++
                                 indent i "}"
 showInd i (x *> y) = (if isNopDeeply x then "" else showInd i x ++ "\n") ++ showInd i y
 showInd i (block x) = indent i "{\n" ++ showInd (n i) x ++ "\n" ++ indent i "}"
-showInd i (print x) = indent i $ "print (" ++ show x ++ ");"
+showInd i (print x) = indent i $ "puts(" ++ show x ++ ");"
 
 export
 Show (Statement pre post) where

@@ -33,7 +33,7 @@ recExpr sub {a=Int'}    = oneOf [ U (+1) {opName="inc"} <$> sub {x=Int'}
                                 , B (+) {opName="+"} <$> sub {x=Int'} <*> sub {x=Int'}
                                 , B (*) {opName="*"} <$> sub {x=Int'} <*> sub {x=Int'}
                                 ]
-recExpr sub {a=String'} = oneOf [ U show {opName="asString"} <$> sub {x=Int'}
+recExpr sub {a=String'} = oneOf [ U show {opName="as_str"} <$> sub {x=Int'}
                                 , B (++) {opName="concat"} <$> sub {x=String'} <*> sub {x=String'}
                                 ]
 recExpr sub {a=Bool'}   = oneOf [ U not {opName="!"} <$> sub {x=Bool'}
