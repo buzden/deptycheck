@@ -57,6 +57,13 @@ exprGen : (szBound : Nat) ->
 exprGen Z     g _   = oneOf $ snd $ nonRec_exprGen g
 exprGen (S n) g rec = oneOf $ snd (nonRec_exprGen g) ++ [ rec (exprGen n g rec) ]
 
+--- Universal patterns (particular cases) ---
+
+asp : {0 index : Type} ->
+      {0 indexed : index -> Type} ->
+      {0 fin : (idx : index) -> indexed idx -> Type} ->
+      Gen (n : index ** p : indexed n ** fin n p)
+
 --- Statements ---
 
 lookupGen : (ctx : Context) -> NonEmpty ctx => Gen (n : Name ** Lookup n ctx)
