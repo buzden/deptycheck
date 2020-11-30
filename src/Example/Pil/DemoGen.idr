@@ -24,7 +24,7 @@ varName : Gen Name
 varName = fromString <$> alphaString
 
 simpleValue : {a : Type'} -> Gen $ idrTypeOf a
-simpleValue {a=Int'}    = chooseAny
+simpleValue {a=Int'}    = choose (-100, 100)
 simpleValue {a=String'} = alphaString
 simpleValue {a=Bool'}   = chooseAny
 
