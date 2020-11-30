@@ -44,12 +44,12 @@ interestingExpr = exprGen 3 simpleValue uniFunction biFunction
 
 export
 someStatementGen : Gen (post ** Statement [] post)
-someStatementGen = stmtGen 5 []
+someStatementGen = stmtGen 10 []
 
 export
 someStatement : Nat -> (post ** Statement [] post)
 someStatement n = unGen (variant n $ someStatementGen) someStdGen
 
 export
-someStatements : String
-someStatements = unlines $ intersperse "----" $ map (\n => show $ snd $ someStatement n) [0 .. 10]
+showSomeStatements : {default 0 variant : Nat} -> (count : Nat) -> IO ()
+showSomeStatements count = traverse_ putStrLn $ intersperse "----" $ map (\n => show $ snd $ someStatement n) [variant .. (variant + count)]
