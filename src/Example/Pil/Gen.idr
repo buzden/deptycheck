@@ -60,9 +60,15 @@ exprGen (S n) g rec = oneOf $ snd (nonRec_exprGen g) ++ [ rec (exprGen n g rec) 
 --- Universal patterns (particular cases) ---
 
 asp : {0 index : Type} ->
-      {0 indexed : index -> Type} ->
-      {0 fin : (idx : index) -> indexed idx -> Type} ->
-      Gen (n : index ** p : indexed n ** fin n p)
+      {0 context : Type} ->
+      {0 indexed : index -> context -> Type} ->
+      {0 fin : (idx : index) -> (ctx : context) -> indexed idx ctx -> Type} ->
+      Gen (n : index ** (ctx : context) -> (p : indexed n ctx ** fin n ctx p))
+
+-- Can/should we put context to the outer place (before the `index` type)?
+-- Can we put `context` out of the `Gen`, i.e. to make the resulting type to be
+--   `(ctx : context) -> Gen (n : index ** indexed n ctx ** fin n ctx p)`?
+--   Consider, here `index` does not depend on `ctx`, should it in general?
 
 --- Statements ---
 
@@ -82,8 +88,10 @@ noCtxChange_noRec_stmtGen ctx =
   [ pure nop
   , case ctx of
     []     => pure nop -- this is returned because `oneOf` requires `Vect`, thus all cases must have equal size.
-    (_::_) => do (n ** _) <- lookupGen ctx
-                 pure $ n #= !genExpr
+    (x::y) => do (n ** f) <- asp {indexed=Lookup} {fin=(\n, ct, lk => Expression ct $ reveal lk)}
+                 let (lk ** e) = f (x::y)
+                 let ass = (#=) {ctx=x::y} n e
+                 pure ass
   , do pure $ print !(genExpr {a=String'})
   ]
 
