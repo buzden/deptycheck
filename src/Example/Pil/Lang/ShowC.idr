@@ -8,21 +8,6 @@ export
 Show Name where
   show (MkName n) = n
 
-public export
-0 allShows : Expression ctx a -> Type
-allShows (C _) = Show $ idrTypeOf a
-allShows (V n) = ()
-allShows (U _ e) = allShows e
-allShows (B _ e1 e2) = (allShows e1, allShows e2)
-
--- More an exercise of precise dependent requirements on function.
-export
-show' : (ex : Expression ctx a) -> (shows : allShows ex) => String
-show' (C x) = show x
-show' (V n) = show n
-show' (U {opName} f e) = opName ++ "(" ++ show' e ++ ")"
-show' (B {opName} f e1 e2) = "(" ++ show' e1 {shows = fst shows} ++ ") " ++ opName ++ " (" ++ show' e2 {shows = snd shows} ++ ")"
-
 looksLikeInfixOperator : String -> Bool
 looksLikeInfixOperator =
   flip elem ["+", "-", "*", "/", "%", "==", "!=", "<", ">", ">=", "<=", "&&", "||", "&", "|", "^", "<<", ">>"]
