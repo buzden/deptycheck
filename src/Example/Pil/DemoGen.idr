@@ -24,23 +24,28 @@ varName : Gen Name
 varName = fromString <$> alphaString
 
 simpleValue : {a : Type'} -> Gen $ idrTypeOf a
-simpleValue {a=Int'}    = chooseAny
+simpleValue {a=Int'}    = choose (-100, 100)
 simpleValue {a=String'} = alphaString
 simpleValue {a=Bool'}   = chooseAny
 
-uniFunction : {a : Type'} -> Gen (idrTypeOf a -> idrTypeOf a)
-uniFunction {a=Int'}    = oneOf $ map pure $ [ (+1), (+2), \x => x - 1 ]
-uniFunction {a=String'} = oneOf $ map pure $ [ ("a"++), (++"z") ]
-uniFunction {a=Bool'}   = pure not
-
-biFunction : {a : Type'} -> Gen (idrTypeOf a -> idrTypeOf a -> idrTypeOf a)
-biFunction {a=Int'}    = oneOf $ map pure $ [ (+), (*) ]
-biFunction {a=String'} = pure (++)
-biFunction {a=Bool'}   = oneOf $ map pure $ [ (\x, y => x && y), (\x, y => x || y) ]
+recExpr : ({x : Type'} -> Gen $ Expression ctx x) -> {a : Type'} -> Gen $ Expression ctx a
+recExpr sub {a=Int'}    = oneOf [ U (+1) {opName="inc"} <$> sub {x=Int'}
+                                , B (+) {opName="+"} <$> sub {x=Int'} <*> sub {x=Int'}
+                                , B (*) {opName="*"} <$> sub {x=Int'} <*> sub {x=Int'}
+                                ]
+recExpr sub {a=String'} = oneOf [ U show {opName="asString"} <$> sub {x=Int'}
+                                , B (++) {opName="concat"} <$> sub {x=String'} <*> sub {x=String'}
+                                ]
+recExpr sub {a=Bool'}   = oneOf [ U not {opName="!"} <$> sub {x=Bool'}
+                                , B (\x, y => x && y) {opName="&&"} <$> sub {x=Bool'} <*> sub {x=Bool'}
+                                , B (\x, y => x || y) {opName="||"} <$> sub {x=Bool'} <*> sub {x=Bool'}
+                                , B (<) {opName="<"} <$> sub {x=Int'} <*> sub {x=Int'}
+                                , B (<=) {opName="<="} <$> sub {x=Int'} <*> sub {x=Int'}
+                                ]
 
 %hint
 interestingExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)
-interestingExpr = exprGen 3 simpleValue uniFunction biFunction
+interestingExpr = exprGen 3 simpleValue recExpr
 
 export
 someStatementGen : Gen (post ** Statement [] post)
