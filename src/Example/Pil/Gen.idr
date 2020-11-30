@@ -50,14 +50,12 @@ nonRec_exprGen g = ( _ ** [C <$> g] ++ map pure (fromList varExprGen') )
 export
 exprGen : (szBound : Nat) ->
           {a : Type'} ->
-          Gen (idrTypeOf a) -> Gen (idrTypeOf a -> idrTypeOf a) -> Gen (idrTypeOf a -> idrTypeOf a -> idrTypeOf a) ->
+          ({b : Type'} -> Gen $ idrTypeOf b) ->
           {ctx : Context} ->
+          ((subGen : {x : Type'} -> Gen $ Expression ctx x) -> {b : Type'} -> Gen $ Expression ctx b) ->
           Gen (Expression ctx a)
-exprGen Z g _ _ = oneOf $ snd $ nonRec_exprGen g
-exprGen (S n) g gg ggg = oneOf $ snd (nonRec_exprGen g) ++
-                               [ [| U gg (exprGen n g gg ggg) |]
-                               , let s = exprGen n g gg ggg in [| B ggg s s |]
-                               ]
+exprGen Z     g _   = oneOf $ snd $ nonRec_exprGen g
+exprGen (S n) g rec = oneOf $ snd (nonRec_exprGen g) ++ [ rec (exprGen n g rec) ]
 
 --- Statements ---
 
