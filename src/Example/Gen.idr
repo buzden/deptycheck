@@ -79,10 +79,6 @@ oneOf' : (l : List (Gen a)) -> NonEmpty l => Gen a
 oneOf' l@(_::_) = oneOf $ fromList l
 
 export
-pairOf : Gen a -> Gen b -> Gen (a, b)
-pairOf l r = (,) <$> l <*> r
-
-export
 listOf : Gen a -> Gen (List a)
 listOf g = sequence $ replicate !chooseAny g
 
