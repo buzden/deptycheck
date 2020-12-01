@@ -59,9 +59,7 @@ exprGen (S n) g rec = oneOf $ snd (nonRec_exprGen g) ++ [ rec (exprGen n g rec) 
 
 --- Universal patterns (particular cases) ---
 
-asp : {0 index : Type} ->
-      {0 context : Type} ->
-      {0 indexed : index -> context -> Type} ->
+asp : {0 indexed : index -> context -> Type} ->
       {0 fin : (idx : index) -> (ctx : context) -> indexed idx ctx -> Type} ->
       Gen (n : index ** (ctx : context) -> (p : indexed n ctx ** fin n ctx p))
 
