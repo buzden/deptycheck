@@ -64,6 +64,8 @@ asp : {0 indexed : index -> Type} ->
       Gen (n ** indexed n) ->
       ({0 idx : index} -> {p : indexed idx} -> Gen $ fin p) ->
       Gen (n : index ** p : indexed n ** fin p)
+asp rl lr = do (n ** i) <- rl
+               pure (n ** i ** !lr)
 
 --- Statements ---
 
