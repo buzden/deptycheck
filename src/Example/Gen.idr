@@ -79,8 +79,8 @@ oneOf' : (l : List (Gen a)) -> NonEmpty l => Gen a
 oneOf' l@(_::_) = oneOf $ fromList l
 
 export
-listOf : Gen a -> Gen (List a)
-listOf g = sequence $ replicate !chooseAny g
+listOf : Gen a -> {default (choose (0, 10)) length : Gen Nat} -> Gen (List a)
+listOf g = sequence $ replicate !length g
 
 export
 vectOf : Gen a -> {n : Nat} -> Gen (Vect n a)
