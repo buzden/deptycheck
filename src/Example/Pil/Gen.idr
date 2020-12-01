@@ -59,13 +59,11 @@ exprGen (S n) g rec = oneOf $ snd (nonRec_exprGen g) ++ [ rec (exprGen n g rec) 
 
 --- Universal patterns (particular cases) ---
 
-asp : {0 indexed : index -> context -> Type} ->
-      {0 fin : (idx : index) -> (ctx : context) -> indexed idx ctx -> Type} ->
-      (ctx : context) ->
-      Gen (n ** indexed n ctx) ->
-      ({idx : index} -> (p : indexed idx ctx) -> Gen $ fin idx ctx p) ->
-      Gen (n : index ** p : indexed n ctx ** fin n ctx p)
-      -- TODO to think whether eliminate `ctx` parameter of `indexed` and `fin` because they can contain it inside as `Gen` parameters do.
+asp : {0 indexed : index -> Type} ->
+      {0 fin : {0 idx : index} -> indexed idx -> Type} ->
+      Gen (n ** indexed n) ->
+      ({0 idx : index} -> {p : indexed idx} -> Gen $ fin p) ->
+      Gen (n : index ** p : indexed n ** fin p)
 
 --- Statements ---
 
@@ -85,7 +83,7 @@ noCtxChange_noRec_stmtGen ctx =
   [ pure nop
   , case ctx of
     []     => pure nop -- this is returned because `oneOf` requires `Vect`, thus all cases must have equal size.
-    (_::_) => do (n ** lk ** e) <- asp {indexed=Lookup} {fin=(\n, ct, lk => Expression ct $ reveal lk)} ctx (lookupGen ctx) (\_ => genExpr)
+    (_::_) => do (n ** _ ** e) <- asp (lookupGen ctx) genExpr
                  pure $ n #= e
   , do pure $ print !(genExpr {a=String'})
   ]
