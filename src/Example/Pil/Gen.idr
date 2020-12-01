@@ -4,8 +4,9 @@ import Data.List
 
 import Decidable.Equality
 
-import public Example.Gen
 import public Example.Pil.Lang
+
+import public Test.DepTyCheck.Gen
 
 %default total
 

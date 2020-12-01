@@ -1,9 +1,9 @@
-module Example.Gen
+module Test.DepTyCheck.Gen
 
 import Data.List
 import public Data.Vect
 
-import public Example.Random
+import public System.Random.Simple
 
 %default total
 
