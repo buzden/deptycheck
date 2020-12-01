@@ -98,9 +98,9 @@ data Statement : (pre : Context) -> (post : Context) -> Type where
   nop  : Statement ctx ctx
   (.)  : (ty : Type') -> (n : Name) -> Statement ctx $ (n, ty)::ctx
   (#=) : (n : Name) -> (0 lk : Lookup n ctx) => (v : Expression ctx $ reveal lk) -> Statement ctx ctx
-  for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool')
-      -> (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body)
-      -> Statement outer_ctx outer_ctx
+  for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool') ->
+         (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body) ->
+         Statement outer_ctx outer_ctx
   if__ : (cond : Expression ctx Bool') -> Statement ctx ctx_then -> Statement ctx ctx_else -> Statement ctx ctx
   (*>) : Statement pre mid -> Statement mid post -> Statement pre post
   block : Statement outer inside -> Statement outer outer
