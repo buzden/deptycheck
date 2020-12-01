@@ -13,6 +13,16 @@ import public Example.Pil.Lang
 --- Generation ---
 ------------------
 
+--- Universal patterns (particular cases) ---
+
+asp : {0 indexed : index -> Type} ->
+      {0 fin : {0 idx : index} -> indexed idx -> Type} ->
+      Gen (n ** indexed n) ->
+      ({0 idx : index} -> {p : indexed idx} -> Gen $ fin p) ->
+      Gen (n : index ** p : indexed n ** fin p)
+asp rl lr = do (n ** i) <- rl
+               pure (n ** i ** !lr)
+
 --- Expressions ---
 
 maybeToList : Maybe a -> List a
@@ -56,16 +66,6 @@ exprGen : (szBound : Nat) ->
           Gen (Expression ctx a)
 exprGen Z     g _   = oneOf $ snd $ nonRec_exprGen g
 exprGen (S n) g rec = oneOf $ snd (nonRec_exprGen g) ++ [ rec (exprGen n g rec) ]
-
---- Universal patterns (particular cases) ---
-
-asp : {0 indexed : index -> Type} ->
-      {0 fin : {0 idx : index} -> indexed idx -> Type} ->
-      Gen (n ** indexed n) ->
-      ({0 idx : index} -> {p : indexed idx} -> Gen $ fin p) ->
-      Gen (n : index ** p : indexed n ** fin p)
-asp rl lr = do (n ** i) <- rl
-               pure (n ** i ** !lr)
 
 --- Statements ---
 
