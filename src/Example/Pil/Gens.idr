@@ -1,4 +1,4 @@
-module Example.Pil.Gen
+module Example.Pil.Gens
 
 import Data.List
 
