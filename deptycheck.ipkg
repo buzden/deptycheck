@@ -1,0 +1,11 @@
+package deptycheck
+
+authors = "Denis Buzdalov"
+version = "0.0.1"
+
+modules = System.Random.Simple
+        , Test.DepTyCheck.Gen
+
+depends = contrib
+
+sourcedir = "src"

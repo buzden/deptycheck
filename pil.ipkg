@@ -1,4 +1,6 @@
-package primitive-imperative-language
+package primitive-imperative-language-example
+
+authors = "Denis Buzdalov"
 
 modules = Example.Pil.Lang
 
@@ -6,6 +8,6 @@ modules = Example.Pil.Lang
         , Example.Pil.Gens
         , Example.Pil.Lang.ShowC
 
-depends = contrib
+depends = contrib, deptycheck
 
 sourcedir = "src"
