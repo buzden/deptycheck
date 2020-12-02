@@ -3,7 +3,7 @@ module Example.Pil.DemoGen
 import Data.List
 import Data.Strings
 
-import Example.Pil.Gen
+import Example.Pil.Gens
 import Example.Pil.Lang.ShowC
 
 %default total

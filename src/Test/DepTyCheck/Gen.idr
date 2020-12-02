@@ -1,9 +1,9 @@
-module Example.Gen
+module Test.DepTyCheck.Gen
 
 import Data.List
 import public Data.Vect
 
-import public Example.Random
+import public System.Random.Simple
 
 %default total
 
@@ -79,12 +79,8 @@ oneOf' : (l : List (Gen a)) -> NonEmpty l => Gen a
 oneOf' l@(_::_) = oneOf $ fromList l
 
 export
-pairOf : Gen a -> Gen b -> Gen (a, b)
-pairOf l r = (,) <$> l <*> r
-
-export
-listOf : Gen a -> Gen (List a)
-listOf g = sequence $ replicate !chooseAny g
+listOf : Gen a -> {default (choose (0, 10)) length : Gen Nat} -> Gen (List a)
+listOf g = sequence $ replicate !length g
 
 export
 vectOf : Gen a -> {n : Nat} -> Gen (Vect n a)

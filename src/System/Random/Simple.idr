@@ -1,6 +1,6 @@
 -- This is based on the David Christianen's port of QuickCheck to Idris 1
 
-module Example.Random
+module System.Random.Simple
 
 import Data.Fin
 
