@@ -2,6 +2,10 @@ package primitive-imperative-language
 
 modules = Example.Pil.Lang
 
+        , Example.Pil.DemoGen
+        , Example.Pil.Gens
+        , Example.Pil.Lang.ShowC
+
 depends = contrib
 
 sourcedir = "src"
