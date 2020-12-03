@@ -116,22 +116,25 @@ mapMaybe p (Raw sf)    = Raw \r =>
   choice $ map (\r => sf r >>= p) $ take RawFilteringAttempts $ countFrom r $ snd . next
 
 export
-filter_lawful : Gen a -> (p : a -> Bool) -> Gen $ a `HavingTrue` p
-filter_lawful g p = mapMaybe lp g where
+suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `HavingTrue` p
+suchThat_withPrf g p = mapMaybe lp g where
   lp : a -> Maybe $ a `HavingTrue` p
   lp x = case @@ p x of
     (True ** prf) => Just $ Element x prf
     (False ** _)  => Nothing
 
+infixl 4 `suchThat`
+
 public export
 suchThat : Gen a -> (a -> Bool) -> Gen a
-suchThat g p = fst <$> filter_lawful g p
+suchThat g p = fst <$> suchThat_withPrf g p
 
+||| Filters the given generator so, that resulting values `x` are solutions of equation `y = f x` for given `f` and `y`.
 export
-propEqFilter : DecEq b => {f : a -> b} -> Gen a -> (y : b) -> Gen $ Subset a \x => f x = y
-propEqFilter g y = mapMaybe pep g where
-  pep : a -> Maybe $ Subset a \x => f x = y
-  pep x = case decEq (f x) y of
+suchThat_invertedEq : DecEq b => Gen a -> (y : b) -> (f : a -> b) -> Gen $ Subset a \x => y = f x
+suchThat_invertedEq g y f = mapMaybe pep g where
+  pep : a -> Maybe $ Subset a \x => y = f x
+  pep x = case decEq y $ f x of
     Yes prf => Just $ Element x prf
     No _    => Nothing
 
