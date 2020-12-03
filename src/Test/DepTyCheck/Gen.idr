@@ -10,13 +10,44 @@ import public System.Random.Simple
 
 %default total
 
--------------------------------
---- Definition of the `Gen` ---
--------------------------------
+---------------------------------------------
+--- General decisions and magic constants ---
+---------------------------------------------
+
+-- All of those can (and even should) be generalized some day.
 
 public export %inline
 Seed : Type
 Seed = StdGen
+
+-- TODO to make this externally tunable somehow.
+RawFilteringAttempts : Nat
+RawFilteringAttempts = 100
+
+-------------------------------------------------
+--- General utility functions and definitions ---
+-------------------------------------------------
+
+splitSeed : Seed -> (Seed, Seed)
+splitSeed = bimap (snd . next) (snd . next) . split
+
+index' : (l : List a) -> Fin (length l) -> a
+index' (x::_)  FZ     = x
+index' (x::xs) (FS i) = index' xs i
+
+public export
+HavingTrue : (a : Type) -> (a -> Bool) -> Type
+HavingTrue a p = Subset a \x => p x = True
+
+filter' : (p : a -> Bool) -> List a -> List $ a `HavingTrue` p
+filter' p [] = []
+filter' p (x::xs) = case @@ p x of
+  (True ** prf) => Element x prf :: filter' p xs
+  (False ** _)  => filter' p xs
+
+-------------------------------
+--- Definition of the `Gen` ---
+-------------------------------
 
 public export
 data Gen : Type -> Type where
@@ -36,10 +67,6 @@ export
 choose : Random a => (a, a) -> Gen a
 choose bounds = Raw $ Just . fst . randomR bounds
 
-index' : (l : List a) -> Fin (length l) -> a
-index' (x::_)  FZ     = x
-index' (x::xs) (FS i) = index' xs i
-
 export
 unGen : Gen a -> Seed -> Maybe a
 unGen (Uniform [])        _ = Nothing
@@ -50,9 +77,6 @@ export
 Functor Gen where
   map f (Uniform xs) = Uniform $ map f xs
   map f (Raw gena)   = Raw $ map f . gena
-
-splitSeed : Seed -> (Seed, Seed)
-splitSeed = bimap (snd . next) (snd . next) . split
 
 export
 Applicative Gen where
@@ -71,17 +95,16 @@ Alternative Gen where
       (Just vl, Just vr) => Just $ if fst $ random sb then vl else vr
       _ => l <|> r -- take the only `Just`, if there is some.
 
--- Places `Uniform`s at those position where `foldr` (as an implementation detail of `choice`)
--- would first pick them preserving uniform as long as possible.
-reorderUniforms : List (Gen a) -> List (Gen a)
-reorderUniforms xs = let (nonUni, uni) = partition isNonUni xs in nonUni ++ uni where
-  isNonUni : Gen a -> Bool
-  isNonUni (Uniform _) = True
-  isNonUni _           = False
-
 export
 oneOf : List (Gen a) -> Gen a
-oneOf ls = choice $ reorderUniforms ls
+oneOf ls = choice $ reorderUniforms ls where
+  -- Places `Uniform`s at those position where `foldr` (as an implementation detail of `choice`)
+  -- would first pick them preserving uniform as long as possible.
+  reorderUniforms : List (Gen a) -> List (Gen a)
+  reorderUniforms xs = let (nonUni, uni) = partition isNonUni xs in nonUni ++ uni where
+    isNonUni : Gen a -> Bool
+    isNonUni (Uniform _) = True
+    isNonUni _           = False
 
 export
 Monad Gen where
@@ -89,16 +112,6 @@ Monad Gen where
   (Raw sf)   >>= c = Raw \s =>
     let (s1, s2) = splitSeed s in
     sf s1 >>= \a => unGen (c a) s2
-
-public export
-HavingTrue : (a : Type) -> (a -> Bool) -> Type
-HavingTrue a p = Subset a \x => p x = True
-
-filter' : (p : a -> Bool) -> List a -> List $ a `HavingTrue` p
-filter' p [] = []
-filter' p (x::xs) = case @@ p x of
-  (True ** prf) => Element x prf :: filter' p xs
-  (False ** _)  => filter' p xs
 
 export
 filter_lawful : Gen a -> (p : a -> Bool) -> Gen $ a `HavingTrue` p
@@ -114,9 +127,6 @@ filter_lawful (Raw f)     p = Raw \r => findOrFail RawFilteringAttempts r where
                        where
                          continue : Maybe $ a `HavingTrue` p
                          continue = findOrFail n $ snd $ next r
-  -- TODO to make this externally tunable somehow.
-  RawFilteringAttempts : Nat
-  RawFilteringAttempts = 100
 
 public export
 suchThat : Gen a -> (a -> Bool) -> Gen a
