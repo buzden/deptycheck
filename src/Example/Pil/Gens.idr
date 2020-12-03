@@ -34,10 +34,6 @@ lookupGen ctx = uniform $ mapLk ctx where
 
 --- Expressions ---
 
-maybeToList : Maybe a -> List a
-maybeToList (Just x) = [x]
-maybeToList Nothing = []
-
 export
 varExprGen : {a : Type'} -> {ctx : Context} -> Gen $ Expression ctx a
 varExprGen = uniform $ varExpr <$> varsOfType
@@ -55,7 +51,7 @@ varExprGen = uniform $ varExpr <$> varsOfType
 
         varsOfTypeOfCtx : List (n : Name ** ty : Type' ** lk : Lookup n ctx ** reveal lk = ty) -> List (n : Name ** lk : Lookup n ctx ** reveal lk = a)
         varsOfTypeOfCtx [] = []
-        varsOfTypeOfCtx ((n ** ty ** lk ** lk_ty)::xs) = maybeToList varX ++ varsOfTypeOfCtx xs where
+        varsOfTypeOfCtx ((n ** ty ** lk ** lk_ty)::xs) = toList varX ++ varsOfTypeOfCtx xs where
           varX : Maybe (n : Name ** lk : Lookup n ctx ** reveal lk = a)
           varX = case decEq ty a of
             (Yes ty_a) => Just (n ** lk ** trans lk_ty ty_a)
