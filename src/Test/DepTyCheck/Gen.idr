@@ -4,6 +4,8 @@ import Data.DPair
 import Data.List
 import public Data.Vect
 
+import Decidable.Equality
+
 import Syntax.WithProof
 
 import public System.Random.Simple
@@ -131,6 +133,20 @@ filter_lawful (Raw f)     p = Raw \r => findOrFail RawFilteringAttempts r where
 public export
 suchThat : Gen a -> (a -> Bool) -> Gen a
 suchThat g p = fst <$> filter_lawful g p
+
+export
+propEqFilter : DecEq b => {f : a -> b} -> Gen a -> (y : b) -> Gen $ Subset a \x => f x = y
+propEqFilter g y = fyer <$> filter_lawful g P
+  where
+    P : a -> Bool
+    P x = case decEq (f x) y of
+      Yes _ => True
+      No _ => False
+
+    fyer : a `HavingTrue` P -> Subset a \x => f x = y
+    fyer (Element x pt) = Element x $ case @@ decEq (f x) y of
+      (Yes prf ** _) => prf
+      (No contra ** pn) => absurd $ the (False = True) rewrite sym pt in rewrite pn in Refl
 
 -- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
 export
