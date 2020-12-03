@@ -101,9 +101,15 @@ suchThat (Raw f)     p = Raw \r => findOrFail RawFilteringAttempts r where
   RawFilteringAttempts : Nat
   RawFilteringAttempts = 100
 
+-- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
 export
 variant : Nat -> Gen a -> Gen a
-variant v gen = ?variant_rhs
+variant Z       gen = gen
+variant x@(S _) gen = Raw \r => unGen gen $ getV x r
+  where
+    getV : Nat -> Seed -> Seed
+    getV Z     r = r
+    getV (S n) r = getV n $ snd $ split r
 
 export
 uniform : List a -> Gen a
