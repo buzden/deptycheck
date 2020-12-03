@@ -1,5 +1,6 @@
 module Example.Pil.Gens
 
+import Data.DPair
 import Data.List
 
 import Decidable.Equality
@@ -36,26 +37,8 @@ lookupGen ctx = uniform $ mapLk ctx where
 
 export
 varExprGen : {a : Type'} -> {ctx : Context} -> Gen $ Expression ctx a
-varExprGen = uniform $ varExpr <$> varsOfType
-  where
-    varExpr : (n : Name ** lk : Lookup n ctx ** reveal lk = a) -> Expression ctx a
-    varExpr (n ** _ ** prf) = rewrite sym prf in V n
-
-    varsOfType : List (n : Name ** lk : Lookup n ctx ** reveal lk = a)
-    varsOfType = varsOfTypeOfCtx $ addLookups ctx
-      where
-        addLookups : (ctx : Context) -> List (n : Name ** ty : Type' ** lk : Lookup n ctx ** reveal lk = ty)
-        addLookups [] = []
-        addLookups ((n, ty)::xs) = (n ** ty ** Here ty ** Refl) ::
-                                   map (\(n ** ty ** lk ** lk_ty) => (n ** ty ** There lk ** lk_ty)) (addLookups xs)
-
-        varsOfTypeOfCtx : List (n : Name ** ty : Type' ** lk : Lookup n ctx ** reveal lk = ty) -> List (n : Name ** lk : Lookup n ctx ** reveal lk = a)
-        varsOfTypeOfCtx [] = []
-        varsOfTypeOfCtx ((n ** ty ** lk ** lk_ty)::xs) = toList varX ++ varsOfTypeOfCtx xs where
-          varX : Maybe (n : Name ** lk : Lookup n ctx ** reveal lk = a)
-          varX = case decEq ty a of
-            (Yes ty_a) => Just (n ** lk ** trans lk_ty ty_a)
-            (No _)     => Nothing
+varExprGen = do Element (n ** _) prf <- lookupGen ctx `suchThat_invertedEq` a $ \(_ ** lk) => reveal lk
+                pure rewrite prf in V n
 
 ||| Generator of non-recursive expressions (thus those that can be used with zero recursion bound).
 nonRec_exprGen : {a : Type'} -> {ctx : Context} -> Gen (idrTypeOf a) -> Gen $ Expression ctx a
