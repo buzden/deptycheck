@@ -26,7 +26,22 @@ bound (Uniform xs) = Just $ length xs
 bound (Raw _)      = Nothing
 
 export
+chooseAny : Random a => Gen a
+chooseAny = Raw $ Just . fst . random
+
+export
+choose : Random a => (a, a) -> Gen a
+choose bounds = Raw $ Just . fst . randomR bounds
+
+index' : (l : List a) -> Fin (length l) -> a
+index' (x::_)  FZ     = x
+index' (x::xs) (FS i) = index' xs i
+
+export
 unGen : Gen a -> Seed -> Maybe a
+unGen (Uniform [])        _ = Nothing
+unGen (Uniform xs@(_::_)) s = Just $ index' xs $ fst $ random s
+unGen (Raw sf)            s = sf s
 
 export
 Functor Gen where
@@ -85,14 +100,6 @@ suchThat (Raw f)     p = Raw \r => findOrFail RawFilteringAttempts r where
   -- TODO to make this externally tunable somehow.
   RawFilteringAttempts : Nat
   RawFilteringAttempts = 100
-
-export
-chooseAny : Random a => Gen a
-chooseAny = Raw $ Just . fst . random
-
-export
-choose : Random a => (a, a) -> Gen a
-choose bounds = Raw $ Just . fst . randomR bounds
 
 export
 variant : Nat -> Gen a -> Gen a
