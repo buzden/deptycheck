@@ -24,6 +24,14 @@ asp : {0 indexed : index -> Type} ->
 asp rl lr = do (n ** i) <- rl
                pure (n ** i ** !lr)
 
+--- Common ---
+
+lookupGen : (ctx : Context) -> Gen (n : Name ** Lookup n ctx)
+lookupGen ctx = uniform $ mapLk ctx where
+  mapLk : (ctx : Context) -> List (n ** Lookup n ctx)
+  mapLk []            = []
+  mapLk ((n, ty)::xs) = (n ** Here ty) :: map (\(n ** lk) => (n ** There lk)) (mapLk xs)
+
 --- Expressions ---
 
 maybeToList : Maybe a -> List a
@@ -69,14 +77,6 @@ exprGen Z     g _   = oneOf $ snd $ nonRec_exprGen g
 exprGen (S n) g rec = oneOf $ snd (nonRec_exprGen g) ++ [ rec (exprGen n g rec) ]
 
 --- Statements ---
-
-lookupGen : (ctx : Context) -> NonEmpty ctx => Gen (n : Name ** Lookup n ctx)
-lookupGen ctx = let (lks@(_::_) ** _) = mapLk ctx in
-                oneOf $ map pure $ fromList lks
-  where
-    mapLk : (ctx : Context) -> NonEmpty ctx => (l : List (n : Name ** Lookup n ctx) ** NonEmpty l)
-    mapLk [(n, ty)] = ( [(n ** Here ty)] ** IsNonEmpty )
-    mapLk ((n, ty)::xs@(_::_)) = ( (n ** Here ty) :: map (\(n ** lk) => (n ** There lk)) (fst $ mapLk xs) ** IsNonEmpty )
 
 ||| Statements generator of those that do not change the context and those that are not recursive.
 noCtxChange_noRec_stmtGen : (ctx : Context) ->
