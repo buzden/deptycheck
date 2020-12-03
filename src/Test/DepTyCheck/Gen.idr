@@ -1,7 +1,10 @@
 module Test.DepTyCheck.Gen
 
+import Data.DPair
 import Data.List
 import public Data.Vect
+
+import Syntax.WithProof
 
 import public System.Random.Simple
 
@@ -87,19 +90,37 @@ Monad Gen where
     let (s1, s2) = splitSeed s in
     sf s1 >>= \a => unGen (c a) s2
 
+public export
+HavingTrue : (a : Type) -> (a -> Bool) -> Type
+HavingTrue a p = Subset a \x => p x = True
+
+filter' : (p : a -> Bool) -> List a -> List $ a `HavingTrue` p
+filter' p [] = []
+filter' p (x::xs) = case @@ p x of
+  (True ** prf) => Element x prf :: filter' p xs
+  (False ** _)  => filter' p xs
+
 export
-suchThat : Gen a -> (a -> Bool) -> Gen a
-suchThat (Uniform f) p = Uniform $ filter p f
-suchThat (Raw f)     p = Raw \r => findOrFail RawFilteringAttempts r where
-  findOrFail : Nat -> Seed -> Maybe a
+filter_lawful : Gen a -> (p : a -> Bool) -> Gen $ a `HavingTrue` p
+filter_lawful (Uniform f) p = Uniform $ filter' p f
+filter_lawful (Raw f)     p = Raw \r => findOrFail RawFilteringAttempts r where
+  findOrFail : Nat -> Seed -> Maybe $ a `HavingTrue` p
   findOrFail Z     _ = Nothing
-  findOrFail (S n) r = let v = f r in
-                       case p <$> v of
-                         Just True => v
-                         _ => findOrFail n $ snd $ next r
+  findOrFail (S n) r = case f r of
+                         Just x => case @@ p x of
+                           (True ** prf) => Just $ Element x prf
+                           (False ** _)  => continue
+                         Nothing => continue
+                       where
+                         continue : Maybe $ a `HavingTrue` p
+                         continue = findOrFail n $ snd $ next r
   -- TODO to make this externally tunable somehow.
   RawFilteringAttempts : Nat
   RawFilteringAttempts = 100
+
+public export
+suchThat : Gen a -> (a -> Bool) -> Gen a
+suchThat g p = fst <$> filter_lawful g p
 
 -- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
 export
