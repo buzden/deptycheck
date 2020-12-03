@@ -41,12 +41,6 @@ public export
 HavingTrue : (a : Type) -> (a -> Bool) -> Type
 HavingTrue a p = Subset a \x => p x = True
 
-filter' : (p : a -> Bool) -> List a -> List $ a `HavingTrue` p
-filter' p [] = []
-filter' p (x::xs) = case @@ p x of
-  (True ** prf) => Element x prf :: filter' p xs
-  (False ** _)  => filter' p xs
-
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
@@ -116,19 +110,18 @@ Monad Gen where
     sf s1 >>= \a => unGen (c a) s2
 
 export
+mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
+mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
+mapMaybe p (Raw sf)    = Raw \r =>
+  choice $ map (\r => sf r >>= p) $ take RawFilteringAttempts $ countFrom r $ snd . next
+
+export
 filter_lawful : Gen a -> (p : a -> Bool) -> Gen $ a `HavingTrue` p
-filter_lawful (Uniform f) p = Uniform $ filter' p f
-filter_lawful (Raw f)     p = Raw \r => findOrFail RawFilteringAttempts r where
-  findOrFail : Nat -> Seed -> Maybe $ a `HavingTrue` p
-  findOrFail Z     _ = Nothing
-  findOrFail (S n) r = case f r of
-                         Just x => case @@ p x of
-                           (True ** prf) => Just $ Element x prf
-                           (False ** _)  => continue
-                         Nothing => continue
-                       where
-                         continue : Maybe $ a `HavingTrue` p
-                         continue = findOrFail n $ snd $ next r
+filter_lawful g p = mapMaybe lp g where
+  lp : a -> Maybe $ a `HavingTrue` p
+  lp x = case @@ p x of
+    (True ** prf) => Just $ Element x prf
+    (False ** _)  => Nothing
 
 public export
 suchThat : Gen a -> (a -> Bool) -> Gen a
@@ -136,17 +129,11 @@ suchThat g p = fst <$> filter_lawful g p
 
 export
 propEqFilter : DecEq b => {f : a -> b} -> Gen a -> (y : b) -> Gen $ Subset a \x => f x = y
-propEqFilter g y = fyer <$> filter_lawful g P
-  where
-    P : a -> Bool
-    P x = case decEq (f x) y of
-      Yes _ => True
-      No _ => False
-
-    fyer : a `HavingTrue` P -> Subset a \x => f x = y
-    fyer (Element x pt) = Element x $ case @@ decEq (f x) y of
-      (Yes prf ** _) => prf
-      (No contra ** pn) => absurd $ the (False = True) rewrite sym pt in rewrite pn in Refl
+propEqFilter g y = mapMaybe pep g where
+  pep : a -> Maybe $ Subset a \x => f x = y
+  pep x = case decEq (f x) y of
+    Yes prf => Just $ Element x prf
+    No _    => Nothing
 
 -- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
 export
