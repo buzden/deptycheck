@@ -39,10 +39,9 @@ maybeToList (Just x) = [x]
 maybeToList Nothing = []
 
 export
-varExprGen' : {a : Type'} -> {ctx : Context} -> List (Expression ctx a)
-varExprGen' = varExpressions {- this could be `oneOf $ map pure (fromList varExpressions)` if `Gen` could fail (contain zero) -} where
-  varExpressions : List (Expression ctx a)
-  varExpressions = map varExpr varsOfType where
+varExprGen : {a : Type'} -> {ctx : Context} -> Gen $ Expression ctx a
+varExprGen = uniform $ varExpr <$> varsOfType
+  where
     varExpr : (n : Name ** lk : Lookup n ctx ** reveal lk = a) -> Expression ctx a
     varExpr (n ** _ ** prf) = rewrite sym prf in V n
 
@@ -63,8 +62,8 @@ varExprGen' = varExpressions {- this could be `oneOf $ map pure (fromList varExp
             (No _)     => Nothing
 
 ||| Generator of non-recursive expressions (thus those that can be used with zero recursion bound).
-nonRec_exprGen : {a : Type'} -> {ctx : Context} -> Gen (idrTypeOf a) -> (n ** Vect n $ Gen $ Expression ctx a)
-nonRec_exprGen g = ( _ ** [C <$> g] ++ map pure (fromList varExprGen') )
+nonRec_exprGen : {a : Type'} -> {ctx : Context} -> Gen (idrTypeOf a) -> Gen $ Expression ctx a
+nonRec_exprGen g = [| C g |] <|> varExprGen
 
 export
 exprGen : (szBound : Nat) ->
@@ -73,21 +72,19 @@ exprGen : (szBound : Nat) ->
           {ctx : Context} ->
           ((subGen : {x : Type'} -> Gen $ Expression ctx x) -> {b : Type'} -> Gen $ Expression ctx b) ->
           Gen (Expression ctx a)
-exprGen Z     g _   = oneOf $ snd $ nonRec_exprGen g
-exprGen (S n) g rec = oneOf $ snd (nonRec_exprGen g) ++ [ rec (exprGen n g rec) ]
+exprGen Z     g _   = nonRec_exprGen g
+exprGen (S n) g rec = nonRec_exprGen g <|> rec (exprGen n g rec)
 
 --- Statements ---
 
 ||| Statements generator of those that do not change the context and those that are not recursive.
 noCtxChange_noRec_stmtGen : (ctx : Context) ->
                             (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
-                            Vect 3 $ Gen (Statement ctx ctx)
-noCtxChange_noRec_stmtGen ctx =
+                            Gen (Statement ctx ctx)
+noCtxChange_noRec_stmtGen ctx = oneOf
   [ pure nop
-  , case ctx of
-    []     => pure nop -- this is returned because `oneOf` requires `Vect`, thus all cases must have equal size.
-    (_::_) => do (n ** _ ** e) <- asp (lookupGen ctx) genExpr
-                 pure $ n #= e
+  , do (n ** _ ** e) <- asp (lookupGen ctx) genExpr
+       pure $ n #= e
   , do pure $ print !(genExpr {a=String'})
   ]
 
@@ -111,9 +108,8 @@ mutual
                         Gen Name =>
                         (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
                         Gen (Statement ctx ctx)
-  noCtxChange_stmtGen Z     ctx = oneOf $ noCtxChange_noRec_stmtGen ctx
-  noCtxChange_stmtGen (S n) ctx = oneOf $
-    noCtxChange_noRec_stmtGen ctx ++
+  noCtxChange_stmtGen Z     ctx = noCtxChange_noRec_stmtGen ctx
+  noCtxChange_stmtGen (S n) ctx = noCtxChange_noRec_stmtGen ctx <|> oneOf
     [ do (inside_for ** init) <- stmtGen n ctx
          (_ ** body) <- stmtGen n inside_for
          pure $ for init !genExpr !(noCtxChange_stmtGen n inside_for) body
@@ -129,9 +125,8 @@ mutual
             (genName : Gen Name) =>
             ({a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
             Gen (post ** Statement pre post)
-  stmtGen Z     pre = oneOf $ [ctxChanging_noRec_stmtGen pre, pure (pre ** !(noCtxChange_stmtGen Z pre))]
-  stmtGen (S n) pre = oneOf $
-    [ctxChanging_noRec_stmtGen pre] ++
+  stmtGen Z     pre = ctxChanging_noRec_stmtGen pre <|> pure (pre ** !(noCtxChange_stmtGen Z pre))
+  stmtGen (S n) pre = ctxChanging_noRec_stmtGen pre <|> oneOf
     [ pure (pre ** !(noCtxChange_stmtGen n pre))
     , do (mid ** l) <- stmtGen n pre
          (post ** r) <- stmtGen n mid
