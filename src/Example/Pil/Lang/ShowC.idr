@@ -41,7 +41,6 @@ isNopDeeply Example.Pil.Lang.nop = True
 isNopDeeply (x *> y)             = isNopDeeply x && isNopDeeply y
 isNopDeeply _                    = False
 
-||| Next identation
 n : Nat -> Nat
 n = (+ 2)
 
@@ -49,7 +48,7 @@ showInd : (indent : Nat) -> Statement pre post -> String
 showInd i Example.Pil.Lang.nop = ""
 showInd i (ty . n) = indent i $ show ty ++ " " ++ show n ++ ";"
 showInd i (Example.Pil.Lang.(#=) n v) = indent i $ show n ++ " = " ++ show v ++ ";"
-showInd i (for init cond upd body) = if isNopDeeply init -- TODO to add a situation when we can use normal C's `for`
+showInd i (for init cond upd body) = if isNopDeeply init
   then showWhile i
   else indent i "{\n" ++
          showInd (n i) init ++ "\n" ++

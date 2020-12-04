@@ -13,17 +13,10 @@ import public System.Random.Simple
 
 %default total
 
----------------------------------------------
---- General decisions and magic constants ---
----------------------------------------------
-
--- All of those can (and even should) be generalized some day.
-
 public export %inline
 Seed : Type
 Seed = StdGen
 
--- TODO to make this externally tunable somehow.
 RawFilteringAttempts : Nat
 RawFilteringAttempts = 100
 
@@ -46,15 +39,6 @@ public export
 data Gen : Type -> Type where
   Uniform : List a -> Gen a
   Raw     : (Seed -> Maybe a) -> Gen a
-
--- TODO To use lazy lists with maximum of lazy operations (++, <*>).
-
--- TODO To add a metric of size of `Gen`. It can be partially ordered, e.g. separate counting of uniform elements and raws.
---      Then, for instance, during `<|>`-composition probabilities should be distributed according to that sized.
---      For example, it would mean that `a <|> b <|> c` composition would be really associative for even `Raw` `Gen`s (unlike now)
---      and distribution between those `a`, `b` and `c` if they are all primitive `Raw` `Gen`s would be uniform.
-
--- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
 export
 bound : Gen a -> Maybe Nat
@@ -100,8 +84,6 @@ Alternative Gen where
 export
 oneOf : List (Gen a) -> Gen a
 oneOf ls = choice $ reorderUniforms ls where
-  -- Places `Uniform`s at those position where `foldr` (as an implementation detail of `choice`)
-  -- would first pick them preserving uniform as long as possible.
   reorderUniforms : List (Gen a) -> List (Gen a)
   reorderUniforms xs = let (nonUni, uni) = partition isNonUni xs in nonUni ++ uni where
     isNonUni : Gen a -> Bool
@@ -135,7 +117,6 @@ public export
 suchThat : Gen a -> (a -> Bool) -> Gen a
 suchThat g p = fst <$> suchThat_withPrf g p
 
-||| Filters the given generator so, that resulting values `x` are solutions of equation `y = f x` for given `f` and `y`.
 export
 suchThat_invertedEq : DecEq b => Gen a -> (y : b) -> (f : a -> b) -> Gen $ Subset a \x => y = f x
 suchThat_invertedEq g y f = mapMaybe pep g where
@@ -144,7 +125,6 @@ suchThat_invertedEq g y f = mapMaybe pep g where
     Yes prf => Just $ Element x prf
     No _    => Nothing
 
--- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
 export
 variant : Nat -> Gen a -> Gen a
 variant Z       gen = gen

@@ -1,4 +1,3 @@
--- Primitive Imperative Language --
 module Example.Pil.Lang
 
 import Decidable.Equality
@@ -52,7 +51,7 @@ DecEq Type' where
   decEq String' Bool'   = No $ \case Refl impossible
   decEq String' Int'    = No $ \case Refl impossible
 
---- Static context in terms of which we are formulating an invariant ---
+--- Static context for formulating an invariant ---
 
 public export
 Context : Type

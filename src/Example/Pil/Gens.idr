@@ -11,12 +11,6 @@ import public Test.DepTyCheck.Gen
 
 %default total
 
-------------------
---- Generation ---
-------------------
-
---- Universal patterns (particular cases) ---
-
 asp : {0 indexed : index -> Type} ->
       {0 fin : {0 idx : index} -> indexed idx -> Type} ->
       Gen (n ** indexed n) ->
@@ -40,7 +34,6 @@ varExprGen : {a : Type'} -> {ctx : Context} -> Gen $ Expression ctx a
 varExprGen = do Element (n ** _) prf <- lookupGen ctx `suchThat_invertedEq` a $ \(_ ** lk) => reveal lk
                 pure rewrite prf in V n
 
-||| Generator of non-recursive expressions (thus those that can be used with zero recursion bound).
 nonRec_exprGen : {a : Type'} -> {ctx : Context} -> Gen (idrTypeOf a) -> Gen $ Expression ctx a
 nonRec_exprGen g = [| C g |] <|> varExprGen
 
@@ -56,7 +49,6 @@ exprGen (S n) g rec = nonRec_exprGen g <|> rec (exprGen n g rec)
 
 --- Statements ---
 
-||| Statements generator of those that do not change the context and those that are not recursive.
 noCtxChange_noRec_stmtGen : (ctx : Context) ->
                             (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
                             Gen (Statement ctx ctx)
@@ -67,7 +59,6 @@ noCtxChange_noRec_stmtGen ctx = oneOf
   , do pure $ print !(genExpr {a=String'})
   ]
 
-||| Statements generator of those that can change the context and those that are not recursive.
 ctxChanging_noRec_stmtGen : (pre : Context) ->
                             (genTy : Gen Type') =>
                             (genName : Gen Name) =>
@@ -79,7 +70,6 @@ ctxChanging_noRec_stmtGen pre = do
 
 mutual
 
-  ||| Statements generator of those statements that can't change the context.
   export
   noCtxChange_stmtGen : (bound : Nat) ->
                         (ctx : Context) ->

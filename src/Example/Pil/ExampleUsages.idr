@@ -38,7 +38,7 @@ export %inline
 
 export %inline
 (&&) : Expression ctx Bool' -> Expression ctx Bool' -> Expression ctx Bool'
-(&&) = B (\a, b => a && b) {opName="&&"} -- recoded because of laziness
+(&&) = B (\a, b => a && b) {opName="&&"}
 
 export %inline
 (++) : Expression ctx String' -> Expression ctx String' -> Expression ctx String'
@@ -67,12 +67,6 @@ lost_block = do
 some_for : Statement ctx ctx
 some_for = for (do Int'. "x" #= C 0; Int'. "y" #= C 0) (V "x" < C 5 && V "y" < C 10) ("x" #= V "x" + C 1) $ do
              "y" #= V "y" + V "x" + C 1
-
---bad_for : Statement ctx ctx
---bad_for = for (do Int'. "x" #= C 0; Int'. "y" #= C 0)
---                (V "y")
---                  ("x" #= V "x" + C 1) $ do
---             "y" #= V "y" `div` V "x" + C 1
 
 euc : {0 ctx : Context} -> let c = ("a", Int')::("b", Int')::ctx in Statement c $ ("res", Int')::c
 euc = do
