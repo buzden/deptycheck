@@ -2,6 +2,7 @@ module Test.DepTyCheck.Gen
 
 import Data.DPair
 import Data.List
+import Data.Stream
 import Data.Vect
 
 import Decidable.Equality
@@ -142,11 +143,7 @@ suchThat_invertedEq g y f = mapMaybe pep g where
 export
 variant : Nat -> Gen a -> Gen a
 variant Z       gen = gen
-variant x@(S _) gen = Raw \r => unGen gen $ getV x r
-  where
-    getV : Nat -> Seed -> Seed
-    getV Z     r = r
-    getV (S n) r = getV n $ snd $ split r
+variant x@(S _) gen = Raw $ unGen gen . index x . iterate (snd . split)
 
 export
 uniform : List a -> Gen a
