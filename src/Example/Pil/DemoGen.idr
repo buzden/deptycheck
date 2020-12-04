@@ -52,9 +52,9 @@ someStatementGen : Gen (post ** Statement [] post)
 someStatementGen = stmtGen 10 []
 
 export
-someStatement : Nat -> (post ** Statement [] post)
+someStatement : Nat -> Maybe (post ** Statement [] post)
 someStatement n = unGen (variant n $ someStatementGen) someStdGen
 
 export
 showSomeStatements : {default 0 variant : Nat} -> (count : Nat) -> IO ()
-showSomeStatements count = traverse_ putStrLn $ intersperse "----" $ map (\n => show $ snd $ someStatement n) [variant .. (variant + count)]
+showSomeStatements count = traverse_ putStrLn $ intersperse "----" $ (concat . map (\p => show $ snd p) . someStatement) <$> [variant .. (variant + count)]
