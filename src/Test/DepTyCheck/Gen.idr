@@ -78,7 +78,7 @@ Functor Gen where
 export
 Applicative Gen where
   pure x = Uniform [x]
-  Uniform fs <*> Uniform xs = Uniform [f x | x <- xs, f <- fs]
+  Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
   generalF   <*> generalA   = Raw \s => let (s1, s2) = splitSeed s in
     unGen generalF s1 <*> unGen generalA s2
 
