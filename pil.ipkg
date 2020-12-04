@@ -4,6 +4,7 @@ authors = "Denis Buzdalov"
 
 modules = Example.Pil.Lang
 
+        , Example.Pil.ExampleUsages
         , Example.Pil.DemoGen
         , Example.Pil.Gens
         , Example.Pil.Lang.ShowC
