@@ -48,8 +48,17 @@ HavingTrue a p = Subset a \x => p x = True
 
 public export
 data Gen : Type -> Type where
-  Uniform : List a -> Gen a            -- TODO to think about arbitrary discrete final probability distribution instead of only uniform
-  Raw     : (Seed -> Maybe a) -> Gen a -- No "size" parameter in the `Seed -> ...` function unlike the quickcheck's `Gen`!
+  Uniform : List a -> Gen a
+  Raw     : (Seed -> Maybe a) -> Gen a
+
+-- TODO To use lazy lists with maximum of lazy operations (++, <*>).
+
+-- TODO To add a metric of size of `Gen`. It can be partially ordered, e.g. separate counting of uniform elements and raws.
+--      Then, for instance, during `<|>`-composition probabilities should be distributed according to that sized.
+--      For example, it would mean that `a <|> b <|> c` composition would be really associative for even `Raw` `Gen`s (unlike now)
+--      and distribution between those `a`, `b` and `c` if they are all primitive `Raw` `Gen`s would be uniform.
+
+-- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
 export
 bound : Gen a -> Maybe Nat
