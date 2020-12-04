@@ -2,7 +2,7 @@ module Test.DepTyCheck.Gen
 
 import Data.DPair
 import Data.List
-import public Data.Vect
+import Data.Vect
 
 import Decidable.Equality
 
