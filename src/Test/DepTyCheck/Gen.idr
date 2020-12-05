@@ -34,10 +34,6 @@ RawFilteringAttempts = 100
 splitSeed : Seed -> (Seed, Seed)
 splitSeed = bimap (snd . next) (snd . next) . split
 
-index' : (l : List a) -> Fin (length l) -> a
-index' (x::_)  FZ     = x
-index' (x::xs) (FS i) = index' xs i
-
 public export
 HavingTrue : (a : Type) -> (a -> Bool) -> Type
 HavingTrue a p = Subset a \x => p x = True
