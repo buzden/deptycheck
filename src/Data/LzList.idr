@@ -43,6 +43,9 @@ export
 xs ++ ys = MkLzList _ $ Concat xs ys
 
 splitSumFin : {a : Nat} -> Fin (a + b) -> Either (Fin a) (Fin b)
+splitSumFin {a=Z}   x      = Right x
+splitSumFin {a=S k} FZ     = Left FZ
+splitSumFin {a=S k} (FS x) = bimap FS id $ splitSumFin x
 
 0 splitSumFin_correctness : {a, b : Nat} -> (x : Fin $ a + b) ->
                             case splitSumFin {a} {b} x of
