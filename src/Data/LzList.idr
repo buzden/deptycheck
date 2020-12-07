@@ -82,15 +82,20 @@ index lz i = ind (force lz.contents) i where
 --- Functor-related ---
 
 Functor LzList where
-  map f xso = ?map_o_rhs
+  map f xs = MkLzList _ $ Map f xs
 
 mapMaybe : (f : a -> Maybe b) -> LzList a -> LzList a
 
 zipWith : (f : a -> b -> c) -> LzList a -> LzList b -> LzList c
+zipWith f xs ys = map (uncurry f) $ MkLzList _ $ Cart xs ys
 
 Applicative LzList where
   pure x = MkLzList 1 $ Eager [x]
-  xso <*> yso = ?ap_n_rhs
+  (<*>) = zipWith apply
+
+Alternative LzList where
+  empty = []
+  (<|>) = (++)
 
 --- Folds ---
 
