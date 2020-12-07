@@ -42,9 +42,18 @@ export
 (++) : LzList a -> LzList a -> LzList a
 xs ++ ys = MkLzList _ $ Concat xs ys
 
-splitSumFin : {a, b : Nat} -> Fin (a + b) -> Either (Fin a) (Fin b)
+splitSumFin : {a : Nat} -> Fin (a + b) -> Either (Fin a) (Fin b)
+
+0 splitSumFin_correctness : {a, b : Nat} -> (x : Fin $ a + b) ->
+                            case splitSumFin {a} {b} x of
+                              Left  l => x = weakenN b l
+                              Right r => x = shift a r
 
 splitProdFin : {a, b : Nat} -> Fin (a * b) -> (Fin a, Fin b)
+
+0 splitProdFin_correctness : {a, b : Nat} -> (x : Fin $ a * b) ->
+                             let (o, i) = splitProdFin {a} {b} x in
+                             finToNat x = finToNat o * b + finToNat i
 
 export
 index : (lz : LzList a) -> Fin lz.length -> a
