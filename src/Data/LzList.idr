@@ -51,6 +51,12 @@ splitSumFin {a=S k} (FS x) = bimap FS id $ splitSumFin x
                             case splitSumFin {a} {b} x of
                               Left  l => x = weakenN b l
                               Right r => x = shift a r
+splitSumFin_correctness {a=Z}   x  = Refl
+splitSumFin_correctness {a=S k} FZ = Refl
+splitSumFin_correctness {a=S k} (FS x) with (splitSumFin_correctness x)
+  splitSumFin_correctness {a=S k} (FS x) | subcorr with (splitSumFin x)
+    splitSumFin_correctness {a=S k} (FS x) | subcorr | Left  y = rewrite subcorr in Refl
+    splitSumFin_correctness {a=S k} (FS x) | subcorr | Right y = rewrite subcorr in Refl
 
 splitProdFin : {a, b : Nat} -> Fin (a * b) -> (Fin a, Fin b)
 
