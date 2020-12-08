@@ -115,13 +115,13 @@ export
 mapMaybe : (f : a -> Maybe b) -> LzList a -> LzList a
 
 export
-zipWith : (f : a -> b -> c) -> LzList a -> LzList b -> LzList c
-zipWith f xs ys = map (uncurry f) $ MkLzList _ $ Cart xs ys
+cartWith : (f : a -> b -> c) -> LzList a -> LzList b -> LzList c
+cartWith f xs ys = map (uncurry f) $ MkLzList _ $ Cart xs ys
 
 export
 Applicative LzList where
   pure x = MkLzList 1 $ Eager [x]
-  (<*>) = zipWith apply
+  (<*>) = cartWith apply
 
 export
 Alternative LzList where
