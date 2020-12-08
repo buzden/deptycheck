@@ -31,8 +31,12 @@ data LzVect : Nat -> Type -> Type where
 --- Common functions ---
 
 export
+fromList : List a -> LzList a
+fromList xs = MkLzList _ $ Eager xs
+
+export
 Nil : LzList a
-Nil = MkLzList 0 $ Eager []
+Nil = fromList []
 
 export
 (++) : LzList a -> LzList a -> LzList a
@@ -120,7 +124,7 @@ cartWith f xs ys = map (uncurry f) $ MkLzList _ $ Cart xs ys
 
 export
 Applicative LzList where
-  pure x = MkLzList 1 $ Eager [x]
+  pure x = fromList [x]
   (<*>) = cartWith apply
 
 export
@@ -139,7 +143,7 @@ uncons : LzList a -> Maybe (a, LzList a)
 uncons $ MkLzList {contents = Delay lv, _} = unc lv where
   unc : forall a. LzVect n a -> Maybe (a, LzList a)
   unc $ Eager []      = Nothing
-  unc $ Eager (x::xs) = Just (x, MkLzList _ $ Eager xs)
+  unc $ Eager (x::xs) = Just (x, fromList xs)
   unc $ Concat ls rs  = map (map (++ rs)) (uncons ls) <|> uncons rs
   unc $ Map f xs      = bimap f (map f) <$> uncons xs
   unc $ Cart os is    = [| recart (uncons os) (uncons is) |] where
