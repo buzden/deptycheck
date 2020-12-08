@@ -11,7 +11,7 @@ import Decidable.Equality
 data LzVect : Nat -> Type -> Type
 
 ||| List with lazy contents and statically known size.
-export
+public export
 record LzList a where
   constructor MkLzList
   length   : Nat
