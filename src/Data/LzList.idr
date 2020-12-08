@@ -2,6 +2,7 @@ module Data.LzList
 
 import Data.Fin
 import Data.List
+import Data.Nat
 
 import Decidable.Equality
 
@@ -40,6 +41,18 @@ xs ++ ys = MkLzList _ $ Concat xs ys
 namespace FinFun
 
   export
+  finToNatWeakenNNeutral : (k : Nat) -> (a : Fin n) -> finToNat (weakenN k a) = finToNat a
+  finToNatWeakenNNeutral k FZ     = Refl
+  finToNatWeakenNNeutral k (FS x) = rewrite finToNatWeakenNNeutral k x in Refl
+
+  export
+  finToNatShift : (k : Nat) -> (a : Fin n) -> finToNat (shift k a) = k + finToNat a
+  finToNatShift Z     a = Refl
+  finToNatShift (S k) a = rewrite finToNatShift k a in Refl
+
+  ---------
+
+  export
   splitSumFin : {a : Nat} -> Fin (a + b) -> Either (Fin a) (Fin b)
   splitSumFin {a=Z}   x      = Right x
   splitSumFin {a=S k} FZ     = Left FZ
@@ -67,6 +80,17 @@ namespace FinFun
   0 splitProdFin_correctness : {a, b : Nat} -> (x : Fin $ a * b) ->
                                let (o, i) = splitProdFin {a} {b} x in
                                finToNat x = finToNat o * b + finToNat i
+  splitProdFin_correctness {a=S _} x with (splitSumFin_correctness x)
+    splitProdFin_correctness x | sumcorr with (splitSumFin x)
+      splitProdFin_correctness x | sumcorr | Left  y = rewrite sumcorr in finToNatWeakenNNeutral _ _
+      splitProdFin_correctness x | sumcorr | Right y with (splitProdFin_correctness y)
+        splitProdFin_correctness x | sumcorr | Right y | subcorr with (splitProdFin y)
+          splitProdFin_correctness x | sumcorr | Right y | subcorr | (o, i) =
+            rewrite sumcorr in
+            rewrite finToNatShift b y in
+            rewrite subcorr in
+            rewrite plusAssociative b (finToNat o * b) (finToNat i) in
+            Refl
 
 export
 index : (lz : LzList a) -> Fin lz.length -> a
