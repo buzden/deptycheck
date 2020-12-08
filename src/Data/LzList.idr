@@ -154,19 +154,23 @@ uncons $ MkLzList {contents = Delay lv, _} = unc lv where
 
 --- Folds ---
 
--- These are tremendously inffective implementations.
-
 export
 Foldable LzList where
-  foldr f n xxs = case uncons xxs of
-    Nothing => n
-    Just (x, xs) => f x $ foldr f n $ assert_smaller xxs xs -- I swear at least due to `uncons_length_correct`.
+  foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
+    Eager xs     => foldr f n xs
+    Map g xs     => foldr (f . g) n xs
+    Concat ls rs => foldr f (foldr f n rs) ls
+    Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
 
 export
 Traversable LzList where
-  traverse f xxs = case uncons xxs of
-    Nothing => pure []
-    Just (x, xs) => [| (f x) :: (traverse f $ assert_smaller xxs xs) |]
+  traverse f ll@(MkLzList {contents=Delay lv, _}) = case lv of
+    Eager xs     => fromList <$> traverse f xs
+    Map g xs     => traverse (f . g) xs
+    Concat ls rs => [| traverse f ls ++ traverse f rs |]
+    Cart _ _     => foldr (\curr, rest => [| f curr :: rest |]) (pure []) ll
+                    -- This particular case is rather inffective. It loses the original lazy structure.
+                    -- I don't know how to do better when we don't have `Monad LzList`.
 
 --- Show ---
 
