@@ -150,13 +150,19 @@ uncons $ MkLzList {contents = Delay lv, _} = unc lv where
 
 --- Folds ---
 
+-- These are tremendously inffective implementations.
+
 export
 Foldable LzList where
-  foldr = ?foldr_rhs
+  foldr f n xxs = case uncons xxs of
+    Nothing => n
+    Just (x, xs) => f x $ foldr f n $ assert_smaller xxs xs -- I swear at least due to `uncons_length_correct`.
 
 export
 Traversable LzList where
-  traverse = ?traverse_rhs
+  traverse f xxs = case uncons xxs of
+    Nothing => pure []
+    Just (x, xs) => [| (f x) :: (traverse f $ assert_smaller xxs xs) |]
 
 --- Show ---
 
