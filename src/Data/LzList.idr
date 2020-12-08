@@ -59,6 +59,9 @@ namespace FinFun
 
   export
   splitProdFin : {a, b : Nat} -> Fin (a * b) -> (Fin a, Fin b)
+  splitProdFin {a=S _} x = case splitSumFin x of
+    Left  y => (FZ, y)
+    Right y => bimap FS id $ splitProdFin y
 
   export
   0 splitProdFin_correctness : {a, b : Nat} -> (x : Fin $ a * b) ->
