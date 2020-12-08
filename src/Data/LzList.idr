@@ -21,7 +21,6 @@ record LzList a where
 export
 data LzVect : Nat -> Type -> Type where
   Eager  : (xs : List a) -> LzVect (length xs) a
-  Cons   : a -> (xs : LzList a) -> LzVect (S xs.length) a
   Concat : (ls : LzList a) -> (rs : LzList a) -> LzVect (ls.length + rs.length) a
   Map    : (a -> b) -> (xs : LzList a) -> LzVect xs.length b
   Cart   : (os : LzList a) -> (is : LzList b) -> LzVect (os.length * is.length) (a, b)
@@ -33,10 +32,6 @@ data LzVect : Nat -> Type -> Type where
 export
 Nil : LzList a
 Nil = MkLzList 0 $ Eager []
-
-export
-(::) : a -> LzList a -> LzList a
-x :: xs = MkLzList _ $ Cons x xs
 
 export
 (++) : LzList a -> LzList a -> LzList a
@@ -69,8 +64,6 @@ index : (lz : LzList a) -> Fin lz.length -> a
 index lz i = ind (force lz.contents) i where
   ind : forall a. LzVect n a -> Fin n -> a
   ind (Eager xs)     i      = index' xs i
-  ind (Cons x _)     FZ     = x
-  ind (Cons _ xs)    (FS i) = index xs i
   ind (Concat ls rs) i      = assert_total $ either (index ls) (index rs) $ splitSumFin i
   ind (Map f xs)     i      = f $ assert_total $ index xs i
   ind (Cart os is)   i      = let (oi, ii) = splitProdFin i in assert_total $ (index os oi, index is ii)
@@ -96,6 +89,12 @@ Applicative LzList where
 Alternative LzList where
   empty = []
   (<|>) = (++)
+
+--- Cons function for lists syntax ---
+
+export
+(::) : a -> LzList a -> LzList a
+x :: xs = pure x ++ xs
 
 --- Folds ---
 
