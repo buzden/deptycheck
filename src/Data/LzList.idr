@@ -99,7 +99,7 @@ index lz i = ind (force lz.contents) i where
   ind (Eager xs)     i = index' xs i
   ind (Concat ls rs) i = assert_total $ either (index ls) (index rs) $ splitSumFin i
   ind (Map f xs)     i = f $ assert_total $ index xs i
-  ind (Cart os is)   i = let (oi, ii) = splitProdFin i in assert_total $ (index os oi, index is ii)
+  ind (Cart os is)   i = assert_total $ bimap (index os) (index is) $ splitProdFin i
 
 -------------------------------------------------
 --- Funny implementations of funny interfaces ---
