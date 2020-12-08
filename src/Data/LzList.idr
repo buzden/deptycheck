@@ -134,6 +134,18 @@ export
 (::) : a -> LzList a -> LzList a
 x :: xs = pure x ++ xs
 
+export
+uncons : LzList a -> Maybe (a, LzList a)
+uncons $ MkLzList {contents = Delay lv, _} = unc lv where
+  unc : forall a. LzVect n a -> Maybe (a, LzList a)
+  unc $ Eager []      = Nothing
+  unc $ Eager (x::xs) = Just (x, MkLzList _ $ Eager xs)
+  unc $ Concat ls rs  = map (map (++ rs)) (uncons ls) <|> uncons rs
+  unc $ Map f xs      = bimap f (map f) <$> uncons xs
+  unc $ Cart os is    = [| recart (uncons os) (uncons is) |] where
+    recart : forall a, b. (a, LzList a) -> (b, LzList b) -> ((a, b), LzList (a, b))
+    recart (x, xs) (y, ys) = ((x, y), map (, y) xs ++ [| (xs, ys) |])
+
 --- Folds ---
 
 export
