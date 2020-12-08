@@ -2,6 +2,7 @@ module Test.DepTyCheck.Gen
 
 import Data.DPair
 import Data.List
+import Data.LzList
 import Data.Stream
 import Data.Vect
 
@@ -44,10 +45,8 @@ HavingTrue a p = Subset a \x => p x = True
 
 public export
 data Gen : Type -> Type where
-  Uniform : List a -> Gen a
+  Uniform : LzList a -> Gen a
   Raw     : (Seed -> Maybe a) -> Gen a
-
--- TODO To use lazy lists with maximum of lazy operations (++, <*>).
 
 -- TODO To add a metric of size of `Gen`. It can be partially ordered, e.g. separate counting of uniform elements and raws.
 --      Then, for instance, during `<|>`-composition probabilities should be distributed according to that sized.
@@ -71,9 +70,10 @@ choose bounds = Raw $ Just . fst . randomR bounds
 
 export
 unGen : Gen a -> Seed -> Maybe a
-unGen (Uniform [])        _ = Nothing
-unGen (Uniform xs@(_::_)) s = Just $ index' xs $ fst $ random s
-unGen (Raw sf)            s = sf s
+unGen (Uniform xs) s = case @@ xs.length of
+                         (Z   ** _)   => Nothing
+                         (S _ ** prf) => Just $ index xs rewrite prf in fst $ random s
+unGen (Raw sf) s = sf s
 
 export
 Functor Gen where
@@ -110,8 +110,8 @@ oneOf ls = choice $ reorderUniforms ls where
 
 export
 Monad Gen where
-  Uniform ls >>= c = oneOf $ c <$> ls
-  (Raw sf)   >>= c = Raw \s =>
+  Uniform ls >>= c = oneOf $ c <$> toList ls
+  Raw sf >>= c = Raw \s =>
     let (s1, s2) = splitSeed s in
     sf s1 >>= \a => unGen (c a) s2
 
@@ -151,7 +151,7 @@ variant Z       gen = gen
 variant x@(S _) gen = Raw $ unGen gen . index x . iterate (snd . split)
 
 export
-uniform : List a -> Gen a
+uniform : LzList a -> Gen a
 uniform = Uniform
 
 export
