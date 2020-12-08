@@ -94,12 +94,12 @@ namespace FinFun
 
 export
 index : (lz : LzList a) -> Fin lz.length -> a
-index lz i = ind (force lz.contents) i where
+index $ MkLzList {contents=Delay lv, _} = ind lv where
   ind : forall a. LzVect n a -> Fin n -> a
   ind (Eager xs)     i = index' xs i
-  ind (Concat ls rs) i = assert_total $ either (index ls) (index rs) $ splitSumFin i
-  ind (Map f xs)     i = f $ assert_total $ index xs i
-  ind (Cart os is)   i = assert_total $ bimap (index os) (index is) $ splitProdFin i
+  ind (Concat ls rs) i = either (index ls) (index rs) $ splitSumFin i
+  ind (Map f xs)     i = f $ index xs i
+  ind (Cart os is)   i = bimap (index os) (index is) $ splitProdFin i
 
 -------------------------------------------------
 --- Funny implementations of funny interfaces ---
