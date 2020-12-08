@@ -116,7 +116,7 @@ Functor LzList where
   map f xs = MkLzList _ $ Map f xs
 
 export
-mapMaybe : (f : a -> Maybe b) -> LzList a -> LzList a
+mapMaybe : (f : a -> Maybe b) -> LzList a -> LzList b
 
 export
 cartWith : (f : a -> b -> c) -> LzList a -> LzList b -> LzList c
