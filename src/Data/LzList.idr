@@ -37,27 +37,33 @@ export
 (++) : LzList a -> LzList a -> LzList a
 xs ++ ys = MkLzList _ $ Concat xs ys
 
-splitSumFin : {a : Nat} -> Fin (a + b) -> Either (Fin a) (Fin b)
-splitSumFin {a=Z}   x      = Right x
-splitSumFin {a=S k} FZ     = Left FZ
-splitSumFin {a=S k} (FS x) = bimap FS id $ splitSumFin x
+namespace FinFun
 
-0 splitSumFin_correctness : {a, b : Nat} -> (x : Fin $ a + b) ->
-                            case splitSumFin {a} {b} x of
-                              Left  l => x = weakenN b l
-                              Right r => x = shift a r
-splitSumFin_correctness {a=Z}   x  = Refl
-splitSumFin_correctness {a=S k} FZ = Refl
-splitSumFin_correctness {a=S k} (FS x) with (splitSumFin_correctness x)
-  splitSumFin_correctness {a=S k} (FS x) | subcorr with (splitSumFin x)
-    splitSumFin_correctness {a=S k} (FS x) | subcorr | Left  y = rewrite subcorr in Refl
-    splitSumFin_correctness {a=S k} (FS x) | subcorr | Right y = rewrite subcorr in Refl
+  export
+  splitSumFin : {a : Nat} -> Fin (a + b) -> Either (Fin a) (Fin b)
+  splitSumFin {a=Z}   x      = Right x
+  splitSumFin {a=S k} FZ     = Left FZ
+  splitSumFin {a=S k} (FS x) = bimap FS id $ splitSumFin x
 
-splitProdFin : {a, b : Nat} -> Fin (a * b) -> (Fin a, Fin b)
+  export
+  0 splitSumFin_correctness : {a, b : Nat} -> (x : Fin $ a + b) ->
+                              case splitSumFin {a} {b} x of
+                                Left  l => x = weakenN b l
+                                Right r => x = shift a r
+  splitSumFin_correctness {a=Z}   x  = Refl
+  splitSumFin_correctness {a=S k} FZ = Refl
+  splitSumFin_correctness {a=S k} (FS x) with (splitSumFin_correctness x)
+    splitSumFin_correctness {a=S k} (FS x) | subcorr with (splitSumFin x)
+      splitSumFin_correctness {a=S k} (FS x) | subcorr | Left  y = rewrite subcorr in Refl
+      splitSumFin_correctness {a=S k} (FS x) | subcorr | Right y = rewrite subcorr in Refl
 
-0 splitProdFin_correctness : {a, b : Nat} -> (x : Fin $ a * b) ->
-                             let (o, i) = splitProdFin {a} {b} x in
-                             finToNat x = finToNat o * b + finToNat i
+  export
+  splitProdFin : {a, b : Nat} -> Fin (a * b) -> (Fin a, Fin b)
+
+  export
+  0 splitProdFin_correctness : {a, b : Nat} -> (x : Fin $ a * b) ->
+                               let (o, i) = splitProdFin {a} {b} x in
+                               finToNat x = finToNat o * b + finToNat i
 
 export
 index : (lz : LzList a) -> Fin lz.length -> a
