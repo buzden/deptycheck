@@ -146,6 +146,8 @@ uncons $ MkLzList {contents = Delay lv, _} = unc lv where
     recart : forall a, b. (a, LzList a) -> (b, LzList b) -> ((a, b), LzList (a, b))
     recart (x, xs) (y, ys) = ((x, y), map (, y) xs ++ [| (xs, ys) |])
 
+0 uncons_length_correct : (lz : LzList a) -> case uncons lz of Nothing => Unit; Just (hd, tl) => lz.length = S tl.length
+
 --- Folds ---
 
 export
