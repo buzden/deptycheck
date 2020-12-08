@@ -74,18 +74,23 @@ index lz i = ind (force lz.contents) i where
 
 --- Functor-related ---
 
+export
 Functor LzList where
   map f xs = MkLzList _ $ Map f xs
 
+export
 mapMaybe : (f : a -> Maybe b) -> LzList a -> LzList a
 
+export
 zipWith : (f : a -> b -> c) -> LzList a -> LzList b -> LzList c
 zipWith f xs ys = map (uncurry f) $ MkLzList _ $ Cart xs ys
 
+export
 Applicative LzList where
   pure x = MkLzList 1 $ Eager [x]
   (<*>) = zipWith apply
 
+export
 Alternative LzList where
   empty = []
   (<|>) = (++)
@@ -98,13 +103,16 @@ x :: xs = pure x ++ xs
 
 --- Folds ---
 
+export
 Foldable LzList where
   foldr = ?foldr_rhs
 
+export
 Traversable LzList where
   traverse = ?traverse_rhs
 
 --- Show ---
 
+export
 Show a => Show (LzList a) where
   show = show . toList
