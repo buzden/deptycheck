@@ -22,8 +22,8 @@ record LzList a where
 export
 data LzVect : Nat -> Type -> Type where
   Eager  : (xs : List a) -> LzVect (length xs) a
-  Concat : (ls : LzList a) -> (rs : LzList a) -> LzVect (ls.length + rs.length) a
   Map    : (a -> b) -> (xs : LzList a) -> LzVect xs.length b
+  Concat : (ls : LzList a) -> (rs : LzList a) -> LzVect (ls.length + rs.length) a
   Cart   : (os : LzList a) -> (is : LzList b) -> LzVect (os.length * is.length) (a, b)
 
 %name LzVect lvxs, lvys, lvzs
@@ -101,8 +101,8 @@ index : (lz : LzList a) -> Fin lz.length -> a
 index $ MkLzList {contents=Delay lv, _} = ind lv where
   ind : forall a. LzVect n a -> Fin n -> a
   ind (Eager xs)     i = index' xs i
-  ind (Concat ls rs) i = either (index ls) (index rs) $ splitSumFin i
   ind (Map f xs)     i = f $ index xs i
+  ind (Concat ls rs) i = either (index ls) (index rs) $ splitSumFin i
   ind (Cart os is)   i = bimap (index os) (index is) $ splitProdFin i
 
 -------------------------------------------------
@@ -144,8 +144,8 @@ uncons $ MkLzList {contents = Delay lv, _} = unc lv where
   unc : forall a. LzVect n a -> Maybe (a, LzList a)
   unc $ Eager []      = Nothing
   unc $ Eager (x::xs) = Just (x, fromList xs)
-  unc $ Concat ls rs  = map (map (++ rs)) (uncons ls) <|> uncons rs
   unc $ Map f xs      = bimap f (map f) <$> uncons xs
+  unc $ Concat ls rs  = map (map (++ rs)) (uncons ls) <|> uncons rs
   unc $ Cart os is    = [| recart (uncons os) (uncons is) |] where
     recart : forall a, b. (a, LzList a) -> (b, LzList b) -> ((a, b), LzList (a, b))
     recart (x, xs) (y, ys) = ((x, y), map (, y) xs ++ [| (xs, ys) |])
