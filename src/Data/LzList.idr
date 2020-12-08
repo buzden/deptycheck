@@ -116,9 +116,6 @@ Functor LzList where
   map f xs = MkLzList _ $ Map f xs
 
 export
-mapMaybe : (f : a -> Maybe b) -> LzList a -> LzList b
-
-export
 cartWith : (f : a -> b -> c) -> LzList a -> LzList b -> LzList c
 cartWith f xs ys = map (uncurry f) $ MkLzList _ $ Cart xs ys
 
@@ -171,6 +168,18 @@ Traversable LzList where
     Cart _ _     => foldr (\curr, rest => [| f curr :: rest |]) (pure []) ll
                     -- This particular case is rather inffective. It loses the original lazy structure.
                     -- I don't know how to do better when we don't have `Monad LzList`.
+
+--- Filtering ---
+
+export
+mapMaybe : (f : a -> Maybe b) -> LzList a -> LzList b
+mapMaybe f ll@(MkLzList {contents=Delay lz, _}) = case lz of
+  Eager xs     => fromList $ mapMaybe f xs
+  Map g xs     => mapMaybe (f . g) xs
+  Concat ls rs => mapMaybe f ls ++ mapMaybe f rs
+  Cart os is   => foldr (fo . f) [] ll where -- This does not preverse the shape in the general case.
+    fo : Maybe b -> LzList b -> LzList b
+    fo mb tl = maybe tl (::tl) mb
 
 --- Show ---
 
