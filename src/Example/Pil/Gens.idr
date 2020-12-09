@@ -28,8 +28,8 @@ asp rl lr = do (n ** i) <- rl
 --- Common ---
 
 lookupGen : (ctx : Context) -> Gen (n : Name ** Lookup n ctx)
-lookupGen ctx = uniform $ mapLk ctx where
-  mapLk : (ctx : Context) -> LzList (n ** Lookup n ctx)
+lookupGen ctx = uniform $ fromList $ mapLk ctx where
+  mapLk : (ctx : Context) -> List (n ** Lookup n ctx)
   mapLk []            = []
   mapLk ((n, ty)::xs) = (n ** Here ty) :: map (\(n ** lk) => (n ** There lk)) (mapLk xs)
 
