@@ -110,10 +110,9 @@ oneOf ls = choice $ reorderUniforms ls where
 
 export
 Monad Gen where
-  Uniform ls >>= c = oneOf $ c <$> toList ls
-  Raw sf >>= c = Raw \s =>
+  g >>= c = Raw \s =>
     let (s1, s2) = splitSeed s in
-    sf s1 >>= \a => unGen (c a) s2
+    unGen g s1 >>= \a => unGen (c a) s2
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
