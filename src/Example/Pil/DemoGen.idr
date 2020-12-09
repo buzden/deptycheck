@@ -49,7 +49,7 @@ interestingExpr = exprGen 3 simpleValue recExpr
 
 export
 someStatementGen : Gen (post ** Statement [] post)
-someStatementGen = stmtGen 4 []
+someStatementGen = stmtGen 6 []
 
 export
 someStatement : Nat -> Maybe (post ** Statement [] post)
