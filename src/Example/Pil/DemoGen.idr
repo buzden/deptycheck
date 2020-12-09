@@ -58,3 +58,7 @@ someStatement n = unGen (variant n $ someStatementGen) someStdGen
 export
 showSomeStatements : {default 0 variant : Nat} -> (count : Nat) -> IO ()
 showSomeStatements count = traverse_ putStrLn $ intersperse "----" $ (concat . map (\p => show $ snd p) . someStatement) <$> [variant .. (variant + count)]
+
+export
+main : IO ()
+main = showSomeStatements {variant=5003} 10
