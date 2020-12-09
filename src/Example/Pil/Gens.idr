@@ -1,7 +1,7 @@
 module Example.Pil.Gens
 
 import Data.DPair
-import Data.List
+import Data.LzList
 
 import Decidable.Equality
 
@@ -29,7 +29,7 @@ asp rl lr = do (n ** i) <- rl
 
 lookupGen : (ctx : Context) -> Gen (n : Name ** Lookup n ctx)
 lookupGen ctx = uniform $ mapLk ctx where
-  mapLk : (ctx : Context) -> List (n ** Lookup n ctx)
+  mapLk : (ctx : Context) -> LzList (n ** Lookup n ctx)
   mapLk []            = []
   mapLk ((n, ty)::xs) = (n ** Here ty) :: map (\(n ** lk) => (n ** There lk)) (mapLk xs)
 
