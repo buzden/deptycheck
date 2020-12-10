@@ -92,10 +92,11 @@ Alternative Gen where
   empty = Uniform []
   Uniform ls <|> Uniform rs = Uniform $ ls ++ rs
   generalL   <|> generalR   = Raw \s =>
-    let (sb, l, r) = bimap (unGen generalL) (unGen generalR) . splitSeed <$> splitSeed s in
-    case (l, r) of
-      (Just vl, Just vr) => Just $ if fst $ random sb then vl else vr
-      _ => l <|> r -- take the only `Just`, if there is some.
+    let (sCh, sSub) = splitSeed s
+        (first, second) = if fst $ random sCh then (generalL, generalR) else (generalR, generalL) in
+    case unGen first sSub of
+      r@(Just _) => r
+      Nothing => unGen second sSub
 
 export
 oneOf : List (Gen a) -> Gen a
