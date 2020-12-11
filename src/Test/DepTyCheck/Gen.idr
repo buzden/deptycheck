@@ -75,6 +75,13 @@ unGen (Uniform xs) s = case @@ xs.length of
                          (S _ ** prf) => Just $ index xs rewrite prf in fst $ random s
 unGen (Raw sf) s = sf s
 
+export %inline
+unGenWithFallback : Gen a -> Gen a -> Seed -> Maybe a
+unGenWithFallback main fallback s =
+  case unGen main s of
+    r@(Just _) => r
+    Nothing => unGen fallback s
+
 export
 Functor Gen where
   map f (Uniform xs) = Uniform $ map f xs
@@ -94,9 +101,7 @@ Alternative Gen where
   generalL   <|> generalR   = Raw \s =>
     let (sCh, sSub) = splitSeed s
         (first, second) = if fst $ random sCh then (generalL, generalR) else (generalR, generalL) in
-    case unGen first sSub of
-      r@(Just _) => r
-      Nothing => unGen second sSub
+    unGenWithFallback first second sSub
 
 export
 oneOf : List (Gen a) -> Gen a
