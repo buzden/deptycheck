@@ -159,6 +159,8 @@ Foldable LzList where
     Concat ls rs => foldr f (foldr f n rs) ls
     Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
 
+  null xs = xs.length == 0
+
 export
 Traversable LzList where
   traverse f ll@(MkLzList {contents=Delay lv, _}) = case lv of
