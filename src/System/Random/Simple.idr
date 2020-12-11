@@ -69,7 +69,14 @@ interface Random a where
   randomR : RandomGen g => (a, a) -> g -> (a, g)
   random : RandomGen g => g -> (a, g)
 
+  -- `Nothing` for infinite or unknown
+  cardinality : Maybe Nat
+  cardinalityR : (a, a) -> Maybe Nat
+
 --- Random Int ---
+
+intToNat : Int -> Nat
+intToNat = fromInteger . cast
 
 export
 Random Int where
@@ -99,15 +106,18 @@ Random Int where
         -- We shift over the random bits generated thusfar (* b) and add in the new ones.
         f (assert_smaller n' $ n' - 1) (x + acc * b) g'
 
---- Random Nat ---
+  cardinality = Nothing
+  cardinalityR (a, b) = Just $ intToNat $ if a > b then a - b else b - a
 
-intToNat : Int -> Nat
-intToNat = fromInteger . cast
+--- Random Nat ---
 
 export
 Random Nat where
   randomR (lo, hi) = mapFst intToNat . randomR (cast lo, cast hi)
   random = mapFst intToNat . random
+
+  cardinality = Nothing
+  cardinalityR (a, b) = Just $ if a > b then a `minus` b else b `minus` a
 
 --- Random Unit ---
 
@@ -115,6 +125,9 @@ export
 Random Unit where
   randomR ((), ()) gen = ((), snd $ next gen)
   random gen = ((), snd $ next gen)
+
+  cardinality = Just 1
+  cardinalityR _ = Just 1
 
 --- Random Fin ---
 
@@ -129,12 +142,18 @@ export
   randomR (lo, hi) gen = mapFst (intToFin n) $ randomR (finToInt lo, finToInt hi) gen
   random = mapFst (intToFin n) . random
 
+  cardinality = Just n
+  cardinalityR (a, b) = cardinalityR (finToInt a, finToInt b)
+
 --- Random Char ---
 
 export
 Random Char where
   randomR (lo, hi) = mapFst chr . randomR (ord lo, ord hi)
   random = mapFst chr . random
+
+  cardinality = cardinality {a=Int} -- Well, I don't know how many chars there are a pair of functions to and back for `Int`s
+  cardinalityR (a, b) = cardinalityR (ord a, ord b)
 
 --- Random Bool ---
 
@@ -149,3 +168,6 @@ export
 Random Bool where
   randomR (lo, hi) = mapFst intToBoolUni . randomR (boolToInt lo, boolToInt hi)
   random = mapFst intToBoolUni . random
+
+  cardinality = Just 2
+  cardinalityR (a, b) = if a == b then Just 1 else Just 2
