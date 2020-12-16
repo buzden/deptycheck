@@ -43,7 +43,7 @@ HavingTrue a p = Subset a \x => p x = True
 --- Definition of the `Gen` ---
 -------------------------------
 
-public export
+export
 data Gen : Type -> Type where
   Uniform : LzList a -> Gen a
   Raw     : (Seed -> Maybe a) -> Gen a
