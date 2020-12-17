@@ -87,12 +87,17 @@ Functor Gen where
   map f (Uniform xs) = Uniform $ map f xs
   map f (Raw gena)   = Raw $ map f . gena
 
+apAsRaw : Gen (a -> b) -> Gen a -> Gen b
+apAsRaw generalF generalA = Raw \s => let (s1, s2) = splitSeed s in
+  unGen generalF s1 <*> unGen generalA s2
+
 export
 Applicative Gen where
   pure x = Uniform [x]
+
   Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
-  generalF   <*> generalA   = Raw \s => let (s1, s2) = splitSeed s in
-    unGen generalF s1 <*> unGen generalA s2
+  rawF@(Raw {}) <*> generalA = apAsRaw rawF generalA
+  generalF <*> rawA@(Raw {}) = apAsRaw generalF rawA
 
 export
 Alternative Gen where
