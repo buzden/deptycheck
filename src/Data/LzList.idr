@@ -133,7 +133,9 @@ Alternative LzList where
 
 export
 (::) : a -> LzList a -> LzList a
-x :: xs = pure x ++ xs
+x :: ll@(MkLzList {contents=Delay lv, _}) = case lv of
+  Eager xs => fromList $ x::xs
+  _        => pure x ++ ll
 
 export
 uncons : LzList a -> Maybe (a, LzList a)
