@@ -68,12 +68,15 @@ export
 choose : Random a => (a, a) -> Gen a
 choose bounds = Raw $ Just . fst . randomR bounds
 
+pickAny : LzList a -> Seed -> Maybe a
+pickAny xs s = case @@ xs.length of
+  (Z   ** _)   => Nothing
+  (S _ ** prf) => Just $ index xs rewrite prf in fst $ random s
+
 export
 unGen : Gen a -> Seed -> Maybe a
-unGen (Uniform xs) s = case @@ xs.length of
-                         (Z   ** _)   => Nothing
-                         (S _ ** prf) => Just $ index xs rewrite prf in fst $ random s
-unGen (Raw sf) s = sf s
+unGen (Uniform xs) = pickAny xs
+unGen (Raw sf)     = sf
 
 export %inline
 unGenWithFallback : Gen a -> Gen a -> Seed -> Maybe a
