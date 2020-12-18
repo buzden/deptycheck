@@ -2,7 +2,7 @@ module Test.DepTyCheck.Gen
 
 import Data.DPair
 import Data.List
-import Data.LzList
+import Data.List.Lazier
 import Data.Stream
 import Data.Vect
 

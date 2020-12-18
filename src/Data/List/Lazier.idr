@@ -1,4 +1,4 @@
-module Data.LzList
+module Data.List.Lazier
 
 import Data.Fin
 import Data.List

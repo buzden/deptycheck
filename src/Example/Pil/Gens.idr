@@ -1,7 +1,7 @@
 module Example.Pil.Gens
 
 import Data.DPair
-import Data.LzList
+import Data.List.Lazier
 
 import Decidable.Equality
 
