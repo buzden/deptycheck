@@ -3,6 +3,7 @@ module Test.DepTyCheck.Gen
 import Data.DPair
 import Data.List
 import Data.List.Lazier
+import Data.List.Lazy
 import Data.Stream
 import Data.Vect
 
@@ -24,10 +25,6 @@ public export %inline
 Seed : Type
 Seed = StdGen
 
--- TODO to make this externally tunable somehow.
-RawFilteringAttempts : Nat
-RawFilteringAttempts = 100
-
 -------------------------------------------------
 --- General utility functions and definitions ---
 -------------------------------------------------
@@ -47,7 +44,7 @@ export
 data Gen : Type -> Type where
   Uniform : LzList a -> Gen a
   UniGens : LzList (Gen a) -> Gen a
-  Raw     : (Seed -> Maybe a) -> Gen a
+  Raw     : (Seed -> LazyList a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
@@ -59,30 +56,23 @@ bound (Raw _)      = Nothing
 
 export
 chooseAny : Random a => Gen a
-chooseAny = Raw $ Just . fst . random
+chooseAny = Raw $ pure . fst . random
 
 export
 choose : Random a => (a, a) -> Gen a
-choose bounds = Raw $ Just . fst . randomR bounds
+choose bounds = Raw $ pure . fst . randomR bounds
 
-pickAny : LzList a -> Seed -> Maybe a
-pickAny xs s = case @@ xs.length of
-  (Z   ** _)   => Nothing
-  (S _ ** prf) => Just $ index xs rewrite prf in fst $ random s
+shiftRandomly : LzList a -> Seed -> LazyList a
+shiftRandomly xs s = case @@ xs.length of
+  (Z   ** _)   => []
+  (S _ ** prf) => let (ls, rs) = splitAt xs $ rewrite prf in fst $ random s in toLazyList $ rs ++ ls
 
 export
-unGen : Gen a -> Seed -> Maybe a
-unGen (Uniform xs) = pickAny xs
+unGen : Gen a -> Seed -> LazyList a
 unGen (Raw sf)     = sf
+unGen (Uniform xs) = shiftRandomly xs
 unGen (UniGens gs) = \s => let (s1, s2) = splitSeed s in
-                           pickAny gs s1 >>= flip (assert_total unGen) s2
-
-export %inline
-unGenWithFallback : Gen a -> Gen a -> Seed -> Maybe a
-unGenWithFallback main fallback s =
-  case unGen main s of
-    r@(Just _) => r
-    Nothing => unGen fallback s
+  shiftRandomly gs s1 >>= flip (assert_total unGen) s2
 
 export
 Functor Gen where
@@ -128,8 +118,7 @@ export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
 mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
 mapMaybe p (UniGens l) = UniGens $ assert_total $ mapMaybe p <$> l
-mapMaybe p (Raw sf)    = Raw \r =>
-  choice $ map (\r => sf r >>= p) $ take RawFilteringAttempts $ countFrom r $ snd . next
+mapMaybe p (Raw sf)    = Raw $ mapMaybe p . sf
 
 export
 suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `HavingTrue` p
