@@ -2,6 +2,7 @@ module Data.LzList
 
 import Data.Fin
 import Data.List
+import Data.List.Lazy
 import Data.Nat
 
 import Decidable.Equality
@@ -189,6 +190,19 @@ splitAt' : (lz : LzList a) -> Fin (S lz.length) -> (LzList a, LzList a)
 splitAt' lz i = case strengthen i of
   Left _ => (lz, [])
   Right x => splitAt lz x
+
+--- Conversions ---
+
+-- TODO to remove as soon as PR #862 is accepted.
+covering
+unfoldr : (b -> Maybe (a, b)) -> b -> LazyList a
+unfoldr f c = case f c of
+  Nothing     => []
+  Just (a, n) => a :: unfoldr f n
+
+export
+toLazyList : LzList a -> LazyList a
+toLazyList xs = assert_total $ unfoldr uncons xs -- total because uncons produces shorter list
 
 --- Traversable ---
 
