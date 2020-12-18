@@ -28,6 +28,18 @@ data LzVect : Nat -> Type -> Type where
 
 %name LzVect lvxs, lvys, lvzs
 
+--- Foldable ---
+
+export
+Foldable LzList where
+  foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
+    Eager xs     => foldr f n xs
+    Map g xs     => foldr (f . g) n xs
+    Concat ls rs => foldr f (foldr f n rs) ls
+    Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
+
+  null xs = xs.length == 0
+
 --- Common functions ---
 
 export
@@ -40,7 +52,9 @@ Nil = fromList []
 
 export
 (++) : LzList a -> LzList a -> LzList a
-xs ++ ys = MkLzList _ $ Concat xs ys
+xs ++ ys = if null xs then ys else
+           if null ys then xs else
+             MkLzList _ $ Concat xs ys
 
 namespace FinFun
 
@@ -151,17 +165,7 @@ uncons $ MkLzList {contents = Delay lv, _} = unc lv where
 
 0 uncons_length_correct : (lz : LzList a) -> case uncons lz of Nothing => Unit; Just (hd, tl) => lz.length = S tl.length
 
---- Folds ---
-
-export
-Foldable LzList where
-  foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
-    Eager xs     => foldr f n xs
-    Map g xs     => foldr (f . g) n xs
-    Concat ls rs => foldr f (foldr f n rs) ls
-    Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
-
-  null xs = xs.length == 0
+--- Traversable ---
 
 export
 Traversable LzList where
