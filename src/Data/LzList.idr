@@ -151,6 +151,8 @@ x :: ll@(MkLzList {contents=Delay lv, _}) = case lv of
   Eager xs => fromList $ x::xs
   _        => pure x ++ ll
 
+--- Splitting ---
+
 export
 uncons : LzList a -> Maybe (a, LzList a)
 uncons $ MkLzList {contents = Delay lv, _} = unc lv where
@@ -164,6 +166,29 @@ uncons $ MkLzList {contents = Delay lv, _} = unc lv where
     recart (x, xs) (y, ys) = ((x, y), map (, y) xs ++ [| (xs, ys) |])
 
 0 uncons_length_correct : (lz : LzList a) -> case uncons lz of Nothing => Unit; Just (hd, tl) => lz.length = S tl.length
+
+export
+splitAt : (lz : LzList a) -> Fin lz.length -> (LzList a, LzList a)
+splitAt (MkLzList {contents=Delay lv, _}) i = case lv of
+  Eager xs     => let (l, r) = splitAt (finToNat i) xs in (fromList l, fromList r)
+  Map f xs     => let (l, r) = splitAt xs i in (map f l, map f r)
+  Concat ls rs => case splitSumFin i of
+                    Left  l => let (ll, rr) = splitAt ls l in (ll, rr ++ rs)
+                    Right r => let (ll, rr) = splitAt rs r in (ls ++ ll, rs)
+  Cart os is   => let (oi, ii) = splitProdFin i
+                      (ibef, iaft) = splitAt is ii
+                      topSq = MkLzList _ $ Cart os ibef
+                  in case uncons iaft of
+                    Nothing => (topSq, []) -- Actually, impossible case since the second element (i.e. `iaft`) cannot be empty
+                    Just (p, ibot) => let (middleBef, middleAft) = splitAt (map (, p) os) oi
+                                          botSq = MkLzList _ $ Cart os ibot
+                                      in (topSq ++ middleBef, middleAft ++ botSq)
+
+export
+splitAt' : (lz : LzList a) -> Fin (S lz.length) -> (LzList a, LzList a)
+splitAt' lz i = case strengthen i of
+  Left _ => (lz, [])
+  Right x => splitAt lz x
 
 --- Traversable ---
 
