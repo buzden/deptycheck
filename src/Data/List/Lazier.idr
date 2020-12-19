@@ -193,13 +193,6 @@ splitAt' lz i = case strengthen i of
 
 --- Conversions ---
 
--- TODO to remove as soon as PR #862 is accepted.
-covering
-unfoldr : (b -> Maybe (a, b)) -> b -> LazyList a
-unfoldr f c = case f c of
-  Nothing     => []
-  Just (a, n) => a :: unfoldr f n
-
 export
 toLazyList : LzList a -> LazyList a
 toLazyList xs = assert_total $ unfoldr uncons xs -- total because uncons produces shorter list
