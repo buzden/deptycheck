@@ -110,6 +110,7 @@ oneOf = choice
 
 export
 Monad Gen where
+  Uniform gs >>= c = UniGens $ c <$> gs
   g >>= c = Raw \s =>
     let (s1, s2) = splitSeed s in
     unGen g s1 >>= \a => unGen (c a) s2
