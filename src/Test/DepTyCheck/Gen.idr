@@ -43,7 +43,7 @@ HavingTrue a p = Subset a \x => p x = True
 export
 data Gen : Type -> Type where
   Uniform : LzList a -> Gen a
-  UniGens : LzList (Gen a) -> Gen a
+  AlternG : LzList (Gen a) -> Gen a
   Raw     : (Seed -> LazyList a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
@@ -51,7 +51,7 @@ data Gen : Type -> Type where
 export
 bound : Gen a -> Maybe Nat
 bound (Uniform xs) = Just $ length xs
-bound (UniGens gs) = sum <$> traverse (assert_total bound) gs
+bound (AlternG gs) = sum <$> traverse (assert_total bound) gs
 bound (Raw _)      = Nothing
 
 export
@@ -71,13 +71,13 @@ export
 unGen : Gen a -> Seed -> LazyList a
 unGen (Raw sf)     = sf
 unGen (Uniform xs) = shiftRandomly xs
-unGen (UniGens gs) = \s => let (s1, s2) = splitSeed s in
+unGen (AlternG gs) = \s => let (s1, s2) = splitSeed s in
   shiftRandomly gs s1 >>= flip (assert_total unGen) s2
 
 export
 Functor Gen where
   map f (Uniform xs) = Uniform $ map f xs
-  map f (UniGens gs) = UniGens $ assert_total $ map f <$> gs
+  map f (AlternG gs) = AlternG $ assert_total $ map f <$> gs
   map f (Raw gena)   = Raw $ map f . gena
 
 apAsRaw : Gen (a -> b) -> Gen a -> Gen b
@@ -89,9 +89,9 @@ Applicative Gen where
   pure x = Uniform [x]
 
   Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
-  Uniform fs <*> UniGens gs = UniGens $ [| map fs gs |]
-  UniGens gs <*> Uniform xs = UniGens $ [| (\gab, a => map (flip apply a) gab) gs xs |]
-  UniGens fs <*> UniGens gs = UniGens $ assert_total $ [| fs <*> gs |]
+  Uniform fs <*> AlternG gs = AlternG $ [| map fs gs |]
+  AlternG gs <*> Uniform xs = AlternG $ [| (\gab, a => map (flip apply a) gab) gs xs |]
+  AlternG fs <*> AlternG gs = AlternG $ assert_total $ [| fs <*> gs |]
 
   rawF@(Raw {}) <*> generalA = apAsRaw rawF generalA
   generalF <*> rawA@(Raw {}) = apAsRaw generalF rawA
@@ -99,10 +99,10 @@ Applicative Gen where
 export
 Alternative Gen where
   empty = Uniform []
-  UniGens ls <|> UniGens rs = UniGens $ ls ++ rs
-  UniGens ls <|> generalR   = UniGens $ ls ++ [generalR]
-  generalL   <|> UniGens rs = UniGens $ [generalL] ++ rs
-  generalL   <|> generalR   = UniGens $ [generalL, generalR]
+  AlternG ls <|> AlternG rs = AlternG $ ls ++ rs
+  AlternG ls <|> generalR   = AlternG $ ls ++ [generalR]
+  generalL   <|> AlternG rs = AlternG $ [generalL] ++ rs
+  generalL   <|> generalR   = AlternG $ [generalL, generalR]
 
 export
 oneOf : List (Gen a) -> Gen a
@@ -110,7 +110,7 @@ oneOf = choice
 
 export
 Monad Gen where
-  Uniform gs >>= c = UniGens $ c <$> gs
+  Uniform gs >>= c = AlternG $ c <$> gs
   g >>= c = Raw \s =>
     let (s1, s2) = splitSeed s in
     unGen g s1 >>= \a => unGen (c a) s2
@@ -118,7 +118,7 @@ Monad Gen where
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
 mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
-mapMaybe p (UniGens l) = UniGens $ assert_total $ mapMaybe p <$> l
+mapMaybe p (AlternG l) = AlternG $ assert_total $ mapMaybe p <$> l
 mapMaybe p (Raw sf)    = Raw $ mapMaybe p . sf
 
 export
