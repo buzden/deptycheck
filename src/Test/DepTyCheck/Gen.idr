@@ -3,6 +3,7 @@ module Test.DepTyCheck.Gen
 import Data.DPair
 import Data.List
 import Data.List.Lazier
+import Data.List.Lazy
 import Data.Stream
 import Data.Vect
 
@@ -24,10 +25,6 @@ public export %inline
 Seed : Type
 Seed = StdGen
 
--- TODO to make this externally tunable somehow.
-RawFilteringAttempts : Nat
-RawFilteringAttempts = 100
-
 -------------------------------------------------
 --- General utility functions and definitions ---
 -------------------------------------------------
@@ -46,76 +43,74 @@ HavingTrue a p = Subset a \x => p x = True
 export
 data Gen : Type -> Type where
   Uniform : LzList a -> Gen a
-  Raw     : (Seed -> Maybe a) -> Gen a
-
--- TODO To add a metric of size of `Gen`. It can be partially ordered, e.g. separate counting of uniform elements and raws.
---      Then, for instance, during `<|>`-composition probabilities should be distributed according to that sized.
---      For example, it would mean that `a <|> b <|> c` composition would be really associative for even `Raw` `Gen`s (unlike now)
---      and distribution between those `a`, `b` and `c` if they are all primitive `Raw` `Gen`s would be uniform.
+  AlternG : LzList (Gen a) -> Gen a
+  Raw     : (Seed -> LazyList a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
 export
 bound : Gen a -> Maybe Nat
 bound (Uniform xs) = Just $ length xs
+bound (AlternG gs) = sum <$> traverse (assert_total bound) gs
 bound (Raw _)      = Nothing
 
 export
 chooseAny : Random a => Gen a
-chooseAny = Raw $ Just . fst . random
+chooseAny = Raw $ pure . fst . random
 
 export
 choose : Random a => (a, a) -> Gen a
-choose bounds = Raw $ Just . fst . randomR bounds
+choose bounds = Raw $ pure . fst . randomR bounds
+
+shiftRandomly : LzList a -> Seed -> LazyList a
+shiftRandomly xs s = case @@ xs.length of
+  (Z   ** _)   => []
+  (S _ ** prf) => let (ls, rs) = splitAt xs $ rewrite prf in fst $ random s in toLazyList $ rs ++ ls
 
 export
-unGen : Gen a -> Seed -> Maybe a
-unGen (Uniform xs) s = case @@ xs.length of
-                         (Z   ** _)   => Nothing
-                         (S _ ** prf) => Just $ index xs rewrite prf in fst $ random s
-unGen (Raw sf) s = sf s
-
-export %inline
-unGenWithFallback : Gen a -> Gen a -> Seed -> Maybe a
-unGenWithFallback main fallback s =
-  case unGen main s of
-    r@(Just _) => r
-    Nothing => unGen fallback s
+unGen : Gen a -> Seed -> LazyList a
+unGen (Raw sf)     = sf
+unGen (Uniform xs) = shiftRandomly xs
+unGen (AlternG gs) = \s => let (s1, s2) = splitSeed s in
+  shiftRandomly gs s1 >>= flip (assert_total unGen) s2
 
 export
 Functor Gen where
   map f (Uniform xs) = Uniform $ map f xs
+  map f (AlternG gs) = AlternG $ assert_total $ map f <$> gs
   map f (Raw gena)   = Raw $ map f . gena
+
+apAsRaw : Gen (a -> b) -> Gen a -> Gen b
+apAsRaw generalF generalA = Raw \s => let (s1, s2) = splitSeed s in
+  unGen generalF s1 <*> unGen generalA s2
 
 export
 Applicative Gen where
   pure x = Uniform [x]
+
   Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
-  generalF   <*> generalA   = Raw \s => let (s1, s2) = splitSeed s in
-    unGen generalF s1 <*> unGen generalA s2
+  Uniform fs <*> AlternG gs = AlternG $ [| map fs gs |]
+  AlternG gs <*> Uniform xs = AlternG $ [| (\gab, a => map (flip apply a) gab) gs xs |]
+  AlternG fs <*> AlternG gs = AlternG $ assert_total $ [| fs <*> gs |]
+
+  rawF@(Raw {}) <*> generalA = apAsRaw rawF generalA
+  generalF <*> rawA@(Raw {}) = apAsRaw generalF rawA
 
 export
 Alternative Gen where
   empty = Uniform []
-  Uniform ls <|> Uniform rs = Uniform $ ls ++ rs
-  generalL   <|> generalR   = Raw \s =>
-    let (sCh, sSub) = splitSeed s
-        (first, second) = if fst $ random sCh then (generalL, generalR) else (generalR, generalL) in
-    unGenWithFallback first second sSub
+  AlternG ls <|> AlternG rs = AlternG $ ls ++ rs
+  AlternG ls <|> generalR   = AlternG $ ls ++ [generalR]
+  generalL   <|> AlternG rs = AlternG $ [generalL] ++ rs
+  generalL   <|> generalR   = AlternG $ [generalL, generalR]
 
 export
 oneOf : List (Gen a) -> Gen a
-oneOf ls = choice $ reorderUniforms ls where
-  -- Places `Uniform`s at those position where `foldr` (as an implementation detail of `choice`)
-  -- would first pick them preserving uniform as long as possible.
-  reorderUniforms : List (Gen a) -> List (Gen a)
-  reorderUniforms xs = let (nonUni, uni) = partition isNonUni xs in nonUni ++ uni where
-    isNonUni : Gen a -> Bool
-    isNonUni (Uniform _) = True
-    isNonUni _           = False
+oneOf = choice
 
 export
 Monad Gen where
+  Uniform gs >>= c = AlternG $ c <$> gs
   g >>= c = Raw \s =>
     let (s1, s2) = splitSeed s in
     unGen g s1 >>= \a => unGen (c a) s2
@@ -123,8 +118,8 @@ Monad Gen where
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
 mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
-mapMaybe p (Raw sf)    = Raw \r =>
-  choice $ map (\r => sf r >>= p) $ take RawFilteringAttempts $ countFrom r $ snd . next
+mapMaybe p (AlternG l) = AlternG $ assert_total $ mapMaybe p <$> l
+mapMaybe p (Raw sf)    = Raw $ mapMaybe p . sf
 
 export
 suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `HavingTrue` p

@@ -1,6 +1,7 @@
 module Example.Pil.DemoGen
 
 import Data.List
+import Data.List.Lazy
 import Data.Strings
 
 import Example.Pil.Gens
@@ -53,7 +54,7 @@ someStatementGen = stmtGen 6 []
 
 export
 someStatement : Nat -> Maybe (post ** Statement [] post)
-someStatement n = unGen (variant n $ someStatementGen) someStdGen
+someStatement n = head' $ unGen (variant n $ someStatementGen) someStdGen
 
 export
 showSomeStatements : {default 0 variant : Nat} -> (count : Nat) -> IO ()

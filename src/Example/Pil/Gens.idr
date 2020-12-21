@@ -93,8 +93,8 @@ mutual
          (_ ** body) <- stmtGen n inside_for
          pure $ for init !genExpr !(noCtxChange_stmtGen n inside_for) body
     , pure $ if__ !genExpr (snd !(stmtGen n ctx)) (snd !(stmtGen n ctx))
-    , pure $ !(noCtxChange_stmtGen n ctx) *> !(noCtxChange_stmtGen n ctx)
-    , pure $ block $ snd !(stmtGen n ctx)
+    , [| noCtxChange_stmtGen n ctx *> noCtxChange_stmtGen n ctx |]
+    , (\st => block $ snd st) <$> stmtGen n ctx
     ]
 
   export
@@ -104,10 +104,8 @@ mutual
             (genName : Gen Name) =>
             ({a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
             Gen (post ** Statement pre post)
-  stmtGen Z     pre = ctxChanging_noRec_stmtGen pre <|> pure (pre ** !(noCtxChange_stmtGen Z pre))
-  stmtGen (S n) pre = ctxChanging_noRec_stmtGen pre <|> oneOf
-    [ pure (pre ** !(noCtxChange_stmtGen n pre))
-    , do (mid ** l) <- stmtGen n pre
-         (post ** r) <- stmtGen n mid
-         pure (post ** l *> r)
-    ]
+  stmtGen Z     pre = ctxChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noCtxChange_stmtGen Z pre
+  stmtGen (S n) pre = ctxChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noCtxChange_stmtGen n pre
+    <|> do (mid ** l) <- stmtGen n pre
+           (post ** r) <- stmtGen n mid
+           pure (post ** l *> r)
