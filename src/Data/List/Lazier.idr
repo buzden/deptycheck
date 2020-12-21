@@ -1,7 +1,8 @@
-module Data.LzList
+module Data.List.Lazier
 
 import Data.Fin
 import Data.List
+import Data.List.Lazy
 import Data.Nat
 
 import Decidable.Equality
@@ -28,6 +29,18 @@ data LzVect : Nat -> Type -> Type where
 
 %name LzVect lvxs, lvys, lvzs
 
+--- Foldable ---
+
+export
+Foldable LzList where
+  foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
+    Eager xs     => foldr f n xs
+    Map g xs     => foldr (f . g) n xs
+    Concat ls rs => foldr f (foldr f n rs) ls
+    Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
+
+  null xs = xs.length == 0
+
 --- Common functions ---
 
 export
@@ -40,7 +53,9 @@ Nil = fromList []
 
 export
 (++) : LzList a -> LzList a -> LzList a
-xs ++ ys = MkLzList _ $ Concat xs ys
+xs ++ ys = if null xs then ys else
+           if null ys then xs else
+             MkLzList _ $ Concat xs ys
 
 namespace FinFun
 
@@ -133,7 +148,11 @@ Alternative LzList where
 
 export
 (::) : a -> LzList a -> LzList a
-x :: xs = pure x ++ xs
+x :: ll@(MkLzList {contents=Delay lv, _}) = case lv of
+  Eager xs => fromList $ x::xs
+  _        => pure x ++ ll
+
+--- Splitting ---
 
 export
 uncons : LzList a -> Maybe (a, LzList a)
@@ -149,17 +168,36 @@ uncons $ MkLzList {contents = Delay lv, _} = unc lv where
 
 0 uncons_length_correct : (lz : LzList a) -> case uncons lz of Nothing => Unit; Just (hd, tl) => lz.length = S tl.length
 
---- Folds ---
+export
+splitAt : (lz : LzList a) -> Fin lz.length -> (LzList a, LzList a)
+splitAt (MkLzList {contents=Delay lv, _}) i = case lv of
+  Eager xs     => let (l, r) = splitAt (finToNat i) xs in (fromList l, fromList r)
+  Map f xs     => let (l, r) = splitAt xs i in (map f l, map f r)
+  Concat ls rs => case splitSumFin i of
+                    Left  l => let (ll, rr) = splitAt ls l in (ll, rr ++ rs)
+                    Right r => let (ll, rr) = splitAt rs r in (ls ++ ll, rs)
+  Cart os is   => let (oi, ii) = splitProdFin i
+                      (ibef, iaft) = splitAt is ii
+                      topSq = MkLzList _ $ Cart os ibef
+                  in case uncons iaft of
+                    Nothing => (topSq, []) -- Actually, impossible case since the second element (i.e. `iaft`) cannot be empty
+                    Just (p, ibot) => let (middleBef, middleAft) = splitAt (map (, p) os) oi
+                                          botSq = MkLzList _ $ Cart os ibot
+                                      in (topSq ++ middleBef, middleAft ++ botSq)
 
 export
-Foldable LzList where
-  foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
-    Eager xs     => foldr f n xs
-    Map g xs     => foldr (f . g) n xs
-    Concat ls rs => foldr f (foldr f n rs) ls
-    Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
+splitAt' : (lz : LzList a) -> Fin (S lz.length) -> (LzList a, LzList a)
+splitAt' lz i = case strengthen i of
+  Left _ => (lz, [])
+  Right x => splitAt lz x
 
-  null xs = xs.length == 0
+--- Conversions ---
+
+export
+toLazyList : LzList a -> LazyList a
+toLazyList xs = assert_total $ unfoldr uncons xs -- total because uncons produces shorter list
+
+--- Traversable ---
 
 export
 Traversable LzList where
