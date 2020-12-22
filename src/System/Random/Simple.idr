@@ -12,7 +12,7 @@ import Data.Fin
 
 public export
 interface RandomGen g where
-  next : g -> (Int, g)
+  next : g -> (g, Int)
   genRange : g -> (Int,Int)
   split : g -> (g, g)
 
@@ -43,11 +43,11 @@ RandomGen StdGen where
     let s2'' : Int = if s2' <= 0 then s2' + 2147483399 else s2' in
     let z : Int = s1'' - s2'' in
     let z' : Int = if z < 1 then z + 2147483562 else z in
-    (z', MkStdGen s1'' s2'')
+    (MkStdGen s1'' s2'', z')
 
   genRange _ = (0, 2147483562)
   split (MkStdGen s1 s2) =
-    let gen' : StdGen = snd (next (MkStdGen s1 s2)) in
+    let gen' : StdGen = fst (next (MkStdGen s1 s2)) in
     let t1 : Int = case gen' of { MkStdGen a b => a } in
     let t2 : Int = case gen' of { MkStdGen a b => b } in
     let new_s1 : Int = if s1 >= 2147483562 || s1 < 1
@@ -66,8 +66,8 @@ RandomGen StdGen where
 
 public export
 interface Random a where
-  randomR : RandomGen g => (a, a) -> g -> (a, g)
-  random : RandomGen g => g -> (a, g)
+  randomR : RandomGen g => (a, a) -> g -> (g, a)
+  random : RandomGen g => g -> (g, a)
 
   -- `Nothing` for infinite or unknown
   cardinality : Maybe Nat
@@ -84,7 +84,7 @@ Random Int where
   randomR (lo, hi) gen = if lo > hi
                            then assert_total $ randomR (hi, lo) gen
                            else case (f n 1 gen) of
-                             (v, gen') => ((lo + v `mod` k), gen')
+                             (gen', v) => (gen', (lo + v `mod` k))
     where
       k : Int
       k = hi - lo + 1
@@ -99,10 +99,10 @@ Random Int where
       n = iLogBase k
 
       -- Here we loop until we've generated enough randomness to cover the range:
-      f : Int -> Int -> g -> (Int, g)
-      f 0 acc g = (acc, g)
+      f : Int -> Int -> g -> (g, Int)
+      f 0 acc g = (g, acc)
       f n' acc g =
-        let (x,g') = next g in
+        let (g',x) = next g in
         -- We shift over the random bits generated thusfar (* b) and add in the new ones.
         f (assert_smaller n' $ n' - 1) (x + acc * b) g'
 
@@ -113,8 +113,8 @@ Random Int where
 
 export
 Random Nat where
-  randomR (lo, hi) = mapFst intToNat . randomR (cast lo, cast hi)
-  random = mapFst intToNat . random
+  randomR (lo, hi) = map intToNat . randomR (cast lo, cast hi)
+  random = map intToNat . random
 
   cardinality = Nothing
   cardinalityR (a, b) = Just $ if a > b then a `minus` b else b `minus` a
@@ -123,8 +123,8 @@ Random Nat where
 
 export
 Random Unit where
-  randomR ((), ()) gen = ((), snd $ next gen)
-  random gen = ((), snd $ next gen)
+  randomR ((), ()) gen = map (const ()) $ next gen
+  random gen = map (const ()) $ next gen
 
   cardinality = Just 1
   cardinalityR _ = Just 1
@@ -139,8 +139,8 @@ intToFin n = restrict n . cast
 
 export
 {n : Nat} -> Random (Fin (S n)) where
-  randomR (lo, hi) gen = mapFst (intToFin n) $ randomR (finToInt lo, finToInt hi) gen
-  random = mapFst (intToFin n) . random
+  randomR (lo, hi) = map (intToFin n) . randomR (finToInt lo, finToInt hi)
+  random = map (intToFin n) . random
 
   cardinality = Just n
   cardinalityR (a, b) = cardinalityR (finToInt a, finToInt b)
@@ -149,8 +149,8 @@ export
 
 export
 Random Char where
-  randomR (lo, hi) = mapFst chr . randomR (ord lo, ord hi)
-  random = mapFst chr . random
+  randomR (lo, hi) = map chr . randomR (ord lo, ord hi)
+  random = map chr . random
 
   cardinality = cardinality {a=Int} -- Well, I don't know how many chars there are a pair of functions to and back for `Int`s
   cardinalityR (a, b) = cardinalityR (ord a, ord b)
@@ -166,8 +166,8 @@ intToBoolUni x = x `mod` 2 == 0
 
 export
 Random Bool where
-  randomR (lo, hi) = mapFst intToBoolUni . randomR (boolToInt lo, boolToInt hi)
-  random = mapFst intToBoolUni . random
+  randomR (lo, hi) = map intToBoolUni . randomR (boolToInt lo, boolToInt hi)
+  random = map intToBoolUni . random
 
   cardinality = Just 2
   cardinalityR (a, b) = if a == b then Just 1 else Just 2

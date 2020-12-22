@@ -30,7 +30,7 @@ Seed = StdGen
 -------------------------------------------------
 
 splitSeed : Seed -> (Seed, Seed)
-splitSeed = bimap (snd . next) (snd . next) . split
+splitSeed = bimap (fst . next) (fst . next) . split
 
 public export
 HavingTrue : (a : Type) -> (a -> Bool) -> Type
@@ -56,16 +56,16 @@ bound (Raw _)      = Nothing
 
 export
 chooseAny : Random a => Gen a
-chooseAny = Raw $ pure . fst . random
+chooseAny = Raw $ pure . snd . random
 
 export
 choose : Random a => (a, a) -> Gen a
-choose bounds = Raw $ pure . fst . randomR bounds
+choose bounds = Raw $ pure . snd . randomR bounds
 
 shiftRandomly : LzList a -> Seed -> LazyList a
 shiftRandomly xs s = case @@ xs.length of
   (Z   ** _)   => []
-  (S _ ** prf) => let (ls, rs) = splitAt xs $ rewrite prf in fst $ random s in toLazyList $ rs ++ ls
+  (S _ ** prf) => let (ls, rs) = splitAt xs $ rewrite prf in snd $ random s in toLazyList $ rs ++ ls
 
 export
 unGen : Gen a -> Seed -> LazyList a
