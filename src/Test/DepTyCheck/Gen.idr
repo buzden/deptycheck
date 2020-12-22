@@ -1,5 +1,7 @@
 module Test.DepTyCheck.Gen
 
+import Control.Monad.State
+
 import Data.DPair
 import Data.List
 import Data.List.Lazier
@@ -29,9 +31,6 @@ Seed = StdGen
 --- General utility functions and definitions ---
 -------------------------------------------------
 
-splitSeed : Seed -> (Seed, Seed)
-splitSeed = bimap (fst . next) (fst . next) . split
-
 public export
 HavingTrue : (a : Type) -> (a -> Bool) -> Type
 HavingTrue a p = Subset a \x => p x = True
@@ -44,7 +43,7 @@ export
 data Gen : Type -> Type where
   Uniform : LzList a -> Gen a
   AlternG : LzList (Gen a) -> Gen a
-  Raw     : (Seed -> LazyList a) -> Gen a
+  Raw     : State Seed (LazyList a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
@@ -56,33 +55,37 @@ bound (Raw _)      = Nothing
 
 export
 chooseAny : Random a => Gen a
-chooseAny = Raw $ pure . snd . random
+chooseAny = Raw $ pure <$> random'
 
 export
 choose : Random a => (a, a) -> Gen a
-choose bounds = Raw $ pure . snd . randomR bounds
+choose bounds = Raw $ pure <$> randomR' bounds
 
-shiftRandomly : LzList a -> Seed -> LazyList a
-shiftRandomly xs s = case @@ xs.length of
-  (Z   ** _)   => []
-  (S _ ** prf) => let (ls, rs) = splitAt xs $ rewrite prf in snd $ random s in toLazyList $ rs ++ ls
+shiftRandomly : LzList a -> State Seed (LazyList a)
+shiftRandomly xs = case @@ xs.length of
+  (Z   ** _)   => pure []
+  (S _ ** prf) => (\(ls, rs) => toLazyList $ rs ++ ls) <$> splitAt xs <$> rewrite prf in random'
+
+traverseSt : RandomGen g => LazyList (State g a) -> State g (LazyList a)
+traverseSt []      = pure []
+traverseSt (x::xs) = ST \s =>
+  let ((s1, s2), xx) = mapFst split $ runState s x in
+  Id (s1, xx :: evalState s2 (traverseSt xs))
 
 export
-unGen : Gen a -> Seed -> LazyList a
+unGen : Gen a -> State Seed (LazyList a)
 unGen (Raw sf)     = sf
 unGen (Uniform xs) = shiftRandomly xs
-unGen (AlternG gs) = \s => let (s1, s2) = splitSeed s in
-  shiftRandomly gs s1 >>= flip (assert_total unGen) s2
+unGen (AlternG gs) = shiftRandomly gs >>= map join . traverseSt . map (assert_total unGen)
 
 export
 Functor Gen where
   map f (Uniform xs) = Uniform $ map f xs
   map f (AlternG gs) = AlternG $ assert_total $ map f <$> gs
-  map f (Raw gena)   = Raw $ map f . gena
+  map f (Raw gena)   = Raw $ map f <$> gena
 
 apAsRaw : Gen (a -> b) -> Gen a -> Gen b
-apAsRaw generalF generalA = Raw \s => let (s1, s2) = splitSeed s in
-  unGen generalF s1 <*> unGen generalA s2
+apAsRaw generalF generalA = Raw [| unGen generalF <*> unGen generalA |]
 
 export
 Applicative Gen where
@@ -111,15 +114,13 @@ oneOf = choice
 export
 Monad Gen where
   Uniform gs >>= c = AlternG $ c <$> gs
-  g >>= c = Raw \s =>
-    let (s1, s2) = splitSeed s in
-    unGen g s1 >>= \a => unGen (c a) s2
+  g >>= c = Raw $ unGen g >>= map join . traverseSt . map (unGen . c)
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
 mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
 mapMaybe p (AlternG l) = AlternG $ assert_total $ mapMaybe p <$> l
-mapMaybe p (Raw sf)    = Raw $ mapMaybe p . sf
+mapMaybe p (Raw sf)    = Raw $ mapMaybe p <$> sf
 
 export
 suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `HavingTrue` p
@@ -148,7 +149,7 @@ suchThat_invertedEq g y f = mapMaybe pep g where
 export
 variant : Nat -> Gen a -> Gen a
 variant Z       gen = gen
-variant x@(S _) gen = Raw $ unGen gen . index x . iterate (snd . split)
+variant x@(S _) gen = Raw $ modify (index x . iterate (fst . next)) *> unGen gen
 
 export
 uniform : LzList a -> Gen a
