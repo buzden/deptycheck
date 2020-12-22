@@ -2,6 +2,8 @@
 
 module System.Random.Simple
 
+import Control.Monad.State
+
 import Data.Fin
 
 %default total
@@ -72,6 +74,14 @@ interface Random a where
   -- `Nothing` for infinite or unknown
   cardinality : Maybe Nat
   cardinalityR : (a, a) -> Maybe Nat
+
+export
+randomR' : Random a => RandomGen g => (a, a) -> State g a
+randomR' bounds = ST $ pure . randomR bounds
+
+export
+random' : Random a => RandomGen g => State g a
+random' = ST $ pure . random
 
 --- Random Int ---
 
