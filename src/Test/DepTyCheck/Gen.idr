@@ -61,7 +61,7 @@ export
 choose : Random a => (a, a) -> Gen a
 choose bounds = Raw $ pure <$> randomR' bounds
 
-shiftRandomly : LzList a -> State Seed (LazyList a)
+shiftRandomly : RandomGen g => LzList a -> State g (LazyList a)
 shiftRandomly xs = case @@ xs.length of
   (Z   ** _)   => pure []
   (S _ ** prf) => (\(ls, rs) => toLazyList $ rs ++ ls) <$> splitAt xs <$> rewrite prf in random'
