@@ -142,12 +142,29 @@ Foldable LzList where
     Concat ls rs => foldr f (foldr f n rs) ls
     Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
 
---- Functor-related ---
+--- Functor ---
 
 export
 Functor LzList where
   map f xs = MkLzList _ $ Map f xs
   -- TODO to think about map-fusion.
+
+--- Folding (continued) ---
+
+export
+concatMap : Monoid m => (a -> m) -> LzList a -> m
+concatMap mf lz@(MkLzList {contents=Delay lv, _}) = case lv of
+  Eager xs     => concatMap mf xs
+  Replic n x   => concatMap mf $ Lazy.replicate n x
+  Map f xs     => Lazier.concatMap (mf . f) xs
+  Concat ls rs => Lazier.concatMap mf ls <+> Lazier.concatMap mf rs
+  Cart os is   => Lazier.concatMap mf $ assert_smaller lz $ Lazier.concatMap (\e => map (e, ) is) os
+
+export
+concat : Monoid a => LzList a -> a
+concat = Lazier.concatMap id
+
+--- Applicative-related ---
 
 ||| Produces a list which is a cartesian product of given lists with applied function to each element.
 ||| The resulting length is different with potential `zipWith` function despite the similarly looking signature.
