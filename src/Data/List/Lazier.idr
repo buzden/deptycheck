@@ -122,6 +122,14 @@ index $ MkLzList {contents=Delay lv, _} = ind lv where
 --- Funny implementations of funny interfaces ---
 -------------------------------------------------
 
+--- Monoid ---
+
+Semigroup (LzList a) where
+  (<+>) = (++)
+
+Monoid (LzList a) where
+  neutral = []
+
 --- Folding ---
 
 export
