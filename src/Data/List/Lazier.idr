@@ -130,9 +130,13 @@ export
 Functor LzList where
   map f xs = MkLzList _ $ Map f xs
 
+||| Produces a list which is a cartesian product of given lists with applied function to each element.
+||| The resulting length is different with potential `zipWith` function despite the similarly looking signature.
 export
 cartWith : (f : a -> b -> c) -> LzList a -> LzList b -> LzList c
 cartWith f xs ys = map (uncurry f) $ MkLzList _ $ Cart xs ys
+
+0 cartWith_length_correct : (xs : LzList a) -> (ys : LzList b) -> (f : a -> b -> c) -> (cartWith f xs ys).length = xs.length * ys.length
 
 export
 Applicative LzList where
