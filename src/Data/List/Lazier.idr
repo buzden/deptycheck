@@ -23,6 +23,7 @@ record LzList a where
 export
 data LzVect : Nat -> Type -> Type where
   Eager  : (xs : List a) -> LzVect (length xs) a
+  Replic : (count : Nat) -> a -> LzVect count a
   Map    : (a -> b) -> (xs : LzList a) -> LzVect xs.length b
   Concat : (ls : LzList a) -> (rs : LzList a) -> LzVect (ls.length + rs.length) a
   Cart   : (os : LzList a) -> (is : LzList b) -> LzVect (os.length * is.length) (a, b)
@@ -35,6 +36,7 @@ export
 Foldable LzList where
   foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
     Eager xs     => foldr f n xs
+    Replic c x   => foldr f n $ Lazy.replicate c x
     Map g xs     => foldr (f . g) n xs
     Concat ls rs => foldr f (foldr f n rs) ls
     Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
@@ -56,6 +58,11 @@ export
 xs ++ ys = if null xs then ys else
            if null ys then xs else
              MkLzList _ $ Concat xs ys
+
+export
+replicate : Nat -> a -> LzList a
+replicate Z _ = []
+replicate n x = MkLzList _ $ Replic n x
 
 namespace FinFun
 
@@ -116,6 +123,7 @@ index : (lz : LzList a) -> Fin lz.length -> a
 index $ MkLzList {contents=Delay lv, _} = ind lv where
   ind : forall a. LzVect n a -> Fin n -> a
   ind (Eager xs)     i = index' xs i
+  ind (Replic _ x)   _ = x
   ind (Map f xs)     i = f $ index xs i
   ind (Concat ls rs) i = either (index ls) (index rs) $ splitSumFin i
   ind (Cart os is)   i = bimap (index os) (index is) $ splitProdFin i
@@ -129,6 +137,7 @@ index $ MkLzList {contents=Delay lv, _} = ind lv where
 export
 Functor LzList where
   map f xs = MkLzList _ $ Map f xs
+  -- TODO to think about map-fusion.
 
 ||| Produces a list which is a cartesian product of given lists with applied function to each element.
 ||| The resulting length is different with potential `zipWith` function despite the similarly looking signature.
@@ -164,6 +173,8 @@ uncons $ MkLzList {contents = Delay lv, _} = unc lv where
   unc : forall a. LzVect n a -> Maybe (a, LzList a)
   unc $ Eager []      = Nothing
   unc $ Eager (x::xs) = Just (x, fromList xs)
+  unc $ Replic Z x    = Nothing
+  unc $ Replic (S n) x = Just (x, replicate n x)
   unc $ Map f xs      = bimap f (map f) <$> uncons xs
   unc $ Concat ls rs  = map (map (++ rs)) (uncons ls) <|> uncons rs
   unc $ Cart os is    = [| recart (uncons os) (uncons is) |] where
@@ -176,6 +187,7 @@ export
 splitAt : (lz : LzList a) -> Fin lz.length -> (LzList a, LzList a)
 splitAt (MkLzList {contents=Delay lv, _}) i = case lv of
   Eager xs     => let (l, r) = splitAt (finToNat i) xs in (fromList l, fromList r)
+  Replic n x   => (replicate (finToNat i) x, replicate (n `minus` finToNat i) x)
   Map f xs     => let (l, r) = splitAt xs i in (map f l, map f r)
   Concat ls rs => case splitSumFin i of
                     Left  l => let (ll, rr) = splitAt ls l in (ll, rr ++ rs)
@@ -207,6 +219,7 @@ export
 Traversable LzList where
   traverse f ll@(MkLzList {contents=Delay lv, _}) = case lv of
     Eager xs     => fromList <$> traverse f xs
+    Replic n x   => replicate n <$> f x
     Map g xs     => traverse (f . g) xs
     Concat ls rs => [| traverse f ls ++ traverse f rs |]
     Cart _ _     => foldr (\curr, rest => [| f curr :: rest |]) (pure []) ll
@@ -219,6 +232,8 @@ export
 mapMaybe : (f : a -> Maybe b) -> LzList a -> LzList b
 mapMaybe f ll@(MkLzList {contents=Delay lz, _}) = case lz of
   Eager xs     => fromList $ mapMaybe f xs
+  Replic Z _   => []
+  Replic n x   => maybe [] (replicate n) $ f x
   Map g xs     => mapMaybe (f . g) xs
   Concat ls rs => mapMaybe f ls ++ mapMaybe f rs
   Cart os is   => foldr (fo . f) [] ll where -- This does not preverse the shape in the general case.
