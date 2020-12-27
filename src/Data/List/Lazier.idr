@@ -30,19 +30,6 @@ data LzVect : Nat -> Type -> Type where
 
 %name LzVect lvxs, lvys, lvzs
 
---- Foldable ---
-
-export
-Foldable LzList where
-  foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
-    Eager xs     => foldr f n xs
-    Replic c x   => foldr f n $ Lazy.replicate c x
-    Map g xs     => foldr (f . g) n xs
-    Concat ls rs => foldr f (foldr f n rs) ls
-    Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
-
-  null xs = xs.length == 0
-
 --- Common functions ---
 
 export
@@ -53,10 +40,13 @@ export
 Nil : LzList a
 Nil = fromList []
 
+lzNull : LzList a -> Bool
+lzNull xs = xs.length == 0
+
 export
 (++) : LzList a -> LzList a -> LzList a
-xs ++ ys = if null xs then ys else
-           if null ys then xs else
+xs ++ ys = if lzNull xs then ys else
+           if lzNull ys then xs else
              MkLzList _ $ Concat xs ys
 
 export
@@ -131,6 +121,18 @@ index $ MkLzList {contents=Delay lv, _} = ind lv where
 -------------------------------------------------
 --- Funny implementations of funny interfaces ---
 -------------------------------------------------
+
+--- Folding ---
+
+export
+Foldable LzList where
+  null = lzNull
+  foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
+    Eager xs     => foldr f n xs
+    Replic c x   => foldr f n $ Lazy.replicate c x
+    Map g xs     => foldr (f . g) n xs
+    Concat ls rs => foldr f (foldr f n rs) ls
+    Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
 
 --- Functor-related ---
 
