@@ -30,19 +30,6 @@ data LzVect : Nat -> Type -> Type where
 
 %name LzVect lvxs, lvys, lvzs
 
---- Foldable ---
-
-export
-Foldable LzList where
-  foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
-    Eager xs     => foldr f n xs
-    Replic c x   => foldr f n $ Lazy.replicate c x
-    Map g xs     => foldr (f . g) n xs
-    Concat ls rs => foldr f (foldr f n rs) ls
-    Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
-
-  null xs = xs.length == 0
-
 --- Common functions ---
 
 export
@@ -53,10 +40,13 @@ export
 Nil : LzList a
 Nil = fromList []
 
+lzNull : LzList a -> Bool
+lzNull xs = xs.length == 0
+
 export
 (++) : LzList a -> LzList a -> LzList a
-xs ++ ys = if null xs then ys else
-           if null ys then xs else
+xs ++ ys = if lzNull xs then ys else
+           if lzNull ys then xs else
              MkLzList _ $ Concat xs ys
 
 export
@@ -132,12 +122,49 @@ index $ MkLzList {contents=Delay lv, _} = ind lv where
 --- Funny implementations of funny interfaces ---
 -------------------------------------------------
 
---- Functor-related ---
+--- Monoid ---
+
+Semigroup (LzList a) where
+  (<+>) = (++)
+
+Monoid (LzList a) where
+  neutral = []
+
+--- Folding ---
+
+export
+Foldable LzList where
+  null = lzNull
+  foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
+    Eager xs     => foldr f n xs
+    Replic c x   => foldr f n $ Lazy.replicate c x
+    Map g xs     => foldr (f . g) n xs
+    Concat ls rs => foldr f (foldr f n rs) ls
+    Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
+
+--- Functor ---
 
 export
 Functor LzList where
   map f xs = MkLzList _ $ Map f xs
   -- TODO to think about map-fusion.
+
+--- Folding (continued) ---
+
+export
+concatMap : Monoid m => (a -> m) -> LzList a -> m
+concatMap mf lz@(MkLzList {contents=Delay lv, _}) = case lv of
+  Eager xs     => concatMap mf xs
+  Replic n x   => concatMap mf $ Lazy.replicate n x
+  Map f xs     => Lazier.concatMap (mf . f) xs
+  Concat ls rs => Lazier.concatMap mf ls <+> Lazier.concatMap mf rs
+  Cart os is   => Lazier.concatMap mf $ assert_smaller lz $ Lazier.concatMap (\e => map (e, ) is) os
+
+export
+concat : Monoid a => LzList a -> a
+concat = Lazier.concatMap id
+
+--- Applicative-related ---
 
 ||| Produces a list which is a cartesian product of given lists with applied function to each element.
 ||| The resulting length is different with potential `zipWith` function despite the similarly looking signature.
