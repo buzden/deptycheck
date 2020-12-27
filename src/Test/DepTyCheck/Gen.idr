@@ -107,9 +107,25 @@ Alternative Gen where
   generalL   <|> AlternG rs = AlternG $ [generalL] ++ rs
   generalL   <|> generalR   = AlternG $ [generalL, generalR]
 
+||| Makes the given `Gen` to act as an independent generator according to the `Alternative` combination.
+||| That is, in `independent (independent a <|> independent b)` given `a` and `b` are distributed evenly.
 export
+independent : Gen a -> Gen a
+independent alt@(AlternG xs) = AlternG $ pure $ alt
+independent other = other
+
+||| Choose one of the given generators uniformly.
+|||
+||| All the given generators are treated as independent, i.e. `oneOf [a <|> b, c]` is not the same as `a <|> b <|> c`.
+||| In this example case, generator `a <|> b` and generator `c` will have the same probability in the resulting generator,
+||| i.e., `oneOf [a <|> b, c]` is equivalent to `independent (a <|> b) <|> independent c`.
+|||
+||| If you want generators in the list to be treated non-independent, you can use the `choice` function from prelude.
+|||
+||| The resulting generator is not independent, i.e. `oneOf [a, b, c] <|> oneOf [d, e]` is equivalent to `oneOf [a, b, c, d, e]`.
+public export
 oneOf : List (Gen a) -> Gen a
-oneOf = choice
+oneOf = choiceMap independent
 
 export
 Monad Gen where
