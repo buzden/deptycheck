@@ -184,6 +184,10 @@ Alternative LzList where
   empty = []
   (<|>) = (++)
 
+export
+Monad LzList where
+  (>>=) = flip Lazier.concatMap
+
 --- Cons function for lists syntax ---
 
 export
