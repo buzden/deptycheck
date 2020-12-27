@@ -127,6 +127,29 @@ public export
 oneOf : List (Gen a) -> Gen a
 oneOf = choiceMap independent
 
+||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
+|||
+||| This function treats given generators in the same way as `oneOf` do, but the resulting generator uses generator
+||| from the given list the more frequently, the higher number is has.
+||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
+||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
+|||
+||| The resulting generator is not independent, i.e. `frequency [(n1, g1), (n2, g2)] <|> frequency [(n3, g3), (n4, g4)]` is
+||| equivalent to `frequency [(n1, g1), (n2, g2), (n3, g3), (n4, g4)]`.
+||| Also, `frequency [(n, g), (m, h)] <|> oneOf [u, w]` is equivalent to `frequency [(n, g), (m, h), (1, u), (1, w)]`.
+export
+frequency : List (Nat, Gen a) -> Gen a
+frequency = AlternG . concatMap (\(n, g) => replicate n $ independent g)
+
+||| Choose one of the given generators with probability proportional to the given value, treating all source generators dependently.
+|||
+||| This function is similar to `frequency` but as of it takes internal alternative combinations inside the given generators level up.
+||| That is, unlike the `frequency` function, `frequency' [(n, oneOf [a, b, c]), (m, x)]` is equivalent to
+||| `frequency [(n, a), (n, b), (n, c), (m, x)]`
+export
+frequency' : List (Nat, Gen a) -> Gen a
+frequency' = AlternG . concatMap (uncurry replicate)
+
 export
 Monad Gen where
   Uniform gs >>= c = AlternG $ c <$> gs
