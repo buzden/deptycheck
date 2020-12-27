@@ -124,9 +124,11 @@ index $ MkLzList {contents=Delay lv, _} = ind lv where
 
 --- Monoid ---
 
+public export
 Semigroup (LzList a) where
   (<+>) = (++)
 
+public export
 Monoid (LzList a) where
   neutral = []
 
@@ -179,7 +181,7 @@ Applicative LzList where
   pure x = fromList [x]
   (<*>) = cartWith apply
 
-export
+public export
 Alternative LzList where
   empty = []
   (<|>) = (++)
