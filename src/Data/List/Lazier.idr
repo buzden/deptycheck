@@ -234,6 +234,13 @@ splitAt (MkLzList {contents=Delay lv, _}) i = case lv of
                                           botSq = MkLzList _ $ Cart os ibot
                                       in (topSq ++ middleBef, middleAft ++ botSq)
 
+0 splitAt_length_correct_fst : (lz : LzList a) -> (i : Fin lz.length) -> (fst $ splitAt lz i).length = finToNat i
+
+0 splitAt_length_correct_sum : (lz : LzList a) -> (i : Fin lz.length) -> let (ll, rr) = splitAt lz i in lz.length = ll.length + rr.length
+
+-- Somewhat an extensional equality of `index lz` and `index (ll ++ rr)`.
+--0 splitAt_correct : (lz : LzList a) -> (i, j : Fin lz.length) -> let (ll, rr) = splitAt lz i in index lz j = index (ll ++ rr) j
+
 export
 splitAt' : (lz : LzList a) -> Fin (S lz.length) -> (LzList a, LzList a)
 splitAt' lz i = case strengthen i of
