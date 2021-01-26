@@ -3,11 +3,15 @@ package primitive-imperative-language-example
 authors = "Denis Buzdalov"
 
 modules = Example.Pil.Lang
+        , Example.Pil.Lang.Common
+        , Example.Pil.Lang.Expression
+        , Example.Pil.Lang.Statement
 
         , Example.Pil.ExampleUsages
         , Example.Pil.DemoGen
         , Example.Pil.Gens
-        , Example.Pil.Lang.ShowC
+
+        , Data.List.Lookup
 
 depends = contrib, deptycheck
 
