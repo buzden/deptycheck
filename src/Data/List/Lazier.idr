@@ -136,7 +136,7 @@ Monoid (LzList a) where
 
 export
 Foldable LzList where
-  null = lzNull
+  null = delay . lzNull
   foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
     Eager xs     => foldr f n xs
     Replic c x   => foldr f n $ Lazy.replicate c x
