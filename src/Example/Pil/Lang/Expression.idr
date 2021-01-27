@@ -11,7 +11,7 @@ data Expression : (ctx : Context) -> (res : Type') -> Type where
   -- Constant expression
   C : {ty : Type'} -> (x : idrTypeOf ty) -> Expression ctx ty
   -- Value of the variable
-  V : (n : Name) -> (0 lk : Lookup n ctx) => Expression ctx $ reveal lk
+  V : (n : Name) -> (0 lk : Lookup n ctx) => Expression ctx lk.reveal
   -- Unary operation over the result of another expression
   U : {default "?func" opName : String} -> (f : idrTypeOf a -> idrTypeOf b) -> Expression ctx a -> Expression ctx b
   -- Binary operation over the results of two another expressions

@@ -16,7 +16,7 @@ public export
 data Statement : (pre : Context) -> (post : Context) -> Type where
   nop  : Statement ctx ctx
   (.)  : (ty : Type') -> (n : Name) -> Statement ctx $ (n, ty)::ctx
-  (#=) : (n : Name) -> (0 lk : Lookup n ctx) => (v : Expression ctx $ reveal lk) -> Statement ctx ctx
+  (#=) : (n : Name) -> (0 lk : Lookup n ctx) => (v : Expression ctx lk.reveal) -> Statement ctx ctx
   for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool') ->
          (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body) ->
          Statement outer_ctx outer_ctx

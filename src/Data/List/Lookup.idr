@@ -15,3 +15,7 @@ public export
 reveal : Lookup {b} x xys -> b
 reveal (Here y) = y
 reveal (There subl) = reveal subl
+
+public export
+(.reveal) : Lookup {b} x xys -> b
+(.reveal) = reveal
