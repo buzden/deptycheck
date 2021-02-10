@@ -32,7 +32,7 @@ namespace Types
     decEq String' Bool'   = No \case Refl impossible
     decEq String' Int'    = No \case Refl impossible
 
-namespace Auxiliray
+namespace Auxiliary
 
   --- Auxiliary data definitions and their instances ---
 
