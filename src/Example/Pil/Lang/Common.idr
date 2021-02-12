@@ -70,3 +70,33 @@ namespace Invariant
   Registers n = Vect n $ Maybe Type'
 
   %name Registers regs
+
+  public export
+  AllUndefined : {rc : Nat} -> Registers rc
+  AllUndefined = replicate rc Nothing
+
+  public export
+  data RegisterTyUpdate = NoTypeUpdate | SetTo Type' | SetUndefined
+
+  public export
+  RegisterTyUpdates : Nat -> Type
+  RegisterTyUpdates rc = Vect rc RegisterTyUpdate
+
+  public export
+  NoTyUpdates : {rc : Nat} -> RegisterTyUpdates rc
+  NoTyUpdates = replicate rc NoTypeUpdate
+
+  public export
+  updateRegisterType : Maybe Type' -> RegisterTyUpdate -> Maybe Type'
+  updateRegisterType ty NoTypeUpdate = ty
+  updateRegisterType _  (SetTo nty)  = Just nty
+  updateRegisterType _  SetUndefined = Nothing
+
+  public export
+  withUpdates : Registers rc -> RegisterTyUpdates rc -> Registers rc
+  withUpdates = zipWith updateRegisterType
+
+  export
+  withUpdates_neutral : (regs : Registers rc) -> regs `withUpdates` NoTyUpdates = regs
+  withUpdates_neutral []      = Refl
+  withUpdates_neutral (_::rs) = rewrite withUpdates_neutral rs in Refl
