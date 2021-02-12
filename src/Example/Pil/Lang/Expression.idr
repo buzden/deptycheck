@@ -7,27 +7,34 @@ import Example.Pil.Lang.Common
 %default total
 
 public export
-data Expression : (vars : Variables) -> (res : Type') -> Type where
+data Expression : (vars : Variables) -> (regs : Registers rc) -> (res : Type') -> Type where
   -- Constant expression
-  C : {ty : Type'} -> (x : idrTypeOf ty) -> Expression vars ty
+  C : {ty : Type'} -> (x : idrTypeOf ty) -> Expression vars regs ty
+
   -- Value of the variable
-  V : (n : Name) -> (0 lk : Lookup n vars) => Expression vars lk.reveal
+  V : (n : Name) -> (0 lk : Lookup n vars) => Expression vars regs lk.reveal
+
   -- Unary operation over the result of another expression
-  U : {default "?func" opName : String} -> (f : idrTypeOf a -> idrTypeOf b) -> Expression vars a -> Expression vars b
+  U : {default "?func" opName : String} ->
+      (f : idrTypeOf a -> idrTypeOf b) ->
+      Expression vars regs a -> Expression vars regs b
+
   -- Binary operation over the results of two another expressions
-  B : {default "??" opName : String} -> (f : idrTypeOf a -> idrTypeOf b -> idrTypeOf c) -> Expression vars a -> Expression vars b -> Expression vars c
+  B : {default "??" opName : String} ->
+      (f : idrTypeOf a -> idrTypeOf b -> idrTypeOf c) ->
+      Expression vars regs a -> Expression vars regs b -> Expression vars regs c
 
 namespace ShowC
 
   looksLikeInfixOperator : String -> Bool
   looksLikeInfixOperator =
-    flip elem ["+", "-", "*", "/", "%", "==", "!=", "<", ">", ">=", "<=", "&&", "||", "&", "|", "^", "<<", ">>"]
+    flip Prelude.elem ["+", "-", "*", "/", "%", "==", "!=", "<", ">", ">=", "<=", "&&", "||", "&", "|", "^", "<<", ">>"]
 
   makeFuncName : String -> String
   makeFuncName = pack . map (\k => if isAlphaNum k then k else '_') . unpack
 
   export
-  Show (Expression vars a) where
+  Show (Expression vars regs a) where
     show (C {ty=Bool'}   x) = show x
     show (C {ty=Int'}    x) = show x
     show (C {ty=String'} x) = show x
@@ -37,6 +44,6 @@ namespace ShowC
         then wr l ++ " " ++ opName ++ " " ++ wr r
         else makeFuncName opName ++ "(" ++ show l ++ ", " ++ show r ++ ")"
       where
-      wr : Expression vars x -> String
+      wr : Expression vars regs x -> String
       wr e@(B _ _ _) = "(" ++ show e ++ ")"
       wr e           = show e

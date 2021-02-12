@@ -1,6 +1,6 @@
 module Example.Pil.Lang.Common
 
-import Data.Vect
+import public Data.Vect
 
 import Decidable.Equality
 
