@@ -117,6 +117,12 @@ namespace Invariant
       updSequential _ y            = y
 
       export
+      updSequential_neutral_l : (u : RegisterTyUpdate) -> NoTypeUpdate `updSequential` u = u
+      updSequential_neutral_l NoTypeUpdate = Refl
+      updSequential_neutral_l (SetTo _)    = Refl
+      updSequential_neutral_l SetUndefined = Refl
+
+      export
       updSequential_neutral_r : (u : RegisterTyUpdate) -> u `updSequential` NoTypeUpdate = u
       updSequential_neutral_r u = Refl
 
@@ -131,6 +137,12 @@ namespace Invariant
       public export
       updsSequential : RegisterTyUpdates rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
       updsSequential = zipWith updSequential
+
+      export
+      updsSequential_neutral_l : (upd : RegisterTyUpdates rc) -> updsSequential NoTyUpdates upd = upd
+
+      export
+      updsSequential_neutral_r : (upd : RegisterTyUpdates rc) -> updsSequential upd NoTyUpdates = upd
 
       --- Merge of independent updates ---
 
@@ -163,3 +175,11 @@ namespace Invariant
       public export
       threeWayMergeUpds : Registers rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
       threeWayMergeUpds = zipWith3 threeWayMergeUpd
+
+      --- Mark updates as setting undefined ---
+
+      public export
+      undefUpds : Registers rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
+
+      export
+      undefUpds_as_3wayMerge : (reg : _) -> (upd : _) -> undefUpds reg upd = threeWayMergeUpds reg upd NoTyUpdates

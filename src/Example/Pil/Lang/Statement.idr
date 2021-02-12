@@ -24,38 +24,55 @@ stmt.regsAfter = preR `withUpdates` updR
 
 public export
 data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (updR : RegisterTyUpdates rc) -> Type where
-  nop  : Statement vars vars
-  (.)  : (ty : Type') -> (n : Name) -> Statement vars $ (n, ty)::vars
-  (#=) : (n : Name) -> (0 lk : Lookup n vars) => (v : Expression vars lk.reveal) -> Statement vars vars
-  for  : (init : Statement outer_vars inside_for)  -> (cond : Expression inside_for Bool') ->
-         (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body) ->
-         Statement outer_vars outer_vars
-  if__ : (cond : Expression vars Bool') -> Statement vars vars_then -> Statement vars vars_else -> Statement vars vars
-  (*>) : Statement pre mid -> Statement mid post -> Statement pre post
-  block : Statement outer inside -> Statement outer outer
-  print : Show (idrTypeOf ty) => Expression vars ty -> Statement vars vars
+  nop  : Statement vars regs vars NoTyUpdates
+
+  (.)  : (ty : Type') -> (n : Name) -> Statement vars regs ((n, ty)::vars) NoTyUpdates
+
+  (#=) : (n : Name) -> (0 lk : Lookup n vars) => (v : Expression vars regs lk.reveal) -> Statement vars regs vars NoTyUpdates
+
+  for  : (init : Statement preV preR insideV insideUpdR) ->
+         (cond : Expression init.varsAfter init.regsAfter Bool') ->
+         (upd  : Statement init.varsAfter init.regsAfter init.varsAfter NoTyUpdates) ->
+         (body : Statement init.varsAfter init.regsAfter postBodyV NoTyUpdates) ->
+         Statement preV preR preV insideUpdR
+         -- Registers that are changed in `upd` or `body` must be unavailable in `cond`, `upd`, `body` and `for` itself
+         -- in the case when we allow `upd` and `body` to change register types.
+
+  if__ : (cond : Expression vars regs Bool') ->
+         Statement vars regs varsThen regUpdThen ->
+         Statement vars regs varsElse regUpdElse ->
+         Statement vars regs vars $ threeWayMergeUpds regs regUpdThen regUpdElse
+
+  (*>) : (l : Statement preV preR midV updR1) ->
+         (r : Statement l.varsAfter l.regsAfter postV updR2) ->
+         Statement preV preR postV $ updsSequential updR1 updR2
+
+  block : Statement preV preR insideV updR -> Statement preV preR preV updR
+
+  print : Show (idrTypeOf ty) => Expression vars regs ty -> Statement vars regs vars NoTyUpdates
 
 public export %inline
-(>>=) : Statement pre mid -> (Unit -> Statement mid post) -> Statement pre post
+(>>=) : (l : Statement preV preR midV updR1) -> (Unit -> Statement l.varsAfter l.regsAfter postV updR2) -> Statement preV preR postV $ updsSequential updR1 updR2
 a >>= f = a *> f ()
 
 public export %inline
-if_  : (cond : Expression vars Bool') -> Statement vars vars_then -> Statement vars vars
-if_ c t = if__ c t nop
+if_  : (cond : Expression vars regs Bool') -> Statement vars regs varsThen updThen -> Statement vars regs vars $ undefUpds regs updThen
+if_ c t = rewrite undefUpds_as_3wayMerge regs updThen in if__ c t nop
 
 public export %inline
-while : Expression vars Bool' -> Statement vars after_body -> Statement vars vars
-while cond = for nop cond nop
+while : Expression vars regs Bool' -> Statement vars regs after_body NoTyUpdates -> Statement vars regs vars NoTyUpdates
+while cond body = for nop (rewrite withUpdates_neutral regs in cond) nop (rewrite withUpdates_neutral regs in body)
 
 -- Define with derived type and assign immediately
 public export %inline
-(?#=) : (n : Name) -> {ty : Type'} -> Expression ((n, ty)::vars) ty -> Statement vars $ (n, ty)::vars
-n ?#= v = ty. n *> n #= v
+(?#=) : (n : Name) -> {ty : Type'} -> {0 regs : Registers rc} -> Expression ((n, ty)::vars) regs ty -> Statement vars regs ((n, ty)::vars) NoTyUpdates
+n ?#= v = rewrite sym $ updsSequential_neutral_l {rc} NoTyUpdates in
+          ty. n *> (rewrite withUpdates_neutral regs in n #= v)
 
 namespace AlternativeDefineAndAssign
 
   public export %inline
-  (#=) : (p : (Name, Type')) -> Expression (p::vars) (snd p) -> Statement vars $ p::vars
+  (#=) : (p : (Name, Type')) -> Expression (p::vars) regs (snd p) -> Statement vars regs (p::vars) NoTyUpdates
   (n, _) #= v = n ?#= v
 
   public export %inline
@@ -70,7 +87,7 @@ namespace ShowC
     show Int'    = "int"
     show String' = "char *"
 
-  isNopDeeply : Statement pre post -> Bool
+  isNopDeeply : Statement pre regs post upd -> Bool
   isNopDeeply Statement.nop = True
   isNopDeeply (x *> y)      = isNopDeeply x && isNopDeeply y
   isNopDeeply _             = False
@@ -79,7 +96,7 @@ namespace ShowC
   n : Nat -> Nat
   n = (+ 2)
 
-  showInd : (indent : Nat) -> Statement pre post -> String
+  showInd : (indent : Nat) -> Statement pre regs post upd -> String
   showInd i Statement.nop = ""
   showInd i (ty . n) = indent i $ show ty ++ " " ++ show n ++ ";"
   showInd i (Statement.(#=) n v) = indent i $ show n ++ " = " ++ show v ++ ";"
@@ -112,5 +129,5 @@ namespace ShowC
   showInd i (print x) = indent i $ "puts(" ++ show x ++ ");"
 
   export
-  Show (Statement pre post) where
+  Show (Statement pre regs post upd) where
     show = showInd 0
