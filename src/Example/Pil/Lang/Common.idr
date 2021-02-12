@@ -109,6 +109,29 @@ namespace Invariant
       withUpdates_neutral []      = Refl
       withUpdates_neutral (_::rs) = rewrite withUpdates_neutral rs in Refl
 
+      --- Merge of sequential updates ---
+
+      public export
+      updSequential : RegisterTyUpdate -> RegisterTyUpdate -> RegisterTyUpdate
+      updSequential x NoTypeUpdate = x
+      updSequential _ y            = y
+
+      export
+      updSequential_neutral_r : (u : RegisterTyUpdate) -> u `updSequential` NoTypeUpdate = u
+      updSequential_neutral_r u = Refl
+
+      export
+      updSequential_undef_absorbs_r : (u : RegisterTyUpdate) -> u `updSequential` SetUndefined = SetUndefined
+      updSequential_undef_absorbs_r u = Refl
+
+      export
+      updSequential_set_absorbs_r : (u : RegisterTyUpdate) -> u `updSequential` (SetTo x) = SetTo x
+      updSequential_set_absorbs_r u = Refl
+
+      public export
+      updsSequential : RegisterTyUpdates rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
+      updsSequential = zipWith updSequential
+
       --- Merge of independent updates ---
 
       public export
