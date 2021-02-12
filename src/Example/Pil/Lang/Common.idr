@@ -59,44 +59,50 @@ namespace Invariant
 
   --- Static context in terms of which we are formulating an invariant ---
 
-  public export
-  Variables : Type
-  Variables = List (Name, Type')
+  namespace Variable
 
-  %name Variables vars
+    public export
+    Variables : Type
+    Variables = List (Name, Type')
 
-  public export
-  Registers : Nat -> Type
-  Registers n = Vect n $ Maybe Type'
+    %name Variables vars
 
-  %name Registers regs
+  namespace Register
 
-  public export
-  AllUndefined : {rc : Nat} -> Registers rc
-  AllUndefined = replicate rc Nothing
+    public export
+    Registers : Nat -> Type
+    Registers n = Vect n $ Maybe Type'
 
-  public export
-  data RegisterTyUpdate = NoTypeUpdate | SetTo Type' | SetUndefined
+    %name Registers regs
 
-  public export
-  RegisterTyUpdates : Nat -> Type
-  RegisterTyUpdates rc = Vect rc RegisterTyUpdate
+    public export
+    AllUndefined : {rc : Nat} -> Registers rc
+    AllUndefined = replicate rc Nothing
 
-  public export
-  NoTyUpdates : {rc : Nat} -> RegisterTyUpdates rc
-  NoTyUpdates = replicate rc NoTypeUpdate
+    namespace Updates
 
-  public export
-  updateRegisterType : Maybe Type' -> RegisterTyUpdate -> Maybe Type'
-  updateRegisterType ty NoTypeUpdate = ty
-  updateRegisterType _  (SetTo nty)  = Just nty
-  updateRegisterType _  SetUndefined = Nothing
+      public export
+      data RegisterTyUpdate = NoTypeUpdate | SetTo Type' | SetUndefined
 
-  public export
-  withUpdates : Registers rc -> RegisterTyUpdates rc -> Registers rc
-  withUpdates = zipWith updateRegisterType
+      public export
+      RegisterTyUpdates : Nat -> Type
+      RegisterTyUpdates rc = Vect rc RegisterTyUpdate
 
-  export
-  withUpdates_neutral : (regs : Registers rc) -> regs `withUpdates` NoTyUpdates = regs
-  withUpdates_neutral []      = Refl
-  withUpdates_neutral (_::rs) = rewrite withUpdates_neutral rs in Refl
+      public export
+      NoTyUpdates : {rc : Nat} -> RegisterTyUpdates rc
+      NoTyUpdates = replicate rc NoTypeUpdate
+
+      public export
+      updateRegisterType : Maybe Type' -> RegisterTyUpdate -> Maybe Type'
+      updateRegisterType ty NoTypeUpdate = ty
+      updateRegisterType _  (SetTo nty)  = Just nty
+      updateRegisterType _  SetUndefined = Nothing
+
+      public export
+      withUpdates : Registers rc -> RegisterTyUpdates rc -> Registers rc
+      withUpdates = zipWith updateRegisterType
+
+      export
+      withUpdates_neutral : (regs : Registers rc) -> regs `withUpdates` NoTyUpdates = regs
+      withUpdates_neutral []      = Refl
+      withUpdates_neutral (_::rs) = rewrite withUpdates_neutral rs in Refl
