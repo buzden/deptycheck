@@ -27,52 +27,52 @@ asp rl lr = do (n ** i) <- rl
 
 --- Common ---
 
-lookupGen : (ctx : Context) -> Gen (n : Name ** Lookup n ctx)
-lookupGen ctx = uniform $ fromList $ mapLk ctx where
-  mapLk : (ctx : Context) -> List (n ** Lookup n ctx)
+lookupGen : (vars : Variables) -> Gen (n : Name ** Lookup n vars)
+lookupGen vars = uniform $ fromList $ mapLk vars where
+  mapLk : (vars : Variables) -> List (n ** Lookup n vars)
   mapLk []            = []
   mapLk ((n, ty)::xs) = (n ** Here ty) :: map (\(n ** lk) => (n ** There lk)) (mapLk xs)
 
 --- Expressions ---
 
 export
-varExprGen : {a : Type'} -> {ctx : Context} -> Gen $ Expression ctx a
-varExprGen = do Element (n ** _) prf <- lookupGen ctx `suchThat_invertedEq` a $ \(_ ** lk) => reveal lk
+varExprGen : {a : Type'} -> {vars : Variables} -> Gen $ Expression vars a
+varExprGen = do Element (n ** _) prf <- lookupGen vars `suchThat_invertedEq` a $ \(_ ** lk) => reveal lk
                 pure rewrite prf in V n
 
 ||| Generator of non-recursive expressions (thus those that can be used with zero recursion bound).
-nonRec_exprGen : {a : Type'} -> {ctx : Context} -> Gen (idrTypeOf a) -> Gen $ Expression ctx a
+nonRec_exprGen : {a : Type'} -> {vars : Variables} -> Gen (idrTypeOf a) -> Gen $ Expression vars a
 nonRec_exprGen g = [| C g |] <|> varExprGen
 
 export
 exprGen : (szBound : Nat) ->
           {a : Type'} ->
           ({b : Type'} -> Gen $ idrTypeOf b) ->
-          {ctx : Context} ->
-          ((subGen : {x : Type'} -> Gen $ Expression ctx x) -> {b : Type'} -> Gen $ Expression ctx b) ->
-          Gen (Expression ctx a)
+          {vars : Variables} ->
+          ((subGen : {x : Type'} -> Gen $ Expression vars x) -> {b : Type'} -> Gen $ Expression vars b) ->
+          Gen (Expression vars a)
 exprGen Z     g _   = nonRec_exprGen g
 exprGen (S n) g rec = nonRec_exprGen g <|> rec (exprGen n g rec)
 
 --- Statements ---
 
 ||| Statements generator of those that do not change the context and those that are not recursive.
-noCtxChange_noRec_stmtGen : (ctx : Context) ->
-                            (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
-                            Gen (Statement ctx ctx)
-noCtxChange_noRec_stmtGen ctx = oneOf
+noCtxChange_noRec_stmtGen : (vars : Variables) ->
+                            (genExpr : {a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
+                            Gen (Statement vars vars)
+noCtxChange_noRec_stmtGen vars = oneOf
   [ pure nop
-  , do (n ** _ ** e) <- asp (lookupGen ctx) genExpr
+  , do (n ** _ ** e) <- asp (lookupGen vars) genExpr
        pure $ n #= e
   , do pure $ print !(genExpr {a=String'})
   ]
 
 ||| Statements generator of those that can change the context and those that are not recursive.
-ctxChanging_noRec_stmtGen : (pre : Context) ->
+varsChanging_noRec_stmtGen : (pre : Variables) ->
                             (genTy : Gen Type') =>
                             (genName : Gen Name) =>
                             Gen (post ** Statement pre post)
-ctxChanging_noRec_stmtGen pre = do
+varsChanging_noRec_stmtGen pre = do
   ty <- genTy
   n <- genName
   pure ((n, ty)::pre ** ty. n)
@@ -82,30 +82,30 @@ mutual
   ||| Statements generator of those statements that can't change the context.
   export
   noCtxChange_stmtGen : (bound : Nat) ->
-                        (ctx : Context) ->
+                        (vars : Variables) ->
                         Gen Type' =>
                         Gen Name =>
-                        (genExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
-                        Gen (Statement ctx ctx)
-  noCtxChange_stmtGen Z     ctx = noCtxChange_noRec_stmtGen ctx
-  noCtxChange_stmtGen (S n) ctx = noCtxChange_noRec_stmtGen ctx <|> oneOf
-    [ do (inside_for ** init) <- stmtGen n ctx
+                        (genExpr : {a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
+                        Gen (Statement vars vars)
+  noCtxChange_stmtGen Z     vars = noCtxChange_noRec_stmtGen vars
+  noCtxChange_stmtGen (S n) vars = noCtxChange_noRec_stmtGen vars <|> oneOf
+    [ do (inside_for ** init) <- stmtGen n vars
          (_ ** body) <- stmtGen n inside_for
          pure $ for init !genExpr !(noCtxChange_stmtGen n inside_for) body
-    , pure $ if__ !genExpr (snd !(stmtGen n ctx)) (snd !(stmtGen n ctx))
-    , [| noCtxChange_stmtGen n ctx *> noCtxChange_stmtGen n ctx |]
-    , (\st => block $ snd st) <$> stmtGen n ctx
+    , pure $ if__ !genExpr (snd !(stmtGen n vars)) (snd !(stmtGen n vars))
+    , [| noCtxChange_stmtGen n vars *> noCtxChange_stmtGen n vars |]
+    , (\st => block $ snd st) <$> stmtGen n vars
     ]
 
   export
   stmtGen : (bound : Nat) ->
-            (pre : Context) ->
+            (pre : Variables) ->
             (genTy : Gen Type') =>
             (genName : Gen Name) =>
-            ({a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)) =>
+            ({a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
             Gen (post ** Statement pre post)
-  stmtGen Z     pre = ctxChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noCtxChange_stmtGen Z pre
-  stmtGen (S n) pre = ctxChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noCtxChange_stmtGen n pre
+  stmtGen Z     pre = varsChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noCtxChange_stmtGen Z pre
+  stmtGen (S n) pre = varsChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noCtxChange_stmtGen n pre
     <|> do (mid ** l) <- stmtGen n pre
            (post ** r) <- stmtGen n mid
            pure (post ** l *> r)

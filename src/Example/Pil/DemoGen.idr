@@ -31,7 +31,7 @@ simpleValue {a=Int'}    = choose (-100, 100)
 simpleValue {a=String'} = alphaString
 simpleValue {a=Bool'}   = chooseAny
 
-recExpr : ({x : Type'} -> Gen $ Expression ctx x) -> {a : Type'} -> Gen $ Expression ctx a
+recExpr : ({x : Type'} -> Gen $ Expression vars x) -> {a : Type'} -> Gen $ Expression vars a
 recExpr sub {a=Int'}    = oneOf [ U (+1) {opName="inc"} <$> sub {x=Int'}
                                 , B (+) {opName="+"} <$> sub {x=Int'} <*> sub {x=Int'}
                                 , B (*) {opName="*"} <$> sub {x=Int'} <*> sub {x=Int'}
@@ -47,7 +47,7 @@ recExpr sub {a=Bool'}   = oneOf [ U not {opName="!"} <$> sub {x=Bool'}
                                 ]
 
 %hint
-interestingExpr : {a : Type'} -> {ctx : Context} -> Gen (Expression ctx a)
+interestingExpr : {a : Type'} -> {vars : Variables} -> Gen (Expression vars a)
 interestingExpr = exprGen 3 simpleValue recExpr
 
 export

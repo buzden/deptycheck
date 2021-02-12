@@ -58,7 +58,7 @@ namespace Invariant
   --- Static context in terms of which we are formulating an invariant ---
 
   public export
-  Context : Type
-  Context = List (Name, Type')
+  Variables : Type
+  Variables = List (Name, Type')
 
-  %name Context ctx
+  %name Variables vars

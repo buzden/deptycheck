@@ -7,15 +7,15 @@ import Example.Pil.Lang.Common
 %default total
 
 public export
-data Expression : (ctx : Context) -> (res : Type') -> Type where
+data Expression : (vars : Variables) -> (res : Type') -> Type where
   -- Constant expression
-  C : {ty : Type'} -> (x : idrTypeOf ty) -> Expression ctx ty
+  C : {ty : Type'} -> (x : idrTypeOf ty) -> Expression vars ty
   -- Value of the variable
-  V : (n : Name) -> (0 lk : Lookup n ctx) => Expression ctx lk.reveal
+  V : (n : Name) -> (0 lk : Lookup n vars) => Expression vars lk.reveal
   -- Unary operation over the result of another expression
-  U : {default "?func" opName : String} -> (f : idrTypeOf a -> idrTypeOf b) -> Expression ctx a -> Expression ctx b
+  U : {default "?func" opName : String} -> (f : idrTypeOf a -> idrTypeOf b) -> Expression vars a -> Expression vars b
   -- Binary operation over the results of two another expressions
-  B : {default "??" opName : String} -> (f : idrTypeOf a -> idrTypeOf b -> idrTypeOf c) -> Expression ctx a -> Expression ctx b -> Expression ctx c
+  B : {default "??" opName : String} -> (f : idrTypeOf a -> idrTypeOf b -> idrTypeOf c) -> Expression vars a -> Expression vars b -> Expression vars c
 
 namespace ShowC
 
@@ -27,7 +27,7 @@ namespace ShowC
   makeFuncName = pack . map (\k => if isAlphaNum k then k else '_') . unpack
 
   export
-  Show (Expression ctx a) where
+  Show (Expression vars a) where
     show (C {ty=Bool'}   x) = show x
     show (C {ty=Int'}    x) = show x
     show (C {ty=String'} x) = show x
@@ -37,6 +37,6 @@ namespace ShowC
         then wr l ++ " " ++ opName ++ " " ++ wr r
         else makeFuncName opName ++ "(" ++ show l ++ ", " ++ show r ++ ")"
       where
-      wr : Expression ctx x -> String
+      wr : Expression vars x -> String
       wr e@(B _ _ _) = "(" ++ show e ++ ")"
       wr e           = show e

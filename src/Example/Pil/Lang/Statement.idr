@@ -13,39 +13,39 @@ infix 2 #=, ?#=
 infixr 1 *>
 
 public export
-data Statement : (pre : Context) -> (post : Context) -> Type where
-  nop  : Statement ctx ctx
-  (.)  : (ty : Type') -> (n : Name) -> Statement ctx $ (n, ty)::ctx
-  (#=) : (n : Name) -> (0 lk : Lookup n ctx) => (v : Expression ctx lk.reveal) -> Statement ctx ctx
-  for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool') ->
+data Statement : (pre : Variables) -> (post : Variables) -> Type where
+  nop  : Statement vars vars
+  (.)  : (ty : Type') -> (n : Name) -> Statement vars $ (n, ty)::vars
+  (#=) : (n : Name) -> (0 lk : Lookup n vars) => (v : Expression vars lk.reveal) -> Statement vars vars
+  for  : (init : Statement outer_vars inside_for)  -> (cond : Expression inside_for Bool') ->
          (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body) ->
-         Statement outer_ctx outer_ctx
-  if__ : (cond : Expression ctx Bool') -> Statement ctx ctx_then -> Statement ctx ctx_else -> Statement ctx ctx
+         Statement outer_vars outer_vars
+  if__ : (cond : Expression vars Bool') -> Statement vars vars_then -> Statement vars vars_else -> Statement vars vars
   (*>) : Statement pre mid -> Statement mid post -> Statement pre post
   block : Statement outer inside -> Statement outer outer
-  print : Show (idrTypeOf ty) => Expression ctx ty -> Statement ctx ctx
+  print : Show (idrTypeOf ty) => Expression vars ty -> Statement vars vars
 
 public export %inline
 (>>=) : Statement pre mid -> (Unit -> Statement mid post) -> Statement pre post
 a >>= f = a *> f ()
 
 public export %inline
-if_  : (cond : Expression ctx Bool') -> Statement ctx ctx_then -> Statement ctx ctx
+if_  : (cond : Expression vars Bool') -> Statement vars vars_then -> Statement vars vars
 if_ c t = if__ c t nop
 
 public export %inline
-while : Expression ctx Bool' -> Statement ctx after_body -> Statement ctx ctx
+while : Expression vars Bool' -> Statement vars after_body -> Statement vars vars
 while cond = for nop cond nop
 
 -- Define with derived type and assign immediately
 public export %inline
-(?#=) : (n : Name) -> {ty : Type'} -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
+(?#=) : (n : Name) -> {ty : Type'} -> Expression ((n, ty)::vars) ty -> Statement vars $ (n, ty)::vars
 n ?#= v = ty. n *> n #= v
 
 namespace AlternativeDefineAndAssign
 
   public export %inline
-  (#=) : (p : (Name, Type')) -> Expression (p::ctx) (snd p) -> Statement ctx $ p::ctx
+  (#=) : (p : (Name, Type')) -> Expression (p::vars) (snd p) -> Statement vars $ p::vars
   (n, _) #= v = n ?#= v
 
   public export %inline
