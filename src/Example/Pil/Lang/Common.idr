@@ -112,29 +112,31 @@ namespace Invariant
       --- Merge of independent updates ---
 
       public export
-      theOnly : Type' -> Type' -> Maybe Type'
-      theOnly x y = case decEq x y of
-        Yes p => Just x
-        No up => Nothing
+      noUpdateWhenSame : Maybe Type' -> Type' -> RegisterTyUpdate
+      noUpdateWhenSame Nothing  _ = SetUndefined
+      noUpdateWhenSame (Just x) y = case decEq x y of
+                                      Yes p => NoTypeUpdate
+                                      No up => SetUndefined
 
       public export
-      whenSame : Maybe Type' -> Type' -> Maybe Type'
-      whenSame (Just x) y = theOnly x y
-      whenSame Nothing  _ = Nothing
-
-      public export
-      threeWayMergeUpd : Maybe Type' -> RegisterTyUpdate -> RegisterTyUpdate -> Maybe Type'
-      threeWayMergeUpd ty SetUndefined _            = Nothing
-      threeWayMergeUpd ty NoTypeUpdate NoTypeUpdate = ty
-      threeWayMergeUpd ty NoTypeUpdate SetUndefined = Nothing
-      threeWayMergeUpd ty NoTypeUpdate (SetTo y)    = whenSame ty y
-      threeWayMergeUpd ty (SetTo x)    NoTypeUpdate = whenSame ty x
-      threeWayMergeUpd ty (SetTo _)    SetUndefined = Nothing
-      threeWayMergeUpd ty (SetTo x)    (SetTo y)    = theOnly x y
+      threeWayMergeUpd : Maybe Type' -> RegisterTyUpdate -> RegisterTyUpdate -> RegisterTyUpdate
+      threeWayMergeUpd _  SetUndefined _            = SetUndefined
+      threeWayMergeUpd _  NoTypeUpdate SetUndefined = SetUndefined
+      threeWayMergeUpd _  NoTypeUpdate NoTypeUpdate = NoTypeUpdate
+      threeWayMergeUpd ty NoTypeUpdate (SetTo y)    = noUpdateWhenSame ty y
+      threeWayMergeUpd ty (SetTo x)    NoTypeUpdate = noUpdateWhenSame ty x
+      threeWayMergeUpd _  (SetTo _)    SetUndefined = SetUndefined
+      threeWayMergeUpd _  (SetTo x)    (SetTo y)    = case decEq x y of
+                                                        Yes p => SetTo x
+                                                        No up => SetUndefined
 
       export
       threeWayMergeUpd_commutative : (ty : Maybe Type') -> (u1, u2 : RegisterTyUpdate) -> threeWayMergeUpd ty u1 u2 = threeWayMergeUpd ty u2 u1
 
+      export
+      threeWayMergeUpd_associative : (ty : Maybe Type') -> (u1, u2, u3 : RegisterTyUpdate) ->
+                                     let op = threeWayMergeUpd ty in (u1 `op` u2) `op` u3 = u1 `op` (u2 `op` u3)
+
       public export
-      threeWayMergeUpds : Registers rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc -> Registers rc
+      threeWayMergeUpds : Registers rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
       threeWayMergeUpds = zipWith3 threeWayMergeUpd
