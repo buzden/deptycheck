@@ -1,5 +1,7 @@
 module Example.Pil.Lang.Common
 
+import Data.Vect
+
 import Decidable.Equality
 
 %default total
@@ -62,3 +64,9 @@ namespace Invariant
   Variables = List (Name, Type')
 
   %name Variables vars
+
+  public export
+  Registers : Nat -> Type
+  Registers n = Vect n $ Maybe Type'
+
+  %name Registers regs
