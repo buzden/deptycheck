@@ -12,8 +12,18 @@ import Example.Pil.Lang.Expression
 infix 2 #=, ?#=
 infixr 1 *>
 
+data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (updR : RegisterTyUpdates rc) -> Type
+
+public export %inline
+0 (.varsAfter) : Statement preV preR postV updR -> Variables
+stmt.varsAfter = postV
+
+public export %inline
+0 (.regsAfter) : {0 preR : Registers rc} -> Statement preV preR postV updR -> Registers rc
+stmt.regsAfter = preR `withUpdates` updR
+
 public export
-data Statement : (pre : Variables) -> (post : Variables) -> Type where
+data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (updR : RegisterTyUpdates rc) -> Type where
   nop  : Statement vars vars
   (.)  : (ty : Type') -> (n : Name) -> Statement vars $ (n, ty)::vars
   (#=) : (n : Name) -> (0 lk : Lookup n vars) => (v : Expression vars lk.reveal) -> Statement vars vars
