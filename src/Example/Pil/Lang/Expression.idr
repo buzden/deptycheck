@@ -1,6 +1,7 @@
 module Example.Pil.Lang.Expression
 
 import Data.List.Lookup
+import Data.Maybe
 
 import Example.Pil.Lang.Common
 
@@ -13,6 +14,9 @@ data Expression : (vars : Variables) -> (regs : Registers rc) -> (res : Type') -
 
   -- Value of the variable
   V : (n : Name) -> (0 lk : Lookup n vars) => Expression vars regs lk.reveal
+
+  -- Value of the register
+  R : (r : Fin rc) -> (0 _ : IsJust $ index r regs) => Expression vars regs $ fromJust $ index r regs
 
   -- Unary operation over the result of another expression
   U : {default "?func" opName : String} ->
@@ -39,6 +43,7 @@ namespace ShowC
     show (C {ty=Int'}    x) = show x
     show (C {ty=String'} x) = show x
     show (V n)              = show n
+    show (R r)              = "[[" ++ show (finToNat r) ++ "]]"
     show (U {opName} _ e)   = opName ++ "(" ++ show e ++ ")"
     show (B {opName} _ l r) = if looksLikeInfixOperator opName
         then wr l ++ " " ++ opName ++ " " ++ wr r
