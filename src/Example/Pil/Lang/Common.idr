@@ -92,6 +92,8 @@ namespace Invariant
       NoTyUpdates : {rc : Nat} -> RegisterTyUpdates rc
       NoTyUpdates = replicate rc NoTypeUpdate
 
+      --- Update of a state with updates ---
+
       public export
       updateRegisterType : Maybe Type' -> RegisterTyUpdate -> Maybe Type'
       updateRegisterType ty NoTypeUpdate = ty
@@ -106,3 +108,33 @@ namespace Invariant
       withUpdates_neutral : (regs : Registers rc) -> regs `withUpdates` NoTyUpdates = regs
       withUpdates_neutral []      = Refl
       withUpdates_neutral (_::rs) = rewrite withUpdates_neutral rs in Refl
+
+      --- Merge of independent updates ---
+
+      public export
+      theOnly : Type' -> Type' -> Maybe Type'
+      theOnly x y = case decEq x y of
+        Yes p => Just x
+        No up => Nothing
+
+      public export
+      whenSame : Maybe Type' -> Type' -> Maybe Type'
+      whenSame (Just x) y = theOnly x y
+      whenSame Nothing  _ = Nothing
+
+      public export
+      threeWayMergeUpd : Maybe Type' -> RegisterTyUpdate -> RegisterTyUpdate -> Maybe Type'
+      threeWayMergeUpd ty SetUndefined _            = Nothing
+      threeWayMergeUpd ty NoTypeUpdate NoTypeUpdate = ty
+      threeWayMergeUpd ty NoTypeUpdate SetUndefined = Nothing
+      threeWayMergeUpd ty NoTypeUpdate (SetTo y)    = whenSame ty y
+      threeWayMergeUpd ty (SetTo x)    NoTypeUpdate = whenSame ty x
+      threeWayMergeUpd ty (SetTo _)    SetUndefined = Nothing
+      threeWayMergeUpd ty (SetTo x)    (SetTo y)    = theOnly x y
+
+      export
+      threeWayMergeUpd_commutative : (ty : Maybe Type') -> (u1, u2 : RegisterTyUpdate) -> threeWayMergeUpd ty u1 u2 = threeWayMergeUpd ty u2 u1
+
+      public export
+      threeWayMergeUpds : Registers rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc -> Registers rc
+      threeWayMergeUpds = zipWith3 threeWayMergeUpd
