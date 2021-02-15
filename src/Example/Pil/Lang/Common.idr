@@ -103,24 +103,24 @@ namespace Invariant
     data (=%=) : Registers rc -> Registers rc -> Type where
       EquivByIndex : ((i : Fin rc) -> index i l = index i r) -> l =%= r
 
-    export
+    export %hint
     index_equiv_refl : {0 x : Registers rc} -> x =%= x
     index_equiv_refl = EquivByIndex {rc} \_ => Refl
 
-    export
+    export %hint
     index_equiv_sym : {0 x, y : Registers rc} -> x =%= y -> y =%= x
     index_equiv_sym (EquivByIndex xy) = EquivByIndex \i => sym $ xy i
 
-    export
+    export %hint
     index_equiv_trans : {x, y, z : _} -> x =%= y -> y =%= z -> x =%= z
 
     --- Equivalence properties of `Merge` ---
 
-    export
+    export %hint
     merge_commutative : {l, r : _} -> Merge l r =%= Merge r l
 
-    export
+    export %hint
     merge_associative : {a, b, c : _} -> (a `Merge` b) `Merge` c =%= a `Merge` (b `Merge` c)
 
-    export
+    export %hint
     merge_refl : {x : _} -> Merge x x =%= x

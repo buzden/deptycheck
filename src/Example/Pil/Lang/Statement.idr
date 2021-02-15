@@ -32,8 +32,10 @@ data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variabl
 
   for  : (init : Statement preV preR insideV insideR) ->
          (cond : Expression insideV insideR Bool') ->
-         (upd  : Statement insideV insideR insideV insideR) ->
-         (body : Statement insideV insideR postBodyV insideR) ->
+         (upd  : Statement insideV insideR insideV updR) ->
+         (0 _ : updR =%= insideR) =>
+         (body : Statement insideV insideR postBodyV bodyR) ->
+         (0 _ : bodyR =%= insideR) =>
          Statement preV preR preV insideUpdR
          -- Registers that are changed in `upd` or `body` must be unavailable in `cond`, `upd`, `body` and `for` itself
          -- in the case when we allow `upd` and `body` to change register types.
@@ -60,7 +62,7 @@ if_  : (cond : Expression vars regsBefore Bool') -> Statement vars regsBefore va
 if_ c t = if__ c t nop
 
 public export %inline
-while : Expression vars regs Bool' -> Statement vars regs after_body regs -> Statement vars regs vars regs
+while : Expression vars regs Bool' -> Statement vars regs after_body body_regs -> (0 _ : body_regs =%= regs) => Statement vars regs vars regs
 while cond body = for nop cond nop body
 
 -- Define with derived type and assign immediately
