@@ -94,5 +94,33 @@ namespace Invariant
     index i $ Base xs     = Vect.index i xs
     index i $ Merge r1 r2 = mergeSame (index i r1) (index i r2)
 
+    --- Index-equivalence relation ---
+
+    infix 0 =%=
+
+    -- Extensional equality regarding to the `index` function for any possible indexing argument.
+    public export
+    data (=%=) : Registers rc -> Registers rc -> Type where
+      EquivByIndex : ((i : Fin rc) -> index i l = index i r) -> l =%= r
+
     export
-    index_merge_commutative : (i : _) -> (l, r : _) -> index i (Merge l r) = index i (Merge r l)
+    index_equiv_refl : {0 x : Registers rc} -> x =%= x
+    index_equiv_refl = EquivByIndex {rc} \_ => Refl
+
+    export
+    index_equiv_sym : {0 x, y : Registers rc} -> x =%= y -> y =%= x
+    index_equiv_sym (EquivByIndex xy) = EquivByIndex \i => sym $ xy i
+
+    export
+    index_equiv_trans : {x, y, z : _} -> x =%= y -> y =%= z -> x =%= z
+
+    --- Equivalence properties of `Merge` ---
+
+    export
+    merge_commutative : {l, r : _} -> Merge l r =%= Merge r l
+
+    export
+    merge_associative : {a, b, c : _} -> (a `Merge` b) `Merge` c =%= a `Merge` (b `Merge` c)
+
+    export
+    merge_refl : {x : _} -> Merge x x =%= x
