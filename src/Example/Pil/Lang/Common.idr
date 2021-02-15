@@ -70,23 +70,9 @@ namespace Invariant
   namespace Register
 
     public export
-    data RegisterTyUpdate = NoTypeUpdate | SetTo Type' | SetUndefined
-
-    public export
-    RegisterTyUpdates : Nat -> Type
-    RegisterTyUpdates rc = Vect rc RegisterTyUpdate
-
-    %name RegisterTyUpdates upds
-
-    public export
-    NoTyUpdates : {rc : Nat} -> RegisterTyUpdates rc
-    NoTyUpdates = replicate rc NoTypeUpdate
-
-    public export
     data Registers : Nat -> Type where
-      Base   : Vect rc $ Maybe Type' -> Registers rc
-      Update : Registers rc -> RegisterTyUpdates rc -> Registers rc
-      Merge  : Registers rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc -> Registers rc
+      Base  : Vect rc $ Maybe Type' -> Registers rc
+      Merge : Registers rc -> Registers rc -> Registers rc
 
     %name Registers regs
 
@@ -95,39 +81,18 @@ namespace Invariant
     AllUndefined = Base $ replicate rc Nothing
 
     public export
-    updatedRegisterType : Maybe Type' -> RegisterTyUpdate -> Maybe Type'
-    updatedRegisterType ty NoTypeUpdate = ty
-    updatedRegisterType _  (SetTo nty)  = Just nty
-    updatedRegisterType _  SetUndefined = Nothing
-
-    public export
-    mergeSame : Type' -> Type' -> Maybe Type'
-    mergeSame x y = case decEq x y of
+    mergeSame : Maybe Type' -> Maybe Type' -> Maybe Type'
+    mergeSame Nothing  Nothing  = Nothing
+    mergeSame Nothing  (Just _) = Nothing
+    mergeSame (Just _) Nothing  = Nothing
+    mergeSame (Just x) (Just y) = case decEq x y of
       Yes _ => Just x
       No  _ => Nothing
 
     public export
-    mergeSame' : Maybe Type' -> Type' -> Maybe Type'
-    mergeSame' m y = m >>= mergeSame y
-
-    public export
-    threeWayMergeUpd : Maybe Type' -> RegisterTyUpdate -> RegisterTyUpdate -> Maybe Type'
-    threeWayMergeUpd _  SetUndefined _            = Nothing
-    threeWayMergeUpd _  NoTypeUpdate SetUndefined = Nothing
-    threeWayMergeUpd _  (SetTo _)    SetUndefined = Nothing
-    threeWayMergeUpd ty NoTypeUpdate NoTypeUpdate = ty
-    threeWayMergeUpd ty NoTypeUpdate (SetTo y)    = mergeSame' ty y
-    threeWayMergeUpd ty (SetTo x)    NoTypeUpdate = mergeSame' ty x
-    threeWayMergeUpd _  (SetTo x)    (SetTo y)    = mergeSame x y
-
-    export
-    threeWayMergeUpd_commutative : (ty : Maybe Type') -> (u1, u2 : RegisterTyUpdate) -> threeWayMergeUpd ty u1 u2 = threeWayMergeUpd ty u2 u1
-
-    public export
     index : Fin rc -> Registers rc -> Maybe Type'
-    index i $ Base xs          = Vect.index i xs
-    index i $ Update regs upd  = updatedRegisterType (index i regs) (index i upd)
-    index i $ Merge regs u1 u2 = threeWayMergeUpd (index i regs) (index i u1) (index i u2)
+    index i $ Base xs     = Vect.index i xs
+    index i $ Merge r1 r2 = mergeSame (index i r1) (index i r2)
 
     export
-    index_update_neutral : (i : _) -> (regs : _) -> index i regs = index i (Update regs NoTyUpdates)
+    index_merge_commutative : (i : _) -> (l, r : _) -> index i (Merge l r) = index i (Merge r l)
