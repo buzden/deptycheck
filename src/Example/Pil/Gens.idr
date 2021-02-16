@@ -89,6 +89,66 @@ SpecGen res =
   ({a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen (Expression vars regs a)) =>
   res rc
 
+namespace ForStatement_UpdateArgument_Generation
+
+  public export
+  ForUpdArgGen : Type
+  ForUpdArgGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (newR ** (Statement preV preR preV newR, newR =%= preR))
+
+  export nop_gen   : ForUpdArgGen
+  export dot_gen   : ForUpdArgGen
+  export ass_gen   : ForUpdArgGen
+  export for_gen   : ForUpdArgGen
+  export if_gen    : ForUpdArgGen
+  export seq_gen   : ForUpdArgGen
+  export block_gen : ForUpdArgGen
+  export print_gen : ForUpdArgGen
+
+  export
+  for_upd_arg_gen : ForUpdArgGen
+  for_upd_arg_gen Dry preV preR = nop_gen   Dry preV preR
+                              <|> dot_gen   Dry preV preR
+                              <|> ass_gen   Dry preV preR
+                              <|> print_gen Dry preV preR
+  for_upd_arg_gen (More f) preV preR = nop_gen   f preV preR
+                                   <|> dot_gen   f preV preR
+                                   <|> ass_gen   f preV preR
+                                   <|> for_gen   f preV preR
+                                   <|> if_gen    f preV preR
+                                   <|> seq_gen   f preV preR
+                                   <|> block_gen f preV preR
+                                   <|> print_gen f preV preR
+
+namespace ForStatement_BodyArgument_Generation
+
+  public export
+  ForBodyArgGen : Type
+  ForBodyArgGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (postV ** newR ** (Statement preV preR postV newR, newR =%= preR))
+
+  export nop_gen   : ForBodyArgGen
+  export dot_gen   : ForBodyArgGen
+  export ass_gen   : ForBodyArgGen
+  export for_gen   : ForBodyArgGen
+  export if_gen    : ForBodyArgGen
+  export seq_gen   : ForBodyArgGen
+  export block_gen : ForBodyArgGen
+  export print_gen : ForBodyArgGen
+
+  export
+  for_body_arg_gen : ForBodyArgGen
+  for_body_arg_gen Dry preV preR = nop_gen   Dry preV preR
+                               <|> dot_gen   Dry preV preR
+                               <|> ass_gen   Dry preV preR
+                               <|> print_gen Dry preV preR
+  for_body_arg_gen (More f) preV preR = nop_gen   f preV preR
+                                    <|> dot_gen   f preV preR
+                                    <|> ass_gen   f preV preR
+                                    <|> for_gen   f preV preR
+                                    <|> if_gen    f preV preR
+                                    <|> seq_gen   f preV preR
+                                    <|> block_gen f preV preR
+                                    <|> print_gen f preV preR
+
 namespace Statement_Generation
 
   public export
@@ -127,27 +187,9 @@ namespace Statement_Generation
     (n ** lk) <- lookupGen preV
     pure (_ ** _ ** n #= !expr)
 
-  namespace ForStatement_UpdateArgument_Generation
-
-    public export
-    ForUpdArgGen : Type
-    ForUpdArgGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (newR ** (Statement preV preR preV newR, newR =%= preR))
-
-    export
-    for_upd_arg_gen : ForUpdArgGen
-
-  namespace ForStatement_BodyArgument_Generation
-
-    public export
-    ForBodyArgGen : Type
-    ForBodyArgGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (postV ** newR ** (Statement preV preR postV newR, newR =%= preR))
-
-    export
-    for_body_arg_gen : ForBodyArgGen
-
   for_gen @{_} @{_} @{expr} f preV preR = do
     (insideV ** insideR ** init) <- statement_gen f preV preR
-    (_ ** (upd, _))  <- for_upd_arg_gen f insideV insideR
+    (_ ** (upd, _)) <- for_upd_arg_gen f insideV insideR
     (_ ** _ ** (body, _)) <- for_body_arg_gen f insideV insideR
     pure (_ ** _ ** for init !expr upd body)
 
