@@ -95,14 +95,14 @@ namespace ForStatement_UpdateArgument_Generation
   ForUpdArgGen : Type
   ForUpdArgGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (newR ** (Statement preV preR preV newR, newR =%= preR))
 
-  export nop_gen   : ForUpdArgGen
-  export dot_gen   : ForUpdArgGen
-  export ass_gen   : ForUpdArgGen
-  export for_gen   : ForUpdArgGen
-  export if_gen    : ForUpdArgGen
-  export seq_gen   : ForUpdArgGen
-  export block_gen : ForUpdArgGen
-  export print_gen : ForUpdArgGen
+  nop_gen   : ForUpdArgGen
+  dot_gen   : ForUpdArgGen
+  ass_gen   : ForUpdArgGen
+  for_gen   : ForUpdArgGen
+  if_gen    : ForUpdArgGen
+  seq_gen   : ForUpdArgGen
+  block_gen : ForUpdArgGen
+  print_gen : ForUpdArgGen
 
   export
   for_upd_arg_gen : ForUpdArgGen
@@ -125,14 +125,14 @@ namespace ForStatement_BodyArgument_Generation
   ForBodyArgGen : Type
   ForBodyArgGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (postV ** newR ** (Statement preV preR postV newR, newR =%= preR))
 
-  export nop_gen   : ForBodyArgGen
-  export dot_gen   : ForBodyArgGen
-  export ass_gen   : ForBodyArgGen
-  export for_gen   : ForBodyArgGen
-  export if_gen    : ForBodyArgGen
-  export seq_gen   : ForBodyArgGen
-  export block_gen : ForBodyArgGen
-  export print_gen : ForBodyArgGen
+  nop_gen   : ForBodyArgGen
+  dot_gen   : ForBodyArgGen
+  ass_gen   : ForBodyArgGen
+  for_gen   : ForBodyArgGen
+  if_gen    : ForBodyArgGen
+  seq_gen   : ForBodyArgGen
+  block_gen : ForBodyArgGen
+  print_gen : ForBodyArgGen
 
   export
   for_body_arg_gen : ForBodyArgGen
@@ -155,14 +155,14 @@ namespace Statement_Generation
   StmtGen : Type
   StmtGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (postV ** postR ** Statement preV preR postV postR)
 
-  export nop_gen   : StmtGen
-  export dot_gen   : StmtGen
-  export ass_gen   : StmtGen
-  export for_gen   : StmtGen
-  export if_gen    : StmtGen
-  export seq_gen   : StmtGen
-  export block_gen : StmtGen
-  export print_gen : StmtGen
+  nop_gen   : StmtGen
+  dot_gen   : StmtGen
+  ass_gen   : StmtGen
+  for_gen   : StmtGen
+  if_gen    : StmtGen
+  seq_gen   : StmtGen
+  block_gen : StmtGen
+  print_gen : StmtGen
 
   export
   statement_gen : StmtGen
