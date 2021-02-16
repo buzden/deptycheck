@@ -114,18 +114,22 @@ namespace Statements_given_preV_preR_postV_postR
 
   export
   statement_gen : Statement''_Gen
-  statement_gen Dry preV preR postV postR = nop_gen   Dry preV preR postV postR
-                                        <|> dot_gen   Dry preV preR postV postR
-                                        <|> ass_gen   Dry preV preR postV postR
-                                        <|> print_gen Dry preV preR postV postR
-  statement_gen (More f) preV preR postV postR = nop_gen   f preV preR postV postR
-                                             <|> dot_gen   f preV preR postV postR
-                                             <|> ass_gen   f preV preR postV postR
-                                             <|> for_gen   f preV preR postV postR
-                                             <|> if_gen    f preV preR postV postR
-                                             <|> seq_gen   f preV preR postV postR
-                                             <|> block_gen f preV preR postV postR
-                                             <|> print_gen f preV preR postV postR
+  statement_gen Dry preV preR postV postR = oneOf
+    [ nop_gen   Dry preV preR postV postR
+    , dot_gen   Dry preV preR postV postR
+    , ass_gen   Dry preV preR postV postR
+    , print_gen Dry preV preR postV postR
+    ]
+  statement_gen (More f) preV preR postV postR = oneOf
+    [ nop_gen   f preV preR postV postR
+    , dot_gen   f preV preR postV postR
+    , ass_gen   f preV preR postV postR
+    , for_gen   f preV preR postV postR
+    , if_gen    f preV preR postV postR
+    , seq_gen   f preV preR postV postR
+    , block_gen f preV preR postV postR
+    , print_gen f preV preR postV postR
+    ]
 
 namespace Statements_given_preV_preR_postR
 
@@ -145,18 +149,22 @@ namespace Statements_given_preV_preR_postR
 
   export
   statement_gen : Statement'_Gen
-  statement_gen Dry preV preR postR = nop_gen   Dry preV preR postR
-                                  <|> dot_gen   Dry preV preR postR
-                                  <|> ass_gen   Dry preV preR postR
-                                  <|> print_gen Dry preV preR postR
-  statement_gen (More f) preV preR postR = nop_gen   f preV preR postR
-                                       <|> dot_gen   f preV preR postR
-                                       <|> ass_gen   f preV preR postR
-                                       <|> for_gen   f preV preR postR
-                                       <|> if_gen    f preV preR postR
-                                       <|> seq_gen   f preV preR postR
-                                       <|> block_gen f preV preR postR
-                                       <|> print_gen f preV preR postR
+  statement_gen Dry preV preR postR = oneOf
+    [ nop_gen   Dry preV preR postR
+    , dot_gen   Dry preV preR postR
+    , ass_gen   Dry preV preR postR
+    , print_gen Dry preV preR postR
+    ]
+  statement_gen (More f) preV preR postR = oneOf
+    [ nop_gen   f preV preR postR
+    , dot_gen   f preV preR postR
+    , ass_gen   f preV preR postR
+    , for_gen   f preV preR postR
+    , if_gen    f preV preR postR
+    , seq_gen   f preV preR postR
+    , block_gen f preV preR postR
+    , print_gen f preV preR postR
+    ]
 
 namespace Statements_given_preV_preR
 
@@ -175,18 +183,22 @@ namespace Statements_given_preV_preR
 
   export
   statement_gen : StmtGen
-  statement_gen Dry preV preR = nop_gen   Dry preV preR
-                            <|> dot_gen   Dry preV preR
-                            <|> ass_gen   Dry preV preR
-                            <|> print_gen Dry preV preR
-  statement_gen (More f) preV preR = nop_gen   f preV preR
-                                 <|> dot_gen   f preV preR
-                                 <|> ass_gen   f preV preR
-                                 <|> for_gen   f preV preR
-                                 <|> if_gen    f preV preR
-                                 <|> seq_gen   f preV preR
-                                 <|> block_gen f preV preR
-                                 <|> print_gen f preV preR
+  statement_gen Dry preV preR = oneOf
+    [ nop_gen   Dry preV preR
+    , dot_gen   Dry preV preR
+    , ass_gen   Dry preV preR
+    , print_gen Dry preV preR
+    ]
+  statement_gen (More f) preV preR = oneOf
+    [ nop_gen   f preV preR
+    , dot_gen   f preV preR
+    , ass_gen   f preV preR
+    , for_gen   f preV preR
+    , if_gen    f preV preR
+    , seq_gen   f preV preR
+    , block_gen f preV preR
+    , print_gen f preV preR
+    ]
 
 namespace Statements_given_preV_preR
 
