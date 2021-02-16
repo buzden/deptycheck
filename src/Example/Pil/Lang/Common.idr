@@ -4,6 +4,8 @@ import public Data.Vect
 
 import Decidable.Equality
 
+import Syntax.WithProof
+
 %default total
 
 namespace Types
@@ -70,116 +72,115 @@ namespace Invariant
   namespace Register
 
     public export
-    Registers : Nat -> Type
-    Registers n = Vect n $ Maybe Type'
+    data Registers : Nat -> Type where
+      Base  : Vect rc $ Maybe Type' -> Registers rc
+      Merge : Registers rc -> Registers rc -> Registers rc
 
     %name Registers regs
 
     public export
     AllUndefined : {rc : Nat} -> Registers rc
-    AllUndefined = replicate rc Nothing
+    AllUndefined = Base $ replicate rc Nothing
 
-    namespace Updates
+    --- Rules of merging of independent register types ---
 
-      public export
-      data RegisterTyUpdate = NoTypeUpdate | SetTo Type' | SetUndefined
+    public export
+    mergeSame : Maybe Type' -> Maybe Type' -> Maybe Type'
+    mergeSame Nothing  _        = Nothing
+    mergeSame (Just _) Nothing  = Nothing
+    mergeSame (Just x) (Just y) = case decEq x y of
+      Yes _ => Just x
+      No  _ => Nothing
 
-      public export
-      RegisterTyUpdates : Nat -> Type
-      RegisterTyUpdates rc = Vect rc RegisterTyUpdate
-
-      public export
-      NoTyUpdates : {rc : Nat} -> RegisterTyUpdates rc
-      NoTyUpdates = replicate rc NoTypeUpdate
-
-      --- Update of a state with updates ---
-
-      public export
-      updateRegisterType : Maybe Type' -> RegisterTyUpdate -> Maybe Type'
-      updateRegisterType ty NoTypeUpdate = ty
-      updateRegisterType _  (SetTo nty)  = Just nty
-      updateRegisterType _  SetUndefined = Nothing
-
-      public export
-      withUpdates : Registers rc -> RegisterTyUpdates rc -> Registers rc
-      withUpdates = zipWith updateRegisterType
+    namespace MergeSameProperties
 
       export
-      withUpdates_neutral : (regs : Registers rc) -> regs `withUpdates` NoTyUpdates = regs
-      withUpdates_neutral []      = Refl
-      withUpdates_neutral (_::rs) = rewrite withUpdates_neutral rs in Refl
-
-      --- Merge of sequential updates ---
-
-      public export
-      updSequential : RegisterTyUpdate -> RegisterTyUpdate -> RegisterTyUpdate
-      updSequential x NoTypeUpdate = x
-      updSequential _ y            = y
+      mergeSame_idempotent : (x : _) -> mergeSame x x = x
+      mergeSame_idempotent Nothing = Refl
+      mergeSame_idempotent (Just x) = rewrite decEqSelfIsYes {x} in Refl
 
       export
-      updSequential_neutral_l : (u : RegisterTyUpdate) -> NoTypeUpdate `updSequential` u = u
-      updSequential_neutral_l NoTypeUpdate = Refl
-      updSequential_neutral_l (SetTo _)    = Refl
-      updSequential_neutral_l SetUndefined = Refl
+      mergeSame_commutative : (x, y : _) -> mergeSame x y = mergeSame y x
+      mergeSame_commutative Nothing  Nothing  = Refl
+      mergeSame_commutative Nothing  (Just _) = Refl
+      mergeSame_commutative (Just _) Nothing  = Refl
+      mergeSame_commutative (Just x) (Just y) with (decEq x y)
+        mergeSame_commutative (Just x) (Just y) | No uxy with (decEq y x)
+          mergeSame_commutative (Just _) (Just _) | No _   | No _   = Refl
+          mergeSame_commutative (Just _) (Just _) | No uxy | Yes yx = absurd $ uxy $ sym yx
+        mergeSame_commutative (Just x) (Just y) | Yes xy = rewrite sym xy in
+                                                           rewrite decEqSelfIsYes {x} in
+                                                           Refl
 
       export
-      updSequential_neutral_r : (u : RegisterTyUpdate) -> u `updSequential` NoTypeUpdate = u
-      updSequential_neutral_r u = Refl
+      mergeSame_nothing_absorbs_r : (x : _) -> mergeSame x Nothing = Nothing
+      mergeSame_nothing_absorbs_r Nothing  = Refl
+      mergeSame_nothing_absorbs_r (Just _) = Refl
+
+      -- To be removed from here as soon as PR#1072 is merged.
+      decEqContraIsNo : DecEq a => {x, y : a} -> (x = y -> Void) -> (p ** decEq x y = No p)
+      decEqContraIsNo uxy with (decEq x y)
+        decEqContraIsNo uxy | Yes xy = absurd $ uxy xy
+        decEqContraIsNo _   | No uxy = (uxy ** Refl)
 
       export
-      updSequential_undef_absorbs_r : (u : RegisterTyUpdate) -> u `updSequential` SetUndefined = SetUndefined
-      updSequential_undef_absorbs_r u = Refl
+      mergeSame_associative : (x, y, z : _) -> (x `mergeSame` y) `mergeSame` z = x `mergeSame` (y `mergeSame` z)
+      mergeSame_associative Nothing  _        _        = Refl
+      mergeSame_associative (Just x) Nothing  _        = Refl
+      mergeSame_associative (Just x) (Just y) Nothing  = mergeSame_nothing_absorbs_r _
+      mergeSame_associative (Just x) (Just y) (Just z) with (decEq x y)
+        mergeSame_associative (Just x) (Just y) (Just z) | Yes xy = rewrite xy in
+                                                                    case @@ decEq y z of
+                                                                      (Yes _ ** p) => rewrite p in
+                                                                                      rewrite decEqSelfIsYes {x=y} in
+                                                                                      Refl
+                                                                      (No _ ** p) => rewrite p in Refl
+        mergeSame_associative (Just x) (Just y) (Just z) | No uxy with (decEq y z)
+          mergeSame_associative (Just x) (Just y) (Just z) | No uxy | Yes yz = rewrite snd $ decEqContraIsNo uxy in Refl
+          mergeSame_associative (Just x) (Just y) (Just z) | No uxy | No uyz = Refl
 
-      export
-      updSequential_set_absorbs_r : (u : RegisterTyUpdate) -> u `updSequential` (SetTo x) = SetTo x
-      updSequential_set_absorbs_r u = Refl
+    --- The main eliminator for the `Registers` type ---
 
-      public export
-      updsSequential : RegisterTyUpdates rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
-      updsSequential = zipWith updSequential
+    public export
+    index : Fin rc -> Registers rc -> Maybe Type'
+    index i $ Base xs     = Vect.index i xs
+    index i $ Merge r1 r2 = mergeSame (index i r1) (index i r2)
 
-      export
-      updsSequential_neutral_l : (upd : RegisterTyUpdates rc) -> updsSequential NoTyUpdates upd = upd
+    --- Index-equivalence relation ---
 
-      export
-      updsSequential_neutral_r : (upd : RegisterTyUpdates rc) -> updsSequential upd NoTyUpdates = upd
+    infix 0 =%=
 
-      --- Merge of independent updates ---
+    -- Extensional equality regarding to the `index` function for any possible indexing argument.
+    public export
+    data (=%=) : Registers rc -> Registers rc -> Type where
+      EquivByIndex : {0 l, r : Registers rc} -> ((i : Fin rc) -> index i l = index i r) -> l =%= r
 
-      public export
-      noUpdateWhenSame : Maybe Type' -> Type' -> RegisterTyUpdate
-      noUpdateWhenSame Nothing  _ = SetUndefined
-      noUpdateWhenSame (Just x) y = case decEq x y of
-                                      Yes p => NoTypeUpdate
-                                      No up => SetUndefined
+    public export %inline
+    (.ieq) : x =%= y -> (i : _) -> index i x = index i y
+    (.ieq) (EquivByIndex f) = f
 
-      public export
-      threeWayMergeUpd : Maybe Type' -> RegisterTyUpdate -> RegisterTyUpdate -> RegisterTyUpdate
-      threeWayMergeUpd _  SetUndefined _            = SetUndefined
-      threeWayMergeUpd _  NoTypeUpdate SetUndefined = SetUndefined
-      threeWayMergeUpd _  NoTypeUpdate NoTypeUpdate = NoTypeUpdate
-      threeWayMergeUpd ty NoTypeUpdate (SetTo y)    = noUpdateWhenSame ty y
-      threeWayMergeUpd ty (SetTo x)    NoTypeUpdate = noUpdateWhenSame ty x
-      threeWayMergeUpd _  (SetTo _)    SetUndefined = SetUndefined
-      threeWayMergeUpd _  (SetTo x)    (SetTo y)    = case decEq x y of
-                                                        Yes p => SetTo x
-                                                        No up => SetUndefined
+    export %hint
+    index_equiv_refl : x =%= x
+    index_equiv_refl = EquivByIndex \_ => Refl
 
-      export
-      threeWayMergeUpd_commutative : (ty : Maybe Type') -> (u1, u2 : RegisterTyUpdate) -> threeWayMergeUpd ty u1 u2 = threeWayMergeUpd ty u2 u1
+    export %hint
+    index_equiv_sym : x =%= y -> y =%= x
+    index_equiv_sym xy = EquivByIndex \i => sym $ xy.ieq i
 
-      export
-      threeWayMergeUpd_associative : (ty : Maybe Type') -> (u1, u2, u3 : RegisterTyUpdate) ->
-                                     let op = threeWayMergeUpd ty in (u1 `op` u2) `op` u3 = u1 `op` (u2 `op` u3)
+    export %hint
+    index_equiv_trans : x =%= y -> y =%= z -> x =%= z
+    index_equiv_trans xy yz = EquivByIndex \i => trans (xy.ieq i) (yz.ieq i)
 
-      public export
-      threeWayMergeUpds : Registers rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
-      threeWayMergeUpds = zipWith3 threeWayMergeUpd
+    --- Equivalence properties of `Merge` ---
 
-      --- Mark updates as setting undefined ---
+    export %hint
+    merge_commutative : {l, r : _} -> Merge l r =%= Merge r l
+    merge_commutative = EquivByIndex \i => mergeSame_commutative _ _
 
-      public export
-      undefUpds : Registers rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
+    export %hint
+    merge_associative : {a, b, c : _} -> (a `Merge` b) `Merge` c =%= a `Merge` (b `Merge` c)
+    merge_associative = EquivByIndex \i => mergeSame_associative _ _ _
 
-      export
-      undefUpds_as_3wayMerge : (reg : _) -> (upd : _) -> undefUpds reg upd = threeWayMergeUpds reg upd NoTyUpdates
+    export %hint
+    merge_idempotent : {x : _} -> Merge x x =%= x
+    merge_idempotent = EquivByIndex \i => mergeSame_idempotent _
