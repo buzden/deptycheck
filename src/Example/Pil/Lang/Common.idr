@@ -101,18 +101,23 @@ namespace Invariant
     -- Extensional equality regarding to the `index` function for any possible indexing argument.
     public export
     data (=%=) : Registers rc -> Registers rc -> Type where
-      EquivByIndex : ((i : Fin rc) -> index i l = index i r) -> l =%= r
+      EquivByIndex : {0 l, r : Registers rc} -> ((i : Fin rc) -> index i l = index i r) -> l =%= r
+
+    public export %inline
+    (.ieq) : x =%= y -> (i : _) -> index i x = index i y
+    (.ieq) (EquivByIndex f) = f
 
     export %hint
-    index_equiv_refl : {0 x : Registers rc} -> x =%= x
-    index_equiv_refl = EquivByIndex {rc} \_ => Refl
+    index_equiv_refl : x =%= x
+    index_equiv_refl = EquivByIndex \_ => Refl
 
     export %hint
-    index_equiv_sym : {0 x, y : Registers rc} -> x =%= y -> y =%= x
-    index_equiv_sym (EquivByIndex xy) = EquivByIndex \i => sym $ xy i
+    index_equiv_sym : x =%= y -> y =%= x
+    index_equiv_sym xy = EquivByIndex \i => sym $ xy.ieq i
 
     export %hint
-    index_equiv_trans : {x, y, z : _} -> x =%= y -> y =%= z -> x =%= z
+    index_equiv_trans : x =%= y -> y =%= z -> x =%= z
+    index_equiv_trans xy yz = EquivByIndex \i => trans (xy.ieq i) (yz.ieq i)
 
     --- Equivalence properties of `Merge` ---
 
