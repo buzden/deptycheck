@@ -188,6 +188,8 @@ namespace Statements_given_preV_preR
                                  <|> block_gen f preV preR
                                  <|> print_gen f preV preR
 
+namespace Statements_given_preV_preR
+
   nop_gen _ preV preR = pure (_ ** _ ** nop)
 
   dot_gen @{type'} @{name} @{_} _ preV preR = pure (_ ** _ ** !type'. !name)
