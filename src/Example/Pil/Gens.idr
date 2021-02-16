@@ -28,6 +28,7 @@ import public Test.DepTyCheck.Gen
 
 -- For each constructor of the desired type (`X` in the example) do the following.
 -- Determine its arguments
+-- TBD
 
 -- For recursion, mutuality or separate signature predeclaration is required.
 -- The latter is, probably, the most universal way since it would always work
