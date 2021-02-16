@@ -92,6 +92,8 @@ namespace Invariant
       NoTyUpdates : {rc : Nat} -> RegisterTyUpdates rc
       NoTyUpdates = replicate rc NoTypeUpdate
 
+      --- Update of a state with updates ---
+
       public export
       updateRegisterType : Maybe Type' -> RegisterTyUpdate -> Maybe Type'
       updateRegisterType ty NoTypeUpdate = ty
@@ -106,3 +108,78 @@ namespace Invariant
       withUpdates_neutral : (regs : Registers rc) -> regs `withUpdates` NoTyUpdates = regs
       withUpdates_neutral []      = Refl
       withUpdates_neutral (_::rs) = rewrite withUpdates_neutral rs in Refl
+
+      --- Merge of sequential updates ---
+
+      public export
+      updSequential : RegisterTyUpdate -> RegisterTyUpdate -> RegisterTyUpdate
+      updSequential x NoTypeUpdate = x
+      updSequential _ y            = y
+
+      export
+      updSequential_neutral_l : (u : RegisterTyUpdate) -> NoTypeUpdate `updSequential` u = u
+      updSequential_neutral_l NoTypeUpdate = Refl
+      updSequential_neutral_l (SetTo _)    = Refl
+      updSequential_neutral_l SetUndefined = Refl
+
+      export
+      updSequential_neutral_r : (u : RegisterTyUpdate) -> u `updSequential` NoTypeUpdate = u
+      updSequential_neutral_r u = Refl
+
+      export
+      updSequential_undef_absorbs_r : (u : RegisterTyUpdate) -> u `updSequential` SetUndefined = SetUndefined
+      updSequential_undef_absorbs_r u = Refl
+
+      export
+      updSequential_set_absorbs_r : (u : RegisterTyUpdate) -> u `updSequential` (SetTo x) = SetTo x
+      updSequential_set_absorbs_r u = Refl
+
+      public export
+      updsSequential : RegisterTyUpdates rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
+      updsSequential = zipWith updSequential
+
+      export
+      updsSequential_neutral_l : (upd : RegisterTyUpdates rc) -> updsSequential NoTyUpdates upd = upd
+
+      export
+      updsSequential_neutral_r : (upd : RegisterTyUpdates rc) -> updsSequential upd NoTyUpdates = upd
+
+      --- Merge of independent updates ---
+
+      public export
+      noUpdateWhenSame : Maybe Type' -> Type' -> RegisterTyUpdate
+      noUpdateWhenSame Nothing  _ = SetUndefined
+      noUpdateWhenSame (Just x) y = case decEq x y of
+                                      Yes p => NoTypeUpdate
+                                      No up => SetUndefined
+
+      public export
+      threeWayMergeUpd : Maybe Type' -> RegisterTyUpdate -> RegisterTyUpdate -> RegisterTyUpdate
+      threeWayMergeUpd _  SetUndefined _            = SetUndefined
+      threeWayMergeUpd _  NoTypeUpdate SetUndefined = SetUndefined
+      threeWayMergeUpd _  NoTypeUpdate NoTypeUpdate = NoTypeUpdate
+      threeWayMergeUpd ty NoTypeUpdate (SetTo y)    = noUpdateWhenSame ty y
+      threeWayMergeUpd ty (SetTo x)    NoTypeUpdate = noUpdateWhenSame ty x
+      threeWayMergeUpd _  (SetTo _)    SetUndefined = SetUndefined
+      threeWayMergeUpd _  (SetTo x)    (SetTo y)    = case decEq x y of
+                                                        Yes p => SetTo x
+                                                        No up => SetUndefined
+
+      export
+      threeWayMergeUpd_commutative : (ty : Maybe Type') -> (u1, u2 : RegisterTyUpdate) -> threeWayMergeUpd ty u1 u2 = threeWayMergeUpd ty u2 u1
+
+      export
+      threeWayMergeUpd_associative : (ty : Maybe Type') -> (u1, u2, u3 : RegisterTyUpdate) ->
+                                     let op = threeWayMergeUpd ty in (u1 `op` u2) `op` u3 = u1 `op` (u2 `op` u3)
+
+      public export
+      threeWayMergeUpds : Registers rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
+      threeWayMergeUpds = zipWith3 threeWayMergeUpd
+
+      --- Mark updates as setting undefined ---
+
+      public export
+      undefUpds : Registers rc -> RegisterTyUpdates rc -> RegisterTyUpdates rc
+
+      export
+      undefUpds_as_3wayMerge : (reg : _) -> (upd : _) -> undefUpds reg upd = threeWayMergeUpds reg upd NoTyUpdates
