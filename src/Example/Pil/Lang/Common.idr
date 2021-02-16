@@ -80,6 +80,8 @@ namespace Invariant
     AllUndefined : {rc : Nat} -> Registers rc
     AllUndefined = Base $ replicate rc Nothing
 
+    --- Rules of merging of independent register types ---
+
     public export
     mergeSame : Maybe Type' -> Maybe Type' -> Maybe Type'
     mergeSame Nothing  Nothing  = Nothing
@@ -88,6 +90,19 @@ namespace Invariant
     mergeSame (Just x) (Just y) = case decEq x y of
       Yes _ => Just x
       No  _ => Nothing
+
+    namespace MergeSameProperties
+
+      export
+      mergeSame_idempotent : (x : _) -> mergeSame x x = x
+
+      export
+      mergeSame_commutative : (x, y : _) -> mergeSame x y = mergeSame y x
+
+      export
+      mergeSame_associative : (x, y, z : _) -> (x `mergeSame` y) `mergeSame` z = x `mergeSame` (y `mergeSame` z)
+
+    --- The main eliminator for the `Registers` type ---
 
     public export
     index : Fin rc -> Registers rc -> Maybe Type'
@@ -123,9 +138,12 @@ namespace Invariant
 
     export %hint
     merge_commutative : {l, r : _} -> Merge l r =%= Merge r l
+    merge_commutative = EquivByIndex \i => mergeSame_commutative _ _
 
     export %hint
     merge_associative : {a, b, c : _} -> (a `Merge` b) `Merge` c =%= a `Merge` (b `Merge` c)
+    merge_associative = EquivByIndex \i => mergeSame_associative _ _ _
 
     export %hint
-    merge_refl : {x : _} -> Merge x x =%= x
+    merge_idempotent : {x : _} -> Merge x x =%= x
+    merge_idempotent = EquivByIndex \i => mergeSame_idempotent _
