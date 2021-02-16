@@ -113,12 +113,12 @@ namespace Statements_given_preV_preR_postV_postR
   print_gen : Statement''_Gen
 
   export
-  statement''_gen : Statement''_Gen
-  statement''_gen Dry preV preR postV postR = nop_gen   Dry preV preR postV postR
+  statement_gen : Statement''_Gen
+  statement_gen Dry preV preR postV postR = nop_gen   Dry preV preR postV postR
                                           <|> dot_gen   Dry preV preR postV postR
                                           <|> ass_gen   Dry preV preR postV postR
                                           <|> print_gen Dry preV preR postV postR
-  statement''_gen (More f) preV preR postV postR = nop_gen   f preV preR postV postR
+  statement_gen (More f) preV preR postV postR = nop_gen   f preV preR postV postR
                                                <|> dot_gen   f preV preR postV postR
                                                <|> ass_gen   f preV preR postV postR
                                                <|> for_gen   f preV preR postV postR
@@ -144,12 +144,12 @@ namespace Statements_given_preV_preR_postR
   print_gen : Statement'_Gen
 
   export
-  statement'_gen : Statement'_Gen
-  statement'_gen Dry preV preR postR = nop_gen   Dry preV preR postR
+  statement_gen : Statement'_Gen
+  statement_gen Dry preV preR postR = nop_gen   Dry preV preR postR
                                    <|> dot_gen   Dry preV preR postR
                                    <|> ass_gen   Dry preV preR postR
                                    <|> print_gen Dry preV preR postR
-  statement'_gen (More f) preV preR postR = nop_gen   f preV preR postR
+  statement_gen (More f) preV preR postR = nop_gen   f preV preR postR
                                         <|> dot_gen   f preV preR postR
                                         <|> ass_gen   f preV preR postR
                                         <|> for_gen   f preV preR postR
@@ -158,7 +158,7 @@ namespace Statements_given_preV_preR_postR
                                         <|> block_gen f preV preR postR
                                         <|> print_gen f preV preR postR
 
-namespace Statement_Generation
+namespace Statements_given_preV_preR
 
   public export
   StmtGen : Type
@@ -199,9 +199,9 @@ namespace Statement_Generation
   for_gen @{_} @{_} @{expr} f preV preR = do
     (insideV ** insideR ** init) <- statement_gen f preV preR
     (updR ** _) <- eq_registers_gen f insideR
-    upd <- statement''_gen f insideV insideR insideV updR
+    upd         <- statement_gen f insideV insideR insideV updR
     (bodyR ** _) <- eq_registers_gen f insideR
-    (_ ** body) <- statement'_gen f insideV insideR bodyR
+    (_ ** body)  <- statement_gen f insideV insideR bodyR
     pure (_ ** _ ** for init !expr upd body)
 
   if_gen @{_} @{_} @{expr} f preV preR = do
