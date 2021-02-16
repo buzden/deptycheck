@@ -135,12 +135,6 @@ namespace Invariant
       mergeSame_nothing_absorbs_r Nothing  = Refl
       mergeSame_nothing_absorbs_r (Just _) = Refl
 
-      -- To be removed from here as soon as PR#1072 is merged.
-      decEqContraIsNo : DecEq a => {x, y : a} -> (x = y -> Void) -> (p ** decEq x y = No p)
-      decEqContraIsNo uxy with (decEq x y)
-        decEqContraIsNo uxy | Yes xy = absurd $ uxy xy
-        decEqContraIsNo _   | No uxy = (uxy ** Refl)
-
       export
       mergeSame_associative : (x, y, z : _) -> (x `mergeSame` y) `mergeSame` z = x `mergeSame` (y `mergeSame` z)
       mergeSame_associative Nothing  _        _        = Refl
