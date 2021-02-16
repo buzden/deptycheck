@@ -16,6 +16,23 @@ import public Test.DepTyCheck.Gen
 --- Generation ---
 ------------------
 
+--- General methodology of writing generators ---
+
+-- Determine the desired (root) data component and its parameters.
+-- Say, it is a `X (a : A) (b : B)`.
+-- Determine which parameters finally would be user-defined and which are generated.
+-- Say, `x` is user-defined and `y` is generated.
+-- Then the type of the main generator would be `(a : A) -> Gen (b : B ** X a b)`.
+
+-- Determine also the types which has external generators and add their `Gen Y =>` to the final signature.
+
+-- For each constructor of the desired type (`X` in the example) do the following.
+-- Determine its arguments
+
+-- For recursion, mutuality or separate signature predeclaration is required.
+-- The latter is, probably, the most universal way since it would always work
+-- because there is no need of reduction of `Gen`-producing functions.
+
 --- Universal patterns (particular cases) ---
 
 asp : {0 indexed : index -> Type} ->
@@ -37,76 +54,105 @@ lookupGen vars = uniform $ fromList $ mapLk vars where
 --- Expressions ---
 
 export
-varExprGen : {a : Type'} -> {vars : Variables} -> Gen $ Expression vars a
+varExprGen : {a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen $ Expression vars regs a
 varExprGen = do Element (n ** _) prf <- lookupGen vars `suchThat_invertedEq` a $ \(_ ** lk) => reveal lk
                 pure rewrite prf in V n
 
 ||| Generator of non-recursive expressions (thus those that can be used with zero recursion bound).
-nonRec_exprGen : {a : Type'} -> {vars : Variables} -> Gen (idrTypeOf a) -> Gen $ Expression vars a
+nonRec_exprGen : {a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen (idrTypeOf a) -> Gen $ Expression vars regs a
 nonRec_exprGen g = [| C g |] <|> varExprGen
+                   -- TODO to add the register access expression
 
 export
 exprGen : (fuel : Fuel) ->
           {a : Type'} ->
           ({b : Type'} -> Gen $ idrTypeOf b) ->
           {vars : Variables} ->
-          ((subGen : {x : Type'} -> Gen $ Expression vars x) -> {b : Type'} -> Gen $ Expression vars b) ->
-          Gen (Expression vars a)
+          {regs : Registers rc} ->
+          ((subGen : {x : Type'} -> Gen $ Expression vars regs x) -> {b : Type'} -> Gen $ Expression vars regs b) ->
+          Gen (Expression vars regs a)
 exprGen Dry      g _   = nonRec_exprGen g
 exprGen (More f) g rec = nonRec_exprGen g <|> rec (exprGen f g rec)
 
 --- Statements ---
 
-||| Statements generator of those that do not change the context and those that are not recursive.
-noVarsChange_noRec_stmtGen : (vars : Variables) ->
-                             (genExpr : {a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
-                             Gen (Statement vars vars)
-noVarsChange_noRec_stmtGen vars = oneOf
-  [ pure nop
-  , do (n ** _ ** e) <- asp (lookupGen vars) genExpr
-       pure $ n #= e
-  , do pure $ print !(genExpr {a=String'})
-  ]
+-- `preV` and `preR` paremeters are considered to be used-defined.
 
-||| Statements generator of those that can change the context and those that are not recursive.
-varsChanging_noRec_stmtGen : (pre : Variables) ->
-                             (genTy : Gen Type') =>
-                             (genName : Gen Name) =>
-                             Gen (post ** Statement pre post)
-varsChanging_noRec_stmtGen pre = do
-  ty <- genTy
-  n <- genName
-  pure ((n, ty)::pre ** ty. n)
+public export
+SpecGen : (Nat -> Type) -> Type
+SpecGen res =
+  (fuel : Fuel) ->
+  {0 rc : Nat} ->
+  Gen Type' =>
+  Gen Name =>
+  ({a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen (Expression vars regs a)) =>
+  res rc
 
-mutual
+public export
+StmtGen : Type
+StmtGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (postV ** postR ** Statement preV preR postV postR)
 
-  ||| Statements generator of those statements that can't change the context.
-  export
-  noVarsChange_stmtGen : (bound : Nat) ->
-                         (vars : Variables) ->
-                         Gen Type' =>
-                          Gen Name =>
-                         (genExpr : {a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
-                         Gen (Statement vars vars)
-  noVarsChange_stmtGen Z     vars = noVarsChange_noRec_stmtGen vars
-  noVarsChange_stmtGen (S n) vars = noVarsChange_noRec_stmtGen vars <|> oneOf
-    [ do (inside_for ** init) <- stmtGen n vars
-         (_ ** body) <- stmtGen n inside_for
-         pure $ for init !genExpr !(noVarsChange_stmtGen n inside_for) body
-    , pure $ if__ !genExpr (snd !(stmtGen n vars)) (snd !(stmtGen n vars))
-    , [| noVarsChange_stmtGen n vars *> noVarsChange_stmtGen n vars |]
-    , (\st => block $ snd st) <$> stmtGen n vars
-    ]
+nop_gen   : StmtGen
+dot_gen   : StmtGen
+ass_gen   : StmtGen
+for_gen   : StmtGen
+if_gen    : StmtGen
+seq_gen   : StmtGen
+block_gen : StmtGen
+print_gen : StmtGen
 
-  export
-  stmtGen : (bound : Nat) ->
-            (pre : Variables) ->
-            (genTy : Gen Type') =>
-            (genName : Gen Name) =>
-            ({a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
-            Gen (post ** Statement pre post)
-  stmtGen Z     pre = varsChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noVarsChange_stmtGen Z pre
-  stmtGen (S n) pre = varsChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noVarsChange_stmtGen n pre
-    <|> do (mid ** l) <- stmtGen n pre
-           (post ** r) <- stmtGen n mid
-           pure (post ** l *> r)
+public export
+ForUpdArgGen : Type
+ForUpdArgGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (newR ** (Statement preV preR preV newR, newR =%= preR))
+
+for_upd_arg_gen : ForUpdArgGen
+
+public export
+ForBodyArgGen : Type
+ForBodyArgGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (postV ** newR ** (Statement preV preR postV newR, newR =%= preR))
+
+for_body_arg_gen : ForBodyArgGen
+
+statement_gen : StmtGen
+statement_gen Dry preV preR = nop_gen   Dry preV preR
+                          <|> dot_gen   Dry preV preR
+                          <|> ass_gen   Dry preV preR
+                          <|> print_gen Dry preV preR
+statement_gen (More f) preV preR = nop_gen   f preV preR
+                               <|> dot_gen   f preV preR
+                               <|> ass_gen   f preV preR
+                               <|> for_gen   f preV preR
+                               <|> if_gen    f preV preR
+                               <|> seq_gen   f preV preR
+                               <|> block_gen f preV preR
+                               <|> print_gen f preV preR
+
+nop_gen _ preV preR = pure (_ ** _ ** nop)
+
+dot_gen @{type'} @{name} @{_} _ preV preR = pure (_ ** _ ** !type'. !name)
+
+ass_gen @{_} @{_} @{expr} _ preV preR = do
+  (n ** lk) <- lookupGen preV
+  pure (_ ** _ ** n #= !expr)
+
+for_gen @{_} @{_} @{expr} f preV preR = do
+  (insideV ** insideR ** init) <- statement_gen f preV preR
+  (_ ** (upd, _))  <- for_upd_arg_gen f insideV insideR
+  (_ ** _ ** (body, _)) <- for_body_arg_gen f insideV insideR
+  pure (_ ** _ ** for init !expr upd body)
+
+if_gen @{_} @{_} @{expr} f preV preR = do
+  (_ ** _ ** th) <- statement_gen f preV preR
+  (_ ** _ ** el) <- statement_gen f preV preR
+  pure (_ ** _ ** if__ !expr th el)
+
+seq_gen f preV preR = do
+  (midV ** midR ** l) <- statement_gen f preV preR
+  (_    ** _    ** r) <- statement_gen f midV midR
+  pure (_ ** _ ** l *> r)
+
+block_gen f preV preR = do
+  (_ ** _ ** s) <- statement_gen f preV preR
+  pure (_ ** _ ** block s)
+
+print_gen @{_} @{_} @{expr} _ preV preR = pure (_ ** _ ** print !(expr {a=String'}))
