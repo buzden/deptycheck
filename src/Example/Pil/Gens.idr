@@ -57,10 +57,10 @@ exprGen (S n) g rec = nonRec_exprGen g <|> rec (exprGen n g rec)
 --- Statements ---
 
 ||| Statements generator of those that do not change the context and those that are not recursive.
-noCtxChange_noRec_stmtGen : (vars : Variables) ->
-                            (genExpr : {a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
-                            Gen (Statement vars vars)
-noCtxChange_noRec_stmtGen vars = oneOf
+noVarsChange_noRec_stmtGen : (vars : Variables) ->
+                             (genExpr : {a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
+                             Gen (Statement vars vars)
+noVarsChange_noRec_stmtGen vars = oneOf
   [ pure nop
   , do (n ** _ ** e) <- asp (lookupGen vars) genExpr
        pure $ n #= e
@@ -69,9 +69,9 @@ noCtxChange_noRec_stmtGen vars = oneOf
 
 ||| Statements generator of those that can change the context and those that are not recursive.
 varsChanging_noRec_stmtGen : (pre : Variables) ->
-                            (genTy : Gen Type') =>
-                            (genName : Gen Name) =>
-                            Gen (post ** Statement pre post)
+                             (genTy : Gen Type') =>
+                             (genName : Gen Name) =>
+                             Gen (post ** Statement pre post)
 varsChanging_noRec_stmtGen pre = do
   ty <- genTy
   n <- genName
@@ -81,19 +81,19 @@ mutual
 
   ||| Statements generator of those statements that can't change the context.
   export
-  noCtxChange_stmtGen : (bound : Nat) ->
-                        (vars : Variables) ->
-                        Gen Type' =>
-                        Gen Name =>
-                        (genExpr : {a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
-                        Gen (Statement vars vars)
-  noCtxChange_stmtGen Z     vars = noCtxChange_noRec_stmtGen vars
-  noCtxChange_stmtGen (S n) vars = noCtxChange_noRec_stmtGen vars <|> oneOf
+  noVarsChange_stmtGen : (bound : Nat) ->
+                         (vars : Variables) ->
+                         Gen Type' =>
+                          Gen Name =>
+                         (genExpr : {a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
+                         Gen (Statement vars vars)
+  noVarsChange_stmtGen Z     vars = noVarsChange_noRec_stmtGen vars
+  noVarsChange_stmtGen (S n) vars = noVarsChange_noRec_stmtGen vars <|> oneOf
     [ do (inside_for ** init) <- stmtGen n vars
          (_ ** body) <- stmtGen n inside_for
-         pure $ for init !genExpr !(noCtxChange_stmtGen n inside_for) body
+         pure $ for init !genExpr !(noVarsChange_stmtGen n inside_for) body
     , pure $ if__ !genExpr (snd !(stmtGen n vars)) (snd !(stmtGen n vars))
-    , [| noCtxChange_stmtGen n vars *> noCtxChange_stmtGen n vars |]
+    , [| noVarsChange_stmtGen n vars *> noVarsChange_stmtGen n vars |]
     , (\st => block $ snd st) <$> stmtGen n vars
     ]
 
@@ -104,8 +104,8 @@ mutual
             (genName : Gen Name) =>
             ({a : Type'} -> {vars : Variables} -> Gen (Expression vars a)) =>
             Gen (post ** Statement pre post)
-  stmtGen Z     pre = varsChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noCtxChange_stmtGen Z pre
-  stmtGen (S n) pre = varsChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noCtxChange_stmtGen n pre
+  stmtGen Z     pre = varsChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noVarsChange_stmtGen Z pre
+  stmtGen (S n) pre = varsChanging_noRec_stmtGen pre <|> (\st => (pre ** st)) <$> noVarsChange_stmtGen n pre
     <|> do (mid ** l) <- stmtGen n pre
            (post ** r) <- stmtGen n mid
            pure (post ** l *> r)
