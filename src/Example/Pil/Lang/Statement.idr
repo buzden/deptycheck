@@ -36,7 +36,7 @@ data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variabl
          (0 _ : updR =%= insideR) =>
          (body : Statement insideV insideR postBodyV bodyR) ->
          (0 _ : bodyR =%= insideR) =>
-         Statement preV preR preV insideUpdR
+         Statement preV preR preV insideR
          -- Registers that are changed in `upd` or `body` must be unavailable in `cond`, `upd`, `body` and `for` itself
          -- in the case when we allow `upd` and `body` to change register types.
 
