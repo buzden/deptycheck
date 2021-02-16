@@ -2,6 +2,7 @@ module Example.Pil.Gens
 
 import Data.DPair
 import Data.List.Lazier
+import Data.Fuel
 
 import Decidable.Equality
 
@@ -45,14 +46,14 @@ nonRec_exprGen : {a : Type'} -> {vars : Variables} -> Gen (idrTypeOf a) -> Gen $
 nonRec_exprGen g = [| C g |] <|> varExprGen
 
 export
-exprGen : (szBound : Nat) ->
+exprGen : (fuel : Fuel) ->
           {a : Type'} ->
           ({b : Type'} -> Gen $ idrTypeOf b) ->
           {vars : Variables} ->
           ((subGen : {x : Type'} -> Gen $ Expression vars x) -> {b : Type'} -> Gen $ Expression vars b) ->
           Gen (Expression vars a)
-exprGen Z     g _   = nonRec_exprGen g
-exprGen (S n) g rec = nonRec_exprGen g <|> rec (exprGen n g rec)
+exprGen Dry      g _   = nonRec_exprGen g
+exprGen (More f) g rec = nonRec_exprGen g <|> rec (exprGen f g rec)
 
 --- Statements ---
 
