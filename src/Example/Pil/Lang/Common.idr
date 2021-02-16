@@ -4,6 +4,8 @@ import public Data.Vect
 
 import Decidable.Equality
 
+import Syntax.WithProof
+
 %default total
 
 namespace Types
@@ -84,8 +86,7 @@ namespace Invariant
 
     public export
     mergeSame : Maybe Type' -> Maybe Type' -> Maybe Type'
-    mergeSame Nothing  Nothing  = Nothing
-    mergeSame Nothing  (Just _) = Nothing
+    mergeSame Nothing  _        = Nothing
     mergeSame (Just _) Nothing  = Nothing
     mergeSame (Just x) (Just y) = case decEq x y of
       Yes _ => Just x
@@ -95,12 +96,48 @@ namespace Invariant
 
       export
       mergeSame_idempotent : (x : _) -> mergeSame x x = x
+      mergeSame_idempotent Nothing = Refl
+      mergeSame_idempotent (Just x) = rewrite decEqSelfIsYes {x} in Refl
 
       export
       mergeSame_commutative : (x, y : _) -> mergeSame x y = mergeSame y x
+      mergeSame_commutative Nothing  Nothing  = Refl
+      mergeSame_commutative Nothing  (Just _) = Refl
+      mergeSame_commutative (Just _) Nothing  = Refl
+      mergeSame_commutative (Just x) (Just y) with (decEq x y)
+        mergeSame_commutative (Just x) (Just y) | No uxy with (decEq y x)
+          mergeSame_commutative (Just _) (Just _) | No _   | No _   = Refl
+          mergeSame_commutative (Just _) (Just _) | No uxy | Yes yx = absurd $ uxy $ sym yx
+        mergeSame_commutative (Just x) (Just y) | Yes xy = rewrite sym xy in
+                                                           rewrite decEqSelfIsYes {x} in
+                                                           Refl
+
+      export
+      mergeSame_nothing_absorbs_r : (x : _) -> mergeSame x Nothing = Nothing
+      mergeSame_nothing_absorbs_r Nothing  = Refl
+      mergeSame_nothing_absorbs_r (Just _) = Refl
+
+      -- To be removed from here as soon as PR#1072 is merged.
+      decEqContraIsNo : DecEq a => {x, y : a} -> (x = y -> Void) -> (p ** decEq x y = No p)
+      decEqContraIsNo uxy with (decEq x y)
+        decEqContraIsNo uxy | Yes xy = absurd $ uxy xy
+        decEqContraIsNo _   | No uxy = (uxy ** Refl)
 
       export
       mergeSame_associative : (x, y, z : _) -> (x `mergeSame` y) `mergeSame` z = x `mergeSame` (y `mergeSame` z)
+      mergeSame_associative Nothing  _        _        = Refl
+      mergeSame_associative (Just x) Nothing  _        = Refl
+      mergeSame_associative (Just x) (Just y) Nothing  = mergeSame_nothing_absorbs_r _
+      mergeSame_associative (Just x) (Just y) (Just z) with (decEq x y)
+        mergeSame_associative (Just x) (Just y) (Just z) | Yes xy = rewrite xy in
+                                                                    case @@ decEq y z of
+                                                                      (Yes _ ** p) => rewrite p in
+                                                                                      rewrite decEqSelfIsYes {x=y} in
+                                                                                      Refl
+                                                                      (No _ ** p) => rewrite p in Refl
+        mergeSame_associative (Just x) (Just y) (Just z) | No uxy with (decEq y z)
+          mergeSame_associative (Just x) (Just y) (Just z) | No uxy | Yes yz = rewrite snd $ decEqContraIsNo uxy in Refl
+          mergeSame_associative (Just x) (Just y) (Just z) | No uxy | No uyz = Refl
 
     --- The main eliminator for the `Registers` type ---
 
