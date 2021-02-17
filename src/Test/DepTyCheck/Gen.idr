@@ -175,14 +175,18 @@ public export
 suchThat : Gen a -> (a -> Bool) -> Gen a
 suchThat g p = fst <$> suchThat_withPrf g p
 
+export
+suchThat_dec : Gen a -> ((x : a) -> Dec (prop x)) -> Gen $ Subset a prop
+suchThat_dec g f = mapMaybe d g where
+  d : a -> Maybe $ Subset a prop
+  d x = case f x of
+    Yes p => Just $ Element x p
+    No  _ => Nothing
+
 ||| Filters the given generator so, that resulting values `x` are solutions of equation `y = f x` for given `f` and `y`.
 export
 suchThat_invertedEq : DecEq b => Gen a -> (y : b) -> (f : a -> b) -> Gen $ Subset a \x => y = f x
-suchThat_invertedEq g y f = mapMaybe pep g where
-  pep : a -> Maybe $ Subset a \x => y = f x
-  pep x = case decEq y $ f x of
-    Yes prf => Just $ Element x prf
-    No _    => Nothing
+suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
 
 -- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
 export
