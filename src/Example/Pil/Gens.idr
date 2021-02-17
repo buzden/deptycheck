@@ -276,10 +276,13 @@ namespace Statements_given_preV_preR -- implementations
 
   for_gen @{_} @{_} @{expr} f preV preR = do
     (insideV ** insideR ** init) <- statement_gen f preV preR
+    --
     (updR ** _) <- eq_registers_gen f insideR
     upd         <- statement_gen f insideV insideR insideV updR
+    --
     (bodyR ** _) <- eq_registers_gen f insideR
     (_ ** body)  <- statement_gen f insideV insideR bodyR
+    --
     pure (_ ** _ ** for init !expr upd body)
 
   if_gen @{_} @{_} @{expr} f preV preR = do
