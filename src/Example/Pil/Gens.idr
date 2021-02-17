@@ -110,6 +110,8 @@ namespace Equal_registers
     , merge_assoc' f regs
     ]
 
+namespace Equal_registers -- implementations
+
   refl _ regs = pure (_ ** index_equiv_refl)
 
   merge_idemp _ regs = pure (_ ** merge_idempotent)
@@ -126,21 +128,21 @@ namespace Equal_registers
 namespace Statements_given_preV_preR_postV_postR
 
   public export
-  Statement''_Gen : Type
-  Statement''_Gen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (postR : Registers rc) ->
-                                   Gen (Statement preV preR postV postR)
+  Statement_no_Gen : Type
+  Statement_no_Gen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (postR : Registers rc) ->
+                                    Gen (Statement preV preR postV postR)
 
-  nop_gen   : Statement''_Gen
-  dot_gen   : Statement''_Gen
-  ass_gen   : Statement''_Gen
-  for_gen   : Statement''_Gen
-  if_gen    : Statement''_Gen
-  seq_gen   : Statement''_Gen
-  block_gen : Statement''_Gen
-  print_gen : Statement''_Gen
+  nop_gen   : Statement_no_Gen
+  dot_gen   : Statement_no_Gen
+  ass_gen   : Statement_no_Gen
+  for_gen   : Statement_no_Gen
+  if_gen    : Statement_no_Gen
+  seq_gen   : Statement_no_Gen
+  block_gen : Statement_no_Gen
+  print_gen : Statement_no_Gen
 
   export
-  statement_gen : Statement''_Gen
+  statement_gen : Statement_no_Gen
   statement_gen Dry preV preR postV postR = oneOf
     [ nop_gen   Dry preV preR postV postR
     , dot_gen   Dry preV preR postV postR
@@ -158,24 +160,59 @@ namespace Statements_given_preV_preR_postV_postR
     , print_gen f preV preR postV postR
     ]
 
+namespace Statements_given_preV_preR_postV
+
+  public export
+  Statement_postR_Gen : Type
+  Statement_postR_Gen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) ->
+                                       Gen (postR ** Statement preV preR postV postR)
+
+  nop_gen   : Statement_postR_Gen
+  dot_gen   : Statement_postR_Gen
+  ass_gen   : Statement_postR_Gen
+  for_gen   : Statement_postR_Gen
+  if_gen    : Statement_postR_Gen
+  seq_gen   : Statement_postR_Gen
+  block_gen : Statement_postR_Gen
+  print_gen : Statement_postR_Gen
+
+  export
+  statement_gen : Statement_postR_Gen
+  statement_gen Dry preV preR postR = oneOf
+    [ nop_gen   Dry preV preR postR
+    , dot_gen   Dry preV preR postR
+    , ass_gen   Dry preV preR postR
+    , print_gen Dry preV preR postR
+    ]
+  statement_gen (More f) preV preR postR = oneOf
+    [ nop_gen   f preV preR postR
+    , dot_gen   f preV preR postR
+    , ass_gen   f preV preR postR
+    , for_gen   f preV preR postR
+    , if_gen    f preV preR postR
+    , seq_gen   f preV preR postR
+    , block_gen f preV preR postR
+    , print_gen f preV preR postR
+    ]
+
 namespace Statements_given_preV_preR_postR
 
   public export
-  Statement'_Gen : Type
-  Statement'_Gen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> (postR : Registers rc) ->
-                                 Gen (postV ** Statement preV preR postV postR)
+  Statement_postV_Gen : Type
+  Statement_postV_Gen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> (postR : Registers rc) ->
+                                       Gen (postV ** Statement preV preR postV postR)
 
-  nop_gen   : Statement'_Gen
-  dot_gen   : Statement'_Gen
-  ass_gen   : Statement'_Gen
-  for_gen   : Statement'_Gen
-  if_gen    : Statement'_Gen
-  seq_gen   : Statement'_Gen
-  block_gen : Statement'_Gen
-  print_gen : Statement'_Gen
+  nop_gen   : Statement_postV_Gen
+  dot_gen   : Statement_postV_Gen
+  ass_gen   : Statement_postV_Gen
+  for_gen   : Statement_postV_Gen
+  if_gen    : Statement_postV_Gen
+  seq_gen   : Statement_postV_Gen
+  block_gen : Statement_postV_Gen
+  print_gen : Statement_postV_Gen
 
   export
-  statement_gen : Statement'_Gen
+  statement_gen : Statement_postV_Gen
   statement_gen Dry preV preR postR = oneOf
     [ nop_gen   Dry preV preR postR
     , dot_gen   Dry preV preR postR
@@ -196,20 +233,20 @@ namespace Statements_given_preV_preR_postR
 namespace Statements_given_preV_preR
 
   public export
-  StmtGen : Type
-  StmtGen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (postV ** postR ** Statement preV preR postV postR)
+  Statement_postV_postR_Gen : Type
+  Statement_postV_postR_Gen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (postV ** postR ** Statement preV preR postV postR)
 
-  nop_gen   : StmtGen
-  dot_gen   : StmtGen
-  ass_gen   : StmtGen
-  for_gen   : StmtGen
-  if_gen    : StmtGen
-  seq_gen   : StmtGen
-  block_gen : StmtGen
-  print_gen : StmtGen
+  nop_gen   : Statement_postV_postR_Gen
+  dot_gen   : Statement_postV_postR_Gen
+  ass_gen   : Statement_postV_postR_Gen
+  for_gen   : Statement_postV_postR_Gen
+  if_gen    : Statement_postV_postR_Gen
+  seq_gen   : Statement_postV_postR_Gen
+  block_gen : Statement_postV_postR_Gen
+  print_gen : Statement_postV_postR_Gen
 
   export
-  statement_gen : StmtGen
+  statement_gen : Statement_postV_postR_Gen
   statement_gen Dry preV preR = oneOf
     [ nop_gen   Dry preV preR
     , dot_gen   Dry preV preR
@@ -227,7 +264,7 @@ namespace Statements_given_preV_preR
     , print_gen f preV preR
     ]
 
-namespace Statements_given_preV_preR
+namespace Statements_given_preV_preR -- implementations
 
   nop_gen _ preV preR = pure (_ ** _ ** nop)
 
