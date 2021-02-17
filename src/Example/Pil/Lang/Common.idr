@@ -78,6 +78,18 @@ namespace Invariant
 
     %name Registers regs
 
+    export
+    DecEq (Registers rc) where
+      decEq (Base xs) (Base ys) with (decEq xs ys)
+        decEq (Base _) (Base _) | Yes p = rewrite p in Yes Refl
+        decEq (Base _) (Base _) | No up = No $ up . \case Refl => Refl
+      decEq (Merge r1 r2) (Merge s1 s2) with (decEq r1 s1, decEq r2 s2)
+        decEq (Merge _ _) (Merge _ _) | (Yes p, Yes s) = rewrite p in rewrite s in Yes Refl
+        decEq (Merge _ _) (Merge _ _) | (Yes _, No us) = No $ us . \case Refl => Refl
+        decEq (Merge _ _) (Merge _ _) | (No up, _    ) = No $ up . \case Refl => Refl
+      decEq (Base _) (Merge _ _) = No \case Refl impossible
+      decEq (Merge _ _) (Base _) = No \case Refl impossible
+
     public export
     AllUndefined : {rc : Nat} -> Registers rc
     AllUndefined = Base $ replicate rc Nothing
