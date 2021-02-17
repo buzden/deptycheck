@@ -93,8 +93,35 @@ namespace Equal_registers
   EqRegisters_Gen : Type
   EqRegisters_Gen = SpecGen \rc => (regs : Registers rc) -> Gen (regs' ** regs' =%= regs)
 
+  refl  : EqRegisters_Gen
+
+  merge_idemp  : EqRegisters_Gen
+  merge_comm   : EqRegisters_Gen
+  merge_assoc  : EqRegisters_Gen
+  merge_assoc' : EqRegisters_Gen
+
   export
   eq_registers_gen : EqRegisters_Gen
+  eq_registers_gen f regs = oneOf
+    [ refl         f regs
+    , merge_idemp  f regs
+    , merge_comm   f regs
+    , merge_assoc  f regs
+    , merge_assoc' f regs
+    ]
+
+  refl _ regs = pure (_ ** index_equiv_refl)
+
+  merge_idemp _ regs = pure (_ ** merge_idempotent)
+
+  merge_comm _ $ r1 `Merge` r2 = pure (_ ** merge_commutative)
+  merge_comm _ _ = empty
+
+  merge_assoc _ $ a `Merge` (b `Merge` c) = pure (_ ** merge_associative)
+  merge_assoc _ _ = empty
+
+  merge_assoc' _ $ (a `Merge` b) `Merge` c = pure (_ ** index_equiv_sym merge_associative)
+  merge_assoc' _ _ = empty
 
 namespace Statements_given_preV_preR_postV_postR
 
