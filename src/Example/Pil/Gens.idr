@@ -2,7 +2,7 @@ module Example.Pil.Gens
 
 import Data.DPair
 import Data.List.Lazier
-import Data.Fuel
+import public Data.Fuel
 
 import Decidable.Equality
 
