@@ -57,6 +57,12 @@ namespace Auxiliary
   Show Name where
     show (MkName n) = n
 
+  export
+  DecEq Name where
+    decEq (MkName n) (MkName m) with (decEq n m)
+      decEq (MkName n) (MkName m) | Yes p = rewrite p in Yes Refl
+      decEq (MkName n) (MkName m) | No co = No \case Refl => co Refl
+
 namespace Invariant
 
   --- Static context in terms of which we are formulating an invariant ---
