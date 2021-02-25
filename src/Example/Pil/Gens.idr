@@ -363,3 +363,21 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
     (_, No _) => empty
     (Yes p, Yes q) => rewrite p in rewrite q in
       pure $ print !(expr {a=String'})
+
+namespace Statements_given_preV_preR_postR -- implementations
+
+  nop_gen _ preV preR postR = ?foo_nop
+
+  dot_gen @{type'} @{name} @{_} _ preV preR postR = ?foo_dot
+
+  ass_gen @{_} @{_} @{expr} _ preV preR postR = ?foo_ass
+
+  for_gen @{_} @{_} @{expr} f preV preR postR = ?foo_for
+
+  if_gen @{_} @{_} @{expr} f preV preR postR = ?foo_if
+
+  seq_gen f preV preR postR = ?foo_seq
+
+  block_gen f preV preR postR = ?foo_block
+
+  print_gen @{_} @{_} @{expr} _ preV preR postR = ?foo_print
