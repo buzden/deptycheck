@@ -305,30 +305,30 @@ namespace Statements_given_preV_preR -- implementations
 
 namespace Statements_given_preV_preR_postV_postR -- implementations
 
-  nop_gen _ preV preR postV postR = case (decEq preV postV, decEq preR postR) of
+  nop_gen _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
     (_, No _) => empty
-    (Yes p, Yes q) => rewrite sym p in rewrite sym q in
+    (Yes p, Yes q) => rewrite p in rewrite q in
                       pure nop
 
   dot_gen _ preV preR postV postR = case postV of
     [] => empty
-    ((n, ty)::postV') => case (decEq preV postV', decEq preR postR) of
+    ((n, ty)::postV') => case (decEq postV' preV, decEq postR preR) of
       (No _, _) => empty
       (_, No _) => empty
-      (Yes p, Yes q) => rewrite sym p in rewrite sym q in
+      (Yes p, Yes q) => rewrite p in rewrite q in
         pure (ty . n)
 
-  ass_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq preV postV, decEq preR postR) of
+  ass_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
     (_, No _) => empty
-    (Yes p, Yes q) => rewrite sym p in rewrite sym q in do
+    (Yes p, Yes q) => rewrite p in rewrite q in do
       (n ** lk) <- lookupGen preV
       pure $ n #= !expr
 
-  for_gen @{_} @{_} @{expr} f preV preR postV postR = case decEq preV postV of
+  for_gen @{_} @{_} @{expr} f preV preR postV postR = case decEq postV preV of
     No _ => empty
-    Yes p => rewrite sym p in do
+    Yes p => rewrite p in do
       (insideV ** init) <- statement_gen f preV preR postR
       --
       (updR ** _) <- eq_registers_gen f postR
@@ -339,10 +339,10 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
       --
       pure $ for init !expr upd body
 
-  if_gen @{_} @{_} @{expr} f preV preR postV postR = case (decEq preV postV, @@ postR) of
+  if_gen @{_} @{_} @{expr} f preV preR postV postR = case (decEq postV preV, @@ postR) of
     (No _, _) => empty
     (_, (Base {} ** _)) => empty
-    (Yes p, (Merge thR elR ** q)) => rewrite sym p in rewrite q in do
+    (Yes p, (Merge thR elR ** q)) => rewrite p in rewrite q in do
       (_ ** th) <- statement_gen f preV preR thR
       (_ ** el) <- statement_gen f preV preR elR
       pure $ if__ !expr th el
@@ -352,14 +352,14 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
     right                  <- statement_gen f midV midR postV postR
     pure $ left *> right
 
-  block_gen f preV preR postV postR = case decEq preV postV of
+  block_gen f preV preR postV postR = case decEq postV preV of
     No _ => empty
-    Yes p => rewrite sym p in do
+    Yes p => rewrite p in do
       (_ ** stmt) <- statement_gen f preV preR postR
       pure $ block stmt
 
-  print_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq preV postV, decEq preR postR) of
+  print_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
     (_, No _) => empty
-    (Yes p, Yes q) => rewrite sym p in rewrite sym q in
+    (Yes p, Yes q) => rewrite p in rewrite q in
       pure $ print !(expr {a=String'})
