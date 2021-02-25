@@ -309,7 +309,7 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
     (No _, _) => empty
     (_, No _) => empty
     (Yes p, Yes q) => rewrite p in rewrite q in
-                      pure nop
+      pure nop
 
   dot_gen _ preV preR postV postR = case postV of
     [] => empty
@@ -317,7 +317,7 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
       (No _, _) => empty
       (_, No _) => empty
       (Yes p, Yes q) => rewrite p in rewrite q in
-        pure (ty . n)
+        pure $ ty. n
 
   ass_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
@@ -366,18 +366,50 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
 
 namespace Statements_given_preV_preR_postR -- implementations
 
-  nop_gen _ preV preR postR = ?foo_nop
+  nop_gen _ preV preR postR = case decEq postR preR of
+    No _ => empty
+    Yes p => rewrite p in
+      pure (_ ** nop)
 
-  dot_gen @{type'} @{name} @{_} _ preV preR postR = ?foo_dot
+  dot_gen @{type'} @{name} @{_} _ preV preR postR = case decEq postR preR of
+    No _ => empty
+    Yes p => rewrite p in
+      pure (_ ** !type'. !name)
 
-  ass_gen @{_} @{_} @{expr} _ preV preR postR = ?foo_ass
+  ass_gen @{_} @{_} @{expr} _ preV preR postR = case decEq postR preR of
+    No _ => empty
+    Yes p => rewrite p in do
+      (n ** lk) <- lookupGen preV
+      pure (_ ** n #= !expr)
 
-  for_gen @{_} @{_} @{expr} f preV preR postR = ?foo_for
+  for_gen @{_} @{_} @{expr} f preV preR postR = do
+    (insideV ** init) <- statement_gen f preV preR postR
+    --
+    (updR ** _) <- eq_registers_gen f postR
+    upd         <- statement_gen f insideV postR insideV updR
+    --
+    (bodyR ** _) <- eq_registers_gen f postR
+    (_ ** body)  <- statement_gen f insideV postR bodyR
+    --
+    pure (_ ** for init !expr upd body)
 
-  if_gen @{_} @{_} @{expr} f preV preR postR = ?foo_if
+  if_gen @{_} @{_} @{expr} f preV preR postR = case postR of
+    Base {} => empty
+    Merge thR elR => do
+      (_ ** th) <- statement_gen f preV preR thR
+      (_ ** el) <- statement_gen f preV preR elR
+      pure (_ ** if__ !expr th el)
 
-  seq_gen f preV preR postR = ?foo_seq
+  seq_gen f preV preR postR = do
+    (midV ** midR ** left) <- statement_gen f preV preR
+    (_           ** right) <- statement_gen f midV midR postR
+    pure $ (_ ** left *> right)
 
-  block_gen f preV preR postR = ?foo_block
+  block_gen f preV preR postR = do
+    (_ ** stmt) <- statement_gen f preV preR postR
+    pure $ (_ ** block stmt)
 
-  print_gen @{_} @{_} @{expr} _ preV preR postR = ?foo_print
+  print_gen @{_} @{_} @{expr} _ preV preR postR = case decEq postR preR of
+    No _ => empty
+    Yes p => rewrite p in
+      pure $ (_ ** print !(expr {a=String'}))
