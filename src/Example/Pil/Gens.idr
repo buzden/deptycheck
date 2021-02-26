@@ -102,6 +102,8 @@ namespace Equal_registers
   merge_assoc  : EqRegisters_Gen
   merge_assoc' : EqRegisters_Gen
 
+  squashed : EqRegisters_Gen
+
   export
   eq_registers_gen : EqRegisters_Gen
   eq_registers_gen f regs = oneOf
@@ -110,6 +112,7 @@ namespace Equal_registers
     , merge_comm   f regs
     , merge_assoc  f regs
     , merge_assoc' f regs
+    , squashed     f regs
     ]
 
 namespace Equal_registers -- implementations
@@ -126,6 +129,9 @@ namespace Equal_registers -- implementations
 
   merge_assoc' _ $ (a `Merge` b) `Merge` c = pure (_ ** index_equiv_sym merge_associative)
   merge_assoc' _ _ = empty
+
+  squashed _ $ Base _ = empty -- just to not to repeat `refl` since squash of `Base` is the same
+  squashed _ $ Merge _ _ = pure (_ ** squashed_regs_equiv)
 
 namespace Statements_given_preV_preR_postV_postR
 
