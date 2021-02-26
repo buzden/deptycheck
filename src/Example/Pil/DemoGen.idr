@@ -62,7 +62,10 @@ showSomeStatements : {default 0 variant : Nat} -> {default 2 regCount : Nat} -> 
 showSomeStatements count =
   traverse_ putStrLn $
     intersperse "----" $
-      (concat . map (\p => show $ snd p) . someStatement {rc=regCount}) <$> [variant .. (variant + count)]
+      (concat . map showStatement . someStatement {rc=regCount}) <$> [variant .. (variant + count)]
+  where
+    showStatement : forall preV, preR. (postV ** postR ** Statement preV preR postV postR) -> String
+    showStatement (postV ** postR ** stmt) = show stmt ++ "\n// regs ty after: " ++ show postR
 
 export
 main : IO ()
