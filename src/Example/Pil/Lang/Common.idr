@@ -177,6 +177,18 @@ namespace Invariant
                                              rewrite squash_preserves_index i r2 in
                                              Refl
 
+    --- Showing the registers state as a string ---
+
+    Show (Maybe Type') where
+      show $ Just Bool'   = "Bool"
+      show $ Just Int'    = "Int"
+      show $ Just String' = "String"
+      show $ Nothing      = "-"
+
+    export
+    Show (Registers rc) where
+      show = show . squash
+
     --- Index-equivalence relation ---
 
     infix 0 =%=
