@@ -172,7 +172,7 @@ namespace Invariant
     export
     squash_preserves_index : (i : Fin rc) -> (regs : Registers rc) -> index i (squash regs) = index i regs
     squash_preserves_index _ $ Base _ = Refl
-    squash_preserves_index i $ Merge r1 r2 = rewrite zipWith_index_linear mergeSame (squash r1) (squash r2) i in
+    squash_preserves_index i $ Merge r1 r2 = rewrite zipWithIndexLinear mergeSame (squash r1) (squash r2) i in
                                              rewrite squash_preserves_index i r1 in
                                              rewrite squash_preserves_index i r2 in
                                              Refl
