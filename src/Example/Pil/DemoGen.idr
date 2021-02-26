@@ -17,7 +17,6 @@ interestingType = oneOf $ map pure $ [Int', String', Bool']
 alphaChar : Gen Char
 alphaChar = choose ('a', 'z')
 
-%hint
 alphaString : Gen String
 alphaString = map pack $ sequence $ replicate !(choose (1, 3)) alphaChar
 
