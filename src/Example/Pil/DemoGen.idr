@@ -64,7 +64,10 @@ showSomeStatements count =
       (concat . map showStatement . someStatement {rc=regCount}) <$> [variant .. (variant + count)]
   where
     showStatement : forall preV, preR. (postV ** postR ** Statement preV preR postV postR) -> String
-    showStatement (postV ** postR ** stmt) = show stmt ++ "\n// regs ty after: " ++ show postR
+    showStatement (postV ** postR ** stmt) = """
+      \{show stmt}
+      // regs ty after: \{show postR}
+      """
 
 export
 main : IO ()
