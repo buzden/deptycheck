@@ -9,7 +9,7 @@ import Example.Pil.Lang.Expression
 
 %default total
 
-infix 2 #=, ?#=
+infix 2 #=, ?#=, !#=
 infixr 1 *>
 
 data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (postR : Registers rc) -> Type
@@ -73,8 +73,8 @@ n ?#= v = ty. n *> n #= v
 namespace AlternativeDefineAndAssign
 
   public export %inline
-  (#=) : (p : (Name, Type')) -> Expression (p::vars) regs (snd p) -> Statement vars regs (p::vars) regs
-  (n, _) #= v = n ?#= v
+  (!#=) : (p : (Name, Type')) -> Expression (p::vars) regs (snd p) -> Statement vars regs (p::vars) regs
+  (n, _) !#= v = n ?#= v
 
   public export %inline
   (.) : a -> b -> (b, a)

@@ -60,12 +60,12 @@ lost_block = do
   block $ do
     Int'. "x"
     "x" #= C 2
-    Int'. "y" #= V "x"
-    Int'. "z" #= C 3
+    Int'. "y" !#= V "x"
+    Int'. "z" !#= C 3
     print $ V "y" + V "z" + V "x"
 
 some_for : Statement vars regs vars regs
-some_for = for (do Int'. "x" #= C 0; Int'. "y" #= C 0) (V "x" < C 5 && V "y" < C 10) ("x" #= V "x" + C 1) $ do
+some_for = for (do Int'. "x" !#= C 0; Int'. "y" !#= C 0) (V "x" < C 5 && V "y" < C 10) ("x" #= V "x" + C 1) $ do
              "y" #= V "y" + V "x" + C 1
 
 --bad_for : Statement vars regs vars regs
@@ -80,14 +80,14 @@ euc = do
     if__ (V "a" > V "b")
       ("a" #= V "a" `mod` V "b")
       ("b" #= V "b" `mod` V "a")
-  Int'. "res" #= V "a" + V "b"
+  Int'. "res" !#= V "a" + V "b"
 
 name_shadowing : Statement vars regs vars regs
 name_shadowing = block $ do
-  Int'. "x" #= C 0
+  Int'. "x" !#= C 0
   block $ do
-    Int'. "x" #= C 3
-    Int'. "y" #= V "x" + C 2
-    String'. "x" #= C "foo"
+    Int'. "x" !#= C 3
+    Int'. "y" !#= V "x" + C 2
+    String'. "x" !#= C "foo"
     print $ V "x" ++ C "bar" ++ show (V "y")
-  Int'. "z" #= V "x" + C 2
+  Int'. "z" !#= V "x" + C 2
