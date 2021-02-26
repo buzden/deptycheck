@@ -157,12 +157,25 @@ namespace Invariant
           mergeSame_associative (Just x) (Just y) (Just z) | No uxy | Yes yz = rewrite snd $ decEqContraIsNo uxy in Refl
           mergeSame_associative (Just x) (Just y) (Just z) | No uxy | No uyz = Refl
 
-    --- The main eliminator for the `Registers` type ---
+    --- Eliminators for the `Registers` type ---
 
     public export
     index : Fin rc -> Registers rc -> Maybe Type'
     index i $ Base xs     = Vect.index i xs
     index i $ Merge r1 r2 = mergeSame (index i r1) (index i r2)
+
+    public export
+    squash : Registers rc -> Vect rc $ Maybe Type'
+    squash $ Base xs = xs
+    squash $ Merge r1 r2 = zipWith mergeSame (squash r1) (squash r2)
+
+    export
+    squash_preserves_index : (i : Fin rc) -> (regs : Registers rc) -> index i (squash regs) = index i regs
+    squash_preserves_index _ $ Base _ = Refl
+    squash_preserves_index i $ Merge r1 r2 = rewrite zipWith_index_linear mergeSame (squash r1) (squash r2) i in
+                                             rewrite squash_preserves_index i r1 in
+                                             rewrite squash_preserves_index i r2 in
+                                             Refl
 
     --- Index-equivalence relation ---
 
@@ -202,3 +215,9 @@ namespace Invariant
     export %hint
     merge_idempotent : {x : _} -> Merge x x =%= x
     merge_idempotent = EquivByIndex \i => mergeSame_idempotent _
+
+    --- Equivalence properties of `squash` ---
+
+    export %hint
+    squashed_regs_equiv : {x : _} -> Base (squash x) =%= x
+    squashed_regs_equiv = EquivByIndex \i => squash_preserves_index i x
