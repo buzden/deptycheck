@@ -102,10 +102,10 @@ Applicative Gen where
 export
 Alternative Gen where
   empty = Uniform []
-  AlternG ls <|> AlternG rs = AlternG $ ls ++ rs
-  AlternG ls <|> generalR   = AlternG $ ls ++ [generalR]
-  generalL   <|> AlternG rs = AlternG $ [generalL] ++ rs
-  generalL   <|> generalR   = AlternG $ [generalL, generalR]
+  AlternG ls <|> Delay (AlternG rs) = AlternG $ ls ++ rs
+  AlternG ls <|> Delay (generalR  ) = AlternG $ ls ++ [generalR]
+  generalL   <|> Delay (AlternG rs) = AlternG $ [generalL] ++ rs
+  generalL   <|> Delay (generalR  ) = AlternG $ [generalL, generalR]
 
 ||| Makes the given `Gen` to act as an independent generator according to the `Alternative` combination.
 ||| That is, in `independent (independent a <|> independent b)` given `a` and `b` are distributed evenly.
