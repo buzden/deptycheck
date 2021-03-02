@@ -93,7 +93,7 @@ Applicative Gen where
 
   Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
   Uniform fs <*> AlternG gs = AlternG $ [| map fs gs |]
-  AlternG gs <*> Uniform xs = AlternG $ [| (\gab, a => map (flip apply a) gab) gs xs |]
+  AlternG gs <*> Uniform xs = AlternG $ [| (\gab, a => flip apply a <$> gab) gs xs |]
   AlternG fs <*> AlternG gs = AlternG $ assert_total $ [| fs <*> gs |]
 
   rawF@(Raw {}) <*> generalA = apAsRaw rawF generalA
