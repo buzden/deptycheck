@@ -82,7 +82,6 @@ namespace AlternativeDefineAndAssign
 
 namespace ShowC
 
-  export
   Show Type' where
     show Bool'   = "bool"
     show Int'    = "int"

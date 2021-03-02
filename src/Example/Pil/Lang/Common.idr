@@ -57,6 +57,12 @@ namespace Auxiliary
   Show Name where
     show (MkName n) = n
 
+  export
+  DecEq Name where
+    decEq (MkName n) (MkName m) with (decEq n m)
+      decEq (MkName n) (MkName m) | Yes p = rewrite p in Yes Refl
+      decEq (MkName n) (MkName m) | No co = No \case Refl => co Refl
+
 namespace Invariant
 
   --- Static context in terms of which we are formulating an invariant ---
@@ -77,6 +83,18 @@ namespace Invariant
       Merge : Registers rc -> Registers rc -> Registers rc
 
     %name Registers regs
+
+    export
+    DecEq (Registers rc) where
+      decEq (Base xs) (Base ys) with (decEq xs ys)
+        decEq (Base _) (Base _) | Yes p = rewrite p in Yes Refl
+        decEq (Base _) (Base _) | No up = No $ up . \case Refl => Refl
+      decEq (Merge r1 r2) (Merge s1 s2) with (decEq r1 s1, decEq r2 s2)
+        decEq (Merge _ _) (Merge _ _) | (Yes p, Yes s) = rewrite p in rewrite s in Yes Refl
+        decEq (Merge _ _) (Merge _ _) | (Yes _, No us) = No $ us . \case Refl => Refl
+        decEq (Merge _ _) (Merge _ _) | (No up, _    ) = No $ up . \case Refl => Refl
+      decEq (Base _) (Merge _ _) = No \case Refl impossible
+      decEq (Merge _ _) (Base _) = No \case Refl impossible
 
     public export
     AllUndefined : {rc : Nat} -> Registers rc
@@ -139,12 +157,37 @@ namespace Invariant
           mergeSame_associative (Just x) (Just y) (Just z) | No uxy | Yes yz = rewrite snd $ decEqContraIsNo uxy in Refl
           mergeSame_associative (Just x) (Just y) (Just z) | No uxy | No uyz = Refl
 
-    --- The main eliminator for the `Registers` type ---
+    --- Eliminators for the `Registers` type ---
 
     public export
     index : Fin rc -> Registers rc -> Maybe Type'
     index i $ Base xs     = Vect.index i xs
     index i $ Merge r1 r2 = mergeSame (index i r1) (index i r2)
+
+    public export
+    squash : Registers rc -> Vect rc $ Maybe Type'
+    squash $ Base xs = xs
+    squash $ Merge r1 r2 = zipWith mergeSame (squash r1) (squash r2)
+
+    export
+    squash_preserves_index : (i : Fin rc) -> (regs : Registers rc) -> index i (squash regs) = index i regs
+    squash_preserves_index _ $ Base _ = Refl
+    squash_preserves_index i $ Merge r1 r2 = rewrite zipWithIndexLinear mergeSame (squash r1) (squash r2) i in
+                                             rewrite squash_preserves_index i r1 in
+                                             rewrite squash_preserves_index i r2 in
+                                             Refl
+
+    --- Showing the registers state as a string ---
+
+    Show (Maybe Type') where
+      show $ Just Bool'   = "Bool"
+      show $ Just Int'    = "Int"
+      show $ Just String' = "String"
+      show $ Nothing      = "-"
+
+    export
+    Show (Registers rc) where
+      show = show . squash
 
     --- Index-equivalence relation ---
 
@@ -184,3 +227,9 @@ namespace Invariant
     export %hint
     merge_idempotent : {x : _} -> Merge x x =%= x
     merge_idempotent = EquivByIndex \i => mergeSame_idempotent _
+
+    --- Equivalence properties of `squash` ---
+
+    export %hint
+    squashed_regs_equiv : {x : _} -> Base (squash x) =%= x
+    squashed_regs_equiv = EquivByIndex \i => squash_preserves_index i x
