@@ -9,44 +9,72 @@ import Example.Pil.Lang.Expression
 
 %default total
 
-infix 2 #=, ?#=
+infix 2 #=, ?#=, !#=
 infixr 1 *>
 
-public export
-data Statement : (pre : Context) -> (post : Context) -> Type where
-  nop  : Statement ctx ctx
-  (.)  : (ty : Type') -> (n : Name) -> Statement ctx $ (n, ty)::ctx
-  (#=) : (n : Name) -> (0 lk : Lookup n ctx) => (v : Expression ctx lk.reveal) -> Statement ctx ctx
-  for  : (init : Statement outer_ctx inside_for)  -> (cond : Expression inside_for Bool') ->
-         (upd  : Statement inside_for inside_for) -> (body : Statement inside_for after_body) ->
-         Statement outer_ctx outer_ctx
-  if__ : (cond : Expression ctx Bool') -> Statement ctx ctx_then -> Statement ctx ctx_else -> Statement ctx ctx
-  (*>) : Statement pre mid -> Statement mid post -> Statement pre post
-  block : Statement outer inside -> Statement outer outer
-  print : Show (idrTypeOf ty) => Expression ctx ty -> Statement ctx ctx
+data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (postR : Registers rc) -> Type
 
 public export %inline
-(>>=) : Statement pre mid -> (Unit -> Statement mid post) -> Statement pre post
+0 (.varsAfter) : Statement preV preR postV postR -> Variables
+stmt.varsAfter = postV
+
+public export %inline
+0 (.regsAfter) : {0 preR : Registers rc} -> Statement preV preR postV postR -> Registers rc
+stmt.regsAfter = postR
+
+public export
+data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (postR : Registers rc) -> Type where
+  nop  : Statement vars regs vars regs
+
+  (.)  : (ty : Type') -> (n : Name) -> Statement vars regs ((n, ty)::vars) regs
+
+  (#=) : (n : Name) -> (0 lk : Lookup n vars) => (v : Expression vars regs lk.reveal) -> Statement vars regs vars regs
+
+  for  : (init : Statement preV preR insideV insideR) ->
+         (cond : Expression insideV insideR Bool') ->
+         (upd  : Statement insideV insideR insideV updR) ->
+         (0 _ : updR =%= insideR) =>
+         (body : Statement insideV insideR postBodyV bodyR) ->
+         (0 _ : bodyR =%= insideR) =>
+         Statement preV preR preV insideR
+         -- Registers that are changed in `upd` or `body` must be unavailable in `cond`, `upd`, `body` and `for` itself
+         -- in the case when we allow `upd` and `body` to change register types.
+
+  if__ : (cond : Expression vars regs Bool') ->
+         Statement vars regs varsThen regsThen ->
+         Statement vars regs varsElse regsElse ->
+         Statement vars regs vars $ Merge regsThen regsElse
+
+  (*>) : Statement preV preR midV midR ->
+         Statement midV midR postV postR ->
+         Statement preV preR postV postR
+
+  block : Statement preV preR insideV postR -> Statement preV preR preV postR
+
+  print : Show (idrTypeOf ty) => Expression vars regs ty -> Statement vars regs vars regs
+
+public export %inline
+(>>=) : Statement preV preR midV midR -> (Unit -> Statement midV midR postV postR) -> Statement preV preR postV postR
 a >>= f = a *> f ()
 
 public export %inline
-if_  : (cond : Expression ctx Bool') -> Statement ctx ctx_then -> Statement ctx ctx
+if_  : (cond : Expression vars regsBefore Bool') -> Statement vars regsBefore varsThen regsThen -> Statement vars regsBefore vars $ Merge regsThen regsBefore
 if_ c t = if__ c t nop
 
 public export %inline
-while : Expression ctx Bool' -> Statement ctx after_body -> Statement ctx ctx
-while cond = for nop cond nop
+while : Expression vars regs Bool' -> Statement vars regs after_body body_regs -> (0 _ : body_regs =%= regs) => Statement vars regs vars regs
+while cond body = for nop cond nop body
 
 -- Define with derived type and assign immediately
 public export %inline
-(?#=) : (n : Name) -> {ty : Type'} -> Expression ((n, ty)::ctx) ty -> Statement ctx $ (n, ty)::ctx
+(?#=) : (n : Name) -> {ty : Type'} -> {0 regs : Registers rc} -> Expression ((n, ty)::vars) regs ty -> Statement vars regs ((n, ty)::vars) regs
 n ?#= v = ty. n *> n #= v
 
 namespace AlternativeDefineAndAssign
 
   public export %inline
-  (#=) : (p : (Name, Type')) -> Expression (p::ctx) (snd p) -> Statement ctx $ p::ctx
-  (n, _) #= v = n ?#= v
+  (!#=) : (p : (Name, Type')) -> Expression (p::vars) regs (snd p) -> Statement vars regs (p::vars) regs
+  (n, _) !#= v = n ?#= v
 
   public export %inline
   (.) : a -> b -> (b, a)
@@ -54,13 +82,12 @@ namespace AlternativeDefineAndAssign
 
 namespace ShowC
 
-  export
   Show Type' where
     show Bool'   = "bool"
     show Int'    = "int"
     show String' = "char *"
 
-  isNopDeeply : Statement pre post -> Bool
+  isNopDeeply : Statement preV preR postV postR -> Bool
   isNopDeeply Statement.nop = True
   isNopDeeply (x *> y)      = isNopDeeply x && isNopDeeply y
   isNopDeeply _             = False
@@ -69,7 +96,7 @@ namespace ShowC
   n : Nat -> Nat
   n = (+ 2)
 
-  showInd : (indent : Nat) -> Statement pre post -> String
+  showInd : (indent : Nat) -> Statement preV preR postV postR -> String
   showInd i Statement.nop = ""
   showInd i (ty . n) = indent i $ show ty ++ " " ++ show n ++ ";"
   showInd i (Statement.(#=) n v) = indent i $ show n ++ " = " ++ show v ++ ";"
@@ -102,5 +129,5 @@ namespace ShowC
   showInd i (print x) = indent i $ "puts(" ++ show x ++ ");"
 
   export
-  Show (Statement pre post) where
+  Show (Statement preV preR postV postR) where
     show = showInd 0
