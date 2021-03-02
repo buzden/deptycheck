@@ -184,7 +184,7 @@ Applicative LzList where
 public export
 Alternative LzList where
   empty = []
-  (<|>) = (++)
+  a <|> b = a ++ b
 
 export
 Monad LzList where

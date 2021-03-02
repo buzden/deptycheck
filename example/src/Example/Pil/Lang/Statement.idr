@@ -54,6 +54,10 @@ data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variabl
   print : Show (idrTypeOf ty) => Expression vars regs ty -> Statement vars regs vars regs
 
 public export %inline
+(>>) : Statement preV preR midV midR -> Statement midV midR postV postR -> Statement preV preR postV postR
+(>>) = (*>)
+
+public export %inline
 (>>=) : Statement preV preR midV midR -> (Unit -> Statement midV midR postV postR) -> Statement preV preR postV postR
 a >>= f = a *> f ()
 
