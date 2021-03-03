@@ -158,8 +158,8 @@ frequency = AlternG . concatMap (uncurry replicate . map independent)
 ||| That is, unlike the `frequency` function, `frequency' [(n, oneOf [a, b, c]), (m, x)]` is equivalent to
 ||| `frequency [(n, a), (n, b), (n, c), (m, x)]`
 export
-frequency' : List (Nat, Gen a) -> Gen a
-frequency' = AlternG . concatMap (uncurry replicate)
+frequency_dep : List (Nat, Gen a) -> Gen a
+frequency_dep = AlternG . concatMap (uncurry replicate)
 
 export
 Monad Gen where
