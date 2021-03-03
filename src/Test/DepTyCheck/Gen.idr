@@ -153,7 +153,7 @@ frequency' = AlternG . concatMap (uncurry replicate)
 
 export
 Monad Gen where
-  Uniform gs >>= c = AlternG $ c <$> gs
+  Uniform gs >>= c = if null gs then Uniform [] else AlternG $ c <$> gs
   g >>= c = Raw $ unGen g >>= map join . traverseSt . map (unGen . c)
 
 export
