@@ -92,9 +92,10 @@ Applicative Gen where
   pure x = Uniform [x]
 
   Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
-  Uniform fs <*> AlternG gs = AlternG $ [| map fs gs |]
-  AlternG gs <*> Uniform xs = AlternG $ [| (\gab, a => flip apply a <$> gab) gs xs |]
-  AlternG fs <*> AlternG gs = AlternG $ assert_total $ [| fs <*> gs |]
+
+  Uniform fs <*> AlternG gs = AlternG [| map fs gs |]
+  AlternG gs <*> Uniform xs = AlternG [| (\gab, a => flip apply a <$> gab) gs xs |]
+  AlternG fs <*> AlternG gs = AlternG $ assert_total [| fs <*> gs |]
 
   rawF@(Raw {}) <*> generalA = apAsRaw rawF generalA
   generalF <*> rawA@(Raw {}) = apAsRaw generalF rawA
@@ -105,13 +106,13 @@ Alternative Gen where
   AlternG ls <|> Delay (AlternG rs) = AlternG $ ls ++ rs
   AlternG ls <|> Delay (generalR  ) = AlternG $ ls ++ [generalR]
   generalL   <|> Delay (AlternG rs) = AlternG $ [generalL] ++ rs
-  generalL   <|> Delay (generalR  ) = AlternG $ [generalL, generalR]
+  generalL   <|> Delay (generalR  ) = AlternG [generalL, generalR]
 
 ||| Makes the given `Gen` to act as an independent generator according to the `Alternative` combination.
 ||| That is, in `independent (independent a <|> independent b)` given `a` and `b` are distributed evenly.
 export
 independent : Gen a -> Gen a
-independent alt@(AlternG xs) = AlternG $ pure $ alt
+independent alt@(AlternG _) = AlternG [alt]
 independent other = other
 
 ||| Choose one of the given generators uniformly.
@@ -139,7 +140,7 @@ oneOf = choiceMap independent
 ||| Also, `frequency [(n, g), (m, h)] <|> oneOf [u, w]` is equivalent to `frequency [(n, g), (m, h), (1, u), (1, w)]`.
 export
 frequency : List (Nat, Gen a) -> Gen a
-frequency = AlternG . concatMap (\(n, g) => replicate n $ independent g)
+frequency = AlternG . concatMap (uncurry replicate . map independent)
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators dependently.
 |||
