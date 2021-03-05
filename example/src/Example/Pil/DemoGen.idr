@@ -56,18 +56,18 @@ export
 someStatement : {rc : Nat} -> Nat -> Maybe (postV ** postR ** Statement [] (AllUndefined {rc}) postV postR)
 someStatement n = head' $ evalState someStdGen $ unGen (variant n $ someStatementGen)
 
+showStatement : forall preV, preR. (postV ** postR ** Statement preV preR postV postR) -> String
+showStatement (postV ** postR ** stmt) = """
+  \{show stmt}
+  // regs ty after: \{show postR}
+  """
+
 export
 showSomeStatements : {default 0 variant : Nat} -> {default 2 regCount : Nat} -> (count : Nat) -> IO ()
 showSomeStatements count =
   traverse_ putStrLn $
     intersperse "----" $
       (concat . map showStatement . someStatement {rc=regCount}) <$> [variant .. (variant + count)]
-  where
-    showStatement : forall preV, preR. (postV ** postR ** Statement preV preR postV postR) -> String
-    showStatement (postV ** postR ** stmt) = """
-      \{show stmt}
-      // regs ty after: \{show postR}
-      """
 
 export
 main : IO ()
