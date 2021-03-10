@@ -82,6 +82,10 @@ namespace Invariant
       Base  : Vect rc $ Maybe Type' -> Registers rc
       Merge : Registers rc -> Registers rc -> Registers rc
 
+    -- TODO to make this a constructor of the `Registers`
+    export
+    With : Registers rc -> (Fin rc, Maybe Type') -> Registers rs
+
     %name Registers regs
 
     export
