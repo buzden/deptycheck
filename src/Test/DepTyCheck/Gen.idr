@@ -92,9 +92,10 @@ Applicative Gen where
   pure x = Uniform [x]
 
   Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
-  Uniform fs <*> AlternG gs = AlternG $ [| map fs gs |]
-  AlternG gs <*> Uniform xs = AlternG $ [| (\gab, a => flip apply a <$> gab) gs xs |]
-  AlternG fs <*> AlternG gs = AlternG $ assert_total $ [| fs <*> gs |]
+
+  Uniform fs <*> AlternG gs = AlternG [| map fs gs |]
+  AlternG gs <*> Uniform xs = AlternG [| (\gab, a => flip apply a <$> gab) gs xs |]
+  AlternG fs <*> AlternG gs = AlternG $ assert_total [| fs <*> gs |]
 
   rawF@(Raw {}) <*> generalA = apAsRaw rawF generalA
   generalF <*> rawA@(Raw {}) = apAsRaw generalF rawA
@@ -105,13 +106,13 @@ Alternative Gen where
   AlternG ls <|> Delay (AlternG rs) = AlternG $ ls ++ rs
   AlternG ls <|> Delay (generalR  ) = AlternG $ ls ++ [generalR]
   generalL   <|> Delay (AlternG rs) = AlternG $ [generalL] ++ rs
-  generalL   <|> Delay (generalR  ) = AlternG $ [generalL, generalR]
+  generalL   <|> Delay (generalR  ) = AlternG [generalL, generalR]
 
 ||| Makes the given `Gen` to act as an independent generator according to the `Alternative` combination.
 ||| That is, in `independent (independent a <|> independent b)` given `a` and `b` are distributed evenly.
 export
 independent : Gen a -> Gen a
-independent alt@(AlternG xs) = AlternG $ pure $ alt
+independent alt@(AlternG _) = AlternG [alt]
 independent other = other
 
 ||| Choose one of the given generators uniformly.
@@ -124,8 +125,18 @@ independent other = other
 |||
 ||| The resulting generator is not independent, i.e. `oneOf [a, b, c] <|> oneOf [d, e]` is equivalent to `oneOf [a, b, c, d, e]`.
 public export
-oneOf : List (Gen a) -> Gen a
-oneOf = choiceMap independent
+oneOf : Vect (S n) (Gen a) -> Gen a
+oneOf [x] = x
+oneOf (x::xs@(_::_)) = independent x <|> oneOf xs
+
+||| Choose one of the given generators uniformly (using a list as an input).
+|||
+||| This function behaves similarly to `oneOf` but
+|||   - takes `List` that can be empty and
+|||   - even for non-empty lists has `... <|> empty` at the end of the result.
+public export
+oneOf' : List (Gen a) -> Gen a
+oneOf' = choiceMap independent
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -139,7 +150,7 @@ oneOf = choiceMap independent
 ||| Also, `frequency [(n, g), (m, h)] <|> oneOf [u, w]` is equivalent to `frequency [(n, g), (m, h), (1, u), (1, w)]`.
 export
 frequency : List (Nat, Gen a) -> Gen a
-frequency = AlternG . concatMap (\(n, g) => replicate n $ independent g)
+frequency = AlternG . concatMap (uncurry replicate . map independent)
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators dependently.
 |||
@@ -147,12 +158,12 @@ frequency = AlternG . concatMap (\(n, g) => replicate n $ independent g)
 ||| That is, unlike the `frequency` function, `frequency' [(n, oneOf [a, b, c]), (m, x)]` is equivalent to
 ||| `frequency [(n, a), (n, b), (n, c), (m, x)]`
 export
-frequency' : List (Nat, Gen a) -> Gen a
-frequency' = AlternG . concatMap (uncurry replicate)
+frequency_dep : List (Nat, Gen a) -> Gen a
+frequency_dep = AlternG . concatMap (uncurry replicate)
 
 export
 Monad Gen where
-  Uniform gs >>= c = AlternG $ c <$> gs
+  Uniform gs >>= c = if null gs then Uniform [] else AlternG $ c <$> gs
   g >>= c = Raw $ unGen g >>= map join . traverseSt . map (unGen . c)
 
 export
