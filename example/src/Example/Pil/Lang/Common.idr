@@ -2,6 +2,7 @@ module Example.Pil.Lang.Common
 
 import public Data.Vect
 
+import Decidable.Decidable
 import Decidable.Equality
 
 import Syntax.WithProof
@@ -81,24 +82,34 @@ namespace Invariant
     data Registers : Nat -> Type where
       Base  : Vect rc $ Maybe Type' -> Registers rc
       Merge : Registers rc -> Registers rc -> Registers rc
-
-    -- TODO to make this a constructor of the `Registers`
-    export
-    With : Registers rc -> (Fin rc, Maybe Type') -> Registers rs
+      With  : Registers rc -> (Fin rc, Maybe Type') -> Registers rc
 
     %name Registers regs
 
     export
     DecEq (Registers rc) where
+
       decEq (Base xs) (Base ys) with (decEq xs ys)
         decEq (Base _) (Base _) | Yes Refl = Yes Refl
         decEq (Base _) (Base _) | No up = No $ up . \case Refl => Refl
+
       decEq (Merge r1 r2) (Merge s1 s2) with (decEq r1 s1, decEq r2 s2)
         decEq (Merge _ _) (Merge _ _) | (Yes Refl, Yes Refl) = Yes Refl
-        decEq (Merge _ _) (Merge _ _) | (Yes _, No us) = No $ us . \case Refl => Refl
-        decEq (Merge _ _) (Merge _ _) | (No up, _    ) = No $ up . \case Refl => Refl
-      decEq (Base _) (Merge _ _) = No \case Refl impossible
-      decEq (Merge _ _) (Base _) = No \case Refl impossible
+        decEq (Merge _ _) (Merge _ _) | (_, No us) = No $ us . \case Refl => Refl
+        decEq (Merge _ _) (Merge _ _) | (No up, _) = No $ up . \case Refl => Refl
+
+      decEq (With rs1 (r1, ty1)) (With rs2 (r2, ty2)) with (decEq rs1 rs2, decEq r1 r2, decEq ty1 ty2)
+        decEq (With _ (_, _)) (With _ (_, _)) | (Yes Refl, Yes Refl, Yes Refl) = Yes Refl
+        decEq (With _ (_, _)) (With _ (_, _)) | (_, _, No ur) = No $ ur . \case Refl => Refl
+        decEq (With _ (_, _)) (With _ (_, _)) | (_, No uq, _) = No $ uq . \case Refl => Refl
+        decEq (With _ (_, _)) (With _ (_, _)) | (No up, _, _) = No $ up . \case Refl => Refl
+
+      decEq (Base _)    (Merge _ _) = No \case Refl impossible
+      decEq (Base _)    (With _ _)  = No \case Refl impossible
+      decEq (Merge _ _) (Base _)    = No \case Refl impossible
+      decEq (Merge _ _) (With _ _)  = No \case Refl impossible
+      decEq (With _ _)  (Base _)    = No \case Refl impossible
+      decEq (With _ _)  (Merge _ _) = No \case Refl impossible
 
     public export
     AllUndefined : {rc : Nat} -> Registers rc
@@ -156,13 +167,25 @@ namespace Invariant
 
     public export
     index : Fin rc -> Registers rc -> Maybe Type'
-    index i $ Base xs     = Vect.index i xs
-    index i $ Merge r1 r2 = mergeSame (index i r1) (index i r2)
+    index i $ Base xs         = Vect.index i xs
+    index i $ Merge r1 r2     = mergeSame (index i r1) (index i r2)
+    index i $ With rs (n, ty) = if isYes $ decEq i n then ty else index i rs
 
     public export
     squash : Registers rc -> Vect rc $ Maybe Type'
     squash $ Base xs = xs
     squash $ Merge r1 r2 = zipWith mergeSame (squash r1) (squash r2)
+    squash $ With rs (n, ty) = replaceAt n ty $ squash rs
+
+    replaceAt_same_determines_index : (xs : Vect n a) -> (i : Fin n) -> (0 y : a) -> index i (replaceAt i y xs) = y
+    replaceAt_same_determines_index (_::_) FZ     _ = Refl
+    replaceAt_same_determines_index (_::_) (FS _) _ = replaceAt_same_determines_index _ _ _
+
+    replaceAt_different_preserves_index : (xs : Vect n a) -> (i, j : Fin n) -> Not (i = j) -> (0 y : a) -> index i (replaceAt j y xs) = index i xs
+    replaceAt_different_preserves_index (_::_) FZ     FZ     co _ = absurd $ co Refl
+    replaceAt_different_preserves_index (_::_) FZ     (FS _) _  _ = Refl
+    replaceAt_different_preserves_index (_::_) (FS _) FZ     _  _ = Refl
+    replaceAt_different_preserves_index (_::_) (FS z) (FS w) co y = replaceAt_different_preserves_index _ z w (co . cong FS) y
 
     export
     squash_preserves_index : (i : Fin rc) -> (regs : Registers rc) -> index i (squash regs) = index i regs
@@ -171,6 +194,10 @@ namespace Invariant
                                              rewrite squash_preserves_index i r1 in
                                              rewrite squash_preserves_index i r2 in
                                              Refl
+    squash_preserves_index i $ With rs (n, ty) with (decEq i n)
+      squash_preserves_index i $ With rs (i, ty) | Yes Refl = replaceAt_same_determines_index _ _ _
+      squash_preserves_index i $ With rs (n, ty) | No co = rewrite replaceAt_different_preserves_index (squash rs) i n co ty in
+                                                           squash_preserves_index i rs
 
     --- Showing the registers state as a string ---
 
@@ -222,6 +249,14 @@ namespace Invariant
     export %hint
     merge_idempotent : {x : _} -> Merge x x =%= x
     merge_idempotent = EquivByIndex \i => mergeSame_idempotent _
+
+    --- Equivalence properties of `With` ---
+
+    export %hint
+    withed_with_same_equiv : {x : _} -> {j : _} -> x `With` (j, index j x) =%= x
+    withed_with_same_equiv = EquivByIndex \i => case decEq i j of
+                               Yes Refl => rewrite decEqSelfIsYes {x=j} in Refl
+                               No co => rewrite snd $ decEqContraIsNo co in Refl
 
     --- Equivalence properties of `squash` ---
 
