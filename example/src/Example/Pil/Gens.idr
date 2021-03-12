@@ -179,6 +179,12 @@ namespace Equal_registers -- implementations
     Z   => empty -- no such generator if there are no registers, sorry.
     S _ => pure (_ ** withed_with_same_equiv {j = !chooseAny})
 
+  -- TODO to think of reverse `squashed` and `withed`, i.e. those which
+  --   - by a `rs@(Base xs)` generates those that squash to `rs` and
+  --   - by a `rs `With` (i, index i rs)` returns `rs`.
+
+  -- TODO to think of recusrive application of these generators.
+
 namespace Statements_given_preV_preR_postV_postR
 
   public export
