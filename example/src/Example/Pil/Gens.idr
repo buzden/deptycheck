@@ -122,7 +122,7 @@ public export
 0 SpecGen : (Nat -> Type) -> Type
 SpecGen res =
   (fuel : Fuel) ->
-  {0 rc : Nat} ->
+  {rc : Nat} ->
   Gen Type' =>
   Gen Name =>
   ({a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen (Expression vars regs a)) =>
@@ -143,6 +143,8 @@ namespace Equal_registers
 
   squashed : EqRegisters_Gen
 
+  withed : EqRegisters_Gen
+
   export
   eq_registers_gen : EqRegisters_Gen
   eq_registers_gen f regs = oneOf
@@ -152,6 +154,7 @@ namespace Equal_registers
     , merge_assoc  f regs
     , merge_assoc' f regs
     , squashed     f regs
+    , withed       f regs
     ]
 
 namespace Equal_registers -- implementations
@@ -171,6 +174,10 @@ namespace Equal_registers -- implementations
 
   squashed _ $ Base _ = empty -- just to not to repeat `refl` since squash of `Base` is the same
   squashed _ _ = pure (_ ** squashed_regs_equiv)
+
+  withed _ _ = case rc of
+    Z   => empty -- no such generator if there are no registers, sorry.
+    S _ => pure (_ ** withed_with_same_equiv {j = !chooseAny})
 
 namespace Statements_given_preV_preR_postV_postR
 
