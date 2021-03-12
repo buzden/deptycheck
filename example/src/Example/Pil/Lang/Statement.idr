@@ -9,7 +9,7 @@ import Example.Pil.Lang.Expression
 
 %default total
 
-infix 2 #=, ?#=, !#=
+infix 2 #=, ?#=, !#=, %=
 infixr 1 *>
 
 data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (postR : Registers rc) -> Type
@@ -29,6 +29,9 @@ data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variabl
   (.)  : (ty : Type') -> (n : Name) -> Statement vars regs ((n, ty)::vars) regs
 
   (#=) : (n : Name) -> (0 lk : Lookup n vars) => (v : Expression vars regs lk.reveal) -> Statement vars regs vars regs
+
+  (%=) : {0 preR : Registers rc} ->
+         (reg : Fin rc) -> Expression vars preR ty -> Statement vars preR vars $ preR `With` (reg, Just ty)
 
   for  : (init : Statement preV preR insideV insideR) ->
          (cond : Expression insideV insideR Bool') ->
@@ -104,6 +107,7 @@ namespace ShowC
   showInd i Statement.nop = ""
   showInd i (ty . n) = indent i $ show ty ++ " " ++ show n ++ ";"
   showInd i (Statement.(#=) n v) = indent i $ show n ++ " = " ++ show v ++ ";"
+  showInd i (reg %= v) = indent i "[\{show $ finToNat reg}] = \{show v};"
   showInd i (for init cond upd body) = if isNopDeeply init -- TODO to add a situation when we can use normal C's `for`
                                          then showWhile i
                                          else indent i "{\n" ++
