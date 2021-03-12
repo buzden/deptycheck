@@ -60,9 +60,9 @@ namespace Auxiliary
 
   export
   DecEq Name where
-    decEq (MkName n) (MkName m) with (decEq n m)
-      decEq (MkName _) (MkName _) | Yes Refl = Yes Refl
-      decEq (MkName _) (MkName _) | No co = No \case Refl => co Refl
+    decEq (MkName n) (MkName m) = case decEq n m of
+      Yes Refl => Yes Refl
+      No co => No \case Refl => co Refl
 
 namespace Invariant
 
@@ -89,20 +89,20 @@ namespace Invariant
     export
     DecEq (Registers rc) where
 
-      decEq (Base xs) (Base ys) with (decEq xs ys)
-        decEq (Base _) (Base _) | Yes Refl = Yes Refl
-        decEq (Base _) (Base _) | No up = No $ up . \case Refl => Refl
+      decEq (Base xs) (Base ys) = case (decEq xs ys) of
+        Yes Refl => Yes Refl
+        No up => No $ up . \case Refl => Refl
 
-      decEq (Merge r1 r2) (Merge s1 s2) with (decEq r1 s1, decEq r2 s2)
-        decEq (Merge _ _) (Merge _ _) | (Yes Refl, Yes Refl) = Yes Refl
-        decEq (Merge _ _) (Merge _ _) | (_, No us) = No $ us . \case Refl => Refl
-        decEq (Merge _ _) (Merge _ _) | (No up, _) = No $ up . \case Refl => Refl
+      decEq (Merge r1 r2) (Merge s1 s2) = case (decEq r1 s1, decEq r2 s2) of
+        (Yes Refl, Yes Refl) => Yes Refl
+        (_, No us) => No $ us . \case Refl => Refl
+        (No up, _) => No $ up . \case Refl => Refl
 
-      decEq (With rs1 (r1, ty1)) (With rs2 (r2, ty2)) with (decEq rs1 rs2, decEq r1 r2, decEq ty1 ty2)
-        decEq (With _ (_, _)) (With _ (_, _)) | (Yes Refl, Yes Refl, Yes Refl) = Yes Refl
-        decEq (With _ (_, _)) (With _ (_, _)) | (_, _, No ur) = No $ ur . \case Refl => Refl
-        decEq (With _ (_, _)) (With _ (_, _)) | (_, No uq, _) = No $ uq . \case Refl => Refl
-        decEq (With _ (_, _)) (With _ (_, _)) | (No up, _, _) = No $ up . \case Refl => Refl
+      decEq (With rs1 (r1, ty1)) (With rs2 (r2, ty2)) = case (decEq rs1 rs2, decEq r1 r2, decEq ty1 ty2) of
+        (Yes Refl, Yes Refl, Yes Refl) => Yes Refl
+        (_, _, No ur) => No $ ur . \case Refl => Refl
+        (_, No uq, _) => No $ uq . \case Refl => Refl
+        (No up, _, _) => No $ up . \case Refl => Refl
 
       decEq (Base _)    (Merge _ _) = No \case Refl impossible
       decEq (Base _)    (With _ _)  = No \case Refl impossible
