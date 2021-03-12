@@ -125,7 +125,7 @@ SpecGen res =
   {rc : Nat} ->
   Gen Type' =>
   Gen Name =>
-  ({a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen (Expression vars regs a)) =>
+  ({ty : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen (Expression vars regs ty)) =>
   res rc
 
 namespace Equal_registers
@@ -324,7 +324,7 @@ namespace Statements_given_preV_preR -- implementations
     (_ ** _ ** s) <- statement_gen f preV preR
     pure (_ ** _ ** block s)
 
-  print_gen @{_} @{_} @{expr} _ preV preR = pure (_ ** _ ** print !(expr {a=String'}))
+  print_gen @{_} @{_} @{expr} _ preV preR = pure (_ ** _ ** print !(expr {ty=String'}))
 
 namespace Statements_given_preV_preR_postV_postR -- implementations
 
@@ -381,7 +381,7 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
   print_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
     (_, No _) => empty
-    (Yes Refl, Yes Refl) => pure $ print !(expr {a=String'})
+    (Yes Refl, Yes Refl) => pure $ print !(expr {ty=String'})
 
 namespace Statements_given_preV_preR_postR -- implementations
 
@@ -428,4 +428,4 @@ namespace Statements_given_preV_preR_postR -- implementations
 
   print_gen @{_} @{_} @{expr} _ preV preR postR = case decEq postR preR of
     No _ => empty
-    Yes Refl => pure $ (_ ** print !(expr {a=String'}))
+    Yes Refl => pure $ (_ ** print !(expr {ty=String'}))
