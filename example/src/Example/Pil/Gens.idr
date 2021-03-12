@@ -195,6 +195,7 @@ namespace Statements_given_preV_preR_postV_postR
   nop_gen   : Statement_no_Gen
   dot_gen   : Statement_no_Gen
   v_ass_gen : Statement_no_Gen
+  r_ass_gen : Statement_no_Gen
   for_gen   : Statement_no_Gen
   if_gen    : Statement_no_Gen
   seq_gen   : Statement_no_Gen
@@ -207,12 +208,14 @@ namespace Statements_given_preV_preR_postV_postR
     [ nop_gen   Dry preV preR postV postR
     , dot_gen   Dry preV preR postV postR
     , v_ass_gen Dry preV preR postV postR
+    , r_ass_gen Dry preV preR postV postR
     , print_gen Dry preV preR postV postR
     ]
   statement_gen (More f) preV preR postV postR = oneOf
     [ nop_gen   f preV preR postV postR
     , dot_gen   f preV preR postV postR
     , v_ass_gen f preV preR postV postR
+    , r_ass_gen f preV preR postV postR
     , for_gen   f preV preR postV postR
     , if_gen    f preV preR postV postR
     , seq_gen   f preV preR postV postR
@@ -230,6 +233,7 @@ namespace Statements_given_preV_preR_postR
   nop_gen   : Statement_postV_Gen
   dot_gen   : Statement_postV_Gen
   v_ass_gen : Statement_postV_Gen
+  r_ass_gen : Statement_postV_Gen
   for_gen   : Statement_postV_Gen
   if_gen    : Statement_postV_Gen
   seq_gen   : Statement_postV_Gen
@@ -242,12 +246,14 @@ namespace Statements_given_preV_preR_postR
     [ nop_gen   Dry preV preR postR
     , dot_gen   Dry preV preR postR
     , v_ass_gen Dry preV preR postR
+    , r_ass_gen Dry preV preR postR
     , print_gen Dry preV preR postR
     ]
   statement_gen (More f) preV preR postR = oneOf
     [ nop_gen   f preV preR postR
     , dot_gen   f preV preR postR
     , v_ass_gen f preV preR postR
+    , r_ass_gen f preV preR postR
     , for_gen   f preV preR postR
     , if_gen    f preV preR postR
     , seq_gen   f preV preR postR
@@ -264,6 +270,7 @@ namespace Statements_given_preV_preR
   nop_gen   : Statement_postV_postR_Gen
   dot_gen   : Statement_postV_postR_Gen
   v_ass_gen : Statement_postV_postR_Gen
+  r_ass_gen : Statement_postV_postR_Gen
   for_gen   : Statement_postV_postR_Gen
   if_gen    : Statement_postV_postR_Gen
   seq_gen   : Statement_postV_postR_Gen
@@ -276,12 +283,14 @@ namespace Statements_given_preV_preR
     [ nop_gen   Dry preV preR
     , dot_gen   Dry preV preR
     , v_ass_gen Dry preV preR
+    , r_ass_gen Dry preV preR
     , print_gen Dry preV preR
     ]
   statement_gen (More f) preV preR = oneOf
     [ nop_gen   f preV preR
     , dot_gen   f preV preR
     , v_ass_gen f preV preR
+    , r_ass_gen f preV preR
     , for_gen   f preV preR
     , if_gen    f preV preR
     , seq_gen   f preV preR
@@ -298,6 +307,10 @@ namespace Statements_given_preV_preR -- implementations
   v_ass_gen @{_} @{_} @{expr} _ preV preR = do
     (n ** lk) <- lookupGen preV
     pure (_ ** _ ** n #= !expr)
+
+  r_ass_gen @{type'} @{_} @{expr} _ preV preR = case rc of
+    Z   => empty
+    S _ => pure (_ ** _ ** !chooseAny %= !(expr {ty = !type'}))
 
   for_gen @{_} @{_} @{expr} f preV preR = do
     (insideV ** insideR ** init) <- statement_gen f preV preR
@@ -346,6 +359,14 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
     (Yes Refl, Yes Refl) => do
       (n ** lk) <- lookupGen preV
       pure $ n #= !expr
+
+  r_ass_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, @@ postR) of
+    (Yes Refl, (rs `With` (reg, Just ty) ** Refl)) => case decEq rs preR of
+      Yes Refl => case rc of
+        Z   => empty
+        S _ => pure $ reg %= !expr
+      No _ => empty
+    _ => empty
 
   for_gen @{_} @{_} @{expr} f preV preR postV postR = case decEq postV preV of
     No _ => empty
@@ -398,6 +419,14 @@ namespace Statements_given_preV_preR_postR -- implementations
     Yes Refl => do
       (n ** lk) <- lookupGen preV
       pure (_ ** n #= !expr)
+
+  r_ass_gen @{_} @{_} @{expr} _ preV preR postR = case postR of
+    rs `With` (reg, Just ty) => case decEq rs preR of
+      Yes Refl => case rc of
+        Z   => empty
+        S _ => pure $ (_ ** reg %= !expr)
+      No _ => empty
+    _ => empty
 
   for_gen @{_} @{_} @{expr} f preV preR postR = do
     (insideV ** init) <- statement_gen f preV preR postR
