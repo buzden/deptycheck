@@ -194,7 +194,7 @@ namespace Statements_given_preV_preR_postV_postR
 
   nop_gen   : Statement_no_Gen
   dot_gen   : Statement_no_Gen
-  ass_gen   : Statement_no_Gen
+  v_ass_gen : Statement_no_Gen
   for_gen   : Statement_no_Gen
   if_gen    : Statement_no_Gen
   seq_gen   : Statement_no_Gen
@@ -206,13 +206,13 @@ namespace Statements_given_preV_preR_postV_postR
   statement_gen Dry preV preR postV postR = oneOf
     [ nop_gen   Dry preV preR postV postR
     , dot_gen   Dry preV preR postV postR
-    , ass_gen   Dry preV preR postV postR
+    , v_ass_gen Dry preV preR postV postR
     , print_gen Dry preV preR postV postR
     ]
   statement_gen (More f) preV preR postV postR = oneOf
     [ nop_gen   f preV preR postV postR
     , dot_gen   f preV preR postV postR
-    , ass_gen   f preV preR postV postR
+    , v_ass_gen f preV preR postV postR
     , for_gen   f preV preR postV postR
     , if_gen    f preV preR postV postR
     , seq_gen   f preV preR postV postR
@@ -229,7 +229,7 @@ namespace Statements_given_preV_preR_postR
 
   nop_gen   : Statement_postV_Gen
   dot_gen   : Statement_postV_Gen
-  ass_gen   : Statement_postV_Gen
+  v_ass_gen : Statement_postV_Gen
   for_gen   : Statement_postV_Gen
   if_gen    : Statement_postV_Gen
   seq_gen   : Statement_postV_Gen
@@ -241,13 +241,13 @@ namespace Statements_given_preV_preR_postR
   statement_gen Dry preV preR postR = oneOf
     [ nop_gen   Dry preV preR postR
     , dot_gen   Dry preV preR postR
-    , ass_gen   Dry preV preR postR
+    , v_ass_gen Dry preV preR postR
     , print_gen Dry preV preR postR
     ]
   statement_gen (More f) preV preR postR = oneOf
     [ nop_gen   f preV preR postR
     , dot_gen   f preV preR postR
-    , ass_gen   f preV preR postR
+    , v_ass_gen f preV preR postR
     , for_gen   f preV preR postR
     , if_gen    f preV preR postR
     , seq_gen   f preV preR postR
@@ -263,7 +263,7 @@ namespace Statements_given_preV_preR
 
   nop_gen   : Statement_postV_postR_Gen
   dot_gen   : Statement_postV_postR_Gen
-  ass_gen   : Statement_postV_postR_Gen
+  v_ass_gen : Statement_postV_postR_Gen
   for_gen   : Statement_postV_postR_Gen
   if_gen    : Statement_postV_postR_Gen
   seq_gen   : Statement_postV_postR_Gen
@@ -275,13 +275,13 @@ namespace Statements_given_preV_preR
   statement_gen Dry preV preR = oneOf
     [ nop_gen   Dry preV preR
     , dot_gen   Dry preV preR
-    , ass_gen   Dry preV preR
+    , v_ass_gen Dry preV preR
     , print_gen Dry preV preR
     ]
   statement_gen (More f) preV preR = oneOf
     [ nop_gen   f preV preR
     , dot_gen   f preV preR
-    , ass_gen   f preV preR
+    , v_ass_gen f preV preR
     , for_gen   f preV preR
     , if_gen    f preV preR
     , seq_gen   f preV preR
@@ -295,7 +295,7 @@ namespace Statements_given_preV_preR -- implementations
 
   dot_gen @{type'} @{name} @{_} _ preV preR = pure (_ ** _ ** !type'. !name)
 
-  ass_gen @{_} @{_} @{expr} _ preV preR = do
+  v_ass_gen @{_} @{_} @{expr} _ preV preR = do
     (n ** lk) <- lookupGen preV
     pure (_ ** _ ** n #= !expr)
 
@@ -340,7 +340,7 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
       (_, No _) => empty
       (Yes Refl, Yes Refl) => pure $ ty. n
 
-  ass_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
+  v_ass_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
     (_, No _) => empty
     (Yes Refl, Yes Refl) => do
@@ -393,7 +393,7 @@ namespace Statements_given_preV_preR_postR -- implementations
     No _ => empty
     Yes Refl => pure (_ ** !type'. !name)
 
-  ass_gen @{_} @{_} @{expr} _ preV preR postR = case decEq postR preR of
+  v_ass_gen @{_} @{_} @{expr} _ preV preR postR = case decEq postR preR of
     No _ => empty
     Yes Refl => do
       (n ** lk) <- lookupGen preV
