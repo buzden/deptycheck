@@ -170,7 +170,7 @@ namespace Equal_registers -- implementations
   merge_assoc' _ _ = empty
 
   squashed _ $ Base _ = empty -- just to not to repeat `refl` since squash of `Base` is the same
-  squashed _ $ Merge _ _ = pure (_ ** squashed_regs_equiv)
+  squashed _ _ = pure (_ ** squashed_regs_equiv)
 
 namespace Statements_given_preV_preR_postV_postR
 
@@ -348,12 +348,11 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
       pure $ for init !expr upd body
 
   if_gen @{_} @{_} @{expr} f preV preR postV postR = case (decEq postV preV, @@ postR) of
-    (No _, _) => empty
-    (_, (Base {} ** _)) => empty
     (Yes p, (Merge thR elR ** q)) => rewrite p in rewrite q in do
       (_ ** th) <- statement_gen f preV preR thR
       (_ ** el) <- statement_gen f preV preR elR
       pure $ if__ !expr th el
+    _ => empty
 
   seq_gen f preV preR postV postR = do
     (midV ** midR ** left) <- statement_gen f preV preR
@@ -399,11 +398,11 @@ namespace Statements_given_preV_preR_postR -- implementations
     pure (_ ** for init !expr upd body)
 
   if_gen @{_} @{_} @{expr} f preV preR postR = case postR of
-    Base {} => empty
     Merge thR elR => do
       (_ ** th) <- statement_gen f preV preR thR
       (_ ** el) <- statement_gen f preV preR elR
       pure (_ ** if__ !expr th el)
+    _ => empty
 
   seq_gen f preV preR postR = do
     (midV ** midR ** left) <- statement_gen f preV preR
