@@ -58,7 +58,7 @@ someStatement : {rc : Nat} -> Nat -> Maybe (postV ** postR ** Statement [] (AllU
 someStatement n = evalState someStdGen $ unGen (variant n $ someStatementGen) >>= takeSomeRandomly
   where
     takeSomeRandomly : RandomGen g => LazyList a -> State g $ Maybe a
-    takeSomeRandomly xs = pure $ head' $ drop (finToNat {n=10} !random') xs
+    takeSomeRandomly xs = pure $ head' $ drop (finToNat {n=1000} !random') xs
 
 showStatement : forall preV, preR. (postV ** postR ** Statement preV preR postV postR) -> String
 showStatement (postV ** postR ** stmt) = """
