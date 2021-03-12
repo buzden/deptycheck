@@ -60,8 +60,8 @@ namespace Auxiliary
   export
   DecEq Name where
     decEq (MkName n) (MkName m) with (decEq n m)
-      decEq (MkName n) (MkName m) | Yes p = rewrite p in Yes Refl
-      decEq (MkName n) (MkName m) | No co = No \case Refl => co Refl
+      decEq (MkName _) (MkName _) | Yes Refl = Yes Refl
+      decEq (MkName _) (MkName _) | No co = No \case Refl => co Refl
 
 namespace Invariant
 
@@ -87,10 +87,10 @@ namespace Invariant
     export
     DecEq (Registers rc) where
       decEq (Base xs) (Base ys) with (decEq xs ys)
-        decEq (Base _) (Base _) | Yes p = rewrite p in Yes Refl
+        decEq (Base _) (Base _) | Yes Refl = Yes Refl
         decEq (Base _) (Base _) | No up = No $ up . \case Refl => Refl
       decEq (Merge r1 r2) (Merge s1 s2) with (decEq r1 s1, decEq r2 s2)
-        decEq (Merge _ _) (Merge _ _) | (Yes p, Yes s) = rewrite p in rewrite s in Yes Refl
+        decEq (Merge _ _) (Merge _ _) | (Yes Refl, Yes Refl) = Yes Refl
         decEq (Merge _ _) (Merge _ _) | (Yes _, No us) = No $ us . \case Refl => Refl
         decEq (Merge _ _) (Merge _ _) | (No up, _    ) = No $ up . \case Refl => Refl
       decEq (Base _) (Merge _ _) = No \case Refl impossible
@@ -123,12 +123,10 @@ namespace Invariant
       mergeSame_commutative Nothing  (Just _) = Refl
       mergeSame_commutative (Just _) Nothing  = Refl
       mergeSame_commutative (Just x) (Just y) with (decEq x y)
+        mergeSame_commutative (Just x) (Just x) | Yes Refl = rewrite decEqSelfIsYes {x} in Refl
         mergeSame_commutative (Just x) (Just y) | No uxy with (decEq y x)
-          mergeSame_commutative (Just _) (Just _) | No _   | No _   = Refl
+          mergeSame_commutative (Just _) (Just _) | No _   | No  _  = Refl
           mergeSame_commutative (Just _) (Just _) | No uxy | Yes yx = absurd $ uxy $ sym yx
-        mergeSame_commutative (Just x) (Just y) | Yes xy = rewrite sym xy in
-                                                           rewrite decEqSelfIsYes {x} in
-                                                           Refl
 
       export
       mergeSame_nothing_absorbs_r : (x : _) -> mergeSame x Nothing = Nothing
@@ -141,14 +139,13 @@ namespace Invariant
       mergeSame_associative (Just x) Nothing  _        = Refl
       mergeSame_associative (Just x) (Just y) Nothing  = mergeSame_nothing_absorbs_r _
       mergeSame_associative (Just x) (Just y) (Just z) with (decEq x y)
-        mergeSame_associative (Just x) (Just y) (Just z) | Yes xy = rewrite xy in
-                                                                    case @@ decEq y z of
-                                                                      (Yes _ ** p) => rewrite p in
-                                                                                      rewrite decEqSelfIsYes {x=y} in
-                                                                                      Refl
-                                                                      (No _ ** p) => rewrite p in Refl
+        mergeSame_associative (Just y) (Just y) (Just z) | Yes Refl = case @@ decEq y z of
+                                                                        (Yes _ ** p) => rewrite p in
+                                                                                        rewrite decEqSelfIsYes {x=y} in
+                                                                                        Refl
+                                                                        (No _ ** p) => rewrite p in Refl
         mergeSame_associative (Just x) (Just y) (Just z) | No uxy with (decEq y z)
-          mergeSame_associative (Just x) (Just y) (Just z) | No uxy | Yes yz = rewrite snd $ decEqContraIsNo uxy in Refl
+          mergeSame_associative (Just x) (Just y) (Just z) | No uxy | Yes _  = rewrite snd $ decEqContraIsNo uxy in Refl
           mergeSame_associative (Just x) (Just y) (Just z) | No uxy | No uyz = Refl
 
     --- Eliminators for the `Registers` type ---

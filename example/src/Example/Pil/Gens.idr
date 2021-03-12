@@ -318,27 +318,25 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
   nop_gen _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
     (_, No _) => empty
-    (Yes p, Yes q) => rewrite p in rewrite q in
-      pure nop
+    (Yes Refl, Yes Refl) => pure nop
 
   dot_gen _ preV preR postV postR = case postV of
     [] => empty
     ((n, ty)::postV') => case (decEq postV' preV, decEq postR preR) of
       (No _, _) => empty
       (_, No _) => empty
-      (Yes p, Yes q) => rewrite p in rewrite q in
-        pure $ ty. n
+      (Yes Refl, Yes Refl) => pure $ ty. n
 
   ass_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
     (_, No _) => empty
-    (Yes p, Yes q) => rewrite p in rewrite q in do
+    (Yes Refl, Yes Refl) => do
       (n ** lk) <- lookupGen preV
       pure $ n #= !expr
 
   for_gen @{_} @{_} @{expr} f preV preR postV postR = case decEq postV preV of
     No _ => empty
-    Yes p => rewrite p in do
+    Yes Refl => do
       (insideV ** init) <- statement_gen f preV preR postR
       --
       (updR ** _) <- eq_registers_gen f postR
@@ -364,31 +362,28 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
 
   block_gen f preV preR postV postR = case decEq postV preV of
     No _ => empty
-    Yes p => rewrite p in do
+    Yes Refl => do
       (_ ** stmt) <- statement_gen f preV preR postR
       pure $ block stmt
 
   print_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
     (_, No _) => empty
-    (Yes p, Yes q) => rewrite p in rewrite q in
-      pure $ print !(expr {a=String'})
+    (Yes Refl, Yes Refl) => pure $ print !(expr {a=String'})
 
 namespace Statements_given_preV_preR_postR -- implementations
 
   nop_gen _ preV preR postR = case decEq postR preR of
     No _ => empty
-    Yes p => rewrite p in
-      pure (_ ** nop)
+    Yes Refl => pure (_ ** nop)
 
   dot_gen @{type'} @{name} @{_} _ preV preR postR = case decEq postR preR of
     No _ => empty
-    Yes p => rewrite p in
-      pure (_ ** !type'. !name)
+    Yes Refl => pure (_ ** !type'. !name)
 
   ass_gen @{_} @{_} @{expr} _ preV preR postR = case decEq postR preR of
     No _ => empty
-    Yes p => rewrite p in do
+    Yes Refl => do
       (n ** lk) <- lookupGen preV
       pure (_ ** n #= !expr)
 
@@ -421,5 +416,4 @@ namespace Statements_given_preV_preR_postR -- implementations
 
   print_gen @{_} @{_} @{expr} _ preV preR postR = case decEq postR preR of
     No _ => empty
-    Yes p => rewrite p in
-      pure $ (_ ** print !(expr {a=String'}))
+    Yes Refl => pure $ (_ ** print !(expr {a=String'}))
