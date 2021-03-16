@@ -1,0 +1,19 @@
+default:
+  image: snazzybucket/idris2:v0.3.0-340-g405c266b
+
+stages:
+  - build
+  - example
+
+build-deptycheck-lib:
+  stage: build
+  script:
+    - idris2 --build deptycheck.ipkg
+
+trigger-example:
+  stage: example
+  trigger:
+    include: example/.gitlab-ci.yaml
+  rules:
+    - changes:
+      - example/*

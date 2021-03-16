@@ -1,0 +1,19 @@
+build-example:
+  stage: build
+  script:
+    - idris2 --build deptycheck.ipkg
+
+positive-examples:
+  stage: test
+  script:
+    - echo "TBD"
+
+negative-examples:
+  stage: test
+  script:
+    - echo "TBD"
+
+demo-run:
+  stage: test
+  script:
+    - build/exec/pil-demo
