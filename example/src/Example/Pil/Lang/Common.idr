@@ -5,8 +5,6 @@ import public Data.Vect
 import Decidable.Decidable
 import Decidable.Equality
 
-import Syntax.WithProof
-
 %default total
 
 namespace Types
@@ -154,11 +152,9 @@ namespace Invariant
       mergeSame_associative (Just x) Nothing  _        = Refl
       mergeSame_associative (Just x) (Just y) Nothing  = mergeSame_nothing_absorbs_r _
       mergeSame_associative (Just x) (Just y) (Just z) with (decEq x y)
-        mergeSame_associative (Just y) (Just y) (Just z) | Yes Refl = case @@ decEq y z of
-                                                                        (Yes _ ** p) => rewrite p in
-                                                                                        rewrite decEqSelfIsYes {x=y} in
-                                                                                        Refl
-                                                                        (No _ ** p) => rewrite p in Refl
+        mergeSame_associative (Just y) (Just y) (Just z) | Yes Refl with (decEq y z)
+          mergeSame_associative (Just _) (Just _) (Just z) | Yes Refl | Yes Refl = rewrite decEqSelfIsYes {x=z} in Refl
+          mergeSame_associative (Just _) (Just _) (Just _) | Yes Refl | No _     = Refl
         mergeSame_associative (Just x) (Just y) (Just z) | No uxy with (decEq y z)
           mergeSame_associative (Just x) (Just y) (Just z) | No uxy | Yes _  = rewrite snd $ decEqContraIsNo uxy in Refl
           mergeSame_associative (Just x) (Just y) (Just z) | No uxy | No uyz = Refl
