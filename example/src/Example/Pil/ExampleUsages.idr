@@ -91,3 +91,15 @@ name_shadowing = block $ do
     String'. "x" !#= C "foo"
     print $ V "x" ++ C "bar" ++ show (V "y")
   Int'. "z" !#= V "x" + C 2
+
+-- Registers-related --
+
+registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `With` (3, Just Int')
+registers_ass = block $ do
+  Int'. "x" !#= C 0
+  3 %= V "x"
+
+--bad_registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `With` (3, Just Int')
+--bad_registers_ass = block $ do
+--  Int'. "x" !#= C 0
+--  6 %= V "x"
