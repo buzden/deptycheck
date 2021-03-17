@@ -94,6 +94,14 @@ name_shadowing = block $ do
 
 -- Registers-related --
 
+read_reg_base : Statement vars (Base [Nothing, Nothing, Just Int', Nothing]) vars (Base [Nothing, Nothing, Just Int', Nothing])
+read_reg_base = block $ do
+  Int'. "x" !#= R 2
+
+--bad_read_reg_base : Statement vars (Base [Nothing, Nothing, Just Int', Nothing]) vars (Base [Nothing, Nothing, Just Int', Nothing])
+--bad_read_reg_base = block $ do
+--  Int'. "x" !#= R 1
+
 registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `With` (3, Just Int')
 registers_ass = block $ do
   Int'. "x" !#= C 0
