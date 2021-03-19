@@ -5,8 +5,6 @@ import public Data.Vect
 import Decidable.Decidable
 import Decidable.Equality
 
-import Syntax.WithProof
-
 %default total
 
 namespace Types
@@ -22,7 +20,7 @@ namespace Types
   idrTypeOf Int'    = Int
   idrTypeOf String' = String
 
-  export
+  public export
   DecEq Type' where
     decEq Bool'   Bool'   = Yes Refl
     decEq Int'    Int'    = Yes Refl
@@ -86,7 +84,7 @@ namespace Invariant
 
     %name Registers regs
 
-    export
+    public export
     DecEq (Registers rc) where
 
       decEq (Base xs) (Base ys) = case (decEq xs ys) of
@@ -154,11 +152,9 @@ namespace Invariant
       mergeSame_associative (Just x) Nothing  _        = Refl
       mergeSame_associative (Just x) (Just y) Nothing  = mergeSame_nothing_absorbs_r _
       mergeSame_associative (Just x) (Just y) (Just z) with (decEq x y)
-        mergeSame_associative (Just y) (Just y) (Just z) | Yes Refl = case @@ decEq y z of
-                                                                        (Yes _ ** p) => rewrite p in
-                                                                                        rewrite decEqSelfIsYes {x=y} in
-                                                                                        Refl
-                                                                        (No _ ** p) => rewrite p in Refl
+        mergeSame_associative (Just y) (Just y) (Just z) | Yes Refl with (decEq y z)
+          mergeSame_associative (Just _) (Just _) (Just z) | Yes Refl | Yes Refl = rewrite decEqSelfIsYes {x=z} in Refl
+          mergeSame_associative (Just _) (Just _) (Just _) | Yes Refl | No _     = Refl
         mergeSame_associative (Just x) (Just y) (Just z) | No uxy with (decEq y z)
           mergeSame_associative (Just x) (Just y) (Just z) | No uxy | Yes _  = rewrite snd $ decEqContraIsNo uxy in Refl
           mergeSame_associative (Just x) (Just y) (Just z) | No uxy | No uyz = Refl
@@ -177,16 +173,6 @@ namespace Invariant
     squash $ Merge r1 r2 = zipWith mergeSame (squash r1) (squash r2)
     squash $ With rs (n, ty) = replaceAt n ty $ squash rs
 
-    replaceAt_same_determines_index : (xs : Vect n a) -> (i : Fin n) -> (0 y : a) -> index i (replaceAt i y xs) = y
-    replaceAt_same_determines_index (_::_) FZ     _ = Refl
-    replaceAt_same_determines_index (_::_) (FS _) _ = replaceAt_same_determines_index _ _ _
-
-    replaceAt_different_preserves_index : (xs : Vect n a) -> (i, j : Fin n) -> Not (i = j) -> (0 y : a) -> index i (replaceAt j y xs) = index i xs
-    replaceAt_different_preserves_index (_::_) FZ     FZ     co _ = absurd $ co Refl
-    replaceAt_different_preserves_index (_::_) FZ     (FS _) _  _ = Refl
-    replaceAt_different_preserves_index (_::_) (FS _) FZ     _  _ = Refl
-    replaceAt_different_preserves_index (_::_) (FS z) (FS w) co y = replaceAt_different_preserves_index _ z w (co . cong FS) y
-
     export
     squash_preserves_index : (i : Fin rc) -> (regs : Registers rc) -> index i (squash regs) = index i regs
     squash_preserves_index _ $ Base _ = Refl
@@ -195,8 +181,8 @@ namespace Invariant
                                              rewrite squash_preserves_index i r2 in
                                              Refl
     squash_preserves_index i $ With rs (n, ty) with (decEq i n)
-      squash_preserves_index i $ With rs (i, ty) | Yes Refl = replaceAt_same_determines_index _ _ _
-      squash_preserves_index i $ With rs (n, ty) | No co = rewrite replaceAt_different_preserves_index (squash rs) i n co ty in
+      squash_preserves_index i $ With rs (i, ty) | Yes Refl = replaceAtSameIndex _ _ _
+      squash_preserves_index i $ With rs (n, ty) | No co = rewrite replaceAtDiffIndexPreserves (squash rs) i n co ty in
                                                            squash_preserves_index i rs
 
     --- Showing the registers state as a string ---
