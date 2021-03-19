@@ -102,6 +102,24 @@ read_reg_base = block $ do
 --bad_read_reg_base = block $ do
 --  Int'. "x" !#= R 1
 
+read_reg_undef_with : Statement vars (AllUndefined {rc=4} `With` (3, Just Int'))
+                                vars (AllUndefined {rc=4} `With` (3, Just Int'))
+read_reg_undef_with = block $ do
+  Int'. "x" !#= R 3
+
+--bad_read_reg_undef_with : Statement vars (AllUndefined {rc=4} `With` (3, Just Int'))
+--                                    vars (AllUndefined {rc=4} `With` (3, Just Int'))
+--bad_read_reg_undef_with = block $ do
+--  Int'. "x" !#= R 2
+
+read_reg_with : {0 regs : Registers 5} -> Statement vars (regs `With` (3, Just Int')) vars (regs `With` (3, Just Int'))
+read_reg_with = block $ do
+  Int'. "x" !#= R 3 + C 0
+
+--bad_read_reg_with : {0 regs : Registers 5} -> Statement vars (regs `With` (3, Just Int')) vars (regs `With` (3, Just Int'))
+--bad_read_reg_with = block $ do
+--  Int'. "x" !#= R 2 + C 0
+
 registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `With` (3, Just Int')
 registers_ass = block $ do
   Int'. "x" !#= C 0
