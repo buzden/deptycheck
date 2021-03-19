@@ -12,7 +12,9 @@ import Example.Pil.Lang.Expression
 infix 2 #=, ?#=, !#=, %=
 infixr 1 *>
 
-data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (postR : Registers rc) -> Type
+data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
+                 (postV : Variables) -> (postR : Registers rc) ->
+                 Type
 
 public export %inline
 0 (.varsAfter) : Statement preV preR postV postR -> Variables
@@ -23,15 +25,20 @@ public export %inline
 stmt.regsAfter = postR
 
 public export
-data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (postR : Registers rc) -> Type where
+data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
+                 (postV : Variables) -> (postR : Registers rc) ->
+                 Type where
+
   nop  : Statement vars regs vars regs
 
   (.)  : (ty : Type') -> (n : Name) -> Statement vars regs ((n, ty)::vars) regs
 
-  (#=) : (n : Name) -> (0 lk : Lookup n vars) => (v : Expression vars regs lk.reveal) -> Statement vars regs vars regs
+  (#=) : (n : Name) -> (0 lk : Lookup n vars) => (v : Expression vars regs lk.reveal) ->
+         Statement vars regs vars regs
 
   (%=) : {0 preR : Registers rc} ->
-         (reg : Fin rc) -> Expression vars preR ty -> Statement vars preR vars $ preR `With` (reg, Just ty)
+         (reg : Fin rc) -> Expression vars preR ty ->
+         Statement vars preR vars $ preR `With` (reg, Just ty)
 
   for  : (init : Statement preV preR insideV insideR) ->
          (cond : Expression insideV insideR Bool') ->
@@ -57,24 +64,34 @@ data Statement : (preV : Variables) -> (preR : Registers rc) -> (postV : Variabl
   print : Show (idrTypeOf ty) => Expression vars regs ty -> Statement vars regs vars regs
 
 public export %inline
-(>>) : Statement preV preR midV midR -> Statement midV midR postV postR -> Statement preV preR postV postR
+(>>) : Statement preV preR midV midR ->
+       Statement midV midR postV postR ->
+       Statement preV preR postV postR
 (>>) = (*>)
 
 public export %inline
-(>>=) : Statement preV preR midV midR -> (Unit -> Statement midV midR postV postR) -> Statement preV preR postV postR
+(>>=) : Statement preV preR midV midR ->
+        (Unit -> Statement midV midR postV postR) ->
+        Statement preV preR postV postR
 a >>= f = a *> f ()
 
 public export %inline
-if_  : (cond : Expression vars regsBefore Bool') -> Statement vars regsBefore varsThen regsThen -> Statement vars regsBefore vars $ Merge regsThen regsBefore
+if_  : (cond : Expression vars regsBefore Bool') ->
+       Statement vars regsBefore varsThen regsThen ->
+       Statement vars regsBefore vars $ Merge regsThen regsBefore
 if_ c t = if__ c t nop
 
 public export %inline
-while : Expression vars regs Bool' -> Statement vars regs after_body body_regs -> (0 _ : body_regs =%= regs) => Statement vars regs vars regs
+while : Expression vars regs Bool' ->
+        Statement vars regs after_body body_regs ->
+        (0 _ : body_regs =%= regs) =>
+        Statement vars regs vars regs
 while cond body = for nop cond nop body
 
 -- Define with derived type and assign immediately
 public export %inline
-(?#=) : (n : Name) -> {ty : Type'} -> {0 regs : Registers rc} -> Expression ((n, ty)::vars) regs ty -> Statement vars regs ((n, ty)::vars) regs
+(?#=) : (n : Name) -> {ty : Type'} -> {0 regs : Registers rc} ->
+        Expression ((n, ty)::vars) regs ty -> Statement vars regs ((n, ty)::vars) regs
 n ?#= v = ty. n *> n #= v
 
 namespace AlternativeDefineAndAssign
