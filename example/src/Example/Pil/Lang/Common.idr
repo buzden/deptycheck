@@ -20,7 +20,7 @@ namespace Types
   idrTypeOf Int'    = Int
   idrTypeOf String' = String
 
-  export
+  public export
   DecEq Type' where
     decEq Bool'   Bool'   = Yes Refl
     decEq Int'    Int'    = Yes Refl
@@ -84,7 +84,7 @@ namespace Invariant
 
     %name Registers regs
 
-    export
+    public export
     DecEq (Registers rc) where
 
       decEq (Base xs) (Base ys) = case (decEq xs ys) of
