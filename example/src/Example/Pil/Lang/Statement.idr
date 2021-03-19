@@ -12,18 +12,6 @@ import Example.Pil.Lang.Expression
 infix 2 #=, ?#=, !#=, %=
 infixr 1 *>
 
-data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
-                 (postV : Variables) -> (postR : Registers rc) ->
-                 Type
-
-public export %inline
-0 (.varsAfter) : Statement preV preR postV postR -> Variables
-stmt.varsAfter = postV
-
-public export %inline
-0 (.regsAfter) : {0 preR : Registers rc} -> Statement preV preR postV postR -> Registers rc
-stmt.regsAfter = postR
-
 public export
 data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
                  (postV : Variables) -> (postR : Registers rc) ->
