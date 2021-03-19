@@ -2,8 +2,8 @@ module Example.Pil.Lang.Common
 
 import public Data.Vect
 
-import Decidable.Decidable
-import Decidable.Equality
+import public Decidable.Decidable
+import public Decidable.Equality
 
 %default total
 
