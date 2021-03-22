@@ -3,7 +3,8 @@ module Example.Pil.Lang.Expression
 import Data.List.Lookup
 import Data.Maybe
 
-import Example.Pil.Lang.Common
+import Example.Pil.Lang.Aspects.Variables
+import Example.Pil.Lang.Aspects.Registers
 
 %default total
 

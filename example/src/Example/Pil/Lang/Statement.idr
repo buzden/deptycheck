@@ -4,7 +4,8 @@ import Data.List.Lookup
 
 import Data.String.Extra
 
-import Example.Pil.Lang.Common
+import Example.Pil.Lang.Aspects.Variables
+import Example.Pil.Lang.Aspects.Registers
 import Example.Pil.Lang.Expression
 
 %default total
