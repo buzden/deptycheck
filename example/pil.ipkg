@@ -5,7 +5,9 @@ version = 0.4
 authors = "Denis Buzdalov"
 
 modules = Example.Pil.Lang
-        , Example.Pil.Lang.Common
+        , Example.Pil.Lang.Aspects.Types
+        , Example.Pil.Lang.Aspects.Registers
+        , Example.Pil.Lang.Aspects.Variables
         , Example.Pil.Lang.Expression
         , Example.Pil.Lang.Statement
 
