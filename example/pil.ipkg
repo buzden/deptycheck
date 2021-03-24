@@ -9,6 +9,7 @@ modules = Example.Pil.Lang
         , Example.Pil.Lang.Aspects.Registers
         , Example.Pil.Lang.Aspects.Variables
         , Example.Pil.Lang.Expression
+        , Example.Pil.Lang.ShowC
         , Example.Pil.Lang.Statement
 
         , Example.Pil.ExampleUsages

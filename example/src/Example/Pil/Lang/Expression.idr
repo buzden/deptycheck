@@ -28,28 +28,3 @@ data Expression : (vars : Variables) -> (regs : Registers rc) -> (res : Type') -
   B : {default "??" opName : String} ->
       (f : idrTypeOf a -> idrTypeOf b -> idrTypeOf c) ->
       Expression vars regs a -> Expression vars regs b -> Expression vars regs c
-
-namespace ShowC
-
-  looksLikeInfixOperator : String -> Bool
-  looksLikeInfixOperator =
-    flip Prelude.elem ["+", "-", "*", "/", "%", "==", "!=", "<", ">", ">=", "<=", "&&", "||", "&", "|", "^", "<<", ">>"]
-
-  makeFuncName : String -> String
-  makeFuncName = pack . map (\k => if isAlphaNum k then k else '_') . unpack
-
-  export
-  Show (Expression vars regs a) where
-    show (C {ty=Bool'}   x) = show x
-    show (C {ty=Int'}    x) = show x
-    show (C {ty=String'} x) = show x
-    show (V n)              = show n
-    show (R r)              = "[[" ++ show (finToNat r) ++ "]]"
-    show (U {opName} _ e)   = opName ++ "(" ++ show e ++ ")"
-    show (B {opName} _ l r) = if looksLikeInfixOperator opName
-        then wr l ++ " " ++ opName ++ " " ++ wr r
-        else makeFuncName opName ++ "(" ++ show l ++ ", " ++ show r ++ ")"
-      where
-      wr : Expression vars regs x -> String
-      wr e@(B _ _ _) = "(" ++ show e ++ ")"
-      wr e           = show e

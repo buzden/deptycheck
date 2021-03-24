@@ -8,6 +8,7 @@ import Data.List.Lazy
 import Data.Strings
 
 import Example.Pil.Gens
+import Example.Pil.Lang.ShowC
 
 %default total
 
