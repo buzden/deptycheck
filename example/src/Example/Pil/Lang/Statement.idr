@@ -16,7 +16,7 @@ data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
                  (postV : Variables) -> (postR : Registers rc) ->
                  Type where
 
-  nop  : Statement vars regs vars regs
+  Nop  : Statement vars regs vars regs
 
   (.)  : (ty : Type') -> (n : Name) -> Statement vars regs ((n, ty)::vars) regs
 
@@ -27,7 +27,7 @@ data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
          (reg : Fin rc) -> Expression vars preR ty ->
          Statement vars preR vars $ preR `With` (reg, Just ty)
 
-  for  : (init : Statement preV preR insideV insideR) ->
+  For  : (init : Statement preV preR insideV insideR) ->
          (cond : Expression insideV insideR Bool') ->
          (upd  : Statement insideV insideR insideV updR) ->
          (0 _ : updR =%= insideR) =>
@@ -37,7 +37,7 @@ data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
          -- Registers that are changed in `upd` or `body` must be unavailable in `cond`, `upd`, `body` and `for` itself
          -- in the case when we allow `upd` and `body` to change register types.
 
-  if__ : (cond : Expression vars regs Bool') ->
+  If__ : (cond : Expression vars regs Bool') ->
          Statement vars regs varsThen regsThen ->
          Statement vars regs varsElse regsElse ->
          Statement vars regs vars $ Merge regsThen regsElse
@@ -46,9 +46,38 @@ data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
          Statement midV midR postV postR ->
          Statement preV preR postV postR
 
-  block : Statement preV preR insideV postR -> Statement preV preR preV postR
+  Block : Statement preV preR insideV postR -> Statement preV preR preV postR
 
-  print : Show (idrTypeOf ty) => Expression vars regs ty -> Statement vars regs vars regs
+  Print : Show (idrTypeOf ty) => Expression vars regs ty -> Statement vars regs vars regs
+
+public export %inline
+nop  : Statement vars regs vars regs
+nop = Nop
+
+public export %inline
+for  : (init : Statement preV preR insideV insideR) ->
+       (cond : Expression insideV insideR Bool') ->
+       (upd  : Statement insideV insideR insideV updR) ->
+       (0 _ : updR =%= insideR) =>
+       (body : Statement insideV insideR postBodyV bodyR) ->
+       (0 _ : bodyR =%= insideR) =>
+       Statement preV preR preV insideR
+for = For
+
+public export %inline
+if__ : (cond : Expression vars regs Bool') ->
+       Statement vars regs varsThen regsThen ->
+       Statement vars regs varsElse regsElse ->
+       Statement vars regs vars $ Merge regsThen regsElse
+if__ = If__
+
+public export %inline
+block : Statement preV preR insideV postR -> Statement preV preR preV postR
+block = Block
+
+public export %inline
+print : Show (idrTypeOf ty) => Expression vars regs ty -> Statement vars regs vars regs
+print = Print
 
 public export %inline
 (>>) : Statement preV preR midV midR ->
@@ -99,20 +128,20 @@ namespace ShowC
     show String' = "char *"
 
   isNopDeeply : Statement preV preR postV postR -> Bool
-  isNopDeeply Statement.nop = True
-  isNopDeeply (x *> y)      = isNopDeeply x && isNopDeeply y
-  isNopDeeply _             = False
+  isNopDeeply Nop      = True
+  isNopDeeply (x *> y) = isNopDeeply x && isNopDeeply y
+  isNopDeeply _        = False
 
   ||| Next identation
   n : Nat -> Nat
   n = (+ 2)
 
   showInd : (indent : Nat) -> Statement preV preR postV postR -> String
-  showInd i Statement.nop = ""
+  showInd i Nop = ""
   showInd i (ty . n) = indent i $ show ty ++ " " ++ show n ++ ";"
   showInd i (Statement.(#=) n v) = indent i $ show n ++ " = " ++ show v ++ ";"
   showInd i (reg %= v) = indent i "[\{show $ finToNat reg}] = \{show v};"
-  showInd i (for init cond upd body) = if isNopDeeply init -- TODO to add a situation when we can use normal C's `for`
+  showInd i (For init cond upd body) = if isNopDeeply init -- TODO to add a situation when we can use normal C's `for`
                                          then showWhile i
                                          else indent i "{\n" ++
                                                 showInd (n i) init ++ "\n" ++
@@ -126,7 +155,7 @@ namespace ShowC
                                                (if isNopDeeply upd then ""
                                                  else showInd (n i) upd ++ "\n") ++
                                              indent i "}"
-  showInd i (if__ cond x y) = indent i "if (" ++ show cond ++ ") {\n" ++
+  showInd i (If__ cond x y) = indent i "if (" ++ show cond ++ ") {\n" ++
                                 showInd (n i) x ++ "\n" ++
                               indent i "}" ++ if isNopDeeply y then ""
                                 else " else {\n" ++
@@ -137,8 +166,8 @@ namespace ShowC
                          else showInd i x ++
                          if isNopDeeply y then "" else "\n" ++
                          showInd i y
-  showInd i (block x) = indent i "{\n" ++ showInd (n i) x ++ "\n" ++ indent i "}"
-  showInd i (print x) = indent i $ "puts(" ++ show x ++ ");"
+  showInd i (Block x) = indent i "{\n" ++ showInd (n i) x ++ "\n" ++ indent i "}"
+  showInd i (Print x) = indent i $ "puts(" ++ show x ++ ");"
 
   export
   Show (Statement preV preR postV postR) where
