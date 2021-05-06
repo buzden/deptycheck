@@ -114,6 +114,12 @@ exprGen (More f) g rec = nonRec_exprGen g <|> rec (exprGen f g rec)
 
   -- TODO to automate all this as an elaboration script.
 
+--- Utils ---
+
+fin_uni_gen : {rc : Nat} -> Gen (Fin rc)
+fin_uni_gen {rc=Z}   = empty
+fin_uni_gen {rc=S _} = chooseAny
+
 --- Statements ---
 
 public export
@@ -173,8 +179,7 @@ namespace Equal_registers -- implementations
   squashed _ $ Base _ = empty -- just to not to repeat `refl` since squash of `Base` is the same
   squashed _ _ = pure (_ ** squashed_regs_equiv)
 
-  withed _ _ {rc=S _} = pure (_ ** withed_with_same_equiv {j = !chooseAny})
-  withed _ _ {rc=Z} = empty -- no such generator if there are no registers, sorry.
+  withed _ _ = pure (_ ** withed_with_same_equiv {j = !fin_uni_gen})
 
   -- TODO to think of reverse `squashed` and `withed`, i.e. those which
   --   - by a `rs@(Base xs)` generates those that squash to `rs` and
@@ -305,8 +310,7 @@ namespace Statements_given_preV_preR -- implementations
     (n ** lk) <- lookupGen preV
     pure (_ ** _ ** n #= !expr)
 
-  r_ass_gen {rc=Z}   @{type'} @{_} @{expr} _ preV preR = empty
-  r_ass_gen {rc=S _} @{type'} @{_} @{expr} _ preV preR = pure (_ ** _ ** !chooseAny %= !(expr {ty = !type'}))
+  r_ass_gen @{type'} @{_} @{expr} _ preV preR = pure (_ ** _ ** !fin_uni_gen %= !(expr {ty = !type'}))
 
   for_gen @{_} @{_} @{expr} f preV preR = do
     (insideV ** insideR ** init) <- statement_gen f preV preR
@@ -355,7 +359,7 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
       (n ** lk) <- lookupGen preV
       pure $ n #= !expr
 
-  r_ass_gen {rc=S _} @{_} @{_} @{expr} _ preV preR postV (rs `With` (reg, Just ty)) = case (decEq postV preV, decEq rs preR) of
+  r_ass_gen @{_} @{_} @{expr} _ preV preR postV (rs `With` (reg, Just ty)) = case (decEq postV preV, decEq rs preR) of
     (Yes Refl, Yes Refl) => pure $ reg %= !expr
     (No _, _)     => empty
     (_, No _)     => empty
@@ -414,7 +418,7 @@ namespace Statements_given_preV_preR_postR -- implementations
       (n ** lk) <- lookupGen preV
       pure (_ ** n #= !expr)
 
-  r_ass_gen {rc=S _} @{_} @{_} @{expr} _ preV preR (rs `With` (reg, Just ty)) = case decEq rs preR of
+  r_ass_gen @{_} @{_} @{expr} _ preV preR (rs `With` (reg, Just ty)) = case decEq rs preR of
     Yes Refl => pure $ (_ ** reg %= !expr)
     No _ => empty
   r_ass_gen @{_} @{_} @{expr} _ preV preR _ = empty
