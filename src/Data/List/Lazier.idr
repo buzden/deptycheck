@@ -1,6 +1,7 @@
 module Data.List.Lazier
 
 import Data.Fin
+import Data.Fin.Extra
 import Data.List
 import Data.List.Lazy
 import Data.Nat
@@ -54,60 +55,6 @@ replicate : Nat -> a -> LzList a
 replicate Z _ = []
 replicate n x = MkLzList _ $ Replic n x
 
-namespace FinFun
-
-  export
-  finToNatWeakenNNeutral : (k : Nat) -> (a : Fin n) -> finToNat (weakenN k a) = finToNat a
-  finToNatWeakenNNeutral k FZ     = Refl
-  finToNatWeakenNNeutral k (FS x) = rewrite finToNatWeakenNNeutral k x in Refl
-
-  export
-  finToNatShift : (k : Nat) -> (a : Fin n) -> finToNat (shift k a) = k + finToNat a
-  finToNatShift Z     a = Refl
-  finToNatShift (S k) a = rewrite finToNatShift k a in Refl
-
-  ---------
-
-  export
-  splitSumFin : {a : Nat} -> Fin (a + b) -> Either (Fin a) (Fin b)
-  splitSumFin {a=Z}   x      = Right x
-  splitSumFin {a=S k} FZ     = Left FZ
-  splitSumFin {a=S k} (FS x) = bimap FS id $ splitSumFin x
-
-  export
-  0 splitSumFin_correctness : {a, b : Nat} -> (x : Fin $ a + b) ->
-                              case splitSumFin {a} {b} x of
-                                Left  l => x = weakenN b l
-                                Right r => x = shift a r
-  splitSumFin_correctness {a=Z}   x  = Refl
-  splitSumFin_correctness {a=S k} FZ = Refl
-  splitSumFin_correctness {a=S k} (FS x) with (splitSumFin_correctness x)
-    splitSumFin_correctness {a=S k} (FS x) | subcorr with (splitSumFin x)
-      splitSumFin_correctness {a=S k} (FS x) | subcorr | Left  y = rewrite subcorr in Refl
-      splitSumFin_correctness {a=S k} (FS x) | subcorr | Right y = rewrite subcorr in Refl
-
-  export
-  splitProdFin : {a, b : Nat} -> Fin (a * b) -> (Fin a, Fin b)
-  splitProdFin {a=S _} x = case splitSumFin x of
-    Left  y => (FZ, y)
-    Right y => bimap FS id $ splitProdFin y
-
-  export
-  0 splitProdFin_correctness : {a, b : Nat} -> (x : Fin $ a * b) ->
-                               let (o, i) = splitProdFin {a} {b} x in
-                               finToNat x = finToNat o * b + finToNat i
-  splitProdFin_correctness {a=S _} x with (splitSumFin_correctness x)
-    splitProdFin_correctness x | sumcorr with (splitSumFin x)
-      splitProdFin_correctness x | sumcorr | Left  y = rewrite sumcorr in finToNatWeakenNNeutral _ _
-      splitProdFin_correctness x | sumcorr | Right y with (splitProdFin_correctness y)
-        splitProdFin_correctness x | sumcorr | Right y | subcorr with (splitProdFin y)
-          splitProdFin_correctness x | sumcorr | Right y | subcorr | (o, i) =
-            rewrite sumcorr in
-            rewrite finToNatShift b y in
-            rewrite subcorr in
-            rewrite plusAssociative b (finToNat o * b) (finToNat i) in
-            Refl
-
 export
 index : (lz : LzList a) -> Fin lz.length -> a
 index $ MkLzList {contents=Delay lv, _} = ind lv where
@@ -115,8 +62,8 @@ index $ MkLzList {contents=Delay lv, _} = ind lv where
   ind (Eager xs)     i = index' xs i
   ind (Replic _ x)   _ = x
   ind (Map f xs)     i = f $ index xs i
-  ind (Concat ls rs) i = either (index ls) (index rs) $ splitSumFin i
-  ind (Cart os is)   i = bimap (index os) (index is) $ splitProdFin i
+  ind (Concat ls rs) i = either (index ls) (index rs) $ splitSum i
+  ind (Cart os is)   i = bimap (index os) (index is) $ splitProd i
 
 -------------------------------------------------
 --- Funny implementations of funny interfaces ---
@@ -222,10 +169,10 @@ splitAt (MkLzList {contents=Delay lv, _}) i = case lv of
   Eager xs     => let (l, r) = splitAt (finToNat i) xs in (fromList l, fromList r)
   Replic n x   => (replicate (finToNat i) x, replicate (n `minus` finToNat i) x)
   Map f xs     => let (l, r) = splitAt xs i in (map f l, map f r)
-  Concat ls rs => case splitSumFin i of
+  Concat ls rs => case splitSum i of
                     Left  l => let (ll, rr) = splitAt ls l in (ll, rr ++ rs)
                     Right r => let (ll, rr) = splitAt rs r in (ls ++ ll, rs)
-  Cart os is   => let (oi, ii) = splitProdFin i
+  Cart os is   => let (oi, ii) = splitProd i
                       (ibef, iaft) = splitAt is ii
                       topSq = MkLzList _ $ Cart os ibef
                   in case uncons iaft of
