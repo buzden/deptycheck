@@ -62,7 +62,7 @@ choose bounds = Raw $ pure <$> randomR' bounds
 shiftRandomly : RandomGen g => LzList a -> State g (LazyList a)
 shiftRandomly xs with (xs.length) proof prf
   shiftRandomly xs | Z   = pure []
-  shiftRandomly xs | S _ = (\(ls, rs) => toLazyList $ rs ++ ls) <$> splitAt xs <$> rewrite prf in random'
+  shiftRandomly xs | S _ = (uncurry $ toLazyList .: flip (++)) <$> splitAt xs <$> rewrite prf in random'
 
 traverseSt : RandomGen g => LazyList (State g a) -> State g (LazyList a)
 traverseSt []      = pure []
