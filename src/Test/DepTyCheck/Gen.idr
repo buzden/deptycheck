@@ -11,8 +11,6 @@ import Data.Vect
 
 import Decidable.Equality
 
-import Syntax.WithProof
-
 import public System.Random.Simple
 
 %default total
@@ -62,9 +60,9 @@ choose : Random a => (a, a) -> Gen a
 choose bounds = Raw $ pure <$> randomR' bounds
 
 shiftRandomly : RandomGen g => LzList a -> State g (LazyList a)
-shiftRandomly xs = case @@ xs.length of
-  (Z   ** _)   => pure []
-  (S _ ** prf) => (\(ls, rs) => toLazyList $ rs ++ ls) <$> splitAt xs <$> rewrite prf in random'
+shiftRandomly xs with (xs.length) proof prf
+  shiftRandomly xs | Z   = pure []
+  shiftRandomly xs | S _ = (uncurry $ toLazyList .: flip (++)) <$> splitAt xs <$> rewrite prf in random'
 
 traverseSt : RandomGen g => LazyList (State g a) -> State g (LazyList a)
 traverseSt []      = pure []
@@ -176,9 +174,9 @@ export
 suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `HavingTrue` p
 suchThat_withPrf g p = mapMaybe lp g where
   lp : a -> Maybe $ a `HavingTrue` p
-  lp x = case @@ p x of
-    (True ** prf) => Just $ Element x prf
-    (False ** _)  => Nothing
+  lp x with (p x) proof prf
+    lp x | True  = Just $ Element x prf
+    lp x | False = Nothing
 
 infixl 4 `suchThat`
 
