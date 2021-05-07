@@ -127,20 +127,19 @@ external_gen @{x} = x
 --- Statements ---
 
 public export
-0 SpecGen : (Nat -> Type) -> Type
+0 SpecGen : Type -> Type
 SpecGen res =
   (fuel : Fuel) ->
-  {rc : Nat} ->
   Gen Type' =>
   Gen Name =>
-  ({ty : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen (Expression vars regs ty)) =>
-  res rc
+  ({ty : Type'} -> {vars : Variables} -> {rc : Nat} -> {regs : Registers rc} -> Gen (Expression vars regs ty)) =>
+  res
 
 namespace Equal_registers
 
   public export
   0 EqRegisters_Gen : Type
-  EqRegisters_Gen = SpecGen \rc => (regs : Registers rc) -> Gen (regs' ** regs' =%= regs)
+  EqRegisters_Gen = SpecGen $ {rc : Nat} -> (regs : Registers rc) -> Gen (regs' ** regs' =%= regs)
 
   refl  : EqRegisters_Gen
 
@@ -195,8 +194,8 @@ namespace Statements_given_preV_preR_postV_postR
 
   public export
   0 Statement_no_Gen : Type
-  Statement_no_Gen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (postR : Registers rc) ->
-                                    Gen (Statement preV preR postV postR)
+  Statement_no_Gen = SpecGen $ {rc : Nat} -> (preV : Variables) -> (preR : Registers rc) -> (postV : Variables) -> (postR : Registers rc) ->
+                               Gen (Statement preV preR postV postR)
 
   nop_gen   : Statement_no_Gen
   dot_gen   : Statement_no_Gen
@@ -233,8 +232,8 @@ namespace Statements_given_preV_preR_postR
 
   public export
   0 Statement_postV_Gen : Type
-  Statement_postV_Gen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> (postR : Registers rc) ->
-                                       Gen (postV ** Statement preV preR postV postR)
+  Statement_postV_Gen = SpecGen $ {rc : Nat} -> (preV : Variables) -> (preR : Registers rc) -> (postR : Registers rc) ->
+                                  Gen (postV ** Statement preV preR postV postR)
 
   nop_gen   : Statement_postV_Gen
   dot_gen   : Statement_postV_Gen
@@ -271,7 +270,7 @@ namespace Statements_given_preV_preR
 
   public export
   0 Statement_postV_postR_Gen : Type
-  Statement_postV_postR_Gen = SpecGen \rc => (preV : Variables) -> (preR : Registers rc) -> Gen (postV ** postR ** Statement preV preR postV postR)
+  Statement_postV_postR_Gen = SpecGen $ {rc : Nat} -> (preV : Variables) -> (preR : Registers rc) -> Gen (postV ** postR ** Statement preV preR postV postR)
 
   nop_gen   : Statement_postV_postR_Gen
   dot_gen   : Statement_postV_postR_Gen
