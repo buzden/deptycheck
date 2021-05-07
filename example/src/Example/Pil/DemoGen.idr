@@ -52,7 +52,7 @@ interestingExpr = exprGen (limit 3) simpleValue recExpr
 
 export
 someStatementGen : {rc : Nat} -> Gen (postV ** postR ** Statement [] (AllUndefined {rc}) postV postR)
-someStatementGen = statement_gen (limit 6) [] (AllUndefined {rc})
+someStatementGen = statement_gen (limit 6) [] AllUndefined
 
 export
 someStatement : {rc : Nat} -> Nat -> Maybe (postV ** postR ** Statement [] (AllUndefined {rc}) postV postR)
