@@ -57,13 +57,12 @@ replicate n x = MkLzList _ $ Replic n x
 
 export
 index : (lz : LzList a) -> Fin lz.length -> a
-index $ MkLzList {contents=Delay lv, _} = ind lv where
-  ind : forall a. LzVect n a -> Fin n -> a
-  ind (Eager xs)     i = index' xs i
-  ind (Replic _ x)   _ = x
-  ind (Map f xs)     i = f $ index xs i
-  ind (Concat ls rs) i = either (index ls) (index rs) $ splitSum i
-  ind (Cart os is)   i = bimap (index os) (index is) $ splitProd i
+index $ MkLzList {contents=Delay lv, _} = case lv of
+  Eager xs     => index' xs
+  Replic _ x   => const x
+  Map f xs     => f . index xs
+  Concat ls rs => either (index ls) (index rs) . splitSum
+  Cart os is   => bimap  (index os) (index is) . splitProd
 
 -------------------------------------------------
 --- Funny implementations of funny interfaces ---
@@ -149,15 +148,14 @@ x :: ll@(MkLzList {contents=Delay lv, _}) = case lv of
 
 export
 uncons : LzList a -> Maybe (a, LzList a)
-uncons $ MkLzList {contents = Delay lv, _} = unc lv where
-  unc : forall a. LzVect n a -> Maybe (a, LzList a)
-  unc $ Eager []      = Nothing
-  unc $ Eager (x::xs) = Just (x, fromList xs)
-  unc $ Replic Z x    = Nothing
-  unc $ Replic (S n) x = Just (x, replicate n x)
-  unc $ Map f xs      = bimap f (map f) <$> uncons xs
-  unc $ Concat ls rs  = map (map (++ rs)) (uncons ls) <|> uncons rs
-  unc $ Cart os is    = [| recart (uncons os) (uncons is) |] where
+uncons $ MkLzList {contents = Delay lv, _} = case lv of
+  Eager []       => Nothing
+  Eager (x::xs)  => Just (x, fromList xs)
+  Replic Z x     => Nothing
+  Replic (S n) x => Just (x, replicate n x)
+  Map f xs       => bimap f (map f) <$> uncons xs
+  Concat ls rs   => map (map (++ rs)) (uncons ls) <|> uncons rs
+  Cart os is     => [| recart (uncons os) (uncons is) |] where
     recart : forall a, b. (a, LzList a) -> (b, LzList b) -> ((a, b), LzList (a, b))
     recart (x, xs) (y, ys) = ((x, y), map (, y) xs ++ [| (xs, ys) |])
 
@@ -217,7 +215,7 @@ Traversable LzList where
 
 export
 mapMaybe : (f : a -> Maybe b) -> LzList a -> LzList b
-mapMaybe f ll@(MkLzList {contents=Delay lz, _}) = case lz of
+mapMaybe f ll@(MkLzList {contents=Delay lv, _}) = case lv of
   Eager xs     => fromList $ mapMaybe f xs
   Replic Z _   => []
   Replic n x   => maybe [] (replicate n) $ f x
