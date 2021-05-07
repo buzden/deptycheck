@@ -6,6 +6,7 @@ version = 0.0.1
 modules = System.Random.Simple
         , Data.List.Lazier
         , Test.DepTyCheck.Gen
+        , Test.DepTyCheck.Gen.Auto
 
 depends = contrib
 
