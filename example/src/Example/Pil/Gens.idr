@@ -105,7 +105,7 @@ exprGen (More f) g rec = nonRec_exprGen g <|> rec (exprGen f g rec)
   --
   --   If there is not such a generator, then the whole generation process should be repeated for this type from the beginning on this methodology.
   --
-  -- For external data generators, we use `@{expr}` pattern matching and explicit `!expr` expression to call the generator.
+  -- For external data generators, we use `!external_gen` expression to call the generator (somethimes with explicit setting of the desired type).
   -- For non-external data generators, we use the `do`-notation and generate appropriate value (or dependent pair of values)
   -- and then use them for generation.
   --
@@ -116,9 +116,13 @@ exprGen (More f) g rec = nonRec_exprGen g <|> rec (exprGen f g rec)
 
 --- Utils ---
 
+%hint
 fin_uni_gen : {rc : Nat} -> Gen (Fin rc)
 fin_uni_gen {rc=Z}   = empty
 fin_uni_gen {rc=S _} = chooseAny
+
+external_gen : Gen ty => Gen ty
+external_gen @{x} = x
 
 --- Statements ---
 
@@ -179,7 +183,7 @@ namespace Equal_registers -- implementations
   squashed _ $ Base _ = empty -- just to not to repeat `refl` since squash of `Base` is the same
   squashed _ _ = pure (_ ** squashed_regs_equiv)
 
-  withed _ _ = pure (_ ** withed_with_same_equiv {j = !fin_uni_gen})
+  withed _ _ = pure (_ ** withed_with_same_equiv {j = !external_gen})
 
   -- TODO to think of reverse `squashed` and `withed`, i.e. those which
   --   - by a `rs@(Base xs)` generates those that squash to `rs` and
@@ -304,15 +308,15 @@ namespace Statements_given_preV_preR -- implementations
 
   nop_gen _ preV preR = pure (_ ** _ ** nop)
 
-  dot_gen @{type'} @{name} @{_} _ preV preR = pure (_ ** _ ** !type'. !name)
+  dot_gen _ preV preR = pure (_ ** _ ** !external_gen. !external_gen)
 
-  v_ass_gen @{_} @{_} @{expr} _ preV preR = do
+  v_ass_gen _ preV preR = do
     (n ** lk) <- lookupGen preV
-    pure (_ ** _ ** n #= !expr)
+    pure (_ ** _ ** n #= !external_gen)
 
-  r_ass_gen @{type'} @{_} @{expr} _ preV preR = pure (_ ** _ ** !fin_uni_gen %= !(expr {ty = !type'}))
+  r_ass_gen _ preV preR = pure (_ ** _ ** !external_gen %= !(external_gen {ty = Expression _ _ !external_gen}))
 
-  for_gen @{_} @{_} @{expr} f preV preR = do
+  for_gen f preV preR = do
     (insideV ** insideR ** init) <- statement_gen f preV preR
     --
     (updR ** _) <- eq_registers_gen f insideR
@@ -321,12 +325,12 @@ namespace Statements_given_preV_preR -- implementations
     (bodyR ** _) <- eq_registers_gen f insideR
     (_ ** body)  <- statement_gen f insideV insideR bodyR
     --
-    pure (_ ** _ ** for init !expr upd body)
+    pure (_ ** _ ** for init !external_gen upd body)
 
-  if_gen @{_} @{_} @{expr} f preV preR = do
+  if_gen f preV preR = do
     (_ ** _ ** th) <- statement_gen f preV preR
     (_ ** _ ** el) <- statement_gen f preV preR
-    pure (_ ** _ ** if__ !expr th el)
+    pure (_ ** _ ** if__ !external_gen th el)
 
   seq_gen f preV preR = do
     (midV ** midR ** l) <- statement_gen f preV preR
@@ -337,7 +341,7 @@ namespace Statements_given_preV_preR -- implementations
     (_ ** _ ** s) <- statement_gen f preV preR
     pure (_ ** _ ** block s)
 
-  print_gen @{_} @{_} @{expr} _ preV preR = pure (_ ** _ ** print !(expr {ty=String'}))
+  print_gen _ preV preR = pure (_ ** _ ** print !(external_gen {ty=Expression _ _ String'}))
 
 namespace Statements_given_preV_preR_postV_postR -- implementations
 
@@ -352,20 +356,20 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
     (_, No _) => empty
     (Yes Refl, Yes Refl) => pure $ ty. n
 
-  v_ass_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
+  v_ass_gen _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
     (_, No _) => empty
     (Yes Refl, Yes Refl) => do
       (n ** lk) <- lookupGen preV
-      pure $ n #= !expr
+      pure $ n #= !external_gen
 
-  r_ass_gen @{_} @{_} @{expr} _ preV preR postV (rs `With` (reg, Just ty)) = case (decEq postV preV, decEq rs preR) of
-    (Yes Refl, Yes Refl) => pure $ reg %= !expr
+  r_ass_gen _ preV preR postV (rs `With` (reg, Just ty)) = case (decEq postV preV, decEq rs preR) of
+    (Yes Refl, Yes Refl) => pure $ reg %= !external_gen
     (No _, _)     => empty
     (_, No _)     => empty
-  r_ass_gen @{_} @{_} @{expr} _ preV preR postV _ = empty
+  r_ass_gen _ preV preR postV _ = empty
 
-  for_gen @{_} @{_} @{expr} f preV preR postV postR = case decEq postV preV of
+  for_gen f preV preR postV postR = case decEq postV preV of
     No _ => empty
     Yes Refl => do
       (insideV ** init) <- statement_gen f preV preR postR
@@ -376,15 +380,15 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
       (bodyR ** _) <- eq_registers_gen f postR
       (_ ** body)  <- statement_gen f insideV postR bodyR
       --
-      pure $ for init !expr upd body
+      pure $ for init !external_gen upd body
 
-  if_gen @{_} @{_} @{expr} f preV preR postV (Merge thR elR) = case decEq postV preV of
+  if_gen f preV preR postV (Merge thR elR) = case decEq postV preV of
     Yes Refl => do
       (_ ** th) <- statement_gen f preV preR thR
       (_ ** el) <- statement_gen f preV preR elR
-      pure $ if__ !expr th el
+      pure $ if__ !external_gen th el
     No _ => empty
-  if_gen @{_} @{_} @{expr} f preV preR postV _ = empty
+  if_gen f preV preR postV _ = empty
 
   seq_gen f preV preR postV postR = do
     (midV ** midR ** left) <- statement_gen f preV preR
@@ -397,10 +401,10 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
       (_ ** stmt) <- statement_gen f preV preR postR
       pure $ block stmt
 
-  print_gen @{_} @{_} @{expr} _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
+  print_gen _ preV preR postV postR = case (decEq postV preV, decEq postR preR) of
     (No _, _) => empty
     (_, No _) => empty
-    (Yes Refl, Yes Refl) => pure $ print !(expr {ty=String'})
+    (Yes Refl, Yes Refl) => pure $ print !(external_gen {ty=Expression _ _ String'})
 
 namespace Statements_given_preV_preR_postR -- implementations
 
@@ -408,22 +412,22 @@ namespace Statements_given_preV_preR_postR -- implementations
     No _ => empty
     Yes Refl => pure (_ ** nop)
 
-  dot_gen @{type'} @{name} @{_} _ preV preR postR = case decEq postR preR of
+  dot_gen _ preV preR postR = case decEq postR preR of
     No _ => empty
-    Yes Refl => pure (_ ** !type'. !name)
+    Yes Refl => pure (_ ** !external_gen. !external_gen)
 
-  v_ass_gen @{_} @{_} @{expr} _ preV preR postR = case decEq postR preR of
+  v_ass_gen _ preV preR postR = case decEq postR preR of
     No _ => empty
     Yes Refl => do
       (n ** lk) <- lookupGen preV
-      pure (_ ** n #= !expr)
+      pure (_ ** n #= !external_gen)
 
-  r_ass_gen @{_} @{_} @{expr} _ preV preR (rs `With` (reg, Just ty)) = case decEq rs preR of
-    Yes Refl => pure $ (_ ** reg %= !expr)
+  r_ass_gen _ preV preR (rs `With` (reg, Just ty)) = case decEq rs preR of
+    Yes Refl => pure $ (_ ** reg %= !external_gen)
     No _ => empty
-  r_ass_gen @{_} @{_} @{expr} _ preV preR _ = empty
+  r_ass_gen _ preV preR _ = empty
 
-  for_gen @{_} @{_} @{expr} f preV preR postR = do
+  for_gen f preV preR postR = do
     (insideV ** init) <- statement_gen f preV preR postR
     --
     (updR ** _) <- eq_registers_gen f postR
@@ -432,13 +436,13 @@ namespace Statements_given_preV_preR_postR -- implementations
     (bodyR ** _) <- eq_registers_gen f postR
     (_ ** body)  <- statement_gen f insideV postR bodyR
     --
-    pure (_ ** for init !expr upd body)
+    pure (_ ** for init !external_gen upd body)
 
-  if_gen @{_} @{_} @{expr} f preV preR (Merge thR elR) = do
+  if_gen f preV preR (Merge thR elR) = do
       (_ ** th) <- statement_gen f preV preR thR
       (_ ** el) <- statement_gen f preV preR elR
-      pure (_ ** if__ !expr th el)
-  if_gen @{_} @{_} @{expr} f preV preR _ = empty
+      pure (_ ** if__ !external_gen th el)
+  if_gen f preV preR _ = empty
 
   seq_gen f preV preR postR = do
     (midV ** midR ** left) <- statement_gen f preV preR
@@ -449,6 +453,6 @@ namespace Statements_given_preV_preR_postR -- implementations
     (_ ** stmt) <- statement_gen f preV preR postR
     pure $ (_ ** block stmt)
 
-  print_gen @{_} @{_} @{expr} _ preV preR postR = case decEq postR preR of
+  print_gen _ preV preR postR = case decEq postR preR of
     No _ => empty
-    Yes Refl => pure $ (_ ** print !(expr {ty=String'}))
+    Yes Refl => pure $ (_ ** print !(external_gen {ty=Expression _ _ String'}))
