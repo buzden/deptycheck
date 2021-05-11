@@ -9,5 +9,6 @@ modules = System.Random.Simple
         , Test.DepTyCheck.Gen.Auto
 
 depends = contrib
+        , elab-util >= 0.2.1 && < 0.3
 
 sourcedir = "src"
