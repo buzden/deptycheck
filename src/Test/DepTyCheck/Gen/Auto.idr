@@ -26,6 +26,16 @@ namespace NamedOrPositionalArgs
   fromInteger : (x : Integer) -> (0 _ : So (x >= 0)) => DatatypeArgPointer
   fromInteger x = PosForExplicit $ integerToNat x
 
+(.length) : List a -> Nat
+xs.length = length xs
+
+generateGensFor' : (ty : TypeInfo) ->
+                   (definedImplicitParams : List $ Fin ty.args.length) ->
+                   (definedExplicitParams : List $ Fin ty.args.length) ->
+                   (externalImplicitGens : List TypeInfo) -> -- todo maybe to use smth without constructors info instead of `TypeInfo`.
+                   (externalHintedGens : List TypeInfo) ->
+                   Elab ()
+
 ||| The entry-point function of automatic generation of `Gen`'s.
 |||
 ||| Consider, you have a `data X (a : A) (b : B n) (c : C) where ...` and
