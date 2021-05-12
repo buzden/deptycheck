@@ -1,12 +1,30 @@
 module Test.DepTyCheck.Gen.Auto
 
+import Data.So
+
 import Language.Reflection
 import Language.Reflection.Types
+import Language.Reflection.Syntax
 
 import public Test.DepTyCheck.Gen
 
 %default total
 %language ElabReflection
+
+namespace NamedOrPositionalArgs
+
+  public export
+  data DatatypeArgPointer
+         = ArgName Name
+         | PosForExplicit Nat
+
+  public export
+  FromString DatatypeArgPointer where
+    fromString s = ArgName $ assert_total $ fromString s
+
+  public export
+  fromInteger : (x : Integer) -> (0 _ : So (x >= 0)) => DatatypeArgPointer
+  fromInteger x = PosForExplicit $ integerToNat x
 
 ||| The entry-point function of automatic generation of `Gen`'s.
 |||
@@ -15,6 +33,11 @@ import public Test.DepTyCheck.Gen
 ||| Say, you want to have `a` and `c` parameters of `X` to be set by the caller and the `b` parameter to be generated.
 ||| For this you can call `%runElab generateGensFor "X" [] ["a", "c"] [] []` and
 ||| you get (besides all) a function with a signature `(a : A) -> (c : C) -> (n ** b : B n ** X a b c)`.
+|||
+||| You can use positional arguments adderssing instead of named (espesially for unnamed arguments),
+||| including mix of positional and named ones.
+||| Arguments count from zero and only explicit arguments count.
+||| I.e., the following call is equivalent to the one above: `%runElab generateGensFor "X" ["a", 2] [] []`.
 |||
 ||| Say, you want `n` to be set by the caller to.
 ||| For this, you can use `%runElab generateGensFor "X" ["n"] ["a", "c"] [] []` and
@@ -29,8 +52,8 @@ import public Test.DepTyCheck.Gen
 ||| `%hint _ : Gen Y` from the current scope will be used as soon as a value of type `Y` will be needed for generation.
 export
 generateGensFor : Name ->
-                  (definedImplicitParams : List Name) ->
-                  (definedExplicitParams : List Name) ->
+                  (definedImplicitParams : List DatatypeArgPointer) ->
+                  (definedExplicitParams : List DatatypeArgPointer) ->
                   (externalImplicitGens : List Name) ->
                   (externalHintedGens : List Name) ->
                   Elab ()
