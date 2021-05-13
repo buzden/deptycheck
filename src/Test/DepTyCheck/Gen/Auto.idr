@@ -20,7 +20,7 @@ namespace NamedOrPositionalArgs
 
   public export
   FromString DatatypeArgPointer where
-    fromString s = Named $ assert_total $ fromString s
+    fromString = Named . fromString
 
   public export
   fromInteger : (x : Integer) -> (0 _ : So (x >= 0)) => DatatypeArgPointer
