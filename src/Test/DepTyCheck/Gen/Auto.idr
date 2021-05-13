@@ -21,7 +21,7 @@ import public Test.DepTyCheck.Gen
 xs.length = length xs
 
 -- Not effective but clean
-find' : (p : a -> Bool) -> (xs : List a) -> Maybe $ Fin (length xs)
+find' : (p : a -> Bool) -> (xs : List a) -> Maybe $ Fin xs.length
 find' _ [] = Nothing
 find' p (x::xs) = if p x then Just FZ else FS <$> find' p xs
 
