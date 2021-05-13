@@ -17,6 +17,11 @@ import public Test.DepTyCheck.Gen
 (.length) : List a -> Nat
 xs.length = length xs
 
+-- Not effective but clean
+find' : (p : a -> Bool) -> (xs : List a) -> Maybe $ Fin (length xs)
+find' _ [] = Nothing
+find' p (x::xs) = if p x then Just FZ else FS <$> find' p xs
+
 --- Internal generation functions ---
 
 generateGensFor' : (ty : TypeInfo) ->
@@ -42,6 +47,27 @@ namespace DatatypeArgPointer
   public export
   fromInteger : (x : Integer) -> (0 _ : So (x >= 0)) => DatatypeArgPointer
   fromInteger x = PositionalExplicit $ integerToNat x
+
+Eq Namespace where
+  (MkNS xs) == (MkNS ys) = xs == ys
+
+Eq Name where -- I'm not sure that this implementation is correct for my case.
+  (UN x)   == (UN y)   = x == y
+  (MN x n) == (MN y m) = x == y && n == m
+  (NS s n) == (NS p m) = s == p && n == m
+  (DN x n) == (DN y m) = x == y && n == m
+  (RF x)   == (RF y)   = x == y
+  _ == _ = False
+
+-- To report an error about particular argument.
+toIndex : (ty : TypeInfo) -> DatatypeArgPointer -> Maybe $ Fin ty.args.length
+toIndex ty (Named n) = find' ((== n) . name) ty.args
+toIndex ty (PositionalExplicit k) = findNthExplicit ty.args k where
+  findNthExplicit : (xs : List NamedArg) -> Nat -> Maybe $ Fin xs.length
+  findNthExplicit []                              _     = Nothing
+  findNthExplicit (MkArg _ ExplicitArg _ _ :: _ ) Z     = Just FZ
+  findNthExplicit (MkArg _ ExplicitArg _ _ :: xs) (S k) = FS <$> findNthExplicit xs k
+  findNthExplicit (MkArg _ _           _ _ :: xs) n     = FS <$> findNthExplicit xs n
 
 ||| The entry-point function of automatic generation of `Gen`'s.
 |||
@@ -74,3 +100,10 @@ generateGensFor : Name ->
                   (externalImplicitGens : List Name) ->
                   (externalHintedGens : List Name) ->
                   Elab ()
+generateGensFor n defImpl defExpl extImpl extHint = do
+  ty <- getInfo' n
+  let Just resolvedGivenImpl = traverse (toIndex ty) defImpl
+      | Nothing => fail "Invalid given implicit parameter"
+  let Just resolvedGivenExpl = traverse (toIndex ty) defExpl
+      | Nothing => fail "Invalid given explicit parameter"
+  generateGensFor' ty resolvedGivenImpl resolvedGivenExpl !(for extImpl getInfo') !(for extHint getInfo')
