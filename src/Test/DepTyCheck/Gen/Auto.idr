@@ -69,6 +69,9 @@ toIndex ty (PositionalExplicit k) = findNthExplicit ty.args k where
   findNthExplicit (MkArg _ ExplicitArg _ _ :: xs) (S k) = FS <$> findNthExplicit xs k
   findNthExplicit (MkArg _ _           _ _ :: xs) n     = FS <$> findNthExplicit xs n
 
+resolveGivens : (desc : String) -> {ty : TypeInfo} -> List DatatypeArgPointer -> Elab $ List $ Fin ty.args.length
+resolveGivens desc = maybe (fail "Invalid given \{desc} parameter") pure . traverse (toIndex ty)
+
 ||| The entry-point function of automatic generation of `Gen`'s.
 |||
 ||| Consider, you have a `data X (a : A) (b : B n) (c : C) where ...` and
@@ -100,10 +103,10 @@ generateGensFor : Name ->
                   (externalImplicitGens : List Name) ->
                   (externalHintedGens : List Name) ->
                   Elab ()
-generateGensFor n defImpl defExpl extImpl extHint = do
-  ty <- getInfo' n
-  let Just resolvedGivenImpl = traverse (toIndex ty) defImpl
-      | Nothing => fail "Invalid given implicit parameter"
-  let Just resolvedGivenExpl = traverse (toIndex ty) defExpl
-      | Nothing => fail "Invalid given explicit parameter"
-  generateGensFor' ty resolvedGivenImpl resolvedGivenExpl !(for extImpl getInfo') !(for extHint getInfo')
+generateGensFor n defImpl defExpl extImpl extHint =
+  generateGensFor'
+    !(getInfo' n)
+    !(resolveGivens "implicit" defImpl)
+    !(resolveGivens "explicit" defExpl)
+    !(for extImpl getInfo')
+    !(for extHint getInfo')
