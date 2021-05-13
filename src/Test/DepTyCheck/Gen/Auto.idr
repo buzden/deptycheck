@@ -1,6 +1,9 @@
 module Test.DepTyCheck.Gen.Auto
 
+import Data.Either
+import Data.List1
 import Data.So
+import Data.Validated
 
 import Language.Reflection
 import Language.Reflection.Types
@@ -38,6 +41,10 @@ data DatatypeArgPointer
        = Named Name
        | PositionalExplicit Nat
 
+Show DatatypeArgPointer where
+  show (Named x) = show x
+  show (PositionalExplicit k) = "explicit #\{show k}"
+
 public export
 FromString DatatypeArgPointer where
   fromString = Named . fromString
@@ -61,20 +68,23 @@ Eq Name where -- I'm not sure that this implementation is correct for my case.
 
 %inline
 ResolvedArg : Type -> Type
-ResolvedArg = Maybe
+ResolvedArg = ValidatedL DatatypeArgPointer
 
 -- To report an error about particular argument.
 toIndex : (ty : TypeInfo) -> DatatypeArgPointer -> ResolvedArg $ Fin ty.args.length
-toIndex ty (Named n) = find' ((== n) . name) ty.args
-toIndex ty (PositionalExplicit k) = findNthExplicit ty.args k where
+toIndex ty p@(Named n) = fromEitherL $ maybeToEither p $ find' ((== n) . name) ty.args
+toIndex ty p@(PositionalExplicit k) = findNthExplicit ty.args k where
   findNthExplicit : (xs : List NamedArg) -> Nat -> ResolvedArg $ Fin xs.length
-  findNthExplicit []                              _     = Nothing
-  findNthExplicit (MkArg _ ExplicitArg _ _ :: _ ) Z     = Just FZ
+  findNthExplicit []                              _     = Invalid $ pure p
+  findNthExplicit (MkArg _ ExplicitArg _ _ :: _ ) Z     = Valid FZ
   findNthExplicit (MkArg _ ExplicitArg _ _ :: xs) (S k) = FS <$> findNthExplicit xs k
   findNthExplicit (MkArg _ _           _ _ :: xs) n     = FS <$> findNthExplicit xs n
 
 resolveGivens : (desc : String) -> {ty : TypeInfo} -> List DatatypeArgPointer -> Elab $ List $ Fin ty.args.length
-resolveGivens desc = maybe (fail "Invalid given \{desc} parameter") pure . traverse (toIndex ty)
+resolveGivens desc givens = do
+  let Valid resolved = traverse (toIndex ty) givens
+    | Invalid badArgs => fail "Could not found arguments \{show badArgs} of type \{show ty.name} from the \{desc} givens"
+  pure resolved
 
 ||| The entry-point function of automatic generation of `Gen`'s.
 |||
