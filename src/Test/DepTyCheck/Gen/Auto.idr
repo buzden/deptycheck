@@ -59,11 +59,15 @@ Eq Name where -- I'm not sure that this implementation is correct for my case.
   (RF x)   == (RF y)   = x == y
   _ == _ = False
 
+%inline
+ResolvedArg : Type -> Type
+ResolvedArg = Maybe
+
 -- To report an error about particular argument.
-toIndex : (ty : TypeInfo) -> DatatypeArgPointer -> Maybe $ Fin ty.args.length
+toIndex : (ty : TypeInfo) -> DatatypeArgPointer -> ResolvedArg $ Fin ty.args.length
 toIndex ty (Named n) = find' ((== n) . name) ty.args
 toIndex ty (PositionalExplicit k) = findNthExplicit ty.args k where
-  findNthExplicit : (xs : List NamedArg) -> Nat -> Maybe $ Fin xs.length
+  findNthExplicit : (xs : List NamedArg) -> Nat -> ResolvedArg $ Fin xs.length
   findNthExplicit []                              _     = Nothing
   findNthExplicit (MkArg _ ExplicitArg _ _ :: _ ) Z     = Just FZ
   findNthExplicit (MkArg _ ExplicitArg _ _ :: xs) (S k) = FS <$> findNthExplicit xs k
