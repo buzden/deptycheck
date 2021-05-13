@@ -15,23 +15,23 @@ namespace NamedOrPositionalArgs
 
   public export
   data DatatypeArgPointer
-         = ArgName Name
-         | PosForExplicit Nat
+         = Named Name
+         | PositionalExplicit Nat
 
   public export
   FromString DatatypeArgPointer where
-    fromString s = ArgName $ assert_total $ fromString s
+    fromString s = Named $ assert_total $ fromString s
 
   public export
   fromInteger : (x : Integer) -> (0 _ : So (x >= 0)) => DatatypeArgPointer
-  fromInteger x = PosForExplicit $ integerToNat x
+  fromInteger x = PositionalExplicit $ integerToNat x
 
 (.length) : List a -> Nat
 xs.length = length xs
 
 generateGensFor' : (ty : TypeInfo) ->
-                   (definedImplicitParams : List $ Fin ty.args.length) ->
-                   (definedExplicitParams : List $ Fin ty.args.length) ->
+                   (givenImplicitParams : List $ Fin ty.args.length) ->
+                   (givenExplicitParams : List $ Fin ty.args.length) ->
                    (externalImplicitGens : List TypeInfo) -> -- todo maybe to use smth without constructors info instead of `TypeInfo`.
                    (externalHintedGens : List TypeInfo) ->
                    Elab ()
@@ -62,8 +62,8 @@ generateGensFor' : (ty : TypeInfo) ->
 ||| `%hint _ : Gen Y` from the current scope will be used as soon as a value of type `Y` will be needed for generation.
 export
 generateGensFor : Name ->
-                  (definedImplicitParams : List DatatypeArgPointer) ->
-                  (definedExplicitParams : List DatatypeArgPointer) ->
+                  (givenImplicitParams : List DatatypeArgPointer) ->
+                  (givenExplicitParams : List DatatypeArgPointer) ->
                   (externalImplicitGens : List Name) ->
                   (externalHintedGens : List Name) ->
                   Elab ()
