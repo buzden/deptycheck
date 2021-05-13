@@ -11,23 +11,13 @@ import public Test.DepTyCheck.Gen
 %default total
 %language ElabReflection
 
-namespace NamedOrPositionalArgs
+--- Lists utilities ---
 
-  public export
-  data DatatypeArgPointer
-         = Named Name
-         | PositionalExplicit Nat
-
-  public export
-  FromString DatatypeArgPointer where
-    fromString = Named . fromString
-
-  public export
-  fromInteger : (x : Integer) -> (0 _ : So (x >= 0)) => DatatypeArgPointer
-  fromInteger x = PositionalExplicit $ integerToNat x
-
+%inline
 (.length) : List a -> Nat
 xs.length = length xs
+
+--- Internal generation functions ---
 
 generateGensFor' : (ty : TypeInfo) ->
                    (givenImplicitParams : List $ Fin ty.args.length) ->
@@ -35,6 +25,23 @@ generateGensFor' : (ty : TypeInfo) ->
                    (externalImplicitGens : List TypeInfo) -> -- todo maybe to use smth without constructors info instead of `TypeInfo`.
                    (externalHintedGens : List TypeInfo) ->
                    Elab ()
+
+--- External generation interface and aux stuff for that ---
+
+public export
+data DatatypeArgPointer
+       = Named Name
+       | PositionalExplicit Nat
+
+public export
+FromString DatatypeArgPointer where
+  fromString = Named . fromString
+
+namespace DatatypeArgPointer
+
+  public export
+  fromInteger : (x : Integer) -> (0 _ : So (x >= 0)) => DatatypeArgPointer
+  fromInteger x = PositionalExplicit $ integerToNat x
 
 ||| The entry-point function of automatic generation of `Gen`'s.
 |||
