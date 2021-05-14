@@ -2,15 +2,12 @@ export IDRIS2 ?= idris2
 
 RUNTESTS := build/exec/runtests
 
-.PHONY: all test deptycheck clean
+.PHONY: all deptycheck clean
 
 all: deptycheck
 
 deptycheck:
 	${IDRIS2} --build deptycheck.ipkg
-
-test: deptycheck
-	${MAKE} -C tests -f tests.mk only=${only}
 
 clean:
 	${IDRIS2} --clean deptycheck.ipkg
@@ -19,7 +16,16 @@ clean:
 	${MAKE} -C tests -f tests.mk clean
 	${MAKE} -C example -f pil.mk clean
 
-.PHONY: pil test-pil clean
+.PHONY: test test-all test-deptycheck
+
+test: test-all
+
+test-all: test-deptycheck test-pil
+
+test-deptycheck: deptycheck
+	${MAKE} -C tests -f tests.mk only=${only}
+
+.PHONY: pil test-pil
 
 pil: deptycheck
 	${MAKE} -C example -f pil.mk
