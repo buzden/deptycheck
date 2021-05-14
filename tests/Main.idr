@@ -13,9 +13,15 @@ genMonad = MkTestPool "The `Gen` monad" [] Nothing $ ("gen-monad/" ++) <$>
   [ "basic001"
   ]
 
+autoGen : TestPool
+autoGen = MkTestPool "Autogeneration of `Gen`s" [] $ ("auto-gen/" ++) <$>
+  [ "inputvalidation001"
+  ]
+
 main : IO ()
 main = do
   runner
     [ lazierList
     , genMonad
+    , autoGen
     ]

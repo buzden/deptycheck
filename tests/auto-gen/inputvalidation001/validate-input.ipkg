@@ -1,0 +1,7 @@
+package validate-input
+
+authors = "Denis Buzdalov"
+
+opts = "--no-color --console-width 0"
+
+depends = deptycheck, contrib, elab-util

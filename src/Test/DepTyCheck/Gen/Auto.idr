@@ -5,9 +5,9 @@ import Data.List1
 import Data.So
 import Data.Validated
 
-import Language.Reflection
-import Language.Reflection.Types
-import Language.Reflection.Syntax
+import public Language.Reflection
+import public Language.Reflection.Types
+import public Language.Reflection.Syntax
 
 import public Test.DepTyCheck.Gen
 
