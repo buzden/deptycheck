@@ -1,0 +1,8 @@
+package demogen
+
+authors = "Denis Buzdalov"
+
+modules = DemoGen
+opts = "--no-color --console-width 0"
+
+depends = primitive-imperative-language-example, contrib, deptycheck

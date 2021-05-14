@@ -1,0 +1,4 @@
+$1 --build demogen.ipkg
+$1 --find-ipkg --exec main DemoGen.idr
+
+rm -rf build
