@@ -18,11 +18,11 @@ import public Test.DepTyCheck.Gen
 
 --- Universal patterns (particular cases) ---
 
-asp : {0 indexed : index -> Type} ->
-      {0 fin : {0 idx : index} -> indexed idx -> Type} ->
+asp : {0 indexed : indexTy -> Type} ->
+      {0 fin : {0 idx : indexTy} -> indexed idx -> Type} ->
       Gen (n ** indexed n) ->
-      ({0 idx : index} -> {p : indexed idx} -> Gen $ fin p) ->
-      Gen (n : index ** p : indexed n ** fin p)
+      ({0 idx : indexTy} -> {p : indexed idx} -> Gen $ fin p) ->
+      Gen (n : indexTy ** p : indexed n ** fin p)
 asp rl lr = do (n ** i) <- rl
                pure (n ** i ** !lr)
 
