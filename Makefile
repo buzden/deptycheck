@@ -6,7 +6,7 @@ RUNTESTS := build/exec/runtests
 
 all: deptycheck
 
-deptycheck:
+deptycheck: thirdparty-elab-util
 	${IDRIS2} --build deptycheck.ipkg
 
 clean:
@@ -15,6 +15,9 @@ clean:
 	@
 	${MAKE} -C tests -f tests.mk clean
 	${MAKE} -C example -f pil.mk clean
+	@
+	${IDRIS2} --clean thirdparty/elab-util/elab-util.ipkg
+	${RM} -r thirdparty/elab-util/build
 
 .PHONY: test test-all test-deptycheck
 
@@ -24,6 +27,11 @@ test-all: test-deptycheck print-v-delimiter test-pil
 
 test-deptycheck: deptycheck
 	${MAKE} -C tests -f tests.mk only=${only}
+
+.PHONY: thirdparty-elab-util
+
+thirdparty-elab-util:
+	${IDRIS2} --build thirdparty/elab-util/elab-util.ipkg
 
 .PHONY: pil test-pil
 
