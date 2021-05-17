@@ -20,7 +20,7 @@ clean:
 
 test: test-all
 
-test-all: test-deptycheck test-pil
+test-all: test-deptycheck print-v-delimiter test-pil
 
 test-deptycheck: deptycheck
 	${MAKE} -C tests -f tests.mk only=${only}
@@ -32,3 +32,12 @@ pil: deptycheck
 
 test-pil: pil
 	${MAKE} -C example -f pil.mk test only=${only}
+
+.PHONY: print-v-delimiter
+
+print-v-delimiter:
+	@echo
+	@echo
+	@echo "========================================================================"
+	@echo
+	@echo
