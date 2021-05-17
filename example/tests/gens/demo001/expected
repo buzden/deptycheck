@@ -1,0 +1,4117 @@
+1/1: Building DemoGen (DemoGen.idr)
+{
+  char * bd;
+  while (-1 < inc(-86)) {
+    bool ym;
+    bd = as_str(inc(inc(-29)));
+  }
+}
+// regs ty after: [-, -]
+
+----
+
+{
+  char * hbt;
+  while (!(!(False && False))) {
+    {
+      {
+        {
+          {
+            if (!(!(!(False)))) {
+
+            } else {
+              int xgv;
+            }
+            while (!(!(!(True)))) {
+              if (!(!(!(True)))) {
+                char * m;
+              } else {
+                char * igu;
+              }
+              if (!(!(!(True)))) {
+                char * jn;
+              } else {
+                char * a;
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+
+            hbt = as_str(inc(inc(-47)));
+          }
+        }
+        while (!(!(!(True)))) {
+          char * tq;
+          hbt = as_str(inc(inc(-59)));
+        }
+      }
+      while (!(!(False || False))) {
+        {
+          {
+            {
+              if (!(!(!(True)))) {
+                char * m;
+              } else {
+                char * igu;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(False))) {
+                  char * a;
+                } else {
+                  char * ryi;
+                }
+                if (!(!(False))) {
+
+                } else {
+                  int tuh;
+                }
+              }
+            }
+            while (!(!(!(True)))) {
+              {
+                if (!(!(!(True)))) {
+                  char * wdh;
+                }
+                while (!(!(True))) {
+                  if (!(!(!(False)))) {
+
+                  } else {
+                    char * l;
+                  }
+                  if (!(!(!(False)))) {
+                    int v;
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  char * py;
+                } else {
+                  char * e;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+                    int v;
+                  }
+                  if (!(!(!(True)))) {
+                    char * wdh;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+            char * g;
+            {
+              {
+                if (!(!(!(True)))) {
+                  char * py;
+                } else {
+                  char * e;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+                    int v;
+                  }
+                  if (!(!(!(True)))) {
+                    char * wdh;
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+
+                {
+                  if (!(!(!(True)))) {
+                    char * wdh;
+                  }
+                  while (!(!(True))) {
+                    if (!(!(!(False)))) {
+
+                    } else {
+                      char * l;
+                    }
+                    if (!(!(!(False)))) {
+                      int v;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        hbt = as_str(inc(inc(-46)));
+      }
+    }
+    {
+      {
+        {
+          {
+            if (!(!(!(True)))) {
+              char * wp;
+            } else {
+              char * m;
+            }
+            while (!(!(!(False)))) {
+              if (!(!(False))) {
+                char * g;
+              } else {
+                int tuh;
+              }
+              if (!(!(False))) {
+
+              } else {
+                int jw;
+              }
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              if (!(!(False))) {
+                char * g;
+              } else {
+                int tuh;
+              }
+              while (!(!(True))) {
+                if (!(!(False))) {
+
+                } else {
+                  int tuh;
+                }
+                if (!(!(!(True)))) {
+                  char * m;
+                } else {
+                  char * igu;
+                }
+              }
+            }
+            {
+              if (!(!(False))) {
+
+              } else {
+                int jw;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+                  char * m;
+                } else {
+                  char * igu;
+                }
+                if (!(!(False))) {
+                  char * g;
+                } else {
+                  int tuh;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(False)))) {
+          char * tl;
+          hbt = as_str(inc(inc(-86)));
+        }
+      }
+      while (!(!(!(False)))) {
+        char * n;
+        {
+          {
+            {
+              if (!(!(!(False)))) {
+
+              } else {
+                int xgv;
+              }
+              while (!(!(!(True)))) {
+                if (!(!(!(True)))) {
+                  char * m;
+                } else {
+                  char * igu;
+                }
+                if (!(!(!(True)))) {
+                  char * jn;
+                } else {
+                  char * a;
+                }
+              }
+            }
+            while (!(!(!(True)))) {
+
+              hbt = as_str(inc(inc(-47)));
+            }
+          }
+          while (!(!(!(True)))) {
+            char * tq;
+            hbt = as_str(inc(inc(-59)));
+          }
+        }
+      }
+    }
+  }
+}
+// regs ty after: [-, -]
+
+----
+
+{
+  char * bd;
+  while (-1 < inc(-86)) {
+    bool ym;
+    bd = as_str(inc(inc(-29)));
+  }
+}
+// regs ty after: [-, -]
+
+----
+
+{
+  char * tpy;
+  while (True || (!(True) && !(False))) {
+    {
+      {
+        {
+          {
+            if (!(!(!(False)))) {
+              char * l;
+            } else {
+              char * fw;
+            }
+            while (!(!(!(True)))) {
+              if (!(!(!(False)))) {
+                char * lk;
+              } else {
+                char * yf;
+              }
+              tpy = as_str(inc(inc(-28)));
+            }
+          }
+          while (!(!(True))) {
+            {
+              if (!(!(!(False)))) {
+                char * lk;
+              } else {
+                char * yf;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(False)))) {
+                  char * hbx;
+                } else {
+                  char * hg;
+                }
+                tpy = as_str(inc(inc(-22)));
+              }
+            }
+            {
+              if (!(!(!(True)))) {
+                char * f;
+              } else {
+                char * oz;
+              }
+              while (!(!(True))) {
+                char * ym;
+                if (!(!(!(False)))) {
+                  char * lk;
+                } else {
+                  char * yf;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(False)))) {
+          {
+            {
+              if (!(!(!(False)))) {
+                char * lk;
+              } else {
+                char * yf;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(False)))) {
+                  char * hbx;
+                } else {
+                  char * hg;
+                }
+                tpy = as_str(inc(inc(-22)));
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  char * hbx;
+                } else {
+                  char * hg;
+                }
+                while (!(!(False))) {
+                  if (!(!(True))) {
+                    char * kyg;
+                  } else {
+                    char * n;
+                  }
+                  if (!(!(!(True)))) {
+
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  int c;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  }
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                }
+              }
+            }
+          }
+          {
+            {
+              if (!(!(True))) {
+
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              tpy = as_str(inc(-88));
+            }
+          }
+        }
+      }
+      while (!(!(False || False))) {
+        {
+          {
+            {
+              if (!(!(!(False)))) {
+                char * lk;
+              } else {
+                char * yf;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(False)))) {
+                  char * hbx;
+                } else {
+                  char * hg;
+                }
+                tpy = as_str(inc(inc(-22)));
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  char * hbx;
+                } else {
+                  char * hg;
+                }
+                while (!(!(False))) {
+                  if (!(!(True))) {
+                    char * kyg;
+                  } else {
+                    char * n;
+                  }
+                  if (!(!(!(True)))) {
+
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  int c;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  }
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(True))) {
+
+            {
+              {
+                if (!(!(!(True)))) {
+                  int c;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  }
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  while (!(!(!(False)))) {
+                    if (!(!(True))) {
+                      char * u;
+                    }
+                    tpy = as_str(inc(inc(-44)));
+                  }
+                }
+                {
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                  while (!(!(False))) {
+                    if (!(!(True))) {
+                      char * kyg;
+                    } else {
+                      char * n;
+                    }
+                    if (!(!(!(True)))) {
+
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        {
+          {
+            {
+              if (!(!(True))) {
+
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              tpy = as_str(inc(-88));
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+
+                tpy = as_str(inc(inc(14)));
+              }
+            }
+            {
+              {
+                if (!(!(!(False)))) {
+
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(True))) {
+                    char * fe;
+                  } else {
+                    char * nl;
+                  }
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    int pck;
+                  }
+                }
+              }
+              while (!(!(False))) {
+                {
+                  if (!(!(True))) {
+                    char * fe;
+                  } else {
+                    char * nl;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * xzl;
+                    } else {
+                      int t;
+                    }
+                    if (!(!(!(True)))) {
+                      char * e;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    int pck;
+                  }
+                  while (!(!(False))) {
+                    if (!(!(!(True)))) {
+                      char * e;
+                    }
+                    if (!(!(True))) {
+                      char * fe;
+                    } else {
+                      char * nl;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    {
+      {
+        {
+          {
+            if (!(!(!(False)))) {
+              char * xl;
+            } else {
+              int mmt;
+            }
+            while (!(!(!(True)))) {
+              if (!(!(!(True)))) {
+                char * k;
+              } else {
+                int pck;
+              }
+              if (!(!(!(False)))) {
+                char * j;
+              }
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              if (!(!(!(True)))) {
+                char * k;
+              } else {
+                int pck;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  int pck;
+                }
+                if (!(!(!(False)))) {
+
+                }
+              }
+            }
+            {
+              if (!(!(!(False)))) {
+                char * j;
+              }
+              while (!(!(!(True)))) {
+                if (!(!(!(False)))) {
+
+                }
+                if (!(!(!(True)))) {
+                  char * k;
+                } else {
+                  int pck;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(True)))) {
+          {
+            {
+              if (!(!(True))) {
+
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              tpy = as_str(inc(-88));
+            }
+          }
+          {
+            {
+              if (!(!(!(True)))) {
+                int l;
+              } else {
+                char * txe;
+              }
+              while (!(!(!(True)))) {
+                if (!(!(!(False)))) {
+
+                }
+                if (!(!(True))) {
+
+                }
+              }
+            }
+            while (!(!(!(True)))) {
+              char * msu;
+              {
+                if (!(!(True))) {
+
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * hf;
+                  }
+                  if (!(!(!(False)))) {
+
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      while (!(!(!(False)))) {
+        {
+          {
+            {
+              if (!(!(True))) {
+
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              tpy = as_str(inc(-88));
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+
+                tpy = as_str(inc(inc(14)));
+              }
+            }
+            {
+              {
+                if (!(!(!(False)))) {
+
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(True))) {
+                    char * fe;
+                  } else {
+                    char * nl;
+                  }
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    int pck;
+                  }
+                }
+              }
+              while (!(!(False))) {
+                {
+                  if (!(!(True))) {
+                    char * fe;
+                  } else {
+                    char * nl;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * xzl;
+                    } else {
+                      int t;
+                    }
+                    if (!(!(!(True)))) {
+                      char * e;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    int pck;
+                  }
+                  while (!(!(False))) {
+                    if (!(!(!(True)))) {
+                      char * e;
+                    }
+                    if (!(!(True))) {
+                      char * fe;
+                    } else {
+                      char * nl;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        {
+          {
+            {
+              if (!(!(!(False)))) {
+                char * l;
+              } else {
+                char * fw;
+              }
+              while (!(!(!(True)))) {
+                if (!(!(!(False)))) {
+                  char * lk;
+                } else {
+                  char * yf;
+                }
+                tpy = as_str(inc(inc(-28)));
+              }
+            }
+            while (!(!(True))) {
+              {
+                if (!(!(!(False)))) {
+                  char * lk;
+                } else {
+                  char * yf;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                  tpy = as_str(inc(inc(-22)));
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  char * f;
+                } else {
+                  char * oz;
+                }
+                while (!(!(True))) {
+                  char * ym;
+                  if (!(!(!(False)))) {
+                    char * lk;
+                  } else {
+                    char * yf;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              {
+                if (!(!(!(False)))) {
+                  char * lk;
+                } else {
+                  char * yf;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                  tpy = as_str(inc(inc(-22)));
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                  while (!(!(False))) {
+                    if (!(!(True))) {
+                      char * kyg;
+                    } else {
+                      char * n;
+                    }
+                    if (!(!(!(True)))) {
+
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(True)))) {
+                    int c;
+                  }
+                  while (!(!(!(False)))) {
+                    if (!(!(!(True)))) {
+
+                    }
+                    if (!(!(!(False)))) {
+                      char * hbx;
+                    } else {
+                      char * hg;
+                    }
+                  }
+                }
+              }
+            }
+            {
+              {
+                if (!(!(True))) {
+
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * hf;
+                  }
+                  if (!(!(!(False)))) {
+
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * hf;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * yf;
+                    } else {
+                      char * je;
+                    }
+                    if (!(!(!(False)))) {
+                      char * z;
+                    } else {
+                      char * iuf;
+                    }
+                  }
+                }
+                tpy = as_str(inc(-88));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+// regs ty after: [-, -]
+
+----
+
+{
+  char * ut;
+  while (False || (!(True) && !(False))) {
+    {
+      {
+        {
+          {
+            if (!(!(!(True)))) {
+
+            }
+            while (!(!(False))) {
+              if (!(!(!(False)))) {
+                char * txe;
+              }
+              if (!(!(!(False)))) {
+                char * cc;
+              } else {
+                char * gzd;
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              if (!(!(!(True)))) {
+                char * fw;
+              } else {
+                char * nx;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(False)))) {
+                  int xyf;
+                } else {
+                  char * je;
+                }
+                if (!(!(!(False)))) {
+                  char * oz;
+                } else {
+                  char * iuf;
+                }
+              }
+            }
+            {
+              if (!(!(!(True)))) {
+                char * c;
+              } else {
+                char * gu;
+              }
+              while (!(!(!(True)))) {
+                if (!(!(!(False)))) {
+                  char * oz;
+                } else {
+                  char * iuf;
+                }
+                if (!(!(!(True)))) {
+                  char * fw;
+                } else {
+                  char * nx;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(True)))) {
+          char * tzr;
+          ut = as_str(inc(inc(76)));
+        }
+      }
+      while (!(!(False || False))) {
+        {
+          {
+            {
+              if (!(!(!(True)))) {
+                char * fw;
+              } else {
+                char * nx;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(False)))) {
+                  int xyf;
+                } else {
+                  char * je;
+                }
+                if (!(!(!(False)))) {
+                  char * oz;
+                } else {
+                  char * iuf;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  int xyf;
+                } else {
+                  char * je;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * iuf;
+                  } else {
+                    char * bu;
+                  }
+                  if (!(!(False))) {
+
+                  } else {
+                    char * yi;
+                  }
+                }
+              }
+              {
+                if (!(!(!(False)))) {
+                  char * oz;
+                } else {
+                  char * iuf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(False))) {
+
+                  } else {
+                    char * yi;
+                  }
+                  if (!(!(!(False)))) {
+                    int xyf;
+                  } else {
+                    char * je;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              {
+                if (!(!(!(False)))) {
+                  int xyf;
+                } else {
+                  char * je;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * iuf;
+                  } else {
+                    char * bu;
+                  }
+                  if (!(!(False))) {
+
+                  } else {
+                    char * yi;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * iuf;
+                  } else {
+                    char * bu;
+                  }
+                  while (!(!(!(False)))) {
+                    int zup;
+                    if (!(!(!(True)))) {
+                      char * lje;
+                    } else {
+                      int ex;
+                    }
+                  }
+                }
+                ut = as_str(inc(inc(6)));
+              }
+            }
+            {
+              {
+                if (!(!(!(True)))) {
+                  char * hf;
+                }
+                while (!(!(True))) {
+                  if (!(!(!(False)))) {
+                    char * nx;
+                  } else {
+                    char * uz;
+                  }
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * nx;
+                  } else {
+                    char * uz;
+                  }
+                  while (!(!(!(False)))) {
+                    int kbx;
+                    if (!(!(!(True)))) {
+
+                    } else {
+                      char * v;
+                    }
+                  }
+                }
+                ut = as_str(inc(inc(79)));
+              }
+            }
+          }
+        }
+        {
+          {
+            {
+              if (!(!(!(True)))) {
+                char * c;
+              } else {
+                char * gu;
+              }
+              while (!(!(!(True)))) {
+                if (!(!(!(False)))) {
+                  char * oz;
+                } else {
+                  char * iuf;
+                }
+                if (!(!(!(True)))) {
+                  char * fw;
+                } else {
+                  char * nx;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  char * oz;
+                } else {
+                  char * iuf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(False))) {
+
+                  } else {
+                    char * yi;
+                  }
+                  if (!(!(!(False)))) {
+                    int xyf;
+                  } else {
+                    char * je;
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  char * fw;
+                } else {
+                  char * nx;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+                    int xyf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * oz;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              {
+                if (!(!(!(True)))) {
+                  char * hf;
+                }
+                while (!(!(True))) {
+                  if (!(!(!(False)))) {
+                    char * nx;
+                  } else {
+                    char * uz;
+                  }
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * nx;
+                  } else {
+                    char * uz;
+                  }
+                  while (!(!(!(False)))) {
+                    int kbx;
+                    if (!(!(!(True)))) {
+
+                    } else {
+                      char * v;
+                    }
+                  }
+                }
+                ut = as_str(inc(inc(79)));
+              }
+            }
+            ut = as_str(inc(inc(-66)));
+          }
+        }
+      }
+    }
+    {
+      {
+        {
+          {
+            if (!(!(!(False)))) {
+              int rt;
+            }
+            while (!(!(!(False)))) {
+              if (!(!(!(False)))) {
+                char * cc;
+              } else {
+                char * gzd;
+              }
+              if (!(!(!(True)))) {
+
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              if (!(!(!(False)))) {
+                char * cc;
+              } else {
+                char * gzd;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+              }
+            }
+            {
+              if (!(!(!(True)))) {
+
+              }
+              while (!(!(False))) {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                if (!(!(!(False)))) {
+                  char * cc;
+                } else {
+                  char * gzd;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(False)))) {
+          char * sdu;
+          ut = as_str(inc(inc(61)));
+        }
+      }
+      while (!(!(!(False)))) {
+        {
+          {
+            {
+              if (!(!(!(True)))) {
+                char * c;
+              } else {
+                char * gu;
+              }
+              while (!(!(!(True)))) {
+                if (!(!(!(False)))) {
+                  char * oz;
+                } else {
+                  char * iuf;
+                }
+                if (!(!(!(True)))) {
+                  char * fw;
+                } else {
+                  char * nx;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  char * oz;
+                } else {
+                  char * iuf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(False))) {
+
+                  } else {
+                    char * yi;
+                  }
+                  if (!(!(!(False)))) {
+                    int xyf;
+                  } else {
+                    char * je;
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  char * fw;
+                } else {
+                  char * nx;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+                    int xyf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * oz;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              {
+                if (!(!(!(True)))) {
+                  char * hf;
+                }
+                while (!(!(True))) {
+                  if (!(!(!(False)))) {
+                    char * nx;
+                  } else {
+                    char * uz;
+                  }
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * nx;
+                  } else {
+                    char * uz;
+                  }
+                  while (!(!(!(False)))) {
+                    int kbx;
+                    if (!(!(!(True)))) {
+
+                    } else {
+                      char * v;
+                    }
+                  }
+                }
+                ut = as_str(inc(inc(79)));
+              }
+            }
+            ut = as_str(inc(inc(-66)));
+          }
+        }
+        {
+          {
+            {
+              if (!(!(!(True)))) {
+
+              }
+              while (!(!(False))) {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                if (!(!(!(False)))) {
+                  char * cc;
+                } else {
+                  char * gzd;
+                }
+              }
+            }
+            while (!(!(!(True)))) {
+              {
+                if (!(!(!(True)))) {
+                  char * fw;
+                } else {
+                  char * nx;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+                    int xyf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * oz;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  char * c;
+                } else {
+                  char * gu;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * oz;
+                  } else {
+                    char * iuf;
+                  }
+                  if (!(!(!(True)))) {
+                    char * fw;
+                  } else {
+                    char * nx;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+            char * tzr;
+            ut = as_str(inc(inc(76)));
+          }
+        }
+      }
+    }
+  }
+}
+// regs ty after: [-, -]
+
+----
+
+char * fso;
+// regs ty after: [-, -]
+
+----
+
+{
+  char * py;
+  while (!(True && False) && !(!(False))) {
+    {
+      {
+        {
+          {
+            if (!(!(!(False)))) {
+              char * l;
+            } else {
+              char * fw;
+            }
+            while (!(!(!(True)))) {
+              if (!(!(!(False)))) {
+                char * lk;
+              } else {
+                char * yf;
+              }
+              py = as_str(inc(inc(-28)));
+            }
+          }
+          while (!(!(True))) {
+            {
+              if (!(!(!(False)))) {
+                char * lk;
+              } else {
+                char * yf;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(False)))) {
+                  char * hbx;
+                } else {
+                  char * hg;
+                }
+                py = as_str(inc(inc(-22)));
+              }
+            }
+            {
+              if (!(!(!(True)))) {
+                char * f;
+              } else {
+                char * oz;
+              }
+              while (!(!(True))) {
+                char * ym;
+                if (!(!(!(False)))) {
+                  char * lk;
+                } else {
+                  char * yf;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(False)))) {
+          {
+            {
+              if (!(!(!(False)))) {
+                char * lk;
+              } else {
+                char * yf;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(False)))) {
+                  char * hbx;
+                } else {
+                  char * hg;
+                }
+                py = as_str(inc(inc(-22)));
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  char * hbx;
+                } else {
+                  char * hg;
+                }
+                while (!(!(False))) {
+                  if (!(!(True))) {
+                    char * kyg;
+                  } else {
+                    char * n;
+                  }
+                  if (!(!(!(True)))) {
+
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  int c;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  }
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                }
+              }
+            }
+          }
+          {
+            {
+              if (!(!(True))) {
+
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              py = as_str(inc(-88));
+            }
+          }
+        }
+      }
+      while (!(!(!(True)))) {
+        {
+          {
+            {
+              if (!(!(!(False)))) {
+                char * lk;
+              } else {
+                char * yf;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(False)))) {
+                  char * hbx;
+                } else {
+                  char * hg;
+                }
+                py = as_str(inc(inc(-22)));
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  char * hbx;
+                } else {
+                  char * hg;
+                }
+                while (!(!(False))) {
+                  if (!(!(True))) {
+                    char * kyg;
+                  } else {
+                    char * n;
+                  }
+                  if (!(!(!(True)))) {
+
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  int c;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  }
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(True))) {
+
+            {
+              {
+                if (!(!(!(True)))) {
+                  int c;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  }
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  while (!(!(!(False)))) {
+                    if (!(!(True))) {
+                      char * u;
+                    }
+                    py = as_str(inc(inc(-44)));
+                  }
+                }
+                {
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                  while (!(!(False))) {
+                    if (!(!(True))) {
+                      char * kyg;
+                    } else {
+                      char * n;
+                    }
+                    if (!(!(!(True)))) {
+
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        {
+          {
+            {
+              if (!(!(True))) {
+
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              py = as_str(inc(-88));
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+
+                py = as_str(inc(inc(14)));
+              }
+            }
+            {
+              {
+                if (!(!(!(False)))) {
+
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(True))) {
+                    char * fe;
+                  } else {
+                    char * nl;
+                  }
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    int pck;
+                  }
+                }
+              }
+              while (!(!(False))) {
+                {
+                  if (!(!(True))) {
+                    char * fe;
+                  } else {
+                    char * nl;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * xzl;
+                    } else {
+                      int t;
+                    }
+                    if (!(!(!(True)))) {
+                      char * e;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    int pck;
+                  }
+                  while (!(!(False))) {
+                    if (!(!(!(True)))) {
+                      char * e;
+                    }
+                    if (!(!(True))) {
+                      char * fe;
+                    } else {
+                      char * nl;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    {
+      {
+        {
+          {
+            if (!(!(!(False)))) {
+              char * xl;
+            } else {
+              int mmt;
+            }
+            while (!(!(!(True)))) {
+              if (!(!(!(True)))) {
+                char * k;
+              } else {
+                int pck;
+              }
+              if (!(!(!(False)))) {
+                char * j;
+              }
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              if (!(!(!(True)))) {
+                char * k;
+              } else {
+                int pck;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  int pck;
+                }
+                if (!(!(!(False)))) {
+
+                }
+              }
+            }
+            {
+              if (!(!(!(False)))) {
+                char * j;
+              }
+              while (!(!(!(True)))) {
+                if (!(!(!(False)))) {
+
+                }
+                if (!(!(!(True)))) {
+                  char * k;
+                } else {
+                  int pck;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(True)))) {
+          {
+            {
+              if (!(!(True))) {
+
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              py = as_str(inc(-88));
+            }
+          }
+          {
+            {
+              if (!(!(!(True)))) {
+                int l;
+              } else {
+                char * txe;
+              }
+              while (!(!(!(True)))) {
+                if (!(!(!(False)))) {
+
+                }
+                if (!(!(True))) {
+
+                }
+              }
+            }
+            while (!(!(!(True)))) {
+              char * msu;
+              {
+                if (!(!(True))) {
+
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * hf;
+                  }
+                  if (!(!(!(False)))) {
+
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      while (!(!(!(False)))) {
+        {
+          {
+            {
+              if (!(!(True))) {
+
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              py = as_str(inc(-88));
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * hf;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yf;
+                  } else {
+                    char * je;
+                  }
+                  if (!(!(!(False)))) {
+                    char * z;
+                  } else {
+                    char * iuf;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+
+                py = as_str(inc(inc(14)));
+              }
+            }
+            {
+              {
+                if (!(!(!(False)))) {
+
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(True))) {
+                    char * fe;
+                  } else {
+                    char * nl;
+                  }
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    int pck;
+                  }
+                }
+              }
+              while (!(!(False))) {
+                {
+                  if (!(!(True))) {
+                    char * fe;
+                  } else {
+                    char * nl;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * xzl;
+                    } else {
+                      int t;
+                    }
+                    if (!(!(!(True)))) {
+                      char * e;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    int pck;
+                  }
+                  while (!(!(False))) {
+                    if (!(!(!(True)))) {
+                      char * e;
+                    }
+                    if (!(!(True))) {
+                      char * fe;
+                    } else {
+                      char * nl;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        {
+          {
+            {
+              if (!(!(!(False)))) {
+                char * l;
+              } else {
+                char * fw;
+              }
+              while (!(!(!(True)))) {
+                if (!(!(!(False)))) {
+                  char * lk;
+                } else {
+                  char * yf;
+                }
+                py = as_str(inc(inc(-28)));
+              }
+            }
+            while (!(!(True))) {
+              {
+                if (!(!(!(False)))) {
+                  char * lk;
+                } else {
+                  char * yf;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                  py = as_str(inc(inc(-22)));
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  char * f;
+                } else {
+                  char * oz;
+                }
+                while (!(!(True))) {
+                  char * ym;
+                  if (!(!(!(False)))) {
+                    char * lk;
+                  } else {
+                    char * yf;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              {
+                if (!(!(!(False)))) {
+                  char * lk;
+                } else {
+                  char * yf;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                  py = as_str(inc(inc(-22)));
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * hbx;
+                  } else {
+                    char * hg;
+                  }
+                  while (!(!(False))) {
+                    if (!(!(True))) {
+                      char * kyg;
+                    } else {
+                      char * n;
+                    }
+                    if (!(!(!(True)))) {
+
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(True)))) {
+                    int c;
+                  }
+                  while (!(!(!(False)))) {
+                    if (!(!(!(True)))) {
+
+                    }
+                    if (!(!(!(False)))) {
+                      char * hbx;
+                    } else {
+                      char * hg;
+                    }
+                  }
+                }
+              }
+            }
+            {
+              {
+                if (!(!(True))) {
+
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * hf;
+                  }
+                  if (!(!(!(False)))) {
+
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * hf;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * yf;
+                    } else {
+                      char * je;
+                    }
+                    if (!(!(!(False)))) {
+                      char * z;
+                    } else {
+                      char * iuf;
+                    }
+                  }
+                }
+                py = as_str(inc(-88));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+// regs ty after: [-, -]
+
+----
+
+{
+  int rl;
+  while (True) {
+    {
+      {
+        {
+          {
+            if (!(!(!(False)))) {
+
+            } else {
+              char * zfj;
+            }
+            while (!(!(!(False)))) {
+              if (!(!(True))) {
+                char * ptx;
+              } else {
+                char * sil;
+              }
+              if (!(!(!(True)))) {
+                char * m;
+              } else {
+                char * bma;
+              }
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              if (!(!(True))) {
+                char * ptx;
+              } else {
+                char * sil;
+              }
+              while (!(!(!(True)))) {
+                char * it;
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+              }
+            }
+            {
+              if (!(!(!(True)))) {
+                char * m;
+              } else {
+                char * bma;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(False)))) {
+          {
+            {
+              if (!(!(True))) {
+                char * ptx;
+              } else {
+                char * sil;
+              }
+              while (!(!(!(True)))) {
+                char * it;
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  char * gu;
+                } else {
+                  int cjd;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yi;
+                  } else {
+                    int ejb;
+                  }
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  rl = inc(inc(-23));
+                }
+              }
+            }
+          }
+          {
+            {
+              if (!(!(!(True)))) {
+                char * m;
+              } else {
+                char * bma;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+              }
+            }
+            while (!(!(!(True)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  rl = inc(inc(-23));
+                }
+              }
+              {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                while (!(!(!(True)))) {
+                  char * it;
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      while (!(!(!(True)))) {
+        {
+          {
+            {
+              if (!(!(True))) {
+                char * ptx;
+              } else {
+                char * sil;
+              }
+              while (!(!(!(True)))) {
+                char * it;
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  char * gu;
+                } else {
+                  int cjd;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yi;
+                  } else {
+                    int ejb;
+                  }
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  rl = inc(inc(-23));
+                }
+              }
+            }
+          }
+          while (!(!(True))) {
+            {
+              {
+                if (!(!(!(False)))) {
+                  char * gu;
+                } else {
+                  int cjd;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    char * yi;
+                  } else {
+                    int ejb;
+                  }
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * yi;
+                  } else {
+                    int ejb;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(True)))) {
+                      char * an;
+                    }
+                    if (!(!(!(True)))) {
+                      char * qlj;
+                    } else {
+                      char * a;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  while (!(!(!(False)))) {
+                    if (!(!(!(True)))) {
+                      char * qlj;
+                    } else {
+                      char * a;
+                    }
+                    if (!(!(!(False)))) {
+                      char * yi;
+                    } else {
+                      int ejb;
+                    }
+                  }
+                }
+              }
+            }
+            {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  rl = inc(inc(-23));
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  while (!(!(!(False)))) {
+                    if (!(!(!(True)))) {
+                      char * qlj;
+                    } else {
+                      char * a;
+                    }
+                    if (!(!(!(False)))) {
+                      char * yi;
+                    } else {
+                      int ejb;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(False)))) {
+                    char * gu;
+                  } else {
+                    int cjd;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * yi;
+                    } else {
+                      int ejb;
+                    }
+                    if (!(!(!(False)))) {
+                      int knx;
+                    } else {
+                      char * uz;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        {
+          {
+            {
+              if (!(!(!(True)))) {
+                char * m;
+              } else {
+                char * bma;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+              }
+            }
+            while (!(!(!(True)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  rl = inc(inc(-23));
+                }
+              }
+              {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                while (!(!(!(True)))) {
+                  char * it;
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  rl = inc(inc(-23));
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  while (!(!(!(False)))) {
+                    if (!(!(!(True)))) {
+                      char * qlj;
+                    } else {
+                      char * a;
+                    }
+                    if (!(!(!(False)))) {
+                      char * yi;
+                    } else {
+                      int ejb;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(False)))) {
+                    char * gu;
+                  } else {
+                    int cjd;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * yi;
+                    } else {
+                      int ejb;
+                    }
+                    if (!(!(!(False)))) {
+                      int knx;
+                    } else {
+                      char * uz;
+                    }
+                  }
+                }
+              }
+            }
+            {
+              {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                while (!(!(!(True)))) {
+                  char * it;
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * gu;
+                  } else {
+                    int cjd;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * yi;
+                    } else {
+                      int ejb;
+                    }
+                    if (!(!(!(False)))) {
+                      int knx;
+                    } else {
+                      char * uz;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      int knx;
+                    } else {
+                      char * uz;
+                    }
+                    rl = inc(inc(-23));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    {
+      {
+        {
+          {
+            if (!(!(!(False)))) {
+              int frj;
+            }
+            while (!(True)) {
+              if (!(!(!(True)))) {
+                char * m;
+              } else {
+                char * bma;
+              }
+              if (!(!(!(False)))) {
+
+              } else {
+                char * zfj;
+              }
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              if (!(!(!(True)))) {
+                char * m;
+              } else {
+                char * bma;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+              }
+            }
+            {
+              if (!(!(!(False)))) {
+
+              } else {
+                char * zfj;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                if (!(!(!(True)))) {
+                  char * m;
+                } else {
+                  char * bma;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(False)))) {
+          {
+            {
+              if (!(!(!(True)))) {
+                char * m;
+              } else {
+                char * bma;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+              }
+            }
+            while (!(!(!(True)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  rl = inc(inc(-23));
+                }
+              }
+              {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                while (!(!(!(True)))) {
+                  char * it;
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                }
+              }
+            }
+          }
+          {
+            {
+              if (!(!(!(False)))) {
+
+              } else {
+                char * zfj;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                if (!(!(!(True)))) {
+                  char * m;
+                } else {
+                  char * bma;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                while (!(!(!(True)))) {
+                  char * it;
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  char * m;
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                  if (!(!(True))) {
+                    char * ptx;
+                  } else {
+                    char * sil;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      while (!(!(!(False)))) {
+        {
+          {
+            {
+              if (!(!(!(True)))) {
+                char * m;
+              } else {
+                char * bma;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+              }
+            }
+            while (!(!(!(True)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  rl = inc(inc(-23));
+                }
+              }
+              {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                while (!(!(!(True)))) {
+                  char * it;
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  rl = inc(inc(-23));
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    int knx;
+                  } else {
+                    char * uz;
+                  }
+                  while (!(!(!(False)))) {
+                    if (!(!(!(True)))) {
+                      char * qlj;
+                    } else {
+                      char * a;
+                    }
+                    if (!(!(!(False)))) {
+                      char * yi;
+                    } else {
+                      int ejb;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(False)))) {
+                    char * gu;
+                  } else {
+                    int cjd;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * yi;
+                    } else {
+                      int ejb;
+                    }
+                    if (!(!(!(False)))) {
+                      int knx;
+                    } else {
+                      char * uz;
+                    }
+                  }
+                }
+              }
+            }
+            {
+              {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                while (!(!(!(True)))) {
+                  char * it;
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * gu;
+                  } else {
+                    int cjd;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * yi;
+                    } else {
+                      int ejb;
+                    }
+                    if (!(!(!(False)))) {
+                      int knx;
+                    } else {
+                      char * uz;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      int knx;
+                    } else {
+                      char * uz;
+                    }
+                    rl = inc(inc(-23));
+                  }
+                }
+              }
+            }
+          }
+        }
+        {
+          {
+            {
+              if (!(!(!(False)))) {
+
+              } else {
+                char * zfj;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                if (!(!(!(True)))) {
+                  char * m;
+                } else {
+                  char * bma;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                while (!(!(!(True)))) {
+                  char * it;
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+                  char * m;
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                  if (!(!(True))) {
+                    char * ptx;
+                  } else {
+                    char * sil;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              {
+                if (!(!(True))) {
+                  char * ptx;
+                } else {
+                  char * sil;
+                }
+                while (!(!(!(True)))) {
+                  char * it;
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * gu;
+                  } else {
+                    int cjd;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      char * yi;
+                    } else {
+                      int ejb;
+                    }
+                    if (!(!(!(False)))) {
+                      int knx;
+                    } else {
+                      char * uz;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      int knx;
+                    } else {
+                      char * uz;
+                    }
+                    rl = inc(inc(-23));
+                  }
+                }
+              }
+            }
+            {
+              {
+                if (!(!(!(True)))) {
+                  char * m;
+                } else {
+                  char * bma;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                  if (!(!(True))) {
+                    char * ptx;
+                  } else {
+                    char * sil;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+                {
+                  if (!(!(!(True)))) {
+
+                  } else {
+                    char * bma;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(False)))) {
+                      int knx;
+                    } else {
+                      char * uz;
+                    }
+                    rl = inc(inc(-23));
+                  }
+                }
+                {
+                  if (!(!(True))) {
+                    char * ptx;
+                  } else {
+                    char * sil;
+                  }
+                  while (!(!(!(True)))) {
+                    char * it;
+                    if (!(!(!(True)))) {
+
+                    } else {
+                      char * bma;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+// regs ty after: [-, -]
+
+----
+
+{
+  char * ly;
+  while (!(-39 < inc(-8))) {
+    int x;
+    {
+      {
+        {
+          {
+            if (!(!(!(False)))) {
+              int rt;
+            }
+            while (!(!(!(False)))) {
+              if (!(!(!(False)))) {
+                char * cc;
+              } else {
+                char * gzd;
+              }
+              if (!(!(!(True)))) {
+
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              if (!(!(!(False)))) {
+                char * cc;
+              } else {
+                char * gzd;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+              }
+            }
+            {
+              if (!(!(!(True)))) {
+
+              }
+              while (!(!(False))) {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                if (!(!(!(False)))) {
+                  char * cc;
+                } else {
+                  char * gzd;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(True)))) {
+          {
+            {
+              if (!(!(!(False)))) {
+                char * cc;
+              } else {
+                char * gzd;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+                  char * hf;
+                }
+                while (!(!(True))) {
+                  if (!(!(!(False)))) {
+                    char * nx;
+                  } else {
+                    char * uz;
+                  }
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                }
+              }
+              {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                }
+              }
+            }
+          }
+          {
+            {
+              if (!(!(!(True)))) {
+
+              }
+              while (!(!(False))) {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                if (!(!(!(False)))) {
+                  char * cc;
+                } else {
+                  char * gzd;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                }
+              }
+              {
+                if (!(!(!(False)))) {
+                  char * cc;
+                } else {
+                  char * gzd;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                  if (!(!(!(False)))) {
+                    char * txe;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      while (!(!(!(False)))) {
+        {
+          {
+            {
+              if (!(!(!(False)))) {
+                char * cc;
+              } else {
+                char * gzd;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(!(True)))) {
+                  char * hf;
+                }
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+                  char * hf;
+                }
+                while (!(!(True))) {
+                  if (!(!(!(False)))) {
+                    char * nx;
+                  } else {
+                    char * uz;
+                  }
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                }
+              }
+              {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              {
+                if (!(!(!(True)))) {
+                  char * hf;
+                }
+                while (!(!(True))) {
+                  if (!(!(!(False)))) {
+                    char * nx;
+                  } else {
+                    char * uz;
+                  }
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+                {
+                  if (!(!(!(False)))) {
+                    char * nx;
+                  } else {
+                    char * uz;
+                  }
+                  while (!(!(!(False)))) {
+                    int kbx;
+                    if (!(!(!(True)))) {
+
+                    } else {
+                      char * v;
+                    }
+                  }
+                }
+                ly = as_str(inc(inc(79)));
+              }
+            }
+            {
+              {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                char * sp;
+                {
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                  while (!(!(True))) {
+                    if (!(!(!(False)))) {
+                      char * nx;
+                    } else {
+                      char * uz;
+                    }
+                    if (!(!(!(True)))) {
+                      char * a;
+                    } else {
+                      char * v;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        {
+          {
+            {
+              if (!(!(!(True)))) {
+
+              }
+              while (!(!(False))) {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                if (!(!(!(False)))) {
+                  char * cc;
+                } else {
+                  char * gzd;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                }
+              }
+              {
+                if (!(!(!(False)))) {
+                  char * cc;
+                } else {
+                  char * gzd;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                  if (!(!(!(False)))) {
+                    char * txe;
+                  }
+                }
+              }
+            }
+          }
+          while (!(!(!(True)))) {
+            {
+              {
+                if (!(!(!(False)))) {
+                  char * txe;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * a;
+                  } else {
+                    char * v;
+                  }
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                char * sp;
+                {
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                  while (!(!(True))) {
+                    if (!(!(!(False)))) {
+                      char * nx;
+                    } else {
+                      char * uz;
+                    }
+                    if (!(!(!(True)))) {
+                      char * a;
+                    } else {
+                      char * v;
+                    }
+                  }
+                }
+              }
+            }
+            {
+              {
+                if (!(!(!(False)))) {
+                  char * cc;
+                } else {
+                  char * gzd;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                  if (!(!(!(False)))) {
+                    char * txe;
+                  }
+                }
+              }
+              while (!(!(!(False)))) {
+                {
+                  if (!(!(!(True)))) {
+                    char * hf;
+                  }
+                  while (!(!(True))) {
+                    if (!(!(!(False)))) {
+                      char * nx;
+                    } else {
+                      char * uz;
+                    }
+                    if (!(!(!(True)))) {
+                      char * a;
+                    } else {
+                      char * v;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(False)))) {
+                    char * txe;
+                  }
+                  while (!(!(!(False)))) {
+                    if (!(!(!(True)))) {
+                      char * a;
+                    } else {
+                      char * v;
+                    }
+                    if (!(!(!(True)))) {
+                      char * hf;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+// regs ty after: [-, -]
+
+----
+
+[1] = !(False && False) || True;
+// regs ty after: [-, Bool]
+
+----
+
+{
+  char * myv;
+  while (True && !(-49 <= -59)) {
+    char * v;
+    {
+      {
+        {
+          {
+            if (!(!(!(True)))) {
+              char * uf;
+            } else {
+              char * o;
+            }
+            while (!(!(!(True)))) {
+              if (!(True)) {
+                int xo;
+              } else {
+                char * lny;
+              }
+              myv = as_str(inc(-8));
+            }
+          }
+          while (!(!(!(False)))) {
+            {
+              if (!(True)) {
+
+              } else {
+                char * g;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(False))) {
+                  char * gzd;
+                }
+                myv = as_str(inc(inc(100)));
+              }
+            }
+            {
+              if (!(!(!(True)))) {
+                char * jm;
+              } else {
+                int m;
+              }
+              while (!(!(!(False)))) {
+                int ysb;
+                if (!(True)) {
+
+                } else {
+                  char * g;
+                }
+              }
+            }
+          }
+        }
+        while (!(!(!(True)))) {
+          {
+            {
+              if (!(True)) {
+
+              } else {
+                char * g;
+              }
+              while (!(!(!(False)))) {
+                if (!(!(False))) {
+                  char * gzd;
+                }
+                myv = as_str(inc(inc(100)));
+              }
+            }
+            while (!(!(!(True)))) {
+              {
+                if (!(!(False))) {
+                  char * gzd;
+                }
+                while (!(!(!(True)))) {
+                  if (!(!(True))) {
+
+                  }
+                  if (!(!(!(True)))) {
+                    char * ay;
+                  } else {
+                    char * pfm;
+                  }
+                }
+              }
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * p;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * ay;
+                  } else {
+                    char * pfm;
+                  }
+                  if (!(!(False))) {
+                    char * gzd;
+                  }
+                }
+              }
+            }
+          }
+          {
+            {
+              if (!(!(!(True)))) {
+                char * jm;
+              } else {
+                int m;
+              }
+              while (!(!(!(False)))) {
+                int ysb;
+                if (!(True)) {
+
+                } else {
+                  char * g;
+                }
+              }
+            }
+            while (!(!(!(True)))) {
+              {
+                if (!(!(!(True)))) {
+
+                } else {
+                  char * p;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(True)))) {
+                    char * ay;
+                  } else {
+                    char * pfm;
+                  }
+                  if (!(!(False))) {
+                    char * gzd;
+                  }
+                }
+              }
+              {
+                if (!(True)) {
+
+                } else {
+                  char * g;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(False))) {
+                    char * gzd;
+                  }
+                  myv = as_str(inc(inc(100)));
+                }
+              }
+            }
+          }
+        }
+      }
+      while (!(!(!(True)))) {
+        char * o;
+        {
+          {
+            {
+              if (!(!(!(False)))) {
+
+              } else {
+                int ofb;
+              }
+              while (!(!(!(False)))) {
+
+                if (!(!(!(False)))) {
+
+                } else {
+                  int t;
+                }
+              }
+            }
+            while (!(!(!(False)))) {
+              {
+                if (!(!(!(True)))) {
+                  char * cof;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+
+                  } else {
+                    char * tb;
+                  }
+                  if (!(!(!(True)))) {
+                    int m;
+                  } else {
+                    int z;
+                  }
+                }
+              }
+              myv = as_str(inc(inc(82)));
+            }
+          }
+          while (!(!(True))) {
+            {
+              {
+                if (!(!(!(True)))) {
+                  char * cof;
+                }
+                while (!(!(!(False)))) {
+                  if (!(!(!(False)))) {
+
+                  } else {
+                    char * tb;
+                  }
+                  if (!(!(!(True)))) {
+                    int m;
+                  } else {
+                    int z;
+                  }
+                }
+              }
+              while (!(!(!(True)))) {
+                {
+                  if (!(!(!(True)))) {
+                    char * lny;
+                  } else {
+                    char * ig;
+                  }
+                  while (!(!(!(True)))) {
+                    if (!(!(!(True)))) {
+                      char * gfv;
+                    }
+                    if (!(!(!(False)))) {
+                      char * hsh;
+                    } else {
+                      int s;
+                    }
+                  }
+                }
+                {
+                  if (!(!(!(True)))) {
+                    int m;
+                  } else {
+                    int z;
+                  }
+                  while (!(!(!(False)))) {
+                    if (!(!(!(False)))) {
+                      char * drm;
+                    } else {
+                      char * xjg;
+                    }
+                    if (!(!(!(False)))) {
+
+                    } else {
+                      char * tb;
+                    }
+                  }
+                }
+              }
+            }
+            myv = as_str(inc(inc(0)));
+          }
+        }
+      }
+    }
+  }
+}
+// regs ty after: [-, -]

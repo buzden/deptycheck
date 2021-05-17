@@ -12,8 +12,6 @@ modules = Example.Pil.Lang
         , Example.Pil.Lang.ShowC
         , Example.Pil.Lang.Statement
 
-        , Example.Pil.ExampleUsages
-        , Example.Pil.DemoGen
         , Example.Pil.Gens
 
         , Data.List.Lookup
@@ -21,6 +19,3 @@ modules = Example.Pil.Lang
 depends = contrib, deptycheck
 
 sourcedir = "src"
-
-main = Example.Pil.DemoGen
-executable = pil-demo

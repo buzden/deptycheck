@@ -1,0 +1,4 @@
+$1 --build use-pil.ipkg
+$1 --find-ipkg --no-banner UsePil.idr < input
+
+rm -rf build

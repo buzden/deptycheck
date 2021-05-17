@@ -1,4 +1,4 @@
-module Example.Pil.DemoGen
+module DemoGen
 
 import Control.Monad.State
 

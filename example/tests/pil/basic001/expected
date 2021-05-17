@@ -1,0 +1,4 @@
+1/1: Building UsePil (UsePil.idr)
+UsePil> Example.Pil.Lang.Statement.Statement : Variables -> Registers rc -> Variables -> Registers rc -> Type
+UsePil> Example.Pil.Lang.Expression.Expression : Variables -> Registers rc -> Type' -> Type
+UsePil> Bye for now!
