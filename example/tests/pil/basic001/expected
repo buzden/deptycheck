@@ -1,11 +1,4 @@
 1/1: Building UsePil (UsePil.idr)
-     ____    __     _         ___                                           
-    /  _/___/ /____(_)____   |__ \                                          
-    / // __  / ___/ / ___/   __/ /     Version 0.3.0-7e520994f
-  _/ // /_/ / /  / (__  )   / __/      https://www.idris-lang.org           
- /___/\__,_/_/  /_/____/   /____/      Type :? for help                     
-
-Welcome to Idris 2.  Enjoy yourself!
 UsePil> Example.Pil.Lang.Statement.Statement : Variables -> Registers rc -> Variables -> Registers rc -> Type
 UsePil> Example.Pil.Lang.Expression.Expression : Variables -> Registers rc -> Type' -> Type
 UsePil> Bye for now!
