@@ -1,3 +1,6 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
 .depends-on-idris:
   parallel:
     matrix:
@@ -8,11 +11,20 @@
   image: snazzybucket/idris2:${IDRIS2_TAG}
 
 stages:
+  - thirdparties
   - lint
   - build-lib
   - test-lib
   - build-example
   - test-example
+
+# TODO to cache the results of the previous stages to the latter ones.
+
+build-thirdparties:
+  extends: .depends-on-idris
+  stage: thirdparties
+  script:
+    - make thirdparties
 
 build-deptycheck-lib:
   extends: .depends-on-idris
@@ -43,3 +55,5 @@ include:
 
 super_linter:
   stage: lint
+  variables:
+    FILTER_REGEX_EXCLUDE: ".*/thirdparty/.*"

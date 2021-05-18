@@ -28,7 +28,9 @@ test-all: test-deptycheck print-v-delimiter test-pil
 test-deptycheck: deptycheck
 	${MAKE} -C tests -f tests.mk only=${only}
 
-.PHONY: thirdparty-elab-util
+.PHONY: thirdparties thirdparty-elab-util
+
+thirdparties: thirdparty-elab-util
 
 thirdparty-elab-util:
 	${IDRIS2} --build thirdparty/elab-util/elab-util.ipkg
