@@ -1,0 +1,39 @@
+.default:
+  parallel:
+    matrix:
+      - IDRIS2_TAG:
+        - v0.3.0-588-g2f66f3e0
+        # get the desired suffix by `git describe --tags`
+        - latest
+  image: snazzybucket/idris2:${IDRIS2_TAG}
+
+stages:
+  - lib-build
+  - lib-test
+  - example-build
+  - example-test
+  - check-latest
+
+build-deptycheck-lib:
+  extends: .default
+  stage: lib-build
+  script:
+    - make deptycheck
+
+test-deptycheck-lib:
+  extends: .default
+  stage: lib-test
+  script:
+    - make test-deptycheck
+
+build-pil:
+  extends: .default
+  stage: example-build
+  script:
+    - make pil
+
+test-pil:
+  extends: .default
+  stage: example-test
+  script:
+    - make test-pil
