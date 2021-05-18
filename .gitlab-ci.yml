@@ -7,6 +7,7 @@ stages:
   - lib-test
   - example-build
   - example-test
+  - check-latest
 
 build-deptycheck-lib:
   stage: lib-build
@@ -27,3 +28,12 @@ test-pil:
   stage: example-test
   script:
     - make test-pil
+
+# TODO To make testing on the latest compiler version symmetric to the rest.
+#      Something like matrix with the `image` and `allow_failure` alternating.
+test-latest:
+  stage: check-latest
+  image: snazzybucket/idris2:latest
+  allow_failure: true
+  script:
+    - make test-all
