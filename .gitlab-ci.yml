@@ -1,19 +1,29 @@
 default:
-  image: snazzybucket/idris2:v0.3.0-340-g405c266b
+  image: snazzybucket/idris2:v0.3.0-588-g2f66f3e0
+  # get the desired suffix by `git describe --tags`
 
 stages:
-  - build
-  - example
+  - lib-build
+  - lib-test
+  - example-build
+  - example-test
 
 build-deptycheck-lib:
-  stage: build
+  stage: lib-build
   script:
-    - idris2 --build deptycheck.ipkg
+    - make deptycheck
 
-trigger-example:
-  stage: example
-  trigger:
-    include: example/.gitlab-ci.yaml
-  rules:
-    - changes:
-      - example/*
+test-deptycheck-lib:
+  stage: lib-test
+  script:
+    - make test-deptycheck
+
+build-pil:
+  stage: example-build
+  script:
+    - make pil
+
+test-pil:
+  stage: example-test
+  script:
+    - make test-pil
