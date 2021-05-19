@@ -8,6 +8,7 @@
   image: snazzybucket/idris2:${IDRIS2_TAG}
 
 stages:
+  - lint
   - build-lib
   - test-lib
   - build-example
@@ -36,3 +37,9 @@ test-pil:
   stage: test-example
   script:
     - make test-pil
+
+include:
+  - remote: 'https://jobs.r2devops.io/latest/super_linter.yml'
+
+super_linter:
+  stage: lint
