@@ -8,32 +8,38 @@
   image: snazzybucket/idris2:${IDRIS2_TAG}
 
 stages:
-  - lib-build
-  - lib-test
-  - example-build
-  - example-test
-  - check-latest
+  - lint
+  - build-lib
+  - test-lib
+  - build-example
+  - test-example
 
 build-deptycheck-lib:
   extends: .default
-  stage: lib-build
+  stage: build-lib
   script:
     - make deptycheck
 
 test-deptycheck-lib:
   extends: .default
-  stage: lib-test
+  stage: test-lib
   script:
     - make test-deptycheck
 
 build-pil:
   extends: .default
-  stage: example-build
+  stage: build-example
   script:
     - make pil
 
 test-pil:
   extends: .default
-  stage: example-test
+  stage: test-example
   script:
     - make test-pil
+
+include:
+  - remote: 'https://jobs.r2devops.io/latest/super_linter.yml'
+
+super_linter:
+  stage: lint
