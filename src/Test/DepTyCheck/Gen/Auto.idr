@@ -91,6 +91,16 @@ singleSignatureDef presenceToSet = map foldResolved . traverse toIndex where
   foldResolved : List (Fin ty.args.length) -> Vect ty.args.length PresenceAtSignature
   foldResolved = foldr (`replaceAt` presenceToSet) $ replicate ty.args.length NotPresent
 
+Show PresenceAtSignature where
+  show NotPresent  = "-"
+  show ExplicitArg = "explicit"
+  show ImplicitArg = "implicit"
+
+resolveGivens : PresenceAtSignature -> {ty : TypeInfo} -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
+resolveGivens p =
+  either (\bads => fail "Could not found arguments \{show bads} of type \{show ty.name} specified as \{show p} givens") pure .
+    toEither . singleSignatureDef p
+
 mergeSignatureDefs : Vect n PresenceAtSignature -> Vect n PresenceAtSignature -> ValidatedL (Fin n) $ Vect n PresenceAtSignature
 mergeSignatureDefs [] [] = pure []
 mergeSignatureDefs (x::xs) (y::ys) = [| mergeSingle x y :: mapFst (map FS) (mergeSignatureDefs xs ys) |] where
@@ -101,8 +111,8 @@ mergeSignatureDefs (x::xs) (y::ys) = [| mergeSingle x y :: mapFst (map FS) (merg
 
 signatureDef : (impl, expl : List DatatypeArgPointer) -> {ty : TypeInfo} -> Elab $ Vect ty.args.length PresenceAtSignature
 signatureDef impl expl = do
-  let Valid (impl', expl') = [| (singleSignatureDef ImplicitArg impl, singleSignatureDef ExplicitArg expl) |]
-    | Invalid badArgs => fail "Could not find argument(s) \{show badArgs} of type \{show ty.name} specified as givens"
+  impl' <- resolveGivens ImplicitArg impl
+  expl' <- resolveGivens ExplicitArg expl
   let Valid merged = mergeSignatureDefs impl' expl'
     | Invalid badPositions => fail "Argument(s) \{show $ humanReadableArgumentFor ty <$> badPositions} is/are defined as both implicit and explicit given"
   pure merged
