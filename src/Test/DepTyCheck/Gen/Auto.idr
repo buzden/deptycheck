@@ -27,11 +27,12 @@ find' p (x::xs) = if p x then Just FZ else FS <$> find' p xs
 
 --- Internal generation functions ---
 
+data ExternalGenAccess = ThruImplicit | ThruHint
+
 generateGensFor' : (ty : TypeInfo) ->
                    (givenImplicitParams : List $ Fin ty.args.length) ->
                    (givenExplicitParams : List $ Fin ty.args.length) ->
-                   (externalImplicitGens : List TypeInfo) -> -- todo maybe to use smth without constructors info instead of `TypeInfo`.
-                   (externalHintedGens : List TypeInfo) ->
+                   (externalGens : List (TypeInfo, ExternalGenAccess)) -> -- todo maybe to use smth without constructors info instead of `TypeInfo`.
                    Elab ()
 
 --- External generation interface and aux stuff for that ---
@@ -117,10 +118,11 @@ generateGensFor : Name ->
                   (externalImplicitGens : List Name) ->
                   (externalHintedGens : List Name) ->
                   Elab ()
-generateGensFor n defImpl defExpl extImpl extHint =
+generateGensFor n defImpl defExpl extImpl extHint = do
+  extImplResolved <- for extImpl getInfo'
+  extHintResolved <- for extHint getInfo'
   generateGensFor'
     !(getInfo' n)
     !(resolveGivens "implicit" defImpl)
     !(resolveGivens "explicit" defExpl)
-    !(for extImpl getInfo')
-    !(for extHint getInfo')
+    (map (, ThruImplicit) extImplResolved ++ map (, ThruHint) extHintResolved)
