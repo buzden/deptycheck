@@ -27,11 +27,18 @@ find' p (x::xs) = if p x then Just FZ else FS <$> find' p xs
 
 --- Internal generation functions ---
 
+data PresenceAtSignature = NotPresent | ExplicitArg | ImplicitArg
+
+Eq PresenceAtSignature where
+  NotPresent  == NotPresent  = True
+  ExplicitArg == ExplicitArg = True
+  ImplicitArg == ImplicitArg = True
+  _ == _ = False
+
 data ExternalGenAccess = ThruImplicit | ThruHint
 
 generateGensFor' : (ty : TypeInfo) ->
-                   (givenImplicitParams : List $ Fin ty.args.length) ->
-                   (givenExplicitParams : List $ Fin ty.args.length) ->
+                   (givenParams : Vect ty.args.length PresenceAtSignature) ->
                    (externalGens : List (TypeInfo, ExternalGenAccess)) -> -- todo maybe to use smth without constructors info instead of `TypeInfo`.
                    Elab ()
 
@@ -67,25 +74,48 @@ Eq Name where -- I'm not sure that this implementation is correct for my case.
   (RF x)   == (RF y)   = x == y
   _ == _ = False
 
-%inline
-ResolvedArg : Type -> Type
-ResolvedArg = ValidatedL DatatypeArgPointer
-
--- To report an error about particular argument.
-toIndex : (ty : TypeInfo) -> DatatypeArgPointer -> ResolvedArg $ Fin ty.args.length
-toIndex ty p@(Named n) = fromEitherL $ maybeToEither p $ find' ((== n) . name) ty.args
-toIndex ty p@(PositionalExplicit k) = findNthExplicit ty.args k where
-  findNthExplicit : (xs : List NamedArg) -> Nat -> ResolvedArg $ Fin xs.length
+toIndex : {ty : TypeInfo} -> DatatypeArgPointer -> ValidatedL DatatypeArgPointer $ Fin ty.args.length
+toIndex p@(Named n) = fromEitherL $ maybeToEither p $ find' ((== n) . name) ty.args
+toIndex p@(PositionalExplicit k) = findNthExplicit ty.args k where
+  findNthExplicit : (xs : List NamedArg) -> Nat -> ValidatedL DatatypeArgPointer $ Fin xs.length
   findNthExplicit []                              _     = Invalid $ pure p
   findNthExplicit (MkArg _ ExplicitArg _ _ :: _ ) Z     = Valid FZ
   findNthExplicit (MkArg _ ExplicitArg _ _ :: xs) (S k) = FS <$> findNthExplicit xs k
   findNthExplicit (MkArg _ _           _ _ :: xs) n     = FS <$> findNthExplicit xs n
 
-resolveGivens : (desc : String) -> {ty : TypeInfo} -> List DatatypeArgPointer -> Elab $ List $ Fin ty.args.length
-resolveGivens desc givens = do
-  let Valid resolved = traverse (toIndex ty) givens
-    | Invalid badArgs => fail "Could not found arguments \{show badArgs} of type \{show ty.name} from the \{desc} givens"
-  pure resolved
+singleSignatureDef : (presenceToSet : PresenceAtSignature) ->
+                     {ty : TypeInfo} ->
+                     List DatatypeArgPointer ->
+                     ValidatedL DatatypeArgPointer $ Vect ty.args.length PresenceAtSignature
+singleSignatureDef presenceToSet = map foldResolved . traverse toIndex where
+  foldResolved : List (Fin ty.args.length) -> Vect ty.args.length PresenceAtSignature
+  foldResolved = foldr (`replaceAt` presenceToSet) $ replicate ty.args.length NotPresent
+
+mergeSignatureDefs : Vect n PresenceAtSignature -> Vect n PresenceAtSignature -> ValidatedL (Fin n) $ Vect n PresenceAtSignature
+mergeSignatureDefs [] [] = pure []
+mergeSignatureDefs (x::xs) (y::ys) = [| mergeSingle x y :: mapFst (map FS) (mergeSignatureDefs xs ys) |] where
+  mergeSingle : PresenceAtSignature -> PresenceAtSignature -> ValidatedL (Fin n) $ PresenceAtSignature
+  mergeSingle NotPresent r = pure r
+  mergeSingle l NotPresent = pure l
+  mergeSingle l r = if l == r then pure l else oneInvalid FZ
+
+signatureDef : (impl, expl : List DatatypeArgPointer) -> {ty : TypeInfo} -> Elab $ Vect ty.args.length PresenceAtSignature
+signatureDef impl expl = do
+  let Valid (impl', expl') = [| (singleSignatureDef ImplicitArg impl, singleSignatureDef ExplicitArg expl) |]
+    | Invalid badArgs => fail "Could not find argument(s) \{show badArgs} of type \{show ty.name} specified as givens"
+  let Valid merged = mergeSignatureDefs impl' expl'
+    | Invalid badPositions => fail "Argument(s) \{show $ humanReadableArgumentFor ty <$> badPositions} is/are defined as both implicit and explicit given"
+  pure merged
+  where
+    humanReadableArgumentFor : (ty : TypeInfo) -> (pos : Fin ty.args.length) -> String
+    humanReadableArgumentFor ty pos =
+      case index' ty.args pos of
+        MkArg {piInfo=ExplicitArg, name=MN {}, _} => -- machine-generated explicit parameter
+                                                     let expArg : NamedArg -> Bool
+                                                         expArg $ MkArg {piInfo=ExplicitArg, _} = True
+                                                         expArg _ = False
+                                                     in show $ PositionalExplicit $ length $ filter expArg $ take (finToNat pos `minus` 1) ty.args
+        MkArg {name, _} => show name
 
 ||| The entry-point function of automatic generation of `Gen`'s.
 |||
@@ -121,8 +151,5 @@ generateGensFor : Name ->
 generateGensFor n defImpl defExpl extImpl extHint = do
   extImplResolved <- for extImpl getInfo'
   extHintResolved <- for extHint getInfo'
-  generateGensFor'
-    !(getInfo' n)
-    !(resolveGivens "implicit" defImpl)
-    !(resolveGivens "explicit" defExpl)
-    (map (, ThruImplicit) extImplResolved ++ map (, ThruHint) extHintResolved)
+  let extResolved = map (, ThruImplicit) extImplResolved ++ map (, ThruHint) extHintResolved
+  generateGensFor' !(getInfo' n) !(signatureDef defImpl defExpl) extResolved
