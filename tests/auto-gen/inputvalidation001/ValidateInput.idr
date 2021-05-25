@@ -4,25 +4,31 @@ import Test.DepTyCheck.Gen.Auto
 
 %language ElabReflection
 
+--------------------
 --- Unknown type ---
+--------------------
 
 -- %runElab generateGensFor "X" [] [] [] []
 
---- Known type but unknown argument ---
+----------------------------------
+--- Known type, unknown givens ---
+----------------------------------
+
+--- Unknown named argument ---
 
 data Y : Type -> Type -> Type where
   MkY : Y Int String
 
 -- %runElab generateGensFor "Y" ["a"] [] [] []
 
---- Known type with lacking positional argument ---
+--- Lacking positional argument (with no params in type) ---
 
 data NoParam : Type where
   MkNoParam : NoParam
 
 -- %runElab generateGensFor "NoParam" [0] [] [] []
 
---- Known type with lacking positional argument ---
+--- Lacking positional argument (with existing parameters) ---
 
 data TwoExplParams : Type -> Type -> Type where
   MkTwoExplParams : TwoExplParams a b
@@ -32,7 +38,7 @@ data TwoExplParams : Type -> Type -> Type where
 -- Two errors
 -- %runElab generateGensFor "TwoExplParams" [2, 3] [] [] []
 
---- Known type with lacking explicit positional arguments ---
+--- Lacking explicit positional arguments ---
 
 data TwoExplParamsWithImpl : Type -> Vect n a -> Type where
   MkTwoExplParamsWithImpl : TwoExplParamsWithImpl a v
