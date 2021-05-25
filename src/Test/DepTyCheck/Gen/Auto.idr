@@ -2,7 +2,7 @@ module Test.DepTyCheck.Gen.Auto
 
 import Data.Either
 import Data.List1
-import Data.So
+import public Data.So
 import Data.Validated
 
 import public Language.Reflection
