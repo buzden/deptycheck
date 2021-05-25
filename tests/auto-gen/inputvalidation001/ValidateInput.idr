@@ -4,11 +4,15 @@ import Test.DepTyCheck.Gen.Auto
 
 %language ElabReflection
 
+%default total
+
 --------------------
 --- Unknown type ---
 --------------------
 
--- %runElab generateGensFor "X" [] []
+%runElab generateGensFor "X" [] []
+
+%runElab generateGensFor "X" ["a"] [0]
 
 ----------------------------------
 --- Known type, unknown givens ---
