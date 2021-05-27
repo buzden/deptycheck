@@ -1,4 +1,4 @@
 [submodule "thirdparty/elab-util"]
 	path = thirdparty/elab-util
-	url = https://github.com/buzden/idris2-elab-util
-	branch = more-total
+	url = https://github.com/stefan-hoeck/idris2-elab-util
+	branch = main
