@@ -74,14 +74,16 @@ Eq Name where -- I'm not sure that this implementation is correct for my case.
   (RF x)   == (RF y)   = x == y
   _ == _ = False
 
+findNthExplicit : Nat -> (xs : List NamedArg) -> Maybe $ Fin xs.length
+findNthExplicit _     []                              = Nothing
+findNthExplicit Z     (MkArg _ ExplicitArg _ _ :: _ ) = Just FZ
+findNthExplicit (S k) (MkArg _ ExplicitArg _ _ :: xs) = FS <$> findNthExplicit k xs
+findNthExplicit n     (MkArg _ _           _ _ :: xs) = FS <$> findNthExplicit n xs
+
 toIndex : {ty : TypeInfo} -> DatatypeArgPointer -> ValidatedL DatatypeArgPointer $ Fin ty.args.length
-toIndex p@(Named n) = fromEitherL $ maybeToEither p $ find' ((== n) . name) ty.args
-toIndex p@(PositionalExplicit k) = findNthExplicit ty.args k where
-  findNthExplicit : (xs : List NamedArg) -> Nat -> ValidatedL DatatypeArgPointer $ Fin xs.length
-  findNthExplicit []                              _     = Invalid $ pure p
-  findNthExplicit (MkArg _ ExplicitArg _ _ :: _ ) Z     = Valid FZ
-  findNthExplicit (MkArg _ ExplicitArg _ _ :: xs) (S k) = FS <$> findNthExplicit xs k
-  findNthExplicit (MkArg _ _           _ _ :: xs) n     = FS <$> findNthExplicit xs n
+toIndex p = fromEitherL $ maybeToEither p $ case p of
+  Named n              => find' ((== n) . name) ty.args
+  PositionalExplicit k => findNthExplicit k ty.args
 
 singleSignatureDef : (presenceToSet : PresenceAtSignature) ->
                      {ty : TypeInfo} ->
