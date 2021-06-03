@@ -80,10 +80,12 @@ findNthExplicit Z     (MkArg _ ExplicitArg _ _ :: _ ) = Just FZ
 findNthExplicit (S k) (MkArg _ ExplicitArg _ _ :: xs) = FS <$> findNthExplicit k xs
 findNthExplicit n     (MkArg _ _           _ _ :: xs) = FS <$> findNthExplicit n xs
 
+findArg : {ty : TypeInfo} -> DatatypeArgPointer -> Maybe $ Fin ty.args.length
+findArg (Named n)              = find' ((== n) . name) ty.args
+findArg (PositionalExplicit k) = findNthExplicit k ty.args
+
 toIndex : {ty : TypeInfo} -> DatatypeArgPointer -> ValidatedL DatatypeArgPointer $ Fin ty.args.length
-toIndex p = fromEitherL $ maybeToEither p $ case p of
-  Named n              => find' ((== n) . name) ty.args
-  PositionalExplicit k => findNthExplicit k ty.args
+toIndex p = fromEitherL $ maybeToEither p $ findArg p
 
 singleSignatureDef : (presenceToSet : PresenceAtSignature) ->
                      {ty : TypeInfo} ->
