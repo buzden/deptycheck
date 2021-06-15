@@ -1,6 +1,6 @@
 module Example.Pil.Lang.ShowC
 
-import Data.String.Extra
+import Data.String
 
 import Example.Pil.Lang.Expression
 import Example.Pil.Lang.Statement

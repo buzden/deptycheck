@@ -189,8 +189,8 @@ splitAt (MkLzList {contents=Delay lv, _}) i = case lv of
 export
 splitAt' : (lz : LzList a) -> Fin (S lz.length) -> (LzList a, LzList a)
 splitAt' lz i = case strengthen i of
-  Left _ => (lz, [])
-  Right x => splitAt lz x
+  Nothing => (lz, [])
+  Just x  => splitAt lz x
 
 --- Conversions ---
 
