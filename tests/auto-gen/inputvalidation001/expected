@@ -1,7 +1,7 @@
 1/1: Building ValidateInput (ValidateInput.idr)
 Error: Error during reflection: ValidateInput.X is not in scope.
 
-ValidateInput.idr:13:1--13:35
+ValidateInput:13:1--13:35
  09 | --------------------
  10 | --- Unknown type ---
  11 | --------------------
@@ -11,7 +11,7 @@ ValidateInput.idr:13:1--13:35
 
 Error: Error during reflection: ValidateInput.X is not in scope.
 
-ValidateInput.idr:15:1--15:39
+ValidateInput:15:1--15:39
  11 | --------------------
  12 | 
  13 | %runElab generateGensFor "X" [] []
