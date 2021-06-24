@@ -3,14 +3,14 @@ module Main
 import Test.Golden
 
 pilLanguage : TestPool
-pilLanguage = MkTestPool "PIL usage examples" [] $ ("pil/" ++) <$>
+pilLanguage = MkTestPool "PIL usage examples" [] Nothing $ ("pil/" ++) <$>
   [ "basic001"
   , "usage001"
   -- TODO to add positive and negative tests for particular language constructions
   ]
 
 pilGenerators : TestPool
-pilGenerators = MkTestPool "Generators for PIL" [] $ ("gens/" ++) <$>
+pilGenerators = MkTestPool "Generators for PIL" [] Nothing $ ("gens/" ++) <$>
   [ "demo001"
   ]
 

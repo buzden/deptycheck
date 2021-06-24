@@ -4,7 +4,7 @@
 Error: While processing right hand side of bad_for. When unifying Type' and ?b -> ?c.
 Mismatch between: Type' and ?b -> ?c.
 
-Negative.idr:11:19--11:23
+Negative:11:19--11:23
  07 | 
  08 | --- Example statements ---
  09 | 
@@ -14,7 +14,7 @@ Negative.idr:11:19--11:23
 
 Error: While processing right hand side of bad_read_reg_base. Can't find an implementation for IsJust (index (with block in fromInteger 4 1 (integerToFin 1 4) ItIsJust) (Base [Nothing, Nothing, Just Int', Nothing])).
 
-Negative.idr:20:17--20:20
+Negative:20:17--20:20
  16 | -- Registers-related --
  17 | 
  18 | bad_read_reg_base : Statement vars (Base [Nothing, Nothing, Just Int', Nothing]) vars (Base [Nothing, Nothing, Just Int', Nothing])
@@ -24,7 +24,7 @@ Negative.idr:20:17--20:20
 
 Error: While processing right hand side of bad_read_reg_undef_with. Can't find an implementation for IsJust (index (with block in fromInteger 4 2 (integerToFin 2 4) ItIsJust) (With AllUndefined (FS (FS (FS FZ)), Just Int'))).
 
-Negative.idr:25:17--25:20
+Negative:25:17--25:20
  21 | 
  22 | bad_read_reg_undef_with : Statement vars (AllUndefined {rc=4} `With` (3, Just Int'))
  23 |                                     vars (AllUndefined {rc=4} `With` (3, Just Int'))
@@ -34,7 +34,7 @@ Negative.idr:25:17--25:20
 
 Error: While processing right hand side of bad_read_reg_with. Can't find an implementation for IsJust (index (with block in fromInteger 5 2 (integerToFin 2 5) ItIsJust) (With regs (FS (FS (FS FZ)), Just Int'))).
 
-Negative.idr:29:17--29:20
+Negative:29:17--29:20
  25 |   Int'. "x" !#= R 2
  26 | 
  27 | bad_read_reg_with : {0 regs : Registers 5} -> Statement vars (regs `With` (3, Just Int')) vars (regs `With` (3, Just Int'))
@@ -44,7 +44,7 @@ Negative.idr:29:17--29:20
 
 Error: While processing right hand side of bad_registers_ass. Can't find an implementation for IsJust (integerToFin 6 5).
 
-Negative.idr:34:3--34:4
+Negative:34:3--34:4
  30 | 
  31 | bad_registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `With` (3, Just Int')
  32 | bad_registers_ass = block $ do
