@@ -5,7 +5,7 @@ import Control.Monad.State
 import Data.Fin
 import Data.List
 import Data.List.Lazy
-import Data.Strings
+import Data.String
 
 import Example.Pil.Gens
 import Example.Pil.Lang.ShowC
