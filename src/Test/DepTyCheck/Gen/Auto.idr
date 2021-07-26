@@ -164,7 +164,7 @@ generateGensFor : Name ->
                   {default [] externalHintedGens : List Name} ->
                   Elab ()
 generateGensFor n defImpl defExpl = do
-  extImplResolved <- for externalImplicitGens getInfo'
-  extHintResolved <- for externalHintedGens getInfo'
-  let extResolved = map (, ThruImplicit) extImplResolved ++ map (, ThruHint) extHintResolved
+  extImplResolved <- map (, ThruImplicit) <$> for externalImplicitGens getInfo'
+  extHintResolved <- map (, ThruHint)     <$> for externalHintedGens   getInfo'
+  let extResolved = extImplResolved ++ extHintResolved
   generateGensFor' !(getInfo' n) !(signatureDef defImpl defExpl) extResolved
