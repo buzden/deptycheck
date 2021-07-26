@@ -102,7 +102,7 @@ Show PresenceAtSignature where
 
 resolveGivens : PresenceAtSignature -> {ty : TypeInfo} -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
 resolveGivens p as = case singleSignatureDef p as of
-  Invalid bads => fail "Could not found arguments \{show bads} of type \{show ty.name} specified as \{show p} givens"
+  Invalid bads => fail "Could not find arguments \{show bads} of type \{show ty.name} specified as \{show p} givens"
   Valid x => pure x
 
 mergeSignatureDefs : Vect n PresenceAtSignature -> Vect n PresenceAtSignature -> ValidatedL (Fin n) $ Vect n PresenceAtSignature
