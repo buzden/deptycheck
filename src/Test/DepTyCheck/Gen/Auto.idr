@@ -87,8 +87,8 @@ findArg (PositionalExplicit k) = findNthExplicit k ty.args
 toIndex : {ty : TypeInfo} -> DatatypeArgPointer -> ValidatedL DatatypeArgPointer $ Fin ty.args.length
 toIndex p = fromEitherL $ maybeToEither p $ findArg p
 
-singleSignatureDef : (presenceToSet : PresenceAtSignature) ->
-                     {ty : TypeInfo} ->
+singleSignatureDef : {ty : TypeInfo} ->
+                     (presenceToSet : PresenceAtSignature) ->
                      List DatatypeArgPointer ->
                      ValidatedL DatatypeArgPointer $ Vect ty.args.length PresenceAtSignature
 singleSignatureDef presenceToSet = map foldResolved . traverse toIndex where
@@ -100,10 +100,11 @@ Show PresenceAtSignature where
   show ExplicitArg = "explicit"
   show ImplicitArg = "implicit"
 
-resolveGivens : PresenceAtSignature -> {ty : TypeInfo} -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
-resolveGivens p as = case singleSignatureDef p as of
-  Invalid bads => fail "Could not find arguments \{show bads} of type \{show ty.name} specified as \{show p} givens"
-  Valid x => pure x
+resolveGivens : {ty : TypeInfo} -> PresenceAtSignature -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
+resolveGivens p = copeErr . singleSignatureDef p where
+  copeErr : ValidatedL DatatypeArgPointer (Vect ty.args.length PresenceAtSignature) -> Elab $ Vect ty.args.length PresenceAtSignature
+  copeErr $ Invalid bads = fail "Could not find arguments \{show bads} of type \{show ty.name} specified as \{show p} givens"
+  copeErr $ Valid x      = pure x
 
 mergeSignatureDefs : Vect n PresenceAtSignature -> Vect n PresenceAtSignature -> ValidatedL (Fin n) $ Vect n PresenceAtSignature
 mergeSignatureDefs [] [] = pure []
