@@ -87,21 +87,17 @@ findArg (PositionalExplicit k) = findNthExplicit k ty.args
 toIndex : {ty : TypeInfo} -> DatatypeArgPointer -> ValidatedL DatatypeArgPointer $ Fin ty.args.length
 toIndex p = fromEitherL $ maybeToEither p $ findArg p
 
-singleSignatureDef : {ty : TypeInfo} ->
-                     (presenceToSet : PresenceAtSignature) ->
-                     List DatatypeArgPointer ->
-                     ValidatedL DatatypeArgPointer $ Vect ty.args.length PresenceAtSignature
-singleSignatureDef presenceToSet = map foldResolved . traverse toIndex where
-  foldResolved : List (Fin ty.args.length) -> Vect ty.args.length PresenceAtSignature
-  foldResolved = foldr (`replaceAt` presenceToSet) $ replicate ty.args.length NotPresent
-
 Show PresenceAtSignature where
   show NotPresent  = "-"
   show ExplicitArg = "explicit"
   show ImplicitArg = "implicit"
 
 resolveGivens : {ty : TypeInfo} -> PresenceAtSignature -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
-resolveGivens p = copeErr . singleSignatureDef p where
+resolveGivens p = copeErr . map foldResolved . traverse toIndex where
+
+  foldResolved : List (Fin ty.args.length) -> Vect ty.args.length PresenceAtSignature
+  foldResolved = foldr (`replaceAt` p) $ replicate ty.args.length NotPresent
+
   copeErr : ValidatedL DatatypeArgPointer (Vect ty.args.length PresenceAtSignature) -> Elab $ Vect ty.args.length PresenceAtSignature
   copeErr $ Invalid bads = fail "Could not find arguments \{show bads} of type \{show ty.name} specified as \{show p} givens"
   copeErr $ Valid x      = pure x
