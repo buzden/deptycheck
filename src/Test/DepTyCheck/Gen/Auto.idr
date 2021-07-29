@@ -50,8 +50,8 @@ data DatatypeArgPointer
        | PositionalExplicit Nat
 
 Show DatatypeArgPointer where
-  show (Named x) = show x
-  show (PositionalExplicit k) = "explicit #\{show k}"
+  show (Named x) = "named argument `\{show x}`"
+  show (PositionalExplicit k) = "explicit argument #\{show k}"
 
 public export
 FromString DatatypeArgPointer where
@@ -92,6 +92,16 @@ Show PresenceAtSignature where
   show ExplicitArg = "explicit"
   show ImplicitArg = "implicit"
 
+-- This is a straightforward version of `resolveGivens` below, that reduces better.
+-- Functionally it stops at the first error instead of analyzing them all.
+resolveGivens' : {ty : TypeInfo} -> PresenceAtSignature -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
+resolveGivens' _ [] = pure $ replicate ty.args.length NotPresent
+resolveGivens' p (curr::rest) = do
+  let Just pos = findArg curr
+    | Nothing => fail "Could not find \{show curr} of type \{show ty.name} listed in \{show p} givens"
+  existing <- resolveGivens' p rest
+  pure $ replaceAt pos p existing
+
 resolveGivens : {ty : TypeInfo} -> PresenceAtSignature -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
 resolveGivens p = copeErr . map foldResolved . traverse toIndex where
 
@@ -99,7 +109,7 @@ resolveGivens p = copeErr . map foldResolved . traverse toIndex where
   foldResolved = foldr (`replaceAt` p) $ replicate ty.args.length NotPresent
 
   copeErr : ValidatedL DatatypeArgPointer (Vect ty.args.length PresenceAtSignature) -> Elab $ Vect ty.args.length PresenceAtSignature
-  copeErr $ Invalid bads = fail "Could not find arguments \{show bads} of type \{show ty.name} specified as \{show p} givens"
+  copeErr $ Invalid bads = fail "Could not find \{show bads} of type \{show ty.name} listed in \{show p} givens"
   copeErr $ Valid x      = pure x
 
 mergeSignatureDefs : Vect n PresenceAtSignature -> Vect n PresenceAtSignature -> ValidatedL (Fin n) $ Vect n PresenceAtSignature
@@ -112,8 +122,8 @@ mergeSignatureDefs (x::xs) (y::ys) = [| mergeSingle x y :: mapFst (map FS) (merg
 
 signatureDef : (impl, expl : List DatatypeArgPointer) -> {ty : TypeInfo} -> Elab $ Vect ty.args.length PresenceAtSignature
 signatureDef impl expl = do
-  impl' <- resolveGivens ImplicitArg impl
-  expl' <- resolveGivens ExplicitArg expl
+  impl' <- resolveGivens' ImplicitArg impl
+  expl' <- resolveGivens' ExplicitArg expl
   let Valid merged = mergeSignatureDefs impl' expl'
     | Invalid badPositions => fail "Argument(s) \{show $ humanReadableArgumentFor ty <$> badPositions} is/are defined as both implicit and explicit given"
   pure merged

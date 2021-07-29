@@ -19,3 +19,43 @@ ValidateInput:15:1--15:39
  15 | %runElab generateGensFor "X" ["a"] [0]
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Error: Error during reflection: Could not find named argument `a` of type ValidateInput.Y listed in implicit givens
+
+ValidateInput:26:1--26:38
+ 22 | 
+ 23 | data Y : Type -> Type -> Type where
+ 24 |   MkY : Y Int String
+ 25 | 
+ 26 | %runElab generateGensFor "Y" ["a"] []
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: Error during reflection: Could not find explicit argument #0 of type ValidateInput.NoParam listed in implicit givens
+
+ValidateInput:33:1--33:42
+ 29 | 
+ 30 | data NoParam : Type where
+ 31 |   MkNoParam : NoParam
+ 32 | 
+ 33 | %runElab generateGensFor "NoParam" [0] []
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: Error during reflection: Could not find explicit argument #2 of type ValidateInput.TwoExplParams listed in implicit givens
+
+ValidateInput:40:1--40:51
+ 36 | 
+ 37 | data TwoExplParams : Type -> Type -> Type where
+ 38 |   MkTwoExplParams : TwoExplParams a b
+ 39 | 
+ 40 | %runElab generateGensFor "TwoExplParams" [2, 0] []
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: Error during reflection: Could not find explicit argument #2 of type ValidateInput.TwoExplParamsWithImpl listed in implicit givens
+
+ValidateInput:50:1--50:59
+ 46 | 
+ 47 | data TwoExplParamsWithImpl : Type -> Vect n a -> Type where
+ 48 |   MkTwoExplParamsWithImpl : TwoExplParamsWithImpl a v
+ 49 | 
+ 50 | %runElab generateGensFor "TwoExplParamsWithImpl" [2, 0] []
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
