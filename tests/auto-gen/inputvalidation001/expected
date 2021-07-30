@@ -49,6 +49,16 @@ ValidateInput:40:1--40:51
  40 | %runElab generateGensFor "TwoExplParams" [2, 0] []
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Error: Error during reflection: Could not find explicit argument #2 of type ValidateInput.TwoExplParams listed in implicit givens
+
+ValidateInput:43:1--43:51
+ 39 | 
+ 40 | %runElab generateGensFor "TwoExplParams" [2, 0] []
+ 41 | 
+ 42 | -- Two errors
+ 43 | %runElab generateGensFor "TwoExplParams" [2, 3] []
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Error: Error during reflection: Could not find explicit argument #2 of type ValidateInput.TwoExplParamsWithImpl listed in implicit givens
 
 ValidateInput:50:1--50:59

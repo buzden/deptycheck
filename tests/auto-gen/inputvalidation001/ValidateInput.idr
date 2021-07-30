@@ -40,7 +40,7 @@ data TwoExplParams : Type -> Type -> Type where
 %runElab generateGensFor "TwoExplParams" [2, 0] []
 
 -- Two errors
--- %runElab generateGensFor "TwoExplParams" [2, 3] []
+%runElab generateGensFor "TwoExplParams" [2, 3] []
 
 --- Lacking explicit positional arguments ---
 
