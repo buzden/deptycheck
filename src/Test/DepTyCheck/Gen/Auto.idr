@@ -3,7 +3,6 @@ module Test.DepTyCheck.Gen.Auto
 import Data.Either
 import Data.List1
 import public Data.So
-import Data.Validated
 
 import public Language.Reflection
 import public Language.Reflection.Types
@@ -100,31 +99,31 @@ resolveGivens' p (curr::rest) = do
   existing <- resolveGivens' p rest
   pure $ replaceAt pos p existing
 
-mergeSignatureDefs : Vect n PresenceAtSignature -> Vect n PresenceAtSignature -> ValidatedL (Fin n) $ Vect n PresenceAtSignature
+mergeSignatureDefs : Vect n PresenceAtSignature -> Vect n PresenceAtSignature -> Either (Fin n) $ Vect n PresenceAtSignature
 mergeSignatureDefs [] [] = pure []
-mergeSignatureDefs (x::xs) (y::ys) = [| mergeSingle x y :: mapFst (map FS) (mergeSignatureDefs xs ys) |] where
-  mergeSingle : PresenceAtSignature -> PresenceAtSignature -> ValidatedL (Fin n) $ PresenceAtSignature
+mergeSignatureDefs (x::xs) (y::ys) = [| mergeSingle x y :: mapFst FS (mergeSignatureDefs xs ys) |] where
+  mergeSingle : PresenceAtSignature -> PresenceAtSignature -> Either (Fin n) $ PresenceAtSignature
   mergeSingle NotPresent r = pure r
   mergeSingle l NotPresent = pure l
-  mergeSingle l r = if l == r then pure l else oneInvalid FZ
+  mergeSingle l r = if l == r then pure l else Left FZ
 
 signatureDef : (impl, expl : List DatatypeArgPointer) -> {ty : TypeInfo} -> Elab $ Vect ty.args.length PresenceAtSignature
 signatureDef impl expl = do
   impl' <- resolveGivens' ImplicitArg impl
   expl' <- resolveGivens' ExplicitArg expl
-  let Valid merged = mergeSignatureDefs impl' expl'
-    | Invalid badPositions => fail "Argument(s) \{show $ humanReadableArgumentFor ty <$> badPositions} is/are defined as both implicit and explicit given"
+  let Right merged = mergeSignatureDefs impl' expl'
+    | Left badPosition => fail "\{humanReadableArgumentFor badPosition} is listed in both implicit and explicit givens"
   pure merged
   where
-    humanReadableArgumentFor : (ty : TypeInfo) -> (pos : Fin ty.args.length) -> String
-    humanReadableArgumentFor ty pos =
-      case index' ty.args pos of
-        MkArg {piInfo=ExplicitArg, name=MN {}, _} => -- machine-generated explicit parameter
-                                                     let expArg : NamedArg -> Bool
-                                                         expArg $ MkArg {piInfo=ExplicitArg, _} = True
-                                                         expArg _ = False
-                                                     in show $ PositionalExplicit $ length $ filter expArg $ take (finToNat pos `minus` 1) ty.args
-        MkArg {name, _} => show name
+    explicitArg : NamedArg -> Bool
+    explicitArg $ MkArg {piInfo=ExplicitArg, _} = True
+    explicitArg _ = False
+
+    humanReadableArgumentFor : (pos : Fin ty.args.length) -> String
+    humanReadableArgumentFor pos = show $ case index' ty.args pos of
+      MkArg {piInfo=ExplicitArg, name=MN {}, _} => -- machine-generated explicit parameter
+        PositionalExplicit $ length $ filter explicitArg $ take (finToNat pos) ty.args
+      MkArg {name, _} => Named name
 
 ||| The entry-point function of automatic generation of `Gen`'s.
 |||

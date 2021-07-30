@@ -59,3 +59,63 @@ ValidateInput:50:1--50:59
  50 | %runElab generateGensFor "TwoExplParamsWithImpl" [2, 0] []
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Error: Error during reflection: explicit argument #0 is listed in both implicit and explicit givens
+
+ValidateInput:76:1--76:57
+ 72 | -- %runElab generateGensFor "TwoExplParamsWithImpl'" [1, "v"] ["b", 0]
+ 73 | 
+ 74 | --- Existence of a given which is both implicit and explicit ---
+ 75 | 
+ 76 | %runElab generateGensFor "TwoExplParamsWithImpl" [0] [0]
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: Error during reflection: explicit argument #1 is listed in both implicit and explicit givens
+
+ValidateInput:77:1--77:57
+ 73 | 
+ 74 | --- Existence of a given which is both implicit and explicit ---
+ 75 | 
+ 76 | %runElab generateGensFor "TwoExplParamsWithImpl" [0] [0]
+ 77 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [1]
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: Error during reflection: explicit argument #1 is listed in both implicit and explicit givens
+
+ValidateInput:78:1--78:60
+ 74 | --- Existence of a given which is both implicit and explicit ---
+ 75 | 
+ 76 | %runElab generateGensFor "TwoExplParamsWithImpl" [0] [0]
+ 77 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [1]
+ 78 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [0, 1]
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: Error during reflection: named argument `v` is listed in both implicit and explicit givens
+
+ValidateInput:80:1--80:60
+ 76 | %runElab generateGensFor "TwoExplParamsWithImpl" [0] [0]
+ 77 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [1]
+ 78 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [0, 1]
+ 79 | 
+ 80 | %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [1]
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: Error during reflection: named argument `v` is listed in both implicit and explicit givens
+
+ValidateInput:81:1--81:63
+ 77 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [1]
+ 78 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [0, 1]
+ 79 | 
+ 80 | %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [1]
+ 81 | %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [0, 1]
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: Error during reflection: named argument `v` is listed in both implicit and explicit givens
+
+ValidateInput:82:1--82:61
+ 78 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [0, 1]
+ 79 | 
+ 80 | %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [1]
+ 81 | %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [0, 1]
+ 82 | %runElab generateGensFor "TwoExplParamsWithImpl'" [1] [0, 1]
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
