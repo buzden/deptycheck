@@ -88,15 +88,12 @@ Show PresenceAtSignature where
   show ExplicitArg = "explicit"
   show ImplicitArg = "implicit"
 
--- This is a straightforward version the original `resolveGivens` which reduces better.
--- Functionally it stops at the first error instead of analyzing them all.
--- TODO to return the functionality of showing the multiple errors all at once.
-resolveGivens' : {ty : TypeInfo} -> PresenceAtSignature -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
-resolveGivens' _ [] = pure $ replicate ty.args.length NotPresent
-resolveGivens' p (curr::rest) = do
+resolveGivens : {ty : TypeInfo} -> PresenceAtSignature -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
+resolveGivens _ [] = pure $ replicate ty.args.length NotPresent
+resolveGivens p (curr::rest) = do
   let Just pos = findArg curr
     | Nothing => fail "Could not find \{show curr} of type \{show ty.name} listed in \{show p} givens"
-  existing <- resolveGivens' p rest
+  existing <- resolveGivens p rest
   let NotPresent = index pos existing
     | _ => fail "\{show curr} is listed in \{show p} givens several times"
   pure $ replaceAt pos p existing
@@ -109,10 +106,12 @@ mergeSignatureDefs (x::xs) (y::ys) = [| mergeSingle x y :: mapFst FS (mergeSigna
   mergeSingle l NotPresent = pure l
   mergeSingle l r = if l == r then pure l else Left FZ
 
+-- TODO to return the functionality of showing the multiple errors all at once.
+
 signatureDef : (impl, expl : List DatatypeArgPointer) -> {ty : TypeInfo} -> Elab $ Vect ty.args.length PresenceAtSignature
 signatureDef impl expl = do
-  impl' <- resolveGivens' ImplicitArg impl
-  expl' <- resolveGivens' ExplicitArg expl
+  impl' <- resolveGivens ImplicitArg impl
+  expl' <- resolveGivens ExplicitArg expl
   let Right merged = mergeSignatureDefs impl' expl'
     | Left badPosition => fail "\{humanReadableArgumentFor badPosition} is listed in both implicit and explicit givens"
   pure merged
