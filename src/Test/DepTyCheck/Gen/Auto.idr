@@ -84,16 +84,14 @@ findArg : {ty : TypeInfo} -> DatatypeArgPointer -> Maybe $ Fin ty.args.length
 findArg (Named n)              = find' ((== n) . name) ty.args
 findArg (PositionalExplicit k) = findNthExplicit k ty.args
 
-toIndex : {ty : TypeInfo} -> DatatypeArgPointer -> ValidatedL DatatypeArgPointer $ Fin ty.args.length
-toIndex p = fromEitherL $ maybeToEither p $ findArg p
-
 Show PresenceAtSignature where
   show NotPresent  = "-"
   show ExplicitArg = "explicit"
   show ImplicitArg = "implicit"
 
--- This is a straightforward version of `resolveGivens` below, that reduces better.
+-- This is a straightforward version the original `resolveGivens` which reduces better.
 -- Functionally it stops at the first error instead of analyzing them all.
+-- TODO to return the functionality of showing the multiple errors all at once.
 resolveGivens' : {ty : TypeInfo} -> PresenceAtSignature -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
 resolveGivens' _ [] = pure $ replicate ty.args.length NotPresent
 resolveGivens' p (curr::rest) = do
@@ -101,16 +99,6 @@ resolveGivens' p (curr::rest) = do
     | Nothing => fail "Could not find \{show curr} of type \{show ty.name} listed in \{show p} givens"
   existing <- resolveGivens' p rest
   pure $ replaceAt pos p existing
-
-resolveGivens : {ty : TypeInfo} -> PresenceAtSignature -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
-resolveGivens p = copeErr . map foldResolved . traverse toIndex where
-
-  foldResolved : List (Fin ty.args.length) -> Vect ty.args.length PresenceAtSignature
-  foldResolved = foldr (`replaceAt` p) $ replicate ty.args.length NotPresent
-
-  copeErr : ValidatedL DatatypeArgPointer (Vect ty.args.length PresenceAtSignature) -> Elab $ Vect ty.args.length PresenceAtSignature
-  copeErr $ Invalid bads = fail "Could not find \{show bads} of type \{show ty.name} listed in \{show p} givens"
-  copeErr $ Valid x      = pure x
 
 mergeSignatureDefs : Vect n PresenceAtSignature -> Vect n PresenceAtSignature -> ValidatedL (Fin n) $ Vect n PresenceAtSignature
 mergeSignatureDefs [] [] = pure []
