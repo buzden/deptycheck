@@ -58,18 +58,18 @@ data TwoExplParamsWithImpl' : (b : Type) -> (v : Vect n a) -> Type where
 
 --- Repeating implicit givens ---
 
--- %runElab generateGensFor "TwoExplParamsWithImpl" [0, 1, 1] []
--- %runElab generateGensFor "TwoExplParamsWithImpl'" [0, "v", 1] []
+%runElab generateGensFor "TwoExplParamsWithImpl" [0, 1, 1] []
+%runElab generateGensFor "TwoExplParamsWithImpl'" [0, "v", 1] []
 
 --- Repeating explciit givens ---
 
--- %runElab generateGensFor "TwoExplParamsWithImpl" [] [0, 1, 1]
--- %runElab generateGensFor "TwoExplParamsWithImpl'" [] [0, 1, "v"]
+%runElab generateGensFor "TwoExplParamsWithImpl" [] [0, 1, 1]
+%runElab generateGensFor "TwoExplParamsWithImpl'" [] [0, 1, "v"]
 
 --- Repeating both implicit and explicit givens ---
 
--- %runElab generateGensFor "TwoExplParamsWithImpl" [1, 1] [0, 0]
--- %runElab generateGensFor "TwoExplParamsWithImpl'" [1, "v"] ["b", 0]
+%runElab generateGensFor "TwoExplParamsWithImpl" [1, 1] [0, 0]
+%runElab generateGensFor "TwoExplParamsWithImpl'" [1, "v"] ["b", 0]
 
 --- Existence of a given which is both implicit and explicit ---
 

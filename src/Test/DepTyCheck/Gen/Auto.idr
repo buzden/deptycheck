@@ -97,6 +97,8 @@ resolveGivens' p (curr::rest) = do
   let Just pos = findArg curr
     | Nothing => fail "Could not find \{show curr} of type \{show ty.name} listed in \{show p} givens"
   existing <- resolveGivens' p rest
+  let NotPresent = index pos existing
+    | _ => fail "\{show curr} is listed in \{show p} givens several times"
   pure $ replaceAt pos p existing
 
 mergeSignatureDefs : Vect n PresenceAtSignature -> Vect n PresenceAtSignature -> Either (Fin n) $ Vect n PresenceAtSignature
