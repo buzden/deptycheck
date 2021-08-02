@@ -11,11 +11,10 @@ import public Test.DepTyCheck.Gen.Auto.Util
 --------------------------------------------------------------
 
 public export
-data PresenceAtSignature = NotPresent | ExplicitArg | ImplicitArg
+data ArgExplicitness = ExplicitArg | ImplicitArg
 
 public export
-Eq PresenceAtSignature where
-  NotPresent  == NotPresent  = True
+Eq ArgExplicitness where
   ExplicitArg == ExplicitArg = True
   ImplicitArg == ImplicitArg = True
   _ == _ = False
@@ -25,6 +24,6 @@ data ExternalGenAccess = ThruImplicit | ThruHint
 
 export
 generateGensFor : (ty : TypeInfo) ->
-                  (givenParams : Vect ty.args.length PresenceAtSignature) ->
+                  (givenParams : Vect ty.args.length $ Maybe ArgExplicitness) ->
                   (externalGens : List (TypeInfo, ExternalGenAccess)) -> -- todo maybe to use smth without constructors info instead of `TypeInfo`.
                   Elab ()

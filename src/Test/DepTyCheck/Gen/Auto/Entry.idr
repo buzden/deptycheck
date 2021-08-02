@@ -54,32 +54,31 @@ findArg : {ty : TypeInfo} -> DatatypeArgPointer -> Maybe $ Fin ty.args.length
 findArg (Named n)              = find' ((== n) . name) ty.args
 findArg (PositionalExplicit k) = findNthExplicit k ty.args
 
-Show PresenceAtSignature where
-  show NotPresent  = "-"
+Show ArgExplicitness where
   show ExplicitArg = "explicit"
   show ImplicitArg = "implicit"
 
-resolveGivens : {ty : TypeInfo} -> PresenceAtSignature -> List DatatypeArgPointer -> Elab $ Vect ty.args.length PresenceAtSignature
-resolveGivens _ [] = pure $ replicate ty.args.length NotPresent
+resolveGivens : {ty : TypeInfo} -> ArgExplicitness -> List DatatypeArgPointer -> Elab $ Vect ty.args.length $ Maybe ArgExplicitness
+resolveGivens _ [] = pure $ replicate ty.args.length Nothing
 resolveGivens p (curr::rest) = do
   let Just pos = findArg curr
     | Nothing => fail "Could not find \{show curr} of type \{show ty.name} listed in \{show p} givens"
   existing <- resolveGivens p rest
-  let NotPresent = index pos existing
+  let Nothing = Vect.index pos existing
     | _ => fail "\{show curr} is listed in \{show p} givens several times"
-  pure $ replaceAt pos p existing
+  pure $ replaceAt pos (Just p) existing
 
-mergeSignatureDefs : Vect n PresenceAtSignature -> Vect n PresenceAtSignature -> Either (Fin n) $ Vect n PresenceAtSignature
+mergeSignatureDefs : Vect n $ Maybe ArgExplicitness -> Vect n $ Maybe ArgExplicitness -> Either (Fin n) $ Vect n $ Maybe ArgExplicitness
 mergeSignatureDefs [] [] = pure []
 mergeSignatureDefs (x::xs) (y::ys) = [| mergeSingle x y :: mapFst FS (mergeSignatureDefs xs ys) |] where
-  mergeSingle : PresenceAtSignature -> PresenceAtSignature -> Either (Fin n) $ PresenceAtSignature
-  mergeSingle NotPresent r = pure r
-  mergeSingle l NotPresent = pure l
+  mergeSingle : Maybe ArgExplicitness -> Maybe ArgExplicitness -> Either (Fin n) $ Maybe ArgExplicitness
+  mergeSingle Nothing r = pure r
+  mergeSingle l Nothing = pure l
   mergeSingle l r = if l == r then pure l else Left FZ
 
 -- TODO to return the functionality of showing the multiple errors all at once.
 
-signatureDef : (impl, expl : List DatatypeArgPointer) -> {ty : TypeInfo} -> Elab $ Vect ty.args.length PresenceAtSignature
+signatureDef : (impl, expl : List DatatypeArgPointer) -> {ty : TypeInfo} -> Elab $ Vect ty.args.length $ Maybe ArgExplicitness
 signatureDef impl expl = do
   impl' <- resolveGivens ImplicitArg impl
   expl' <- resolveGivens ExplicitArg expl
