@@ -1,3 +1,4 @@
+||| External generation interface and aux stuff for that
 module Test.DepTyCheck.Gen.Auto.Entry
 
 import public Data.So
@@ -6,11 +7,9 @@ import public Test.DepTyCheck.Gen.Auto.Checked
 
 %default total
 
-------------------------------------------------------------
---- External generation interface and aux stuff for that ---
-------------------------------------------------------------
-
+---------------------------------------------------
 --- Datatypes needed for the external interface ---
+---------------------------------------------------
 
 public export
 data DatatypeArgPointer
@@ -31,7 +30,9 @@ namespace DatatypeArgPointer
   fromInteger : (x : Integer) -> (0 _ : So (x >= 0)) => DatatypeArgPointer
   fromInteger x = PositionalExplicit $ integerToNat x
 
+----------------------------------------
 --- Internal functions and instances ---
+----------------------------------------
 
 Eq Namespace where
   (MkNS xs) == (MkNS ys) = xs == ys
@@ -96,7 +97,9 @@ signatureDef impl expl = do
         PositionalExplicit $ length $ filter explicitArg $ take (finToNat pos) ty.args
       MkArg {name, _} => Named name
 
+------------------------------
 --- Functions for the user ---
+------------------------------
 
 ||| The entry-point function of automatic generation of `Gen`'s.
 |||

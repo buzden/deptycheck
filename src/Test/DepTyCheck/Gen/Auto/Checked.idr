@@ -1,3 +1,4 @@
+||| Internal generation functions, after user input checks
 module Test.DepTyCheck.Gen.Auto.Checked
 
 import public Language.Reflection.Types
@@ -6,9 +7,9 @@ import public Test.DepTyCheck.Gen.Auto.Util
 
 %default total
 
---------------------------------------------------------------
---- Internal generation functions, after user input checks ---
---------------------------------------------------------------
+-----------------------------------------------------
+--- Data types for the safe signature formulation ---
+-----------------------------------------------------
 
 public export
 data ArgExplicitness = ExplicitArg | ImplicitArg
@@ -22,8 +23,13 @@ Eq ArgExplicitness where
 public export
 data ExternalGenAccess = ThruImplicit | ThruHint
 
+------------------------------------------
+--- The entry-point generator function ---
+------------------------------------------
+
+-- TODO maybe to use smth without constructors info instead of `TypeInfo` for the `externalGens` parameter.
 export
 generateGensFor : (ty : TypeInfo) ->
                   (givenParams : Vect ty.args.length $ Maybe ArgExplicitness) ->
-                  (externalGens : List (TypeInfo, ExternalGenAccess)) -> -- todo maybe to use smth without constructors info instead of `TypeInfo`.
+                  (externalGens : List (TypeInfo, ExternalGenAccess)) ->
                   Elab ()

@@ -4,7 +4,9 @@ import Data.Fin
 
 %default total
 
+-----------------------
 --- Lists utilities ---
+-----------------------
 
 public export %inline
 (.length) : List a -> Nat
