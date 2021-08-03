@@ -61,3 +61,32 @@ registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `With`
 registers_ass = block $ do
   Int'. "x" !#= C 0
   3 %= V "x"
+
+-- Basic if tests
+
+if_local_vars : {cond : Expression (("x", Int')::vars) regs Bool'} -> Statement vars regs vars $ regs `Merge` regs
+if_local_vars = block $ do
+  Int'. "x" !#= C 0
+  if__ cond (String'. "x" !#= C "foo") (Bool'. "x" !#= C True)
+  "x" #= C 42
+
+-- Registers are correctly merged in if clauses --
+
+if_merge_two_branches : {0 regs : Registers 3} -> {cond : Expression vars regs Bool'} -> Statement vars regs (("x", Int')::vars) $ (regs `With` (1, Just Int')) `Merge` (regs `With` (1, Just Int'))
+if_merge_two_branches = do
+    if__ cond thenBranch elseBranch
+    Int' . "x" !#= R 1
+  where
+    thenBranch : Statement vars regs vars $ regs `With` (1, Just Int')
+    thenBranch = do
+      1 %= C 1
+    elseBranch : Statement vars regs vars $ regs `With` (1, Just Int')
+    elseBranch = do
+      1 %= C 1
+
+if_merge_one_branch : {0 regs : Registers 3} -> {cond : Expression (("x", Int')::vars) (regs `With` (1, Just Int')) Bool'} -> Statement vars regs (("x", Int')::vars) $ (regs `With` (1, Just Int')) `Merge` ((regs `With` (1, Just Int')) `With` (1, Just Int'))
+if_merge_one_branch = do
+  Int' . "x" !#= C 1
+  1 %= C 2
+  if__ cond ("x" #= C 3) (1 %= C 4)
+  "x" #= R 1
