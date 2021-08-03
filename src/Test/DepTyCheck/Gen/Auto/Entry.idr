@@ -87,14 +87,10 @@ signatureDef impl expl = do
     | Left badPosition => fail "\{humanReadableArgumentFor badPosition} is listed in both implicit and explicit givens"
   pure merged
   where
-    explicitArg : NamedArg -> Bool
-    explicitArg $ MkArg {piInfo=ExplicitArg, _} = True
-    explicitArg _ = False
-
     humanReadableArgumentFor : (pos : Fin ty.args.length) -> String
     humanReadableArgumentFor pos = show $ case index' ty.args pos of
       MkArg {piInfo=ExplicitArg, name=MN {}, _} => -- machine-generated explicit parameter
-        PositionalExplicit $ length $ filter explicitArg $ take (finToNat pos) ty.args
+        PositionalExplicit $ length $ filter isExplicit $ take (finToNat pos) ty.args
       MkArg {name, _} => Named name
 
 ------------------------------
