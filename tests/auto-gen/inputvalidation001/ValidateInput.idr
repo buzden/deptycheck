@@ -80,3 +80,13 @@ data TwoExplParamsWithImpl' : (b : Type) -> (v : Vect n a) -> Type where
 %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [1]
 %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [0, 1]
 %runElab generateGensFor "TwoExplParamsWithImpl'" [1] [0, 1]
+
+-------------------------------
+--- Bad external generators ---
+-------------------------------
+
+-- TODO to add some other incorrect cases, connected with external generators
+
+--- Conflicting external generators ---
+
+%runElab generateGensFor "Y" [] [] {externalImplicitGens = ["TwoExmplParamsWithImpl"]} {externalHintedGens = ["TwoExmplParamsWithImpl"]}

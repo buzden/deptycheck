@@ -134,6 +134,8 @@ generateGensFor : Name ->
                   {default [] externalHintedGens : List Name} ->
                   Elab ()
 generateGensFor n defImpl defExpl = do
+  let [] = intersect externalImplicitGens externalHintedGens
+    | common => fail "External generators lists have non-empty intersection: \{show common}"
   extImplResolved <- map (, ThruImplicit) <$> for externalImplicitGens getInfo'
   extHintResolved <- map (, ThruHint)     <$> for externalHintedGens   getInfo'
   let extResolved = extImplResolved ++ extHintResolved
