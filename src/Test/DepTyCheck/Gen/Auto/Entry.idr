@@ -130,13 +130,13 @@ export
 generateGensFor : Name ->
                   (givenImplicitParams : List DatatypeArgPointer) ->
                   (givenExplicitParams : List DatatypeArgPointer) ->
-                  {default [] externalImplicitGens : List Name} ->
+                  {default [] externalAutoImplicitGens : List Name} ->
                   {default [] externalHintedGens : List Name} ->
                   Elab ()
 generateGensFor n defImpl defExpl = do
-  let [] = intersect externalImplicitGens externalHintedGens
+  let [] = intersect externalAutoImplicitGens externalHintedGens
     | common => fail "External generators lists have non-empty intersection: \{show common}"
-  extImplResolved <- map (, ThruImplicit) <$> for externalImplicitGens getInfo'
-  extHintResolved <- map (, ThruHint)     <$> for externalHintedGens   getInfo'
-  let extResolved = extImplResolved ++ extHintResolved
+  extAutoImplResolved <- map (, ThruAutoImplicit) <$> for externalAutoImplicitGens getInfo'
+  extHintResolved     <- map (, ThruHint)         <$> for externalHintedGens       getInfo'
+  let extResolved = extAutoImplResolved ++ extHintResolved
   generateGensFor !(getInfo' n) !(signatureDef defImpl defExpl) extResolved

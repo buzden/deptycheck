@@ -191,11 +191,11 @@ ValidateInput:82:1--82:61
 
 Error: Error during reflection: External generators lists have non-empty intersection: [TwoExmplParamsWithImpl]
 
-ValidateInput:92:1--92:137
+ValidateInput:92:1--92:141
  88 | -- TODO to add some other incorrect cases, connected with external generators
  89 | 
  90 | --- Conflicting external generators ---
  91 | 
- 92 | %runElab generateGensFor "Y" [] [] {externalImplicitGens = ["TwoExmplParamsWithImpl"]} {externalHintedGens = ["TwoExmplParamsWithImpl"]}
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 92 | %runElab generateGensFor "Y" [] [] {externalAutoImplicitGens = ["TwoExmplParamsWithImpl"]} {externalHintedGens = ["TwoExmplParamsWithImpl"]}
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

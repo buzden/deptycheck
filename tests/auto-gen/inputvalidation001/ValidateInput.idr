@@ -89,4 +89,4 @@ data TwoExplParamsWithImpl' : (b : Type) -> (v : Vect n a) -> Type where
 
 --- Conflicting external generators ---
 
-%runElab generateGensFor "Y" [] [] {externalImplicitGens = ["TwoExmplParamsWithImpl"]} {externalHintedGens = ["TwoExmplParamsWithImpl"]}
+%runElab generateGensFor "Y" [] [] {externalAutoImplicitGens = ["TwoExmplParamsWithImpl"]} {externalHintedGens = ["TwoExmplParamsWithImpl"]}

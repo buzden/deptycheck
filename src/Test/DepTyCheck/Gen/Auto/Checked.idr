@@ -21,7 +21,7 @@ Eq ArgExplicitness where
   _ == _ = False
 
 public export
-data ExternalGenAccess = ThruImplicit | ThruHint
+data ExternalGenAccess = ThruAutoImplicit | ThruHint
 
 ------------------------------------------
 --- The entry-point generator function ---
