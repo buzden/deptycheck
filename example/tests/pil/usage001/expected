@@ -59,3 +59,33 @@ Negative:33:3--33:20
  33 |   Int'. "x" !#= C 0
         ^^^^^^^^^^^^^^^^^
 
+Error: While processing right hand side of bad_if_access_local. Can't find an implementation for Lookup (MkName "x") ((Int' . MkName "y") :: vars).
+
+Negative:41:17--41:22
+ 37 | 
+ 38 | bad_if_access_local : {cond : Expression vars regs Bool'} -> Statement vars regs vars $ regs `Merge` regs
+ 39 | bad_if_access_local = block $ do
+ 40 |   if__ cond (Int'. "x" !#= C 1) (Int'. "x" !#= C 2)
+ 41 |   Int'. "y" !#= V "x"
+                      ^^^^^
+
+Error: While processing right hand side of bad_if_taints_register. Can't find an implementation for IsJust (index (with block in fromInteger 5 3 (integerToFin 3 5) ItIsJust) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Int')) (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Bool')))).
+
+Negative:49:17--49:20
+ 45 | bad_if_taints_register : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
+ 46 | bad_if_taints_register = block $ do
+ 47 |   3 %= C 1
+ 48 |   if__ cond (3 %= C 2) (3 %= C True)
+ 49 |   Int'. "x" !#= R 3
+                      ^^^
+
+Error: While processing right hand side of bad_if_single_branch_taint. Can't find an implementation for IsJust (index (with block in fromInteger 5 3 (integerToFin 3 5) ItIsJust) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just String')) (With regs (FS (FS (FS FZ)), Just Int')))).
+
+Negative:55:18--55:21
+ 51 | bad_if_single_branch_taint : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
+ 52 | bad_if_single_branch_taint = block $ do
+ 53 |   3 %= C 1
+ 54 |   if__ cond (3 %= C "foo") nop
+ 55 |   Int' . "x" !#= R 3
+                       ^^^
+

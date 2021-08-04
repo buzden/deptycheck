@@ -32,3 +32,24 @@ bad_registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `W
 bad_registers_ass = block $ do
   Int'. "x" !#= C 0
   6 %= V "x"
+
+-- Basic if statement tests --
+
+bad_if_access_local : {cond : Expression vars regs Bool'} -> Statement vars regs vars $ regs `Merge` regs
+bad_if_access_local = block $ do
+  if__ cond (Int'. "x" !#= C 1) (Int'. "x" !#= C 2)
+  Int'. "y" !#= V "x"
+
+-- Registers are correctly merged in if clauses --
+
+bad_if_taints_register : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
+bad_if_taints_register = block $ do
+  3 %= C 1
+  if__ cond (3 %= C 2) (3 %= C True)
+  Int'. "x" !#= R 3
+
+bad_if_single_branch_taint : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
+bad_if_single_branch_taint = block $ do
+  3 %= C 1
+  if__ cond (3 %= C "foo") nop
+  Int' . "x" !#= R 3
