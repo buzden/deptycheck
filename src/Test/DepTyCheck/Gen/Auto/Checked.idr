@@ -30,6 +30,6 @@ data ExternalGenAccess = ThruAutoImplicit | ThruHint
 -- TODO maybe to use smth without constructors info instead of `TypeInfo` for the `externalGens` parameter.
 export
 generateGensFor : (ty : TypeInfo) ->
-                  (givenParams : Vect ty.args.length $ Maybe ArgExplicitness) ->
+                  (tyParams : Vect ty.args.length $ Maybe ArgExplicitness) ->
                   (externalGens : List (TypeInfo, ExternalGenAccess)) ->
                   Elab ()
