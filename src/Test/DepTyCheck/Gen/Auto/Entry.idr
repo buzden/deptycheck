@@ -1,138 +1,93 @@
 ||| External generation interface and aux stuff for that
 module Test.DepTyCheck.Gen.Auto.Entry
 
-import public Data.So
+import public Data.Fuel
 
+import public Test.DepTyCheck.Gen -- for `Gen` data type
 import public Test.DepTyCheck.Gen.Auto.Checked
 
 %default total
-
----------------------------------------------------
---- Datatypes needed for the external interface ---
----------------------------------------------------
-
-public export
-data DatatypeArgPointer
-       = Named Name
-       | PositionalExplicit Nat
-
-Show DatatypeArgPointer where
-  show (Named x) = "named argument `\{show x}`"
-  show (PositionalExplicit k) = "explicit argument #\{show k}"
-
-public export
-FromString DatatypeArgPointer where
-  fromString = Named . fromString
-
-namespace DatatypeArgPointer
-
-  public export
-  fromInteger : (x : Integer) -> (0 _ : So (x >= 0)) => DatatypeArgPointer
-  fromInteger x = PositionalExplicit $ integerToNat x
 
 ----------------------------------------
 --- Internal functions and instances ---
 ----------------------------------------
 
-Eq Namespace where
-  (MkNS xs) == (MkNS ys) = xs == ys
-
-Eq Name where -- I'm not sure that this implementation is correct for my case.
-  (UN x)   == (UN y)   = x == y
-  (MN x n) == (MN y m) = x == y && n == m
-  (NS s n) == (NS p m) = s == p && n == m
-  (DN x n) == (DN y m) = x == y && n == m
-  (RF x)   == (RF y)   = x == y
-  _ == _ = False
-
-findNthExplicit : Nat -> (xs : List NamedArg) -> Maybe $ Fin xs.length
-findNthExplicit _     []                              = Nothing
-findNthExplicit Z     (MkArg _ ExplicitArg _ _ :: _ ) = Just FZ
-findNthExplicit (S k) (MkArg _ ExplicitArg _ _ :: xs) = FS <$> findNthExplicit k xs
-findNthExplicit n     (MkArg _ _           _ _ :: xs) = FS <$> findNthExplicit n xs
-
-findArg : {ty : TypeInfo} -> DatatypeArgPointer -> Maybe $ Fin ty.args.length
-findArg (Named n)              = find' ((== n) . name) ty.args
-findArg (PositionalExplicit k) = findNthExplicit k ty.args
-
-Show ArgExplicitness where
-  show ExplicitArg = "explicit"
-  show ImplicitArg = "implicit"
-
-resolveGivens : {ty : TypeInfo} -> ArgExplicitness -> List DatatypeArgPointer -> Elab $ Vect ty.args.length $ Maybe ArgExplicitness
-resolveGivens _ [] = pure $ replicate ty.args.length Nothing
-resolveGivens p (curr::rest) = do
-  let Just pos = findArg curr
-    | Nothing => fail "Could not find \{show curr} of type \{show ty.name} listed in \{show p} givens"
-  existing <- resolveGivens p rest
-  let Nothing = Vect.index pos existing
-    | _ => fail "\{show curr} is listed in \{show p} givens several times"
-  pure $ replaceAt pos (Just p) existing
-
-mergeSignatureDefs : Vect n $ Maybe ArgExplicitness -> Vect n $ Maybe ArgExplicitness -> Either (Fin n) $ Vect n $ Maybe ArgExplicitness
-mergeSignatureDefs [] [] = pure []
-mergeSignatureDefs (x::xs) (y::ys) = [| mergeSingle x y :: mapFst FS (mergeSignatureDefs xs ys) |] where
-  mergeSingle : Maybe ArgExplicitness -> Maybe ArgExplicitness -> Either (Fin n) $ Maybe ArgExplicitness
-  mergeSingle Nothing r = pure r
-  mergeSingle l Nothing = pure l
-  mergeSingle l r = if l == r then pure l else Left FZ
-
--- TODO to return the functionality of showing the multiple errors all at once.
-
-signatureDef : (impl, expl : List DatatypeArgPointer) -> {ty : TypeInfo} -> Elab $ Vect ty.args.length $ Maybe ArgExplicitness
-signatureDef impl expl = do
-  impl' <- resolveGivens ImplicitArg impl
-  expl' <- resolveGivens ExplicitArg expl
-  let Right merged = mergeSignatureDefs impl' expl'
-    | Left badPosition => fail "\{humanReadableArgumentFor badPosition} is listed in both implicit and explicit givens"
-  pure merged
-  where
-    humanReadableArgumentFor : (pos : Fin ty.args.length) -> String
-    humanReadableArgumentFor pos = show $ case index' ty.args pos of
-      MkArg {piInfo=ExplicitArg, name=MN {}, _} => -- machine-generated explicit parameter
-        PositionalExplicit $ length $ filter isExplicit $ take (finToNat pos) ty.args
-      MkArg {name, _} => Named name
+-- This function either fails or not instead of returning some error-containing result.
+-- This is due to technical limitation of the `Elab`'s `check` function.
+-- TODO To think of return type of `TypeInfo` and, maybe, somewhat parsed arguments,
+--      like `Vect ty.args.length $ Maybe ArgExplicitness`, like is was before.
+-- TODO Also, maybe, there is a need in the result of some map from `TypeInfo` (and, maybe, `Vect` like above) to `auto-implicit | hinted`.
+--      Or, at least, the filled generators manager, that remembers what already is generated (and how it is named) and
+--      what is present as external (with auto-implicit or hinted).
+--      In this case, it would be a stateful something.
+checkTypeIsGen : TTImp -> Elab ()
+checkTypeIsGen sig = do
+  _ <- check {expected=Type} sig
+  -- result
+  --   check the resulting type is `Gen`
+  --   check the `Gen`'s parameter is pure type or a dependent pair resulting a pure type
+  --   check that all parts of the dependent pair are the type parameters of the target type
+  --   (not sure, if needed) check that parameters of the target type are open (either a parameter of function or present in the dependent pair)
+  -- arguments
+  --   check all arguments are MW, not M0 or M1
+  --   check the first explicit argument is `Fuel`
+  --   (not sure, if needed) check all `auto` `implicit` external `Gen`'s are before the all other parameters
+  --   (not sure, if needed) check that all arguments are actually used
+  -- externals
+  --   check there are no repetition in the external gens lists, both in auto-implicit and hinted, and also between them
+  --
+  ?checkTypeIsGen_impl
 
 ------------------------------
 --- Functions for the user ---
 ------------------------------
 
-||| The entry-point function of automatic generation of `Gen`'s.
+||| The entry-point function of automatic derivation of `Gen`'s.
 |||
 ||| Consider, you have a `data X (a : A) (b : B n) (c : C) where ...` and
-||| you want an autogenerated `Gen` for `X`.
+||| you want a derived `Gen` for `X`.
 ||| Say, you want to have `a` and `c` parameters of `X` to be set by the caller and the `b` parameter to be generated.
-||| For this you can call `%runElab generateGensFor "X" [] ["a", "c"]` and
-||| you get (besides all) a function with a signature `(a : A) -> (c : C) -> (n ** b : B n ** X a b c)`.
+||| For this your generator function should have a signature like `(a : A) -> (c : C) -> (n ** b : B n ** X a b c)`.
+||| So, you need to define a function with this signature, say, named as `genX` and
+||| to write `genX = deriveGen` as an implementation to make the body to be derived.
 |||
-||| You can use positional arguments adderssing instead of named (espesially for unnamed arguments),
-||| including mix of positional and named ones.
-||| Arguments count from zero and only explicit arguments count.
-||| I.e., the following call is equivalent to the one above: `%runElab generateGensFor "X" ["a", 2]`.
-|||
-||| Say, you want `n` to be set by the caller to.
-||| For this, you can use `%runElab generateGensFor "X" ["n"] ["a", "c"]` and
-||| the signature of the main generated function becomes `{n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)`.
+||| Say, you want `n` to be set by the caller and, as the same time, to be an implicit argument.
+||| In this case, the signature of the main function to be derived,
+||| becomes `{n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)`.
+||| But still, you can use this function `deriveGen` to derive a function with such signature.
 |||
 ||| Say, you want your generator to be parameterized with some external `Gen`'s.
 ||| Some of these `Gen`'s are known declared `%hint x : Gen Y`, some of them should go as an `auto` parameters.
 ||| Consider types `data Y where ...`, `data Z1 where ...` and `data Z2 (b : B n) where ...`.
-||| If you want to use `%hint` for `Gen Y` and `Gen`'s for `Z1` and `Z2` to be `auto` parameters, you can use
-||| `%runElab generateGensFor "X" ["n"] ["a", "c"] {externalImplicitGens=["Z1", "Z2"]} {externalHintedGens=["Y"]}`
-||| to have a function with a signature
-||| `Gen Z1 => ({n : _} -> {b : B n} -> Gen (Z2 b)) => {n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)`.
+||| For this, `auto`-parameters can be listed with `=>`-syntax in the signature.
+||| External generators declared with `%hint` need to be listed separately in the implicit argument of `deriveGen`.
+|||
+||| For example, if you want to use `%hint` for `Gen Y` and `Gen`'s for `Z1` and `Z2` to be `auto` parameters,
+||| you can define your function in the following way:
+|||
+|||   ```idris
+|||   genX : Gen Z1 => ({n : _} -> {b : B n} -> Gen (Z2 b)) => {n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)
+|||   genX = deriveGen { externalHintedGens = [ `(Gen Y) ] }
+|||   ```
+|||
 ||| `%hint _ : Gen Y` from the current scope will be used as soon as a value of type `Y` will be needed for generation.
-export
-generateGensFor : Name ->
-                  (givenImplicitParams : List DatatypeArgPointer) ->
-                  (givenExplicitParams : List DatatypeArgPointer) ->
-                  {default [] externalAutoImplicitGens : List Name} ->
-                  {default [] externalHintedGens : List Name} ->
-                  Elab ()
-generateGensFor n defImpl defExpl = do
-  let [] = intersect externalAutoImplicitGens externalHintedGens
-    | common => fail "External generators lists have non-empty intersection: \{show common}"
-  extAutoImplResolved <- map (, ThruAutoImplicit) <$> for externalAutoImplicitGens getInfo'
-  extHintResolved     <- map (, ThruHint)         <$> for externalHintedGens       getInfo'
-  let extResolved = extAutoImplResolved ++ extHintResolved
-  generateGensFor !(getInfo' n) !(signatureDef defImpl defExpl) extResolved
+|||
+||| Consider another example, where all generators for `Y`, `Z1` and `Z2` are means to be defined with `%hint`.
+||| In this case, you are meant to declare it in the following way:
+|||
+|||   ```idris
+|||   genX : {n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)
+|||   genX = deriveGen { externalHintedGens = [ `(Gen Z1), `({n : _} -> {b : B n} -> Gen (Z2 b)), `(Gen Y) ] }
+|||   ```
+|||
+||| Consider also, that you may be asked for having the `Fuel` argument as the first argument in the signature
+||| due to (maybe, temporary) unability of `Gen`'s to manage infinite processes of values generation.
+|||
+export %macro
+deriveGen : {default [] externalHintedGens : List TTImp} -> Elab a
+deriveGen = do
+  Just signature <- goal
+     | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
+  checkTypeIsGen signature
+  for_ externalHintedGens checkTypeIsGen
+  ?deriveGen_foo

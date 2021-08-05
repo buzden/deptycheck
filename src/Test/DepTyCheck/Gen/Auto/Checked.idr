@@ -20,16 +20,6 @@ Eq ArgExplicitness where
   ImplicitArg == ImplicitArg = True
   _ == _ = False
 
-public export
-data ExternalGenAccess = ThruAutoImplicit | ThruHint
-
 ------------------------------------------
 --- The entry-point generator function ---
 ------------------------------------------
-
--- TODO maybe to use smth without constructors info instead of `TypeInfo` for the `externalGens` parameter.
-export
-generateGensFor : (ty : TypeInfo) ->
-                  (tyParams : Vect ty.args.length $ Maybe ArgExplicitness) ->
-                  (externalGens : List (TypeInfo, ExternalGenAccess)) ->
-                  Elab ()
