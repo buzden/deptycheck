@@ -62,6 +62,12 @@ registers_ass = block $ do
   Int'. "x" !#= C 0
   3 %= V "x"
 
+registers_multiple_ass : {0 regs : Registers 5} -> Statement vars regs vars $ ((regs `With` (3, Just Bool')) `With` (3, Just Int')) `With` (3, Just String')
+registers_multiple_ass = do
+  3 %= C False
+  3 %= C 42
+  3 %= C "foo"
+
 -- Basic if tests
 
 if_local_vars : {cond : Expression (("x", Int')::vars) regs Bool'} -> Statement vars regs vars $ regs `Merge` regs

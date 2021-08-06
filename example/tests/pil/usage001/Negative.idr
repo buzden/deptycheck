@@ -5,6 +5,30 @@ import Example.Pil.Lang
 import Common
 import Positive -- this import insures that negative tests would compile after positive
 
+-- Simple tests --
+
+bad_ass_no_var : Statement vars regs vars regs
+bad_ass_no_var = do
+  "x" #= C 42
+
+bad_ass_type_mismatch : Statement vars regs (("x", Int')::vars) regs
+bad_ass_type_mismatch = do
+  Int'. "x"
+  "x" #= C "foo"
+
+bad_ass_var_to_var_type_mismatch : Statement vars regs (("y", Bool')::("x", Int')::vars) regs
+bad_ass_var_to_var_type_mismatch = do
+  Int'. "x"
+  "x" #= C 42
+  Bool'. "y"
+  "y" #= V "x"
+
+bad_block_local_vars : Statement vars regs vars regs
+bad_block_local_vars = do
+  block $ do
+    Int'. "x"
+  "x" #= C 1
+
 --- Example statements ---
 
 bad_for : Statement vars regs vars regs
