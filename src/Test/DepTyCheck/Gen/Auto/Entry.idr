@@ -8,9 +8,21 @@ import public Test.DepTyCheck.Gen.Auto.Checked
 
 %default total
 
+-----------------------------------------
+--- Utility `TTImp`-parsing functions ---
+-----------------------------------------
+
+unDPair : TTImp -> (List (Count, PiInfo TTImp, Maybe Name, TTImp), TTImp)
+unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo mbname _ lamTy)) =
+    mapFst ((cnt, piInfo, mbname, typ)::) $ unDPair lamTy
+unDPair expr = ([], expr)
+
 ----------------------------------------
 --- Internal functions and instances ---
 ----------------------------------------
+
+Show TTImp where
+  show expr = show $ assert_total {- WTF?? Why do I need it here? -} $ pretty {ann=Unit} expr
 
 -- This function either fails or not instead of returning some error-containing result.
 -- This is due to technical limitation of the `Elab`'s `check` function.
@@ -22,7 +34,53 @@ import public Test.DepTyCheck.Gen.Auto.Checked
 --      In this case, it would be a stateful something.
 checkTypeIsGen : TTImp -> Elab ()
 checkTypeIsGen sig = do
+  -- check the given expression is a type
   _ <- check {expected=Type} sig
+
+  -- treat the given type expression as a (possibly 0-ary) function type
+  let (genFunArgs, genFunResult) = unPi sig
+
+--  logMsg "gen.derive" 0 $ "goal's result:\n- \{show genFunResult}"
+
+  -- check the resulting type is `Gen`
+  let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) generatedType = genFunResult
+    | _ => fail "The result type must be a `deptycheck`'s `Gen` applied to a type"
+
+  -- check and treat the generated type as a dependent pair
+  let (targetTypeParams, targetType) = unDPair generatedType
+
+  generatedParams <- for targetTypeParams \case
+    (MW, ExplicitArg, Just nm, t) => pure (nm, t)
+    (_,  _,           Nothing, _) => fail "All arguments of dependent pair under the resulting `Gen` are expected to be named"
+    _                             => fail "Bad lambda argument of RHS of dependent pair under the resulting `Gen`, it must be `MW` and explicit"
+
+--  logMsg "gen.derive" 0 $ "generated params:\n- \{show generatedParams}"
+--  logMsg "gen.derive" 0 $ "target type:\n- \{show targetType}"
+
+  -- treat the target type as a function application and check it's applied to some name
+  let (IVar _ targetTypeName, targetTypeArgs) = unApp targetType
+    | _ => fail "Target type is not a simple name: \{show targetType}"
+
+  -- check that desired `Gen` is not a generator of `Gen`s
+  case targetTypeName of
+    `{Test.DepTyCheck.Gen.Gen} => fail "Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`"
+    _ => pure ()
+
+  -- check we can analyze the target type itself
+  targetTypeInfo <- getInfo' targetTypeName
+
+  -- check that there are at least non-zero constructors
+  let (_::_) = targetTypeInfo.cons
+    | [] => fail "No constructors found for the type `\{show targetTypeName}`"
+
+  -- check all the arguments of the target type are variable names, not complex expressions
+  targetTypeArgNames <- for targetTypeArgs \case
+    IVar _ argName => pure argName
+    nonVarArg => fail "All arguments of the resulting `\{show targetTypeName}` are expected to be variable names, but `\{show nonVarArg}` is not"
+
+  -- TODO to check whether all target type's argument names are present either in the function's arguments or in the resulting generated depedent pair.
+
+  ?checkTypeIsGen_impl
   -- result
   --   check the resulting type is `Gen`
   --   check the `Gen`'s parameter is pure type or a dependent pair resulting a pure type
@@ -36,7 +94,6 @@ checkTypeIsGen sig = do
   -- externals
   --   check there are no repetition in the external gens lists, both in auto-implicit and hinted, and also between them
   --
-  ?checkTypeIsGen_impl
 
 ------------------------------
 --- Functions for the user ---
