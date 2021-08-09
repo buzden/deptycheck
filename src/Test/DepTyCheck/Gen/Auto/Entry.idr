@@ -9,20 +9,24 @@ import public Test.DepTyCheck.Gen.Auto.Checked
 %default total
 
 -----------------------------------------
---- Utility `TTImp`-parsing functions ---
+--- Utility `TTImp`-related functions ---
 -----------------------------------------
+
+--- Parsing `TTImp` stuff ---
 
 unDPair : TTImp -> (List (Count, PiInfo TTImp, Maybe Name, TTImp), TTImp)
 unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo mbname _ lamTy)) =
     mapFst ((cnt, piInfo, mbname, typ)::) $ unDPair lamTy
 unDPair expr = ([], expr)
 
-----------------------------------------
---- Internal functions and instances ---
-----------------------------------------
+--- Pretty-printing ---
 
 Show TTImp where
   show expr = show $ assert_total {- WTF?? Why do I need it here? -} $ pretty {ann=Unit} expr
+
+----------------------------------------
+--- Internal functions and instances ---
+----------------------------------------
 
 -- This function either fails or not instead of returning some error-containing result.
 -- This is due to technical limitation of the `Elab`'s `check` function.
