@@ -3,6 +3,8 @@ module Test.DepTyCheck.Gen.Auto.Entry
 
 import public Data.Fuel
 
+import Decidable.Equality
+
 import public Test.DepTyCheck.Gen -- for `Gen` data type
 import public Test.DepTyCheck.Gen.Auto.Checked
 
@@ -28,7 +30,7 @@ Show TTImp where
 --- Internal functions and instances ---
 ----------------------------------------
 
-analyzeSigResult : TTImp -> Elab (List (Name, TTImp), TypeInfo, List Name)
+analyzeSigResult : TTImp -> Elab (List (Name, TTImp), (ty : TypeInfo ** Vect ty.args.length Name))
 analyzeSigResult sigResult = do
   -- check the resulting type is `Gen`
   let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) targetType = sigResult
@@ -59,12 +61,19 @@ analyzeSigResult sigResult = do
   let (_::_) = targetType.cons
     | [] => fail "No constructors found for the type `\{show targetType.name}`"
 
+  -- check the given type info corresponds to the given type application
+  let Yes lengthsCorrect = targetType.args.length `decEq` targetTypeArgs.length
+    | No _ => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
+
+  -- convert a `List` to an appropriate `Vect`
+  let targetTypeArgs : Vect targetType.args.length TTImp := rewrite lengthsCorrect in fromList targetTypeArgs
+
   -- check all the arguments of the target type are variable names, not complex expressions
   targetTypeArgs <- for targetTypeArgs \case
     IVar _ argName => pure argName
     nonVarArg => fail "All arguments of the resulting `\{show targetType.name}` are expected to be variable names, but `\{show nonVarArg}` is not"
 
-  pure (paramsToBeGenerated, targetType, targetTypeArgs)
+  pure (paramsToBeGenerated, (targetType ** targetTypeArgs))
 
 -- This function either fails or not instead of returning some error-containing result.
 -- This is due to technical limitation of the `Elab`'s `check` function.
@@ -85,7 +94,7 @@ checkTypeIsGen sig = do
 --  logMsg "gen.derive" 0 $ "goal's result:\n- \{show sigResult}"
 
   -- check and parse the resulting part of the generator function's signature
-  (paramsToBeGenerated, targetType, targetTypeArgs) <- analyzeSigResult sigResult
+  (paramsToBeGenerated, (targetType ** targetTypeArgs)) <- analyzeSigResult sigResult
 
   -- TODO to check whether all target type's argument names are present either in the function's arguments or in the resulting generated depedent pair.
 
