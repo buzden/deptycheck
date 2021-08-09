@@ -1,6 +1,7 @@
 ||| External generation interface and aux stuff for that
 module Test.DepTyCheck.Gen.Auto.Entry
 
+import Data.Either
 import public Data.Fuel
 
 import Decidable.Equality
@@ -96,9 +97,25 @@ checkTypeIsGen sig = do
   -- check and parse the resulting part of the generator function's signature
   (paramsToBeGenerated, (targetType ** targetTypeArgs)) <- analyzeSigResult sigResult
 
+  -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
+  let notSupported : Maybe Name -> (cntType : String) -> String
+      notSupported name cntType = "\{cntType} arguments are not supported in generator signatures, "
+                               ++ maybe "an unnamed one" (\name => "`\{show name}`") name ++ " is such"
+  (givenParams, autoImplArgs) <- partitionEithers <$> for sigArgs \case
+    MkArg M0 _               name _     => fail $ notSupported name "Erased"
+    MkArg M1 _               name _     => fail $ notSupported name "Linear"
+    MkArg MW (DefImplicit _) name _     => fail $ notSupported name "Default implicit"
+    MkArg MW ImplicitArg Nothing _      => fail "All implicit arguments are expected to be named"
+    MkArg MW ExplicitArg Nothing _      => fail "All explicit arguments are expected to be named"
+    MkArg MW AutoImplicit (Just name) _ => fail "Named auto-implicit parameters are not expected, in particular `\{show name}`"
+    MkArg MW ImplicitArg (Just name) type => pure $ Left (Checked.ImplicitArg, name, type)
+    MkArg MW ExplicitArg (Just name) type => pure $ Left (Checked.ExplicitArg, name, type)
+    MkArg MW AutoImplicit Nothing type    => pure $ Right type
+
   -- TODO to check whether all target type's argument names are present either in the function's arguments or in the resulting generated depedent pair.
 
   ?checkTypeIsGen_impl
+
   -- result
   --   check the resulting type is `Gen`
   --   check the `Gen`'s parameter is pure type or a dependent pair resulting a pure type
