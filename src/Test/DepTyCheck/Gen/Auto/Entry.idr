@@ -29,9 +29,9 @@ Show TTImp where
 ----------------------------------------
 
 analyzeSigResult : TTImp -> Elab (List (Name, TTImp), TypeInfo, List Name)
-analyzeSigResult genSigResult = do
+analyzeSigResult sigResult = do
   -- check the resulting type is `Gen`
-  let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) targetType = genSigResult
+  let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) targetType = sigResult
     | _ => fail "The result type must be a `deptycheck`'s `Gen` applied to a type"
 
   -- treat the generated type as a dependent pair
@@ -80,12 +80,12 @@ checkTypeIsGen sig = do
   _ <- check {expected=Type} sig
 
   -- treat the given type expression as a (possibly 0-ary) function type
-  let (genSigArgs, genSigResult) = unPi sig
+  let (sigArgs, sigResult) = unPi sig
 
---  logMsg "gen.derive" 0 $ "goal's result:\n- \{show genSigResult}"
+--  logMsg "gen.derive" 0 $ "goal's result:\n- \{show sigResult}"
 
   -- check and parse the resulting part of the generator function's signature
-  (paramsToBeGenerated, targetType, targetTypeArgs) <- analyzeSigResult genSigResult
+  (paramsToBeGenerated, targetType, targetTypeArgs) <- analyzeSigResult sigResult
 
   -- TODO to check whether all target type's argument names are present either in the function's arguments or in the resulting generated depedent pair.
 
