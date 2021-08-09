@@ -28,24 +28,8 @@ Show TTImp where
 --- Internal functions and instances ---
 ----------------------------------------
 
--- This function either fails or not instead of returning some error-containing result.
--- This is due to technical limitation of the `Elab`'s `check` function.
--- TODO To think of return type of `TypeInfo` and, maybe, somewhat parsed arguments,
---      like `Vect ty.args.length $ Maybe ArgExplicitness`, like is was before.
--- TODO Also, maybe, there is a need in the result of some map from `TypeInfo` (and, maybe, `Vect` like above) to `auto-implicit | hinted`.
---      Or, at least, the filled generators manager, that remembers what already is generated (and how it is named) and
---      what is present as external (with auto-implicit or hinted).
---      In this case, it would be a stateful something.
-checkTypeIsGen : TTImp -> Elab ()
-checkTypeIsGen sig = do
-  -- check the given expression is a type
-  _ <- check {expected=Type} sig
-
-  -- treat the given type expression as a (possibly 0-ary) function type
-  let (genSigArgs, genSigResult) = unPi sig
-
---  logMsg "gen.derive" 0 $ "goal's result:\n- \{show genSigResult}"
-
+analyzeSigResult : TTImp -> Elab (List (Name, TTImp), TypeInfo, List Name)
+analyzeSigResult genSigResult = do
   -- check the resulting type is `Gen`
   let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) targetType = genSigResult
     | _ => fail "The result type must be a `deptycheck`'s `Gen` applied to a type"
@@ -79,6 +63,29 @@ checkTypeIsGen sig = do
   targetTypeArgs <- for targetTypeArgs \case
     IVar _ argName => pure argName
     nonVarArg => fail "All arguments of the resulting `\{show targetType.name}` are expected to be variable names, but `\{show nonVarArg}` is not"
+
+  pure (paramsToBeGenerated, targetType, targetTypeArgs)
+
+-- This function either fails or not instead of returning some error-containing result.
+-- This is due to technical limitation of the `Elab`'s `check` function.
+-- TODO To think of return type of `TypeInfo` and, maybe, somewhat parsed arguments,
+--      like `Vect ty.args.length $ Maybe ArgExplicitness`, like is was before.
+-- TODO Also, maybe, there is a need in the result of some map from `TypeInfo` (and, maybe, `Vect` like above) to `auto-implicit | hinted`.
+--      Or, at least, the filled generators manager, that remembers what already is generated (and how it is named) and
+--      what is present as external (with auto-implicit or hinted).
+--      In this case, it would be a stateful something.
+checkTypeIsGen : TTImp -> Elab ()
+checkTypeIsGen sig = do
+  -- check the given expression is a type
+  _ <- check {expected=Type} sig
+
+  -- treat the given type expression as a (possibly 0-ary) function type
+  let (genSigArgs, genSigResult) = unPi sig
+
+--  logMsg "gen.derive" 0 $ "goal's result:\n- \{show genSigResult}"
+
+  -- check and parse the resulting part of the generator function's signature
+  (paramsToBeGenerated, targetType, targetTypeArgs) <- analyzeSigResult genSigResult
 
   -- TODO to check whether all target type's argument names are present either in the function's arguments or in the resulting generated depedent pair.
 
