@@ -38,45 +38,43 @@ checkTypeIsGen sig = do
   _ <- check {expected=Type} sig
 
   -- treat the given type expression as a (possibly 0-ary) function type
-  let (genFunArgs, genFunResult) = unPi sig
+  let (genSigArgs, genSigResult) = unPi sig
 
---  logMsg "gen.derive" 0 $ "goal's result:\n- \{show genFunResult}"
+--  logMsg "gen.derive" 0 $ "goal's result:\n- \{show genSigResult}"
 
   -- check the resulting type is `Gen`
-  let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) generatedType = genFunResult
+  let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) targetType = genSigResult
     | _ => fail "The result type must be a `deptycheck`'s `Gen` applied to a type"
 
-  -- check and treat the generated type as a dependent pair
-  let (targetTypeParams, targetType) = unDPair generatedType
+  -- treat the generated type as a dependent pair
+  let (paramsToBeGenerated, targetType) = unDPair targetType
 
-  generatedParams <- for targetTypeParams \case
+  -- check that all parameters of `DPair` are as expected
+  paramsToBeGenerated <- for paramsToBeGenerated \case
     (MW, ExplicitArg, Just nm, t) => pure (nm, t)
     (_,  _,           Nothing, _) => fail "All arguments of dependent pair under the resulting `Gen` are expected to be named"
     _                             => fail "Bad lambda argument of RHS of dependent pair under the resulting `Gen`, it must be `MW` and explicit"
 
---  logMsg "gen.derive" 0 $ "generated params:\n- \{show generatedParams}"
---  logMsg "gen.derive" 0 $ "target type:\n- \{show targetType}"
-
   -- treat the target type as a function application and check it's applied to some name
-  let (IVar _ targetTypeName, targetTypeArgs) = unApp targetType
+  let (IVar _ targetType, targetTypeArgs) = unApp targetType
     | _ => fail "Target type is not a simple name: \{show targetType}"
 
   -- check that desired `Gen` is not a generator of `Gen`s
-  case targetTypeName of
+  case targetType of
     `{Test.DepTyCheck.Gen.Gen} => fail "Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`"
     _ => pure ()
 
   -- check we can analyze the target type itself
-  targetTypeInfo <- getInfo' targetTypeName
+  targetType <- getInfo' targetType
 
   -- check that there are at least non-zero constructors
-  let (_::_) = targetTypeInfo.cons
-    | [] => fail "No constructors found for the type `\{show targetTypeName}`"
+  let (_::_) = targetType.cons
+    | [] => fail "No constructors found for the type `\{show targetType.name}`"
 
   -- check all the arguments of the target type are variable names, not complex expressions
-  targetTypeArgNames <- for targetTypeArgs \case
+  targetTypeArgs <- for targetTypeArgs \case
     IVar _ argName => pure argName
-    nonVarArg => fail "All arguments of the resulting `\{show targetTypeName}` are expected to be variable names, but `\{show nonVarArg}` is not"
+    nonVarArg => fail "All arguments of the resulting `\{show targetType.name}` are expected to be variable names, but `\{show nonVarArg}` is not"
 
   -- TODO to check whether all target type's argument names are present either in the function's arguments or in the resulting generated depedent pair.
 
