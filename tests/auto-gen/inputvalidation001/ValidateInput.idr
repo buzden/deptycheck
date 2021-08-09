@@ -56,7 +56,7 @@ genY_missplFuel_aft_autoimpl = deriveGen
 
 --- Unrelated stuff in the resulting dpair ---
 
-genY_with_unrelated : Fuel -> (a : Type) -> (b : Type ** n : Nat ** Y a b)
+genY_with_unrelated : Fuel -> (a : Type) -> Gen (b : Type ** n : Nat ** Y a b)
 genY_with_unrelated = deriveGen
 
 --- Gen of strange things ---
