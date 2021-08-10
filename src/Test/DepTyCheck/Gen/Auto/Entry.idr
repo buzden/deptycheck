@@ -49,7 +49,7 @@ analyzeSigResult sigResult = do
   let (paramsToBeGenerated, targetType) = unDPair targetType
 
   -- check that all parameters of `DPair` are as expected
-  paramsToBeGenerated <- for paramsToBeGenerated \case
+  paramsToBeGenerated <- for paramsToBeGenerated $ \case
     (MW, ExplicitArg, Just nm, t) => pure (nm, t)
     (_,  _,           Nothing, _) => fail "All arguments of dependent pair under the resulting `Gen` are expected to be named"
     _                             => fail "Bad lambda argument of RHS of dependent pair under the resulting `Gen`, it must be `MW` and explicit"
@@ -75,7 +75,7 @@ analyzeSigResult sigResult = do
     | Nothing => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
 
   -- check all the arguments of the target type are variable names, not complex expressions
-  targetTypeArgs <- for targetTypeArgs \case
+  targetTypeArgs <- for targetTypeArgs $ \case
     IVar _ argName => pure argName
     nonVarArg => fail "All arguments of the resulting `\{show targetType.name}` are expected to be variable names, but `\{show nonVarArg}` is not"
 
@@ -106,7 +106,7 @@ checkTypeIsGen sig = do
   let notSupported : Maybe Name -> (cntType : String) -> String
       notSupported name cntType = "\{cntType} arguments are not supported in generator signatures, "
                                ++ maybe "an unnamed one" (\name => "`\{show name}`") name ++ " is such"
-  sigArgs <- for {b = Either _ TTImp} sigArgs \case
+  sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
     MkArg M0 _               name    _  => fail $ notSupported name "Erased"
     MkArg M1 _               name    _  => fail $ notSupported name "Linear"
     MkArg MW (DefImplicit _) name    _  => fail $ notSupported name "Default implicit"

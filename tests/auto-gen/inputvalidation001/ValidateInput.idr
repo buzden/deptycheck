@@ -82,13 +82,13 @@ genOfFuns_pur0s = deriveGen
 genOfFuns_pur1s : Fuel -> Gen $ (1 a : Type) -> (1 b : Type) -> Y a b
 genOfFuns_pur1s = deriveGen
 
-genOfFuns_ins_pair : Fuel -> Gen $ (a ** (b : Type) -> Y a b)
+genOfFuns_ins_pair : Fuel -> Gen (a ** ((b : Type) -> Y a b))
 genOfFuns_ins_pair = deriveGen
 
-genOfFuns_ins_pair0 : Fuel -> Gen $ (a ** (0 b : Type) -> Y a b)
+genOfFuns_ins_pair0 : Fuel -> Gen (a ** ((0 b : Type) -> Y a b))
 genOfFuns_ins_pair0 = deriveGen
 
-genOfFuns_ins_pair1 : Fuel -> Gen $ (a ** (1 b : Type) -> Y a b)
+genOfFuns_ins_pair1 : Fuel -> Gen (a ** ((1 b : Type) -> Y a b))
 genOfFuns_ins_pair1 = deriveGen
 
 genOfFuns_out_pair : Fuel -> Gen $ (b : Type) -> (a ** Y a b)
