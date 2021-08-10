@@ -11,6 +11,19 @@ import public Test.DepTyCheck.Gen.Auto.Checked
 
 %default total
 
+-------------------------
+--- Utility functions ---
+-------------------------
+
+listToVectExact : (n : Nat) -> List a -> Maybe $ Vect n a
+listToVectExact n xs = do
+  -- check the given type info corresponds to the given type application
+  let Yes lengthsCorrect = n `decEq` xs.length
+    | No _ => Nothing
+
+  -- convert a `List` to an appropriate `Vect`
+  pure $ rewrite lengthsCorrect in fromList xs
+
 -----------------------------------------
 --- Utility `TTImp`-related functions ---
 -----------------------------------------
@@ -62,12 +75,9 @@ analyzeSigResult sigResult = do
   let (_::_) = targetType.cons
     | [] => fail "No constructors found for the type `\{show targetType.name}`"
 
-  -- check the given type info corresponds to the given type application
-  let Yes lengthsCorrect = targetType.args.length `decEq` targetTypeArgs.length
-    | No _ => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
-
-  -- convert a `List` to an appropriate `Vect`
-  let targetTypeArgs : Vect targetType.args.length TTImp := rewrite lengthsCorrect in fromList targetTypeArgs
+  -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
+  let Just targetTypeArgs = listToVectExact targetType.args.length targetTypeArgs
+    | Nothing => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
 
   -- check all the arguments of the target type are variable names, not complex expressions
   targetTypeArgs <- for targetTypeArgs \case
