@@ -107,15 +107,16 @@ checkTypeIsGen sig = do
       notSupported name cntType = "\{cntType} arguments are not supported in generator signatures, "
                                ++ maybe "an unnamed one" (\name => "`\{show name}`") name ++ " is such"
   (givenParams, autoImplArgs) <- partitionEithers <$> for sigArgs \case
-    MkArg M0 _               name _     => fail $ notSupported name "Erased"
-    MkArg M1 _               name _     => fail $ notSupported name "Linear"
-    MkArg MW (DefImplicit _) name _     => fail $ notSupported name "Default implicit"
-    MkArg MW ImplicitArg Nothing _      => fail "All implicit arguments are expected to be named"
-    MkArg MW ExplicitArg Nothing _      => fail "All explicit arguments are expected to be named"
+    MkArg M0 _               name    _  => fail $ notSupported name "Erased"
+    MkArg M1 _               name    _  => fail $ notSupported name "Linear"
+    MkArg MW (DefImplicit _) name    _  => fail $ notSupported name "Default implicit"
+    MkArg MW ImplicitArg     Nothing _  => fail "All implicit arguments are expected to be named"
+    MkArg MW ExplicitArg     Nothing _  => fail "All explicit arguments are expected to be named"
+    -- TODO the `Fuel` argument is treated incorrectly
     MkArg MW AutoImplicit (Just name) _ => fail "Named auto-implicit parameters are not expected, in particular `\{show name}`"
     MkArg MW ImplicitArg (Just name) type => pure $ Left (Checked.ImplicitArg, name, type)
     MkArg MW ExplicitArg (Just name) type => pure $ Left (Checked.ExplicitArg, name, type)
-    MkArg MW AutoImplicit Nothing type    => pure $ Right type
+    MkArg MW AutoImplicit Nothing    type => pure $ Right type
 
   -- TODO to check whether all target type's argument names are present either in the function's arguments or in the resulting generated depedent pair.
 
