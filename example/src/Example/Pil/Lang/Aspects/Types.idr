@@ -21,11 +21,11 @@ DecEq Type' where
   decEq Int'    Int'    = Yes Refl
   decEq String' String' = Yes Refl
 
-  decEq Bool'   Int'    = No \case Refl impossible
-  decEq Bool'   String' = No \case Refl impossible
+  decEq Bool'   Int'    = No $ \case Refl impossible
+  decEq Bool'   String' = No $ \case Refl impossible
 
-  decEq Int'    Bool'   = No \case Refl impossible
-  decEq Int'    String' = No \case Refl impossible
+  decEq Int'    Bool'   = No $ \case Refl impossible
+  decEq Int'    String' = No $ \case Refl impossible
 
-  decEq String' Bool'   = No \case Refl impossible
-  decEq String' Int'    = No \case Refl impossible
+  decEq String' Bool'   = No $ \case Refl impossible
+  decEq String' Int'    = No $ \case Refl impossible

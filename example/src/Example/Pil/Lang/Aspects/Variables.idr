@@ -27,7 +27,7 @@ export
 DecEq Name where
   decEq (MkName n) (MkName m) = case decEq n m of
     Yes Refl => Yes Refl
-    No co => No \case Refl => co Refl
+    No co => No $ \case Refl => co Refl
 
 --- Main description of defined variables ---
 

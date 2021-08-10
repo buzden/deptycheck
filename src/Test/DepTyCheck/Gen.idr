@@ -31,7 +31,7 @@ Seed = StdGen
 
 public export
 HavingTrue : (a : Type) -> (a -> Bool) -> Type
-HavingTrue a p = Subset a \x => p x = True
+HavingTrue a p = Subset a $ \x => p x = True
 
 -------------------------------
 --- Definition of the `Gen` ---
@@ -66,7 +66,7 @@ shiftRandomly xs with (xs.length) proof prf
 
 traverseSt : RandomGen g => LazyList (State g a) -> State g (LazyList a)
 traverseSt []      = pure []
-traverseSt (x::xs) = ST \s =>
+traverseSt (x::xs) = ST $ \s =>
   let ((s1, s2), xx) = mapFst split $ runState s x in
   Id (s1, xx :: evalState s2 (traverseSt xs))
 
@@ -194,7 +194,7 @@ suchThat_dec g f = mapMaybe d g where
 
 ||| Filters the given generator so, that resulting values `x` are solutions of equation `y = f x` for given `f` and `y`.
 export
-suchThat_invertedEq : DecEq b => Gen a -> (y : b) -> (f : a -> b) -> Gen $ Subset a \x => y = f x
+suchThat_invertedEq : DecEq b => Gen a -> (y : b) -> (f : a -> b) -> Gen $ Subset a $ \x => y = f x
 suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
 
 -- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.

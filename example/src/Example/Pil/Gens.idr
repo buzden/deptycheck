@@ -39,7 +39,7 @@ lookupGen vars = uniform $ fromList $ mapLk vars where
 export
 varExprGen : {a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen $ Expression vars regs a
 varExprGen = do Element (n ** _) prf <- lookupGen vars `suchThat_invertedEq` a $ \(_ ** lk) => reveal lk
-                pure rewrite prf in V n
+                pure $ rewrite prf in V n
 
 ||| Generator of non-recursive expressions (thus those that can be used with zero recursion bound).
 nonRec_exprGen : {a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen (idrTypeOf a) -> Gen $ Expression vars regs a
