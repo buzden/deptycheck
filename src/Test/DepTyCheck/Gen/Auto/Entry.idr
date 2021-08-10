@@ -106,7 +106,7 @@ checkTypeIsGen sig = do
   let notSupported : Maybe Name -> (cntType : String) -> String
       notSupported name cntType = "\{cntType} arguments are not supported in generator signatures, "
                                ++ maybe "an unnamed one" (\name => "`\{show name}`") name ++ " is such"
-  (givenParams, autoImplArgs) <- partitionEithers <$> for sigArgs \case
+  sigArgs <- for {b = Either _ TTImp} sigArgs \case
     MkArg M0 _               name    _  => fail $ notSupported name "Erased"
     MkArg M1 _               name    _  => fail $ notSupported name "Linear"
     MkArg MW (DefImplicit _) name    _  => fail $ notSupported name "Default implicit"
@@ -117,6 +117,7 @@ checkTypeIsGen sig = do
     MkArg MW ImplicitArg (Just name) type => pure $ Left (Checked.ImplicitArg, name, type)
     MkArg MW ExplicitArg (Just name) type => pure $ Left (Checked.ExplicitArg, name, type)
     MkArg MW AutoImplicit Nothing    type => pure $ Right type
+  let (givenParams, autoImplArgs) = (lefts sigArgs, rights sigArgs) -- `partitionEithers sigArgs` does not reduce here somewhy :-(
 
   -- TODO to check whether all target type's argument names are present either in the function's arguments or in the resulting generated depedent pair.
 
