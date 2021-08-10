@@ -4,8 +4,6 @@ module Test.DepTyCheck.Gen.Auto.Entry
 import Data.Either
 import public Data.Fuel
 
-import Decidable.Equality
-
 import public Test.DepTyCheck.Gen -- for `Gen` data type
 import public Test.DepTyCheck.Gen.Auto.Checked
 
@@ -16,13 +14,10 @@ import public Test.DepTyCheck.Gen.Auto.Checked
 -------------------------
 
 listToVectExact : (n : Nat) -> List a -> Maybe $ Vect n a
-listToVectExact n xs = do
-  -- check the given type info corresponds to the given type application
-  let Yes lengthsCorrect = n `decEq` xs.length
-    | No _ => Nothing
-
-  -- convert a `List` to an appropriate `Vect`
-  pure $ rewrite lengthsCorrect in fromList xs
+listToVectExact Z     []      = Just []
+listToVectExact (S k) (x::xs) = (x ::) <$> listToVectExact k xs
+listToVectExact Z     (_::_)  = Nothing
+listToVectExact (S k) []      = Nothing
 
 -----------------------------------------
 --- Utility `TTImp`-related functions ---
