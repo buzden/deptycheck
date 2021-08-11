@@ -4,6 +4,8 @@ module Test.DepTyCheck.Gen.Auto.Entry
 import Data.Either
 import public Data.Fuel
 
+import public Debug.Reflection
+
 import public Test.DepTyCheck.Gen -- for `Gen` data type
 import public Test.DepTyCheck.Gen.Auto.Checked
 
@@ -29,12 +31,6 @@ unDPair : TTImp -> (List (Count, PiInfo TTImp, Maybe Name, TTImp), TTImp)
 unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo mbname _ lamTy)) =
     mapFst ((cnt, piInfo, mbname, typ)::) $ unDPair lamTy
 unDPair expr = ([], expr)
-
---- Pretty-printing ---
-
--- Useful only for debugging purposes
---Show TTImp where
---  show expr = show $ assert_total {- WTF?? Why do I need it here? -} $ pretty {ann=Unit} expr
 
 ----------------------------------------
 --- Internal functions and instances ---
