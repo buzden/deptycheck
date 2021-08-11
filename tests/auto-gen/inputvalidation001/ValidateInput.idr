@@ -51,8 +51,11 @@ genY_missplFuel_aft = deriveGen
 genY_missplFuel_mid : (a : Type) -> Fuel -> (b : Type) -> Gen $ Y a b
 genY_missplFuel_mid = deriveGen
 
-genY_missplFuel_aft_autoimpl : Gen X => Fuel -> (a, b : Type) -> Gen $ Y a b
-genY_missplFuel_aft_autoimpl = deriveGen
+--genY_missplFuel_aft_autoimpl : Gen X => Fuel -> (a, b : Type) -> Gen $ Y a b
+--genY_missplFuel_aft_autoimpl = deriveGen
+-- This test is commented out because the first auto-implicit argument `Gen X` does not
+-- go into a type of `deriveGen`. Moreover, for now, it is impossible to manage with it,
+-- because even explicit setting type argument of `deriveGen` makes two signatures incompatible.
 
 --- Misplaced + implicit fuel argument ---
 
