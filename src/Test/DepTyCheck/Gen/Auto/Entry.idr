@@ -102,6 +102,9 @@ checkTypeIsGen sig = do
   -- check and parse the resulting part of the generator function's signature
   (paramsToBeGenerated, (targetType ** targetTypeArgs)) <- analyzeSigResult sigResult
 
+  let (MkArg MW ImplicitArg (Just `{fuel}) (IVar _ `{Data.Fuel.Fuel}))::sigArgs = sigArgs
+    | _ => fail "The first argument in a generator's function signature must be `{fuel : Fuel}`"
+
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   let notSupported : Maybe Name -> (cntType : String) -> String
       notSupported name cntType = "\{cntType} arguments are not supported in generator signatures, "
@@ -112,7 +115,6 @@ checkTypeIsGen sig = do
     MkArg MW (DefImplicit _) name    _  => fail $ notSupported name "Default implicit"
     MkArg MW ImplicitArg     Nothing _  => fail "All implicit arguments are expected to be named"
     MkArg MW ExplicitArg     Nothing _  => fail "All explicit arguments are expected to be named"
-    -- TODO the `Fuel` argument is treated incorrectly
     MkArg MW AutoImplicit (Just name) _ => fail "Named auto-implicit parameters are not expected, in particular `\{show name}`"
     MkArg MW ImplicitArg (Just name) type => pure $ Left (Checked.ImplicitArg, name, type)
     MkArg MW ExplicitArg (Just name) type => pure $ Left (Checked.ExplicitArg, name, type)
