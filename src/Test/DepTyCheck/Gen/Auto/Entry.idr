@@ -32,8 +32,9 @@ unDPair expr = ([], expr)
 
 --- Pretty-printing ---
 
-Show TTImp where
-  show expr = show $ assert_total {- WTF?? Why do I need it here? -} $ pretty {ann=Unit} expr
+-- Useful only for debugging purposes
+--Show TTImp where
+--  show expr = show $ assert_total {- WTF?? Why do I need it here? -} $ pretty {ann=Unit} expr
 
 ----------------------------------------
 --- Internal functions and instances ---
@@ -43,7 +44,7 @@ analyzeSigResult : TTImp -> Elab (List (Name, TTImp), (ty : TypeInfo ** Vect ty.
 analyzeSigResult sigResult = do
   -- check the resulting type is `Gen`
   let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) targetType = sigResult
-    | _ => fail "The result type must be a `deptycheck`'s `Gen` applied to a type"
+    | _ => failAt (getFC sigResult) "The result type must be a `deptycheck`'s `Gen` applied to a type"
 
   -- treat the generated type as a dependent pair
   let (paramsToBeGenerated, targetType) = unDPair targetType
@@ -51,16 +52,19 @@ analyzeSigResult sigResult = do
   -- check that all parameters of `DPair` are as expected
   paramsToBeGenerated <- for paramsToBeGenerated $ \case
     (MW, ExplicitArg, Just nm, t) => pure (nm, t)
-    (_,  _,           Nothing, _) => fail "All arguments of dependent pair under the resulting `Gen` are expected to be named"
-    _                             => fail "Bad lambda argument of RHS of dependent pair under the resulting `Gen`, it must be `MW` and explicit"
+    (_,  _,           Nothing, _) => failAt (getFC sigResult) "All arguments of dependent pair under the resulting `Gen` are expected to be named"
+    _                             => failAt (getFC sigResult) "Bad lambda argument of RHS of dependent pair under the `Gen`, it must be `MW` and explicit"
 
-  -- treat the target type as a function application and check it's applied to some name
-  let (IVar _ targetType, targetTypeArgs) = unApp targetType
-    | _ => fail "Target type is not a simple name: \{show targetType}"
+  -- treat the target type as a function application
+  let (targetType, targetTypeArgs) = unApp targetType
+
+  -- check it's applied to some name
+  let IVar targetTypeFC targetType = targetType
+    | _ => failAt (getFC targetType) "Target type is not a simple name"
 
   -- check that desired `Gen` is not a generator of `Gen`s
   case targetType of
-    `{Test.DepTyCheck.Gen.Gen} => fail "Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`"
+    `{Test.DepTyCheck.Gen.Gen} => failAt targetTypeFC "Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`"
     _ => pure ()
 
   -- check we can analyze the target type itself
@@ -77,7 +81,7 @@ analyzeSigResult sigResult = do
   -- check all the arguments of the target type are variable names, not complex expressions
   targetTypeArgs <- for targetTypeArgs $ \case
     IVar _ argName => pure argName
-    nonVarArg => fail "All arguments of the resulting `\{show targetType.name}` are expected to be variable names, but `\{show nonVarArg}` is not"
+    nonVarArg => failAt (getFC nonVarArg) "Arguments of the `\{show targetType.name}` is expected to be a variable name"
 
   pure (paramsToBeGenerated, (targetType ** targetTypeArgs))
 
@@ -102,20 +106,25 @@ checkTypeIsGen sig = do
   -- check and parse the resulting part of the generator function's signature
   (paramsToBeGenerated, (targetType ** targetTypeArgs)) <- analyzeSigResult sigResult
 
-  let (MkArg MW ImplicitArg (Just `{fuel}) (IVar _ `{Data.Fuel.Fuel}))::sigArgs = sigArgs
-    | _ => fail "The first argument in a generator's function signature must be `{fuel : Fuel}`"
+  -- check that there are at least some parameters in the signature
+  let (firstArg::sigArgs) = sigArgs
+    | [] => failAt (getFC sig) "No arguments in the signature, at least fuel argument must be present"
+
+  -- check that the first argument is a correct fuel argument
+  let MkArg MW ImplicitArg (Just `{fuel}) (IVar _ `{Data.Fuel.Fuel}) = firstArg
+    | _ => failAt (getFC firstArg.type) "The first argument in a generator's function signature must be `{fuel : Fuel}`"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   let notSupported : Maybe Name -> (cntType : String) -> String
       notSupported name cntType = "\{cntType} arguments are not supported in generator signatures, "
                                ++ maybe "an unnamed one" (\name => "`\{show name}`") name ++ " is such"
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
-    MkArg M0 _               name    _  => fail $ notSupported name "Erased"
-    MkArg M1 _               name    _  => fail $ notSupported name "Linear"
-    MkArg MW (DefImplicit _) name    _  => fail $ notSupported name "Default implicit"
-    MkArg MW ImplicitArg     Nothing _  => fail "All implicit arguments are expected to be named"
-    MkArg MW ExplicitArg     Nothing _  => fail "All explicit arguments are expected to be named"
-    MkArg MW AutoImplicit (Just name) _ => fail "Named auto-implicit parameters are not expected, in particular `\{show name}`"
+    MkArg M0 _               name     ty => failAt (getFC ty) $ notSupported name "Erased"
+    MkArg M1 _               name     ty => failAt (getFC ty) $ notSupported name "Linear"
+    MkArg MW (DefImplicit _) name     ty => failAt (getFC ty) $ notSupported name "Default implicit"
+    MkArg MW ImplicitArg     Nothing  ty => failAt (getFC ty) "All implicit arguments are expected to be named"
+    MkArg MW ExplicitArg     Nothing  ty => failAt (getFC ty) "All explicit arguments are expected to be named"
+    MkArg MW AutoImplicit (Just name) ty => failAt (getFC ty) "Named auto-implicit parameters are not expected, in particular `\{show name}`"
     MkArg MW ImplicitArg (Just name) type => pure $ Left (Checked.ImplicitArg, name, type)
     MkArg MW ExplicitArg (Just name) type => pure $ Left (Checked.ExplicitArg, name, type)
     MkArg MW AutoImplicit Nothing    type => pure $ Right type
