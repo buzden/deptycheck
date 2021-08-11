@@ -95,7 +95,7 @@ checkTypeIsGen sig = do
   _ <- check {expected=Type} sig
 
   -- treat the given type expression as a (possibly 0-ary) function type
-  let (sigArgs, sigResult) = unPi sig
+  (sigArgs, sigResult) <- unPiNamed sig
 
 --  logMsg "gen.derive" 0 $ "goal's result:\n- \{show sigResult}"
 
@@ -107,23 +107,22 @@ checkTypeIsGen sig = do
     | [] => failAt (getFC sig) "No arguments in the signature, at least fuel argument must be present"
 
   -- check that the first argument is a correct fuel argument
-  let MkArg MW ExplicitArg Nothing (IVar _ `{Data.Fuel.Fuel}) = firstArg
+  let MkArg MW ExplicitArg (MN _ _) (IVar _ `{Data.Fuel.Fuel}) = firstArg
     | _ => failAt (getFC firstArg.type) "The first argument must be an explicit unnamed runtime one of type `Fuel`"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
-  let notSupported : Maybe Name -> (cntType : String) -> String
-      notSupported name cntType = "\{cntType} arguments are not supported in generator signatures, "
-                               ++ maybe "an unnamed one" (\name => "`\{show name}`") name ++ " is such"
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
-    MkArg M0 _               name     ty => failAt (getFC ty) $ notSupported name "Erased"
-    MkArg M1 _               name     ty => failAt (getFC ty) $ notSupported name "Linear"
-    MkArg MW (DefImplicit _) name     ty => failAt (getFC ty) $ notSupported name "Default implicit"
-    MkArg MW ImplicitArg     Nothing  ty => failAt (getFC ty) "All implicit arguments are expected to be named"
-    MkArg MW ExplicitArg     Nothing  ty => failAt (getFC ty) "All explicit arguments are expected to be named"
-    MkArg MW AutoImplicit (Just name) ty => failAt (getFC ty) "Named auto-implicit parameters are not expected, in particular `\{show name}`"
-    MkArg MW ImplicitArg (Just name) type => pure $ Left (Checked.ImplicitArg, name, type)
-    MkArg MW ExplicitArg (Just name) type => pure $ Left (Checked.ExplicitArg, name, type)
-    MkArg MW AutoImplicit Nothing    type => pure $ Right type
+    MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, name, type)
+    MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, name, type)
+    MkArg MW AutoImplicit (MN _ _) type => pure $ Right type
+
+    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "All implicit arguments are expected to be named"
+    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "All explicit arguments are expected to be named"
+    MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit parameters are expected to be unnamed"
+
+    MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator signatures"
+    MkArg M1 _               _ ty => failAt (getFC ty) "Linear arguments are not supported in generator signatures"
+    MkArg MW (DefImplicit _) _ ty => failAt (getFC ty) "Default implicit arguments are not supported in generator signatures"
   let givenParams := lefts sigArgs
   let autoImplArgs := rights sigArgs
   --let (givenParams, autoImplArgs) := (lefts sigArgs, rights sigArgs) -- `partitionEithers sigArgs` does not reduce here somewhy :-(
