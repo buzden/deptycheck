@@ -57,6 +57,10 @@ bad_registers_ass = block $ do
   Int'. "x" !#= C 0
   6 %= V "x"
 
+bad_registers_infer_nothing : Statement vars (AllUndefined {rc=4}) vars (AllUndefined {rc=4})
+bad_registers_infer_nothing = block $ do
+  "x" ?#= R 0
+
 -- Basic if statement tests --
 
 bad_if_access_local : {cond : Expression vars regs Bool'} -> Statement vars regs vars $ regs `Merge` regs

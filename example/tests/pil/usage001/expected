@@ -107,33 +107,43 @@ Negative:57:3--57:20
  57 |   Int'. "x" !#= C 0
         ^^^^^^^^^^^^^^^^^
 
+Error: While processing right hand side of bad_registers_infer_nothing. Can't find an implementation for IsJust (index (natToFinLt 0) AllUndefined).
+
+Negative:62:11--62:14
+ 58 |   6 %= V "x"
+ 59 | 
+ 60 | bad_registers_infer_nothing : Statement vars (AllUndefined {rc=4}) vars (AllUndefined {rc=4})
+ 61 | bad_registers_infer_nothing = block $ do
+ 62 |   "x" ?#= R 0
+                ^^^
+
 Error: While processing right hand side of bad_if_access_local. Can't find an implementation for Lookup (MkName "x") ((Int' . MkName "y") :: vars).
 
-Negative:65:17--65:22
- 61 | 
- 62 | bad_if_access_local : {cond : Expression vars regs Bool'} -> Statement vars regs vars $ regs `Merge` regs
- 63 | bad_if_access_local = block $ do
- 64 |   if__ cond (Int'. "x" !#= C 1) (Int'. "x" !#= C 2)
- 65 |   Int'. "y" !#= V "x"
+Negative:69:17--69:22
+ 65 | 
+ 66 | bad_if_access_local : {cond : Expression vars regs Bool'} -> Statement vars regs vars $ regs `Merge` regs
+ 67 | bad_if_access_local = block $ do
+ 68 |   if__ cond (Int'. "x" !#= C 1) (Int'. "x" !#= C 2)
+ 69 |   Int'. "y" !#= V "x"
                       ^^^^^
 
 Error: While processing right hand side of bad_if_taints_register. Can't find an implementation for IsJust (index (natToFinLt 3) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Int')) (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Bool')))).
 
-Negative:73:17--73:20
- 69 | bad_if_taints_register : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
- 70 | bad_if_taints_register = block $ do
- 71 |   3 %= C 1
- 72 |   if__ cond (3 %= C 2) (3 %= C True)
- 73 |   Int'. "x" !#= R 3
+Negative:77:17--77:20
+ 73 | bad_if_taints_register : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
+ 74 | bad_if_taints_register = block $ do
+ 75 |   3 %= C 1
+ 76 |   if__ cond (3 %= C 2) (3 %= C True)
+ 77 |   Int'. "x" !#= R 3
                       ^^^
 
 Error: While processing right hand side of bad_if_single_branch_taint. Can't find an implementation for IsJust (index (natToFinLt 3) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just String')) (With regs (FS (FS (FS FZ)), Just Int')))).
 
-Negative:79:18--79:21
- 75 | bad_if_single_branch_taint : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
- 76 | bad_if_single_branch_taint = block $ do
- 77 |   3 %= C 1
- 78 |   if__ cond (3 %= C "foo") nop
- 79 |   Int' . "x" !#= R 3
+Negative:83:18--83:21
+ 79 | bad_if_single_branch_taint : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
+ 80 | bad_if_single_branch_taint = block $ do
+ 81 |   3 %= C 1
+ 82 |   if__ cond (3 %= C "foo") nop
+ 83 |   Int' . "x" !#= R 3
                        ^^^
 
