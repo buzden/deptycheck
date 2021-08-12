@@ -95,6 +95,15 @@ genY_exp_named_fuel = deriveGen
 genY_with_unrelated : Fuel -> (a : Type) -> Gen (b : Type ** n : Nat ** Y a b)
 genY_with_unrelated = deriveGen
 
+genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen (b : Type ** b : Type ** Y a b)
+genY_with_repeating_name_equityped = deriveGen
+
+genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen (b : Type ** b : Nat ** Y a b)
+genY_with_repeating_name_difflytyped = deriveGen
+
+genY_with_repeating_name_difflytyped' : Fuel -> (a : Type) -> Gen (b : Nat ** b : Type ** Y a b)
+genY_with_repeating_name_difflytyped' = deriveGen
+
 --- Gen of strange things ---
 
 genOfGens : Fuel -> Gen $ Gen X

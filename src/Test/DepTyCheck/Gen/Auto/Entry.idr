@@ -21,6 +21,11 @@ listToVectExact (S k) (x::xs) = (x ::) <$> listToVectExact k xs
 listToVectExact Z     (_::_)  = Nothing
 listToVectExact (S k) []      = Nothing
 
+-- Finds leftmost pair that gives `True` on the given relation
+findLeftmostPair : (a -> a -> Bool) -> List a -> Maybe (a, a)
+findLeftmostPair _   []      = Nothing
+findLeftmostPair rel (x::xs) = (x, ) <$> find (rel x) xs <|> findLeftmostPair rel xs
+
 -----------------------------------------
 --- Utility `TTImp`-related functions ---
 -----------------------------------------
@@ -92,7 +97,9 @@ analyzeSigResult sigResult = do
     IVar _ argName => pure argName
     nonVarArg => failAt (getFC nonVarArg) "Argument is expected to be a variable name"
 
-  -- Here we assume, that all parameters in `parametersToBeGenerated` have different names
+  -- check that all parameters in `parametersToBeGenerated` have different names
+  let Nothing = findLeftmostPair ((==) `on` fst) paramsToBeGenerated
+    | Just (_, (_, ty)) => failAt (getFC ty) "Name of the argument is not unique in the dependent pair"
 
   -- check that all parameters to be generated are actually used inside the target type
   paramsToBeGenerated <- for paramsToBeGenerated $ \(name, ty) => case elemIndex name targetTypeArgs of
