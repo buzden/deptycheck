@@ -49,7 +49,7 @@ Eq Name where
 --- Internal functions and instances ---
 ----------------------------------------
 
-analyzeSigResult : TTImp -> Elab (List (Name, TTImp), (ty : TypeInfo ** Vect ty.args.length Name))
+analyzeSigResult : TTImp -> Elab (ty : TypeInfo ** (Vect ty.args.length Name, List (Fin ty.args.length, TTImp)))
 analyzeSigResult sigResult = do
   -- check the resulting type is `Gen`
   let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) targetType = sigResult
@@ -95,11 +95,11 @@ analyzeSigResult sigResult = do
   -- Here we assume, that all parameters in `parametersToBeGenerated` have different names
 
   -- check that all parameters to be generated are actually used inside the target type
-  for_ paramsToBeGenerated $ \(name, ty) =>
-    unless (name `elem` targetTypeArgs) $ failAt (getFC ty) "Generated parameter is not used in the target type"
-  -- TODO to represent this check in the resulting type somehow, e.g. `paramsToBeGenerated` to have a type `List $ Fin ty.args.length` (or `Set`...)
+  paramsToBeGenerated <- for paramsToBeGenerated $ \(name, ty) => case elemIndex name targetTypeArgs of
+    Just found => pure (found, ty)
+    Nothing => failAt (getFC ty) "Generated parameter is not used in the target type"
 
-  pure (paramsToBeGenerated, (targetType ** targetTypeArgs))
+  pure (targetType ** (targetTypeArgs, paramsToBeGenerated))
 
 -- This function either fails or not instead of returning some error-containing result.
 -- This is due to technical limitation of the `Elab`'s `check` function.
@@ -120,7 +120,7 @@ checkTypeIsGen sig = do
 --  logMsg "gen.derive" 0 $ "goal's result:\n- \{show sigResult}"
 
   -- check and parse the resulting part of the generator function's signature
-  (paramsToBeGenerated, (targetType ** targetTypeArgs)) <- analyzeSigResult sigResult
+  (targetType ** (targetTypeArgs, paramsToBeGenerated)) <- analyzeSigResult sigResult
 
   -- check that there are at least some parameters in the signature
   let (firstArg::sigArgs) = sigArgs
