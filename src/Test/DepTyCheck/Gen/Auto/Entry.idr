@@ -56,9 +56,12 @@ Eq Name where
 
 data UserDefinedName = UserName String
 
+Eq UserDefinedName where
+  (==) = (==) `on` \(UserName n) => n
+
 data TargetTypeArg = Generated | Given
 
-analyzeSigResult : TTImp -> Elab (ty : TypeInfo ** Vect ty.args.length (Name, TargetTypeArg))
+analyzeSigResult : TTImp -> Elab (ty : TypeInfo ** Vect ty.args.length (UserDefinedName, TargetTypeArg))
 analyzeSigResult sigResult = do
   -- check the resulting type is `Gen`
   let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) targetType = sigResult
@@ -69,9 +72,9 @@ analyzeSigResult sigResult = do
 
   -- check that all parameters of `DPair` are as expected
   paramsToBeGenerated <- for paramsToBeGenerated $ \case
-    (MW, ExplicitArg, Just nm, t) => pure (nm, t)
-    (_,  _,           Nothing, _) => failAt (getFC sigResult) "All arguments of dependent pair under the resulting `Gen` are expected to be named"
-    _                             => failAt (getFC sigResult) "Bad lambda argument of RHS of dependent pair under the `Gen`, it must be `MW` and explicit"
+    (MW, ExplicitArg, Just (UN nm), t) => pure (UserName nm, t)
+    (_,  _,           _           , _) => failAt (getFC sigResult) "All arguments of dependent pair under the resulting `Gen` are expected to be named"
+    _                                  => failAt (getFC sigResult) "Bad lambda argument of RHS of dependent pair under the `Gen`, it must be `MW` and explicit"
 
   -- treat the target type as a function application
   let (targetType, targetTypeArgs) = unApp targetType
@@ -98,7 +101,7 @@ analyzeSigResult sigResult = do
 
   -- check all the arguments of the target type are variable names, not complex expressions
   targetTypeArgs <- for targetTypeArgs $ \case
-    IVar _ argName => pure argName
+    IVar _ (UN argName) => pure $ UserName argName
     nonVarArg => failAt (getFC nonVarArg) "Argument is expected to be a variable name"
 
   -- check that all parameters in `parametersToBeGenerated` have different names
