@@ -54,6 +54,8 @@ Eq Name where
 --- Internal functions and instances ---
 ----------------------------------------
 
+data UserDefinedName = UserName String
+
 data TargetTypeArg = Generated | Given
 
 analyzeSigResult : TTImp -> Elab (ty : TypeInfo ** Vect ty.args.length (Name, TargetTypeArg))
@@ -144,8 +146,8 @@ checkTypeIsGen sig = do
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
-    MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, name, type)
-    MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, name, type)
+    MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, UserName name, type)
+    MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, UserName name, type)
     MkArg MW AutoImplicit (MN _ _) type => pure $ Right type
 
     MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "All implicit arguments are expected to be named"
