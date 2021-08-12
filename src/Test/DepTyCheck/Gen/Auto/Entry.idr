@@ -77,7 +77,7 @@ analyzeSigResult sigResult = do
   -- check all the arguments of the target type are variable names, not complex expressions
   targetTypeArgs <- for targetTypeArgs $ \case
     IVar _ argName => pure argName
-    nonVarArg => failAt (getFC nonVarArg) "Arguments of the `\{show targetType.name}` is expected to be a variable name"
+    nonVarArg => failAt (getFC nonVarArg) "Argument is expected to be a variable name"
 
   pure (paramsToBeGenerated, (targetType ** targetTypeArgs))
 
