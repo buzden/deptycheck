@@ -113,6 +113,10 @@ analyzeSigResult sigResult = do
     Just found => pure found
     Nothing => failAt (getFC ty) "Generated parameter is not used in the target type"
 
+  -- Here we still have information of mapping between a name of generated parameter to the index inside the resulting dpair
+  -- With the next action we loose this information
+  -- However, this information is needed for forming the correct result
+
   -- convert a list of fins to a vect of bools of appropriate size
   let paramsToBeGenerated = foldr (`replaceAt` Generated) (replicate _ Given) paramsToBeGenerated
 
