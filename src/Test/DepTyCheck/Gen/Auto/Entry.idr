@@ -32,6 +32,19 @@ unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo 
     mapFst ((cnt, piInfo, mbname, typ)::) $ unDPair lamTy
 unDPair expr = ([], expr)
 
+--- General purpose instances ---
+
+Eq Namespace where
+  MkNS xs == MkNS ys = xs == ys
+
+Eq Name where
+  UN x   == UN y   = x == y
+  MN x n == MN y m = x == y && n == m
+  NS s n == NS p m = s == p && n == m
+  DN x n == DN y m = x == y && n == m
+  RF x   == RF y   = x == y
+  _ == _ = False
+
 ----------------------------------------
 --- Internal functions and instances ---
 ----------------------------------------
@@ -78,6 +91,13 @@ analyzeSigResult sigResult = do
   targetTypeArgs <- for targetTypeArgs $ \case
     IVar _ argName => pure argName
     nonVarArg => failAt (getFC nonVarArg) "Argument is expected to be a variable name"
+
+  -- Here we assume, that all parameters in `parametersToBeGenerated` have different names
+
+  -- check that all parameters to be generated are actually used inside the target type
+  for_ paramsToBeGenerated $ \(name, ty) =>
+    unless (name `elem` targetTypeArgs) $ failAt (getFC ty) "Generated parameter is not used in the target type"
+  -- TODO to represent this check in the resulting type somehow, e.g. `paramsToBeGenerated` to have a type `List $ Fin ty.args.length` (or `Set`...)
 
   pure (paramsToBeGenerated, (targetType ** targetTypeArgs))
 
