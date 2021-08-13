@@ -118,7 +118,7 @@ analyzeSigResult sigResult = do
   -- However, this information is needed for forming the correct result
 
   -- convert a list of fins to a vect of bools of appropriate size
-  let paramsToBeGenerated = foldr (`replaceAt` Generated) (replicate _ Given) paramsToBeGenerated
+  let paramsToBeGenerated = foldr (`replaceAt` Generated) (pure Given) paramsToBeGenerated
 
   pure (targetType ** targetTypeArgs `zip` paramsToBeGenerated)
 
@@ -138,14 +138,14 @@ checkTypeIsGen sig = do
   -- treat the given type expression as a (possibly 0-ary) function type
   (sigArgs, sigResult) <- unPiNamed sig
 
---  logMsg "gen.derive" 0 $ "goal's result:\n- \{show sigResult}"
+--  logMsg "gen.derive" 0 "goal result: \{show sigResult}"
 
   -- check and parse the resulting part of the generator function's signature
   (targetType ** targetTypeArgs) <- analyzeSigResult sigResult
 
   -- check that there are at least some parameters in the signature
   let (firstArg::sigArgs) = sigArgs
-    | [] => failAt (getFC sig) "No arguments in the signature, at least fuel argument must be present"
+    | [] => failAt (getFC sig) "No arguments in the signature, at least a fuel argument must be present"
 
   -- check that the first argument is a correct fuel argument
   let MkArg MW ExplicitArg (MN _ _) (IVar _ `{Data.Fuel.Fuel}) = firstArg
@@ -157,9 +157,9 @@ checkTypeIsGen sig = do
     MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, UserName name, type)
     MkArg MW AutoImplicit (MN _ _) type => pure $ Right type
 
-    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "All implicit arguments are expected to be named"
-    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "All explicit arguments are expected to be named"
-    MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit parameters are expected to be unnamed"
+    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit arguments are expected to be named"
+    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit arguments are expected to be named"
+    MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit arguments are expected to be unnamed"
 
     MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator signatures"
     MkArg M1 _               _ ty => failAt (getFC ty) "Linear arguments are not supported in generator signatures"
@@ -169,6 +169,7 @@ checkTypeIsGen sig = do
   --let (givenParams, autoImplArgs) := (lefts sigArgs, rights sigArgs) -- `partitionEithers sigArgs` does not reduce here somewhy :-(
 
   -- TODO to check whether all target type's argument names are present either in the function's arguments or in the resulting generated depedent pair.
+
 
   ?checkTypeIsGen_impl
 
