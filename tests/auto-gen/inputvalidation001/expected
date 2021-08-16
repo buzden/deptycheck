@@ -1,201 +1,573 @@
 1/1: Building ValidateInput (ValidateInput.idr)
-Error: Error during reflection: ValidateInput.X is not in scope.
+Error: While processing right hand side of list. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
 
-ValidateInput:13:1--13:35
- 09 | --------------------
- 10 | --- Unknown type ---
- 11 | --------------------
- 12 | 
- 13 | %runElab generateGensFor "X" [] []
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Error: Error during reflection: ValidateInput.X is not in scope.
-
-ValidateInput:15:1--15:39
- 11 | --------------------
- 12 | 
- 13 | %runElab generateGensFor "X" [] []
- 14 | 
- 15 | %runElab generateGensFor "X" ["a"] [0]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Error: Error during reflection: Could not find named argument `a` of type ValidateInput.Y listed in implicit givens
-
-ValidateInput:26:1--26:38
- 22 | 
- 23 | data Y : Type -> Type -> Type where
- 24 |   MkY : Y Int String
+ValidateInput:26:8--26:16
+ 22 | ------------------------------------
+ 23 | 
+ 24 | --- Non-Gen type ---
  25 | 
- 26 | %runElab generateGensFor "Y" ["a"] []
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 26 | list : List Int
+             ^^^^^^^^
 
-Error: Error during reflection: Could not find explicit argument #0 of type ValidateInput.NoParam listed in implicit givens
+Error: While processing right hand side of y. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
 
-ValidateInput:33:1--33:42
- 29 | 
- 30 | data NoParam : Type where
- 31 |   MkNoParam : NoParam
- 32 | 
- 33 | %runElab generateGensFor "NoParam" [0] []
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValidateInput:29:5--29:17
+ 25 | 
+ 26 | list : List Int
+ 27 | list = deriveGen
+ 28 | 
+ 29 | y : Y Int String
+          ^^^^^^^^^^^^
 
-Error: Error during reflection: Could not find explicit argument #2 of type ValidateInput.TwoExplParams listed in implicit givens
+Error: While processing right hand side of genY_noFuel_given. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:40:1--40:51
+ValidateInput:34:29--34:33
+ 30 | y = deriveGen
+ 31 | 
+ 32 | --- No fuel argument ---
+ 33 | 
+ 34 | genY_noFuel_given : (a, b : Type) -> Gen $ Y a b
+                                  ^^^^
+
+Error: While processing right hand side of genY_noFuel_mid. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
+
+ValidateInput:37:24--37:28
+ 33 | 
+ 34 | genY_noFuel_given : (a, b : Type) -> Gen $ Y a b
+ 35 | genY_noFuel_given = deriveGen
  36 | 
- 37 | data TwoExplParams : Type -> Type -> Type where
- 38 |   MkTwoExplParams : TwoExplParams a b
+ 37 | genY_noFuel_mid : (b : Type) -> Gen (a ** Y a b)
+                             ^^^^
+
+Error: While processing right hand side of genY_noFuel_mid'. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
+
+ValidateInput:40:25--40:29
+ 36 | 
+ 37 | genY_noFuel_mid : (b : Type) -> Gen (a ** Y a b)
+ 38 | genY_noFuel_mid = deriveGen
  39 | 
- 40 | %runElab generateGensFor "TwoExplParams" [2, 0] []
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 40 | genY_noFuel_mid' : (b : Type) -> Gen $ DPair {a = Type, p = \a => Y a b}
+                              ^^^^
 
-Error: Error during reflection: Could not find explicit argument #2 of type ValidateInput.TwoExplParams listed in implicit givens
+Error: While processing right hand side of genY_noFuel_gened. Error during reflection: No arguments in the signature, at least a fuel argument must be present
 
-ValidateInput:43:1--43:51
+ValidateInput:43:21--43:42
  39 | 
- 40 | %runElab generateGensFor "TwoExplParams" [2, 0] []
- 41 | 
- 42 | -- Two errors
- 43 | %runElab generateGensFor "TwoExplParams" [2, 3] []
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 40 | genY_noFuel_mid' : (b : Type) -> Gen $ DPair {a = Type, p = \a => Y a b}
+ 41 | genY_noFuel_mid' = deriveGen
+ 42 | 
+ 43 | genY_noFuel_gened : Gen (a ** b ** Y a b)
+                          ^^^^^^^^^^^^^^^^^^^^^
 
-Error: Error during reflection: Could not find explicit argument #2 of type ValidateInput.TwoExplParamsWithImpl listed in implicit givens
+Error: While processing right hand side of genY_missplFuel_aft. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:50:1--50:59
- 46 | 
- 47 | data TwoExplParamsWithImpl : Type -> Vect n a -> Type where
- 48 |   MkTwoExplParamsWithImpl : TwoExplParamsWithImpl a v
- 49 | 
- 50 | %runElab generateGensFor "TwoExplParamsWithImpl" [2, 0] []
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValidateInput:48:31--48:35
+ 44 | genY_noFuel_gened = deriveGen
+ 45 | 
+ 46 | --- Misplaced fuel argument ---
+ 47 | 
+ 48 | genY_missplFuel_aft : (a, b : Type) -> Fuel -> Gen $ Y a b
+                                    ^^^^
 
-Error: Error during reflection: explicit argument #1 is listed in implicit givens several times
+Error: While processing right hand side of genY_missplFuel_mid. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:61:1--61:62
- 57 |   MkTwoExplParamsWithImpl' : TwoExplParamsWithImpl' a v
- 58 | 
- 59 | --- Repeating implicit givens ---
- 60 | 
- 61 | %runElab generateGensFor "TwoExplParamsWithImpl" [0, 1, 1] []
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValidateInput:51:28--51:32
+ 47 | 
+ 48 | genY_missplFuel_aft : (a, b : Type) -> Fuel -> Gen $ Y a b
+ 49 | genY_missplFuel_aft = deriveGen
+ 50 | 
+ 51 | genY_missplFuel_mid : (a : Type) -> Fuel -> (b : Type) -> Gen $ Y a b
+                                 ^^^^
 
-Error: Error during reflection: named argument `v` is listed in implicit givens several times
+Error: While processing right hand side of genY_missplFuel_aft_imp. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:62:1--62:65
- 58 | 
- 59 | --- Repeating implicit givens ---
- 60 | 
- 61 | %runElab generateGensFor "TwoExplParamsWithImpl" [0, 1, 1] []
- 62 | %runElab generateGensFor "TwoExplParamsWithImpl'" [0, "v", 1] []
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValidateInput:62:35--62:39
+ 58 | -- because even explicit setting type argument of `deriveGen` makes two signatures incompatible.
+ 59 | 
+ 60 | --- Misplaced + implicit fuel argument ---
+ 61 | 
+ 62 | genY_missplFuel_aft_imp : (a, b : Type) -> {_ : Fuel} -> Gen $ Y a b
+                                        ^^^^
 
-Error: Error during reflection: explicit argument #1 is listed in explicit givens several times
+Error: While processing right hand side of genY_missplFuel_mid_imp. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:66:1--66:62
- 62 | %runElab generateGensFor "TwoExplParamsWithImpl'" [0, "v", 1] []
- 63 | 
- 64 | --- Repeating explciit givens ---
- 65 | 
- 66 | %runElab generateGensFor "TwoExplParamsWithImpl" [] [0, 1, 1]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValidateInput:65:32--65:36
+ 61 | 
+ 62 | genY_missplFuel_aft_imp : (a, b : Type) -> {_ : Fuel} -> Gen $ Y a b
+ 63 | genY_missplFuel_aft_imp = deriveGen
+ 64 | 
+ 65 | genY_missplFuel_mid_imp : (a : Type) -> {_ : Fuel} -> (b : Type) -> Gen $ Y a b
+                                     ^^^^
 
-Error: Error during reflection: explicit argument #1 is listed in explicit givens several times
+Error: While processing right hand side of genY_missplFuel_aft_autoimpl_imp. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:67:1--67:65
- 63 | 
- 64 | --- Repeating explciit givens ---
- 65 | 
- 66 | %runElab generateGensFor "TwoExplParamsWithImpl" [] [0, 1, 1]
- 67 | %runElab generateGensFor "TwoExplParamsWithImpl'" [] [0, 1, "v"]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValidateInput:68:67--68:71
+ 64 | 
+ 65 | genY_missplFuel_mid_imp : (a : Type) -> {_ : Fuel} -> (b : Type) -> Gen $ Y a b
+ 66 | genY_missplFuel_mid_imp = deriveGen
+ 67 | 
+ 68 | genY_missplFuel_aft_autoimpl_imp : Gen X => {_ : Fuel} -> (a, b : Type) -> Gen $ Y a b
+                                                                        ^^^^
 
-Error: Error during reflection: explicit argument #1 is listed in implicit givens several times
+Error: While processing right hand side of genY_unnamed_imp_fuel. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:71:1--71:63
- 67 | %runElab generateGensFor "TwoExplParamsWithImpl'" [] [0, 1, "v"]
- 68 | 
- 69 | --- Repeating both implicit and explicit givens ---
+ValidateInput:73:47--73:51
+ 69 | genY_missplFuel_aft_autoimpl_imp = deriveGen
  70 | 
- 71 | %runElab generateGensFor "TwoExplParamsWithImpl" [1, 1] [0, 0]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 71 | --- Implicit fuel argument ---
+ 72 | 
+ 73 | genY_unnamed_imp_fuel : {_ : Fuel} -> (a, b : Type) -> Gen $ Y a b
+                                                    ^^^^
 
-Error: Error during reflection: explicit argument #1 is listed in implicit givens several times
+Error: While processing right hand side of genY_named_imp_fuel. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:72:1--72:68
- 68 | 
- 69 | --- Repeating both implicit and explicit givens ---
- 70 | 
- 71 | %runElab generateGensFor "TwoExplParamsWithImpl" [1, 1] [0, 0]
- 72 | %runElab generateGensFor "TwoExplParamsWithImpl'" [1, "v"] ["b", 0]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Error: Error during reflection: explicit argument #0 is listed in both implicit and explicit givens
-
-ValidateInput:76:1--76:57
- 72 | %runElab generateGensFor "TwoExplParamsWithImpl'" [1, "v"] ["b", 0]
- 73 | 
- 74 | --- Existence of a given which is both implicit and explicit ---
+ValidateInput:76:45--76:49
+ 72 | 
+ 73 | genY_unnamed_imp_fuel : {_ : Fuel} -> (a, b : Type) -> Gen $ Y a b
+ 74 | genY_unnamed_imp_fuel = deriveGen
  75 | 
- 76 | %runElab generateGensFor "TwoExplParamsWithImpl" [0] [0]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 76 | genY_named_imp_fuel : {f : Fuel} -> (a, b : Type) -> Gen $ Y a b
+                                                  ^^^^
 
-Error: Error during reflection: explicit argument #1 is listed in both implicit and explicit givens
+Error: While processing right hand side of genY_autoimp_fuel. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:77:1--77:57
- 73 | 
- 74 | --- Existence of a given which is both implicit and explicit ---
+ValidateInput:79:37--79:41
  75 | 
- 76 | %runElab generateGensFor "TwoExplParamsWithImpl" [0] [0]
- 77 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [1]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 76 | genY_named_imp_fuel : {f : Fuel} -> (a, b : Type) -> Gen $ Y a b
+ 77 | genY_named_imp_fuel = deriveGen
+ 78 | 
+ 79 | genY_autoimp_fuel : Fuel => (a, b : Type) -> Gen $ Y a b
+                                          ^^^^
 
-Error: Error during reflection: explicit argument #1 is listed in both implicit and explicit givens
+Error: While processing right hand side of genY_defaulted_fuel. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:78:1--78:60
- 74 | --- Existence of a given which is both implicit and explicit ---
- 75 | 
- 76 | %runElab generateGensFor "TwoExplParamsWithImpl" [0] [0]
- 77 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [1]
- 78 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [0, 1]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValidateInput:82:60--82:64
+ 78 | 
+ 79 | genY_autoimp_fuel : Fuel => (a, b : Type) -> Gen $ Y a b
+ 80 | genY_autoimp_fuel = deriveGen
+ 81 | 
+ 82 | genY_defaulted_fuel : {default Dry fuel : Fuel} -> (a, b : Type) -> Gen $ Y a b
+                                                                 ^^^^
 
-Error: Error during reflection: named argument `v` is listed in both implicit and explicit givens
+Error: While processing right hand side of genY_defaulted_fuel'. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:80:1--80:60
- 76 | %runElab generateGensFor "TwoExplParamsWithImpl" [0] [0]
- 77 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [1]
- 78 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [0, 1]
- 79 | 
- 80 | %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [1]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValidateInput:85:69--85:73
+ 81 | 
+ 82 | genY_defaulted_fuel : {default Dry fuel : Fuel} -> (a, b : Type) -> Gen $ Y a b
+ 83 | genY_defaulted_fuel = deriveGen
+ 84 | 
+ 85 | genY_defaulted_fuel' : {default (limit 120) fuel : Fuel} -> (a, b : Type) -> Gen $ Y a b
+                                                                          ^^^^
 
-Error: Error during reflection: named argument `v` is listed in both implicit and explicit givens
+Error: While processing right hand side of genY_exp_named_fuel. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
-ValidateInput:81:1--81:63
- 77 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [1]
- 78 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [0, 1]
- 79 | 
- 80 | %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [1]
- 81 | %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [0, 1]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Error: Error during reflection: named argument `v` is listed in both implicit and explicit givens
-
-ValidateInput:82:1--82:61
- 78 | %runElab generateGensFor "TwoExplParamsWithImpl" [1] [0, 1]
- 79 | 
- 80 | %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [1]
- 81 | %runElab generateGensFor "TwoExplParamsWithImpl'" ["v"] [0, 1]
- 82 | %runElab generateGensFor "TwoExplParamsWithImpl'" [1] [0, 1]
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Error: Error during reflection: External generators lists have non-empty intersection: [TwoExmplParamsWithImpl]
-
-ValidateInput:92:1--92:141
- 88 | -- TODO to add some other incorrect cases, connected with external generators
+ValidateInput:90:31--90:35
+ 86 | genY_defaulted_fuel' = deriveGen
+ 87 | 
+ 88 | --- Named explicit fuel ---
  89 | 
- 90 | --- Conflicting external generators ---
- 91 | 
- 92 | %runElab generateGensFor "Y" [] [] {externalAutoImplicitGens = ["TwoExmplParamsWithImpl"]} {externalHintedGens = ["TwoExmplParamsWithImpl"]}
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 90 | genY_exp_named_fuel : (fuel : Fuel) -> (a, b : Type) -> Gen $ Y a b
+                                    ^^^^
+
+Error: While processing right hand side of genY_with_unrelated. Error during reflection: Generated parameter is not used in the target type
+
+ValidateInput:95:66--95:69
+ 91 | genY_exp_named_fuel = deriveGen
+ 92 | 
+ 93 | --- Unrelated stuff in the resulting dpair ---
+ 94 | 
+ 95 | genY_with_unrelated : Fuel -> (a : Type) -> Gen (b : Type ** n : Nat ** Y a b)
+                                                                       ^^^
+
+Error: While processing right hand side of genY_with_repeating_name_equityped. Error during reflection: All arguments of dependent pair under the resulting `Gen` are expected to be named
+
+ValidateInput:98:60--98:95
+ 94 | 
+ 95 | genY_with_unrelated : Fuel -> (a : Type) -> Gen (b : Type ** n : Nat ** Y a b)
+ 96 | genY_with_unrelated = deriveGen
+ 97 | 
+ 98 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen (b : Type ** b : Type ** Y a b)
+                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: While processing type of genY_with_repeating_name_difflytyped. When unifying Nat and Type.
+Mismatch between: Nat and Type.
+
+ValidateInput:101:94--101:95
+ 097 | 
+ 098 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen (b : Type ** b : Type ** Y a b)
+ 099 | genY_with_repeating_name_equityped = deriveGen
+ 100 | 
+ 101 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen (b : Type ** b : Nat ** Y a b)
+                                                                                                    ^
+
+Error: No type declaration for ValidateInput.genY_with_repeating_name_difflytyped.
+
+ValidateInput:102:1--102:49
+ 098 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen (b : Type ** b : Type ** Y a b)
+ 099 | genY_with_repeating_name_equityped = deriveGen
+ 100 | 
+ 101 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen (b : Type ** b : Nat ** Y a b)
+ 102 | genY_with_repeating_name_difflytyped = deriveGen
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Did you mean: genY_with_repeating_name_equityped?
+Error: While processing right hand side of genY_with_repeating_name_difflytyped'. When unifying Nat and Type.
+Mismatch between: Nat and Type.
+
+ValidateInput:104:79--104:87
+ 100 | 
+ 101 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen (b : Type ** b : Nat ** Y a b)
+ 102 | genY_with_repeating_name_difflytyped = deriveGen
+ 103 | 
+ 104 | genY_with_repeating_name_difflytyped' : Fuel -> (a : Type) -> Gen (b : Nat ** b : Type ** Y a b)
+                                                                                     ^^^^^^^^
+
+Error: While processing right hand side of genOfGens. Error during reflection: Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`
+
+ValidateInput:109:27--109:30
+ 105 | genY_with_repeating_name_difflytyped' = deriveGen
+ 106 | 
+ 107 | --- Gen of strange things ---
+ 108 | 
+ 109 | genOfGens : Fuel -> Gen $ Gen X
+                                 ^^^
+
+Error: While processing right hand side of genOfLazies. Error during reflection: Target type is not a simple name
+
+ValidateInput:112:29--112:35
+ 108 | 
+ 109 | genOfGens : Fuel -> Gen $ Gen X
+ 110 | genOfGens = deriveGen
+ 111 | 
+ 112 | genOfLazies : Fuel -> Gen $ Lazy X
+                                   ^^^^^^
+
+Error: While processing right hand side of genOfInfs. Error during reflection: Target type is not a simple name
+
+ValidateInput:115:27--115:32
+ 111 | 
+ 112 | genOfLazies : Fuel -> Gen $ Lazy X
+ 113 | genOfLazies = deriveGen
+ 114 | 
+ 115 | genOfInfs : Fuel -> Gen $ Inf X
+                                 ^^^^^
+
+Error: While processing right hand side of genOfDPair. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+
+ValidateInput:118:25--118:27
+ 114 | 
+ 115 | genOfInfs : Fuel -> Gen $ Inf X
+ 116 | genOfInfs = deriveGen
+ 117 | 
+ 118 | genOfDPair : Fuel -> (a ** b ** Gen $ Y a b)
+                               ^^
+
+Error: While processing right hand side of genOfFuns_pur. Error during reflection: Target type is not a simple name
+
+ValidateInput:121:32--121:33
+ 117 | 
+ 118 | genOfDPair : Fuel -> (a ** b ** Gen $ Y a b)
+ 119 | genOfDPair = deriveGen
+ 120 | 
+ 121 | genOfFuns_pur : Fuel -> Gen $ (a : Type) -> (b : Type) -> Y a b
+                                      ^
+
+Error: While processing right hand side of genOfFuns_pur0s. Error during reflection: Target type is not a simple name
+
+ValidateInput:124:36--124:37
+ 120 | 
+ 121 | genOfFuns_pur : Fuel -> Gen $ (a : Type) -> (b : Type) -> Y a b
+ 122 | genOfFuns_pur = deriveGen
+ 123 | 
+ 124 | genOfFuns_pur0s : Fuel -> Gen $ (0 a : Type) -> (0 b : Type) -> Y a b
+                                          ^
+
+Error: While processing right hand side of genOfFuns_pur1s. Error during reflection: Target type is not a simple name
+
+ValidateInput:127:36--127:37
+ 123 | 
+ 124 | genOfFuns_pur0s : Fuel -> Gen $ (0 a : Type) -> (0 b : Type) -> Y a b
+ 125 | genOfFuns_pur0s = deriveGen
+ 126 | 
+ 127 | genOfFuns_pur1s : Fuel -> Gen $ (1 a : Type) -> (1 b : Type) -> Y a b
+                                          ^
+
+Error: While processing right hand side of genOfFuns_ins_pair. Error during reflection: Target type is not a simple name
+
+ValidateInput:130:42--130:43
+ 126 | 
+ 127 | genOfFuns_pur1s : Fuel -> Gen $ (1 a : Type) -> (1 b : Type) -> Y a b
+ 128 | genOfFuns_pur1s = deriveGen
+ 129 | 
+ 130 | genOfFuns_ins_pair : Fuel -> Gen (a ** ((b : Type) -> Y a b))
+                                                ^
+
+Error: While processing right hand side of genOfFuns_ins_pair0. Error during reflection: Target type is not a simple name
+
+ValidateInput:133:45--133:46
+ 129 | 
+ 130 | genOfFuns_ins_pair : Fuel -> Gen (a ** ((b : Type) -> Y a b))
+ 131 | genOfFuns_ins_pair = deriveGen
+ 132 | 
+ 133 | genOfFuns_ins_pair0 : Fuel -> Gen (a ** ((0 b : Type) -> Y a b))
+                                                   ^
+
+Error: While processing right hand side of genOfFuns_ins_pair1. Error during reflection: Target type is not a simple name
+
+ValidateInput:136:45--136:46
+ 132 | 
+ 133 | genOfFuns_ins_pair0 : Fuel -> Gen (a ** ((0 b : Type) -> Y a b))
+ 134 | genOfFuns_ins_pair0 = deriveGen
+ 135 | 
+ 136 | genOfFuns_ins_pair1 : Fuel -> Gen (a ** ((1 b : Type) -> Y a b))
+                                                   ^
+
+Error: While processing right hand side of genOfFuns_out_pair. Error during reflection: Target type is not a simple name
+
+ValidateInput:139:37--139:38
+ 135 | 
+ 136 | genOfFuns_ins_pair1 : Fuel -> Gen (a ** ((1 b : Type) -> Y a b))
+ 137 | genOfFuns_ins_pair1 = deriveGen
+ 138 | 
+ 139 | genOfFuns_out_pair : Fuel -> Gen $ (b : Type) -> (a ** Y a b)
+                                           ^
+
+Error: While processing right hand side of genOfFuns_out_pair0. Error during reflection: Target type is not a simple name
+
+ValidateInput:142:40--142:41
+ 138 | 
+ 139 | genOfFuns_out_pair : Fuel -> Gen $ (b : Type) -> (a ** Y a b)
+ 140 | genOfFuns_out_pair = deriveGen
+ 141 | 
+ 142 | genOfFuns_out_pair0 : Fuel -> Gen $ (0 b : Type) -> (a ** Y a b)
+                                              ^
+
+Error: While processing right hand side of genOfFuns_out_pair1. Error during reflection: Target type is not a simple name
+
+ValidateInput:145:40--145:41
+ 141 | 
+ 142 | genOfFuns_out_pair0 : Fuel -> Gen $ (0 b : Type) -> (a ** Y a b)
+ 143 | genOfFuns_out_pair0 = deriveGen
+ 144 | 
+ 145 | genOfFuns_out_pair1 : Fuel -> Gen $ (1 b : Type) -> (a ** Y a b)
+                                              ^
+
+Error: While processing right hand side of genY_Int. Error during reflection: Argument is expected to be a variable name
+
+ValidateInput:152:44--152:47
+ 148 | -- TODO to add more type that cannot be said as "pure types inside a `Gen`", if needed.
+ 149 | 
+ 150 | --- Non-variable arguments of the target type ---
+ 151 | 
+ 152 | genY_Int : Fuel -> (a : Type) -> Gen $ Y a Int
+                                                  ^^^
+
+Error: While processing right hand side of genY_given_zero_fuel. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
+
+ValidateInput:157:31--157:35
+ 153 | genY_Int = deriveGen
+ 154 | 
+ 155 | --- Unexpected zero and linear arguments ---
+ 156 | 
+ 157 | genY_given_zero_fuel : (0 _ : Fuel) -> (a, b : Type) -> Gen $ Y a b
+                                     ^^^^
+
+Error: While processing right hand side of genY_given_zero_arg1. Error during reflection: Erased arguments are not supported in generator signatures
+
+ValidateInput:160:39--160:43
+ 156 | 
+ 157 | genY_given_zero_fuel : (0 _ : Fuel) -> (a, b : Type) -> Gen $ Y a b
+ 158 | genY_given_zero_fuel = deriveGen
+ 159 | 
+ 160 | genY_given_zero_arg1 : Fuel -> (0 a : Type) -> (b : Type) -> Gen $ Y a b
+                                             ^^^^
+
+Error: While processing right hand side of genY_given_zero_args. Error during reflection: Erased arguments are not supported in generator signatures
+
+ValidateInput:163:42--163:46
+ 159 | 
+ 160 | genY_given_zero_arg1 : Fuel -> (0 a : Type) -> (b : Type) -> Gen $ Y a b
+ 161 | genY_given_zero_arg1 = deriveGen
+ 162 | 
+ 163 | genY_given_zero_args : Fuel -> (0 a, b : Type) -> Gen $ Y a b
+                                                ^^^^
+
+Error: While processing right hand side of genY_given_lin_fuel. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
+
+ValidateInput:166:30--166:34
+ 162 | 
+ 163 | genY_given_zero_args : Fuel -> (0 a, b : Type) -> Gen $ Y a b
+ 164 | genY_given_zero_args = deriveGen
+ 165 | 
+ 166 | genY_given_lin_fuel : (1 _ : Fuel) -> (a, b : Type) -> Gen $ Y a b
+                                    ^^^^
+
+Error: While processing right hand side of genY_given_lin_arg1. Error during reflection: Linear arguments are not supported in generator signatures
+
+ValidateInput:169:38--169:42
+ 165 | 
+ 166 | genY_given_lin_fuel : (1 _ : Fuel) -> (a, b : Type) -> Gen $ Y a b
+ 167 | genY_given_lin_fuel = deriveGen
+ 168 | 
+ 169 | genY_given_lin_arg1 : Fuel -> (1 a : Type) -> (b : Type) -> Gen $ Y a b
+                                            ^^^^
+
+Error: While processing right hand side of genY_given_lin_args. Error during reflection: Linear arguments are not supported in generator signatures
+
+ValidateInput:172:41--172:45
+ 168 | 
+ 169 | genY_given_lin_arg1 : Fuel -> (1 a : Type) -> (b : Type) -> Gen $ Y a b
+ 170 | genY_given_lin_arg1 = deriveGen
+ 171 | 
+ 172 | genY_given_lin_args : Fuel -> (1 a, b : Type) -> Gen $ Y a b
+                                               ^^^^
+
+Error: While processing right hand side of genY_given_zero_lin_args. Error during reflection: Erased arguments are not supported in generator signatures
+
+ValidateInput:175:43--175:47
+ 171 | 
+ 172 | genY_given_lin_args : Fuel -> (1 a, b : Type) -> Gen $ Y a b
+ 173 | genY_given_lin_args = deriveGen
+ 174 | 
+ 175 | genY_given_zero_lin_args : Fuel -> (0 a : Type) -> (1 b : Type) -> Gen $ Y a b
+                                                 ^^^^
+
+Error: While processing right hand side of genVoid. Error during reflection: No constructors found for the type `Builtin.Void`
+
+ValidateInput:181:11--181:20
+ 177 | 
+ 178 | --- Gen for type with no constructors ---
+ 179 | 
+ 180 | genVoid : Fuel -> Gen Void
+ 181 | genVoid = deriveGen
+                 ^^^^^^^^^
+
+Error: While processing right hand side of genY_repX_hinted. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+
+ValidateInput:186:56--186:61
+ 182 | 
+ 183 | --- Repeating external gens ---
+ 184 | 
+ 185 | genY_repX_hinted : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 186 | genY_repX_hinted = deriveGen {externalHintedGens = [ `(Gen X), `(Gen X) ]}
+                                                              ^^^^^
+
+Error: While processing right hand side of genY_repX_autoimpl. Error during reflection: No arguments in the signature, at least a fuel argument must be present
+
+ValidateInput:188:30--188:35
+ 184 | 
+ 185 | genY_repX_hinted : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 186 | genY_repX_hinted = deriveGen {externalHintedGens = [ `(Gen X), `(Gen X) ]}
+ 187 | 
+ 188 | genY_repX_autoimpl : Fuel -> Gen X => Gen X => (a, b : Type) -> Gen $ Y a b
+                                    ^^^^^
+
+Error: While processing right hand side of genY_repX_both. Error during reflection: No arguments in the signature, at least a fuel argument must be present
+
+ValidateInput:191:26--191:31
+ 187 | 
+ 188 | genY_repX_autoimpl : Fuel -> Gen X => Gen X => (a, b : Type) -> Gen $ Y a b
+ 189 | genY_repX_autoimpl = deriveGen
+ 190 | 
+ 191 | genY_repX_both : Fuel -> Gen X => (a, b : Type) -> Gen $ Y a b
+                                ^^^^^
+
+Error: While processing right hand side of genY_repX_both'. Error during reflection: No arguments in the signature, at least a fuel argument must be present
+
+ValidateInput:194:27--194:32
+ 190 | 
+ 191 | genY_repX_both : Fuel -> Gen X => (a, b : Type) -> Gen $ Y a b
+ 192 | genY_repX_both = deriveGen {externalHintedGens = [ `(Gen X) ]}
+ 193 | 
+ 194 | genY_repX_both' : Fuel -> Gen X => Gen X => (a, b : Type) -> Gen $ Y a b
+                                 ^^^^^
+
+Error: While processing right hand side of genY_nonex_hinted. Undefined name NonExistent. 
+
+ValidateInput:200:61--200:72
+ 196 | 
+ 197 | --- Non-existent hinted gens ---
+ 198 | 
+ 199 | genY_nonex_hinted : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 200 | genY_nonex_hinted = deriveGen {externalHintedGens = [ `(Gen NonExistent) ]}
+                                                                   ^^^^^^^^^^^
+
+Error: While processing right hand side of genY_nonex_hinted'. Undefined name NonExistent. 
+
+ValidateInput:203:74--203:85
+ 199 | genY_nonex_hinted : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 200 | genY_nonex_hinted = deriveGen {externalHintedGens = [ `(Gen NonExistent) ]}
+ 201 | 
+ 202 | genY_nonex_hinted' : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 203 | genY_nonex_hinted' = deriveGen {externalHintedGens = [ `(forall a. Gen $ NonExistent a) ]}
+                                                                                ^^^^^^^^^^^
+
+Error: While processing right hand side of genY_nonex_hinted''. Undefined name NonExistent. 
+
+ValidateInput:206:65--206:76
+ 202 | genY_nonex_hinted' : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 203 | genY_nonex_hinted' = deriveGen {externalHintedGens = [ `(forall a. Gen $ NonExistent a) ]}
+ 204 | 
+ 205 | genY_nonex_hinted'' : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 206 | genY_nonex_hinted'' = deriveGen {externalHintedGens = [ `(Gen $ NonExistent a) ]}
+                                                                       ^^^^^^^^^^^
+
+Error: While processing right hand side of genY_nongen_hinted_list. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+
+ValidateInput:211:63--211:71
+ 207 | 
+ 208 | --- Non-gen externals ---
+ 209 | 
+ 210 | genY_nongen_hinted_list : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 211 | genY_nongen_hinted_list = deriveGen {externalHintedGens = [ `(List Int) ]}
+                                                                     ^^^^^^^^
+
+Error: While processing right hand side of genY_nongen_hinted_pair. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+
+ValidateInput:214:70--214:71
+ 210 | genY_nongen_hinted_list : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 211 | genY_nongen_hinted_list = deriveGen {externalHintedGens = [ `(List Int) ]}
+ 212 | 
+ 213 | genY_nongen_hinted_pair : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 214 | genY_nongen_hinted_pair = deriveGen {externalHintedGens = [ `( (Gen X, Gen X') ) ]}
+                                                                            ^
+
+Error: While processing right hand side of genY_nongen_hinted_dpair. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+
+ValidateInput:217:65--217:88
+ 213 | genY_nongen_hinted_pair : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 214 | genY_nongen_hinted_pair = deriveGen {externalHintedGens = [ `( (Gen X, Gen X') ) ]}
+ 215 | 
+ 216 | genY_nongen_hinted_dpair : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 217 | genY_nongen_hinted_dpair = deriveGen {externalHintedGens = [ `( (a ** b ** Gen $ Y a b) ) ]}
+                                                                       ^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: While processing right hand side of genY_nongen_autoimpl_list. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+
+ValidateInput:219:37--219:45
+ 215 | 
+ 216 | genY_nongen_hinted_dpair : Fuel -> (a, b : Type) -> Gen $ Y a b
+ 217 | genY_nongen_hinted_dpair = deriveGen {externalHintedGens = [ `( (a ** b ** Gen $ Y a b) ) ]}
+ 218 | 
+ 219 | genY_nongen_autoimpl_list : Fuel -> List Int => (a, b : Type) -> Gen $ Y a b
+                                           ^^^^^^^^
+
+Error: While processing right hand side of genY_nongen_autoimpl_pair. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+
+ValidateInput:222:38--222:44
+ 218 | 
+ 219 | genY_nongen_autoimpl_list : Fuel -> List Int => (a, b : Type) -> Gen $ Y a b
+ 220 | genY_nongen_autoimpl_list = deriveGen
+ 221 | 
+ 222 | genY_nongen_autoimpl_pair : Fuel -> (Gen X, Gen X') => (a, b : Type) -> Gen $ Y a b
+                                            ^^^^^^
+
+Error: While processing right hand side of genY_nongen_autoimpl_dpair. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+
+ValidateInput:225:41--225:43
+ 221 | 
+ 222 | genY_nongen_autoimpl_pair : Fuel -> (Gen X, Gen X') => (a, b : Type) -> Gen $ Y a b
+ 223 | genY_nongen_autoimpl_pair = deriveGen
+ 224 | 
+ 225 | genY_nongen_autoimpl_dpair : Fuel -> (a ** b ** Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
+                                               ^^
 
