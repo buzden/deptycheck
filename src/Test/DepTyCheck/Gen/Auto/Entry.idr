@@ -59,60 +59,6 @@ data UserDefinedName = UserName String
 Eq UserDefinedName where
   (==) = (==) `on` \(UserName n) => n
 
-analyzeSigResult : TTImp -> Elab (ty : TypeInfo ** (Vect ty.args.length UserDefinedName, List (Fin ty.args.length)))
-analyzeSigResult sigResult = do
-  -- check the resulting type is `Gen`
-  let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) targetType = sigResult
-    | _ => failAt (getFC sigResult) "The result type must be a `deptycheck`'s `Gen` applied to a type"
-
-  -- treat the generated type as a dependent pair
-  let (paramsToBeGenerated, targetType) = unDPair targetType
-
-  -- check that all parameters of `DPair` are as expected
-  paramsToBeGenerated <- for paramsToBeGenerated $ \case
-    (MW, ExplicitArg, Just (UN nm), t) => pure (UserName nm, t)
-    (_,  _,           _           , _) => failAt (getFC sigResult) "All arguments of dependent pair under the resulting `Gen` are expected to be named"
-    _                                  => failAt (getFC sigResult) "Bad lambda argument of RHS of dependent pair under the `Gen`, it must be `MW` and explicit"
-
-  -- treat the target type as a function application
-  let (targetType, targetTypeArgs) = unApp targetType
-
-  -- check it's applied to some name
-  let IVar targetTypeFC targetType = targetType
-    | _ => failAt (getFC targetType) "Target type is not a simple name"
-
-  -- check that desired `Gen` is not a generator of `Gen`s
-  case targetType of
-    `{Test.DepTyCheck.Gen.Gen} => failAt targetTypeFC "Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`"
-    _ => pure ()
-
-  -- check we can analyze the target type itself
-  targetType <- getInfo' targetType
-
-  -- check that there are at least non-zero constructors
-  let (_::_) = targetType.cons
-    | [] => fail "No constructors found for the type `\{show targetType.name}`"
-
-  -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
-  let Just targetTypeArgs = listToVectExact targetType.args.length targetTypeArgs
-    | Nothing => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
-
-  -- check all the arguments of the target type are variable names, not complex expressions
-  targetTypeArgs <- for targetTypeArgs $ \case
-    IVar _ (UN argName) => pure $ UserName argName
-    nonVarArg => failAt (getFC nonVarArg) "Argument is expected to be a variable name"
-
-  -- check that all parameters in `parametersToBeGenerated` have different names
-  let Nothing = findLeftmostPair ((==) `on` fst) paramsToBeGenerated
-    | Just (_, (_, ty)) => failAt (getFC ty) "Name of the argument is not unique in the dependent pair"
-
-  -- check that all parameters to be generated are actually used inside the target type
-  paramsToBeGenerated <- for paramsToBeGenerated $ \(name, ty) => case elemIndex name targetTypeArgs of
-    Just found => pure found
-    Nothing => failAt (getFC ty) "Generated parameter is not used in the target type"
-
-  pure (targetType ** (targetTypeArgs, paramsToBeGenerated))
-
 -- This function either fails or not instead of returning some error-containing result.
 -- This is due to technical limitation of the `Elab`'s `check` function.
 -- TODO To think of return type of `TypeInfo` and, maybe, somewhat parsed arguments,
@@ -131,8 +77,56 @@ checkTypeIsGen sig = do
 
 --  logMsg "gen.derive" 0 "goal result: \{show sigResult}"
 
-  -- check and parse the resulting part of the generator function's signature
-  (targetType ** (targetTypeArgs, paramsToBeGenerated)) <- analyzeSigResult sigResult
+  ---------------------------------------------------------------
+  -- First looks at the resulting type of a generator function --
+  ---------------------------------------------------------------
+
+  -- check the resulting type is `Gen`
+  let IApp _ (IVar _ `{Test.DepTyCheck.Gen.Gen}) targetType = sigResult
+    | _ => failAt (getFC sigResult) "The result type must be a `deptycheck`'s `Gen` applied to a type"
+
+  -- treat the generated type as a dependent pair
+  let (paramsToBeGenerated, targetType) = unDPair targetType
+
+  -- treat the target type as a function application
+  let (targetType, targetTypeArgs) = unApp targetType
+
+  ------------------------------------------
+  -- Working with the target type familly --
+  ------------------------------------------
+
+  -- check it's applied to some name
+  let IVar targetTypeFC targetType = targetType
+    | _ => failAt (getFC targetType) "Target type is not a simple name"
+
+  -- check that desired `Gen` is not a generator of `Gen`s
+  case targetType of
+    `{Test.DepTyCheck.Gen.Gen} => failAt targetTypeFC "Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`"
+    _ => pure ()
+
+  -- check we can analyze the target type itself
+  targetType <- getInfo' targetType
+
+  -- check that there are at least non-zero constructors
+  let (_::_) = targetType.cons
+    | [] => fail "No constructors found for the type `\{show targetType.name}`"
+
+  --------------------------------------------------
+  -- Target type family's arguments' first checks --
+  --------------------------------------------------
+
+  -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
+  let Just targetTypeArgs = listToVectExact targetType.args.length targetTypeArgs
+    | Nothing => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
+
+  -- check all the arguments of the target type are variable names, not complex expressions
+  targetTypeArgs <- for targetTypeArgs $ \case
+    IVar _ (UN argName) => pure $ UserName argName
+    nonVarArg => failAt (getFC nonVarArg) "Argument is expected to be a variable name"
+
+  -----------------------------------------
+  -- First checks in the given arguments --
+  -----------------------------------------
 
   -- check that there are at least some parameters in the signature
   let (firstArg::sigArgs) = sigArgs
@@ -141,6 +135,16 @@ checkTypeIsGen sig = do
   -- check that the first argument is a correct fuel argument
   let MkArg MW ExplicitArg (MN _ _) (IVar _ `{Data.Fuel.Fuel}) = firstArg
     | _ => failAt (getFC firstArg.type) "The first argument must be an explicit unnamed runtime one of type `Fuel`"
+
+  ------------------------------------------------------------
+  -- Parse `Reflect` structures to what's needed to further --
+  ------------------------------------------------------------
+
+  -- check that all parameters of `DPair` are as expected
+  paramsToBeGenerated <- for paramsToBeGenerated $ \case
+    (MW, ExplicitArg, Just (UN nm), t) => pure (UserName nm, t)
+    (_,  _,           _           , _) => failAt (getFC sigResult) "All arguments of dependent pair under the resulting `Gen` are expected to be named"
+    _                                  => failAt (getFC sigResult) "Bad lambda argument of RHS of dependent pair under the `Gen`, it must be `MW` and explicit"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
@@ -159,11 +163,26 @@ checkTypeIsGen sig = do
   let autoImplArgs := rights sigArgs
   --let (givenParams, autoImplArgs) := (lefts sigArgs, rights sigArgs) -- `partitionEithers sigArgs` does not reduce here somewhy :-(
 
-  -- TODO to unify somehow the checks below with siminar checks in the signature result function
+  ----------------------------------------------------------------------
+  -- Check that generated and given parameter lists are actually sets --
+  ----------------------------------------------------------------------
+
+  -- check that all parameters in `parametersToBeGenerated` have different names
+  let Nothing = findLeftmostPair ((==) `on` fst) paramsToBeGenerated
+    | Just (_, (_, ty)) => failAt (getFC ty) "Name of the argument is not unique in the dependent pair"
 
   -- check that all given parameters have different names
   let Nothing = findLeftmostPair ((==) `on` (Builtin.fst . snd)) givenParams
     | Just (_, (_, _, ty)) => failAt (getFC ty) "Name of the argument is not unique"
+
+  -----------------------------------------------------------------------
+  -- Link generated and given parameters lists to the `targetTypeArgs` --
+  -----------------------------------------------------------------------
+
+  -- check that all parameters to be generated are actually used inside the target type
+  paramsToBeGenerated <- for paramsToBeGenerated $ \(name, ty) => case elemIndex name targetTypeArgs of
+    Just found => pure found
+    Nothing => failAt (getFC ty) "Generated parameter is not used in the target type"
 
   -- check that all target type's parameters classied as "given" are present in the given params list
   givenParams <- for givenParams $ \(explicitness, name, ty) => case elemIndex name targetTypeArgs of
