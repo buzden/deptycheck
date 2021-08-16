@@ -59,7 +59,19 @@ data UserDefinedName = UserName String
 Eq UserDefinedName where
   (==) = (==) `on` \(UserName n) => n
 
-checkTypeIsGen : TTImp -> Elab ()
+record GenSignatureDesc where
+  constructor MkGenSignatureDesc
+
+  targetType : TypeInfo
+  targetTypeArgs : Vect targetType.args.length UserDefinedName
+
+  -- non-checked, but meant to be that these two do not intersect and their union is a full set
+  paramsToBeGenerated : List $ Fin targetType.args.length
+  givenParams         : List $ Fin targetType.args.length
+
+  autoImplArgs : List GenSignatureDesc
+
+checkTypeIsGen : TTImp -> Elab GenSignatureDesc
 checkTypeIsGen sig = do
 
   -- check the given expression is a type
@@ -180,7 +192,18 @@ checkTypeIsGen sig = do
     Just found => pure found
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
-  ?checkTypeIsGen_impl
+  -------------------------------------
+  -- Auto-implicit generators checks --
+  -------------------------------------
+
+  -- check all auto-implicit arguments pass the checks for the `Gen`
+  autoImplArgs <- for autoImplArgs checkTypeIsGen
+
+  ------------
+  -- Result --
+  ------------
+
+  pure $ MkGenSignatureDesc {targetType, targetTypeArgs, paramsToBeGenerated, givenParams, autoImplArgs}
 
 ------------------------------
 --- Functions for the user ---
@@ -232,6 +255,6 @@ deriveGen : {default [] externalHintedGens : List TTImp} -> Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
-  checkTypeIsGen signature
+  _ <- checkTypeIsGen signature
   for_ externalHintedGens checkTypeIsGen
   ?deriveGen_foo
