@@ -59,23 +59,14 @@ data UserDefinedName = UserName String
 Eq UserDefinedName where
   (==) = (==) `on` \(UserName n) => n
 
--- This function either fails or not instead of returning some error-containing result.
--- This is due to technical limitation of the `Elab`'s `check` function.
--- TODO To think of return type of `TypeInfo` and, maybe, somewhat parsed arguments,
---      like `Vect ty.args.length $ Maybe ArgExplicitness`, like is was before.
--- TODO Also, maybe, there is a need in the result of some map from `TypeInfo` (and, maybe, `Vect` like above) to `auto-implicit | hinted`.
---      Or, at least, the filled generators manager, that remembers what already is generated (and how it is named) and
---      what is present as external (with auto-implicit or hinted).
---      In this case, it would be a stateful something.
 checkTypeIsGen : TTImp -> Elab ()
 checkTypeIsGen sig = do
+
   -- check the given expression is a type
   _ <- check {expected=Type} sig
 
   -- treat the given type expression as a (possibly 0-ary) function type
   (sigArgs, sigResult) <- unPiNamed sig
-
---  logMsg "gen.derive" 0 "goal result: \{show sigResult}"
 
   ---------------------------------------------------------------
   -- First looks at the resulting type of a generator function --
@@ -190,20 +181,6 @@ checkTypeIsGen sig = do
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
   ?checkTypeIsGen_impl
-
-  -- result
-  --   check the resulting type is `Gen`
-  --   check the `Gen`'s parameter is pure type or a dependent pair resulting a pure type
-  --   check that all parts of the dependent pair are the type parameters of the target type
-  --   (not sure, if needed) check that parameters of the target type are open (either a parameter of function or present in the dependent pair)
-  -- arguments
-  --   check all arguments are MW, not M0 or M1
-  --   check the first explicit argument is `Fuel`
-  --   (not sure, if needed) check all `auto` `implicit` external `Gen`'s are before the all other parameters
-  --   (not sure, if needed) check that all arguments are actually used
-  -- externals
-  --   check there are no repetition in the external gens lists, both in auto-implicit and hinted, and also between them
-  --
 
 ------------------------------
 --- Functions for the user ---
