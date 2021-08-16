@@ -1,7 +1,7 @@
 ||| External generation interface and aux stuff for that
 module Test.DepTyCheck.Gen.Auto.Entry
 
-import Data.Either
+import public Data.Either
 import public Data.Fuel
 
 import public Debug.Reflection
@@ -159,8 +159,16 @@ checkTypeIsGen sig = do
   let autoImplArgs := rights sigArgs
   --let (givenParams, autoImplArgs) := (lefts sigArgs, rights sigArgs) -- `partitionEithers sigArgs` does not reduce here somewhy :-(
 
-  -- TODO to check whether all target type's argument names are present either in the function's arguments or in the resulting generated depedent pair.
+  -- TODO to unify somehow the checks below with siminar checks in the signature result function
 
+  -- check that all given parameters have different names
+  let Nothing = findLeftmostPair ((==) `on` (Builtin.fst . snd)) givenParams
+    | Just (_, (_, _, ty)) => failAt (getFC ty) "Name of the argument is not unique"
+
+  -- check that all target type's parameters classied as "given" are present in the given params list
+  givenParams <- for givenParams $ \(explicitness, name, ty) => case elemIndex name targetTypeArgs of
+    Just found => pure found
+    Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
   ?checkTypeIsGen_impl
 
