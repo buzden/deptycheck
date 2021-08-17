@@ -441,7 +441,7 @@ ValidateInput:181:11--181:20
  181 | genVoid = deriveGen
                  ^^^^^^^^^
 
-Error: While processing right hand side of genY_repX_hinted. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+Error: While processing right hand side of genY_repX_hinted. Error during reflection: No arguments in the signature, at least a fuel argument must be present
 
 ValidateInput:186:56--186:61
  182 | 
