@@ -266,6 +266,11 @@ genY_nongen_autoimpl_pair_nofuel = deriveGen
 genY_nongen_autoimpl_dpair_nofuel : Fuel -> (a ** b ** Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
 genY_nongen_autoimpl_dpair_nofuel = deriveGen
 
+--- Auto-implicits are present inside auto-implicits ---
+
+genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
+genY_autoimpl_in_autoimpl = deriveGen
+
 --- Auto-implicits not right after the `Fuel` parameter ---
 
 -- TODO to add if it is needed

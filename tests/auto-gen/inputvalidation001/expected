@@ -701,3 +701,13 @@ ValidateInput:266:48--266:50
  266 | genY_nongen_autoimpl_dpair_nofuel : Fuel -> (a ** b ** Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
                                                       ^^
 
+Error: While processing right hand side of genY_autoimpl_in_autoimpl. Error during reflection: Auto-implicit argument should not contain its own auto-implicit arguments
+
+ValidateInput:271:38--271:42
+ 267 | genY_nongen_autoimpl_dpair_nofuel = deriveGen
+ 268 | 
+ 269 | --- Auto-implicits are present inside auto-implicits ---
+ 270 | 
+ 271 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
+                                            ^^^^
+

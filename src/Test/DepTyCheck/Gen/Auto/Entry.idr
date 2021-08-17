@@ -70,14 +70,12 @@ record GenSignatureDesc where
   paramsToBeGenerated : List $ Fin targetType.args.length
   givenParams         : List $ Fin targetType.args.length
 
-  autoImplArgs : List GenSignatureDesc
-
 isSameTypeAs : Name -> Name -> Elab Bool
 isSameTypeAs checked expected = [| getInfo' checked `eq` getInfo' expected |] where
   eq : TypeInfo -> TypeInfo -> Bool
   eq = (==) `on` name
 
-checkTypeIsGen : TTImp -> Elab GenSignatureDesc
+checkTypeIsGen : TTImp -> Elab (GenSignatureDesc, List GenSignatureDesc)
 checkTypeIsGen sig = do
 
   -- check the given expression is a type
@@ -208,14 +206,16 @@ checkTypeIsGen sig = do
   -- Auto-implicit generators checks --
   -------------------------------------
 
-  -- check all auto-implicit arguments pass the checks for the `Gen`
-  autoImplArgs <- for autoImplArgs checkTypeIsGen
+  -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
+  autoImplArgs <- for autoImplArgs $ checkTypeIsGen >=> \case
+    (subDesc, [])   => pure subDesc
+    (subDesc, _::_) => failAt subDesc.fc "Auto-implicit argument should not contain its own auto-implicit arguments"
 
   ------------
   -- Result --
   ------------
 
-  pure $ MkGenSignatureDesc {fc=getFC sig, targetType, targetTypeArgs, paramsToBeGenerated, givenParams, autoImplArgs}
+  pure (MkGenSignatureDesc {fc=getFC sig, targetType, targetTypeArgs, paramsToBeGenerated, givenParams}, autoImplArgs)
 
 ------------------------------
 --- Functions for the user ---
