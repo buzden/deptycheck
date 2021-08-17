@@ -277,4 +277,5 @@ genY_autoimpl_in_autoimpl = deriveGen
 
 --- Not all arguments are used ---
 
--- TODO to add if it is needed
+genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
+genY_unused_argument = deriveGen

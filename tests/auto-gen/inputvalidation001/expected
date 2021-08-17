@@ -711,3 +711,13 @@ ValidateInput:271:38--271:42
  271 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
                                             ^^^^
 
+Error: While processing right hand side of genY_unused_argument. Error during reflection: Given parameter is not used in the target type
+
+ValidateInput:280:54--280:57
+ 276 | -- TODO to add if it is needed
+ 277 | 
+ 278 | --- Not all arguments are used ---
+ 279 | 
+ 280 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
+                                                            ^^^
+
