@@ -26,13 +26,25 @@ data Y : Type -> Type -> Type where
 list : List Int
 list = deriveGen
 
+list' : Fuel -> List Int
+list' = deriveGen
+
 y : Y Int String
 y = deriveGen
+
+y' : Fuel -> Y Int String
+y' = deriveGen
 
 --- No fuel argument ---
 
 genY_noFuel_given : (a, b : Type) -> Gen $ Y a b
 genY_noFuel_given = deriveGen
+
+genY_noFuel_given' : Int -> (a, b : Type) -> Gen $ Y a b
+genY_noFuel_given' = deriveGen
+
+genY_noFuel_given'' : X -> (a, b : Type) -> Gen $ Y a b
+genY_noFuel_given'' = deriveGen
 
 genY_noFuel_mid : (b : Type) -> Gen (a ** Y a b)
 genY_noFuel_mid = deriveGen
@@ -118,6 +130,12 @@ genOfInfs = deriveGen
 genOfDPair : Fuel -> (a ** b ** Gen $ Y a b)
 genOfDPair = deriveGen
 
+genOfPair : Fuel -> (a, b : Type) -> (Gen (Y a b), Gen (Y a b))
+genOfPair = deriveGen
+
+genOfPair' : Fuel -> (a, b : Type) -> (Gen (Y a b), Gen X)
+genOfPair' = deriveGen
+
 genOfFuns_pur : Fuel -> Gen $ (a : Type) -> (b : Type) -> Y a b
 genOfFuns_pur = deriveGen
 
@@ -183,47 +201,70 @@ genVoid = deriveGen
 --- Repeating external gens ---
 
 genY_repX_hinted : Fuel -> (a, b : Type) -> Gen $ Y a b
-genY_repX_hinted = deriveGen {externalHintedGens = [ `(Gen X), `(Gen X) ]}
+genY_repX_hinted = deriveGen {externalHintedGens = [ `(Fuel -> Gen X), `(Fuel -> Gen X) ]}
 
-genY_repX_autoimpl : Fuel -> Gen X => Gen X => (a, b : Type) -> Gen $ Y a b
+genY_repX_autoimpl : Fuel -> (Fuel -> Gen X) => (Fuel -> Gen X) => (a, b : Type) -> Gen $ Y a b
 genY_repX_autoimpl = deriveGen
 
-genY_repX_both : Fuel -> Gen X => (a, b : Type) -> Gen $ Y a b
-genY_repX_both = deriveGen {externalHintedGens = [ `(Gen X) ]}
+genY_repX_both : Fuel -> (Fuel -> Gen X) => (a, b : Type) -> Gen $ Y a b
+genY_repX_both = deriveGen {externalHintedGens = [ `(Fuel -> Gen X) ]}
 
-genY_repX_both' : Fuel -> Gen X => Gen X => (a, b : Type) -> Gen $ Y a b
-genY_repX_both' = deriveGen {externalHintedGens = [ `(Gen X), `(Gen X) ]}
+genY_repX_both' : Fuel -> (Fuel -> Gen X) => (Fuel -> Gen X) => (a, b : Type) -> Gen $ Y a b
+genY_repX_both' = deriveGen {externalHintedGens = [ `(Fuel -> Gen X), `(Fuel -> Gen X) ]}
 
 --- Non-existent hinted gens ---
 
 genY_nonex_hinted : Fuel -> (a, b : Type) -> Gen $ Y a b
-genY_nonex_hinted = deriveGen {externalHintedGens = [ `(Gen NonExistent) ]}
+genY_nonex_hinted = deriveGen {externalHintedGens = [ `(Fuel -> Gen NonExistent) ]}
 
 genY_nonex_hinted' : Fuel -> (a, b : Type) -> Gen $ Y a b
-genY_nonex_hinted' = deriveGen {externalHintedGens = [ `(forall a. Gen $ NonExistent a) ]}
+genY_nonex_hinted' = deriveGen {externalHintedGens = [ `(forall a. Fuel -> Gen $ NonExistent a) ]}
 
 genY_nonex_hinted'' : Fuel -> (a, b : Type) -> Gen $ Y a b
-genY_nonex_hinted'' = deriveGen {externalHintedGens = [ `(Gen $ NonExistent a) ]}
+genY_nonex_hinted'' = deriveGen {externalHintedGens = [ `(Fuel -> Gen $ NonExistent a) ]}
 
 --- Non-gen externals ---
 
 genY_nongen_hinted_list : Fuel -> (a, b : Type) -> Gen $ Y a b
-genY_nongen_hinted_list = deriveGen {externalHintedGens = [ `(List Int) ]}
+genY_nongen_hinted_list = deriveGen {externalHintedGens = [ `(Fuel -> List Int) ]}
 
 genY_nongen_hinted_pair : Fuel -> (a, b : Type) -> Gen $ Y a b
-genY_nongen_hinted_pair = deriveGen {externalHintedGens = [ `( (Gen X, Gen X') ) ]}
+genY_nongen_hinted_pair = deriveGen {externalHintedGens = [ `( Fuel -> (Gen X, Gen X') ) ]}
 
 genY_nongen_hinted_dpair : Fuel -> (a, b : Type) -> Gen $ Y a b
-genY_nongen_hinted_dpair = deriveGen {externalHintedGens = [ `( (a ** b ** Gen $ Y a b) ) ]}
+genY_nongen_hinted_dpair = deriveGen {externalHintedGens = [ `( Fuel -> (a ** b ** Gen $ Y a b) ) ]}
 
-genY_nongen_autoimpl_list : Fuel -> List Int => (a, b : Type) -> Gen $ Y a b
+genY_nongen_autoimpl_list : Fuel -> (Fuel -> List Int) => (a, b : Type) -> Gen $ Y a b
 genY_nongen_autoimpl_list = deriveGen
 
-genY_nongen_autoimpl_pair : Fuel -> (Gen X, Gen X') => (a, b : Type) -> Gen $ Y a b
+genY_nongen_autoimpl_pair : Fuel -> (Fuel -> Gen X, Fuel -> Gen X') => (a, b : Type) -> Gen $ Y a b
 genY_nongen_autoimpl_pair = deriveGen
 
-genY_nongen_autoimpl_dpair : Fuel -> (a ** b ** Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
+genY_nongen_autoimpl_dpair : Fuel -> (Fuel -> (a ** b ** Gen $ Y a b)) => (a, b : Type) -> Gen $ Y a b
 genY_nongen_autoimpl_dpair = deriveGen
+
+--- Externals with no fuel ---
+
+genY_hinted_nofuel : Fuel -> (a, b : Type) -> Gen $ Y a b
+genY_hinted_nofuel = deriveGen {externalHintedGens = [ `(Gen X) ]}
+
+genY_nongen_hinted_list_nofuel : Fuel -> (a, b : Type) -> Gen $ Y a b
+genY_nongen_hinted_list_nofuel = deriveGen {externalHintedGens = [ `(List Int) ]}
+
+genY_nongen_hinted_pair_nofuel : Fuel -> (a, b : Type) -> Gen $ Y a b
+genY_nongen_hinted_pair_nofuel = deriveGen {externalHintedGens = [ `( (Gen X, Gen X') ) ]}
+
+genY_nongen_hinted_dpair_nofuel : Fuel -> (a, b : Type) -> Gen $ Y a b
+genY_nongen_hinted_dpair_nofuel = deriveGen {externalHintedGens = [ `( (a ** b ** Gen $ Y a b) ) ]}
+
+genY_nongen_autoimpl_list_nofuel : Fuel -> List Int => (a, b : Type) -> Gen $ Y a b
+genY_nongen_autoimpl_list_nofuel = deriveGen
+
+genY_nongen_autoimpl_pair_nofuel : Fuel -> (Gen X, Gen X') => (a, b : Type) -> Gen $ Y a b
+genY_nongen_autoimpl_pair_nofuel = deriveGen
+
+genY_nongen_autoimpl_dpair_nofuel : Fuel -> (a ** b ** Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
+genY_nongen_autoimpl_dpair_nofuel = deriveGen
 
 --- Auto-implicits not right after the `Fuel` parameter ---
 
