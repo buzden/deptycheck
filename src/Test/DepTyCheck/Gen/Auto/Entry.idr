@@ -71,12 +71,10 @@ record GenSignatureDesc where
 
   autoImplArgs : List GenSignatureDesc
 
-isNameGen : Name -> Elab Bool
-isNameGen name = do
-  tyInfo <- getInfo' name
-  pure $ case tyInfo.name of
-    `{Test.DepTyCheck.Gen.Gen} => True
-    _ => False
+isSameTypeAs : Name -> Name -> Elab Bool
+isSameTypeAs checked expected = [| getInfo' checked `eq` getInfo' expected |] where
+  eq : TypeInfo -> TypeInfo -> Bool
+  eq = (==) `on` name
 
 checkTypeIsGen : TTImp -> Elab GenSignatureDesc
 checkTypeIsGen sig = do
@@ -107,7 +105,8 @@ checkTypeIsGen sig = do
   let IApp _ (IVar _ topmostResultName) targetType = sigResult
     | _ => failAt (getFC sigResult) "The result type must be a `deptycheck`'s `Gen` applied to a type"
 
-  unless !(isNameGen topmostResultName) $ failAt (getFC sigResult) "The result type must be a `deptycheck`'s `Gen` applied to a type"
+  unless !(topmostResultName `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
+    failAt (getFC sigResult) "The result type must be a `deptycheck`'s `Gen` applied to a type"
 
   -- treat the generated type as a dependent pair
   let (paramsToBeGenerated, targetType) = unDPair targetType
@@ -124,7 +123,8 @@ checkTypeIsGen sig = do
     | _ => failAt (getFC targetType) "Target type is not a simple name"
 
   -- check that desired `Gen` is not a generator of `Gen`s
-  when !(isNameGen targetType) $ failAt targetTypeFC "Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`"
+  when !(targetType `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
+    failAt targetTypeFC "Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`"
 
   -- check we can analyze the target type itself
   targetType <- getInfo' targetType
