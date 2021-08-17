@@ -75,8 +75,8 @@ isSameTypeAs checked expected = [| getInfo' checked `eq` getInfo' expected |] wh
   eq : TypeInfo -> TypeInfo -> Bool
   eq = (==) `on` name
 
-checkTypeIsGen : TTImp -> Elab (GenSignatureDesc, List GenSignatureDesc)
-checkTypeIsGen sig = do
+checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureDesc, List GenSignatureDesc)
+checkTypeIsGen hinted sig = do
 
   -- check the given expression is a type
   _ <- check {expected=Type} sig
@@ -202,14 +202,17 @@ checkTypeIsGen sig = do
     Just found => pure found
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
-  -------------------------------------
-  -- Auto-implicit generators checks --
-  -------------------------------------
+  ------------------------------------------------
+  -- Auto-implicit and hinted generators checks --
+  ------------------------------------------------
 
   -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
-  autoImplArgs <- for autoImplArgs $ checkTypeIsGen >=> \case
+  autoImplArgs <- for autoImplArgs $ checkTypeIsGen [] >=> \case
     (subDesc, [])   => pure subDesc
     (subDesc, _::_) => failAt subDesc.fc "Auto-implicit argument should not contain its own auto-implicit arguments"
+
+  -- check all hinted arguments pass the checks for the `Gen`
+  for_ hinted $ checkTypeIsGen []
 
   ------------
   -- Result --
@@ -267,6 +270,5 @@ deriveGen : {default [] externalHintedGens : List TTImp} -> Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
-  _ <- checkTypeIsGen signature
-  for_ externalHintedGens checkTypeIsGen
+  _ <- checkTypeIsGen externalHintedGens signature
   ?deriveGen_foo
