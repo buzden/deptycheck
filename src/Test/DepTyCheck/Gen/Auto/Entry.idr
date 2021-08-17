@@ -93,9 +93,13 @@ checkTypeIsGen sig = do
   let (firstArg::sigArgs) = sigArgs
     | [] => failAt (getFC sig) "No arguments in the signature, at least a fuel argument must be present"
 
-  -- check that the first argument is a correct fuel argument
-  let MkArg MW ExplicitArg (MN _ _) (IVar _ `{Data.Fuel.Fuel}) = firstArg
+  -- check that the first argument an explicit unnamed one
+  let MkArg MW ExplicitArg (MN _ _) (IVar firstArgFC firstArgTypeName) = firstArg
     | _ => failAt (getFC firstArg.type) "The first argument must be an explicit unnamed runtime one of type `Fuel`"
+
+  -- check the type of the fuel argument
+  unless !(firstArgTypeName `isSameTypeAs` `{Data.Fuel.Fuel}) $
+    failAt firstArgFC "The first argument must be of type `Fuel`"
 
   ---------------------------------------------------------------
   -- First looks at the resulting type of a generator function --
