@@ -501,25 +501,25 @@ ValidateInput:199:11--199:20
  199 | genVoid = deriveGen
                  ^^^^^^^^^
 
-Error: While processing right hand side of genY_repX_hinted. Repetition of an external generator.
+Error: While processing right hand side of genY_repX_hinted. Error during reflection: Repetition of a hinted external generator
 
-ValidateInput:204:20--204:29
+ValidateInput:204:86--204:87
  200 | 
  201 | --- Repeating external gens ---
  202 | 
  203 | genY_repX_hinted : Fuel -> (a, b : Type) -> Gen $ Y a b
  204 | genY_repX_hinted = deriveGen {externalHintedGens = [ `(Fuel -> Gen X), `(Fuel -> Gen X) ]}
-                          ^^^^^^^^^
+                                                                                            ^
 
-Error: While processing right hand side of genY_repX_autoimpl. Repetition of an external generator.
+Error: While processing right hand side of genY_repX_autoimpl. Error during reflection: Repetition of an auto-implicit external generator
 
-ValidateInput:207:22--207:31
+ValidateInput:206:62--206:63
+ 202 | 
  203 | genY_repX_hinted : Fuel -> (a, b : Type) -> Gen $ Y a b
  204 | genY_repX_hinted = deriveGen {externalHintedGens = [ `(Fuel -> Gen X), `(Fuel -> Gen X) ]}
  205 | 
  206 | genY_repX_autoimpl : Fuel -> (Fuel -> Gen X) => (Fuel -> Gen X) => (a, b : Type) -> Gen $ Y a b
- 207 | genY_repX_autoimpl = deriveGen
-                            ^^^^^^^^^
+                                                                    ^
 
 Error: While processing right hand side of genY_repX_both. Repetition of an external generator.
 
@@ -531,15 +531,15 @@ ValidateInput:210:18--210:27
  210 | genY_repX_both = deriveGen {externalHintedGens = [ `(Fuel -> Gen X) ]}
                         ^^^^^^^^^
 
-Error: While processing right hand side of genY_repX_both'. Repetition of an external generator.
+Error: While processing right hand side of genY_repX_both'. Error during reflection: Repetition of an auto-implicit external generator
 
-ValidateInput:213:19--213:28
+ValidateInput:212:59--212:60
+ 208 | 
  209 | genY_repX_both : Fuel -> (Fuel -> Gen X) => (a, b : Type) -> Gen $ Y a b
  210 | genY_repX_both = deriveGen {externalHintedGens = [ `(Fuel -> Gen X) ]}
  211 | 
  212 | genY_repX_both' : Fuel -> (Fuel -> Gen X) => (Fuel -> Gen X) => (a, b : Type) -> Gen $ Y a b
- 213 | genY_repX_both' = deriveGen {externalHintedGens = [ `(Fuel -> Gen X), `(Fuel -> Gen X) ]}
-                         ^^^^^^^^^
+                                                                 ^
 
 Error: While processing right hand side of genY_nonex_hinted. Undefined name NonExistent. 
 

@@ -79,6 +79,12 @@ record GenSignature where
   paramsToBeGenerated : List $ Fin targetType.args.length
   givenParams         : List $ Fin targetType.args.length
 
+similarSig : GenSignature -> GenSignature -> Bool
+similarSig
+  (MkGenSignature {targetType=ty1, paramsToBeGenerated=gen1, givenParams=giv1, _})
+  (MkGenSignature {targetType=ty2, paramsToBeGenerated=gen2, givenParams=giv2, _})
+    = ty1.name == ty2.name && (finToNat <$> gen1) == (finToNat <$> gen2) && (finToNat <$> giv1) == (finToNat <$> giv2)
+
 record GenInfraSignature where
   constructor MkGenInfraSignature
   sig : GenSignature
@@ -227,6 +233,17 @@ checkTypeIsGen hinted sig = do
 
   -- check all hinted arguments pass the checks for the `Gen`
   hinted <- subCheck "Hinted" hinted
+
+  -- check that all auto-imlicit arguments are unique
+  let Nothing = findLeftmostPair similarSig autoImplArgs
+    | Just (_, MkGenSignature {targetTypeFC=fc, _}) => failAt fc "Repetition of an auto-implicit external generator"
+
+  -- check that all hinted arguments are unique
+  let Nothing = findLeftmostPair similarSig hinted
+    | Just (_, MkGenSignature {targetTypeFC=fc, _}) => failAt fc "Repetition of a hinted external generator"
+
+  -- check that hinted and auto-implicit arguments do not intersect
+  -- TODO
 
   ------------
   -- Result --
