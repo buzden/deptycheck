@@ -61,6 +61,7 @@ Eq UserDefinedName where
 
 record GenSignatureDesc where
   constructor MkGenSignatureDesc
+  fc : FC
 
   targetType : TypeInfo
   targetTypeArgs : Vect targetType.args.length UserDefinedName
@@ -214,7 +215,7 @@ checkTypeIsGen sig = do
   -- Result --
   ------------
 
-  pure $ MkGenSignatureDesc {targetType, targetTypeArgs, paramsToBeGenerated, givenParams, autoImplArgs}
+  pure $ MkGenSignatureDesc {fc=getFC sig, targetType, targetTypeArgs, paramsToBeGenerated, givenParams, autoImplArgs}
 
 ------------------------------
 --- Functions for the user ---
