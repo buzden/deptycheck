@@ -72,12 +72,18 @@ record GenSignature where
   paramsToBeGenerated : List $ Fin targetType.args.length
   givenParams         : List $ Fin targetType.args.length
 
+record GenInfraSignature where
+  constructor MkGenInfraSignature
+  sig : GenSignature
+  autoImplExternals : List GenSignature
+  hintedExternals   : List GenSignature
+
 isSameTypeAs : Name -> Name -> Elab Bool
 isSameTypeAs checked expected = [| getInfo' checked `eq` getInfo' expected |] where
   eq : TypeInfo -> TypeInfo -> Bool
   eq = (==) `on` name
 
-checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignature, List GenSignature)
+checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab GenInfraSignature
 checkTypeIsGen hinted sig = do
 
   -- check the given expression is a type
@@ -209,18 +215,26 @@ checkTypeIsGen hinted sig = do
   ------------------------------------------------
 
   -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
-  autoImplArgs <- for autoImplArgs $ checkTypeIsGen [] >=> \case
-    (subDesc, [])   => pure subDesc
-    (subDesc, _::_) => failAt subDesc.genFC "Auto-implicit argument should not contain its own auto-implicit arguments"
+  autoImplArgs <- subCheck "Auto-implicit" autoImplArgs
 
   -- check all hinted arguments pass the checks for the `Gen`
-  for_ hinted $ checkTypeIsGen []
+  hinted <- subCheck "Hinted" hinted
 
   ------------
   -- Result --
   ------------
 
-  pure (MkGenSignature {sigFC=getFC sig, genFC, targetTypeFC, targetType, targetTypeArgs, paramsToBeGenerated, givenParams}, autoImplArgs)
+  pure $ MkGenInfraSignature
+           (MkGenSignature {sigFC=getFC sig, genFC, targetTypeFC, targetType, targetTypeArgs, paramsToBeGenerated, givenParams})
+           autoImplArgs
+           hinted
+
+  where
+    subCheck : (desc : String) -> List TTImp -> Elab $ List GenSignature
+    subCheck desc = traverse $ checkTypeIsGen [] >=> \case
+      MkGenInfraSignature {sig=s, autoImplExternals=[], hintedExternals=[]} => pure s
+      MkGenInfraSignature {sig=s, autoImplExternals=_::_, _} => failAt s.genFC "\{desc} argument should not contain its own auto-implicit arguments"
+      MkGenInfraSignature {sig=s, hintedExternals=_::_, _} => failAt s.genFC "INTERNAL ERROR: parsed hinted externals are unexpectedly non empty"
 
 ------------------------------
 --- Functions for the user ---
