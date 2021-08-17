@@ -26,6 +26,10 @@ findLeftmostPair : (a -> a -> Bool) -> List a -> Maybe (a, a)
 findLeftmostPair _   []      = Nothing
 findLeftmostPair rel (x::xs) = (x, ) <$> find (rel x) xs <|> findLeftmostPair rel xs
 
+findTruePair : (a -> b -> Bool) -> List a -> List b -> Maybe (a, b)
+findTruePair _ []      _  = Nothing
+findTruePair p (x::xs) ys = (x,) <$> find (p x) ys <|> findTruePair p xs ys
+
 -----------------------------------------
 --- Utility `TTImp`-related functions ---
 -----------------------------------------
@@ -243,7 +247,8 @@ checkTypeIsGen hinted sig = do
     | Just (_, MkGenSignature {targetTypeFC=fc, _}) => failAt fc "Repetition of a hinted external generator"
 
   -- check that hinted and auto-implicit arguments do not intersect
-  -- TODO
+  let Nothing = findTruePair similarSig autoImplArgs hinted
+    | Just (_, MkGenSignature {targetTypeFC=fc, _}) => failAt fc "Repetition of an auto-implicit and a hinted external generators"
 
   ------------
   -- Result --
