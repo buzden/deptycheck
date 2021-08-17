@@ -87,6 +87,18 @@ checkTypeIsGen sig = do
   -- treat the given type expression as a (possibly 0-ary) function type
   (sigArgs, sigResult) <- unPiNamed sig
 
+  -----------------------------------------
+  -- First checks in the given arguments --
+  -----------------------------------------
+
+  -- check that there are at least some parameters in the signature
+  let (firstArg::sigArgs) = sigArgs
+    | [] => failAt (getFC sig) "No arguments in the signature, at least a fuel argument must be present"
+
+  -- check that the first argument is a correct fuel argument
+  let MkArg MW ExplicitArg (MN _ _) (IVar _ `{Data.Fuel.Fuel}) = firstArg
+    | _ => failAt (getFC firstArg.type) "The first argument must be an explicit unnamed runtime one of type `Fuel`"
+
   ---------------------------------------------------------------
   -- First looks at the resulting type of a generator function --
   ---------------------------------------------------------------
@@ -133,18 +145,6 @@ checkTypeIsGen sig = do
   targetTypeArgs <- for targetTypeArgs $ \case
     IVar _ (UN argName) => pure $ UserName argName
     nonVarArg => failAt (getFC nonVarArg) "Argument is expected to be a variable name"
-
-  -----------------------------------------
-  -- First checks in the given arguments --
-  -----------------------------------------
-
-  -- check that there are at least some parameters in the signature
-  let (firstArg::sigArgs) = sigArgs
-    | [] => failAt (getFC sig) "No arguments in the signature, at least a fuel argument must be present"
-
-  -- check that the first argument is a correct fuel argument
-  let MkArg MW ExplicitArg (MN _ _) (IVar _ `{Data.Fuel.Fuel}) = firstArg
-    | _ => failAt (getFC firstArg.type) "The first argument must be an explicit unnamed runtime one of type `Fuel`"
 
   ------------------------------------------------------------
   -- Parse `Reflect` structures to what's needed to further --

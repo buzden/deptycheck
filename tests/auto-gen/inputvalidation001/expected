@@ -1,5 +1,5 @@
 1/1: Building ValidateInput (ValidateInput.idr)
-Error: While processing right hand side of list. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+Error: While processing right hand side of list. Error during reflection: No arguments in the signature, at least a fuel argument must be present
 
 ValidateInput:26:8--26:16
  22 | ------------------------------------
@@ -9,7 +9,7 @@ ValidateInput:26:8--26:16
  26 | list : List Int
              ^^^^^^^^
 
-Error: While processing right hand side of y. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+Error: While processing right hand side of y. Error during reflection: No arguments in the signature, at least a fuel argument must be present
 
 ValidateInput:29:5--29:17
  25 | 
@@ -511,7 +511,7 @@ ValidateInput:206:65--206:76
  206 | genY_nonex_hinted'' = deriveGen {externalHintedGens = [ `(Gen $ NonExistent a) ]}
                                                                        ^^^^^^^^^^^
 
-Error: While processing right hand side of genY_nongen_hinted_list. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+Error: While processing right hand side of genY_nongen_hinted_list. Error during reflection: No arguments in the signature, at least a fuel argument must be present
 
 ValidateInput:211:63--211:71
  207 | 
@@ -521,7 +521,7 @@ ValidateInput:211:63--211:71
  211 | genY_nongen_hinted_list = deriveGen {externalHintedGens = [ `(List Int) ]}
                                                                      ^^^^^^^^
 
-Error: While processing right hand side of genY_nongen_hinted_pair. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+Error: While processing right hand side of genY_nongen_hinted_pair. Error during reflection: No arguments in the signature, at least a fuel argument must be present
 
 ValidateInput:214:70--214:71
  210 | genY_nongen_hinted_list : Fuel -> (a, b : Type) -> Gen $ Y a b
@@ -531,7 +531,7 @@ ValidateInput:214:70--214:71
  214 | genY_nongen_hinted_pair = deriveGen {externalHintedGens = [ `( (Gen X, Gen X') ) ]}
                                                                             ^
 
-Error: While processing right hand side of genY_nongen_hinted_dpair. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+Error: While processing right hand side of genY_nongen_hinted_dpair. Error during reflection: No arguments in the signature, at least a fuel argument must be present
 
 ValidateInput:217:65--217:88
  213 | genY_nongen_hinted_pair : Fuel -> (a, b : Type) -> Gen $ Y a b
@@ -541,7 +541,7 @@ ValidateInput:217:65--217:88
  217 | genY_nongen_hinted_dpair = deriveGen {externalHintedGens = [ `( (a ** b ** Gen $ Y a b) ) ]}
                                                                        ^^^^^^^^^^^^^^^^^^^^^^^
 
-Error: While processing right hand side of genY_nongen_autoimpl_list. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+Error: While processing right hand side of genY_nongen_autoimpl_list. Error during reflection: No arguments in the signature, at least a fuel argument must be present
 
 ValidateInput:219:37--219:45
  215 | 
@@ -551,7 +551,7 @@ ValidateInput:219:37--219:45
  219 | genY_nongen_autoimpl_list : Fuel -> List Int => (a, b : Type) -> Gen $ Y a b
                                            ^^^^^^^^
 
-Error: While processing right hand side of genY_nongen_autoimpl_pair. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+Error: While processing right hand side of genY_nongen_autoimpl_pair. Error during reflection: No arguments in the signature, at least a fuel argument must be present
 
 ValidateInput:222:38--222:44
  218 | 
@@ -561,7 +561,7 @@ ValidateInput:222:38--222:44
  222 | genY_nongen_autoimpl_pair : Fuel -> (Gen X, Gen X') => (a, b : Type) -> Gen $ Y a b
                                             ^^^^^^
 
-Error: While processing right hand side of genY_nongen_autoimpl_dpair. Error during reflection: The result type must be a `deptycheck`'s `Gen` applied to a type
+Error: While processing right hand side of genY_nongen_autoimpl_dpair. Error during reflection: No arguments in the signature, at least a fuel argument must be present
 
 ValidateInput:225:41--225:43
  221 | 
