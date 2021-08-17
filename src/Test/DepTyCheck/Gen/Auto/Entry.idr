@@ -237,6 +237,10 @@ checkTypeIsGen hinted sig = do
            autoImplArgs
            hinted
 
+  -----------------------
+  -- Utility functions --
+  -----------------------
+
   where
     subCheck : (desc : String) -> List TTImp -> Elab $ List GenSignature
     subCheck desc = traverse $ checkTypeIsGen [] >=> \case
