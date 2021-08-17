@@ -61,7 +61,9 @@ Eq UserDefinedName where
 
 record GenSignature where
   constructor MkGenSignature
-  fc : FC
+  sigFC        : FC
+  genFC        : FC
+  targetTypeFC : FC
 
   targetType : TypeInfo
   targetTypeArgs : Vect targetType.args.length UserDefinedName
@@ -105,7 +107,7 @@ checkTypeIsGen hinted sig = do
   ---------------------------------------------------------------
 
   -- check the resulting type is `Gen`
-  let IApp _ (IVar _ topmostResultName) targetType = sigResult
+  let IApp _ (IVar genFC topmostResultName) targetType = sigResult
     | _ => failAt (getFC sigResult) "The result type must be a `deptycheck`'s `Gen` applied to a type"
 
   unless !(topmostResultName `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
@@ -209,7 +211,7 @@ checkTypeIsGen hinted sig = do
   -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
   autoImplArgs <- for autoImplArgs $ checkTypeIsGen [] >=> \case
     (subDesc, [])   => pure subDesc
-    (subDesc, _::_) => failAt subDesc.fc "Auto-implicit argument should not contain its own auto-implicit arguments"
+    (subDesc, _::_) => failAt subDesc.genFC "Auto-implicit argument should not contain its own auto-implicit arguments"
 
   -- check all hinted arguments pass the checks for the `Gen`
   for_ hinted $ checkTypeIsGen []
@@ -218,7 +220,7 @@ checkTypeIsGen hinted sig = do
   -- Result --
   ------------
 
-  pure (MkGenSignature {fc=getFC sig, targetType, targetTypeArgs, paramsToBeGenerated, givenParams}, autoImplArgs)
+  pure (MkGenSignature {sigFC=getFC sig, genFC, targetTypeFC, targetType, targetTypeArgs, paramsToBeGenerated, givenParams}, autoImplArgs)
 
 ------------------------------
 --- Functions for the user ---
