@@ -271,6 +271,9 @@ genY_nongen_autoimpl_dpair_nofuel = deriveGen
 genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
 genY_autoimpl_in_autoimpl = deriveGen
 
+genY_autoimpl_in_hinted : Fuel -> Gen (a ** b ** Y a b)
+genY_autoimpl_in_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) ]}
+
 --- Auto-implicits not right after the `Fuel` parameter ---
 
 -- TODO to add if it is needed

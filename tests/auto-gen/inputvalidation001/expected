@@ -711,13 +711,23 @@ ValidateInput:271:102--271:105
  271 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
                                                                                                             ^^^
 
+Error: While processing right hand side of genY_autoimpl_in_hinted. Error during reflection: Hinted argument should not contain its own auto-implicit arguments
+
+ValidateInput:275:127--275:130
+ 271 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
+ 272 | genY_autoimpl_in_autoimpl = deriveGen
+ 273 | 
+ 274 | genY_autoimpl_in_hinted : Fuel -> Gen (a ** b ** Y a b)
+ 275 | genY_autoimpl_in_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) ]}
+                                                                                                                                     ^^^
+
 Error: While processing right hand side of genY_unused_argument. Error during reflection: Given parameter is not used in the target type
 
-ValidateInput:280:54--280:57
- 276 | -- TODO to add if it is needed
- 277 | 
- 278 | --- Not all arguments are used ---
- 279 | 
- 280 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
+ValidateInput:283:54--283:57
+ 279 | -- TODO to add if it is needed
+ 280 | 
+ 281 | --- Not all arguments are used ---
+ 282 | 
+ 283 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
                                                             ^^^
 

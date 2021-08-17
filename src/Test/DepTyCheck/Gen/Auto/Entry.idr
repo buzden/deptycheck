@@ -37,6 +37,13 @@ unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo 
     mapFst ((cnt, piInfo, mbname, typ)::) $ unDPair lamTy
 unDPair expr = ([], expr)
 
+unDPairUnAlt : TTImp -> Maybe (List (Count, PiInfo TTImp, Maybe Name, TTImp), TTImp)
+unDPairUnAlt (IAlternative _ _ alts) = case filter (not . force . null . Builtin.fst) $ unDPair <$> alts of
+  [x] => Just x
+  []  => Nothing
+  _   => Nothing
+unDPairUnAlt x = Just $ unDPair x
+
 --- General purpose instances ---
 
 Eq Namespace where
@@ -120,7 +127,8 @@ checkTypeIsGen hinted sig = do
     failAt (getFC sigResult) "The result type must be a `deptycheck`'s `Gen` applied to a type"
 
   -- treat the generated type as a dependent pair
-  let (paramsToBeGenerated, targetType) = unDPair targetType
+  let Just (paramsToBeGenerated, targetType) = unDPairUnAlt targetType
+    | Nothing => failAt (getFC targetType) "Cannot interpret as a dependent pair"
 
   -- treat the target type as a function application
   let (targetType, targetTypeArgs) = unApp targetType
