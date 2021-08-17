@@ -59,8 +59,8 @@ data UserDefinedName = UserName String
 Eq UserDefinedName where
   (==) = (==) `on` \(UserName n) => n
 
-record GenSignatureDesc where
-  constructor MkGenSignatureDesc
+record GenSignature where
+  constructor MkGenSignature
   fc : FC
 
   targetType : TypeInfo
@@ -75,7 +75,7 @@ isSameTypeAs checked expected = [| getInfo' checked `eq` getInfo' expected |] wh
   eq : TypeInfo -> TypeInfo -> Bool
   eq = (==) `on` name
 
-checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureDesc, List GenSignatureDesc)
+checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignature, List GenSignature)
 checkTypeIsGen hinted sig = do
 
   -- check the given expression is a type
@@ -218,7 +218,7 @@ checkTypeIsGen hinted sig = do
   -- Result --
   ------------
 
-  pure (MkGenSignatureDesc {fc=getFC sig, targetType, targetTypeArgs, paramsToBeGenerated, givenParams}, autoImplArgs)
+  pure (MkGenSignature {fc=getFC sig, targetType, targetTypeArgs, paramsToBeGenerated, givenParams}, autoImplArgs)
 
 ------------------------------
 --- Functions for the user ---
