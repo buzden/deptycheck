@@ -166,14 +166,18 @@ checkTypeIsGen hinted sig = do
   -- Target type family's arguments' first checks --
   --------------------------------------------------
 
-  -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
-  let Just targetTypeArgs = listToVectExact targetType.args.length targetTypeArgs
-    | Nothing => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
-
   -- check all the arguments of the target type are variable names, not complex expressions
   targetTypeArgs <- for targetTypeArgs $ \case
     IVar _ (UN argName) => pure $ UserName argName
     nonVarArg => failAt (getFC nonVarArg) "Argument is expected to be a variable name"
+
+  -- check that all arguments names are unique
+  let Nothing = findLeftmostPair (==) targetTypeArgs
+    | Just (_, _) => fail "All arguments must be different"
+
+  -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
+  let Just targetTypeArgs = listToVectExact targetType.args.length targetTypeArgs
+    | Nothing => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
 
   ------------------------------------------------------------
   -- Parse `Reflect` structures to what's needed to further --

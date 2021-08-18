@@ -170,6 +170,9 @@ genOfFuns_out_pair1 = deriveGen
 genY_Int : Fuel -> (a : Type) -> Gen $ Y a Int
 genY_Int = deriveGen
 
+genY_same_param : Fuel -> (a : Type) -> Gen $ Y a a
+genY_same_param = deriveGen
+
 --- Unexpected zero and linear arguments ---
 
 genY_given_zero_fuel : (0 _ : Fuel) -> (a, b : Type) -> Gen $ Y a b
