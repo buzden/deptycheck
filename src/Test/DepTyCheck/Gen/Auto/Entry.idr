@@ -72,27 +72,31 @@ Eq UserDefinedName where
 
 record GenSignature where
   constructor MkGenSignature
-  sigFC        : FC
-  genFC        : FC
-  targetTypeFC : FC
-
   targetType : TypeInfo
 
   -- non-checked, but meant to be that these two do not intersect and their union is a full set
   paramsToBeGenerated : List $ Fin targetType.args.length
   givenParams         : List $ Fin targetType.args.length
 
-similarSig : GenSignature -> GenSignature -> Bool
-similarSig
+Eq GenSignature where
   (MkGenSignature {targetType=ty1, paramsToBeGenerated=gen1, givenParams=giv1, _})
+    ==
   (MkGenSignature {targetType=ty2, paramsToBeGenerated=gen2, givenParams=giv2, _})
     = ty1.name == ty2.name && (finToNat <$> gen1) == (finToNat <$> gen2) && (finToNat <$> giv1) == (finToNat <$> giv2)
 
+record GenSignatureWithFC where
+  constructor MkGenSignatureWithFC
+  sigFC        : FC
+  genFC        : FC
+  targetTypeFC : FC
+
+  sigUnFC : GenSignature
+
 record GenInfraSignature where
   constructor MkGenInfraSignature
-  sig : GenSignature
-  autoImplExternals : List GenSignature
-  hintedExternals   : List GenSignature
+  sig : GenSignatureWithFC
+  autoImplExternals : List GenSignatureWithFC
+  hintedExternals   : List GenSignatureWithFC
 
 isSameTypeAs : Name -> Name -> Elab Bool
 isSameTypeAs checked expected = [| getInfo' checked `eq` getInfo' expected |] where
@@ -245,23 +249,24 @@ checkTypeIsGen hinted sig = do
   hinted <- subCheck "Hinted" hinted
 
   -- check that all auto-imlicit arguments are unique
-  let Nothing = findLeftmostPair similarSig autoImplArgs
-    | Just (_, MkGenSignature {targetTypeFC=fc, _}) => failAt fc "Repetition of an auto-implicit external generator"
+  let Nothing = findLeftmostPair ((==) `on` sigUnFC) autoImplArgs
+    | Just (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) => failAt fc "Repetition of an auto-implicit external generator"
 
   -- check that all hinted arguments are unique
-  let Nothing = findLeftmostPair similarSig hinted
-    | Just (_, MkGenSignature {targetTypeFC=fc, _}) => failAt fc "Repetition of a hinted external generator"
+  let Nothing = findLeftmostPair ((==) `on` sigUnFC) hinted
+    | Just (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) => failAt fc "Repetition of a hinted external generator"
 
   -- check that hinted and auto-implicit arguments do not intersect
-  let Nothing = findTruePair similarSig autoImplArgs hinted
-    | Just (_, MkGenSignature {targetTypeFC=fc, _}) => failAt fc "Repetition of an auto-implicit and a hinted external generators"
+  let Nothing = findTruePair ((==) `on` sigUnFC) autoImplArgs hinted
+    | Just (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) => failAt fc "Repetition of an auto-implicit and a hinted external generators"
 
   ------------
   -- Result --
   ------------
 
+  let genSig = MkGenSignature {targetType, paramsToBeGenerated, givenParams}
   pure $ MkGenInfraSignature
-           (MkGenSignature {sigFC=getFC sig, genFC, targetTypeFC, targetType, paramsToBeGenerated, givenParams})
+           (MkGenSignatureWithFC {sigFC=getFC sig, genFC, targetTypeFC, sigUnFC=genSig})
            autoImplArgs
            hinted
 
@@ -270,7 +275,7 @@ checkTypeIsGen hinted sig = do
   -----------------------
 
   where
-    subCheck : (desc : String) -> List TTImp -> Elab $ List GenSignature
+    subCheck : (desc : String) -> List TTImp -> Elab $ List GenSignatureWithFC
     subCheck desc = traverse $ checkTypeIsGen [] >=> \case
       MkGenInfraSignature {sig=s, autoImplExternals=[], hintedExternals=[]} => pure s
       MkGenInfraSignature {sig=s, autoImplExternals=_::_, _} => failAt s.genFC "\{desc} argument should not contain its own auto-implicit arguments"
