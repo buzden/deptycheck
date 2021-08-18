@@ -140,6 +140,9 @@ checkTypeIsGen hinted sig = do
   let Just (paramsToBeGenerated, targetType) = unDPairUnAlt targetType
     | Nothing => failAt (getFC targetType) "Cannot interpret as a dependent pair"
 
+  -- remember the right target type
+  let targetTypeFC = getFC targetType
+
   -- treat the target type as a function application
   let (targetType, targetTypeArgs) = unApp targetType
 
@@ -148,8 +151,8 @@ checkTypeIsGen hinted sig = do
   ------------------------------------------
 
   -- check it's applied to some name
-  let IVar targetTypeFC targetType = targetType
-    | _ => failAt (getFC targetType) "Target type is not a simple name"
+  let IVar _ targetType = targetType
+    | _ => failAt targetTypeFC "Target type is not a simple name"
 
   -- check that desired `Gen` is not a generator of `Gen`s
   when !(targetType `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
@@ -173,7 +176,7 @@ checkTypeIsGen hinted sig = do
 
   -- check that all arguments names are unique
   let Nothing = findLeftmostPair (==) targetTypeArgs
-    | Just (_, _) => fail "All arguments must be different"
+    | Just (_, _) => failAt targetTypeFC "All arguments must be different"
 
   -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
   let Just targetTypeArgs = listToVectExact targetType.args.length targetTypeArgs

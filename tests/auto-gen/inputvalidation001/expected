@@ -263,13 +263,13 @@ ValidateInput:116:79--116:87
 
 Error: While processing right hand side of genOfGens. Error during reflection: Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`
 
-ValidateInput:121:27--121:30
+ValidateInput:121:27--121:32
  117 | genY_with_repeating_name_difflytyped' = deriveGen
  118 | 
  119 | --- Gen of strange things ---
  120 | 
  121 | genOfGens : Fuel -> Gen $ Gen X
-                                 ^^^
+                                 ^^^^^
 
 Error: While processing right hand side of genOfLazies. Error during reflection: Target type is not a simple name
 
@@ -423,13 +423,13 @@ ValidateInput:170:44--170:47
 
 Error: While processing right hand side of genY_same_param. Error during reflection: All arguments must be different
 
-ValidateInput:174:19--174:28
+ValidateInput:173:47--173:52
+ 169 | 
  170 | genY_Int : Fuel -> (a : Type) -> Gen $ Y a Int
  171 | genY_Int = deriveGen
  172 | 
  173 | genY_same_param : Fuel -> (a : Type) -> Gen $ Y a a
- 174 | genY_same_param = deriveGen
-                         ^^^^^^^^^
+                                                     ^^^^^
 
 Error: While processing right hand side of genY_given_zero_fuel. Error during reflection: The first argument must be an explicit unnamed runtime one of type `Fuel`
 
