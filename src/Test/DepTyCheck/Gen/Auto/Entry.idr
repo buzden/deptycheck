@@ -77,7 +77,6 @@ record GenSignature where
   targetTypeFC : FC
 
   targetType : TypeInfo
-  targetTypeArgs : Vect targetType.args.length UserDefinedName
 
   -- non-checked, but meant to be that these two do not intersect and their union is a full set
   paramsToBeGenerated : List $ Fin targetType.args.length
@@ -262,7 +261,7 @@ checkTypeIsGen hinted sig = do
   ------------
 
   pure $ MkGenInfraSignature
-           (MkGenSignature {sigFC=getFC sig, genFC, targetTypeFC, targetType, targetTypeArgs, paramsToBeGenerated, givenParams})
+           (MkGenSignature {sigFC=getFC sig, genFC, targetTypeFC, targetType, paramsToBeGenerated, givenParams})
            autoImplArgs
            hinted
 
