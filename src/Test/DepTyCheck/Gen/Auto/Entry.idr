@@ -123,11 +123,11 @@ checkTypeIsGen hinted sig = do
 
   -- check that there are at least some parameters in the signature
   let (firstArg::sigArgs) = sigArgs
-    | [] => failAt (getFC sig) "No arguments in the signature, at least a fuel argument must be present"
+    | [] => failAt (getFC sig) "No arguments in the generator function signature, at least a fuel argument must be present"
 
   -- check that the first argument an explicit unnamed one
   let MkArg MW ExplicitArg (MN _ _) (IVar firstArgFC firstArgTypeName) = firstArg
-    | _ => failAt (getFC firstArg.type) "The first argument must be an explicit unnamed runtime one of type `Fuel`"
+    | _ => failAt (getFC firstArg.type) "The first argument must be explicit, unnamed, present at runtime and of type `Fuel`"
 
   -- check the type of the fuel argument
   unless !(firstArgTypeName `isSameTypeAs` `{Data.Fuel.Fuel}) $
@@ -139,14 +139,14 @@ checkTypeIsGen hinted sig = do
 
   -- check the resulting type is `Gen`
   let IApp _ (IVar genFC topmostResultName) targetType = sigResult
-    | _ => failAt (getFC sigResult) "The result type must be a `deptycheck`'s `Gen` applied to a type"
+    | _ => failAt (getFC sigResult) "The result type of the generator function must be of type \"`Gen` of desired result\""
 
   unless !(topmostResultName `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
-    failAt (getFC sigResult) "The result type must be a `deptycheck`'s `Gen` applied to a type"
+    failAt (getFC sigResult) "The result type of the generator function must be of type \"`Gen` of desired result\""
 
   -- treat the generated type as a dependent pair
   let Just (paramsToBeGenerated, targetType) = unDPairUnAlt targetType
-    | Nothing => failAt (getFC targetType) "Cannot interpret as a dependent pair"
+    | Nothing => failAt (getFC targetType) "Unable to interpret type under `Gen` as a dependent pair"
 
   -- remember the right target type
   let targetTypeFC = getFC targetType
@@ -164,7 +164,7 @@ checkTypeIsGen hinted sig = do
 
   -- check that desired `Gen` is not a generator of `Gen`s
   when !(targetType `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
-    failAt targetTypeFC "Target type of a derived `Gen` cannot be a `deptycheck`'s `Gen`"
+    failAt targetTypeFC "Target type of a derived `Gen` cannot be a `Gen`"
 
   -- check we can analyze the target type itself
   targetType <- getInfo' targetType
@@ -180,15 +180,15 @@ checkTypeIsGen hinted sig = do
   -- check all the arguments of the target type are variable names, not complex expressions
   targetTypeArgs <- for targetTypeArgs $ \case
     IVar _ (UN argName) => pure $ UserName argName
-    nonVarArg => failAt (getFC nonVarArg) "Argument is expected to be a variable name"
+    nonVarArg => failAt (getFC nonVarArg) "Target type's argument must be a variable name"
 
   -- check that all arguments names are unique
   let [] = findDiffPairWhich (==) targetTypeArgs
-    | _ :: _ => failAt targetTypeFC "All arguments must be different"
+    | _ :: _ => failAt targetTypeFC "All arguments of the target type must be different"
 
   -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
   let Yes targetTypeArgsLengthCorrect = targetType.args.length `decEq` targetTypeArgs.length
-    | No _ => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
+    | No _ => fail "INTERNAL ERROR: unequal argument lists lengths: \{show targetTypeArgs.length} and \{show targetType.args.length}"
 
   ------------------------------------------------------------
   -- Parse `Reflect` structures to what's needed to further --
@@ -197,8 +197,8 @@ checkTypeIsGen hinted sig = do
   -- check that all parameters of `DPair` are as expected
   paramsToBeGenerated <- for paramsToBeGenerated $ \case
     (MW, ExplicitArg, Just (UN nm), t) => pure (UserName nm, t)
-    (_,  _,           _           , _) => failAt (getFC sigResult) "All arguments of dependent pair under the resulting `Gen` are expected to be named"
-    _                                  => failAt (getFC sigResult) "Bad lambda argument of RHS of dependent pair under the `Gen`, it must be `MW` and explicit"
+    (_,  _,           _           , _) => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
+    _                                  => failAt (getFC sigResult) "INTERNAL ERROR: bad lambda in dpair under `Gen`"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
@@ -206,13 +206,13 @@ checkTypeIsGen hinted sig = do
     MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, UserName name, type)
     MkArg MW AutoImplicit (MN _ _) type => pure $ Right type
 
-    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit arguments are expected to be named"
-    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit arguments are expected to be named"
-    MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit arguments are expected to be unnamed"
+    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named"
+    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit argument must be named"
+    MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit argument must be unnamed"
 
-    MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator signatures"
-    MkArg M1 _               _ ty => failAt (getFC ty) "Linear arguments are not supported in generator signatures"
-    MkArg MW (DefImplicit _) _ ty => failAt (getFC ty) "Default implicit arguments are not supported in generator signatures"
+    MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
+    MkArg M1 _               _ ty => failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
+    MkArg MW (DefImplicit _) _ ty => failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
   let givenParams := lefts sigArgs
   let autoImplArgs := rights sigArgs
   --let (givenParams, autoImplArgs) := (lefts sigArgs, rights sigArgs) -- `partitionEithers sigArgs` does not reduce here somewhy :-(
@@ -223,11 +223,11 @@ checkTypeIsGen hinted sig = do
 
   -- check that all parameters in `parametersToBeGenerated` have different names
   let [] = findDiffPairWhich ((==) `on` fst) paramsToBeGenerated
-    | (_, (_, ty)) :: _ => failAt (getFC ty) "Name of the argument is not unique in the dependent pair"
+    | (_, (_, ty)) :: _ => failAt (getFC ty) "Name of the argument is not unique in the dependent pair under the resulting `Gen`"
 
   -- check that all given parameters have different names
   let [] = findDiffPairWhich ((==) `on` (Builtin.fst . snd)) givenParams
-    | (_, (_, _, ty)) :: _ => failAt (getFC ty) "Name of the argument is not unique"
+    | (_, (_, _, ty)) :: _ => failAt (getFC ty) "Name of the generator function's argument is not unique"
 
   -----------------------------------------------------------------------
   -- Link generated and given parameters lists to the `targetTypeArgs` --
@@ -263,7 +263,7 @@ checkTypeIsGen hinted sig = do
 
   -- check that hinted and auto-implicit arguments do not intersect
   let [] = findPairWhich ((==) `on` sigUnFC) autoImplArgs hinted
-    | (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) :: _ => failAt fc "Repetition of an auto-implicit and a hinted external generators"
+    | (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) :: _ => failAt fc "Repetition between auto-implicit and hinted external generators"
 
   ------------
   -- Result --
