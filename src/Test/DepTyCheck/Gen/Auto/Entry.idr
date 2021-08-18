@@ -1,6 +1,7 @@
 ||| External generation interface and aux stuff for that
 module Test.DepTyCheck.Gen.Auto.Entry
 
+import public Data.List.Lazy
 import public Data.Either
 import public Data.Fuel
 
@@ -17,14 +18,16 @@ import public Test.DepTyCheck.Gen.Auto.Checked
 --- Utility functions ---
 -------------------------
 
--- Finds leftmost pair that gives `True` on the given relation
-findLeftmostPair : (a -> a -> Bool) -> List a -> Maybe (a, a)
-findLeftmostPair _   []      = Nothing
-findLeftmostPair rel (x::xs) = (x, ) <$> find (rel x) xs <|> findLeftmostPair rel xs
+-- Calculates all pairs except for the pairs of elements with themselves.
+notTrivPairs : List a -> LazyList (a, a)
+notTrivPairs []      = empty
+notTrivPairs (x::xs) = (x,) <$> fromList xs <|> notTrivPairs xs
 
-findTruePair : (a -> b -> Bool) -> List a -> List b -> Maybe (a, b)
-findTruePair _ []      _  = Nothing
-findTruePair p (x::xs) ys = (x,) <$> find (p x) ys <|> findTruePair p xs ys
+findDiffPairWhich : (a -> a -> Bool) -> List a -> LazyList (a, a)
+findDiffPairWhich p = filter (uncurry p) . notTrivPairs
+
+findPairWhich : (a -> b -> Bool) -> List a -> List b -> LazyList (a, b)
+findPairWhich p xs ys = filter (uncurry p) $ fromList xs `zip` fromList ys
 
 -----------------------------------------
 --- Utility `TTImp`-related functions ---
@@ -60,9 +63,7 @@ Eq Name where
 --- Utility functions working on `TTImp`-related values ---
 
 isSameTypeAs : Name -> Name -> Elab Bool
-isSameTypeAs checked expected = [| getInfo' checked `eq` getInfo' expected |] where
-  eq : TypeInfo -> TypeInfo -> Bool
-  eq = (==) `on` name
+isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `eq` getInfo' expected |]
 
 ----------------------------------------
 --- Internal functions and instances ---
@@ -175,8 +176,8 @@ checkTypeIsGen hinted sig = do
     nonVarArg => failAt (getFC nonVarArg) "Argument is expected to be a variable name"
 
   -- check that all arguments names are unique
-  let Nothing = findLeftmostPair (==) targetTypeArgs
-    | Just (_, _) => failAt targetTypeFC "All arguments must be different"
+  let [] = findDiffPairWhich (==) targetTypeArgs
+    | _ :: _ => failAt targetTypeFC "All arguments must be different"
 
   -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
   let Yes targetTypeArgsLengthCorrect = targetType.args.length `decEq` targetTypeArgs.length
@@ -214,12 +215,12 @@ checkTypeIsGen hinted sig = do
   ----------------------------------------------------------------------
 
   -- check that all parameters in `parametersToBeGenerated` have different names
-  let Nothing = findLeftmostPair ((==) `on` fst) paramsToBeGenerated
-    | Just (_, (_, ty)) => failAt (getFC ty) "Name of the argument is not unique in the dependent pair"
+  let [] = findDiffPairWhich ((==) `on` fst) paramsToBeGenerated
+    | (_, (_, ty)) :: _ => failAt (getFC ty) "Name of the argument is not unique in the dependent pair"
 
   -- check that all given parameters have different names
-  let Nothing = findLeftmostPair ((==) `on` (Builtin.fst . snd)) givenParams
-    | Just (_, (_, _, ty)) => failAt (getFC ty) "Name of the argument is not unique"
+  let [] = findDiffPairWhich ((==) `on` (Builtin.fst . snd)) givenParams
+    | (_, (_, _, ty)) :: _ => failAt (getFC ty) "Name of the argument is not unique"
 
   -----------------------------------------------------------------------
   -- Link generated and given parameters lists to the `targetTypeArgs` --
@@ -246,16 +247,16 @@ checkTypeIsGen hinted sig = do
   hinted <- subCheck "Hinted" hinted
 
   -- check that all auto-imlicit arguments are unique
-  let Nothing = findLeftmostPair ((==) `on` sigUnFC) autoImplArgs
-    | Just (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) => failAt fc "Repetition of an auto-implicit external generator"
+  let [] = findDiffPairWhich ((==) `on` sigUnFC) autoImplArgs
+    | (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) :: _ => failAt fc "Repetition of an auto-implicit external generator"
 
   -- check that all hinted arguments are unique
-  let Nothing = findLeftmostPair ((==) `on` sigUnFC) hinted
-    | Just (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) => failAt fc "Repetition of a hinted external generator"
+  let [] = findDiffPairWhich ((==) `on` sigUnFC) hinted
+    | (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) :: _ => failAt fc "Repetition of a hinted external generator"
 
   -- check that hinted and auto-implicit arguments do not intersect
-  let Nothing = findTruePair ((==) `on` sigUnFC) autoImplArgs hinted
-    | Just (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) => failAt fc "Repetition of an auto-implicit and a hinted external generators"
+  let [] = findPairWhich ((==) `on` sigUnFC) autoImplArgs hinted
+    | (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) :: _ => failAt fc "Repetition of an auto-implicit and a hinted external generators"
 
   ------------
   -- Result --
