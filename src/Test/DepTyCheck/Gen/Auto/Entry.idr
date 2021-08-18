@@ -93,15 +93,22 @@ record GenSignatureWithFC where
 
   sigUnFC : GenSignature
 
-record GenInfraSignature where
+GenSignatureFC : Bool -> Type
+GenSignatureFC False = GenSignature
+GenSignatureFC True  = GenSignatureWithFC
+
+record GenInfraSignature withFC where
   constructor MkGenInfraSignature
-  sig : GenSignatureWithFC
-  autoImplExternals : List GenSignatureWithFC
-  hintedExternals   : List GenSignatureWithFC
+  sig : GenSignatureFC withFC
+  autoImplExternals : List $ GenSignatureFC withFC
+  hintedExternals   : List $ GenSignatureFC withFC
+
+forgetFC : GenInfraSignature True -> GenInfraSignature False
+forgetFC (MkGenInfraSignature sig autoImpls hinted) = MkGenInfraSignature sig.sigUnFC (sigUnFC <$> autoImpls) (sigUnFC <$> hinted)
 
 --- Analysis functions ---
 
-checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab GenInfraSignature
+checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab $ GenInfraSignature True
 checkTypeIsGen hinted sig = do
 
   -- check the given expression is a type
@@ -334,5 +341,5 @@ deriveGen : {default [] externalHintedGens : List TTImp} -> Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
-  _ <- checkTypeIsGen externalHintedGens signature
+  _ <- forgetFC <$> checkTypeIsGen externalHintedGens signature
   ?deriveGen_foo
