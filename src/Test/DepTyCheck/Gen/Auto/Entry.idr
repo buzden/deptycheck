@@ -4,6 +4,8 @@ module Test.DepTyCheck.Gen.Auto.Entry
 import public Data.Either
 import public Data.Fuel
 
+import public Decidable.Equality
+
 import public Debug.Reflection
 
 import public Test.DepTyCheck.Gen -- for `Gen` data type
@@ -14,12 +16,6 @@ import public Test.DepTyCheck.Gen.Auto.Checked
 -------------------------
 --- Utility functions ---
 -------------------------
-
-listToVectExact : (n : Nat) -> List a -> Maybe $ Vect n a
-listToVectExact Z     []      = Just []
-listToVectExact (S k) (x::xs) = (x ::) <$> listToVectExact k xs
-listToVectExact Z     (_::_)  = Nothing
-listToVectExact (S k) []      = Nothing
 
 -- Finds leftmost pair that gives `True` on the given relation
 findLeftmostPair : (a -> a -> Bool) -> List a -> Maybe (a, a)
@@ -183,8 +179,8 @@ checkTypeIsGen hinted sig = do
     | Just (_, _) => failAt targetTypeFC "All arguments must be different"
 
   -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
-  let Just targetTypeArgs = listToVectExact targetType.args.length targetTypeArgs
-    | Nothing => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
+  let Yes targetTypeArgsLengthCorrect = targetType.args.length `decEq` targetTypeArgs.length
+    | No _ => fail "Lengths of target type applcation and description are not equal: \{show targetTypeArgs.length} and \{show targetType.args.length}"
 
   ------------------------------------------------------------
   -- Parse `Reflect` structures to what's needed to further --
@@ -230,13 +226,13 @@ checkTypeIsGen hinted sig = do
   -----------------------------------------------------------------------
 
   -- check that all parameters to be generated are actually used inside the target type
-  paramsToBeGenerated <- for paramsToBeGenerated $ \(name, ty) => case elemIndex name targetTypeArgs of
-    Just found => pure found
+  paramsToBeGenerated <- for paramsToBeGenerated $ \(name, ty) => case findIndex (== name) targetTypeArgs of
+    Just found => pure $ rewrite targetTypeArgsLengthCorrect in found
     Nothing => failAt (getFC ty) "Generated parameter is not used in the target type"
 
   -- check that all target type's parameters classied as "given" are present in the given params list
-  givenParams <- for givenParams $ \(explicitness, name, ty) => case elemIndex name targetTypeArgs of
-    Just found => pure found
+  givenParams <- for givenParams $ \(explicitness, name, ty) => case findIndex (== name) targetTypeArgs of
+    Just found => pure $ rewrite targetTypeArgsLengthCorrect in found
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
   ------------------------------------------------
