@@ -61,14 +61,18 @@ Eq Name where
   RF x   == RF y   = x == y
   _ == _ = False
 
+--- Utility functions working on `TTImp`-related values ---
+
+isSameTypeAs : Name -> Name -> Elab Bool
+isSameTypeAs checked expected = [| getInfo' checked `eq` getInfo' expected |] where
+  eq : TypeInfo -> TypeInfo -> Bool
+  eq = (==) `on` name
+
 ----------------------------------------
 --- Internal functions and instances ---
 ----------------------------------------
 
-data UserDefinedName = UserName String
-
-Eq UserDefinedName where
-  (==) = (==) `on` \(UserName n) => n
+--- Data stuctures for the analysis results ---
 
 record GenSignature where
   constructor MkGenSignature
@@ -98,10 +102,7 @@ record GenInfraSignature where
   autoImplExternals : List GenSignatureWithFC
   hintedExternals   : List GenSignatureWithFC
 
-isSameTypeAs : Name -> Name -> Elab Bool
-isSameTypeAs checked expected = [| getInfo' checked `eq` getInfo' expected |] where
-  eq : TypeInfo -> TypeInfo -> Bool
-  eq = (==) `on` name
+--- Analysis functions ---
 
 checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab GenInfraSignature
 checkTypeIsGen hinted sig = do
@@ -280,6 +281,11 @@ checkTypeIsGen hinted sig = do
       MkGenInfraSignature {sig=s, autoImplExternals=[], hintedExternals=[]} => pure s
       MkGenInfraSignature {sig=s, autoImplExternals=_::_, _} => failAt s.genFC "\{desc} argument should not contain its own auto-implicit arguments"
       MkGenInfraSignature {sig=s, hintedExternals=_::_, _} => failAt s.genFC "INTERNAL ERROR: parsed hinted externals are unexpectedly non empty"
+
+    data UserDefinedName = UserName String
+
+    Eq UserDefinedName where
+      (==) = (==) `on` \(UserName n) => n
 
 ------------------------------
 --- Functions for the user ---
