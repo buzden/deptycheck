@@ -1,7 +1,6 @@
 ||| External generation interface and aux stuff for that
 module Test.DepTyCheck.Gen.Auto.Entry
 
-import public Data.List.Lazy
 import public Data.Either
 import public Data.Fuel
 
@@ -13,21 +12,6 @@ import public Test.DepTyCheck.Gen -- for `Gen` data type
 import public Test.DepTyCheck.Gen.Auto.Checked
 
 %default total
-
--------------------------
---- Utility functions ---
--------------------------
-
--- Calculates all pairs except for the pairs of elements with themselves.
-notTrivPairs : List a -> LazyList (a, a)
-notTrivPairs []      = empty
-notTrivPairs (x::xs) = (x,) <$> fromList xs <|> notTrivPairs xs
-
-findDiffPairWhich : (a -> a -> Bool) -> List a -> LazyList (a, a)
-findDiffPairWhich p = filter (uncurry p) . notTrivPairs
-
-findPairWhich : (a -> b -> Bool) -> List a -> List b -> LazyList (a, b)
-findPairWhich p xs ys = filter (uncurry p) $ fromList xs `zip` fromList ys
 
 -----------------------------------------
 --- Utility `TTImp`-related functions ---
