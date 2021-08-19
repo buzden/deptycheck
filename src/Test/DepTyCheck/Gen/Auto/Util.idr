@@ -8,6 +8,17 @@ import public Language.Reflection.TTImp
 
 %default total
 
+----------------------------
+--- Function composition ---
+----------------------------
+
+infixl 0 .|
+
+-- Instead of `f (a b) $ c d` or `f (a b) (c d)` you can write `f .| a b .| c d`
+public export %inline
+(.|) : (a -> b) -> a -> b
+(.|) = id
+
 -----------------------
 --- Lists utilities ---
 -----------------------

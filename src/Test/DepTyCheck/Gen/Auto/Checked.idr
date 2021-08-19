@@ -63,7 +63,7 @@ record GenInfraSignature withFC where
 
 public export
 forgetFC : GenInfraSignature True -> GenInfraSignature False
-forgetFC (MkGenInfraSignature sig autoImpls hinted) = MkGenInfraSignature sig.sigUnFC (sigUnFC <$> autoImpls) (sigUnFC <$> hinted)
+forgetFC (MkGenInfraSignature sig autoImpls hinted) = MkGenInfraSignature sig.sigUnFC .| sigUnFC <$> autoImpls .| sigUnFC <$> hinted
 
 ------------------------------------------
 --- The entry-point generator function ---

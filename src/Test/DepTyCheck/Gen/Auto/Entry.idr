@@ -204,9 +204,9 @@ checkTypeIsGen hinted sig = do
 
   let genSig = MkGenSignature {targetType, paramsToBeGenerated, givenParams}
   pure $ MkGenInfraSignature
-           (MkGenSignatureWithFC {sigFC=getFC sig, genFC, targetTypeFC, sigUnFC=genSig})
-           autoImplArgs
-           hinted
+           .| MkGenSignatureWithFC {sigFC=getFC sig, genFC, targetTypeFC, sigUnFC=genSig}
+           .| autoImplArgs
+           .| hinted
 
   -----------------------
   -- Utility functions --
