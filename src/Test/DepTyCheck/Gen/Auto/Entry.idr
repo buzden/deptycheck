@@ -27,7 +27,6 @@ unDPair expr = ([], expr)
 unDPairUnAlt : TTImp -> Maybe (List (Count, PiInfo TTImp, Maybe Name, TTImp), TTImp)
 unDPairUnAlt (IAlternative _ _ alts) = case filter (not . force . null . Builtin.fst) $ unDPair <$> alts of
   [x] => Just x
-  []  => Nothing
   _   => Nothing
 unDPairUnAlt x = Just $ unDPair x
 
