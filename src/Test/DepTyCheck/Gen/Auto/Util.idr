@@ -4,6 +4,8 @@ import public Data.Fin
 import public Data.List.Lazy
 import public Data.Zippable
 
+import public Language.Reflection.TTImp
+
 %default total
 
 -----------------------
@@ -33,3 +35,22 @@ findDiffPairWhich p = filter (uncurry p) . notTrivPairs
 public export
 findPairWhich : (a -> b -> Bool) -> List a -> List b -> LazyList (a, b)
 findPairWhich p xs ys = filter (uncurry p) $ fromList xs `zip` fromList ys
+
+---------------------------------
+--- `TTImp`-related utilities ---
+---------------------------------
+
+--- General purpose instances ---
+
+public export
+Eq Namespace where
+  MkNS xs == MkNS ys = xs == ys
+
+public export
+Eq Name where
+  UN x   == UN y   = x == y
+  MN x n == MN y m = x == y && n == m
+  NS s n == NS p m = s == p && n == m
+  DN x n == DN y m = x == y && n == m
+  RF x   == RF y   = x == y
+  _ == _ = False

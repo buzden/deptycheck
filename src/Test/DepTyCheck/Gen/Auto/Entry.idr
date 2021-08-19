@@ -30,19 +30,6 @@ unDPairUnAlt (IAlternative _ _ alts) = case filter (not . force . null . Builtin
   _   => Nothing
 unDPairUnAlt x = Just $ unDPair x
 
---- General purpose instances ---
-
-Eq Namespace where
-  MkNS xs == MkNS ys = xs == ys
-
-Eq Name where
-  UN x   == UN y   = x == y
-  MN x n == MN y m = x == y && n == m
-  NS s n == NS p m = s == p && n == m
-  DN x n == DN y m = x == y && n == m
-  RF x   == RF y   = x == y
-  _ == _ = False
-
 --- Utility functions working on `TTImp`-related values ---
 
 isSameTypeAs : Name -> Name -> Elab Bool
@@ -51,43 +38,6 @@ isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `
 ----------------------------------------
 --- Internal functions and instances ---
 ----------------------------------------
-
---- Data stuctures for the analysis results ---
-
-record GenSignature where
-  constructor MkGenSignature
-  targetType : TypeInfo
-
-  -- non-checked, but meant to be that these two do not intersect and their union is a full set
-  paramsToBeGenerated : List $ Fin targetType.args.length
-  givenParams         : List $ Fin targetType.args.length
-
-Eq GenSignature where
-  (MkGenSignature {targetType=ty1, paramsToBeGenerated=gen1, givenParams=giv1, _})
-    ==
-  (MkGenSignature {targetType=ty2, paramsToBeGenerated=gen2, givenParams=giv2, _})
-    = ty1.name == ty2.name && (finToNat <$> gen1) == (finToNat <$> gen2) && (finToNat <$> giv1) == (finToNat <$> giv2)
-
-record GenSignatureWithFC where
-  constructor MkGenSignatureWithFC
-  sigFC        : FC
-  genFC        : FC
-  targetTypeFC : FC
-
-  sigUnFC : GenSignature
-
-GenSignatureFC : Bool -> Type
-GenSignatureFC False = GenSignature
-GenSignatureFC True  = GenSignatureWithFC
-
-record GenInfraSignature withFC where
-  constructor MkGenInfraSignature
-  sig : GenSignatureFC withFC
-  autoImplExternals : List $ GenSignatureFC withFC
-  hintedExternals   : List $ GenSignatureFC withFC
-
-forgetFC : GenInfraSignature True -> GenInfraSignature False
-forgetFC (MkGenInfraSignature sig autoImpls hinted) = MkGenInfraSignature sig.sigUnFC (sigUnFC <$> autoImpls) (sigUnFC <$> hinted)
 
 --- Analysis functions ---
 
