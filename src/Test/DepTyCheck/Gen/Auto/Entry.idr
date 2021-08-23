@@ -39,6 +39,15 @@ isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `
 --- Internal functions and instances ---
 ----------------------------------------
 
+--- Info of code position ---
+
+public export
+record GenSignatureFC where
+  constructor MkGenSignatureFC
+  sigFC        : FC
+  genFC        : FC
+  targetTypeFC : FC
+
 --- Analysis functions ---
 
 checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureFC, GenSignature, GenExternals)

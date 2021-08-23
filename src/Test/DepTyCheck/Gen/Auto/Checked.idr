@@ -36,15 +36,6 @@ Eq GenSignature where
   MkGenSignature ty1 gen1 giv1 == MkGenSignature ty2 gen2 giv2
     = ty1.name == ty2.name && (finToNat <$> gen1) == (finToNat <$> gen2) && (finToNat <$> giv1) == (finToNat <$> giv2)
 
---- Info of code position ---
-
-public export
-record GenSignatureFC where
-  constructor MkGenSignatureFC
-  sigFC        : FC
-  genFC        : FC
-  targetTypeFC : FC
-
 --- Info of external generators ---
 
 public export
