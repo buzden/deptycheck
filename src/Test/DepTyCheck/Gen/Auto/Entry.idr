@@ -50,7 +50,7 @@ record GenSignatureFC where
 
 --- Analysis functions ---
 
-checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureFC, GenSignature, GenExternals)
+checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureFC, GenSignature List, GenExternals List)
 checkTypeIsGen hinted sig = do
 
   -- check the given expression is a type
@@ -225,7 +225,7 @@ checkTypeIsGen hinted sig = do
   -----------------------
 
   where
-    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature)
+    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature List)
     subCheck desc = traverse $ checkTypeIsGen [] >=> \case
       (fc, s, MkGenExternals {autoImplExternals=[], hintedExternals=[]}) => pure (fc, s)
       (fc, _, MkGenExternals {autoImplExternals=_::_, _}) => failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
