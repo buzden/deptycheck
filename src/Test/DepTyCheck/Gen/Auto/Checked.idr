@@ -36,34 +36,22 @@ Eq GenSignature where
   MkGenSignature ty1 gen1 giv1 == MkGenSignature ty2 gen2 giv2
     = ty1.name == ty2.name && (finToNat <$> gen1) == (finToNat <$> gen2) && (finToNat <$> giv1) == (finToNat <$> giv2)
 
---- One particular generator + info of code position ---
+--- Info of code position ---
 
 public export
-record GenSignatureWithFC where
-  constructor MkGenSignatureWithFC
+record GenSignatureFC where
+  constructor MkGenSignatureFC
   sigFC        : FC
   genFC        : FC
   targetTypeFC : FC
 
-  sigUnFC : GenSignature
+--- Info of external generators ---
 
 public export
-GenSignatureFC : Bool -> Type
-GenSignatureFC False = GenSignature
-GenSignatureFC True  = GenSignatureWithFC
-
---- One particular generator + info of external generators (+ possibly code position info) ---
-
-public export
-record GenInfraSignature withFC where
-  constructor MkGenInfraSignature
-  sig : GenSignatureFC withFC
-  autoImplExternals : List $ GenSignatureFC withFC
-  hintedExternals   : List $ GenSignatureFC withFC
-
-public export
-forgetFC : GenInfraSignature True -> GenInfraSignature False
-forgetFC (MkGenInfraSignature sig autoImpls hinted) = MkGenInfraSignature sig.sigUnFC .| sigUnFC <$> autoImpls .| sigUnFC <$> hinted
+record GenExternals where
+  constructor MkGenExternals
+  autoImplExternals : List GenSignature
+  hintedExternals   : List GenSignature
 
 ------------------------------------------
 --- The entry-point generator function ---
