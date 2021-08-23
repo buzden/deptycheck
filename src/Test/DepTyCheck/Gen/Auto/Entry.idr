@@ -39,9 +39,18 @@ isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `
 --- Internal functions and instances ---
 ----------------------------------------
 
+--- Info of code position ---
+
+public export
+record GenSignatureFC where
+  constructor MkGenSignatureFC
+  sigFC        : FC
+  genFC        : FC
+  targetTypeFC : FC
+
 --- Analysis functions ---
 
-checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab $ GenInfraSignature True
+checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureFC, GenSignature List, GenExternals List)
 checkTypeIsGen hinted sig = do
 
   -- check the given expression is a type
@@ -187,37 +196,40 @@ checkTypeIsGen hinted sig = do
   hinted <- subCheck "Hinted" hinted
 
   -- check that all auto-imlicit arguments are unique
-  let [] = findDiffPairWhich ((==) `on` sigUnFC) autoImplArgs
-    | (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) :: _ => failAt fc "Repetition of an auto-implicit external generator"
+  let [] = findDiffPairWhich ((==) `on` snd) autoImplArgs
+    | (_, (fc, _)) :: _ => failAt fc.targetTypeFC "Repetition of an auto-implicit external generator"
 
   -- check that all hinted arguments are unique
-  let [] = findDiffPairWhich ((==) `on` sigUnFC) hinted
-    | (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) :: _ => failAt fc "Repetition of a hinted external generator"
+  let [] = findDiffPairWhich ((==) `on` snd) hinted
+    | (_, (fc, _)) :: _ => failAt fc.targetTypeFC "Repetition of a hinted external generator"
 
   -- check that hinted and auto-implicit arguments do not intersect
-  let [] = findPairWhich ((==) `on` sigUnFC) autoImplArgs hinted
-    | (_, MkGenSignatureWithFC {targetTypeFC=fc, _}) :: _ => failAt fc "Repetition between auto-implicit and hinted external generators"
+  let [] = findPairWhich ((==) `on` snd) autoImplArgs hinted
+    | (_, (fc, _)) :: _ => failAt fc.targetTypeFC "Repetition between auto-implicit and hinted external generators"
+
+  -- forget FCs of subparsed externals
+  let autoImplArgs = snd <$> autoImplArgs
+  let hinted       = snd <$> hinted
 
   ------------
   -- Result --
   ------------
 
   let genSig = MkGenSignature {targetType, paramsToBeGenerated, givenParams}
-  pure $ MkGenInfraSignature
-           .| MkGenSignatureWithFC {sigFC=getFC sig, genFC, targetTypeFC, sigUnFC=genSig}
-           .| autoImplArgs
-           .| hinted
+  let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
+  let externals = MkGenExternals autoImplArgs hinted
+  pure (fc, genSig, externals)
 
   -----------------------
   -- Utility functions --
   -----------------------
 
   where
-    subCheck : (desc : String) -> List TTImp -> Elab $ List GenSignatureWithFC
+    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature List)
     subCheck desc = traverse $ checkTypeIsGen [] >=> \case
-      MkGenInfraSignature {sig=s, autoImplExternals=[], hintedExternals=[]} => pure s
-      MkGenInfraSignature {sig=s, autoImplExternals=_::_, _} => failAt s.genFC "\{desc} argument should not contain its own auto-implicit arguments"
-      MkGenInfraSignature {sig=s, hintedExternals=_::_, _} => failAt s.genFC "INTERNAL ERROR: parsed hinted externals are unexpectedly non empty"
+      (fc, s, MkGenExternals {autoImplExternals=[], hintedExternals=[]}) => pure (fc, s)
+      (fc, _, MkGenExternals {autoImplExternals=_::_, _}) => failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
+      (fc, _, MkGenExternals {hintedExternals=_::_, _})   => failAt fc.genFC "INTERNAL ERROR: parsed hinted externals are unexpectedly non empty"
 
     data UserDefinedName = UserName String
 
@@ -274,5 +286,5 @@ deriveGen : {default [] externalHintedGens : List TTImp} -> Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
-  _ <- forgetFC <$> checkTypeIsGen externalHintedGens signature
+  _ <- fst <$> checkTypeIsGen externalHintedGens signature
   ?deriveGen_foo
