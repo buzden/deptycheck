@@ -282,9 +282,10 @@ checkTypeIsGen hinted sig = do
 ||| due to (maybe, temporary) unability of `Gen`'s to manage infinite processes of values generation.
 |||
 export %macro
-deriveGen : {default [] externalHintedGens : List TTImp} -> Elab a
+deriveGen : {a : Type} -> {default [] externalHintedGens : List TTImp} -> Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
-  _ <- fst <$> checkTypeIsGen externalHintedGens signature
-  ?deriveGen_foo
+  (signature, externals) <- snd <$> checkTypeIsGen externalHintedGens signature
+  (lambda, locals) <- runCanonic externals $ wrapExternals externals =<< externalLambda signature
+  check $ local locals lambda
