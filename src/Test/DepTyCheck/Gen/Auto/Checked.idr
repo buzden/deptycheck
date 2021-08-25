@@ -32,9 +32,12 @@ record GenSignature f where
   givenParams         : f $ Fin targetType.args.length
 
 public export
-Functor f => Eq (f Nat) => Eq (GenSignature f) where
+Foldable f => Eq (GenSignature f) where
   MkGenSignature ty1 gen1 giv1 == MkGenSignature ty2 gen2 giv2
-    = ty1.name == ty2.name && (finToNat <$> gen1) == (finToNat <$> gen2) && (finToNat <$> giv1) == (finToNat <$> giv2)
+    = ty1.name == ty2.name && (gen1 `equiv` gen2) && (giv1 `equiv` giv2)
+    where
+      equiv : forall n, m. f (Fin n) -> f (Fin m) -> Bool
+      equiv f1 f2 = (finToNat <$> toList f1) == (finToNat <$> toList f2)
 
 namespace GenSignature
 
