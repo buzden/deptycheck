@@ -9,7 +9,7 @@ import public Decidable.Equality
 import public Debug.Reflection
 
 import public Test.DepTyCheck.Gen -- for `Gen` data type
-import public Test.DepTyCheck.Gen.Auto.Checked
+import public Test.DepTyCheck.Gen.Auto.Parsed
 
 %default total
 
@@ -50,7 +50,7 @@ record GenSignatureFC where
 
 --- Analysis functions ---
 
-checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureFC, GenSignature List, GenExternals List)
+checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureFC, ParsedUserGenSignature, ParsedUserGenExternals)
 checkTypeIsGen hinted sig = do
 
   -- check the given expression is a type
@@ -144,8 +144,8 @@ checkTypeIsGen hinted sig = do
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
-    MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, UserName name, type)
-    MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, UserName name, type)
+    MkArg MW ImplicitArg (UN name) type => pure $ Left (Parsed.ImplicitArg, UserName name, type)
+    MkArg MW ExplicitArg (UN name) type => pure $ Left (Parsed.ExplicitArg, UserName name, type)
     MkArg MW AutoImplicit (MN _ _) type => pure $ Right type
 
     MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named"
@@ -182,7 +182,7 @@ checkTypeIsGen hinted sig = do
 
   -- check that all target type's parameters classied as "given" are present in the given params list
   givenParams <- for givenParams $ \(explicitness, name, ty) => case findIndex (== name) targetTypeArgs of
-    Just found => pure $ rewrite targetTypeArgsLengthCorrect in found
+    Just found => pure (explicitness, rewrite targetTypeArgsLengthCorrect in found)
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
   ------------------------------------------------
@@ -215,9 +215,9 @@ checkTypeIsGen hinted sig = do
   -- Result --
   ------------
 
-  let genSig = MkGenSignature {targetType, paramsToBeGenerated, givenParams}
+  let genSig = MkParsedUserGenSignature {targetType, paramsToBeGenerated, givenParams}
   let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
-  let externals = MkGenExternals autoImplArgs hinted
+  let externals = MkParsedUserGenExternals autoImplArgs hinted
   pure (fc, genSig, externals)
 
   -----------------------
@@ -225,11 +225,11 @@ checkTypeIsGen hinted sig = do
   -----------------------
 
   where
-    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature List)
+    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, ParsedUserGenSignature)
     subCheck desc = traverse $ checkTypeIsGen [] >=> \case
-      (fc, s, MkGenExternals {autoImplExternals=[], hintedExternals=[]}) => pure (fc, s)
-      (fc, _, MkGenExternals {autoImplExternals=_::_, _}) => failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
-      (fc, _, MkGenExternals {hintedExternals=_::_, _})   => failAt fc.genFC "INTERNAL ERROR: parsed hinted externals are unexpectedly non empty"
+      (fc, s, MkParsedUserGenExternals {autoImplExternals=[], hintedExternals=[]}) => pure (fc, s)
+      (fc, _, MkParsedUserGenExternals {autoImplExternals=_::_, _}) => failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
+      (fc, _, MkParsedUserGenExternals {hintedExternals=_::_, _})   => failAt fc.genFC "INTERNAL ERROR: parsed hinted externals are unexpectedly non empty"
 
     data UserDefinedName = UserName String
 
@@ -282,9 +282,11 @@ checkTypeIsGen hinted sig = do
 ||| due to (maybe, temporary) unability of `Gen`'s to manage infinite processes of values generation.
 |||
 export %macro
-deriveGen : {default [] externalHintedGens : List TTImp} -> Elab a
+deriveGen : {a : Type} -> {default [] externalHintedGens : List TTImp} -> Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
-  _ <- fst <$> checkTypeIsGen externalHintedGens signature
-  ?deriveGen_foo
+  (signature, externals) <- snd <$> checkTypeIsGen externalHintedGens signature
+  let externals = parsedToCanonicGenExt externals
+  (lambda, locals) <- runCanonic externals $ wrapExternals externals =<< externalLambda signature
+  check $ local locals lambda

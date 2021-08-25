@@ -47,6 +47,10 @@ public export
 findPairWhich : (a -> b -> Bool) -> List a -> List b -> LazyList (a, b)
 findPairWhich p xs ys = filter (uncurry p) $ fromList xs `zip` fromList ys
 
+public export %inline
+toNatList : Foldable f => f (Fin n) -> List Nat
+toNatList = map finToNat . toList
+
 ---------------------------------
 --- `TTImp`-related utilities ---
 ---------------------------------
