@@ -9,7 +9,7 @@ import public Decidable.Equality
 import public Debug.Reflection
 
 import public Test.DepTyCheck.Gen -- for `Gen` data type
-import public Test.DepTyCheck.Gen.Auto.Checked
+import public Test.DepTyCheck.Gen.Auto.Parsed
 
 %default total
 
@@ -144,8 +144,8 @@ checkTypeIsGen hinted sig = do
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
-    MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, UserName name, type)
-    MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, UserName name, type)
+    MkArg MW ImplicitArg (UN name) type => pure $ Left (Parsed.ImplicitArg, UserName name, type)
+    MkArg MW ExplicitArg (UN name) type => pure $ Left (Parsed.ExplicitArg, UserName name, type)
     MkArg MW AutoImplicit (MN _ _) type => pure $ Right type
 
     MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named"

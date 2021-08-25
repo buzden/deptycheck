@@ -1,5 +1,4 @@
-||| Internal generation functions, after user input checks
-module Test.DepTyCheck.Gen.Auto.Checked
+module Test.DepTyCheck.Gen.Auto.Canonic
 
 import public Control.Monad.Reader
 import public Control.Monad.Trans
@@ -14,41 +13,9 @@ import public Test.DepTyCheck.Gen.Auto.Util
 
 %default total
 
------------------------------------------------------
---- Data types for the safe signature formulation ---
------------------------------------------------------
-
-public export
-data ArgExplicitness = ExplicitArg | ImplicitArg
-
-public export
-Eq ArgExplicitness where
-  ExplicitArg == ExplicitArg = True
-  ImplicitArg == ImplicitArg = True
-  _ == _ = False
-
---- Datatypes to describe parsed user signatures ---
-
-public export
-record ParsedUserGenSignature where
-  constructor MkParsedUserGenSignature
-  targetType : TypeInfo
-
-  -- non-checked, but meant to be that these two do not intersect and their union is a full set
-  paramsToBeGenerated : List $ Fin targetType.args.length
-  givenParams         : List (ArgExplicitness, Fin targetType.args.length)
-
-public export
-Eq ParsedUserGenSignature where
-  (==) = (==) `on` \(MkParsedUserGenSignature ty gen giv) => (ty.name, toNatList gen, toNatList $ snd <$> giv)
-
-public export
-record ParsedUserGenExternals where
-  constructor MkParsedUserGenExternals
-  autoImplExternals : List ParsedUserGenSignature
-  hintedExternals   : List ParsedUserGenSignature
-
+--------------------------------------------------------
 --- Datatypes to describe derived canonic signatures ---
+--------------------------------------------------------
 
 public export
 record CanonicGenSignature where
@@ -87,19 +54,7 @@ public export
 interface Monad m => CanonicName m where
   canonicName : CanonicGenSignature -> m Name
 
---- Signature-of-list functions ---
-
-export
-externalLambda : CanonicName m => ParsedUserGenSignature -> m TTImp
-externalLambda sig = do
-  ?foo_ext_lambda -- a remapping between a lambda from external signature and a function from canonical one
-
-export
-wrapExternals : CanonicName m => ParsedUserGenExternals -> (lambda : TTImp) -> m TTImp
-wrapExternals exts lambda = do
-  ?wrapExternals_rhs
-
---- Signature-of-set functions --
+--- Canonic signature functions --
 
 canonicSig : CanonicGenSignature -> TTImp
 canonicSig sig = ?canonicSig_rhs
@@ -123,5 +78,5 @@ CanonicName m where
 --- Canonic-dischagring function ---
 
 export
-runCanonic : ParsedUserGenExternals -> (forall m. CanonicName m => m a) -> Elab (a, List Decl)
+runCanonic : CanonicGenExternals -> (forall m. CanonicName m => m a) -> Elab (a, List Decl)
 runCanonic exts calc = ?runCanonic_rhs
