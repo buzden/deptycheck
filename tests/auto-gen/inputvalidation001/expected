@@ -711,33 +711,153 @@ ValidateInput:269:48--269:50
  269 | genY_nongen_autoimpl_dpair_nofuel : Fuel -> (a ** b ** Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
                                                       ^^
 
+Error: While processing right hand side of genY_require_self_autoimpl. External generators contain the generator asked to be derived.
+
+ValidateInput:275:30--275:39
+ 271 | 
+ 272 | --- Result is alteady in externals ---
+ 273 | 
+ 274 | genY_require_self_autoimpl : Fuel -> (Fuel -> Gen X) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
+ 275 | genY_require_self_autoimpl = deriveGen
+                                    ^^^^^^^^^
+
+Error: While processing right hand side of genY_require_self_hinted. External generators contain the generator asked to be derived.
+
+ValidateInput:278:28--278:37
+ 274 | genY_require_self_autoimpl : Fuel -> (Fuel -> Gen X) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
+ 275 | genY_require_self_autoimpl = deriveGen
+ 276 | 
+ 277 | genY_require_self_hinted : Fuel -> (Fuel -> Gen X) => (a, b : Type) -> Gen $ Y a b
+ 278 | genY_require_self_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (a, b : Type) -> Gen $ Y a b) ]}
+                                  ^^^^^^^^^
+
 Error: While processing right hand side of genY_autoimpl_in_autoimpl. Error during reflection: Auto-implicit argument should not contain its own auto-implicit arguments
 
-ValidateInput:274:102--274:105
- 270 | genY_nongen_autoimpl_dpair_nofuel = deriveGen
- 271 | 
- 272 | --- Auto-implicits are present inside auto-implicits ---
- 273 | 
- 274 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
+ValidateInput:282:102--282:105
+ 278 | genY_require_self_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (a, b : Type) -> Gen $ Y a b) ]}
+ 279 | 
+ 280 | --- Auto-implicits are present inside auto-implicits ---
+ 281 | 
+ 282 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
                                                                                                             ^^^
 
 Error: While processing right hand side of genY_autoimpl_in_hinted. Error during reflection: Hinted argument should not contain its own auto-implicit arguments
 
-ValidateInput:278:127--278:130
- 274 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
- 275 | genY_autoimpl_in_autoimpl = deriveGen
- 276 | 
- 277 | genY_autoimpl_in_hinted : Fuel -> Gen (a ** b ** Y a b)
- 278 | genY_autoimpl_in_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) ]}
+ValidateInput:286:127--286:130
+ 282 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
+ 283 | genY_autoimpl_in_autoimpl = deriveGen
+ 284 | 
+ 285 | genY_autoimpl_in_hinted : Fuel -> Gen (a ** b ** Y a b)
+ 286 | genY_autoimpl_in_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) ]}
                                                                                                                                      ^^^
 
 Error: While processing right hand side of genY_unused_argument. Error during reflection: Given parameter is not used in the target type
 
-ValidateInput:286:54--286:57
- 282 | -- TODO to add if it is needed
- 283 | 
- 284 | --- Not all arguments are used ---
- 285 | 
- 286 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
+ValidateInput:294:54--294:57
+ 290 | -- TODO to add if it is needed
+ 291 | 
+ 292 | --- Not all arguments are used ---
+ 293 | 
+ 294 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
                                                             ^^^
+
+Error: While processing right hand side of genY_wrong_giv_order. Arguments must go in the same order as in the target type.
+
+ValidateInput:300:24--300:33
+ 296 | 
+ 297 | --- Wrong order of parameters ---
+ 298 | 
+ 299 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen $ Y a b
+ 300 | genY_wrong_giv_order = deriveGen
+                              ^^^^^^^^^
+
+Error: While processing right hand side of genX_wrong_giv_order_autoimpl. Arguments must go in the same order as in the target type.
+
+ValidateInput:303:33--303:42
+ 299 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen $ Y a b
+ 300 | genY_wrong_giv_order = deriveGen
+ 301 | 
+ 302 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => Gen X
+ 303 | genX_wrong_giv_order_autoimpl = deriveGen
+                                       ^^^^^^^^^
+
+Error: While processing right hand side of genX_wrong_giv_order_autoimpl_rep. Arguments must go in the same order as in the target type.
+
+ValidateInput:306:37--306:46
+ 302 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => Gen X
+ 303 | genX_wrong_giv_order_autoimpl = deriveGen
+ 304 | 
+ 305 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => Gen X
+ 306 | genX_wrong_giv_order_autoimpl_rep = deriveGen
+                                           ^^^^^^^^^
+
+Error: While processing right hand side of genX_wrong_giv_order_hinted. Arguments must go in the same order as in the target type.
+
+ValidateInput:309:31--309:40
+ 305 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => Gen X
+ 306 | genX_wrong_giv_order_autoimpl_rep = deriveGen
+ 307 | 
+ 308 | genX_wrong_giv_order_hinted : Fuel -> Gen X
+ 309 | genX_wrong_giv_order_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (b, a : Type) -> Gen $ Y a b) ]}
+                                     ^^^^^^^^^
+
+Error: While processing right hand side of genX_wrong_giv_order_hinted_rep. Arguments must go in the same order as in the target type.
+
+ValidateInput:312:35--312:44
+ 308 | genX_wrong_giv_order_hinted : Fuel -> Gen X
+ 309 | genX_wrong_giv_order_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (b, a : Type) -> Gen $ Y a b) ]}
+ 310 | 
+ 311 | genX_wrong_giv_order_hinted_rep : Fuel -> Gen X
+ 312 | genX_wrong_giv_order_hinted_rep = deriveGen {externalHintedGens = [ `(Fuel -> (b, a : Type) -> Gen $ Y a b), `(Fuel -> (a, b : Type) -> Gen $ Y a b) ]}
+                                         ^^^^^^^^^
+
+Error: While processing right hand side of genY_wrong_gened_order. Parts of resulting dependent pair must go in the same order as in the target type.
+
+ValidateInput:315:26--315:35
+ 311 | genX_wrong_giv_order_hinted_rep : Fuel -> Gen X
+ 312 | genX_wrong_giv_order_hinted_rep = deriveGen {externalHintedGens = [ `(Fuel -> (b, a : Type) -> Gen $ Y a b), `(Fuel -> (a, b : Type) -> Gen $ Y a b) ]}
+ 313 | 
+ 314 | genY_wrong_gened_order : Fuel -> Gen (b ** a ** Y a b)
+ 315 | genY_wrong_gened_order = deriveGen
+                                ^^^^^^^^^
+
+Error: While processing right hand side of genX_wrong_gened_order_autoimpl. Parts of resulting dependent pair must go in the same order as in the target type.
+
+ValidateInput:318:35--318:44
+ 314 | genY_wrong_gened_order : Fuel -> Gen (b ** a ** Y a b)
+ 315 | genY_wrong_gened_order = deriveGen
+ 316 | 
+ 317 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => Gen X
+ 318 | genX_wrong_gened_order_autoimpl = deriveGen
+                                         ^^^^^^^^^
+
+Error: While processing right hand side of genX_wrong_gened_order_autoimpl_rep. Parts of resulting dependent pair must go in the same order as in the target type.
+
+ValidateInput:321:39--321:48
+ 317 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => Gen X
+ 318 | genX_wrong_gened_order_autoimpl = deriveGen
+ 319 | 
+ 320 | genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => (Fuel -> Gen (a ** b ** Y a b)) => Gen X
+ 321 | genX_wrong_gened_order_autoimpl_rep = deriveGen
+                                             ^^^^^^^^^
+
+Error: While processing right hand side of genX_wrong_gened_order_hinted. Parts of resulting dependent pair must go in the same order as in the target type.
+
+ValidateInput:324:84--324:97
+ 320 | genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => (Fuel -> Gen (a ** b ** Y a b)) => Gen X
+ 321 | genX_wrong_gened_order_autoimpl_rep = deriveGen
+ 322 | 
+ 323 | genX_wrong_gened_order_hinted : Fuel -> Gen X
+ 324 | genX_wrong_gened_order_hinted = deriveGen {externalHintedGens = [ `(Fuel -> Gen (b ** a ** Y a b)) ]}
+                                                                                          ^^^^^^^^^^^^^
+
+Error: While processing right hand side of genX_wrong_gened_order_hinted_rep. Parts of resulting dependent pair must go in the same order as in the target type.
+
+ValidateInput:327:88--327:101
+ 323 | genX_wrong_gened_order_hinted : Fuel -> Gen X
+ 324 | genX_wrong_gened_order_hinted = deriveGen {externalHintedGens = [ `(Fuel -> Gen (b ** a ** Y a b)) ]}
+ 325 | 
+ 326 | genX_wrong_gened_order_hinted_rep : Fuel -> Gen X
+ 327 | genX_wrong_gened_order_hinted_rep = deriveGen {externalHintedGens = [ `(Fuel -> Gen (b ** a ** Y a b)), `(Fuel -> Gen (a ** b ** Y a b)) ]}
+                                                                                              ^^^^^^^^^^^^^
 

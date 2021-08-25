@@ -269,6 +269,14 @@ genY_nongen_autoimpl_pair_nofuel = deriveGen
 genY_nongen_autoimpl_dpair_nofuel : Fuel -> (a ** b ** Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
 genY_nongen_autoimpl_dpair_nofuel = deriveGen
 
+--- Result is alteady in externals ---
+
+genY_require_self_autoimpl : Fuel -> (Fuel -> Gen X) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
+genY_require_self_autoimpl = deriveGen
+
+genY_require_self_hinted : Fuel -> (Fuel -> Gen X) => (a, b : Type) -> Gen $ Y a b
+genY_require_self_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (a, b : Type) -> Gen $ Y a b) ]}
+
 --- Auto-implicits are present inside auto-implicits ---
 
 genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
@@ -285,3 +293,35 @@ genY_autoimpl_in_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (Fuel -> (
 
 genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
 genY_unused_argument = deriveGen
+
+--- Wrong order of parameters ---
+
+genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen $ Y a b
+genY_wrong_giv_order = deriveGen
+
+genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => Gen X
+genX_wrong_giv_order_autoimpl = deriveGen
+
+genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => Gen X
+genX_wrong_giv_order_autoimpl_rep = deriveGen
+
+genX_wrong_giv_order_hinted : Fuel -> Gen X
+genX_wrong_giv_order_hinted = deriveGen {externalHintedGens = [ `(Fuel -> (b, a : Type) -> Gen $ Y a b) ]}
+
+genX_wrong_giv_order_hinted_rep : Fuel -> Gen X
+genX_wrong_giv_order_hinted_rep = deriveGen {externalHintedGens = [ `(Fuel -> (b, a : Type) -> Gen $ Y a b), `(Fuel -> (a, b : Type) -> Gen $ Y a b) ]}
+
+genY_wrong_gened_order : Fuel -> Gen (b ** a ** Y a b)
+genY_wrong_gened_order = deriveGen
+
+genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => Gen X
+genX_wrong_gened_order_autoimpl = deriveGen
+
+genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => (Fuel -> Gen (a ** b ** Y a b)) => Gen X
+genX_wrong_gened_order_autoimpl_rep = deriveGen
+
+genX_wrong_gened_order_hinted : Fuel -> Gen X
+genX_wrong_gened_order_hinted = deriveGen {externalHintedGens = [ `(Fuel -> Gen (b ** a ** Y a b)) ]}
+
+genX_wrong_gened_order_hinted_rep : Fuel -> Gen X
+genX_wrong_gened_order_hinted_rep = deriveGen {externalHintedGens = [ `(Fuel -> Gen (b ** a ** Y a b)), `(Fuel -> Gen (a ** b ** Y a b)) ]}
