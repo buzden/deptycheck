@@ -36,11 +36,11 @@ record ParsedUserGenSignature where
 
   -- non-checked, but meant to be that these two do not intersect and their union is a full set
   paramsToBeGenerated : List $ Fin targetType.args.length
-  givenParams         : List $ Fin targetType.args.length
+  givenParams         : List (ArgExplicitness, Fin targetType.args.length)
 
 public export
 Eq ParsedUserGenSignature where
-  (==) = (==) `on` \(MkParsedUserGenSignature ty gen giv) => (ty.name, toNatList gen, toNatList giv)
+  (==) = (==) `on` \(MkParsedUserGenSignature ty gen giv) => (ty.name, toNatList gen, toNatList $ snd <$> giv)
 
 public export
 record ParsedUserGenExternals where

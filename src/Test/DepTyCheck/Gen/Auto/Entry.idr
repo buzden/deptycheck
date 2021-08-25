@@ -182,7 +182,7 @@ checkTypeIsGen hinted sig = do
 
   -- check that all target type's parameters classied as "given" are present in the given params list
   givenParams <- for givenParams $ \(explicitness, name, ty) => case findIndex (== name) targetTypeArgs of
-    Just found => pure $ rewrite targetTypeArgsLengthCorrect in found
+    Just found => pure (explicitness, rewrite targetTypeArgsLengthCorrect in found)
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
   ------------------------------------------------
