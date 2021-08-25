@@ -7,6 +7,9 @@ modules = System.Random.Simple
         , Data.List.Lazier
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Auto
+        , Test.DepTyCheck.Gen.Auto.Entry
+        , Test.DepTyCheck.Gen.Auto.Parsed
+        , Test.DepTyCheck.Gen.Auto.Canonic
 
 depends = contrib
         , elab-util
