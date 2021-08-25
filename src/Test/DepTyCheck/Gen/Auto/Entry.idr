@@ -50,8 +50,8 @@ record GenSignatureFC where
 
 --- Analysis functions ---
 
-checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureFC, ParsedUserGenSignature, ParsedUserGenExternals)
-checkTypeIsGen hinted sig = do
+checkTypeIsGen : TTImp -> Elab (GenSignatureFC, ParsedUserGenSignature, ParsedUserGenExternals)
+checkTypeIsGen sig = do
 
   -- check the given expression is a type
   _ <- check {expected=Type} sig
@@ -185,31 +185,19 @@ checkTypeIsGen hinted sig = do
     Just found => pure (explicitness, rewrite targetTypeArgsLengthCorrect in found)
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
-  ------------------------------------------------
-  -- Auto-implicit and hinted generators checks --
-  ------------------------------------------------
+  -------------------------------------
+  -- Auto-implicit generators checks --
+  -------------------------------------
 
   -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
   autoImplArgs <- subCheck "Auto-implicit" autoImplArgs
-
-  -- check all hinted arguments pass the checks for the `Gen`
-  hinted <- subCheck "Hinted" hinted
 
   -- check that all auto-imlicit arguments are unique
   let [] = findDiffPairWhich ((==) `on` snd) autoImplArgs
     | (_, (fc, _)) :: _ => failAt fc.targetTypeFC "Repetition of an auto-implicit external generator"
 
-  -- check that all hinted arguments are unique
-  let [] = findDiffPairWhich ((==) `on` snd) hinted
-    | (_, (fc, _)) :: _ => failAt fc.targetTypeFC "Repetition of a hinted external generator"
-
-  -- check that hinted and auto-implicit arguments do not intersect
-  let [] = findPairWhich ((==) `on` snd) autoImplArgs hinted
-    | (_, (fc, _)) :: _ => failAt fc.targetTypeFC "Repetition between auto-implicit and hinted external generators"
-
   -- forget FCs of subparsed externals
   let autoImplArgs = snd <$> autoImplArgs
-  let hinted       = snd <$> hinted
 
   ------------
   -- Result --
@@ -217,7 +205,7 @@ checkTypeIsGen hinted sig = do
 
   let genSig = MkParsedUserGenSignature {targetType, paramsToBeGenerated, givenParams}
   let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
-  let externals = MkParsedUserGenExternals autoImplArgs hinted
+  let externals = MkParsedUserGenExternals autoImplArgs
   pure (fc, genSig, externals)
 
   -----------------------
@@ -226,10 +214,9 @@ checkTypeIsGen hinted sig = do
 
   where
     subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, ParsedUserGenSignature)
-    subCheck desc = traverse $ checkTypeIsGen [] >=> \case
-      (fc, s, MkParsedUserGenExternals {autoImplExternals=[], hintedExternals=[]}) => pure (fc, s)
-      (fc, _, MkParsedUserGenExternals {autoImplExternals=_::_, _}) => failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
-      (fc, _, MkParsedUserGenExternals {hintedExternals=_::_, _})   => failAt fc.genFC "INTERNAL ERROR: parsed hinted externals are unexpectedly non empty"
+    subCheck desc = traverse $ checkTypeIsGen >=> \case
+      (fc, s, MkParsedUserGenExternals [])     => pure (fc, s)
+      (fc, _, MkParsedUserGenExternals (_::_)) => failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
 
     data UserDefinedName = UserName String
 
@@ -255,38 +242,33 @@ checkTypeIsGen hinted sig = do
 ||| But still, you can use this function `deriveGen` to derive a function with such signature.
 |||
 ||| Say, you want your generator to be parameterized with some external `Gen`'s.
-||| Some of these `Gen`'s are known declared `%hint x : Gen Y`, some of them should go as an `auto` parameters.
 ||| Consider types `data Y where ...`, `data Z1 where ...` and `data Z2 (b : B n) where ...`.
 ||| For this, `auto`-parameters can be listed with `=>`-syntax in the signature.
-||| External generators declared with `%hint` need to be listed separately in the implicit argument of `deriveGen`.
 |||
-||| For example, if you want to use `%hint` for `Gen Y` and `Gen`'s for `Z1` and `Z2` to be `auto` parameters,
+||| For example, if you want to use `Gen Y` and `Gen`'s for `Z1` and `Z2` as external generators,
 ||| you can define your function in the following way:
 |||
 |||   ```idris
-|||   genX : Gen Z1 => ({n : _} -> {b : B n} -> Gen (Z2 b)) => {n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)
-|||   genX = deriveGen { externalHintedGens = [ `(Gen Y) ] }
-|||   ```
-|||
-||| `%hint _ : Gen Y` from the current scope will be used as soon as a value of type `Y` will be needed for generation.
-|||
-||| Consider another example, where all generators for `Y`, `Z1` and `Z2` are means to be defined with `%hint`.
-||| In this case, you are meant to declare it in the following way:
-|||
-|||   ```idris
-|||   genX : {n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)
-|||   genX = deriveGen { externalHintedGens = [ `(Gen Z1), `({n : _} -> {b : B n} -> Gen (Z2 b)), `(Gen Y) ] }
+|||   genX : Gen Y => Gen Z1 => ({n : _} -> {b : B n} -> Gen (Z2 b)) => {n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)
+|||   genX = deriveGen
 |||   ```
 |||
 ||| Consider also, that you may be asked for having the `Fuel` argument as the first argument in the signature
 ||| due to (maybe, temporary) unability of `Gen`'s to manage infinite processes of values generation.
+||| So, the example from above will look like this:
+|||
+|||   ```idris
+|||   genX : Fuel -> (Fuel -> Gen Y) => (Fuel -> Gen Z1) => (Fuel -> {n : _} -> {b : B n} -> Gen (Z2 b)) => {n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)
+|||   genX = deriveGen
+|||   ```
+|||
 |||
 export %macro
-deriveGen : {a : Type} -> {default [] externalHintedGens : List TTImp} -> Elab a
+deriveGen : {a : Type} -> Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
-  (signature, externals) <- snd <$> checkTypeIsGen externalHintedGens signature
+  (signature, externals) <- snd <$> checkTypeIsGen signature
   let externals = parsedToCanonicGenExt externals
   (lambda, locals) <- runCanonic externals $ wrapExternals externals =<< externalLambda signature
   check $ local locals lambda

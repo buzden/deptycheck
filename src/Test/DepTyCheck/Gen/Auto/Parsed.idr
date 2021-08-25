@@ -36,7 +36,6 @@ public export
 record ParsedUserGenExternals where
   constructor MkParsedUserGenExternals
   autoImplExternals : List ParsedUserGenSignature
-  hintedExternals   : List ParsedUserGenSignature
 
 export
 parsedToCanonicGenSig : ParsedUserGenSignature -> CanonicGenSignature
@@ -44,8 +43,8 @@ parsedToCanonicGenSig $ MkParsedUserGenSignature ty gen giv = MkCanonicGenSignat
 
 export
 parsedToCanonicGenExt : ParsedUserGenExternals -> CanonicGenExternals
-parsedToCanonicGenExt $ MkParsedUserGenExternals autoImpl hinted =
-  MkCanonicGenExternals .: union `on` fromList . map parsedToCanonicGenSig .| autoImpl .| hinted
+parsedToCanonicGenExt $ MkParsedUserGenExternals autoImpl =
+  MkCanonicGenExternals $ fromList $ parsedToCanonicGenSig <$> autoImpl
 
 --- Parsed user's gen signature functions ---
 
