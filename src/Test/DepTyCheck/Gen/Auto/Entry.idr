@@ -50,7 +50,7 @@ record GenSignatureFC where
 
 --- Analysis functions ---
 
-checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureFC, GenSignature List, GenExternals List)
+checkTypeIsGen : (hinted : List TTImp) -> TTImp -> Elab (GenSignatureFC, ParsedUserGenSignature, ParsedUserGenExternals)
 checkTypeIsGen hinted sig = do
 
   -- check the given expression is a type
@@ -215,9 +215,9 @@ checkTypeIsGen hinted sig = do
   -- Result --
   ------------
 
-  let genSig = MkGenSignature {targetType, paramsToBeGenerated, givenParams}
+  let genSig = MkParsedUserGenSignature {targetType, paramsToBeGenerated, givenParams}
   let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
-  let externals = MkGenExternals autoImplArgs hinted
+  let externals = MkParsedUserGenExternals autoImplArgs hinted
   pure (fc, genSig, externals)
 
   -----------------------
@@ -225,11 +225,11 @@ checkTypeIsGen hinted sig = do
   -----------------------
 
   where
-    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature List)
+    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, ParsedUserGenSignature)
     subCheck desc = traverse $ checkTypeIsGen [] >=> \case
-      (fc, s, MkGenExternals {autoImplExternals=[], hintedExternals=[]}) => pure (fc, s)
-      (fc, _, MkGenExternals {autoImplExternals=_::_, _}) => failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
-      (fc, _, MkGenExternals {hintedExternals=_::_, _})   => failAt fc.genFC "INTERNAL ERROR: parsed hinted externals are unexpectedly non empty"
+      (fc, s, MkParsedUserGenExternals {autoImplExternals=[], hintedExternals=[]}) => pure (fc, s)
+      (fc, _, MkParsedUserGenExternals {autoImplExternals=_::_, _}) => failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
+      (fc, _, MkParsedUserGenExternals {hintedExternals=_::_, _})   => failAt fc.genFC "INTERNAL ERROR: parsed hinted externals are unexpectedly non empty"
 
     data UserDefinedName = UserName String
 

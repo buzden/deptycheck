@@ -27,48 +27,55 @@ Eq ArgExplicitness where
   ImplicitArg == ImplicitArg = True
   _ == _ = False
 
---- Datatype that describes one particular generator ---
+--- Datatypes to describe parsed user signatures ---
 
 public export
-record GenSignature f where
-  constructor MkGenSignature
+record ParsedUserGenSignature where
+  constructor MkParsedUserGenSignature
   targetType : TypeInfo
 
   -- non-checked, but meant to be that these two do not intersect and their union is a full set
-  paramsToBeGenerated : f $ Fin targetType.args.length
-  givenParams         : f $ Fin targetType.args.length
+  paramsToBeGenerated : List $ Fin targetType.args.length
+  givenParams         : List $ Fin targetType.args.length
 
 public export
-Foldable f => Eq (GenSignature f) where
-  MkGenSignature ty1 gen1 giv1 == MkGenSignature ty2 gen2 giv2
-    = ty1.name == ty2.name && (gen1 `equiv` gen2) && (giv1 `equiv` giv2)
-    where
-      equiv : forall n, m. f (Fin n) -> f (Fin m) -> Bool
-      equiv f1 f2 = (finToNat <$> toList f1) == (finToNat <$> toList f2)
+Eq ParsedUserGenSignature where
+  (==) = (==) `on` \(MkParsedUserGenSignature ty gen giv) => (ty.name, toNatList gen, toNatList giv)
 
 public export
-Foldable f => Ord (GenSignature f) where
-  compare = comparing $ \(MkGenSignature ty gen giv) => (show ty.name, finToNat <$> toList gen, finToNat <$> toList giv)
+record ParsedUserGenExternals where
+  constructor MkParsedUserGenExternals
+  autoImplExternals : List ParsedUserGenSignature
+  hintedExternals   : List ParsedUserGenSignature
 
-namespace GenSignature
-
-  public export
-  mapCarrier : (forall a. f a -> g a) -> GenSignature f -> GenSignature g
-  mapCarrier h (MkGenSignature ty gen giv) = MkGenSignature ty .| h gen .| h giv
-
---- Info of external generators ---
+--- Datatypes to describe derived canonic signatures ---
 
 public export
-record GenExternals f where
-  constructor MkGenExternals
-  autoImplExternals : f $ GenSignature f
-  hintedExternals   : f $ GenSignature f
+record CanonicGenSignature where
+  constructor MkCanonicGenSignature
+  targetType : TypeInfo
 
-namespace GenExternals
+  -- non-checked, but meant to be that these two do not intersect and their union is a full set
+  paramsToBeGenerated : SortedSet $ Fin targetType.args.length
+  givenParams         : SortedSet $ Fin targetType.args.length
 
-  public export
-  mapCarrier : Functor f => (forall a. f a -> g a) -> GenExternals f -> GenExternals g
-  mapCarrier h (MkGenExternals ae he) = MkGenExternals .| h (mapCarrier h <$> ae) .| h (mapCarrier h <$> he)
+namespace CanonicGenSignature
+
+  characteristics : CanonicGenSignature -> (String, List Nat, List Nat)
+  characteristics (MkCanonicGenSignature ty gen giv) = (show ty.name, toNatList gen, toNatList giv)
+
+public export
+Eq CanonicGenSignature where
+  (==) = (==) `on` characteristics
+
+public export
+Ord CanonicGenSignature where
+  compare = comparing characteristics
+
+public export
+record CanonicGenExternals where
+  constructor MkCanonicGenExternals
+  externals : SortedSet CanonicGenSignature
 
 -----------------------------------
 --- "Canonical" functions stuff ---
@@ -76,40 +83,36 @@ namespace GenExternals
 
 --- Main interfaces ---
 
-public export %inline
-GenSigS : Type
-GenSigS = GenSignature SortedSet
-
 public export
 interface Monad m => CanonicName m where
-  canonicName : GenSigS -> m Name
+  canonicName : CanonicGenSignature -> m Name
 
 --- Signature-of-list functions ---
 
 export
-externalLambda : CanonicName m => GenSignature List -> m TTImp
+externalLambda : CanonicName m => ParsedUserGenSignature -> m TTImp
 externalLambda sig = do
   ?foo_ext_lambda -- a remapping between a lambda from external signature and a function from canonical one
 
 export
-wrapExternals : CanonicName m => GenExternals List -> (lambda : TTImp) -> m TTImp
+wrapExternals : CanonicName m => ParsedUserGenExternals -> (lambda : TTImp) -> m TTImp
 wrapExternals exts lambda = do
   ?wrapExternals_rhs
 
 --- Signature-of-set functions --
 
-canonicSig : GenSigS -> TTImp
+canonicSig : CanonicGenSignature -> TTImp
 canonicSig sig = ?canonicSig_rhs
 
 export
-deriveCanonical : CanonicName m => GenSigS -> m Decl
+deriveCanonical : CanonicName m => CanonicGenSignature -> m Decl
 deriveCanonical sig = do
   ?deriveCanonical_rhs
 
 --- Implementations for the canonic interfaces ---
 
-MonadReader (SortedMap GenSigS Name) m =>
-MonadWriter (SortedMap GenSigS $ Lazy Decl) m =>
+MonadReader (SortedMap CanonicGenSignature Name) m =>
+MonadWriter (SortedMap CanonicGenSignature $ Lazy Decl) m =>
 CanonicName m where
   canonicName sig = do
     let Nothing = lookup sig !ask
@@ -120,5 +123,5 @@ CanonicName m where
 --- Canonic-dischagring function ---
 
 export
-runCanonic : GenExternals List -> (forall m. CanonicName m => m a) -> Elab (a, List Decl)
+runCanonic : ParsedUserGenExternals -> (forall m. CanonicName m => m a) -> Elab (a, List Decl)
 runCanonic exts calc = ?runCanonic_rhs
