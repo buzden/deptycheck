@@ -38,6 +38,15 @@ record ParsedUserGenExternals where
   autoImplExternals : List ParsedUserGenSignature
   hintedExternals   : List ParsedUserGenSignature
 
+export
+parsedToCanonicGenSig : ParsedUserGenSignature -> CanonicGenSignature
+parsedToCanonicGenSig $ MkParsedUserGenSignature ty gen giv = MkCanonicGenSignature ty `on` fromList .| gen .| snd <$> giv
+
+export
+parsedToCanonicGenExt : ParsedUserGenExternals -> CanonicGenExternals
+parsedToCanonicGenExt $ MkParsedUserGenExternals autoImpl hinted =
+  MkCanonicGenExternals .: union `on` fromList . map parsedToCanonicGenSig .| autoImpl .| hinted
+
 --- Parsed user's gen signature functions ---
 
 export
@@ -54,4 +63,4 @@ wrapExternals exts lambda = do
 
 export
 runCanonic : ParsedUserGenExternals -> (forall m. CanonicName m => m a) -> Elab (a, List Decl)
-runCanonic exts calc = ?runCanonic_rhs
+runCanonic = runCanonic . parsedToCanonicGenExt
