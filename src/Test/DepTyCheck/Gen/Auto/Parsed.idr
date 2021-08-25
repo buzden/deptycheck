@@ -53,14 +53,3 @@ export
 externalLambda : CanonicName m => ParsedUserGenSignature -> m TTImp
 externalLambda sig = do
   ?foo_ext_lambda -- a remapping between a lambda from external signature and a function from canonical one
-
-export
-wrapExternals : CanonicName m => ParsedUserGenExternals -> (lambda : TTImp) -> m TTImp
-wrapExternals exts lambda = do
-  ?wrapExternals_rhs
-
---- Canonic-dischagring function ---
-
-export
-runCanonic : ParsedUserGenExternals -> (forall m. CanonicName m => m a) -> Elab (a, List Decl)
-runCanonic = runCanonic . parsedToCanonicGenExt
