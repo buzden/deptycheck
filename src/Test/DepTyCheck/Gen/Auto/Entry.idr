@@ -17,12 +17,7 @@ import public Test.DepTyCheck.Gen.Auto.Checked
 --- Utility `TTImp`-related functions ---
 -----------------------------------------
 
---- Parsing `TTImp` stuff ---
-
-unDPair : TTImp -> (List (Count, PiInfo TTImp, Maybe Name, TTImp), TTImp)
-unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo mbname _ lamTy)) =
-    mapFst ((cnt, piInfo, mbname, typ)::) $ unDPair lamTy
-unDPair expr = ([], expr)
+--- Special `TTImp` parsing stuff ---
 
 unDPairUnAlt : TTImp -> Maybe (List (Count, PiInfo TTImp, Maybe Name, TTImp), TTImp)
 unDPairUnAlt (IAlternative _ _ alts) = case filter (not . force . null . Builtin.fst) $ unDPair <$> alts of
