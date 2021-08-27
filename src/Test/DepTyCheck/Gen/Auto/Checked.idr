@@ -66,11 +66,6 @@ interface Monad m => CanonicName m where
 
 --- Canonic signature functions --
 
-export
-wrapExternals : CanonicName m => GenExternals -> (lambda : TTImp) -> m TTImp
-wrapExternals exts lambda = do
-  ?wrapExternals_rhs
-
 canonicSig : GenSignature -> TTImp
 canonicSig sig = ?canonicSig_rhs
 
