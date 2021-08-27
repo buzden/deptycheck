@@ -71,6 +71,10 @@ canonicSig : GenSignature -> TTImp
 canonicSig sig = ?canonicSig_rhs
 
 export
+callCanonicGen : CanonicName m => (sig : GenSignature) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
+callCanonicGen sig values = ?callCanonicGen_rhs
+
+export
 deriveCanonical : CanonicName m => GenSignature -> m Decl
 deriveCanonical sig = do
   ?deriveCanonical_rhs
