@@ -65,6 +65,16 @@ public export %inline
 toNatList : Foldable f => f (Fin n) -> List Nat
 toNatList = map finToNat . toList
 
+public export
+mapI' : (xs : List a) -> (Fin xs.length -> a -> b) -> List b
+mapI' []      _ = []
+mapI' (x::xs) f = f FZ x :: mapI' xs (f . FS)
+
+public export
+mapMaybeI' : (xs : List a) -> (Fin xs.length -> a -> Maybe b) -> List b
+mapMaybeI' []      _ = []
+mapMaybeI' (x::xs) f = maybe id (::) .| f FZ x .| mapMaybeI' xs (f . FS)
+
 ---------------------------------
 --- `TTImp`-related utilities ---
 ---------------------------------
