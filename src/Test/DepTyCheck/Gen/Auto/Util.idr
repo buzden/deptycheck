@@ -4,6 +4,9 @@ import public Data.Fin
 import public Data.List.Lazy
 import public Data.Zippable
 
+import public Data.SortedMap
+import public Data.SortedSet
+
 import public Language.Reflection.TTImp
 
 %default total
@@ -19,13 +22,29 @@ public export %inline
 (.|) : (a -> b) -> a -> b
 (.|) = id
 
------------------------
---- Lists utilities ---
------------------------
+-----------------------------
+--- Nice postfix notation ---
+-----------------------------
 
 public export %inline
 (.length) : List a -> Nat
 xs.length = length xs
+
+namespace SortedMap
+
+  public export %inline
+  (.asList) : SortedMap k v -> List (k, v)
+  m.asList = SortedMap.toList m
+
+namespace SortedSet
+
+  public export %inline
+  (.asList) : SortedSet a -> List a
+  s.asList = SortedSet.toList s
+
+-----------------------
+--- Lists utilities ---
+-----------------------
 
 -- Not effective but clean
 public export
