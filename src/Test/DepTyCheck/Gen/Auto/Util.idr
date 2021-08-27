@@ -8,6 +8,7 @@ import public Data.SortedMap
 import public Data.SortedSet
 
 import public Language.Reflection.TTImp
+import public Language.Reflection.Syntax
 
 %default total
 
@@ -71,9 +72,9 @@ toNatList = map finToNat . toList
 --- Parsing `TTImp` stuff ---
 
 public export
-unDPair : TTImp -> (List (Count, PiInfo TTImp, Maybe Name, TTImp), TTImp)
+unDPair : TTImp -> (List (Arg False), TTImp)
 unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo mbname _ lamTy)) =
-    mapFst ((cnt, piInfo, mbname, typ)::) $ unDPair lamTy
+    mapFst (MkArg cnt piInfo mbname typ ::) $ unDPair lamTy
 unDPair expr = ([], expr)
 
 --- General purpose instances ---

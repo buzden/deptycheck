@@ -19,7 +19,7 @@ import public Test.DepTyCheck.Gen.Auto.Checked
 
 --- Special `TTImp` parsing stuff ---
 
-unDPairUnAlt : TTImp -> Maybe (List (Count, PiInfo TTImp, Maybe Name, TTImp), TTImp)
+unDPairUnAlt : TTImp -> Maybe (List (Arg False), TTImp)
 unDPairUnAlt (IAlternative _ _ alts) = case filter (not . force . null . Builtin.fst) $ unDPair <$> alts of
   [x] => Just x
   _   => Nothing
@@ -133,8 +133,8 @@ checkTypeIsGen sig = do
 
   -- check that all parameters of `DPair` are as expected
   paramsToBeGenerated <- for paramsToBeGenerated $ \case
-    (MW, ExplicitArg, Just (UN nm), t) => pure (UserName nm, t)
-    (_,  _,           _           , _) => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
+    MkArg MW ExplicitArg (Just $ UN nm) t => pure (UserName nm, t)
+    _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
