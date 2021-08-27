@@ -34,7 +34,7 @@ public export
 record GenSignature where
   constructor MkGenSignature
   targetType : TypeInfo
-  givenParams : SortedMap (Fin targetType.args.length) ArgExplicitness
+  givenParams : SortedMap (Fin targetType.args.length) (ArgExplicitness, Name)
 
 namespace GenSignature
 
@@ -66,6 +66,7 @@ interface Monad m => CanonicName m where
 
 --- Canonic signature functions --
 
+-- Must respect names from the `givenParams` field, at least for implicit parameters
 canonicSig : GenSignature -> TTImp
 canonicSig sig = ?canonicSig_rhs
 

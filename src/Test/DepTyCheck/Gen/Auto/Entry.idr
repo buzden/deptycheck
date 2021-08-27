@@ -180,7 +180,7 @@ checkTypeIsGen sig = do
 
   -- check that all target type's parameters classied as "given" are present in the given params list
   givenParams <- for {b=(_, Fin targetType.args.length, _)} givenParams $ \(explicitness, name, ty) => case findIndex (== name) targetTypeArgs of
-    Just found => pure (ty, rewrite targetTypeArgsLengthCorrect in found, explicitness)
+    Just found => pure (ty, rewrite targetTypeArgsLengthCorrect in found, explicitness, toTTName name)
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
   -- check the increasing order of generated params
@@ -242,6 +242,9 @@ checkTypeIsGen sig = do
 
     Eq UserDefinedName where
       (==) = (==) `on` \(UserName n) => n
+
+    toTTName : UserDefinedName -> Name
+    toTTName (UserName n) = UN n
 
     nonIncreasingsBy : Ord b => (a -> b) -> List a -> LazyList (a, a)
     nonIncreasingsBy f xs =
