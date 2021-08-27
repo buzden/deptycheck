@@ -46,12 +46,6 @@ namespace SortedSet
 --- Lists utilities ---
 -----------------------
 
--- Not effective but clean
-public export
-find' : (p : a -> Bool) -> (xs : List a) -> Maybe $ Fin xs.length
-find' _ [] = Nothing
-find' p (x::xs) = if p x then Just FZ else FS <$> find' p xs
-
 -- Calculates all pairs except for the pairs of elements with themselves.
 public export
 notTrivPairs : List a -> LazyList (a, a)
