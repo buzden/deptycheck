@@ -581,15 +581,15 @@ ValidateInput:228:48--228:50
  228 | genY_nongen_autoimpl_dpair_nofuel : Fuel -> (a ** b ** Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
                                                       ^^
 
-Error: While processing right hand side of genY_require_self_autoimpl. External generators contain the generator asked to be derived.
+Error: While processing right hand side of genY_require_self_autoimpl. Error during reflection: External generators contain the generator asked to be derived
 
-ValidateInput:234:30--234:39
+ValidateInput:233:83--233:86
+ 229 | genY_nongen_autoimpl_dpair_nofuel = deriveGen
  230 | 
  231 | --- Result is alteady in externals ---
  232 | 
  233 | genY_require_self_autoimpl : Fuel -> (Fuel -> Gen X) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
- 234 | genY_require_self_autoimpl = deriveGen
-                                    ^^^^^^^^^
+                                                                                         ^^^
 
 Error: While processing right hand side of genY_autoimpl_in_autoimpl. Error during reflection: Auto-implicit argument should not contain its own auto-implicit arguments
 

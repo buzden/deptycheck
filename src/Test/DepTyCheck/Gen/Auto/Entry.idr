@@ -199,6 +199,9 @@ checkTypeIsGen sig = do
   -- forget the order of the given params, convert to a map from index to explicitness
   let givenParams = fromList $ snd <$> givenParams
 
+  -- make the resulting signature
+  let genSig = MkGenSignature {targetType, givenParams}
+
   -------------------------------------
   -- Auto-implicit generators checks --
   -------------------------------------
@@ -210,6 +213,10 @@ checkTypeIsGen sig = do
   let [] = findDiffPairWhich ((==) `on` snd) autoImplArgs
     | (_, (fc, _)) :: _ => failAt fc.targetTypeFC "Repetition of an auto-implicit external generator"
 
+  -- check that the resulting generator is not in externals
+  let Nothing = find ((== genSig) . snd) autoImplArgs
+    | Just (fc, _) => failAt fc.genFC "External generators contain the generator asked to be derived"
+
   -- forget FCs of subparsed externals
   let autoImplArgs = fromList $ snd <$> autoImplArgs
 
@@ -217,7 +224,6 @@ checkTypeIsGen sig = do
   -- Result --
   ------------
 
-  let genSig = MkGenSignature {targetType, givenParams}
   let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
   let externals = MkGenExternals autoImplArgs
   pure (fc, genSig, externals)
