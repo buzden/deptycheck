@@ -135,7 +135,6 @@ checkTypeIsGen sig = do
   paramsToBeGenerated <- for paramsToBeGenerated $ \case
     (MW, ExplicitArg, Just (UN nm), t) => pure (UserName nm, t)
     (_,  _,           _           , _) => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
-    _                                  => failAt (getFC sigResult) "INTERNAL ERROR: bad lambda in dpair under `Gen`"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
