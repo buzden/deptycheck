@@ -9,7 +9,7 @@ import public Decidable.Equality
 import public Debug.Reflection
 
 import public Test.DepTyCheck.Gen -- for `Gen` data type
-import public Test.DepTyCheck.Gen.Auto.Parsed
+import public Test.DepTyCheck.Gen.Auto.Checked
 
 %default total
 
@@ -50,7 +50,7 @@ record GenSignatureFC where
 
 --- Analysis functions ---
 
-checkTypeIsGen : TTImp -> Elab (GenSignatureFC, ParsedUserGenSignature, ParsedUserGenExternals)
+checkTypeIsGen : TTImp -> Elab (GenSignatureFC, GenSignature, GenExternals)
 checkTypeIsGen sig = do
 
   -- check the given expression is a type
@@ -144,8 +144,8 @@ checkTypeIsGen sig = do
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
-    MkArg MW ImplicitArg (UN name) type => pure $ Left (Parsed.ImplicitArg, UserName name, type)
-    MkArg MW ExplicitArg (UN name) type => pure $ Left (Parsed.ExplicitArg, UserName name, type)
+    MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, UserName name, type)
+    MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, UserName name, type)
     MkArg MW AutoImplicit (MN _ _) type => pure $ Right type
 
     MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named"
@@ -168,7 +168,7 @@ checkTypeIsGen sig = do
     | (_, (_, ty)) :: _ => failAt (getFC ty) "Name of the argument is not unique in the dependent pair under the resulting `Gen`"
 
   -- check that all given parameters have different names
-  let [] = findDiffPairWhich ((==) `on` (Builtin.fst . snd)) givenParams
+  let [] = findDiffPairWhich ((==) `on` (\(_, n, _) => n)) givenParams
     | (_, (_, _, ty)) :: _ => failAt (getFC ty) "Name of the generator function's argument is not unique"
 
   -----------------------------------------------------------------------
@@ -176,14 +176,28 @@ checkTypeIsGen sig = do
   -----------------------------------------------------------------------
 
   -- check that all parameters to be generated are actually used inside the target type
-  paramsToBeGenerated <- for paramsToBeGenerated $ \(name, ty) => case findIndex (== name) targetTypeArgs of
-    Just found => pure $ rewrite targetTypeArgsLengthCorrect in found
+  paramsToBeGenerated <- for {b=(_, Fin targetType.args.length)} paramsToBeGenerated $ \(name, ty) => case findIndex (== name) targetTypeArgs of
+    Just found => pure (ty, rewrite targetTypeArgsLengthCorrect in found)
     Nothing => failAt (getFC ty) "Generated parameter is not used in the target type"
 
   -- check that all target type's parameters classied as "given" are present in the given params list
-  givenParams <- for givenParams $ \(explicitness, name, ty) => case findIndex (== name) targetTypeArgs of
-    Just found => pure (explicitness, rewrite targetTypeArgsLengthCorrect in found)
+  givenParams <- for {b=(_, Fin targetType.args.length, _)} givenParams $ \(explicitness, name, ty) => case findIndex (== name) targetTypeArgs of
+    Just found => pure (ty, rewrite targetTypeArgsLengthCorrect in found, explicitness)
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
+
+  -- check the increasing order of generated params
+  let [] = nonIncreasingsBy snd paramsToBeGenerated
+    | (_, (ty, _)) :: _ => failAt (getFC ty) "Generated arguments must go in the same order as in the target type"
+
+  -- check the increasing order of given params
+  let [] = nonIncreasingsBy (\(_, n, _) => n) givenParams
+    | (_, (ty, _, _)) :: _ => failAt (getFC ty) "Given arguments must go in the same order as in the target type"
+
+  -- make unable to use generated params list
+  let 0 paramsToBeGenerated = paramsToBeGenerated
+
+  -- forget the order of the given params, convert to a map from index to explicitness
+  let givenParams = fromList $ snd <$> givenParams
 
   -------------------------------------
   -- Auto-implicit generators checks --
@@ -197,15 +211,15 @@ checkTypeIsGen sig = do
     | (_, (fc, _)) :: _ => failAt fc.targetTypeFC "Repetition of an auto-implicit external generator"
 
   -- forget FCs of subparsed externals
-  let autoImplArgs = snd <$> autoImplArgs
+  let autoImplArgs = fromList $ snd <$> autoImplArgs
 
   ------------
   -- Result --
   ------------
 
-  let genSig = MkParsedUserGenSignature {targetType, paramsToBeGenerated, givenParams}
+  let genSig = MkGenSignature {targetType, givenParams}
   let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
-  let externals = MkParsedUserGenExternals autoImplArgs
+  let externals = MkGenExternals autoImplArgs
   pure (fc, genSig, externals)
 
   -----------------------
@@ -213,19 +227,33 @@ checkTypeIsGen sig = do
   -----------------------
 
   where
-    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, ParsedUserGenSignature)
+
+    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature)
     subCheck desc = traverse $ checkTypeIsGen >=> \case
-      (fc, s, MkParsedUserGenExternals [])     => pure (fc, s)
-      (fc, _, MkParsedUserGenExternals (_::_)) => failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
+      (fc, s, MkGenExternals ext) => if null ext
+        then pure (fc, s)
+        else failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
 
     data UserDefinedName = UserName String
 
     Eq UserDefinedName where
       (==) = (==) `on` \(UserName n) => n
 
+    nonIncreasingsBy : Ord b => (a -> b) -> List a -> LazyList (a, a)
+    nonIncreasingsBy f xs =
+      let xs = Lazy.fromList xs in
+      case tail' xs of
+        Nothing => []
+        Just tl => filter .| uncurry ((>=) `on` f) .| xs `zip` tl
+
+
 ------------------------------
 --- Functions for the user ---
 ------------------------------
+
+outmostLambda : CanonicName m => GenSignature -> m TTImp
+outmostLambda sig = do
+  ?outmostLambda_rhs
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
@@ -269,6 +297,5 @@ deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
   (signature, externals) <- snd <$> checkTypeIsGen signature
-  let externals = parsedToCanonicGenExt externals
-  (lambda, locals) <- runCanonic externals $ wrapExternals externals =<< externalLambda signature
+  (lambda, locals) <- runCanonic externals $ outmostLambda signature
   check $ local locals lambda

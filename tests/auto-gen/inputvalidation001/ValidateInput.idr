@@ -258,11 +258,14 @@ genX_wrong_giv_order_autoimpl = deriveGen
 genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => Gen X
 genX_wrong_giv_order_autoimpl_rep = deriveGen
 
-genY_wrong_gened_order : Fuel -> Gen (b ** a ** Y a b)
+genY_wrong_gened_order : Fuel -> Gen (b : Type ** a : Type ** Y a b)
 genY_wrong_gened_order = deriveGen
 
-genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => Gen X
+genY_wrong_gened_order' : Fuel -> Gen (b ** a ** Y a b)
+genY_wrong_gened_order' = deriveGen
+
+genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b : Type ** a : Type ** Y a b)) => Gen X
 genX_wrong_gened_order_autoimpl = deriveGen
 
-genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => (Fuel -> Gen (a ** b ** Y a b)) => Gen X
+genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen (a : Type ** b : Type ** Y a b)) => Gen X
 genX_wrong_gened_order_autoimpl_rep = deriveGen

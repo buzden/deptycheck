@@ -611,63 +611,73 @@ ValidateInput:247:54--247:57
  247 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
                                                             ^^^
 
-Error: While processing right hand side of genY_wrong_giv_order. Arguments must go in the same order as in the target type.
+Error: While processing right hand side of genY_wrong_giv_order. Error during reflection: Given arguments must go in the same order as in the target type
 
-ValidateInput:253:24--253:33
+ValidateInput:252:40--252:44
+ 248 | genY_unused_argument = deriveGen
  249 | 
  250 | --- Wrong order of parameters ---
  251 | 
  252 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen $ Y a b
- 253 | genY_wrong_giv_order = deriveGen
-                              ^^^^^^^^^
+                                              ^^^^
 
-Error: While processing right hand side of genX_wrong_giv_order_autoimpl. Arguments must go in the same order as in the target type.
+Error: While processing right hand side of genX_wrong_giv_order_autoimpl. Error during reflection: Given arguments must go in the same order as in the target type
 
-ValidateInput:256:33--256:42
+ValidateInput:255:58--255:62
+ 251 | 
  252 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen $ Y a b
  253 | genY_wrong_giv_order = deriveGen
  254 | 
  255 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => Gen X
- 256 | genX_wrong_giv_order_autoimpl = deriveGen
-                                       ^^^^^^^^^
+                                                                ^^^^
 
-Error: While processing right hand side of genX_wrong_giv_order_autoimpl_rep. Arguments must go in the same order as in the target type.
+Error: While processing right hand side of genX_wrong_giv_order_autoimpl_rep. Error during reflection: Given arguments must go in the same order as in the target type
 
-ValidateInput:259:37--259:46
+ValidateInput:258:62--258:66
+ 254 | 
  255 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => Gen X
  256 | genX_wrong_giv_order_autoimpl = deriveGen
  257 | 
  258 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => Gen X
- 259 | genX_wrong_giv_order_autoimpl_rep = deriveGen
-                                           ^^^^^^^^^
+                                                                    ^^^^
 
-Error: While processing right hand side of genY_wrong_gened_order. Parts of resulting dependent pair must go in the same order as in the target type.
+Error: While processing right hand side of genY_wrong_gened_order. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:262:26--262:35
+ValidateInput:261:55--261:59
+ 257 | 
  258 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => Gen X
  259 | genX_wrong_giv_order_autoimpl_rep = deriveGen
  260 | 
- 261 | genY_wrong_gened_order : Fuel -> Gen (b ** a ** Y a b)
- 262 | genY_wrong_gened_order = deriveGen
-                                ^^^^^^^^^
+ 261 | genY_wrong_gened_order : Fuel -> Gen (b : Type ** a : Type ** Y a b)
+                                                             ^^^^
 
-Error: While processing right hand side of genX_wrong_gened_order_autoimpl. Parts of resulting dependent pair must go in the same order as in the target type.
+Error: While processing right hand side of genY_wrong_gened_order'. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:265:35--265:44
- 261 | genY_wrong_gened_order : Fuel -> Gen (b ** a ** Y a b)
- 262 | genY_wrong_gened_order = deriveGen
+ValidateInput:17:10--17:14
+ 13 | data X = MkX
+ 14 | 
+ 15 | data X' = MkX'
+ 16 | 
+ 17 | data Y : Type -> Type -> Type where
+               ^^^^
+
+Error: While processing right hand side of genX_wrong_gened_order_autoimpl. Error during reflection: Generated arguments must go in the same order as in the target type
+
+ValidateInput:267:73--267:77
  263 | 
- 264 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => Gen X
- 265 | genX_wrong_gened_order_autoimpl = deriveGen
-                                         ^^^^^^^^^
-
-Error: While processing right hand side of genX_wrong_gened_order_autoimpl_rep. Parts of resulting dependent pair must go in the same order as in the target type.
-
-ValidateInput:268:39--268:48
- 264 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => Gen X
- 265 | genX_wrong_gened_order_autoimpl = deriveGen
+ 264 | genY_wrong_gened_order' : Fuel -> Gen (b ** a ** Y a b)
+ 265 | genY_wrong_gened_order' = deriveGen
  266 | 
- 267 | genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen (b ** a ** Y a b)) => (Fuel -> Gen (a ** b ** Y a b)) => Gen X
- 268 | genX_wrong_gened_order_autoimpl_rep = deriveGen
-                                             ^^^^^^^^^
+ 267 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b : Type ** a : Type ** Y a b)) => Gen X
+                                                                               ^^^^
+
+Error: While processing right hand side of genX_wrong_gened_order_autoimpl_rep. Error during reflection: Generated arguments must go in the same order as in the target type
+
+ValidateInput:270:77--270:81
+ 266 | 
+ 267 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b : Type ** a : Type ** Y a b)) => Gen X
+ 268 | genX_wrong_gened_order_autoimpl = deriveGen
+ 269 | 
+ 270 | genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen (a : Type ** b : Type ** Y a b)) => Gen X
+                                                                                   ^^^^
 
