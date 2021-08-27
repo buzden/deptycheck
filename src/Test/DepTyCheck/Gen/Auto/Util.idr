@@ -69,13 +69,18 @@ toNatList = map finToNat . toList
 --- `TTImp`-related utilities ---
 ---------------------------------
 
---- Parsing `TTImp` stuff ---
+--- Parsing and rebuilding `TTImp` stuff ---
 
 public export
 unDPair : TTImp -> (List (Arg False), TTImp)
 unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo mbname _ lamTy)) =
     mapFst (MkArg cnt piInfo mbname typ ::) $ unDPair lamTy
 unDPair expr = ([], expr)
+
+public export
+buildDPair : (rhs : TTImp) -> List (Name, TTImp) -> TTImp
+buildDPair = foldr $ \(name, type), res =>
+  var `{Builtin.DPair.DPair} .$ type .$ lam (MkArg MW ExplicitArg (Just name) type) res
 
 --- General purpose instances ---
 
