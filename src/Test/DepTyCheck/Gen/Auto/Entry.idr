@@ -155,9 +155,7 @@ checkTypeIsGen sig = do
     MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
     MkArg M1 _               _ ty => failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
     MkArg MW (DefImplicit _) _ ty => failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
-  let givenParams := lefts sigArgs
-  let autoImplArgs := rights sigArgs
-  --let (givenParams, autoImplArgs) := (lefts sigArgs, rights sigArgs) -- `partitionEithers sigArgs` does not reduce here somewhy :-(
+  let (givenParams, autoImplArgs) := partitionEithers sigArgs
 
   ----------------------------------------------------------------------
   -- Check that generated and given parameter lists are actually sets --
