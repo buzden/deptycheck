@@ -259,8 +259,7 @@ checkTypeIsGen sig = do
 ------------------------------
 
 outmostLambda : CanonicName m => GenSignature -> m TTImp
-outmostLambda sig = do
-  ?outmostLambda_rhs
+outmostLambda = map var . canonicName
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||

@@ -72,7 +72,7 @@ canonicSig sig = ?canonicSig_rhs
 
 export
 callCanonicGen : CanonicName m => (sig : GenSignature) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
-callCanonicGen sig values = ?callCanonicGen_rhs
+callCanonicGen sig values = canonicName sig <&> (`appAll` toList values)
 
 export
 deriveCanonical : CanonicName m => GenSignature -> m Decl
