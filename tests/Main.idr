@@ -16,6 +16,7 @@ genMonad = MkTestPool "The `Gen` monad" [] Nothing $ ("gen-monad/" ++) <$>
 autoGen : TestPool
 autoGen = MkTestPool "Autogeneration of `Gen`s" [] Nothing $ ("auto-gen/" ++) <$>
   [ "inputvalidation001"
+  , "canonicsig001"
   ]
 
 main : IO ()

@@ -74,6 +74,7 @@ interface Monad m => CanonicName m where
 --- Canonic signature functions --
 
 -- Must respect names from the `givenParams` field, at least for implicit parameters
+export
 canonicSig : GenSignature -> TTImp
 canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
 
