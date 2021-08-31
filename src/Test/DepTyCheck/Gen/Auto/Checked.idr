@@ -78,8 +78,16 @@ export
 canonicSig : GenSignature -> TTImp
 canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
 
+  -- should be a memoized constant
+  givensRenamingRules : List (TTImp -> TTImp)
+  givensRenamingRules = mapMaybeI' sig.targetType.args $ \idx, (MkArg _ _ name _) => substNameIn name . snd <$> lookup idx sig.givenParams
+
+  -- Renames all names that are present in the target type declaration to their according names in the gen signature
+  renameGivens : TTImp -> TTImp
+  renameGivens expr = foldr apply expr givensRenamingRules
+
   arg : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> Arg False
-  arg (idx, expl, name) = MkArg MW .| expl.toTT .| Just name .| (index' sig.targetType.args idx).type
+  arg (idx, expl, name) = MkArg MW .| expl.toTT .| Just name .| renameGivens (index' sig.targetType.args idx).type
 
   returnTy : TTImp
   returnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs where
@@ -96,7 +104,7 @@ canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
     generatedArgs : List (Name, TTImp)
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg _ _ name type) =>
                       case lookup idx sig.givenParams of
-                        Nothing => Just (name, type)
+                        Nothing => Just (name, renameGivens type)
                         Just _  => Nothing
 
 export
