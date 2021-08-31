@@ -115,6 +115,11 @@ Eq Name where
   NS s n == NS p m = s == p && n == m
   DN x n == DN y m = x == y && n == m
   RF x   == RF y   = x == y
+
+  Nested x n    ==  Nested y m   = x == y && n == m
+  CaseBlock x n == CaseBlock y m = x == y && n == m
+  WithBlock x n == WithBlock y m = x == y && n == m
+
   _ == _ = False
 
 public export
