@@ -124,18 +124,20 @@ namespace DepParams
                                              $ {b : Type} -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
             ]
 
-pr : List TestCaseDesc -> IO ()
-pr = traverse_ $ \(desc, given, expected) => if given == expected
-       then putStrLn "\{desc}:\tOKAY"
-       else putStrLn """
-                     \{desc}:\tFAILED
-                       - given: \{show given}
-                       - expected: \{show expected}
-                     """
+pr : TestCaseDesc -> String
+pr (desc, given, expected) = if given == expected
+  then "\{desc}:\tOKAY"
+  else """
+       \{desc}:\tFAILED
+         - given: \{show given}
+         - expected: \{show expected}
+       """
 
 main : IO ()
-main = do
-  pr Trivial.check
-  pr NonDepExplParams.check
-  pr NonDepMixedParams.check
-  pr DepParams.check
+main =
+  traverse_ (putStrLn . pr) $ with Prelude.(::) foldMap Lazy.fromList
+    [ Trivial.check
+    , NonDepExplParams.check
+    , NonDepMixedParams.check
+    , DepParams.check
+    ]
