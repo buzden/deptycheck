@@ -74,17 +74,20 @@ interface Monad m => CanonicName m where
 --- Canonic signature functions --
 
 -- Must respect names from the `givenParams` field, at least for implicit parameters
+-- The current implementation expects that names in the given signature
+--   - do not repeat and
+--   - are not equal to names of generated parameters as declared in the target type's definition.
 export
 canonicSig : GenSignature -> TTImp
 canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
 
   -- should be a memoized constant
-  givensRenamingRules : List (TTImp -> TTImp)
-  givensRenamingRules = mapMaybeI' sig.targetType.args $ \idx, (MkArg _ _ name _) => substNameIn name . snd <$> lookup idx sig.givenParams
+  givensRenamingRules : SortedMap Name Name
+  givensRenamingRules = fromList $ mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, _}) => (name,) . snd <$> lookup idx sig.givenParams
 
   -- Renames all names that are present in the target type declaration to their according names in the gen signature
   renameGivens : TTImp -> TTImp
-  renameGivens expr = foldr apply expr givensRenamingRules
+  renameGivens = substNameBy givensRenamingRules
 
   arg : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> Arg False
   arg (idx, expl, name) = MkArg MW .| expl.toTT .| Just name .| renameGivens (index' sig.targetType.args idx).type

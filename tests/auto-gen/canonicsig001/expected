@@ -33,3 +33,4 @@ LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; `a` and `
 LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; `a` and `n` given, impl+impl:	OKAY
 LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all given, expl+expl+expl:	OKAY
 LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all given, impl+expl+expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all given', impl+expl+expl:	OKAY

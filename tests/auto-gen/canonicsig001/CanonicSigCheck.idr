@@ -121,6 +121,8 @@ namespace DepParams
                                              $ (b : Type) -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
             , ("all given, impl+expl+expl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ExplicitArg, "m"), (2, ExplicitArg, "w")]
                                              $ {b : Type} -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
+            , ("all given', impl+expl+expl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ExplicitArg, "a"), (2, ExplicitArg, "n")]
+                                              $ {b : Type} -> (a : Nat) -> (n : Vect a b) -> Gen (Y a n)
             ]
 
 pr : TestCaseDesc -> Elab String
