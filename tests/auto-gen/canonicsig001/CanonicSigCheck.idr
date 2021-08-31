@@ -14,8 +14,16 @@ import Language.Reflection.Types
 Eq TTImp where
   (==) = (==) `on` show
 
+%inline
+TestCaseData : Type
+TestCaseData = (TTImp, TTImp)
+
+%inline
+TestCaseDesc : Type
+TestCaseDesc = (String, TestCaseData)
+
 %macro
-chk : (ty : TypeInfo) -> List (Fin ty.args.length, ArgExplicitness, Name) -> Type -> Elab (TTImp, TTImp)
+chk : (ty : TypeInfo) -> List (Fin ty.args.length, ArgExplicitness, Name) -> Type -> Elab TestCaseData
 chk ty giv expr = pure (canonicSig (MkGenSignature ty $ fromList giv), !(quote expr))
 
 namespace Trivial
@@ -23,7 +31,7 @@ namespace Trivial
   data Y = Y0 | Y1
 
   export
-  check : List (String, TTImp, TTImp)
+  check : List TestCaseDesc
   check = [ ("trivial type; no givens",) $ chk (getInfo "Y") [] $ Gen Y
           ]
 
@@ -37,7 +45,7 @@ namespace NonDepExplParams
   YInfo = getInfo `{Y}
 
   export
-  check : List (String, TTImp, TTImp)
+  check : List TestCaseDesc
   check = mapFst ("non-dependent type + expl params; " ++) <$>
             [ ("no givens",) $ chk YInfo [] $ Gen (n : Nat ** a : Type ** Y n a)
 
@@ -63,7 +71,7 @@ namespace NonDepMixedParams
   YInfo = getInfo `{Y}
 
   export
-  check : List (String, TTImp, TTImp)
+  check : List TestCaseDesc
   check = mapFst ("non-dependent type + mixed explicitness; " ++) <$>
             [ ("no givens",) $ chk YInfo [] $ Gen (n : Nat ** a : Type ** Y {n} a)
 
@@ -89,7 +97,7 @@ namespace DepParams
   YInfo = getInfo `{Y}
 
   export
-  check : List (String, TTImp, TTImp)
+  check : List TestCaseDesc
   check = mapFst ("dependent type + mixed explicitness; " ++) <$>
             [ ("no givens",)  $ chk YInfo [] $ Gen (a : Type ** n : Nat ** v : Vect n a ** Y {a} n v)
             , ("no givens'",) $ chk YInfo [] $ Gen (a : Type ** n : Nat ** v : Vect n a ** Y n v)
@@ -116,7 +124,7 @@ namespace DepParams
                                              $ {b : Type} -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
             ]
 
-pr : List (String, TTImp, TTImp) -> IO ()
+pr : List TestCaseDesc -> IO ()
 pr = traverse_ $ \(desc, given, expected) => if given == expected
        then putStrLn "\{desc}:\tOKAY"
        else putStrLn """
