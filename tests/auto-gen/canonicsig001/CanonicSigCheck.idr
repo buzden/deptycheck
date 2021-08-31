@@ -117,9 +117,9 @@ namespace DepParams
             , ("`a` and `n` given, impl+impl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ImplicitArg, "m")]
                                                 $ {b : Type} -> {m : Nat} -> Gen (v : Vect m b ** Y m v)
 
-            , ("all given, expl+expl+expl",) $ chk YInfo [(0, ExplicitArg, "b"), (1, ImplicitArg, "m"), (2, ExplicitArg, "w")]
+            , ("all given, expl+expl+expl",) $ chk YInfo [(0, ExplicitArg, "b"), (1, ExplicitArg, "m"), (2, ExplicitArg, "w")]
                                              $ (b : Type) -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
-            , ("all given, impl+expl+expl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ImplicitArg, "m"), (2, ExplicitArg, "w")]
+            , ("all given, impl+expl+expl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ExplicitArg, "m"), (2, ExplicitArg, "w")]
                                              $ {b : Type} -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
             ]
 
