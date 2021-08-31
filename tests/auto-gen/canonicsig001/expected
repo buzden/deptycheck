@@ -1,34 +1,35 @@
-trivial type; no givens:	OKAY
-non-dependent type + expl params; no givens:	OKAY
-non-dependent type + expl params; 1st given expl:	OKAY
-non-dependent type + expl params; 1st given impl:	OKAY
-non-dependent type + expl params; 2nd given expl:	OKAY
-non-dependent type + expl params; 2nd given impl:	OKAY
-non-dependent type + expl params; both given, expl+expl:	OKAY
-non-dependent type + expl params; both given', expl+expl:	OKAY
-non-dependent type + expl params; both given, expl+impl:	OKAY
-non-dependent type + expl params; both given, impl+expl:	OKAY
-non-dependent type + expl params; both given, impl+impl:	OKAY
-non-dependent type + mixed explicitness; no givens:	OKAY
-non-dependent type + mixed explicitness; 1st given expl:	OKAY
-non-dependent type + mixed explicitness; 1st given impl:	OKAY
-non-dependent type + mixed explicitness; 2nd given expl:	OKAY
-non-dependent type + mixed explicitness; 2nd given impl:	OKAY
-non-dependent type + mixed explicitness; both given, expl+expl:	OKAY
-non-dependent type + mixed explicitness; both given', expl+expl:	OKAY
-non-dependent type + mixed explicitness; both given, expl+impl:	OKAY
-non-dependent type + mixed explicitness; both given, impl+expl:	OKAY
-non-dependent type + mixed explicitness; both given, impl+impl:	OKAY
-dependent type + mixed explicitness; no givens:	OKAY
-dependent type + mixed explicitness; no givens':	OKAY
-dependent type + mixed explicitness; impl `a` given as expl:	OKAY
-dependent type + mixed explicitness; impl `a` given' as expl:	OKAY
-dependent type + mixed explicitness; impl `a` given as impl:	OKAY
-dependent type + mixed explicitness; expl `n` given as expl:	OKAY
-dependent type + mixed explicitness; expl `n` given as impl:	OKAY
-dependent type + mixed explicitness; `a` and `n` given, expl+expl:	OKAY
-dependent type + mixed explicitness; `a` and `n` given, impl+expl:	OKAY
-dependent type + mixed explicitness; `a` and `n` given, expl+impl:	OKAY
-dependent type + mixed explicitness; `a` and `n` given, impl+impl:	OKAY
-dependent type + mixed explicitness; all given, expl+expl+expl:	OKAY
-dependent type + mixed explicitness; all given, impl+expl+expl:	OKAY
+1/1: Building CanonicSigCheck (CanonicSigCheck.idr)
+LOG gen.auto.canonic.check-sig:0: trivial type; no givens:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; no givens:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; 1st given expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; 1st given impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; 2nd given expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; 2nd given impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; both given, expl+expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; both given', expl+expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; both given, expl+impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; both given, impl+expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; both given, impl+impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + mixed explicitness; no givens:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + mixed explicitness; 1st given expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + mixed explicitness; 1st given impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + mixed explicitness; 2nd given expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + mixed explicitness; 2nd given impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + mixed explicitness; both given, expl+expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + mixed explicitness; both given', expl+expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + mixed explicitness; both given, expl+impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + mixed explicitness; both given, impl+expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: non-dependent type + mixed explicitness; both given, impl+impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; no givens:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; no givens':	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; impl `a` given as expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; impl `a` given' as expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; impl `a` given as impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; expl `n` given as expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; expl `n` given as impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; `a` and `n` given, expl+expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; `a` and `n` given, impl+expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; `a` and `n` given, expl+impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; `a` and `n` given, impl+impl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all given, expl+expl+expl:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all given, impl+expl+expl:	OKAY

@@ -1,11 +1,11 @@
 module CanonicSigCheck
 
-import Debug.Reflection
+import public Debug.Reflection
 
-import Test.DepTyCheck.Gen
-import Test.DepTyCheck.Gen.Auto.Checked
+import public Test.DepTyCheck.Gen
+import public Test.DepTyCheck.Gen.Auto.Checked
 
-import Language.Reflection.Types
+import public Language.Reflection.Types
 
 %default total
 
@@ -16,15 +16,14 @@ Eq TTImp where
 
 %inline
 TestCaseData : Type
-TestCaseData = (TTImp, TTImp)
+TestCaseData = (TTImp, Type)
 
 %inline
 TestCaseDesc : Type
 TestCaseDesc = (String, TestCaseData)
 
-%macro
-chk : (ty : TypeInfo) -> List (Fin ty.args.length, ArgExplicitness, Name) -> Type -> Elab TestCaseData
-chk ty giv expr = pure (canonicSig (MkGenSignature ty $ fromList giv), !(quote expr))
+chk : (ty : TypeInfo) -> List (Fin ty.args.length, ArgExplicitness, Name) -> Type -> TestCaseData
+chk ty giv expr = (canonicSig (MkGenSignature ty $ fromList giv), expr)
 
 namespace Trivial
 
@@ -124,20 +123,27 @@ namespace DepParams
                                              $ {b : Type} -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
             ]
 
-pr : TestCaseDesc -> String
-pr (desc, given, expected) = if given == expected
-  then "\{desc}:\tOKAY"
-  else """
-       \{desc}:\tFAILED
-         - given: \{show given}
-         - expected: \{show expected}
-       """
+pr : TestCaseDesc -> Elab String
+pr (desc, given, expected) = do
+  expected <- quote expected
+  pure $ if given == expected
+    then "\{desc}:\tOKAY"
+    else """
+         \{desc}:\tFAILED
+           - given: \{show given}
+           - expected: \{show expected}
+         """
 
-main : IO ()
+logCheck : String -> Elab ()
+logCheck = \s => logMsg "gen.auto.canonic.check-sig" 0 s
+
+main : Elab ()
 main =
-  traverse_ (putStrLn . pr) $ with Prelude.(::) foldMap Lazy.fromList
+  traverse_ .| logCheck <=< pr .| with Prelude.(::) foldMap Lazy.fromList
     [ Trivial.check
     , NonDepExplParams.check
     , NonDepMixedParams.check
     , DepParams.check
     ]
+
+%runElab main
