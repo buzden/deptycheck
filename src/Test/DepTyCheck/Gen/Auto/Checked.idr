@@ -83,6 +83,7 @@ interface Monad m => CanonicName m where
 export
 canonicSig : GenSignature -> TTImp
 canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
+  -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
 
   -- should be a memoized constant
   givensRenamingRules : SortedMap Name Name
