@@ -4,10 +4,13 @@ import public Control.Monad.Reader
 import public Control.Monad.Trans
 import public Control.Monad.Writer
 
+import public Data.Vect.Extra
 import public Data.SortedMap
 import public Data.SortedSet
 
 import public Language.Reflection.Types
+
+import public Syntax.WithProof
 
 import public Test.DepTyCheck.Gen.Auto.Util
 
@@ -112,7 +115,14 @@ canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
 
 export
 callCanonicGen : CanonicName m => (sig : GenSignature) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
-callCanonicGen sig values = canonicName sig <&> (`appAll` toList values)
+callCanonicGen sig values = do
+  topmostName <- canonicName sig
+  let (givenParams ** prfAsSig) = @@ sig.givenParams.asList
+  pure $ foldl (flip apply) (var topmostName) $ flip mapWithPos values $ \valueIdx, value =>
+    let (_, expl, name) = index' givenParams $ rewrite sym prfAsSig in valueIdx in
+    case expl of
+      ExplicitArg => (.$ value)
+      ImplicitArg => \f => namedApp f name value
 
 export
 deriveCanonical : CanonicName m => GenSignature -> m Decl
