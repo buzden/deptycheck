@@ -41,28 +41,33 @@ namespace ArgExplicitness
 ------------------------------------------------------------------
 
 public export
-record GenSignature where
+data NamesOrigin = CustomNames | FromDataDef
+
+public export
+record GenSignature (nso : NamesOrigin) where
   constructor MkGenSignature
   targetType : TypeInfo
-  givenParams : SortedMap (Fin targetType.args.length) (ArgExplicitness, Name)
+  givenParams : SortedMap (Fin targetType.args.length) $ case nso of
+                                                           CustomNames => (ArgExplicitness, Name)
+                                                           FromDataDef => ArgExplicitness
 
 namespace GenSignature
 
-  characteristics : GenSignature -> (String, List Nat)
+  characteristics : GenSignature cn -> (String, List Nat)
   characteristics (MkGenSignature ty giv) = (show ty.name, toNatList $ keys giv)
 
 public export
-Eq GenSignature where
+Eq (GenSignature cn) where
   (==) = (==) `on` characteristics
 
 public export
-Ord GenSignature where
+Ord (GenSignature cn) where
   compare = comparing characteristics
 
 public export
 record GenExternals where
   constructor MkGenExternals
-  externals : SortedSet GenSignature
+  externals : SortedSet $ GenSignature CustomNames
 
 -----------------------------------
 --- "Canonical" functions stuff ---
@@ -72,7 +77,7 @@ record GenExternals where
 
 public export
 interface Monad m => CanonicName m where
-  canonicName : GenSignature -> m Name
+  canonicName : {nso : _} -> GenSignature nso -> m Name
 
 --- Canonic signature functions --
 
@@ -81,7 +86,7 @@ interface Monad m => CanonicName m where
 --   - do not repeat and
 --   - are not equal to names of generated parameters as declared in the target type's definition.
 export
-canonicSig : GenSignature -> TTImp
+canonicSig : GenSignature CustomNames -> TTImp
 canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
 
@@ -115,32 +120,35 @@ canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
                         Just _  => Nothing
 
 export
-callCanonicGen : CanonicName m => (sig : GenSignature) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
+callCanonicGen : CanonicName m => {nso : _} -> (sig : GenSignature nso) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
 callCanonicGen sig values = do
   topmostName <- canonicName sig
   let (givenParams ** prfAsSig) = @@ sig.givenParams.asList
   pure $ foldl (flip apply) (var topmostName) $ flip mapWithPos values $ \valueIdx, value =>
-    let (_, expl, name) = index' givenParams $ rewrite sym prfAsSig in valueIdx in
-    case expl of
+    let (paramIdx, info) = index' givenParams $ rewrite sym prfAsSig in valueIdx in
+    let (expl, name) : (ArgExplicitness, Name) = case nso of
+                                                   CustomNames => info
+                                                   FromDataDef => (info, nm $ index' sig.targetType.args paramIdx)
+    in case expl of
       ExplicitArg => (.$ value)
       ImplicitArg => \f => namedApp f name value
 
+  where
+    nm : Arg True -> Name -- workaround of some type inference bug
+    nm = name
+
 export
-deriveCanonical : CanonicName m => GenSignature -> m Decl
+deriveCanonical : CanonicName m => GenSignature nso -> m Decl
 deriveCanonical sig = do
   ?deriveCanonical_rhs
 
 --- Implementations for the canonic interfaces ---
 
-MonadReader (SortedMap GenSignature Name) m =>
-MonadWriter (SortedMap GenSignature $ Lazy Decl) m =>
+MonadReader (SortedMap (GenSignature nso) Name) m =>
+MonadWriter (SortedMap (GenSignature nso) $ Lazy Decl) m =>
 CanonicName m where
   canonicName sig = do
-    let Nothing = lookup sig !ask
-      | Just n => pure n
     ?canonocName_impl
---    tell $ singleton sig $ delay !(deriveCanonical sig) -- looks like `deriveCanonical` is called not in a lazy way
---    pure $ MN "\{show sig.targetType.name} given \{show sig.givenParams}" 0
 
 --- Canonic-dischagring function ---
 
