@@ -76,8 +76,8 @@ record GenExternals where
 --- Main interfaces ---
 
 public export
-interface Monad m => CanonicName m where
-  canonicName : {nso : _} -> GenSignature nso -> m Name
+interface Monad m => CanonicGen m where
+  callGen : {nso : _} -> (sig : GenSignature nso) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
 
 --- Canonic signature functions --
 
@@ -107,12 +107,10 @@ canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
                         Nothing => Just (name, type)
                         Just _  => Nothing
 
-export
-callCanonicGen : CanonicName m => {nso : _} -> (sig : GenSignature nso) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
-callCanonicGen sig values = do
-  topmostName <- canonicName sig
-  let (givenParams ** prfAsSig) = @@ sig.givenParams.asList
-  pure $ foldl (flip apply) (var topmostName) $ flip mapWithPos values $ \valueIdx, value =>
+callCanonicGen : {nso : _} -> (sig : GenSignature nso) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callCanonicGen sig topmost values =
+  let (givenParams ** prfAsSig) = @@ sig.givenParams.asList in
+  foldl (flip apply) topmost $ flip mapWithPos values $ \valueIdx, value =>
     let (paramIdx, info) = index' givenParams $ rewrite sym prfAsSig in valueIdx in
     let (expl, name) : (ArgExplicitness, Name) = case nso of
                                                    CustomNames => info
@@ -125,21 +123,32 @@ callCanonicGen sig values = do
     nm : Arg True -> Name -- workaround of some type inference bug
     nm = name
 
+--- The main meat for derivation ---
+
 export
-deriveCanonical : CanonicName m => GenSignature nso -> m Decl
+deriveCanonical : CanonicGen m => GenSignature nso -> m Decl
 deriveCanonical sig = do
   ?deriveCanonical_rhs
 
---- Implementations for the canonic interfaces ---
+--- Particular implementations producing the-meat-derivation-function clojure ---
 
-MonadReader (SortedMap (GenSignature nso) Name) m =>
-MonadWriter (SortedMap (GenSignature nso) $ Lazy Decl) m =>
-CanonicName m where
-  canonicName sig = do
-    ?canonocName_impl
+namespace ClojuringCanonicImpl
+
+  ClojuringContext : (Type -> Type) -> Type
+  ClojuringContext m =
+    ( MonadReader (SortedMap (GenSignature CustomNames) Name) m
+    , MonadWriter (SortedMap (GenSignature CustomNames) $ Lazy Decl) m
+    )
+
+  canonicGenExpr : ClojuringContext m => {nso : _} -> GenSignature nso -> m TTImp
+  canonicGenExpr sig = ?canonicGenExpr_rhs
+
+  export
+  ClojuringContext m => CanonicGen m where
+    callGen sig values = pure $ callCanonicGen sig !(canonicGenExpr sig) values
 
 --- Canonic-dischagring function ---
 
 export
-runCanonic : GenExternals -> (forall m. CanonicName m => m a) -> Elab (a, List Decl)
+runCanonic : GenExternals -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
 runCanonic exts calc = ?runCanonic_rhs

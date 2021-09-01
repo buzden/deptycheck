@@ -252,8 +252,14 @@ checkTypeIsGen sig = do
 --- Functions for the user ---
 ------------------------------
 
-outmostLambda : CanonicName m => GenSignature CustomNames -> m TTImp
-outmostLambda = map var . canonicName
+outmostLambda : CanonicGen m => GenSignature CustomNames -> m TTImp
+outmostLambda sig = foldr (map . mkLam) call sig.givenParams.asList where
+
+  mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
+  mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT (Just name) (index' sig.targetType.args idx).type
+
+  call : m TTImp
+  call = callGen sig $ fromList sig.givenParams.asList <&> \(_, _, name) => var name
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
