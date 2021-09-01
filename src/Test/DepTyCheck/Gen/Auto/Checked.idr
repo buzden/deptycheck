@@ -73,12 +73,6 @@ record GenExternals where
 --- "Canonical" functions stuff ---
 -----------------------------------
 
---- Main interfaces ---
-
-public export
-interface Monad m => CanonicGen m where
-  callGen : {nso : _} -> (sig : GenSignature nso) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
-
 --- Canonic signature functions --
 
 -- Must respect names from the `givenParams` field, at least for implicit parameters
@@ -122,6 +116,22 @@ callCanonicGen sig topmost values =
   where
     nm : Arg True -> Name -- workaround of some type inference bug
     nm = name
+
+--- Main interfaces ---
+
+public export
+interface Monad m => CanonicGen m where
+  callGen : {nso : _} -> (sig : GenSignature nso) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
+
+export
+outmostLambda : CanonicGen m => GenSignature CustomNames -> m TTImp
+outmostLambda sig = foldr (map . mkLam) call sig.givenParams.asList where
+
+  mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
+  mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT (Just name) (index' sig.targetType.args idx).type
+
+  call : m TTImp
+  call = callGen sig $ fromList sig.givenParams.asList <&> \(_, _, name) => var name
 
 --- The main meat for derivation ---
 
