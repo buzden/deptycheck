@@ -227,7 +227,7 @@ checkTypeIsGen sig = do
   where
 
     subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature)
-    subCheck desc = traverse $ checkTypeIsGen >=> \case
+    subCheck desc = traverse $ (assert_total checkTypeIsGen) >=> \case
       (fc, s, MkGenExternals ext) => if null ext
         then pure (fc, s)
         else failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"

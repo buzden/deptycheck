@@ -175,7 +175,7 @@ splitAt (MkLzList {contents=Delay lv, _}) i = case lv of
                       topSq = MkLzList _ $ Cart os ibef
                   in case uncons iaft of
                     Nothing => (topSq, []) -- Actually, impossible case since the second element (i.e. `iaft`) cannot be empty
-                    Just (p, ibot) => let (middleBef, middleAft) = splitAt (map (, p) os) oi
+                    Just (p, ibot) => let (middleBef, middleAft) = splitAt (assert_smaller lv $ map (, p) os) oi
                                           botSq = MkLzList _ $ Cart os ibot
                                       in (topSq ++ middleBef, middleAft ++ botSq)
 
