@@ -108,13 +108,9 @@ canonicSig sig = piAll returnTy $ arg <$> SortedSet.toList sig.givenParams where
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg _ _ name type) => ifThenElse (contains idx sig.givenParams) Nothing $ Just (name, type)
 
 callExternalGen : (sig : ExternalGenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callExternalGen sig topmost values =
-  let (givenParams ** prfAsSig) = @@ sig.givenParams.asList in
-  foldl (flip apply) topmost $ flip mapWithPos values $ \valueIdx, value =>
-    let (_, expl, name) = index' givenParams $ rewrite sym prfAsSig in valueIdx
-    in case expl of
-      ExplicitArg => (.$ value)
-      ImplicitArg => \f => namedApp f name value
+callExternalGen sig topmost values = foldl (flip apply) topmost $ fromList sig.givenParams.asList `zip` values <&> \case
+  ((_, ExplicitArg, _   ), value) => (.$ value)
+  ((_, ImplicitArg, name), value) => \f => namedApp f name value
 
 callInternalGen : (0 sig : GenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
 callInternalGen _ = foldl app
