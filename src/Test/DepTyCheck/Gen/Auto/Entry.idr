@@ -45,7 +45,7 @@ record GenSignatureFC where
 
 --- Analysis functions ---
 
-checkTypeIsGen : TTImp -> Elab (GenSignatureFC, GenSignature, GenExternals)
+checkTypeIsGen : TTImp -> Elab (GenSignatureFC, GenSignature CustomNames, GenExternals)
 checkTypeIsGen sig = do
 
   -- check the given expression is a type
@@ -226,7 +226,7 @@ checkTypeIsGen sig = do
 
   where
 
-    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature)
+    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature CustomNames)
     subCheck desc = traverse $ (assert_total checkTypeIsGen) >=> \case
       (fc, s, MkGenExternals ext) => if null ext
         then pure (fc, s)
@@ -251,9 +251,6 @@ checkTypeIsGen sig = do
 ------------------------------
 --- Functions for the user ---
 ------------------------------
-
-outmostLambda : CanonicName m => GenSignature -> m TTImp
-outmostLambda = map var . canonicName
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||

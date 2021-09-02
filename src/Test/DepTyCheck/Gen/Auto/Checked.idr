@@ -41,67 +41,54 @@ namespace ArgExplicitness
 ------------------------------------------------------------------
 
 public export
-record GenSignature where
+data NamesOrigin = CustomNames | FromDataDef
+
+public export
+record GenSignature (nso : NamesOrigin) where
   constructor MkGenSignature
   targetType : TypeInfo
-  givenParams : SortedMap (Fin targetType.args.length) (ArgExplicitness, Name)
+  givenParams : SortedMap (Fin targetType.args.length) $ case nso of
+                                                           CustomNames => (ArgExplicitness, Name)
+                                                           FromDataDef => ArgExplicitness
 
 namespace GenSignature
 
-  characteristics : GenSignature -> (String, List Nat)
+  characteristics : GenSignature cn -> (String, List Nat)
   characteristics (MkGenSignature ty giv) = (show ty.name, toNatList $ keys giv)
 
 public export
-Eq GenSignature where
+Eq (GenSignature cn) where
   (==) = (==) `on` characteristics
 
 public export
-Ord GenSignature where
+Ord (GenSignature cn) where
   compare = comparing characteristics
 
 public export
 record GenExternals where
   constructor MkGenExternals
-  externals : SortedSet GenSignature
+  externals : SortedSet $ GenSignature CustomNames
 
 -----------------------------------
 --- "Canonical" functions stuff ---
 -----------------------------------
 
---- Main interfaces ---
-
-public export
-interface Monad m => CanonicName m where
-  canonicName : GenSignature -> m Name
-
 --- Canonic signature functions --
 
 -- Must respect names from the `givenParams` field, at least for implicit parameters
--- The current implementation expects that names in the given signature
---   - do not repeat and
---   - are not equal to names of generated parameters as declared in the target type's definition.
 export
-canonicSig : GenSignature -> TTImp
+canonicSig : GenSignature FromDataDef -> TTImp
 canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
 
-  -- should be a memoized constant
-  givensRenamingRules : SortedMap Name Name
-  givensRenamingRules = fromList $ mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, _}) => (name,) . snd <$> lookup idx sig.givenParams
-
-  -- Renames all names that are present in the target type declaration to their according names in the gen signature
-  renameGivens : TTImp -> TTImp
-  renameGivens = substNameBy givensRenamingRules
-
-  arg : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> Arg False
-  arg (idx, expl, name) = MkArg MW .| expl.toTT .| Just name .| renameGivens (index' sig.targetType.args idx).type
+  arg : (Fin sig.targetType.args.length, ArgExplicitness) -> Arg False
+  arg (idx, expl) = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW expl.toTT (Just name) type
 
   returnTy : TTImp
   returnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs where
 
     targetTypeApplied : TTImp
-    targetTypeApplied = foldr apply (var sig.targetType.name) $ reverse $ mapI' sig.targetType.args $ \idx, (MkArg {name, piInfo, _}) =>
-                          let name = maybe name snd $ lookup idx sig.givenParams in
+    targetTypeApplied = foldr apply (var sig.targetType.name) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) =>
                           case piInfo of
                             ExplicitArg   => (.$ var name)
                             ImplicitArg   => \f => namedApp f name $ var name
@@ -111,39 +98,67 @@ canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
     generatedArgs : List (Name, TTImp)
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg _ _ name type) =>
                       case lookup idx sig.givenParams of
-                        Nothing => Just (name, renameGivens type)
+                        Nothing => Just (name, type)
                         Just _  => Nothing
 
-export
-callCanonicGen : CanonicName m => (sig : GenSignature) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
-callCanonicGen sig values = do
-  topmostName <- canonicName sig
-  let (givenParams ** prfAsSig) = @@ sig.givenParams.asList
-  pure $ foldl (flip apply) (var topmostName) $ flip mapWithPos values $ \valueIdx, value =>
-    let (_, expl, name) = index' givenParams $ rewrite sym prfAsSig in valueIdx in
-    case expl of
+callCanonicGen : {nso : _} -> (sig : GenSignature nso) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callCanonicGen sig topmost values =
+  let (givenParams ** prfAsSig) = @@ sig.givenParams.asList in
+  foldl (flip apply) topmost $ flip mapWithPos values $ \valueIdx, value =>
+    let (paramIdx, info) = index' givenParams $ rewrite sym prfAsSig in valueIdx in
+    let (expl, name) : (ArgExplicitness, Name) = case nso of
+                                                   CustomNames => info
+                                                   FromDataDef => (info, nm $ index' sig.targetType.args paramIdx)
+    in case expl of
       ExplicitArg => (.$ value)
       ImplicitArg => \f => namedApp f name value
 
+  where
+    nm : Arg True -> Name -- workaround of some type inference bug
+    nm = name
+
+--- Main interfaces ---
+
+public export
+interface Monad m => CanonicGen m where
+  callGen : {nso : _} -> (sig : GenSignature nso) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
+
 export
-deriveCanonical : CanonicName m => GenSignature -> m Decl
+outmostLambda : CanonicGen m => GenSignature CustomNames -> m TTImp
+outmostLambda sig = foldr (map . mkLam) call sig.givenParams.asList where
+
+  mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
+  mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT (Just name) (index' sig.targetType.args idx).type
+
+  call : m TTImp
+  call = callGen sig $ fromList sig.givenParams.asList <&> \(_, _, name) => var name
+
+--- The main meat for derivation ---
+
+export
+deriveCanonical : CanonicGen m => GenSignature nso -> m Decl
 deriveCanonical sig = do
   ?deriveCanonical_rhs
 
---- Implementations for the canonic interfaces ---
+--- Particular implementations producing the-meat-derivation-function clojure ---
 
-MonadReader (SortedMap GenSignature Name) m =>
-MonadWriter (SortedMap GenSignature $ Lazy Decl) m =>
-CanonicName m where
-  canonicName sig = do
-    let Nothing = lookup sig !ask
-      | Just n => pure n
-    ?canonocName_impl
---    tell $ singleton sig $ delay !(deriveCanonical sig) -- looks like `deriveCanonical` is called not in a lazy way
---    pure $ MN "\{show sig.targetType.name} given \{show sig.givenParams}" 0
+namespace ClojuringCanonicImpl
+
+  ClojuringContext : (Type -> Type) -> Type
+  ClojuringContext m =
+    ( MonadReader (SortedMap (GenSignature CustomNames) Name) m
+    , MonadWriter (SortedMap (GenSignature CustomNames) $ Lazy Decl) m
+    )
+
+  canonicGenExpr : ClojuringContext m => {nso : _} -> GenSignature nso -> m TTImp
+  canonicGenExpr sig = ?canonicGenExpr_rhs
+
+  export
+  ClojuringContext m => CanonicGen m where
+    callGen sig values = pure $ callCanonicGen sig !(canonicGenExpr sig) values
 
 --- Canonic-dischagring function ---
 
 export
-runCanonic : GenExternals -> (forall m. CanonicName m => m a) -> Elab (a, List Decl)
+runCanonic : GenExternals -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
 runCanonic exts calc = ?runCanonic_rhs

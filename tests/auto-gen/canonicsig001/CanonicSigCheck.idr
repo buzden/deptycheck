@@ -22,7 +22,7 @@ TestCaseData = (TTImp, Type)
 TestCaseDesc : Type
 TestCaseDesc = (String, TestCaseData)
 
-chk : (ty : TypeInfo) -> List (Fin ty.args.length, ArgExplicitness, Name) -> Type -> TestCaseData
+chk : (ty : TypeInfo) -> List (Fin ty.args.length, ArgExplicitness) -> Type -> TestCaseData
 chk ty giv expr = (canonicSig (MkGenSignature ty $ fromList giv), expr)
 
 namespace Trivial
@@ -48,35 +48,15 @@ namespace NonDepExplParams_AllNamed
   check = mapFst ("non-dependent type + expl params; all named; " ++) <$>
             [ ("no givens",) $ chk YInfo [] $ Gen (n : Nat ** a : Type ** Y n a)
 
-            , ("1st given expl",) $ chk YInfo [(0, ExplicitArg, "x")] $ (x : Nat) -> Gen (a : Type ** Y x a)
-            , ("1st given impl",) $ chk YInfo [(0, ImplicitArg, "x")] $ {x : Nat} -> Gen (a : Type ** Y x a)
-            , ("2nd given expl",) $ chk YInfo [(1, ExplicitArg, "b")] $ (b : Type) -> Gen (n : Nat ** Y n b)
-            , ("2nd given impl",) $ chk YInfo [(1, ImplicitArg, "b")] $ {b : Type} -> Gen (n : Nat ** Y n b)
+            , ("1st given expl",) $ chk YInfo [(0, ExplicitArg)] $ (n : Nat) -> Gen (a : Type ** Y n a)
+            , ("1st given impl",) $ chk YInfo [(0, ImplicitArg)] $ {n : Nat} -> Gen (a : Type ** Y n a)
+            , ("2nd given expl",) $ chk YInfo [(1, ExplicitArg)] $ (a : Type) -> Gen (n : Nat ** Y n a)
+            , ("2nd given impl",) $ chk YInfo [(1, ImplicitArg)] $ {a : Type} -> Gen (n : Nat ** Y n a)
 
-            , ("both given, expl+expl",)  $ chk YInfo [(1, ExplicitArg, "b"), (0, ExplicitArg, "m")] $ (m : Nat) -> (b : Type) -> Gen (Y m b)
-            , ("both given', expl+expl",) $ chk YInfo [(1, ExplicitArg, "a"), (0, ExplicitArg, "n")] $ (n : Nat) -> (a : Type) -> Gen (Y n a)
-            , ("both given, expl+impl",)  $ chk YInfo [(1, ImplicitArg, "b"), (0, ExplicitArg, "m")] $ (m : Nat) -> {b : Type} -> Gen (Y m b)
-            , ("both given, impl+expl",)  $ chk YInfo [(1, ExplicitArg, "b"), (0, ImplicitArg, "m")] $ {m : Nat} -> (b : Type) -> Gen (Y m b)
-            , ("both given, impl+impl",)  $ chk YInfo [(1, ImplicitArg, "b"), (0, ImplicitArg, "m")] $ {m : Nat} -> {b : Type} -> Gen (Y m b)
-            ]
-
-namespace NonDepExplParams_AllUnnamed
-
-  data Y : Nat -> Type -> Type where
-    Y0 : Y 0 Int
-    Y1 : Y 1 Nat
-
-  YInfo : TypeInfo
-  YInfo = getInfo `{Y}
-
-  export
-  check : List TestCaseDesc
-  check = mapFst ("non-dependent type + expl params; all unnamed; " ++) <$>
-            [ ("both given, expl+expl",)  $ chk YInfo [(1, ExplicitArg, "b"), (0, ExplicitArg, "m")] $ (m : Nat) -> (b : Type) -> Gen (Y m b)
-            , ("both given', expl+expl",) $ chk YInfo [(1, ExplicitArg, "a"), (0, ExplicitArg, "n")] $ (n : Nat) -> (a : Type) -> Gen (Y n a)
-            , ("both given, expl+impl",)  $ chk YInfo [(1, ImplicitArg, "b"), (0, ExplicitArg, "m")] $ (m : Nat) -> {b : Type} -> Gen (Y m b)
-            , ("both given, impl+expl",)  $ chk YInfo [(1, ExplicitArg, "b"), (0, ImplicitArg, "m")] $ {m : Nat} -> (b : Type) -> Gen (Y m b)
-            , ("both given, impl+impl",)  $ chk YInfo [(1, ImplicitArg, "b"), (0, ImplicitArg, "m")] $ {m : Nat} -> {b : Type} -> Gen (Y m b)
+            , ("both given, expl+expl",) $ chk YInfo [(1, ExplicitArg), (0, ExplicitArg)] $ (n : Nat) -> (a : Type) -> Gen (Y n a)
+            , ("both given, expl+impl",) $ chk YInfo [(1, ImplicitArg), (0, ExplicitArg)] $ (n : Nat) -> {a : Type} -> Gen (Y n a)
+            , ("both given, impl+expl",) $ chk YInfo [(1, ExplicitArg), (0, ImplicitArg)] $ {n : Nat} -> (a : Type) -> Gen (Y n a)
+            , ("both given, impl+impl",) $ chk YInfo [(1, ImplicitArg), (0, ImplicitArg)] $ {n : Nat} -> {a : Type} -> Gen (Y n a)
             ]
 
 namespace NonDepMixedParams_AllNamed
@@ -93,16 +73,15 @@ namespace NonDepMixedParams_AllNamed
   check = mapFst ("non-dependent type + mixed explicitness; all named; " ++) <$>
             [ ("no givens",) $ chk YInfo [] $ Gen (n : Nat ** a : Type ** Y {n} a)
 
-            , ("1st given expl",) $ chk YInfo [(0, ExplicitArg, "x")] $ (x : Nat) -> Gen (a : Type ** Y {n=x} a)
-            , ("1st given impl",) $ chk YInfo [(0, ImplicitArg, "x")] $ {x : Nat} -> Gen (a : Type ** Y {n=x} a)
-            , ("2nd given expl",) $ chk YInfo [(1, ExplicitArg, "b")] $ (b : Type) -> Gen (n : Nat ** Y {n} b)
-            , ("2nd given impl",) $ chk YInfo [(1, ImplicitArg, "b")] $ {b : Type} -> Gen (n : Nat ** Y {n} b)
+            , ("1st given expl",) $ chk YInfo [(0, ExplicitArg)] $ (n : Nat) -> Gen (a : Type ** Y {n} a)
+            , ("1st given impl",) $ chk YInfo [(0, ImplicitArg)] $ {n : Nat} -> Gen (a : Type ** Y {n} a)
+            , ("2nd given expl",) $ chk YInfo [(1, ExplicitArg)] $ (a : Type) -> Gen (n : Nat ** Y {n} a)
+            , ("2nd given impl",) $ chk YInfo [(1, ImplicitArg)] $ {a : Type} -> Gen (n : Nat ** Y {n} a)
 
-            , ("both given, expl+expl",)  $ chk YInfo [(1, ExplicitArg, "b"), (0, ExplicitArg, "m")] $ (m : Nat) -> (b : Type) -> Gen (Y {n=m} b)
-            , ("both given', expl+expl",) $ chk YInfo [(1, ExplicitArg, "a"), (0, ExplicitArg, "n")] $ (n : Nat) -> (a : Type) -> Gen (Y {n} a)
-            , ("both given, expl+impl",)  $ chk YInfo [(1, ImplicitArg, "b"), (0, ExplicitArg, "m")] $ (m : Nat) -> {b : Type} -> Gen (Y {n=m} b)
-            , ("both given, impl+expl",)  $ chk YInfo [(1, ExplicitArg, "b"), (0, ImplicitArg, "m")] $ {m : Nat} -> (b : Type) -> Gen (Y {n=m} b)
-            , ("both given, impl+impl",)  $ chk YInfo [(1, ImplicitArg, "b"), (0, ImplicitArg, "m")] $ {m : Nat} -> {b : Type} -> Gen (Y {n=m} b)
+            , ("both given, expl+expl",)  $ chk YInfo [(1, ExplicitArg), (0, ExplicitArg)] $ (n : Nat) -> (a : Type) -> Gen (Y {n} a)
+            , ("both given, expl+impl",)  $ chk YInfo [(1, ImplicitArg), (0, ExplicitArg)] $ (n : Nat) -> {a : Type} -> Gen (Y {n} a)
+            , ("both given, impl+expl",)  $ chk YInfo [(1, ExplicitArg), (0, ImplicitArg)] $ {n : Nat} -> (a : Type) -> Gen (Y {n} a)
+            , ("both given, impl+impl",)  $ chk YInfo [(1, ImplicitArg), (0, ImplicitArg)] $ {n : Nat} -> {a : Type} -> Gen (Y {n} a)
             ]
 
 namespace DepParams_AllNamed
@@ -120,48 +99,25 @@ namespace DepParams_AllNamed
             [ ("no givens",)  $ chk YInfo [] $ Gen (a : Type ** n : Nat ** v : Vect n a ** Y {a} n v)
             , ("no givens'",) $ chk YInfo [] $ Gen (a : Type ** n : Nat ** v : Vect n a ** Y n v)
 
-            , ("impl `a` given as expl",)  $ chk YInfo [(0, ExplicitArg, "u")] $ (u : Type) -> Gen (n : Nat ** v : Vect n u ** Y n v)
-            , ("impl `a` given' as expl",) $ chk YInfo [(0, ExplicitArg, "a")] $ (a : Type) -> Gen (n : Nat ** v : Vect n a ** Y n v)
-            , ("impl `a` given as impl",)  $ chk YInfo [(0, ImplicitArg, "u")] $ {u : Type} -> Gen (n : Nat ** v : Vect n u ** Y n v)
+            , ("impl `a` given as expl",)  $ chk YInfo [(0, ExplicitArg)] $ (a : Type) -> Gen (n : Nat ** v : Vect n a ** Y n v)
+            , ("impl `a` given as impl",)  $ chk YInfo [(0, ImplicitArg)] $ {a : Type} -> Gen (n : Nat ** v : Vect n a ** Y n v)
 
-            , ("expl `n` given as expl",) $ chk YInfo [(1, ExplicitArg, "m")] $ (m : Nat) -> Gen (a : Type ** v : Vect m a ** Y m v)
-            , ("expl `n` given as impl",) $ chk YInfo [(1, ImplicitArg, "m")] $ {m : Nat} -> Gen (a : Type ** v : Vect m a ** Y m v)
+            , ("expl `n` given as expl",) $ chk YInfo [(1, ExplicitArg)] $ (n : Nat) -> Gen (a : Type ** v : Vect n a ** Y n v)
+            , ("expl `n` given as impl",) $ chk YInfo [(1, ImplicitArg)] $ {n : Nat} -> Gen (a : Type ** v : Vect n a ** Y n v)
 
-            , ("`a` and `n` given, expl+expl",) $ chk YInfo [(0, ExplicitArg, "b"), (1, ExplicitArg, "m")]
-                                                $ (b : Type) -> (m : Nat) -> Gen (v : Vect m b ** Y m v)
-            , ("`a` and `n` given, impl+expl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ExplicitArg, "m")]
-                                                $ {b : Type} -> (m : Nat) -> Gen (v : Vect m b ** Y m v)
-            , ("`a` and `n` given, expl+impl",) $ chk YInfo [(0, ExplicitArg, "b"), (1, ImplicitArg, "m")]
-                                                $ (b : Type) -> {m : Nat} -> Gen (v : Vect m b ** Y m v)
-            , ("`a` and `n` given, impl+impl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ImplicitArg, "m")]
-                                                $ {b : Type} -> {m : Nat} -> Gen (v : Vect m b ** Y m v)
+            , ("`a` and `n` given, expl+expl",) $ chk YInfo [(0, ExplicitArg), (1, ExplicitArg)]
+                                                $ (a : Type) -> (n : Nat) -> Gen (v : Vect n a ** Y n v)
+            , ("`a` and `n` given, impl+expl",) $ chk YInfo [(0, ImplicitArg), (1, ExplicitArg)]
+                                                $ {a : Type} -> (n : Nat) -> Gen (v : Vect n a ** Y n v)
+            , ("`a` and `n` given, expl+impl",) $ chk YInfo [(0, ExplicitArg), (1, ImplicitArg)]
+                                                $ (a : Type) -> {n : Nat} -> Gen (v : Vect n a ** Y n v)
+            , ("`a` and `n` given, impl+impl",) $ chk YInfo [(0, ImplicitArg), (1, ImplicitArg)]
+                                                $ {a : Type} -> {n : Nat} -> Gen (v : Vect n a ** Y n v)
 
-            , ("all given, expl+expl+expl",) $ chk YInfo [(0, ExplicitArg, "b"), (1, ExplicitArg, "m"), (2, ExplicitArg, "w")]
-                                             $ (b : Type) -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
-            , ("all given, impl+expl+expl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ExplicitArg, "m"), (2, ExplicitArg, "w")]
-                                             $ {b : Type} -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
-            , ("all given', impl+expl+expl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ExplicitArg, "a"), (2, ExplicitArg, "n")]
-                                              $ {b : Type} -> (a : Nat) -> (n : Vect a b) -> Gen (Y a n)
-            ]
-
-namespace DepParams_RightmostUnnamed
-
-  data Y : (n : Nat) -> Vect n a -> Type where
-    Y0 : Y 0 []
-    Y1 : (x : a) -> Y 1 [x]
-
-  YInfo : TypeInfo
-  YInfo = getInfo `{Y}
-
-  export
-  check : List TestCaseDesc
-  check = mapFst ("dependent type + mixed explicitness; rightmost unnamed; " ++) <$>
-            [ ("all given, expl+expl+expl",) $ chk YInfo [(0, ExplicitArg, "b"), (1, ExplicitArg, "m"), (2, ExplicitArg, "w")]
-                                             $ (b : Type) -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
-            , ("all given, impl+expl+expl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ExplicitArg, "m"), (2, ExplicitArg, "w")]
-                                             $ {b : Type} -> (m : Nat) -> (w : Vect m b) -> Gen (Y m w)
-            , ("all given', impl+expl+expl",) $ chk YInfo [(0, ImplicitArg, "b"), (1, ExplicitArg, "a"), (2, ExplicitArg, "n")]
-                                              $ {b : Type} -> (a : Nat) -> (n : Vect a b) -> Gen (Y a n)
+            , ("all given, expl+expl+expl",) $ chk YInfo [(0, ExplicitArg), (1, ExplicitArg), (2, ExplicitArg)]
+                                             $ (a : Type) -> (n : Nat) -> (v : Vect n a) -> Gen (Y n v)
+            , ("all given, impl+expl+expl",) $ chk YInfo [(0, ImplicitArg), (1, ExplicitArg), (2, ExplicitArg)]
+                                             $ {a : Type} -> (n : Nat) -> (v : Vect n a) -> Gen (Y n v)
             ]
 
 pr : TestCaseDesc -> Elab String
@@ -183,10 +139,8 @@ main =
   traverse_ .| logCheck <=< pr .| with Prelude.(::) foldMap Lazy.fromList
     [ Trivial.check
     , NonDepExplParams_AllNamed.check
-    , NonDepExplParams_AllUnnamed.check
     , NonDepMixedParams_AllNamed.check
     , DepParams_AllNamed.check
-    , DepParams_RightmostUnnamed.check
     ]
 
 %runElab main
