@@ -36,16 +36,21 @@ isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `
 
 --- Info of code position ---
 
-public export
 record GenSignatureFC where
   constructor MkGenSignatureFC
   sigFC        : FC
   genFC        : FC
   targetTypeFC : FC
 
+--- Collection of external `Gen`s ---
+
+record GenExternals where
+  constructor MkGenExternals
+  externals : SortedMap ExternalGenSignature TTImp
+
 --- Analysis functions ---
 
-checkTypeIsGen : TTImp -> Elab (GenSignatureFC, GenSignature CustomNames, GenExternals)
+checkTypeIsGen : TTImp -> Elab (GenSignatureFC, ExternalGenSignature, GenExternals)
 checkTypeIsGen sig = do
 
   -- check the given expression is a type
@@ -192,21 +197,21 @@ checkTypeIsGen sig = do
   let givenParams = fromList $ snd <$> givenParams
 
   -- make the resulting signature
-  let genSig = MkGenSignature {targetType, givenParams}
+  let genSig = MkExternalGenSignature {targetType, givenParams}
 
   -------------------------------------
   -- Auto-implicit generators checks --
   -------------------------------------
 
   -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
-  autoImplArgs <- subCheck "Auto-implicit" autoImplArgs
+  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> subCheck "Auto-implicit" tti
 
   -- check that all auto-imlicit arguments are unique
-  let [] = findDiffPairWhich ((==) `on` snd) autoImplArgs
+  let [] = findDiffPairWhich ((==) `on` \(_, sig, _) => sig) autoImplArgs
     | (_, (fc, _)) :: _ => failAt fc.targetTypeFC "Repetition of an auto-implicit external generator"
 
   -- check that the resulting generator is not in externals
-  let Nothing = find ((== genSig) . snd) autoImplArgs
+  let Nothing = find ((== genSig) . \(_, sig, _) => sig) autoImplArgs
     | Just (fc, _) => failAt fc.genFC "External generators contain the generator asked to be derived"
 
   -- forget FCs of subparsed externals
@@ -226,8 +231,8 @@ checkTypeIsGen sig = do
 
   where
 
-    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature CustomNames)
-    subCheck desc = traverse $ (assert_total checkTypeIsGen) >=> \case
+    subCheck : (desc : String) -> TTImp -> Elab (GenSignatureFC, ExternalGenSignature)
+    subCheck desc = assert_total checkTypeIsGen >=> \case
       (fc, s, MkGenExternals ext) => if null ext
         then pure (fc, s)
         else failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
@@ -251,6 +256,12 @@ checkTypeIsGen sig = do
 ------------------------------
 --- Functions for the user ---
 ------------------------------
+
+assignNames : GenExternals -> Elab $ SortedMap ExternalGenSignature (Name, TTImp)
+assignNames $ MkGenExternals exts = for exts $ \tti => (,tti) <$> genSym "externalAutoimpl"
+
+wrapWithExternalsAutos : SortedMap ExternalGenSignature (Name, TTImp) -> TTImp -> TTImp
+wrapWithExternalsAutos = flip $ foldr $ lam . uncurry (MkArg MW AutoImplicit . Just)
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
@@ -294,5 +305,6 @@ deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
   (signature, externals) <- snd <$> checkTypeIsGen signature
-  (lambda, locals) <- runCanonic externals $ outmostLambda signature
+  externals <- assignNames externals
+  (lambda, locals) <- runCanonic (fst <$> externals) $ wrapWithExternalsAutos externals <$> internalGenCallingLambda signature
   check $ local locals lambda
