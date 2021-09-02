@@ -36,12 +36,17 @@ isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `
 
 --- Info of code position ---
 
-public export
 record GenSignatureFC where
   constructor MkGenSignatureFC
   sigFC        : FC
   genFC        : FC
   targetTypeFC : FC
+
+--- Collection of external `Gen`s ---
+
+record GenExternals where
+  constructor MkGenExternals
+  externals : SortedSet ExternalGenSignature
 
 --- Analysis functions ---
 

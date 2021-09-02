@@ -78,13 +78,6 @@ internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySe
 externalise : GenSignature -> ExternalGenSignature
 externalise $ MkGenSignature ty giv = MkExternalGenSignature ty $ fromList $ (\idx => (idx, ExplicitArg, argName $ index' ty.args idx)) <$> giv.asList
 
---- Collection of external `Gen`s ---
-
-public export
-record GenExternals where
-  constructor MkGenExternals
-  externals : SortedSet ExternalGenSignature
-
 -----------------------------------
 --- "Canonical" functions stuff ---
 -----------------------------------
