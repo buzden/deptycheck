@@ -252,6 +252,9 @@ checkTypeIsGen sig = do
 --- Functions for the user ---
 ------------------------------
 
+assignNames : GenExternals -> Elab $ SortedMap ExternalGenSignature Name
+assignNames $ MkGenExternals exts = map fromList $ for (SortedSet.toList exts) $ \gs => (gs,) <$> genSym "externalAutoimpl"
+
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
 ||| Consider, you have a `data X (a : A) (b : B n) (c : C) where ...` and
@@ -294,5 +297,6 @@ deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
   (signature, externals) <- snd <$> checkTypeIsGen signature
+  externals <- assignNames externals
   (lambda, locals) <- runCanonic externals $ internalGenCallingLambda signature
   check $ local locals lambda

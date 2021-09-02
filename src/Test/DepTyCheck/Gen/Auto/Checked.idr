@@ -172,5 +172,5 @@ namespace ClojuringCanonicImpl
 --- Canonic-dischagring function ---
 
 export
-runCanonic : GenExternals -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
+runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
 runCanonic exts calc = ?runCanonic_rhs
