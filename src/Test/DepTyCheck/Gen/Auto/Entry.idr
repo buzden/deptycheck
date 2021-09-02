@@ -204,7 +204,7 @@ checkTypeIsGen sig = do
   -------------------------------------
 
   -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
-  autoImplArgs <- subCheck "Auto-implicit" autoImplArgs
+  autoImplArgs <- for autoImplArgs $ subCheck "Auto-implicit"
 
   -- check that all auto-imlicit arguments are unique
   let [] = findDiffPairWhich ((==) `on` snd) autoImplArgs
@@ -231,8 +231,8 @@ checkTypeIsGen sig = do
 
   where
 
-    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, ExternalGenSignature)
-    subCheck desc = traverse $ (assert_total checkTypeIsGen) >=> \case
+    subCheck : (desc : String) -> TTImp -> Elab (GenSignatureFC, ExternalGenSignature)
+    subCheck desc = assert_total checkTypeIsGen >=> \case
       (fc, s, MkGenExternals ext) => if null ext
         then pure (fc, s)
         else failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
