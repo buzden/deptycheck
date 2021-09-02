@@ -116,6 +116,9 @@ callExternalGen sig topmost values =
       ExplicitArg => (.$ value)
       ImplicitArg => \f => namedApp f name value
 
+callInternalGen : (0 sig : GenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callInternalGen _ = foldl app
+
 --- Main interfaces ---
 
 public export
@@ -157,9 +160,7 @@ namespace ClojuringCanonicImpl
   ClojuringContext m => CanonicGen m where
     callGen sig values = ?callGen_impl
                          -- First, need to known whether do we have an external generator for the given signature.
-                         -- If yes, just use `callExternalGen` for it.
-                         -- If not, either use `callExternalGen` for an externalised version,
-                         --   or have a separate function equivalent to `callExternalGen` applied to an externalised signature.
+                         -- If yes, use `callExternalGen`, otherwise use `callInternalGen`
                          -- originally was `pure $ callExternalGen sig !(canonicGenExpr sig) values`
 
 --- Canonic-dischagring function ---
