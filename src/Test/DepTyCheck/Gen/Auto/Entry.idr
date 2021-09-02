@@ -294,5 +294,5 @@ deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
   (signature, externals) <- snd <$> checkTypeIsGen signature
-  (lambda, locals) <- runCanonic externals $ outmostLambda signature
+  (lambda, locals) <- runCanonic externals $ internalGenCallingLambda signature
   check $ local locals lambda

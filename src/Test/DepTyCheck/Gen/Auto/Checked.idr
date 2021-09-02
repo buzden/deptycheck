@@ -130,8 +130,8 @@ interface Monad m => CanonicGen m where
   callGen : (sig : GenSignature) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
 
 export
-outmostLambda : CanonicGen m => ExternalGenSignature -> m TTImp
-outmostLambda sig = foldr (map . mkLam) call sig.givenParams.asList where
+internalGenCallingLambda : CanonicGen m => ExternalGenSignature -> m TTImp
+internalGenCallingLambda sig = foldr (map . mkLam) call sig.givenParams.asList where
 
   mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
   mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT (Just name) (index' sig.targetType.args idx).type
