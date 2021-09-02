@@ -121,3 +121,12 @@ Eq Name where
   WithBlock x n == WithBlock y m = x == y && n == m
 
   _ == _ = False
+
+-------------------------------------------
+--- Reflection-related additional stuff ---
+-------------------------------------------
+
+-- Workaround of some type inference bug
+public export
+argName : Arg True -> Name
+argName = name

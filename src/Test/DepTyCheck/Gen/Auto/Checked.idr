@@ -108,14 +108,10 @@ callCanonicGen sig topmost values =
     let (paramIdx, info) = index' givenParams $ rewrite sym prfAsSig in valueIdx in
     let (expl, name) : (ArgExplicitness, Name) = case nso of
                                                    CustomNames => info
-                                                   FromDataDef => (info, nm $ index' sig.targetType.args paramIdx)
+                                                   FromDataDef => (info, argName $ index' sig.targetType.args paramIdx)
     in case expl of
       ExplicitArg => (.$ value)
       ImplicitArg => \f => namedApp f name value
-
-  where
-    nm : Arg True -> Name -- workaround of some type inference bug
-    nm = name
 
 --- Main interfaces ---
 
