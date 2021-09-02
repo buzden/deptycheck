@@ -4,6 +4,8 @@ import public Control.Monad.Reader
 import public Control.Monad.Trans
 import public Control.Monad.Writer
 
+import public Data.DPair
+
 import public Data.Vect.Extra
 import public Data.SortedMap
 import public Data.SortedSet
@@ -40,34 +42,48 @@ namespace ArgExplicitness
 --- Datatypes to describe signatures after checking user input ---
 ------------------------------------------------------------------
 
-public export
-data NamesOrigin = CustomNames | FromDataDef
+--- Simplest `Gen` signature, user for requests ---
 
 public export
-record GenSignature (nso : NamesOrigin) where
+record GenSignature where
   constructor MkGenSignature
   targetType : TypeInfo
-  givenParams : SortedMap (Fin targetType.args.length) $ case nso of
-                                                           CustomNames => (ArgExplicitness, Name)
-                                                           FromDataDef => ArgExplicitness
+  givenParams : SortedSet $ Fin targetType.args.length
 
-namespace GenSignature
-
-  characteristics : GenSignature cn -> (String, List Nat)
-  characteristics (MkGenSignature ty giv) = (show ty.name, toNatList $ keys giv)
+--- `Gen` signature containing info about params explicitness and their names ---
 
 public export
-Eq (GenSignature cn) where
+record ExternalGenSignature where
+  constructor MkExternalGenSignature
+  targetType : TypeInfo
+  givenParams : SortedMap (Fin targetType.args.length) (ArgExplicitness, Name)
+
+namespace ExternalGenSignature
+
+  characteristics : ExternalGenSignature -> (String, List Nat)
+  characteristics $ MkExternalGenSignature ty giv = (show ty.name, toNatList $ keys giv)
+
+public export
+Eq ExternalGenSignature where
   (==) = (==) `on` characteristics
 
 public export
-Ord (GenSignature cn) where
+Ord ExternalGenSignature where
   compare = comparing characteristics
+
+internalise : (extSig : ExternalGenSignature) -> Subset GenSignature $ \sig => sig.givenParams.asList.length = extSig.givenParams.asList.length
+internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySet giv) $ believe_me $ the (0 = 0) Refl
+            -- Dirty-dirty `believe_me` hack! It's true but hard to prove with the current implementation
+
+externalise : GenSignature -> ExternalGenSignature
+externalise $ MkGenSignature ty giv = MkExternalGenSignature ty $ fromList $ (\idx => (idx, ExplicitArg, argName $ index' ty.args idx)) <$> giv.asList
+
+--- Collection of external `Gen`s ---
 
 public export
 record GenExternals where
   constructor MkGenExternals
-  externals : SortedSet $ GenSignature CustomNames
+  externals : SortedSet ExternalGenSignature
 
 -----------------------------------
 --- "Canonical" functions stuff ---
@@ -77,12 +93,12 @@ record GenExternals where
 
 -- Must respect names from the `givenParams` field, at least for implicit parameters
 export
-canonicSig : GenSignature FromDataDef -> TTImp
-canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
+canonicSig : GenSignature -> TTImp
+canonicSig sig = piAll returnTy $ arg <$> SortedSet.toList sig.givenParams where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
 
-  arg : (Fin sig.targetType.args.length, ArgExplicitness) -> Arg False
-  arg (idx, expl) = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW expl.toTT (Just name) type
+  arg : Fin sig.targetType.args.length -> Arg False
+  arg idx = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW ExplicitArg (Just name) type
 
   returnTy : TTImp
   returnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs where
@@ -96,19 +112,13 @@ canonicSig sig = piAll returnTy $ arg <$> toList sig.givenParams where
                             AutoImplicit  => (`autoApp` var name)
 
     generatedArgs : List (Name, TTImp)
-    generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg _ _ name type) =>
-                      case lookup idx sig.givenParams of
-                        Nothing => Just (name, type)
-                        Just _  => Nothing
+    generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg _ _ name type) => ifThenElse (contains idx sig.givenParams) Nothing $ Just (name, type)
 
-callCanonicGen : {nso : _} -> (sig : GenSignature nso) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callCanonicGen : (sig : ExternalGenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
 callCanonicGen sig topmost values =
   let (givenParams ** prfAsSig) = @@ sig.givenParams.asList in
   foldl (flip apply) topmost $ flip mapWithPos values $ \valueIdx, value =>
-    let (paramIdx, info) = index' givenParams $ rewrite sym prfAsSig in valueIdx in
-    let (expl, name) : (ArgExplicitness, Name) = case nso of
-                                                   CustomNames => info
-                                                   FromDataDef => (info, argName $ index' sig.targetType.args paramIdx)
+    let (_, expl, name) = index' givenParams $ rewrite sym prfAsSig in valueIdx
     in case expl of
       ExplicitArg => (.$ value)
       ImplicitArg => \f => namedApp f name value
@@ -117,22 +127,23 @@ callCanonicGen sig topmost values =
 
 public export
 interface Monad m => CanonicGen m where
-  callGen : {nso : _} -> (sig : GenSignature nso) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
+  callGen : (sig : GenSignature) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
 
 export
-outmostLambda : CanonicGen m => GenSignature CustomNames -> m TTImp
+outmostLambda : CanonicGen m => ExternalGenSignature -> m TTImp
 outmostLambda sig = foldr (map . mkLam) call sig.givenParams.asList where
 
   mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
   mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT (Just name) (index' sig.targetType.args idx).type
 
   call : m TTImp
-  call = callGen sig $ fromList sig.givenParams.asList <&> \(_, _, name) => var name
+  call = let Element intSig prf = internalise sig in
+         callGen intSig $ rewrite prf in fromList sig.givenParams.asList <&> \(_, _, name) => var name
 
 --- The main meat for derivation ---
 
 export
-deriveCanonical : CanonicGen m => GenSignature nso -> m Decl
+deriveCanonical : CanonicGen m => GenSignature -> m Decl
 deriveCanonical sig = do
   ?deriveCanonical_rhs
 
@@ -142,16 +153,21 @@ namespace ClojuringCanonicImpl
 
   ClojuringContext : (Type -> Type) -> Type
   ClojuringContext m =
-    ( MonadReader (SortedMap (GenSignature CustomNames) Name) m
-    , MonadWriter (SortedMap (GenSignature CustomNames) $ Lazy Decl) m
+    ( MonadReader (SortedMap ExternalGenSignature Name) m
+    , MonadWriter (SortedMap ExternalGenSignature $ Lazy Decl) m
     )
 
-  canonicGenExpr : ClojuringContext m => {nso : _} -> GenSignature nso -> m TTImp
+  canonicGenExpr : ClojuringContext m => GenSignature -> m TTImp
   canonicGenExpr sig = ?canonicGenExpr_rhs
 
   export
   ClojuringContext m => CanonicGen m where
-    callGen sig values = pure $ callCanonicGen sig !(canonicGenExpr sig) values
+    callGen sig values = ?callGen_impl
+                         -- First, need to known whether do we have an external generator for the given signature.
+                         -- If yes, just use `callCanonicGen` for it.
+                         -- If not, either use `callCanonicGen` for an externalised version,
+                         --   or have a separate function equivalent to `callCanonicGen` applied to an externalised signature.
+                         -- originally was `pure $ callCanonicGen sig !(canonicGenExpr sig) values`
 
 --- Canonic-dischagring function ---
 

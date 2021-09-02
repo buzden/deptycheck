@@ -45,7 +45,7 @@ record GenSignatureFC where
 
 --- Analysis functions ---
 
-checkTypeIsGen : TTImp -> Elab (GenSignatureFC, GenSignature CustomNames, GenExternals)
+checkTypeIsGen : TTImp -> Elab (GenSignatureFC, ExternalGenSignature, GenExternals)
 checkTypeIsGen sig = do
 
   -- check the given expression is a type
@@ -192,7 +192,7 @@ checkTypeIsGen sig = do
   let givenParams = fromList $ snd <$> givenParams
 
   -- make the resulting signature
-  let genSig = MkGenSignature {targetType, givenParams}
+  let genSig = MkExternalGenSignature {targetType, givenParams}
 
   -------------------------------------
   -- Auto-implicit generators checks --
@@ -226,7 +226,7 @@ checkTypeIsGen sig = do
 
   where
 
-    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, GenSignature CustomNames)
+    subCheck : (desc : String) -> List TTImp -> Elab $ List (GenSignatureFC, ExternalGenSignature)
     subCheck desc = traverse $ (assert_total checkTypeIsGen) >=> \case
       (fc, s, MkGenExternals ext) => if null ext
         then pure (fc, s)
