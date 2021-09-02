@@ -107,8 +107,8 @@ canonicSig sig = piAll returnTy $ arg <$> SortedSet.toList sig.givenParams where
     generatedArgs : List (Name, TTImp)
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg _ _ name type) => ifThenElse (contains idx sig.givenParams) Nothing $ Just (name, type)
 
-callCanonicGen : (sig : ExternalGenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callCanonicGen sig topmost values =
+callExternalGen : (sig : ExternalGenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callExternalGen sig topmost values =
   let (givenParams ** prfAsSig) = @@ sig.givenParams.asList in
   foldl (flip apply) topmost $ flip mapWithPos values $ \valueIdx, value =>
     let (_, expl, name) = index' givenParams $ rewrite sym prfAsSig in valueIdx
@@ -157,10 +157,10 @@ namespace ClojuringCanonicImpl
   ClojuringContext m => CanonicGen m where
     callGen sig values = ?callGen_impl
                          -- First, need to known whether do we have an external generator for the given signature.
-                         -- If yes, just use `callCanonicGen` for it.
-                         -- If not, either use `callCanonicGen` for an externalised version,
-                         --   or have a separate function equivalent to `callCanonicGen` applied to an externalised signature.
-                         -- originally was `pure $ callCanonicGen sig !(canonicGenExpr sig) values`
+                         -- If yes, just use `callExternalGen` for it.
+                         -- If not, either use `callExternalGen` for an externalised version,
+                         --   or have a separate function equivalent to `callExternalGen` applied to an externalised signature.
+                         -- originally was `pure $ callExternalGen sig !(canonicGenExpr sig) values`
 
 --- Canonic-dischagring function ---
 
