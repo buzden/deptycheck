@@ -46,7 +46,7 @@ record GenSignatureFC where
 
 record GenExternals where
   constructor MkGenExternals
-  externals : SortedSet ExternalGenSignature
+  externals : SortedMap ExternalGenSignature TTImp
 
 --- Analysis functions ---
 
@@ -204,14 +204,14 @@ checkTypeIsGen sig = do
   -------------------------------------
 
   -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
-  autoImplArgs <- for autoImplArgs $ subCheck "Auto-implicit"
+  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> subCheck "Auto-implicit" tti
 
   -- check that all auto-imlicit arguments are unique
-  let [] = findDiffPairWhich ((==) `on` snd) autoImplArgs
+  let [] = findDiffPairWhich ((==) `on` \(_, sig, _) => sig) autoImplArgs
     | (_, (fc, _)) :: _ => failAt fc.targetTypeFC "Repetition of an auto-implicit external generator"
 
   -- check that the resulting generator is not in externals
-  let Nothing = find ((== genSig) . snd) autoImplArgs
+  let Nothing = find ((== genSig) . \(_, sig, _) => sig) autoImplArgs
     | Just (fc, _) => failAt fc.genFC "External generators contain the generator asked to be derived"
 
   -- forget FCs of subparsed externals
@@ -257,11 +257,11 @@ checkTypeIsGen sig = do
 --- Functions for the user ---
 ------------------------------
 
-assignNames : GenExternals -> Elab $ SortedMap ExternalGenSignature Name
-assignNames $ MkGenExternals exts = map fromList $ for (SortedSet.toList exts) $ \gs => (gs,) <$> genSym "externalAutoimpl"
+assignNames : GenExternals -> Elab $ SortedMap ExternalGenSignature (Name, TTImp)
+assignNames $ MkGenExternals exts = for exts $ \tti => (,tti) <$> genSym "externalAutoimpl"
 
-wrapWithExternalsAutos : SortedMap ExternalGenSignature Name -> TTImp -> TTImp
-wrapWithExternalsAutos exts lambda = ?wrapWithExternalsAutos_rhs
+wrapWithExternalsAutos : SortedMap ExternalGenSignature (Name, TTImp) -> TTImp -> TTImp
+wrapWithExternalsAutos exts lambda = foldl ?wrapWithExternalsAutos_rhs lambda exts
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
@@ -306,5 +306,5 @@ deriveGen = do
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
   (signature, externals) <- snd <$> checkTypeIsGen signature
   externals <- assignNames externals
-  (lambda, locals) <- runCanonic externals $ wrapWithExternalsAutos externals <$> internalGenCallingLambda signature
+  (lambda, locals) <- runCanonic (fst <$> externals) $ wrapWithExternalsAutos externals <$> internalGenCallingLambda signature
   check $ local locals lambda
