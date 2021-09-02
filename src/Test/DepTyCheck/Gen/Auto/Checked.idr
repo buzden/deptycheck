@@ -97,15 +97,15 @@ canonicSig sig = piAll returnTy $ arg <$> SortedSet.toList sig.givenParams where
   returnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs where
 
     targetTypeApplied : TTImp
-    targetTypeApplied = foldr apply (var sig.targetType.name) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) =>
-                          case piInfo of
-                            ExplicitArg   => (.$ var name)
-                            ImplicitArg   => \f => namedApp f name $ var name
-                            DefImplicit _ => \f => namedApp f name $ var name
-                            AutoImplicit  => (`autoApp` var name)
+    targetTypeApplied = foldr apply (var sig.targetType.name) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => case piInfo of
+                          ExplicitArg   => (.$ var name)
+                          ImplicitArg   => \f => namedApp f name $ var name
+                          DefImplicit _ => \f => namedApp f name $ var name
+                          AutoImplicit  => (`autoApp` var name)
 
     generatedArgs : List (Name, TTImp)
-    generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg _ _ name type) => ifThenElse (contains idx sig.givenParams) Nothing $ Just (name, type)
+    generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
+                      ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (name, type)
 
 callExternalGen : (sig : ExternalGenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
 callExternalGen sig topmost values = foldl (flip apply) topmost $ fromList sig.givenParams.asList `zip` values <&> \case
@@ -126,7 +126,7 @@ internalGenCallingLambda : CanonicGen m => ExternalGenSignature -> m TTImp
 internalGenCallingLambda sig = foldr (map . mkLam) call sig.givenParams.asList where
 
   mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
-  mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT (Just name) (index' sig.targetType.args idx).type
+  mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just name .| (index' sig.targetType.args idx).type
 
   call : m TTImp
   call = let Element intSig prf = internalise sig in
