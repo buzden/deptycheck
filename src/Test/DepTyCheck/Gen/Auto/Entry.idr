@@ -261,7 +261,7 @@ assignNames : GenExternals -> Elab $ SortedMap ExternalGenSignature (Name, TTImp
 assignNames $ MkGenExternals exts = for exts $ \tti => (,tti) <$> genSym "externalAutoimpl"
 
 wrapWithExternalsAutos : SortedMap ExternalGenSignature (Name, TTImp) -> TTImp -> TTImp
-wrapWithExternalsAutos exts lambda = foldl ?wrapWithExternalsAutos_rhs lambda exts
+wrapWithExternalsAutos = flip $ foldr $ lam . uncurry (MkArg MW AutoImplicit . Just)
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
