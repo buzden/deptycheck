@@ -177,7 +177,6 @@ namespace ClojuringCanonicImpl
                                       Yes prf => Just $ Element extSig prf
                                       No _    => Nothing
 
-  export
   ClojuringContext m => CanonicGen m where
     callGen sig values = do
 
@@ -214,8 +213,8 @@ namespace ClojuringCanonicImpl
       -- call the internal gen
       pure $ callInternalGen sig internalGenName values
 
---- Canonic-dischagring function ---
+  --- Canonic-dischagring function ---
 
-export
-runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
-runCanonic exts calc = ?runCanonic_rhs
+  export
+  runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
+  runCanonic exts calc = ?runCanonic_rhs
