@@ -1,6 +1,7 @@
 module Test.DepTyCheck.Gen.Auto.Checked
 
 import public Control.Monad.Reader
+import public Control.Monad.State
 import public Control.Monad.Trans
 import public Control.Monad.Writer
 
@@ -158,12 +159,13 @@ namespace ClojuringCanonicImpl
 
   ClojuringContext : (Type -> Type) -> Type
   ClojuringContext m =
-    ( MonadReader (SortedMap ExternalGenSignature Name) m
-    , MonadWriter (SortedMap ExternalGenSignature $ Lazy Decl) m
+    ( MonadReader (SortedMap GenSignature (Name, ExternalGenSignature)) m -- external gens
+    , MonadState  (SortedMap GenSignature Name) m -- gens already asked to be derived
+    , MonadWriter (List Decl, List Decl) m -- function declarations and bodies
     )
 
-  canonicGenExpr : ClojuringContext m => GenSignature -> m TTImp
-  canonicGenExpr sig = ?canonicGenExpr_rhs
+  canonicGenName : GenSignature -> Name
+  canonicGenName = (`MN` 0) . show . characteristics
 
   export
   ClojuringContext m => CanonicGen m where
