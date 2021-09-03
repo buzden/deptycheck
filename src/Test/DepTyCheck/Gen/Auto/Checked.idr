@@ -5,6 +5,8 @@ import public Control.Monad.State
 import public Control.Monad.Trans
 import public Control.Monad.Writer
 
+import public Decidable.Equality
+
 import public Data.DPair
 
 import public Data.Vect.Extra
@@ -167,12 +169,50 @@ namespace ClojuringCanonicImpl
   canonicGenName : GenSignature -> Name
   canonicGenName = (`MN` 0) . show . characteristics
 
+  -- Instead of staticly ensuring that map holds only correct values, we check dynamically, because it's hard to go through `==`-based lookup of maps.
+  lookupLengthChecked : (intSig : GenSignature) -> SortedMap GenSignature (Name, ExternalGenSignature) ->
+                        Maybe (Name, Subset ExternalGenSignature $ \extSig => extSig.givenParams.asList.length = intSig.givenParams.asList.length)
+  lookupLengthChecked intSig m = lookup intSig m >>= \(name, extSig) => (name,) <$>
+                                   case decEq extSig.givenParams.asList.length intSig.givenParams.asList.length of
+                                      Yes prf => Just $ Element extSig prf
+                                      No _    => Nothing
+
   export
   ClojuringContext m => CanonicGen m where
-    callGen sig values = ?callGen_impl
-                         -- First, need to known whether do we have an external generator for the given signature.
-                         -- If yes, use `callExternalGen`, otherwise use `callInternalGen`
-                         -- originally was `pure $ callExternalGen sig !(canonicGenExpr sig) values`
+    callGen sig values = do
+
+      -- look for external gens, and call it if exists
+      let Nothing = lookupLengthChecked sig !ask
+        | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name $ rewrite lenEq in values
+
+      -- get the name of internal gen, derive if necessary
+      internalGenName <- do
+
+        -- look for existing (already derived) internals, use it if exists
+        let Nothing = lookup sig !get
+          | Just name => pure name
+
+        -- nothing found, then derive! acquire the name
+        let name = canonicGenName sig
+
+        do -- actually derive the stuff!
+
+          -- remember that we're responsible for this signature derivation
+          modify $ insert sig name
+
+          -- derive body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
+          genFunBody <- assert_total $ deriveCanonical sig
+
+          -- create a definition for newly derived function gen
+          let genFunClaim = simpleClaim Export name $ canonicSig sig
+
+          -- remember the derived stuff
+          tell ([genFunClaim], [genFunBody])
+
+        pure name
+
+      -- call the internal gen
+      pure $ callInternalGen sig internalGenName values
 
 --- Canonic-dischagring function ---
 
