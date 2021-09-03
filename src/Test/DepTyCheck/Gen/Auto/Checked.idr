@@ -120,13 +120,13 @@ canonicSig sig = piAll returnTy $ arg <$> SortedSet.toList sig.givenParams where
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
                       ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (name, type)
 
-callExternalGen : (sig : ExternalGenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callExternalGen sig topmost values = foldl (flip apply) topmost $ fromList sig.givenParams.asList `zip` values <&> \case
+callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callExternalGen sig topmost values = foldl (flip apply) (var topmost) $ fromList sig.givenParams.asList `zip` values <&> \case
   ((_, ExplicitArg, _   ), value) => (.$ value)
   ((_, ImplicitArg, name), value) => \f => namedApp f name value
 
-callInternalGen : (0 sig : GenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callInternalGen _ = foldl app
+callInternalGen : (0 sig : GenSignature) -> (topmost : Name) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callInternalGen _ = foldl app . var
 
 --- Main interfaces ---
 
