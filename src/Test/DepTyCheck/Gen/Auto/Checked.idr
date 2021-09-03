@@ -3,6 +3,7 @@ module Test.DepTyCheck.Gen.Auto.Checked
 import public Control.Monad.Reader
 import public Control.Monad.State
 import public Control.Monad.Writer
+import public Control.Monad.RWS
 
 import public Decidable.Equality
 
@@ -216,4 +217,6 @@ namespace ClojuringCanonicImpl
 
   export
   runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> (a, List Decl)
-  runCanonic exts calc = ?runCanonic_rhs
+  runCanonic exts calc =
+    let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig) in
+    Prelude.uncurry (++) <$> evalRWS calc exts empty {s=SortedMap GenSignature Name}
