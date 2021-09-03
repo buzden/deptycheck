@@ -161,7 +161,7 @@ namespace ClojuringCanonicImpl
 
   ClojuringContext : (Type -> Type) -> Type
   ClojuringContext m =
-    ( MonadReader (SortedMap GenSignature (Name, ExternalGenSignature)) m -- external gens
+    ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
     , MonadState  (SortedMap GenSignature Name) m -- gens already asked to be derived
     , MonadWriter (List Decl, List Decl) m -- function declarations and bodies
     )
@@ -170,9 +170,9 @@ namespace ClojuringCanonicImpl
   canonicGenName = (`MN` 0) . show . characteristics
 
   -- Instead of staticly ensuring that map holds only correct values, we check dynamically, because it's hard to go through `==`-based lookup of maps.
-  lookupLengthChecked : (intSig : GenSignature) -> SortedMap GenSignature (Name, ExternalGenSignature) ->
+  lookupLengthChecked : (intSig : GenSignature) -> SortedMap GenSignature (ExternalGenSignature, Name) ->
                         Maybe (Name, Subset ExternalGenSignature $ \extSig => extSig.givenParams.asList.length = intSig.givenParams.asList.length)
-  lookupLengthChecked intSig m = lookup intSig m >>= \(name, extSig) => (name,) <$>
+  lookupLengthChecked intSig m = lookup intSig m >>= \(extSig, name) => (name,) <$>
                                    case decEq extSig.givenParams.asList.length intSig.givenParams.asList.length of
                                       Yes prf => Just $ Element extSig prf
                                       No _    => Nothing
