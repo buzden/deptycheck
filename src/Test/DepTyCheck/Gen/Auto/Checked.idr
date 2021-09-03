@@ -50,6 +50,19 @@ record GenSignature where
   targetType : TypeInfo
   givenParams : SortedSet $ Fin targetType.args.length
 
+namespace GenSignature
+
+  characteristics : GenSignature -> (String, List Nat)
+  characteristics $ MkGenSignature ty giv = (show ty.name, toNatList giv)
+
+public export
+Eq GenSignature where
+  (==) = (==) `on` characteristics
+
+public export
+Ord GenSignature where
+  compare = comparing characteristics
+
 --- `Gen` signature containing info about params explicitness and their names ---
 
 public export
