@@ -5,6 +5,7 @@ import public Data.List.Lazy
 import public Data.Zippable
 
 import public Data.SortedMap
+import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
 import public Language.Reflection.TTImp
