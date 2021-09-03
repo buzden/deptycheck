@@ -2,7 +2,6 @@ module Test.DepTyCheck.Gen.Auto.Checked
 
 import public Control.Monad.Reader
 import public Control.Monad.State
-import public Control.Monad.Trans
 import public Control.Monad.Writer
 
 import public Decidable.Equality
@@ -216,5 +215,5 @@ namespace ClojuringCanonicImpl
   --- Canonic-dischagring function ---
 
   export
-  runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
+  runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> (a, List Decl)
   runCanonic exts calc = ?runCanonic_rhs
