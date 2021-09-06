@@ -92,9 +92,6 @@ internalise : (extSig : ExternalGenSignature) -> Subset GenSignature $ \sig => s
 internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySet giv) $ believe_me $ the (0 = 0) Refl
             -- Dirty-dirty `believe_me` hack! It's true but hard to prove with the current implementation
 
-externalise : GenSignature -> ExternalGenSignature
-externalise $ MkGenSignature ty giv = MkExternalGenSignature ty $ fromList $ (\idx => (idx, ExplicitArg, argName $ index' ty.args idx)) <$> giv.asList
-
 -----------------------------------
 --- "Canonical" functions stuff ---
 -----------------------------------
@@ -102,7 +99,6 @@ externalise $ MkGenSignature ty giv = MkExternalGenSignature ty $ fromList $ (\i
 --- Canonic signature functions --
 
 -- Must respect names from the `givenParams` field, at least for implicit parameters
-export
 canonicSig : GenSignature -> TTImp
 canonicSig sig = piAll returnTy $ arg <$> SortedSet.toList sig.givenParams where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
