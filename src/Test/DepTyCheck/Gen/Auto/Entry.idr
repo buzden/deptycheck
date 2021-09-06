@@ -254,21 +254,24 @@ checkTypeIsGen sig = do
 
 --- Boundaries between external and internal generator functions ---
 
-internalGenCallingLambda : CanonicGen m => ExternalGenSignature -> m TTImp
-internalGenCallingLambda sig = foldr (map . mkLam) call sig.givenParams.asList where
+internalGenCallingLambda : CanonicGen m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
+internalGenCallingLambda sig fuelArg = foldr (map . mkLam) call sig.givenParams.asList where
 
   mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
   mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just name .| (index' sig.targetType.args idx).type
 
   call : m TTImp
   call = let Element intSig prf = internalise sig in
-         callGen intSig $ rewrite prf in fromList sig.givenParams.asList <&> \(_, _, name) => var name
+         callGen intSig (var fuelArg) $ rewrite prf in fromList sig.givenParams.asList <&> \(_, _, name) => var name
 
 assignNames : GenExternals -> Elab $ SortedMap ExternalGenSignature (Name, TTImp)
 assignNames $ MkGenExternals exts = for exts $ \tti => (,tti) <$> genSym "externalAutoimpl"
 
 wrapWithExternalsAutos : SortedMap ExternalGenSignature (Name, TTImp) -> TTImp -> TTImp
 wrapWithExternalsAutos = flip $ foldr $ lam . uncurry (MkArg MW AutoImplicit . Just)
+
+wrapFuel : (fuelArg : Name) -> TTImp -> TTImp
+wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 
 ------------------------------
 --- Functions for the user ---
@@ -317,5 +320,6 @@ deriveGen = do
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
   (signature, externals) <- snd <$> checkTypeIsGen signature
   externals <- assignNames externals
-  let (lambda, locals) = runCanonic (fst <$> externals) $ wrapWithExternalsAutos externals <$> internalGenCallingLambda signature
+  fuelArg <- genSym "fuel"
+  let (lambda, locals) = runCanonic (fst <$> externals) $ wrapFuel fuelArg . wrapWithExternalsAutos externals <$> internalGenCallingLambda signature fuelArg
   check $ local locals lambda

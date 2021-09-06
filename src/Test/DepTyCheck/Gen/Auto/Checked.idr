@@ -100,7 +100,7 @@ internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySe
 
 -- Must respect names from the `givenParams` field, at least for implicit parameters
 canonicSig : GenSignature -> TTImp
-canonicSig sig = piAll returnTy $ arg <$> SortedSet.toList sig.givenParams where
+canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
 
   arg : Fin sig.targetType.args.length -> Arg False
@@ -120,19 +120,22 @@ canonicSig sig = piAll returnTy $ arg <$> SortedSet.toList sig.givenParams where
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
                       ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (name, type)
 
-callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callExternalGen sig topmost values = foldl (flip apply) (var topmost) $ fromList sig.givenParams.asList `zip` values <&> \case
+appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
+appFuel = app . var
+
+callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callExternalGen sig topmost fuel values = foldl (flip apply) (appFuel topmost fuel) $ fromList sig.givenParams.asList `zip` values <&> \case
   ((_, ExplicitArg, _   ), value) => (.$ value)
   ((_, ImplicitArg, name), value) => \f => namedApp f name value
 
-callInternalGen : (0 sig : GenSignature) -> (topmost : Name) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callInternalGen _ = foldl app . var
+callInternalGen : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callInternalGen _ = foldl app .: appFuel
 
 --- Main interfaces ---
 
 public export
 interface Monad m => CanonicGen m where
-  callGen : (sig : GenSignature) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
+  callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
 
 --- The main meat for derivation ---
 
@@ -164,11 +167,11 @@ namespace ClojuringCanonicImpl
                                       No _    => Nothing
 
   ClojuringContext m => CanonicGen m where
-    callGen sig values = do
+    callGen sig fuel values = do
 
       -- look for external gens, and call it if exists
       let Nothing = lookupLengthChecked sig !ask
-        | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name $ rewrite lenEq in values
+        | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name fuel $ rewrite lenEq in values
 
       -- get the name of internal gen, derive if necessary
       internalGenName <- do
@@ -197,7 +200,7 @@ namespace ClojuringCanonicImpl
         pure name
 
       -- call the internal gen
-      pure $ callInternalGen sig internalGenName values
+      pure $ callInternalGen sig internalGenName fuel values
 
   --- Canonic-dischagring function ---
 

@@ -1,5 +1,7 @@
 module Test.DepTyCheck.Gen.Auto.Checked.CanonicSigTests
 
+import public Data.Fuel
+
 import public Debug.Reflection
 
 import public Test.DepTyCheck.Gen
@@ -12,7 +14,10 @@ import public Language.Reflection.Types
 %language ElabReflection
 
 Eq TTImp where
-  (==) = (==) `on` show
+  -- The following is a non-complete trick, dealing with the fact that unnamed arguments are named after compler's check for being `Type`
+  -- It works only for the top-level `Pi` type and only when `Pi` type is on the top level.
+  IPi _ MW ExplicitArg Nothing argTy retTy == IPi _ MW ExplicitArg (Just $ MN _ _) argTy' retTy' = argTy == argTy' && retTy == retTy'
+  x == y = show x == show y
 
 %inline
 TestCaseData : Type
@@ -23,7 +28,7 @@ TestCaseDesc : Type
 TestCaseDesc = (String, TestCaseData)
 
 chk : (ty : TypeInfo) -> List (Fin ty.args.length) -> Type -> TestCaseData
-chk ty giv expr = (canonicSig (MkGenSignature ty $ fromList giv), expr)
+chk ty giv expr = (canonicSig (MkGenSignature ty $ fromList giv), Fuel -> expr)
 
 namespace Trivial
 
