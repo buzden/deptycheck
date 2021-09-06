@@ -87,6 +87,7 @@ public export
 Ord ExternalGenSignature where
   compare = comparing characteristics
 
+export
 internalise : (extSig : ExternalGenSignature) -> Subset GenSignature $ \sig => sig.givenParams.asList.length = extSig.givenParams.asList.length
 internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySet giv) $ believe_me $ the (0 = 0) Refl
             -- Dirty-dirty `believe_me` hack! It's true but hard to prove with the current implementation
@@ -136,17 +137,6 @@ callInternalGen _ = foldl app . var
 public export
 interface Monad m => CanonicGen m where
   callGen : (sig : GenSignature) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
-
-export
-internalGenCallingLambda : CanonicGen m => ExternalGenSignature -> m TTImp
-internalGenCallingLambda sig = foldr (map . mkLam) call sig.givenParams.asList where
-
-  mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
-  mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just name .| (index' sig.targetType.args idx).type
-
-  call : m TTImp
-  call = let Element intSig prf = internalise sig in
-         callGen intSig $ rewrite prf in fromList sig.givenParams.asList <&> \(_, _, name) => var name
 
 --- The main meat for derivation ---
 

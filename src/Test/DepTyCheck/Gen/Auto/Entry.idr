@@ -252,16 +252,27 @@ checkTypeIsGen sig = do
         Nothing => []
         Just tl => filter .| uncurry ((>=) `on` f) .| xs `zip` tl
 
+--- Boundaries between external and internal generator functions ---
 
-------------------------------
---- Functions for the user ---
-------------------------------
+internalGenCallingLambda : CanonicGen m => ExternalGenSignature -> m TTImp
+internalGenCallingLambda sig = foldr (map . mkLam) call sig.givenParams.asList where
+
+  mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
+  mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just name .| (index' sig.targetType.args idx).type
+
+  call : m TTImp
+  call = let Element intSig prf = internalise sig in
+         callGen intSig $ rewrite prf in fromList sig.givenParams.asList <&> \(_, _, name) => var name
 
 assignNames : GenExternals -> Elab $ SortedMap ExternalGenSignature (Name, TTImp)
 assignNames $ MkGenExternals exts = for exts $ \tti => (,tti) <$> genSym "externalAutoimpl"
 
 wrapWithExternalsAutos : SortedMap ExternalGenSignature (Name, TTImp) -> TTImp -> TTImp
 wrapWithExternalsAutos = flip $ foldr $ lam . uncurry (MkArg MW AutoImplicit . Just)
+
+------------------------------
+--- Functions for the user ---
+------------------------------
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
