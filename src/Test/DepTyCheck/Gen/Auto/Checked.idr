@@ -1,8 +1,11 @@
 module Test.DepTyCheck.Gen.Auto.Checked
 
 import public Control.Monad.Reader
-import public Control.Monad.Trans
+import public Control.Monad.State
 import public Control.Monad.Writer
+import public Control.Monad.RWS
+
+import public Decidable.Equality
 
 import public Data.DPair
 
@@ -49,6 +52,19 @@ record GenSignature where
   constructor MkGenSignature
   targetType : TypeInfo
   givenParams : SortedSet $ Fin targetType.args.length
+
+namespace GenSignature
+
+  characteristics : GenSignature -> (String, List Nat)
+  characteristics $ MkGenSignature ty giv = (show ty.name, toNatList giv)
+
+public export
+Eq GenSignature where
+  (==) = (==) `on` characteristics
+
+public export
+Ord GenSignature where
+  compare = comparing characteristics
 
 --- `Gen` signature containing info about params explicitness and their names ---
 
@@ -107,13 +123,13 @@ canonicSig sig = piAll returnTy $ arg <$> SortedSet.toList sig.givenParams where
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
                       ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (name, type)
 
-callExternalGen : (sig : ExternalGenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callExternalGen sig topmost values = foldl (flip apply) topmost $ fromList sig.givenParams.asList `zip` values <&> \case
+callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callExternalGen sig topmost values = foldl (flip apply) (var topmost) $ fromList sig.givenParams.asList `zip` values <&> \case
   ((_, ExplicitArg, _   ), value) => (.$ value)
   ((_, ImplicitArg, name), value) => \f => namedApp f name value
 
-callInternalGen : (0 sig : GenSignature) -> (topmost : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callInternalGen _ = foldl app
+callInternalGen : (0 sig : GenSignature) -> (topmost : Name) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callInternalGen _ = foldl app . var
 
 --- Main interfaces ---
 
@@ -145,22 +161,62 @@ namespace ClojuringCanonicImpl
 
   ClojuringContext : (Type -> Type) -> Type
   ClojuringContext m =
-    ( MonadReader (SortedMap ExternalGenSignature Name) m
-    , MonadWriter (SortedMap ExternalGenSignature $ Lazy Decl) m
+    ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
+    , MonadState  (SortedMap GenSignature Name) m -- gens already asked to be derived
+    , MonadWriter (List Decl, List Decl) m -- function declarations and bodies
     )
 
-  canonicGenExpr : ClojuringContext m => GenSignature -> m TTImp
-  canonicGenExpr sig = ?canonicGenExpr_rhs
+  canonicGenName : GenSignature -> Name
+  canonicGenName = (`MN` 0) . show . characteristics
+
+  -- Instead of staticly ensuring that map holds only correct values, we check dynamically, because it's hard to go through `==`-based lookup of maps.
+  lookupLengthChecked : (intSig : GenSignature) -> SortedMap GenSignature (ExternalGenSignature, Name) ->
+                        Maybe (Name, Subset ExternalGenSignature $ \extSig => extSig.givenParams.asList.length = intSig.givenParams.asList.length)
+  lookupLengthChecked intSig m = lookup intSig m >>= \(extSig, name) => (name,) <$>
+                                   case decEq extSig.givenParams.asList.length intSig.givenParams.asList.length of
+                                      Yes prf => Just $ Element extSig prf
+                                      No _    => Nothing
+
+  ClojuringContext m => CanonicGen m where
+    callGen sig values = do
+
+      -- look for external gens, and call it if exists
+      let Nothing = lookupLengthChecked sig !ask
+        | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name $ rewrite lenEq in values
+
+      -- get the name of internal gen, derive if necessary
+      internalGenName <- do
+
+        -- look for existing (already derived) internals, use it if exists
+        let Nothing = lookup sig !get
+          | Just name => pure name
+
+        -- nothing found, then derive! acquire the name
+        let name = canonicGenName sig
+
+        do -- actually derive the stuff!
+
+          -- remember that we're responsible for this signature derivation
+          modify $ insert sig name
+
+          -- derive body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
+          genFunBody <- assert_total $ deriveCanonical sig
+
+          -- create a definition for newly derived function gen
+          let genFunClaim = simpleClaim Export name $ canonicSig sig
+
+          -- remember the derived stuff
+          tell ([genFunClaim], [genFunBody])
+
+        pure name
+
+      -- call the internal gen
+      pure $ callInternalGen sig internalGenName values
+
+  --- Canonic-dischagring function ---
 
   export
-  ClojuringContext m => CanonicGen m where
-    callGen sig values = ?callGen_impl
-                         -- First, need to known whether do we have an external generator for the given signature.
-                         -- If yes, use `callExternalGen`, otherwise use `callInternalGen`
-                         -- originally was `pure $ callExternalGen sig !(canonicGenExpr sig) values`
-
---- Canonic-dischagring function ---
-
-export
-runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
-runCanonic exts calc = ?runCanonic_rhs
+  runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> (a, List Decl)
+  runCanonic exts calc =
+    let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig) in
+    Prelude.uncurry (++) <$> evalRWS calc exts empty {s=SortedMap GenSignature Name}
