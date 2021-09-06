@@ -72,9 +72,9 @@ internalise : (extSig : ExternalGenSignature) -> Subset GenSignature $ \sig => s
 internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySet giv) $ believe_me $ the (0 = 0) Refl
             -- Dirty-dirty `believe_me` hack! It's true but hard to prove with the current implementation
 
------------------------------------
---- "Canonical" functions stuff ---
------------------------------------
+---------------------------------
+--- Infrastructural functions ---
+---------------------------------
 
 appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
 appFuel = app . var
@@ -98,8 +98,8 @@ namespace ClojuringCanonicImpl
     , MonadWriter (List Decl, List Decl) m -- function declarations and bodies
     )
 
-  canonicGenName : GenSignature -> Name
-  canonicGenName = (`MN` 0) . show . characteristics
+  nameForGen : GenSignature -> Name
+  nameForGen = (`MN` 0) . show . characteristics
 
   -- Instead of staticly ensuring that map holds only correct values, we check dynamically, because it's hard to go through `==`-based lookup of maps.
   lookupLengthChecked : (intSig : GenSignature) -> SortedMap GenSignature (ExternalGenSignature, Name) ->
@@ -124,7 +124,7 @@ namespace ClojuringCanonicImpl
           | Just name => pure name
 
         -- nothing found, then derive! acquire the name
-        let name = canonicGenName sig
+        let name = nameForGen sig
 
         do -- actually derive the stuff!
 
