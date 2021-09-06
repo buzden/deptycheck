@@ -17,6 +17,7 @@ import public Language.Reflection.Types
 
 import public Syntax.WithProof
 
+import public Test.DepTyCheck.Gen.Auto.Derive
 import public Test.DepTyCheck.Gen.Auto.Util
 
 %default total
@@ -44,27 +45,6 @@ namespace ArgExplicitness
 ------------------------------------------------------------------
 --- Datatypes to describe signatures after checking user input ---
 ------------------------------------------------------------------
-
---- Simplest `Gen` signature, user for requests ---
-
-public export
-record GenSignature where
-  constructor MkGenSignature
-  targetType : TypeInfo
-  givenParams : SortedSet $ Fin targetType.args.length
-
-namespace GenSignature
-
-  characteristics : GenSignature -> (String, List Nat)
-  characteristics $ MkGenSignature ty giv = (show ty.name, toNatList giv)
-
-public export
-Eq GenSignature where
-  (==) = (==) `on` characteristics
-
-public export
-Ord GenSignature where
-  compare = comparing characteristics
 
 --- `Gen` signature containing info about params explicitness and their names ---
 
@@ -96,30 +76,6 @@ internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySe
 --- "Canonical" functions stuff ---
 -----------------------------------
 
---- Canonic signature functions --
-
--- Must respect names from the `givenParams` field, at least for implicit parameters
-canonicSig : GenSignature -> TTImp
-canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) where
-  -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
-
-  arg : Fin sig.targetType.args.length -> Arg False
-  arg idx = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW ExplicitArg (Just name) type
-
-  returnTy : TTImp
-  returnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs where
-
-    targetTypeApplied : TTImp
-    targetTypeApplied = foldr apply (var sig.targetType.name) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => case piInfo of
-                          ExplicitArg   => (.$ var name)
-                          ImplicitArg   => \f => namedApp f name $ var name
-                          DefImplicit _ => \f => namedApp f name $ var name
-                          AutoImplicit  => (`autoApp` var name)
-
-    generatedArgs : List (Name, TTImp)
-    generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
-                      ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (name, type)
-
 appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
 appFuel = app . var
 
@@ -130,19 +86,6 @@ callExternalGen sig topmost fuel values = foldl (flip apply) (appFuel topmost fu
 
 callInternalGen : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
 callInternalGen _ = foldl app .: appFuel
-
---- Main interfaces ---
-
-public export
-interface Monad m => CanonicGen m where
-  callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
-
---- The main meat for derivation ---
-
-export
-deriveCanonical : CanonicGen m => GenSignature -> m Decl
-deriveCanonical sig = do
-  ?deriveCanonical_rhs
 
 --- Particular implementations producing the-meat-derivation-function clojure ---
 
@@ -188,11 +131,8 @@ namespace ClojuringCanonicImpl
           -- remember that we're responsible for this signature derivation
           modify $ insert sig name
 
-          -- derive body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
-          genFunBody <- assert_total $ deriveCanonical sig
-
-          -- create a definition for newly derived function gen
-          let genFunClaim = simpleClaim Export name $ canonicSig sig
+          -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
+          (genFunClaim, genFunBody) <- assert_total $ deriveCanonical sig name
 
           -- remember the derived stuff
           tell ([genFunClaim], [genFunBody])

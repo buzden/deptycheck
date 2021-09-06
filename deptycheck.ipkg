@@ -8,6 +8,7 @@ modules = System.Random.Simple
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Auto
         , Test.DepTyCheck.Gen.Auto.Checked
+        , Test.DepTyCheck.Gen.Auto.Derive
         , Test.DepTyCheck.Gen.Auto.Entry
 
 depends = contrib

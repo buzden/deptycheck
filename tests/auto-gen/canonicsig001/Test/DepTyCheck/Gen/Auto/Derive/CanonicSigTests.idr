@@ -1,4 +1,4 @@
-module Test.DepTyCheck.Gen.Auto.Checked.CanonicSigTests
+module Test.DepTyCheck.Gen.Auto.Derive.CanonicSigTests
 
 import public Data.Fuel
 

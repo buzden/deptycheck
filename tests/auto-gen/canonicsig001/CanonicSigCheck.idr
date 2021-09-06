@@ -1,6 +1,6 @@
 module CanonicSigCheck
 
-import Test.DepTyCheck.Gen.Auto.Checked.CanonicSigTests
+import Test.DepTyCheck.Gen.Auto.Derive.CanonicSigTests
 
 %language ElabReflection
 
