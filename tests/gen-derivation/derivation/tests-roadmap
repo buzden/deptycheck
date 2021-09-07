@@ -1,0 +1,117 @@
+---------------
+--- Concept ---
+---------------
+
+Independent metrics:
+  - presence of dependent types (nodep, depcons, depdef, depgadt)
+    - in type constructors
+    - in type definition
+    - presence of GADTs
+  - polymorphic target types (maybe, monomophised for particular generator) (nopolytype, polytype_nopolygen, polytype_polygen)
+    - polymorphic generators (polymorphism in the target type)
+  - use of external generators (noext, ext)
+  - recursive types (norec, rec)
+
+------------------------
+--- Particular cases ---
+------------------------
+
+trivial (nodep, nopolytype noext norec)
+  `()`
+
+--- Non-recursive non-dependent types ---
+
+nodep nopolytype noext norec
+  `Bool`
+  `data X = X0 | X1 Bool | X2 Bool Bool`
+
+nodep nopolytype ext norec
+  given gen for `String`, derive for `data X = MkX String`
+  given gen for `String`, derive for `data X = MkX String String`
+  given gens for `String` and `Nat`, derive for `data X = MkX String Nat`
+  given gens for `String` and `Nat`, derive for `data X = X1 String Nat | X2 Nat | X3 String`
+
+nodep polytype_nopolygen noext norec
+  will refuse to derive the following, this is expected behaviour for now, to be reworked
+    `Maybe Bool`
+    `(Bool, Bool)`
+  `data X = MkX (Maybe Bool)`
+  `data X = MkX (Bool, Bool)`
+  `data X = X0 | X1 (Maybe Bool) | X2 Bool (Bool, Bool)`
+
+nodep polytype_nopolygen ext norec
+  given gen for `String`, derive for `data X = MkX (Maybe String)`
+  given gen for `String` and `Nat`, derive for `data X = MkX (String, Nat)` -- norec because gen for `Nat` is given, not derived
+  given gen for `String` and `Nat`, derive for `data X = MkX (String, Nat, String)` -- norec because gen for `Nat` is given, not derived
+  will refuse to derive the following, this is expected behaviour for now, to be reworked
+    given gen for `String`, derive for `Maybe String`
+    given gen for `String` and `Nat`, derive for `(String, Nat)` -- norec because gen for `Nat` is given, not derived
+    given gen for `String` and `Nat`, derive for `(String, Nat, String)` -- norec because gen for `Nat` is given, not derived
+
+nodep polytype_polygen ext norec
+  given gen for `a`, derive for `Maybe a`, run `Maybe String` with `%hint` for `String`
+  given gen for `a`, derive for `Maybe (a, a)`, run `Maybe (String, String)` with `%hint` for `String`
+  given gens for `a` and `b`, derive for `(a, b), run `(String, Nat)` for `%hint` for `String` and `Nat`
+  given gens for `a` and `b`, derive for `Maybe (a, b, a)`, run `Maybe (String, Nat, String)` with `%hint` for `String` and `Nat`
+
+--- Recursive non-dependent types ---
+
+nodep nopolytype noext rec
+  `Nat`
+  `data X = X0 | X1 X`
+  `data X = X0 | X1 X | X2 X X`
+  mutual `data X = X0 | X1 Y` and `data Y = Y0 | Y1 X`
+  mutual `data X = X0 | X1 X Y` and `data Y = Y0 | Y1 X`
+  mutual `data X = X0 | X1 X | X2 Y` and `data Y = Y0 | Y1 X`
+
+nodep nopolytype ext rec
+  given gen for `String`, derive for `data X = X0 String | X1 X`
+  given gen for `String`, derive for `data X = X0 String | X1 X | X2 X X`
+  given gen for `String`, derive for mutual `data X = X0 String | X1 Y` and `data Y = Y0 | Y1 X`
+  given gen for `String`, derive for mutual `data X = X0 String | X1 X Y` and `data Y = Y0 | Y1 X`
+  given gen for `String`, derive for mutual `data X = X0 String | X1 X | X2 Y` and `data Y = Y0 | Y1 X`
+
+nodep polytype_nopolygen noext rec
+  will refuse to derive the following, this is expected behaviour for now, to be reworked
+    `List Bool`
+    `List (Bool, Bool)`
+    `(Bool, List Bool)`
+  mutual `data X = X0 String | X1 X Y | X2 Y` and `data Y = Y0 (List Bool) | Y1 X`
+  mutual `data X = X0 String | X1 X Y | X2 Y` and `data Y = Y0 (List X) | Y1 X`
+  mutual `data X = X0 String | X1 X (Y X) | X2 (Y X)` and `data Y a = Y0 | Y1 a`
+  mutual `data X = X0 String | X1 X (Y X) | X2 (Y $ Maybe X)` and `data Y a = Y0 | Y1 a`
+  mutual `data X = X0 String | X1 X (Y X) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
+
+nodep polytype_nopolygen ext rec
+  will refuse to derive the following, this is expected behaviour for now, to be reworked
+    given gen for `String`, derive for `List String`
+    given gen for `String`, derive for `List (String, Bool)`
+    given gen for `String`, derive for `(Bool, List String)`
+  given gen for `String`, derive for mutual `data X = X0 String | X1 X Y | X2 Y` and `data Y = Y0 (List String) | Y1 X`
+  given gen for `String`, derive for mutual `data X = X0 String | X1 X (Y String) | X2 (Y X)` and `data Y a = Y0 | Y1 a`
+  given gen for `String`, derive for mutual `data X = X0 String | X1 X (Y String) | X2 (Y $ Maybe X)` and `data Y a = Y0 | Y1 a`
+  given gen for `String`, derive for mutual `data X = X0 String | X1 X (Y String) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
+  given gen for `String`, derive for mutual `data X = X0 String | X1 X (Y $ List String) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
+
+nodep polytype_polygen ext rec
+  given gen for `a`, derive for `List a`, run for `List String` with `%hint` for `String`
+  will refuse to derive the following, this is expected behaviour for now, to be reworked
+    given gens for `a` and `b`, derive for `List (a, b)`, run for `List (String, Nat)` with `%hint` for `String` and `Nat`
+    given gen for `a`, derive for `(a, List a)`, run for `(String, List String)` with `%hint` for `String`
+    given gens for `a` and `b`, derive for `(a, List b)`, run for `(String, List Nat)` with `%hint` for `String` and `Nat`
+  given gens for `a` and `String`, derive for `data X a = X0 | X1 (X a) | X2 (X String)`
+  given gen for `a`, derive for `data X a = X0 | X1 (X a) | X2 (X Nat)`
+  given gen for `a`, derive for mutual `data X a = X0 a String | X1 (X a) (Y a) | X2 (Y a)` and `data Y a = Y0 (List String) | Y1 (X a)`
+  given gen for `a`, derive for mutual `data X a = X0 a String | X1 (X a) (Y a) | X2 (Y a)` and `data Y a = Y0 (List a) | Y1 (X Nat)`
+  given gen for `a`, derive for mutual `data X a = X0 a | X1 (X a) (Y $ List String) | X2 (Y $ Maybe $ X a)` and `data Y a = Y0 (List a) | Y1 a`
+  given gens for `a` and `b`, derive for `data X a b = X0 a b | X1 (X b a)`
+  given gens for `a` and `b`, derive for mutual `data X a b = X0 a | X1 (X b a) (Y b $ List String) | X2 (Y (Maybe $ X a) a)` and
+    `data Y a b = Y0 (List (a, b)) | Y1 b a`
+
+--- Dependent non-recusrive types ---
+
+-- TBD
+
+--- Dependent recursive types ---
+
+-- TBD
