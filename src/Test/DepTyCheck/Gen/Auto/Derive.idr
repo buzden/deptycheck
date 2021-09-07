@@ -47,6 +47,7 @@ interface Monad m => CanonicGen m where
 ----------------------------
 
 -- Must respect names from the `givenParams` field, at least for implicit parameters
+export
 canonicSig : GenSignature -> TTImp
 canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
