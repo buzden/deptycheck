@@ -1,8 +1,8 @@
 1/3: Building Common (Common.idr)
 2/3: Building Positive (Positive.idr)
 3/3: Building Negative (Negative.idr)
-Error: While processing right hand side of bad_for. When unifying Type' and FS (FS (FS FZ)) rc regs vars -> Maybe Type' rc regs vars.
-Mismatch between: Type' and FS (FS (FS FZ)) rc regs vars -> Maybe Type' rc regs vars.
+Error: While processing right hand side of bad_for. When unifying Type' and ?b -> ?c.
+Mismatch between: Type' and ?b -> ?c.
 
 Negative:11:19--11:23
  07 | 
