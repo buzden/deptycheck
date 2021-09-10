@@ -11,6 +11,6 @@ main : IO ()
 main = runner
   [ !("Lazier list" `atDir` "lazier")
   , !("The `Gen` monad" `atDir` "gen-monad")
-  , !("Auto derivation: input validation" `atDir` "auto-gen/inputvalidation")
-  , !("Auto derivation: internal functions" `atDir` "auto-gen/internal")
+  , !("Auto derivation: input validation" `atDir` "gen-derivation/inputvalidation")
+  , !("Auto derivation: internal functions" `atDir` "gen-derivation/internal")
   ]
