@@ -2,6 +2,9 @@ export IDRIS2 ?= idris2
 
 RUNTESTS := build/exec/runtests
 
+MKDIR := mkdir -p
+LN := ln
+
 .PHONY: all deptycheck clean
 
 all: deptycheck
@@ -28,12 +31,20 @@ test-all: test-deptycheck print-v-delimiter test-pil
 test-deptycheck: deptycheck
 	${MAKE} -C tests -f tests.mk only=${only}
 
-.PHONY: thirdparties thirdparty-elab-util
+.PHONY: thirdparties thirdparty-elab-util thirdparty-sop
 
-thirdparties: thirdparty-elab-util
+thirdparties: thirdparty-elab-util thirdparty-sop
 
 thirdparty-elab-util:
 	${IDRIS2} --build thirdparty/elab-util/elab-util.ipkg
+
+thirdparty-sop: thirdparty-elab-util
+	${RM} -r thirdparty/sop/depends/
+	${MKDIR} thirdparty/sop/depends/
+	${LN} -sf ../../elab-util/build/ttc/ thirdparty/sop/depends/elab-util-0.3.1
+	${IDRIS2} --build thirdparty/sop/sop.ipkg
+	${RM} -r thirdparty/sop/depends/
+	# TODO to make the `depends` dir be removed even on the compiler crash
 
 .PHONY: pil test-pil
 
