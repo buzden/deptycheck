@@ -1,0 +1,71 @@
+1/1: Building ValidateInput (ValidateInput.idr)
+Error: While processing right hand side of genY_wrong_giv_order. Error during reflection: Given arguments must go in the same order as in the target type
+
+ValidateInput:20:40--20:44
+ 16 | -- TODO to add if it is needed
+ 17 | 
+ 18 | --- Wrong order of parameters ---
+ 19 | 
+ 20 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen $ Y a b
+                                             ^^^^
+
+Error: While processing right hand side of genX_wrong_giv_order_autoimpl. Error during reflection: Given arguments must go in the same order as in the target type
+
+ValidateInput:23:58--23:62
+ 19 | 
+ 20 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen $ Y a b
+ 21 | genY_wrong_giv_order = deriveGen
+ 22 | 
+ 23 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => Gen X
+                                                               ^^^^
+
+Error: While processing right hand side of genX_wrong_giv_order_autoimpl_rep. Error during reflection: Given arguments must go in the same order as in the target type
+
+ValidateInput:26:62--26:66
+ 22 | 
+ 23 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => Gen X
+ 24 | genX_wrong_giv_order_autoimpl = deriveGen
+ 25 | 
+ 26 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => Gen X
+                                                                   ^^^^
+
+Error: While processing right hand side of genY_wrong_gened_order. Error during reflection: Generated arguments must go in the same order as in the target type
+
+ValidateInput:29:55--29:59
+ 25 | 
+ 26 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => Gen X
+ 27 | genX_wrong_giv_order_autoimpl_rep = deriveGen
+ 28 | 
+ 29 | genY_wrong_gened_order : Fuel -> Gen (b : Type ** a : Type ** Y a b)
+                                                            ^^^^
+
+Error: While processing right hand side of genY_wrong_gened_order'. Error during reflection: Generated arguments must go in the same order as in the target type
+
+ValidateInput:11:10--11:14
+ 07 | %default total
+ 08 | 
+ 09 | data X = MkX
+ 10 | 
+ 11 | data Y : Type -> Type -> Type where
+               ^^^^
+
+Error: While processing right hand side of genX_wrong_gened_order_autoimpl. Error during reflection: Generated arguments must go in the same order as in the target type
+
+ValidateInput:35:73--35:77
+ 31 | 
+ 32 | genY_wrong_gened_order' : Fuel -> Gen (b ** a ** Y a b)
+ 33 | genY_wrong_gened_order' = deriveGen
+ 34 | 
+ 35 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b : Type ** a : Type ** Y a b)) => Gen X
+                                                                              ^^^^
+
+Error: While processing right hand side of genX_wrong_gened_order_autoimpl_rep. Error during reflection: Generated arguments must go in the same order as in the target type
+
+ValidateInput:38:77--38:81
+ 34 | 
+ 35 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b : Type ** a : Type ** Y a b)) => Gen X
+ 36 | genX_wrong_gened_order_autoimpl = deriveGen
+ 37 | 
+ 38 | genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen (a : Type ** b : Type ** Y a b)) => Gen X
+                                                                                  ^^^^
+
