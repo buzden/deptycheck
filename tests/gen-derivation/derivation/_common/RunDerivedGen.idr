@@ -4,6 +4,14 @@ import DerivedGen
 
 %default total
 
+%hint
+smallStrings : Fuel -> Gen String
+smallStrings _ = oneOf $ pure <$> ["", "a", "bc"]
+
+%hint
+smallNats : Fuel -> Gen Nat
+smallNats _ = oneOf $ pure <$> [0, 10]
+
 main : IO Unit
 main = do
   putStrLn "Generated values:"

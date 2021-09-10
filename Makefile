@@ -28,7 +28,7 @@ test: test-all
 
 test-all: test-deptycheck print-v-delimiter test-pil
 
-test-deptycheck: deptycheck
+test-deptycheck: deptycheck thirdparty-sop
 	${MAKE} -C tests -f tests.mk only=${only}
 
 .PHONY: thirdparties thirdparty-elab-util thirdparty-sop

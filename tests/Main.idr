@@ -13,5 +13,5 @@ main = runner
   , !("The `Gen` monad" `atDir` "gen-monad")
   , !("Auto derivation: input validation" `atDir` "gen-derivation/inputvalidation")
   , !("Auto derivation: internal canonic signature function" `atDir` "gen-derivation/canonicsig")
-  --, !("Auto derivation: derivation itself" `atDir` "gen-derivation/derivation")
+  , !("Auto derivation: derivation itself" `atDir` "gen-derivation/derivation")
   ]
