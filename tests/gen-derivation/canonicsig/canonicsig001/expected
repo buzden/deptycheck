@@ -1,4 +1,5 @@
-1/1: Building CanonicSigCheck (CanonicSigCheck.idr)
+1/2: Building Infra (Infra.idr)
+2/2: Building CanonicSigCheck (CanonicSigCheck.idr)
 LOG gen.auto.canonic.check-sig:0: trivial type; no givens:	OKAY
 LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; all named; no givens:	OKAY
 LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; all named; 1st given:	OKAY
