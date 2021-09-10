@@ -12,5 +12,5 @@ main = runner
   [ !("Lazier list" `atDir` "lazier")
   , !("The `Gen` monad" `atDir` "gen-monad")
   , !("Auto derivation: input validation" `atDir` "gen-derivation/inputvalidation")
-  , !("Auto derivation: internal functions" `atDir` "gen-derivation/internal")
+  , !("Auto derivation: internal canonic signature function" `atDir` "gen-derivation/canonicsig")
   ]
