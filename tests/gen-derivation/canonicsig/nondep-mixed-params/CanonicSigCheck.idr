@@ -24,4 +24,4 @@ cases = mapFst ("non-dependent type + mixed explicitness; all named; " ++) <$>
           , ("both given",)  $ chk YInfo [1, 0] $ (n : Nat) -> (a : Type) -> Gen (Y {n} a)
           ]
 
-%runElab for_ cases $ logCheck <=< pr
+%runElab for_ cases checkAndLog

@@ -12,4 +12,4 @@ cases : List TestCaseDesc
 cases = [ ("trivial type; no givens",) $ chk (getInfo "Y") [] $ Gen Y
         ]
 
-%runElab for_ cases $ logCheck <=< pr
+%runElab for_ cases checkAndLog

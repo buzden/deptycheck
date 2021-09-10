@@ -31,8 +31,8 @@ chk : (ty : TypeInfo) -> List (Fin ty.args.length) -> Type -> TestCaseData
 chk ty giv expr = (canonicSig (MkGenSignature ty $ fromList giv), Fuel -> expr)
 
 export
-pr : TestCaseDesc -> Elab String
-pr (desc, given, expected) = do
+caseVerdict : TestCaseDesc -> Elab String
+caseVerdict (desc, given, expected) = do
   expected <- quote expected
   pure $ if given == expected
     then "\{desc}:\tOKAY"
@@ -45,3 +45,7 @@ pr (desc, given, expected) = do
 export
 logCheck : String -> Elab ()
 logCheck = \s => logMsg "gen.auto.canonic.check-sig" 0 s
+
+export
+checkAndLog : TestCaseDesc -> Elab ()
+checkAndLog = logCheck <=< caseVerdict
