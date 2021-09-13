@@ -12,6 +12,10 @@ smallStrings _ = choiceMap pure ["", "a", "bc"]
 smallNats : Fuel -> Gen Nat
 smallNats _ = choiceMap pure [0, 10]
 
+%hint
+someTypes : Fuel -> Gen Type
+someTypes _ = choiceMap pure [Nat, String, Bool]
+
 main : IO Unit
 main = do
   putStrLn "Generated values:"

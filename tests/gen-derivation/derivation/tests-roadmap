@@ -8,8 +8,9 @@ Independent metrics:
   - dependent types or polymorphism (nodep, dep_)
     - place where dependent type arise
       - in the target type (_targ_)
-        - given (_giv)
-        - generated (_gen)
+        - all given (_giv)
+        - all generated (_gen)
+        - some given, some generated (_givgen)
       - in types of constructor parameters of the target type (_cons_)
     - particular manifestation of dependent types or polymorphism
       - type parameters (_param)
@@ -21,8 +22,9 @@ Independent metrics:
 
 trivial (norec noext nodep)
   `()`
+  `Void`
 
---- Non-recursive non-dependent types ---
+--- Non-recursive ---
 
 norec noext nodep
   `Bool`
@@ -51,13 +53,60 @@ norec ext dep_cons_param
     given gen for `String` and `Nat`, derive for `(String, Nat)` -- norec because gen for `Nat` is given, not derived
     given gen for `String` and `Nat`, derive for `(String, Nat, String)` -- norec because gen for `Nat` is given, not derived
 
+--- Those above are implemented as tests, those below to be implemented ---
+
+norec noext dep_targ_param_giv
+  ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
+        MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
+      ``` derive for `X b1 b2`
+
+norec noext dep_targ_param_gen
+  ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
+        MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
+      ``` derive for `(b1 ** b2 ** X b1 b2)`
+
+norec noext dep_targ_param_givgen
+  ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
+        MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
+      ``` derive for `(b2 ** X b1 b2)`
+  ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
+        MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
+      ``` derive for `(b1 ** X b1 b2)`
+
 norec ext dep_targ_param_giv
   given gen for `a`, derive for `Maybe a`, run `Maybe String` with `%hint` for `String`
   given gen for `a`, derive for `Maybe (a, a)`, run `Maybe (String, String)` with `%hint` for `String`
   given gens for `a` and `b`, derive for `(a, b), run `(String, Nat)` for `%hint` for `String` and `Nat`
-  given gens for `a` and `b`, derive for `Maybe (a, b, a)`, run `Maybe (String, Nat, String)` with `%hint` for `String` and `Nat`
+  will refuse to derive the following, this is expected behaviour for now, to be reworked
+    given gens for `a` and `b`, derive for `Maybe (a, b, a)`, run `Maybe (String, Nat, String)` with `%hint` for `String` and `Nat`
+  `data X a b = MkX (Maybe (a, b, a))`, given gens for `a` and `b` derive for `X a b`, run `X String Nat` with `%hint` for `String` and `Nat`
 
---- Recursive non-dependent types ---
+norec ext dep_targ_param_gen
+  ``` data X : (n : Nat) -> Type where -- `n` is a parameter, not index
+        X0 : X n
+      ``` given gen for `Nat`, derive for `(n ** X n)`
+  ``` data X : (n : Nat) -> Type where -- `n` is a parameter, not index
+        X0 : (n : Nat) -> X n
+      ``` given gen for `Nat`, derive for `(n ** X n)`
+  ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
+        Xn : (n : Nat) -> X n m
+        Xm : (m : Nat) -> X n m
+      ``` given gen for `Nat`, derive for `(n ** m ** X n m)`
+  given gen for `(t : Type ** t)`, derive for `(a ** Maybe a)`
+  given gen for `(t : Type ** t)`, derive for `(a ** b ** Either a b)`
+
+norec ext dep_targ_param_givgen
+  ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
+        Xn : (n : Nat) -> X n m
+        Xm : (m : Nat) -> X n m
+      ``` given gen for `Nat`, derive for `(m ** X n m)`
+  ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
+        Xn : (n : Nat) -> X n m
+        Xm : (m : Nat) -> X n m
+      ``` given gen for `Nat`, derive for `(n ** X n m)`
+  given gens for `a` and `(t : Type ** t)`, derive for `(b ** Either a b)`
+
+--- Recursive ---
 
 rec noext nodep
   `Nat`
@@ -110,11 +159,3 @@ rec ext dep_targ_param_giv
   given gens for `a` and `b`, derive for `data X a b = X0 a b | X1 (X b a)`
   given gens for `a` and `b`, derive for mutual `data X a b = X0 a | X1 (X b a) (Y b $ List String) | X2 (Y (Maybe $ X a) a)` and
     `data Y a b = Y0 (List (a, b)) | Y1 b a`
-
---- Dependent non-recusrive types ---
-
--- TBD
-
---- Dependent recursive types ---
-
--- TBD
