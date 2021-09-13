@@ -325,5 +325,5 @@ deriveGen = do
   (signature, externals) <- snd <$> checkTypeIsGen signature
   externals <- assignNames externals
   fuelArg <- genSym "fuel"
-  let (lambda, locals) = runCanonic (fst <$> externals) $ wrapFuel fuelArg . wrapWithExternalsAutos externals <$> internalGenCallingLambda signature fuelArg
+  (lambda, locals) <- runCanonic (fst <$> externals) $ wrapFuel fuelArg . wrapWithExternalsAutos externals <$> internalGenCallingLambda signature fuelArg
   check $ local locals lambda

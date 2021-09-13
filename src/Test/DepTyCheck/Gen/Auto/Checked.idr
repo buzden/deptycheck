@@ -145,7 +145,7 @@ namespace ClojuringCanonicImpl
   --- Canonic-dischagring function ---
 
   export
-  runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> (a, List Decl)
+  runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc =
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig) in
-    Prelude.uncurry (++) <$> evalRWS calc exts empty {s=SortedMap GenSignature Name}
+    pure $ Prelude.uncurry (++) <$> evalRWS calc exts empty {s=SortedMap GenSignature Name}
