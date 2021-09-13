@@ -86,7 +86,13 @@ canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel)
 -- Main meat function --
 
 canonicBody : CanonicGen m => GenSignature -> m $ List Clause
-canonicBody sig = ?canonicBody_rhs
+canonicBody sig = do
+
+  -- check that there is at least one constructor
+  let (_::_) = sig.targetType.cons
+    | [] => fail "No constructors found for the type `\{show sig.targetType.name}`"
+
+  ?canonicBody_rhs
 
 ------------------------------
 --- External user function ---
