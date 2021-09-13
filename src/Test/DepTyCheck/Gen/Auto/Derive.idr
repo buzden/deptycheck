@@ -1,5 +1,7 @@
 module Test.DepTyCheck.Gen.Auto.Derive
 
+import public Control.Monad.Error.Interface
+
 import public Language.Reflection.Syntax
 import public Language.Reflection.Types
 
@@ -38,9 +40,21 @@ Ord GenSignature where
 --- Main interface ---
 ----------------------
 
+public export %inline
+CanFailAtFC : (Type -> Type) -> Type
+CanFailAtFC = MonadError (FC, String)
+
 public export
-interface Monad m => CanonicGen m where
+interface Monad m => CanFailAtFC m => CanonicGen m where
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
+
+export
+failAt : CanonicGen m => FC -> String -> m a
+failAt fc msg = throwError (fc, msg)
+
+export
+fail : CanonicGen m => String -> m a
+fail = failAt EmptyFC
 
 ----------------------------
 --- Derivation functions ---
