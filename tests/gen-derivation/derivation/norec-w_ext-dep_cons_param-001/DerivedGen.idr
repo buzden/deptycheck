@@ -8,12 +8,11 @@ import Generics.Derive
 
 %language ElabReflection
 
-public export
-data X = X0 | X1 Bool | X2 Bool Bool
+data X = MkX (Maybe String)
 
 %runElab derive "X" [Generic, Meta, Show]
 
 export
-derivedGen : Fuel -> Gen X
+derivedGen : Fuel -> (Fuel -> Gen String) => Gen X
 --derivedGen = deriveGen
-derivedGen = const empty
+derivedGen _ = empty
