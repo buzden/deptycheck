@@ -90,7 +90,7 @@ checkTypeIsGen sig = do
   let Just (paramsToBeGenerated, targetType) = unDPairUnAlt targetType
     | Nothing => failAt (getFC targetType) "Unable to interpret type under `Gen` as a dependent pair"
 
-  -- remember the right target type
+  -- remember the right target type position
   let targetTypeFC = getFC targetType
 
   -- treat the target type as a function application
@@ -100,16 +100,19 @@ checkTypeIsGen sig = do
   -- Working with the target type familly --
   ------------------------------------------
 
-  -- check it's applied to some name
-  let IVar _ targetType = targetType
-    | _ => failAt targetTypeFC "Target type is not a simple name"
+  -- acquire `TypeInfo` out of the target type `TTImp` expression
+  targetType <- case targetType of
 
-  -- check that desired `Gen` is not a generator of `Gen`s
-  when !(targetType `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
-    failAt targetTypeFC "Target type of a derived `Gen` cannot be a `Gen`"
+    IVar _ targetType => do
 
-  -- check we can analyze the target type itself
-  targetType <- getInfo' targetType
+      -- check that desired `Gen` is not a generator of `Gen`s
+      when !(targetType `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
+        failAt targetTypeFC "Target type of a derived `Gen` cannot be a `Gen`"
+
+      -- check we can analyze the target type itself
+      getInfo' targetType
+
+    _ => failAt targetTypeFC "Target type is not a simple name"
 
   --------------------------------------------------
   -- Target type family's arguments' first checks --
