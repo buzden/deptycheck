@@ -55,14 +55,24 @@ norec ext dep_cons_param
 
 --- Those above are implemented as tests, those below to be implemented ---
 
+-- TODO to think why not to prohibit to be generated those parameters that don't have arguments that depend on it in all constructors.
+--      I.e. those type arguments that are clearly parameters, not indices (maybe, calculated transitively, considering what is given).
+
 norec noext dep_targ_param_giv
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
+      ``` derive for `X b1 b2`
+  `(a, b : Nat) -> Gen (a = b)`
+  ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
+        MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `X b1 b2`
 
 norec noext dep_targ_param_gen
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
+      ``` derive for `(b1 ** b2 ** X b1 b2)`
+  ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
+        MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `(b1 ** b2 ** X b1 b2)`
 
 norec noext dep_targ_param_givgen
@@ -72,6 +82,16 @@ norec noext dep_targ_param_givgen
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
       ``` derive for `(b1 ** X b1 b2)`
+  `(a : Nat) -> Gen (b : Nat ** a = b)`
+  `(b : Nat) -> Gen (a : Nat ** a = b)`
+  ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
+        MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
+      ``` derive for `(b2 ** X b1 b2)`
+  ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
+        MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
+      ``` derive for `(b1 ** X b1 b2)`
+  `(x : a) -> Gen (y : a ** x = y)` -- ??? I'm not sure it should work without an external gen
+  `(y : a) -> Gen (x : a ** x = y)` -- ??? I'm not sure it should work without an external gen
 
 norec ext dep_targ_param_giv
   given gen for `a`, derive for `Maybe a`, run `Maybe String` with `%hint` for `String`
