@@ -1,11 +1,11 @@
-Error: While processing right hand side of derivedGen. Error during reflection: Target type's argument must be a variable name
+Error: While processing right hand side of checkedGen. Error during reflection: Target type's argument must be a variable name
 
 DerivedGen:12:27--12:31
  08 | 
  09 | %language ElabReflection
  10 | 
  11 | export
- 12 | derivedGen : Fuel -> Gen (Bool, Bool)
+ 12 | checkedGen : Fuel -> Gen (Bool, Bool)
                                 ^^^^
 
 Error: Undefined name main. 

@@ -20,4 +20,4 @@ main : IO Unit
 main = do
   putStrLn "Generated values:"
   traverse_ ((putStrLn "-----" >>) . putStrLn) $ map show $
-    evalState someStdGen $ unGen $ derivedGen $ limit 20
+    evalState someStdGen $ unGen $ checkedGen $ limit 20

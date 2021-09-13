@@ -7,6 +7,6 @@ import public Test.DepTyCheck.Gen.Auto
 %language ElabReflection
 
 export
-derivedGen : Fuel -> Gen Unit
---derivedGen = deriveGen
-derivedGen = const empty
+checkedGen : Fuel -> Gen Unit
+--checkedGen = deriveGen
+checkedGen = const empty

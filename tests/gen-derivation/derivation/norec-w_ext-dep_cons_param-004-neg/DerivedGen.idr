@@ -9,5 +9,5 @@ import Generics.Derive
 %language ElabReflection
 
 export
-derivedGen : Fuel -> (Fuel -> Gen String) => Gen (Maybe String)
-derivedGen = deriveGen
+checkedGen : Fuel -> (Fuel -> Gen String) => Gen (Maybe String)
+checkedGen = deriveGen

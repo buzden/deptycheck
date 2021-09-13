@@ -7,5 +7,5 @@ import public Test.DepTyCheck.Gen.Auto
 %language ElabReflection
 
 export
-derivedGen : Fuel -> Gen Void
-derivedGen = deriveGen
+checkedGen : Fuel -> Gen Void
+checkedGen = deriveGen

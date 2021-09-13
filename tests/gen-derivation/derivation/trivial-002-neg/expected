@@ -1,11 +1,11 @@
-Error: While processing right hand side of derivedGen. Error during reflection: No constructors found for the type `Builtin.Void`
+Error: While processing right hand side of checkedGen. Error during reflection: No constructors found for the type `Builtin.Void`
 
 DerivedGen:11:14--11:23
  07 | %language ElabReflection
  08 | 
  09 | export
- 10 | derivedGen : Fuel -> Gen Void
- 11 | derivedGen = deriveGen
+ 10 | checkedGen : Fuel -> Gen Void
+ 11 | checkedGen = deriveGen
                    ^^^^^^^^^
 
 Error: Undefined name main. 
