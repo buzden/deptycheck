@@ -3,6 +3,8 @@
 ---------------
 
 Independent metrics:
+  - recursive types (norec, rec)
+  - use of external generators (noext, ext)
   - dependent types or polymorphism (nodep, dep_)
     - place where dependent type arise
       - in the target type (_targ_)
@@ -10,29 +12,27 @@ Independent metrics:
     - particular manifestation of dependent types or polymorphism
       - type parameters (_param)
       - type indices (GADTs) (_index)
-  - use of external generators (noext, ext)
-  - recursive types (norec, rec)
 
 ------------------------
 --- Particular cases ---
 ------------------------
 
-trivial (nodep noext norec)
+trivial (norec noext nodep)
   `()`
 
 --- Non-recursive non-dependent types ---
 
-nodep noext norec
+norec noext nodep
   `Bool`
   `data X = X0 | X1 Bool | X2 Bool Bool`
 
-nodep ext norec
+norec ext nodep
   given gen for `String`, derive for `data X = MkX String`
   given gen for `String`, derive for `data X = MkX String String`
   given gens for `String` and `Nat`, derive for `data X = MkX String Nat`
   given gens for `String` and `Nat`, derive for `data X = X1 String Nat | X2 Nat | X3 String`
 
-dep_cons_param noext norec
+norec noext dep_cons_param
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     `Maybe Bool`
     `(Bool, Bool)`
@@ -40,7 +40,7 @@ dep_cons_param noext norec
   `data X = MkX (Bool, Bool)`
   `data X = X0 | X1 (Maybe Bool) | X2 Bool (Bool, Bool)`
 
-dep_cons_param ext norec
+norec ext dep_cons_param
   given gen for `String`, derive for `data X = MkX (Maybe String)`
   given gen for `String` and `Nat`, derive for `data X = MkX (String, Nat)` -- norec because gen for `Nat` is given, not derived
   given gen for `String` and `Nat`, derive for `data X = MkX (String, Nat, String)` -- norec because gen for `Nat` is given, not derived
@@ -49,7 +49,7 @@ dep_cons_param ext norec
     given gen for `String` and `Nat`, derive for `(String, Nat)` -- norec because gen for `Nat` is given, not derived
     given gen for `String` and `Nat`, derive for `(String, Nat, String)` -- norec because gen for `Nat` is given, not derived
 
-dep_targ_param ext norec
+norec ext dep_targ_param
   given gen for `a`, derive for `Maybe a`, run `Maybe String` with `%hint` for `String`
   given gen for `a`, derive for `Maybe (a, a)`, run `Maybe (String, String)` with `%hint` for `String`
   given gens for `a` and `b`, derive for `(a, b), run `(String, Nat)` for `%hint` for `String` and `Nat`
@@ -57,7 +57,7 @@ dep_targ_param ext norec
 
 --- Recursive non-dependent types ---
 
-nodep noext rec
+rec noext nodep
   `Nat`
   `data X = X0 | X1 X`
   `data X = X0 | X1 X | X2 X X`
@@ -65,14 +65,14 @@ nodep noext rec
   mutual `data X = X0 | X1 X Y` and `data Y = Y0 | Y1 X`
   mutual `data X = X0 | X1 X | X2 Y` and `data Y = Y0 | Y1 X`
 
-nodep ext rec
+rec ext nodep
   given gen for `String`, derive for `data X = X0 String | X1 X`
   given gen for `String`, derive for `data X = X0 String | X1 X | X2 X X`
   given gen for `String`, derive for mutual `data X = X0 String | X1 Y` and `data Y = Y0 | Y1 X`
   given gen for `String`, derive for mutual `data X = X0 String | X1 X Y` and `data Y = Y0 | Y1 X`
   given gen for `String`, derive for mutual `data X = X0 String | X1 X | X2 Y` and `data Y = Y0 | Y1 X`
 
-dep_cons_param noext rec
+rec noext dep_cons_param
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     `List Bool`
     `List (Bool, Bool)`
@@ -83,7 +83,7 @@ dep_cons_param noext rec
   mutual `data X = X0 String | X1 X (Y X) | X2 (Y $ Maybe X)` and `data Y a = Y0 | Y1 a`
   mutual `data X = X0 String | X1 X (Y X) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
 
-dep_cons_param ext rec
+rec ext dep_cons_param
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     given gen for `String`, derive for `List String`
     given gen for `String`, derive for `List (String, Bool)`
@@ -94,7 +94,7 @@ dep_cons_param ext rec
   given gen for `String`, derive for mutual `data X = X0 String | X1 X (Y String) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
   given gen for `String`, derive for mutual `data X = X0 String | X1 X (Y $ List String) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
 
-dep_targ_param ext rec
+rec ext dep_targ_param
   given gen for `a`, derive for `List a`, run for `List String` with `%hint` for `String`
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     given gens for `a` and `b`, derive for `List (a, b)`, run for `List (String, Nat)` with `%hint` for `String` and `Nat`
