@@ -9,7 +9,7 @@ import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
 import public Language.Reflection.TTImp
-import public Language.Reflection.Syntax
+import public Language.Reflection.Types
 
 %default total
 
@@ -122,6 +122,42 @@ Eq Name where
   WithBlock x n == WithBlock y m = x == y && n == m
 
   _ == _ = False
+
+--- Working around primitive values ---
+
+primTypeInfo : String -> TypeInfo
+primTypeInfo s = MkTypeInfo (UN s) [] []
+
+export
+typeInfoOfConstant : Constant -> Maybe TypeInfo
+typeInfoOfConstant (I _)       = Nothing
+typeInfoOfConstant (BI _)      = Nothing
+typeInfoOfConstant (I8 _)      = Nothing
+typeInfoOfConstant (I16 _)     = Nothing
+typeInfoOfConstant (I32 _)     = Nothing
+typeInfoOfConstant (I64 _)     = Nothing
+typeInfoOfConstant (B8 _)      = Nothing
+typeInfoOfConstant (B16 _)     = Nothing
+typeInfoOfConstant (B32 _)     = Nothing
+typeInfoOfConstant (B64 _)     = Nothing
+typeInfoOfConstant (Str _)     = Nothing
+typeInfoOfConstant (Ch _)      = Nothing
+typeInfoOfConstant (Db _)      = Nothing
+typeInfoOfConstant WorldVal    = Nothing
+typeInfoOfConstant IntType     = Just $ primTypeInfo "Int"
+typeInfoOfConstant IntegerType = Just $ primTypeInfo "Integer"
+typeInfoOfConstant Int8Type    = Just $ primTypeInfo "Int8"
+typeInfoOfConstant Int16Type   = Just $ primTypeInfo "Int16"
+typeInfoOfConstant Int32Type   = Just $ primTypeInfo "Int32"
+typeInfoOfConstant Int64Type   = Just $ primTypeInfo "Int64"
+typeInfoOfConstant Bits8Type   = Just $ primTypeInfo "Bits8"
+typeInfoOfConstant Bits16Type  = Just $ primTypeInfo "Bits16"
+typeInfoOfConstant Bits32Type  = Just $ primTypeInfo "Bits32"
+typeInfoOfConstant Bits64Type  = Just $ primTypeInfo "Bits64"
+typeInfoOfConstant StringType  = Just $ primTypeInfo "String"
+typeInfoOfConstant CharType    = Just $ primTypeInfo "Char"
+typeInfoOfConstant DoubleType  = Just $ primTypeInfo "Double"
+typeInfoOfConstant WorldType   = Nothing
 
 -------------------------------------------
 --- Reflection-related additional stuff ---
