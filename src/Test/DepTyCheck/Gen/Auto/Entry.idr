@@ -111,10 +111,6 @@ checkTypeIsGen sig = do
   -- check we can analyze the target type itself
   targetType <- getInfo' targetType
 
-  -- check that there are at least non-zero constructors
-  let (_::_) = targetType.cons
-    | [] => fail "No constructors found for the type `\{show targetType.name}`"
-
   --------------------------------------------------
   -- Target type family's arguments' first checks --
   --------------------------------------------------
