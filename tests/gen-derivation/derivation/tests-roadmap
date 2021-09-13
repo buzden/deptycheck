@@ -3,12 +3,13 @@
 ---------------
 
 Independent metrics:
-  - presence of dependent types (nodep, depcons, depdef, depgadt)
-    - in type constructors
-    - in type definition
-    - presence of GADTs
-  - polymorphic target types (maybe, monomophised for particular generator) (nopolytype, polytype_nopolygen, polytype_polygen)
-    - polymorphic generators (polymorphism in the target type)
+  - dependent types or polymorphism (nodep, dep_)
+    - place where dependent type arise
+      - in the target type (_targ_)
+      - in types of constructor parameters of the target type (_cons_)
+    - particular manifestation of dependent types or polymorphism
+      - type parameters (_param)
+      - type indices (GADTs) (_index)
   - use of external generators (noext, ext)
   - recursive types (norec, rec)
 
@@ -16,22 +17,22 @@ Independent metrics:
 --- Particular cases ---
 ------------------------
 
-trivial (nodep, nopolytype noext norec)
+trivial (nodep noext norec)
   `()`
 
 --- Non-recursive non-dependent types ---
 
-nodep nopolytype noext norec
+nodep noext norec
   `Bool`
   `data X = X0 | X1 Bool | X2 Bool Bool`
 
-nodep nopolytype ext norec
+nodep ext norec
   given gen for `String`, derive for `data X = MkX String`
   given gen for `String`, derive for `data X = MkX String String`
   given gens for `String` and `Nat`, derive for `data X = MkX String Nat`
   given gens for `String` and `Nat`, derive for `data X = X1 String Nat | X2 Nat | X3 String`
 
-nodep polytype_nopolygen noext norec
+dep_cons_param noext norec
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     `Maybe Bool`
     `(Bool, Bool)`
@@ -39,7 +40,7 @@ nodep polytype_nopolygen noext norec
   `data X = MkX (Bool, Bool)`
   `data X = X0 | X1 (Maybe Bool) | X2 Bool (Bool, Bool)`
 
-nodep polytype_nopolygen ext norec
+dep_cons_param ext norec
   given gen for `String`, derive for `data X = MkX (Maybe String)`
   given gen for `String` and `Nat`, derive for `data X = MkX (String, Nat)` -- norec because gen for `Nat` is given, not derived
   given gen for `String` and `Nat`, derive for `data X = MkX (String, Nat, String)` -- norec because gen for `Nat` is given, not derived
@@ -48,7 +49,7 @@ nodep polytype_nopolygen ext norec
     given gen for `String` and `Nat`, derive for `(String, Nat)` -- norec because gen for `Nat` is given, not derived
     given gen for `String` and `Nat`, derive for `(String, Nat, String)` -- norec because gen for `Nat` is given, not derived
 
-nodep polytype_polygen ext norec
+dep_targ_param ext norec
   given gen for `a`, derive for `Maybe a`, run `Maybe String` with `%hint` for `String`
   given gen for `a`, derive for `Maybe (a, a)`, run `Maybe (String, String)` with `%hint` for `String`
   given gens for `a` and `b`, derive for `(a, b), run `(String, Nat)` for `%hint` for `String` and `Nat`
@@ -56,7 +57,7 @@ nodep polytype_polygen ext norec
 
 --- Recursive non-dependent types ---
 
-nodep nopolytype noext rec
+nodep noext rec
   `Nat`
   `data X = X0 | X1 X`
   `data X = X0 | X1 X | X2 X X`
@@ -64,14 +65,14 @@ nodep nopolytype noext rec
   mutual `data X = X0 | X1 X Y` and `data Y = Y0 | Y1 X`
   mutual `data X = X0 | X1 X | X2 Y` and `data Y = Y0 | Y1 X`
 
-nodep nopolytype ext rec
+nodep ext rec
   given gen for `String`, derive for `data X = X0 String | X1 X`
   given gen for `String`, derive for `data X = X0 String | X1 X | X2 X X`
   given gen for `String`, derive for mutual `data X = X0 String | X1 Y` and `data Y = Y0 | Y1 X`
   given gen for `String`, derive for mutual `data X = X0 String | X1 X Y` and `data Y = Y0 | Y1 X`
   given gen for `String`, derive for mutual `data X = X0 String | X1 X | X2 Y` and `data Y = Y0 | Y1 X`
 
-nodep polytype_nopolygen noext rec
+dep_cons_param noext rec
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     `List Bool`
     `List (Bool, Bool)`
@@ -82,7 +83,7 @@ nodep polytype_nopolygen noext rec
   mutual `data X = X0 String | X1 X (Y X) | X2 (Y $ Maybe X)` and `data Y a = Y0 | Y1 a`
   mutual `data X = X0 String | X1 X (Y X) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
 
-nodep polytype_nopolygen ext rec
+dep_cons_param ext rec
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     given gen for `String`, derive for `List String`
     given gen for `String`, derive for `List (String, Bool)`
@@ -93,7 +94,7 @@ nodep polytype_nopolygen ext rec
   given gen for `String`, derive for mutual `data X = X0 String | X1 X (Y String) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
   given gen for `String`, derive for mutual `data X = X0 String | X1 X (Y $ List String) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
 
-nodep polytype_polygen ext rec
+dep_targ_param ext rec
   given gen for `a`, derive for `List a`, run for `List String` with `%hint` for `String`
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     given gens for `a` and `b`, derive for `List (a, b)`, run for `List (String, Nat)` with `%hint` for `String` and `Nat`
