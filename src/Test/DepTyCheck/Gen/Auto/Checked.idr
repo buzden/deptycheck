@@ -1,5 +1,6 @@
 module Test.DepTyCheck.Gen.Auto.Checked
 
+import public Control.Monad.Either
 import public Control.Monad.Reader
 import public Control.Monad.State
 import public Control.Monad.Writer
@@ -109,7 +110,7 @@ namespace ClojuringCanonicImpl
                                       Yes prf => Just $ Element extSig prf
                                       No _    => Nothing
 
-  ClojuringContext m => CanonicGen m where
+  ClojuringContext m => CanFailAtFC m => CanonicGen m where
     callGen sig fuel values = do
 
       -- look for external gens, and call it if exists
@@ -145,7 +146,9 @@ namespace ClojuringCanonicImpl
   --- Canonic-dischagring function ---
 
   export
-  runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> (a, List Decl)
-  runCanonic exts calc =
-    let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig) in
-    Prelude.uncurry (++) <$> evalRWS calc exts empty {s=SortedMap GenSignature Name}
+  runCanonic : SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
+  runCanonic exts calc = do
+    let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
+    let Right (x, defs, bodies) = runIdentity $ runEitherT $ evalRWST calc exts empty {s=SortedMap GenSignature Name} {w=(_, _)} {m=EitherT (_, _) Identity}
+      | Left (fc, msg) => failAt fc msg
+    pure (x, defs ++ bodies)

@@ -1,5 +1,7 @@
 module Test.DepTyCheck.Gen.Auto.Derive
 
+import public Control.Monad.Error.Interface
+
 import public Language.Reflection.Syntax
 import public Language.Reflection.Types
 
@@ -38,9 +40,21 @@ Ord GenSignature where
 --- Main interface ---
 ----------------------
 
+public export %inline
+CanFailAtFC : (Type -> Type) -> Type
+CanFailAtFC = MonadError (FC, String)
+
 public export
-interface Monad m => CanonicGen m where
+interface Monad m => CanFailAtFC m => CanonicGen m where
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
+
+export
+failAt : CanonicGen m => FC -> String -> m a
+failAt fc msg = throwError (fc, msg)
+
+export
+fail : CanonicGen m => String -> m a
+fail = failAt EmptyFC
 
 ----------------------------
 --- Derivation functions ---
@@ -72,7 +86,13 @@ canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel)
 -- Main meat function --
 
 canonicBody : CanonicGen m => GenSignature -> m $ List Clause
-canonicBody sig = ?canonicBody_rhs
+canonicBody sig = do
+
+  -- check that there is at least one constructor
+  let (_::_) = sig.targetType.cons
+    | [] => fail "No constructors found for the type `\{show sig.targetType.name}`"
+
+  ?canonicBody_rhs
 
 ------------------------------
 --- External user function ---
