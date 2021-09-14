@@ -53,13 +53,15 @@ norec ext dep_cons_param
     given gen for `String` and `Nat`, derive for `(String, Nat)` -- norec because gen for `Nat` is given, not derived
     given gen for `String` and `Nat`, derive for `(String, Nat, String)` -- norec because gen for `Nat` is given, not derived
 
---- Those above are implemented as tests, those below to be implemented ---
-
 norec noext dep_targ_param_giv
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
       ``` derive for `X b1 b2`
+  `(a, b : Bool) -> Gen (a = b)`
   `(a, b : Nat) -> Gen (a = b)`
+
+--- Those above are implemented as tests, those below to be implemented ---
+
   ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
         MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `X b1 b2`
