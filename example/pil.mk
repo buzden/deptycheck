@@ -10,7 +10,7 @@ pil:
 	${IDRIS2} --build pil.ipkg
 
 test: pil
-	${MAKE} -C tests -f tests.mk only=${only}
+	${MAKE} -C tests -f tests.mk only="${only}"
 
 clean:
 	${IDRIS2} --clean pil.ipkg
