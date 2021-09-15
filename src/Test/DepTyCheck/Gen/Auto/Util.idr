@@ -110,12 +110,18 @@ Eq Namespace where
   MkNS xs == MkNS ys = xs == ys
 
 public export
+Eq UserName where
+  Basic x    == Basic y    = x == y
+  Field x    == Field y    = x == y
+  Underscore == Underscore = True
+  _ == _ = False
+
+public export
 Eq Name where
   UN x   == UN y   = x == y
   MN x n == MN y m = x == y && n == m
   NS s n == NS p m = s == p && n == m
   DN x n == DN y m = x == y && n == m
-  RF x   == RF y   = x == y
 
   Nested x n    ==  Nested y m   = x == y && n == m
   CaseBlock x n == CaseBlock y m = x == y && n == m
@@ -126,7 +132,7 @@ Eq Name where
 --- Working around primitive values ---
 
 primTypeInfo : String -> TypeInfo
-primTypeInfo s = MkTypeInfo (UN s) [] []
+primTypeInfo s = MkTypeInfo (UN $ Basic s) [] []
 
 export
 typeInfoOfConstant : Constant -> Maybe TypeInfo
