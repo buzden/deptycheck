@@ -318,7 +318,7 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 |||
 |||
 export %macro
-deriveGen : {a : Type} -> Elab a
+deriveGen : Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
