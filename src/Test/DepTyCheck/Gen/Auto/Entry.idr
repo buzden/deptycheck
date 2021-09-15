@@ -125,7 +125,7 @@ checkTypeIsGen sig = do
 
   -- check all the arguments of the target type are variable names, not complex expressions
   targetTypeArgs <- for targetTypeArgs $ \case
-    IVar _ (UN argName) => pure $ UserName argName
+    IVar _ (UN argName) => pure argName
     nonVarArg => failAt (getFC nonVarArg) "Target type's argument must be a variable name"
 
   -- check that all arguments names are unique
@@ -142,13 +142,13 @@ checkTypeIsGen sig = do
 
   -- check that all parameters of `DPair` are as expected
   paramsToBeGenerated <- for paramsToBeGenerated $ \case
-    MkArg MW ExplicitArg (Just $ UN nm) t => pure (UserName nm, t)
+    MkArg MW ExplicitArg (Just $ UN nm) t => pure (nm, t)
     _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
-    MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, UserName name, type)
-    MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, UserName name, type)
+    MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, name, type)
+    MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, name, type)
     MkArg MW AutoImplicit (MN _ _) type => pure $ Right type
 
     MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named"
@@ -183,7 +183,7 @@ checkTypeIsGen sig = do
 
   -- check that all target type's parameters classied as "given" are present in the given params list
   givenParams <- for {b=(_, Fin targetType.args.length, _)} givenParams $ \(explicitness, name, ty) => case findIndex (== name) targetTypeArgs of
-    Just found => pure (ty, rewrite targetTypeArgsLengthCorrect in found, explicitness, toTTName name)
+    Just found => pure (ty, rewrite targetTypeArgsLengthCorrect in found, explicitness, UN name)
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
   -- check the increasing order of generated params
@@ -240,14 +240,6 @@ checkTypeIsGen sig = do
       (fc, s, MkGenExternals ext) => if null ext
         then pure (fc, s)
         else failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
-
-    data UserDefinedName = UserName String
-
-    Eq UserDefinedName where
-      (==) = (==) `on` \(UserName n) => n
-
-    toTTName : UserDefinedName -> Name
-    toTTName (UserName n) = UN n
 
     nonIncreasingsBy : Ord b => (a -> b) -> List a -> LazyList (a, a)
     nonIncreasingsBy f xs =
@@ -318,7 +310,7 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 |||
 |||
 export %macro
-deriveGen : {a : Type} -> Elab a
+deriveGen : Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
