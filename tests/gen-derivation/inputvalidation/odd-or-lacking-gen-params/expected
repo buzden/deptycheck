@@ -19,7 +19,10 @@ ValidateInput:17:60--17:95
  17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen (b : Type ** b : Type ** Y a b)
                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Error: While processing type of genY_with_repeating_name_difflytyped. When unifying Nat and Type.
+Error: While processing type of genY_with_repeating_name_difflytyped. When unifying:
+    Nat
+and:
+    Type
 Mismatch between: Nat and Type.
 
 ValidateInput:20:94--20:95
@@ -40,7 +43,10 @@ ValidateInput:21:1--21:49
  21 | genY_with_repeating_name_difflytyped = deriveGen
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Did you mean: genY_with_repeating_name_equityped?
-Error: While processing right hand side of genY_with_repeating_name_difflytyped'. When unifying Nat and Type.
+Error: While processing right hand side of genY_with_repeating_name_difflytyped'. When unifying:
+    Nat
+and:
+    Type
 Mismatch between: Nat and Type.
 
 ValidateInput:23:79--23:87
