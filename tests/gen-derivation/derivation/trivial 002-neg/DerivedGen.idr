@@ -1,11 +1,13 @@
 module DerivedGen
 
-import public Test.DepTyCheck.Gen.Auto
+import RunDerivedGen
 
 %default total
 
 %language ElabReflection
 
-export
 checkedGen : Fuel -> Gen Void
 checkedGen = deriveGen
+
+main : IO ()
+main = runGs [ G checkedGen ]

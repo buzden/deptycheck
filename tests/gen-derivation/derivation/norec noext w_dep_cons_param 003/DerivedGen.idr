@@ -1,8 +1,6 @@
 module DerivedGen
 
-import public Test.DepTyCheck.Gen.Auto
-
-import Generics.Derive
+import RunDerivedGen
 
 %default total
 
@@ -12,7 +10,9 @@ data X = MkX (Maybe Bool)
 
 %runElab derive "X" [Generic, Meta, Show]
 
-export
 checkedGen : Fuel -> Gen X
 --checkedGen = deriveGen
 checkedGen _ = empty
+
+main : IO ()
+main = runGs [ G checkedGen ]

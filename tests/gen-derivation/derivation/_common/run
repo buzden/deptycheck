@@ -1,3 +1,4 @@
-$1 --exec main --no-color --console-width 0 --no-banner --find-ipkg RunDerivedGen.idr
+$1 --check --no-color --console-width 0 --no-banner --find-ipkg DerivedGen.idr && \
+$1 --exec main --no-color --console-width 0 --no-banner --find-ipkg DerivedGen.idr
 
 rm -rf build

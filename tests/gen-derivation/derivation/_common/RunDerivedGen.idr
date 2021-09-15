@@ -1,23 +1,35 @@
 module RunDerivedGen
 
-import DerivedGen
+import public Generics.Derive
+
+import public Test.DepTyCheck.Gen.Auto
 
 %default total
 
-%hint
+export %hint
 smallStrings : Fuel -> Gen String
 smallStrings _ = choiceMap pure ["", "a", "bc"]
 
-%hint
+export %hint
 smallNats : Fuel -> Gen Nat
 smallNats _ = choiceMap pure [0, 10]
 
-%hint
+export %hint
 someTypes : Fuel -> Gen Type
 someTypes _ = choiceMap pure [Nat, String, Bool]
 
-main : IO Unit
-main = do
+export
+Show (a = b) where
+  show Refl = "Refl"
+
+public export
+data GenForRun : Type where
+  G : Show x => (Fuel -> Gen x) -> GenForRun
+
+export
+runGs : List GenForRun -> IO Unit
+runGs checkedGens = do
   putStrLn "Generated values:"
-  traverse_ ((putStrLn "-----" >>) . putStrLn) $ map show $
-    evalState someStdGen $ unGen $ checkedGen $ limit 20
+  let genedValues = checkedGens <&> \(G gen) => map show $ evalState someStdGen $ unGen $ gen $ limit 20
+  let delim = (putStrLn "-----" >>)
+  for_ genedValues $ delim . traverse_ (delim . putStrLn)
