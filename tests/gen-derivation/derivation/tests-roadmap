@@ -76,6 +76,13 @@ norec noext dep_targ_param_gen
         MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `(b1 ** b2 ** X b1 b2)`
 
+norec noext dep_targ_index_gen
+  ``` data X : String -> Type where
+        X0 : X "x0"
+        X1 : X "x1"
+      ``` derive for `(s ** X s)`; no external `Gen String` should be required;
+  addition of external `Gen String` to the one above must not change anything
+
 norec noext dep_targ_param_givgen
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
@@ -116,6 +123,13 @@ norec ext dep_targ_param_gen
         ``` given gen for `Nat`, derive for `(n ** m ** X n m)`
     given gen for `(t : Type ** t)`, derive for `(a ** Maybe a)`
     given gen for `(t : Type ** t)`, derive for `(a ** b ** Either a b)`
+
+norec ext dep_targ_index_gen
+  ``` data X : String -> Type where
+        X0 : X "x0"
+        X1 : X "x1"
+        Xn : (s : String) -> X s
+      ``` given gen for `String`, derive for `(s ** X s)`
 
 norec ext dep_targ_param_givgen
   it seems these are negative tests, since params (not indices) should not appear in the target dpair, esp. when external
