@@ -8,13 +8,14 @@ Independent metrics:
   - dependent types or polymorphism (nodep, dep_)
     - place where dependent type arise
       - in the target type (_targ_)
-        - all given (_giv)
-        - all generated (_gen)
-        - some given, some generated (_givgen)
       - in types of constructor parameters of the target type (_cons_)
     - particular manifestation of dependent types or polymorphism
-      - type parameters (_param)
-      - type indices (GADTs) (_index)
+      - freeness of variety
+        - type parameters (_param)
+        - type indices (GADTs) (_index)
+      - position in the type signature (if present)
+        - being given (_giv)
+        - being generated (_gen)
 
 ------------------------
 --- Particular cases ---
@@ -91,7 +92,7 @@ norec noext dep_targ_index_gen
       ``` derive for `(s ** X s)`; no external `Gen String` should be required;
   addition of external `Gen String` to the one above must not change anything
 
-norec noext dep_targ_param_givgen
+norec noext dep_targ_param_giv_param_gen
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
       ``` derive for `(b2 ** X b1 b2)`
@@ -100,6 +101,8 @@ norec noext dep_targ_param_givgen
       ``` derive for `(b1 ** X b1 b2)`
   `(a : Nat) -> Gen (b : Nat ** a = b)`
   `(b : Nat) -> Gen (a : Nat ** a = b)`
+
+norec noext dep_targ_param_giv_index_gen
   ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
         MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `(b2 ** X b1 b2)`
@@ -117,18 +120,21 @@ norec ext dep_targ_param_giv
     given gens for `a` and `b`, derive for `Maybe (a, b, a)`, run `Maybe (String, Nat, String)` with `%hint` for `String` and `Nat`
   `data X a b = MkX (Maybe (a, b, a))`, given gens for `a` and `b` derive for `X a b`, run `X String Nat` with `%hint` for `String` and `Nat`
 
+norec ext dep_targ_param_giv_index_giv
+  given `DecEq a`, derive for `(x, y : a) -> Gen (x = y)`
+
 norec ext dep_targ_param_gen
-  it seems these are negative tests, since params (not indices) should not appear in the target dpair, esp. when external
-    ``` data X : (n : Nat) -> Type where -- `n` is a parameter, not index
-          X0 : X n
-        ``` given gen for `Nat`, derive for `(n ** X n)`
-    ``` data X : (n : Nat) -> Type where -- `n` is a parameter, not index
-          X0 : (n : Nat) -> X n
-        ``` given gen for `Nat`, derive for `(n ** X n)`
-    ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
-          Xn : (n : Nat) -> X n m
-          Xm : (m : Nat) -> X n m
-        ``` given gen for `Nat`, derive for `(n ** m ** X n m)`
+  ``` data X : (n : Nat) -> Type where -- `n` is a parameter, not index
+        X0 : X n
+      ``` given gen for `Nat`, derive for `(n ** X n)`
+  ``` data X : (n : Nat) -> Type where -- `n` is a parameter, not index
+        X0 : (n : Nat) -> X n
+      ``` given gen for `Nat`, derive for `(n ** X n)`
+  ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
+        Xn : (n : Nat) -> X n m
+        Xm : (m : Nat) -> X n m
+      ``` given gen for `Nat`, derive for `(n ** m ** X n m)`
+  it seems these shall be negative tests
     given gen for `(t : Type ** t)`, derive for `(a ** Maybe a)`
     given gen for `(t : Type ** t)`, derive for `(a ** b ** Either a b)`
 
@@ -139,16 +145,16 @@ norec ext dep_targ_index_gen
         Xn : (s : String) -> X s
       ``` given gen for `String`, derive for `(s ** X s)`
 
-norec ext dep_targ_param_givgen
-  it seems these are negative tests, since params (not indices) should not appear in the target dpair, esp. when external
-    ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
-          Xn : (n : Nat) -> X n m
-          Xm : (m : Nat) -> X n m
-        ``` given gen for `Nat`, derive for `(m ** X n m)`
-    ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
-          Xn : (n : Nat) -> X n m
-          Xm : (m : Nat) -> X n m
-        ``` given gen for `Nat`, derive for `(n ** X n m)`
+norec ext dep_targ_param_giv_param_gen
+  ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
+        Xn : (n : Nat) -> X n m
+        Xm : (m : Nat) -> X n m
+      ``` given gen for `Nat`, derive for `(m ** X n m)`
+  ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
+        Xn : (n : Nat) -> X n m
+        Xm : (m : Nat) -> X n m
+      ``` given gen for `Nat`, derive for `(n ** X n m)`
+  it seems these shall be negative tests
     given gens for `a` and `(t : Type ** t)`, derive for `(b ** Either a b)`
 
 --- Recursive ---
