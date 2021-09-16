@@ -21,23 +21,23 @@ Independent metrics:
 --- Particular cases ---
 ------------------------
 
-trivial (norec nodep noext)
+trivial (norec nodep noext) (+)
   `()`
   `Void`
 
 --- Non-recursive ---
 
-norec nodep noext
+norec nodep noext (+)
   `Bool`
   `data X = X0 | X1 Bool | X2 Bool Bool`
 
-norec nodep ext
+norec nodep ext (+)
   given gen for `String`, derive for `data X = MkX String`
   given gen for `String`, derive for `data X = MkX String String`
   given gens for `String` and `Nat`, derive for `data X = MkX String Nat`
   given gens for `String` and `Nat`, derive for `data X = X1 String Nat | X2 Nat | X3 String`
 
-norec part noext
+norec part noext (+)
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     `Maybe Bool`
     `(Bool, Bool)`
@@ -45,7 +45,7 @@ norec part noext
   `data X = MkX (Bool, Bool)`
   `data X = X0 | X1 (Maybe Bool) | X2 Bool (Bool, Bool)`
 
-norec part ext
+norec part ext (+)
   given gen for `String`, derive for `data X = MkX (Maybe String)`
   given gen for `String` and `Nat`, derive for `data X = MkX (String, Nat)` -- norec because gen for `Nat` is given, not derived
   given gen for `String` and `Nat`, derive for `data X = MkX (String, Nat, String)` -- norec because gen for `Nat` is given, not derived
@@ -54,7 +54,7 @@ norec part ext
     given gen for `String` and `Nat`, derive for `(String, Nat)` -- norec because gen for `Nat` is given, not derived
     given gen for `String` and `Nat`, derive for `(String, Nat, String)` -- norec because gen for `Nat` is given, not derived
 
-norec t-p.->.. noext
+norec t-p.->.. noext (+)
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
       ``` derive for `X b1 b2`
@@ -67,7 +67,7 @@ norec t-p.->.. noext
         X1 : Unit -> X b1 b2
       ``` derive for `X b1 b2`
 
-norec t-p.->.. ext
+norec t-p.->.. ext (-)
   given gen for `a`, derive for `Maybe a`, run `Maybe String` with `%hint` for `String`
   given gens for `a` and `b`, derive for `(a, b), run `(String, Nat)` for `%hint` for `String` and `Nat`
   will refuse to derive the following, this is expected behaviour for now, to be reworked
@@ -76,17 +76,17 @@ norec t-p.->.. ext
   `data X a = MkX (Maybe (a, a))`, given gen for `a` derive for `X a`, run `X String` with `%hint` for `String`
   `data X a b = MkX (Maybe (a, b, a))`, given gens for `a` and `b` derive for `X a b`, run `X String Nat` with `%hint` for `String` and `Nat`
 
-norec t-pi->.. noext
+norec t-pi->.. noext (+-)
   `(a, b : Bool) -> Gen (a = b)`
   `(a, b : Nat) -> Gen (a = b)`
   ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
         MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `X b1 b2`
 
-norec t-pi->.. ext
+norec t-pi->.. ext (-)
   given `DecEq a`, derive for `(x, y : a) -> Gen (x = y)`
 
-norec t-..->p. noext
+norec t-..->p. noext (-)
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
       ``` derive for `(b1 ** b2 ** X b1 b2)`
@@ -94,7 +94,7 @@ norec t-..->p. noext
         MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `(b1 ** b2 ** X b1 b2)`
 
-norec t-..->p. ext
+norec t-..->p. ext (-)
   ``` data X : (n : Nat) -> Type where -- `n` is a parameter, not index
         X0 : X n
       ``` given gen for `Nat`, derive for `(n ** X n)`
@@ -109,21 +109,21 @@ norec t-..->p. ext
     given gen for `(t : Type ** t)`, derive for `(a ** Maybe a)`
     given gen for `(t : Type ** t)`, derive for `(a ** b ** Either a b)`
 
-norec t-.i->.. noext
+norec t-.i->.. noext (-)
   ``` data X : String -> Type where
         X0 : X "x0"
         X1 : X "x1"
       ``` derive for `(s ** X s)`; no external `Gen String` should be required;
   addition of external `Gen String` to the one above must not change anything
 
-norec t-.i->.. ext
+norec t-.i->.. ext (-)
   ``` data X : String -> Type where
         X0 : X "x0"
         X1 : X "x1"
         Xn : (s : String) -> X s
       ``` given gen for `String`, derive for `(s ** X s)`
 
-norec t-p.->p. noext
+norec t-p.->p. noext (-)
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
       ``` derive for `(b2 ** X b1 b2)`
@@ -133,7 +133,7 @@ norec t-p.->p. noext
   `(a : Nat) -> Gen (b : Nat ** a = b)`
   `(b : Nat) -> Gen (a : Nat ** a = b)`
 
-norec t-p.->p. ext
+norec t-p.->p. ext (-)
   ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
         Xn : (n : Nat) -> X n m
         Xm : (m : Nat) -> X n m
@@ -145,7 +145,7 @@ norec t-p.->p. ext
   it seems these shall be negative tests
     given gens for `a` and `(t : Type ** t)`, derive for `(b ** Either a b)`
 
-norec t-p.->.i noext
+norec t-p.->.i noext (-)
   ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
         MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `(b2 ** X b1 b2)`
@@ -157,7 +157,7 @@ norec t-p.->.i noext
 
 --- Recursive ---
 
-rec nodep noext
+rec nodep noext (-)
   `Nat`
   `data X = X0 | X1 X`
   `data X = X0 | X1 X | X2 X X`
@@ -165,14 +165,14 @@ rec nodep noext
   mutual `data X = X0 | X1 X Y` and `data Y = Y0 | Y1 X`
   mutual `data X = X0 | X1 X | X2 Y` and `data Y = Y0 | Y1 X`
 
-rec nodep ext
+rec nodep ext (-)
   given gen for `String`, derive for `data X = X0 String | X1 X`
   given gen for `String`, derive for `data X = X0 String | X1 X | X2 X X`
   given gen for `String`, derive for mutual `data X = X0 String | X1 Y` and `data Y = Y0 | Y1 X`
   given gen for `String`, derive for mutual `data X = X0 String | X1 X Y` and `data Y = Y0 | Y1 X`
   given gen for `String`, derive for mutual `data X = X0 String | X1 X | X2 Y` and `data Y = Y0 | Y1 X`
 
-rec part noext
+rec part noext (-)
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     `List Bool`
     `List (Bool, Bool)`
@@ -183,7 +183,7 @@ rec part noext
   mutual `data X = X0 String | X1 X (Y X) | X2 (Y $ Maybe X)` and `data Y a = Y0 | Y1 a`
   mutual `data X = X0 String | X1 X (Y X) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
 
-rec part ext
+rec part ext (-)
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     given gen for `String`, derive for `List String`
     given gen for `String`, derive for `List (String, Bool)`
@@ -194,7 +194,7 @@ rec part ext
   given gen for `String`, derive for mutual `data X = X0 String | X1 X (Y String) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
   given gen for `String`, derive for mutual `data X = X0 String | X1 X (Y $ List String) | X2 (Y $ Maybe X)` and `data Y a = Y0 (List a) | Y1 a`
 
-rec t-p.->.. ext
+rec t-p.->.. ext (-)
   given gen for `a`, derive for `List a`, run for `List String` with `%hint` for `String`
   will refuse to derive the following, this is expected behaviour for now, to be reworked
     given gens for `a` and `b`, derive for `List (a, b)`, run for `List (String, Nat)` with `%hint` for `String` and `Nat`
