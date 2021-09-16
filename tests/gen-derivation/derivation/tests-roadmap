@@ -57,6 +57,14 @@ norec noext dep_targ_param_giv
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
       ``` derive for `X b1 b2`
+  ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
+        X0 : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
+        X1 : X b1 b2
+      ``` derive for `X b1 b2`
+  ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
+        X0 : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
+        X1 : Unit -> X b1 b2
+      ``` derive for `X b1 b2`
 
 norec noext dep_targ_param_giv_index_giv
   `(a, b : Bool) -> Gen (a = b)`
