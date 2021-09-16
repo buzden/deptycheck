@@ -69,10 +69,11 @@ norec noext dep_targ_param_giv
 
 norec ext dep_targ_param_giv
   given gen for `a`, derive for `Maybe a`, run `Maybe String` with `%hint` for `String`
-  given gen for `a`, derive for `Maybe (a, a)`, run `Maybe (String, String)` with `%hint` for `String`
   given gens for `a` and `b`, derive for `(a, b), run `(String, Nat)` for `%hint` for `String` and `Nat`
   will refuse to derive the following, this is expected behaviour for now, to be reworked
+    given gen for `a`, derive for `Maybe (a, a)`, run `Maybe (String, String)` with `%hint` for `String`
     given gens for `a` and `b`, derive for `Maybe (a, b, a)`, run `Maybe (String, Nat, String)` with `%hint` for `String` and `Nat`
+  `data X a = MkX (Maybe (a, a))`, given gen for `a` derive for `X a`, run `X String` with `%hint` for `String`
   `data X a b = MkX (Maybe (a, b, a))`, given gens for `a` and `b` derive for `X a b`, run `X String Nat` with `%hint` for `String` and `Nat`
 
 norec noext dep_targ_param_giv_index_giv
