@@ -110,6 +110,10 @@ norec t-..->p. ext (-)
         Xn : (n : Nat) -> X n m
         Xm : (m : Nat) -> X n m
       ``` given gen for `Nat`, derive for `(n ** m ** X n m)`
+  ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
+        Xn : (n : Nat) -> X n m
+        Xm : Vect n String -> (m : Nat) -> X n m
+      ``` given gens for `Nat` and for `n -> Vect n String`, derive for `(n ** m ** X n m)`
   it seems these shall be negative tests
     given gen for `(t : Type ** t)`, derive for `(a ** Maybe a)`
     given gen for `(t : Type ** t)`, derive for `(a ** b ** Either a b)`

@@ -14,6 +14,11 @@ export %hint
 smallNats : Fuel -> Gen Nat
 smallNats _ = choiceMap pure [0, 10]
 
+export
+aVect : Fuel -> (Fuel -> Gen a) => (n : Nat) -> Gen (Vect n a)
+aVect f Z             = [| [] |]
+aVect f (S n) @{genA} = [| genA f :: aVect f n @{genA} |]
+
 export %hint
 someTypes : Fuel -> Gen Type
 someTypes _ = choiceMap pure [Nat, String, Bool]
