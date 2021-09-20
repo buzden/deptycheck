@@ -11,4 +11,4 @@ checkedGen : Fuel -> (Fuel -> Gen String) => (Fuel -> Gen Nat) => Gen (String, N
 checkedGen = deriveGen
 
 main : IO ()
-main = runGs [ G $ \fl => checkedGen fl @{smallStrings} @{smallNats} ]
+main = runGs [ G $ \fl => checkedGen fl @{smallStrs} @{smallNats} ]

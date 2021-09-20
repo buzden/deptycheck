@@ -11,6 +11,6 @@ checkedGen = deriveGen
 
 main : IO ()
 main = runGs
-  [ G $ \fl => checkedGen fl @{smallStrings} @{smallNats}
+  [ G $ \fl => checkedGen fl @{smallStrs} @{smallNats}
   , G $ \fl => checkedGen fl @{smallNats} @{smallNats}
   ]

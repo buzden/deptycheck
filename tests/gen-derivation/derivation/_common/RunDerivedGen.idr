@@ -7,8 +7,8 @@ import public Test.DepTyCheck.Gen.Auto
 %default total
 
 export %hint
-smallStrings : Fuel -> Gen String
-smallStrings _ = choiceMap pure ["", "a", "bc"]
+smallStrs : Fuel -> Gen String
+smallStrs _ = choiceMap pure ["", "a", "bc"]
 
 export %hint
 smallNats : Fuel -> Gen Nat

@@ -15,4 +15,4 @@ checkedGen : Fuel -> (Fuel -> Gen String) => Gen X
 checkedGen _ = empty
 
 main : IO ()
-main = runGs [ G $ \fl => checkedGen fl @{smallStrings} ]
+main = runGs [ G $ \fl => checkedGen fl @{smallStrs} ]
