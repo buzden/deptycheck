@@ -5,7 +5,7 @@ variables:
   parallel:
     matrix:
       - IDRIS2_TAG:
-        - v0.4.0-352-g426441ee
+        - v0.5.1-2-ga0846af5
         # get the desired suffix by `git describe --tags`
         - latest
   image: snazzybucket/idris2:${IDRIS2_TAG}
