@@ -90,7 +90,7 @@ norec t-pi->.. noext (+)
 norec t-pi->.. ext (+)
   given `DecEq a`, derive for `(x, y : a) -> Gen (x = y)`
 
-norec t-..->p. noext (-)
+norec t-..->p. noext (+)
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
       ``` derive for `(b1 ** b2 ** X b1 b2)`
