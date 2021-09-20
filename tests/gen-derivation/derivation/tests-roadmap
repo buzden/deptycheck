@@ -94,8 +94,9 @@ norec t-..->p. noext (-)
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
       ``` derive for `(b1 ** b2 ** X b1 b2)`
-  ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
-        MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
+  ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
+        X0 : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
+        X1 : X b1 b2
       ``` derive for `(b1 ** b2 ** X b1 b2)`
 
 norec t-..->p. ext (-)
@@ -112,6 +113,19 @@ norec t-..->p. ext (-)
   it seems these shall be negative tests
     given gen for `(t : Type ** t)`, derive for `(a ** Maybe a)`
     given gen for `(t : Type ** t)`, derive for `(a ** b ** Either a b)`
+
+norec t-..->pi noext (-)
+  ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
+        MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
+      ``` derive for `(b1 ** b2 ** X b1 b2)`
+  ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
+        X0 : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
+        X1 : X b1 b2
+      ``` derive for `(b1 ** b2 ** X b1 b2)`
+  `(x : Bool ** y : Bool ** x = y)`
+
+norec t-..->pi ext (-)
+  given gen for `a`, derive for `(x : a ** y : a ** x = y)`
 
 norec t-.i->.. noext (-)
   ``` data X : String -> Type where
@@ -134,8 +148,6 @@ norec t-p.->p. noext (-)
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
         MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2
       ``` derive for `(b1 ** X b1 b2)`
-  `(a : Nat) -> Gen (b : Nat ** a = b)`
-  `(b : Nat) -> Gen (a : Nat ** a = b)`
 
 norec t-p.->p. ext (-)
   ``` data X : (n : Nat) -> (m : Nat) -> Type where -- `n` and `m` are parameters, not indices
@@ -156,6 +168,8 @@ norec t-p.->.i noext (-)
   ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
         MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `(b1 ** X b1 b2)`
+  `(a : Nat) -> Gen (b : Nat ** a = b)`
+  `(b : Nat) -> Gen (a : Nat ** a = b)`
   `(x : a) -> Gen (y : a ** x = y)`
   `(y : a) -> Gen (x : a ** x = y)`
 
