@@ -67,7 +67,7 @@ norec t-p.->.. noext (+)
         X1 : Unit -> X b1 b2
       ``` derive for `X b1 b2`
 
-norec t-p.->.. ext (-)
+norec t-p.->.. ext (+)
   given gen for `a`, derive for `Maybe a`, run `Maybe String` with `%hint` for `String`
   given gens for `a` and `b`, derive for `(a, b), run `(String, Nat)` for `%hint` for `String` and `Nat`
   will refuse to derive the following, this is expected behaviour for now, to be reworked
@@ -76,14 +76,18 @@ norec t-p.->.. ext (-)
   `data X a = MkX (Maybe (a, a))`, given gen for `a` derive for `X a`, run `X String` with `%hint` for `String`
   `data X a b = MkX (Maybe (a, b, a))`, given gens for `a` and `b` derive for `X a b`, run `X String Nat` with `%hint` for `String` and `Nat`
 
-norec t-pi->.. noext (+-)
+norec t-pi->.. noext (+)
   `(a, b : Bool) -> Gen (a = b)`
   `(a, b : Nat) -> Gen (a = b)`
   ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
         MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `X b1 b2`
+  ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
+        X0 : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
+        X1 : X b1 b2
+      ``` derive for `X b1 b2`
 
-norec t-pi->.. ext (-)
+norec t-pi->.. ext (+)
   given `DecEq a`, derive for `(x, y : a) -> Gen (x = y)`
 
 norec t-..->p. noext (-)
