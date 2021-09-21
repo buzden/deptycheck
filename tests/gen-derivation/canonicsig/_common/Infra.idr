@@ -5,7 +5,7 @@ import public Data.Fuel
 import public Debug.Reflection
 
 import public Test.DepTyCheck.Gen
-import public Test.DepTyCheck.Gen.Auto.Derive
+import public Test.DepTyCheck.Gen.Auto.Core
 
 import public Language.Reflection.Types
 

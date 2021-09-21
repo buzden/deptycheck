@@ -1,4 +1,4 @@
-||| External generation interface and aux stuff for that
+||| Derivation interface for an end-point user
 module Test.DepTyCheck.Gen.Auto.Entry
 
 import public Data.Either
@@ -10,6 +10,7 @@ import public Debug.Reflection
 
 import public Test.DepTyCheck.Gen -- for `Gen` data type
 import public Test.DepTyCheck.Gen.Auto.Checked
+import public Test.DepTyCheck.Gen.Auto.Core
 
 %default total
 
@@ -310,7 +311,7 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 |||
 |||
 export %macro
-deriveGen : Elab a
+deriveGen : DerivatorCore => Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
