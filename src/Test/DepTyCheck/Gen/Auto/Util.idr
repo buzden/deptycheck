@@ -103,6 +103,10 @@ buildDPair : (rhs : TTImp) -> List (Name, TTImp) -> TTImp
 buildDPair = foldr $ \(name, type), res =>
   var `{Builtin.DPair.DPair} .$ type .$ lam (MkArg MW ExplicitArg (Just name) type) res
 
+public export
+appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
+appFuel = app . var
+
 --- General purpose instances ---
 
 public export

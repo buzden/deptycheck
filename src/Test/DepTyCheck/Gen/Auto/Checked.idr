@@ -78,9 +78,6 @@ internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySe
 --- Infrastructural functions ---
 ---------------------------------
 
-appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
-appFuel = app . var
-
 callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
 callExternalGen sig topmost fuel values = foldl (flip apply) (appFuel topmost fuel) $ fromList sig.givenParams.asList `zip` values <&> \case
   ((_, ExplicitArg, _   ), value) => (.$ value)
