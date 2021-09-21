@@ -78,18 +78,12 @@ internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySe
 --- Infrastructural functions ---
 ---------------------------------
 
-appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
-appFuel = app . var
-
 callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
 callExternalGen sig topmost fuel values = foldl (flip apply) (appFuel topmost fuel) $ fromList sig.givenParams.asList `zip` values <&> \case
   ((_, ExplicitArg, _   ), value) => (.$ value)
   ((_, ImplicitArg, name), value) => \f => namedApp f name value
 
-callInternalGen : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callInternalGen _ = foldl app .: appFuel
-
---- Particular implementations producing the-meat-derivation-function clojure ---
+--- Particular implementations producing the-core-derivation-function clojure ---
 
 namespace ClojuringCanonicImpl
 
