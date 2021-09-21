@@ -55,6 +55,20 @@ export
 fail : CanonicGen m => String -> m a
 fail = failAt EmptyFC
 
+--- Low-level derivation interface ---
+
 public export
 interface DerivatorCore where
-  deriveCanonical : CanonicGen m => GenSignature -> Name -> m (Decl, Decl)
+  internalGenSig  : GenSignature -> TTImp
+  callInternalGen : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+
+  internalGenBody : CanonicGen m => GenSignature -> m $ List Clause
+
+-- NOTE: Implementation of `internalGenBody` cannot know the `Name` of the called gen, thus it cannot use `callInternalGen` function directly.
+--       It have to use `callGen` function from `CanonicGen` interface instead.
+--       But `callInternalGen` function is still present here because, in some sense, it is a complementary to `internalGenSig`.
+--       Internals and changes in the implementation of `internalGenSig` influence on the implementation of `callInternalGen`.
+
+export
+deriveCanonical : DerivatorCore => CanonicGen m => GenSignature -> Name -> m (Decl, Decl)
+deriveCanonical sig name = pure (export' name (internalGenSig sig), def name !(internalGenBody sig))

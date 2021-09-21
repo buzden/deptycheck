@@ -83,10 +83,7 @@ callExternalGen sig topmost fuel values = foldl (flip apply) (appFuel topmost fu
   ((_, ExplicitArg, _   ), value) => (.$ value)
   ((_, ImplicitArg, name), value) => \f => namedApp f name value
 
-callInternalGen : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callInternalGen _ = foldl app .: appFuel
-
---- Particular implementations producing the-meat-derivation-function clojure ---
+--- Particular implementations producing the-core-derivation-function clojure ---
 
 namespace ClojuringCanonicImpl
 

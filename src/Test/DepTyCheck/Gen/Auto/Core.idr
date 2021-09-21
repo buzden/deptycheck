@@ -35,6 +35,9 @@ canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel)
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
                       ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (name, type)
 
+callCanonic : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callCanonic _ = foldl app .: appFuel
+
 -- Main meat function --
 
 canonicBody : CanonicGen m => GenSignature -> m $ List Clause
@@ -52,4 +55,6 @@ canonicBody sig = do
 
 export
 DerivatorCore where
-  deriveCanonical sig name = pure (export' name (canonicSig sig), def name !(canonicBody sig))
+  internalGenSig  = canonicSig
+  callInternalGen = callCanonic
+  internalGenBody = canonicBody
