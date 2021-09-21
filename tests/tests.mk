@@ -26,8 +26,7 @@ retest: runner
 clean:
 	${IDRIS2} --clean tests.ipkg
 	$(RM) failures
-	$(RM) -r build
-	$(RM) -r **/**/build
+	@find . -type f -name build -exec rm -rf '{}' \;
 	@find . -type f -name 'output' -exec rm -rf '{}' \;
 	@find . -type f -name '*.ttc' -exec rm -f '{}' \;
 	@find . -type f -name '*.ttm' -exec rm -f '{}' \;
