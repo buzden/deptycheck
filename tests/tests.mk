@@ -18,10 +18,10 @@ runner:
 	${IDRIS2} --build tests.ipkg
 
 test: runner
-	./build/exec/runtests $(IDRIS2) $(INTERACTIVE) --failure-file failures --threads $(threads) --only $(only)
+	./build/exec/runtests $(IDRIS2) $(INTERACTIVE) --failure-file failures --threads $(threads) --only "$(only)"
 
 retest: runner
-	./build/exec/runtests $(IDRIS2) $(INTERACTIVE) --failure-file failures --threads $(threads) --only-file failures --only $(only)
+	./build/exec/runtests $(IDRIS2) $(INTERACTIVE) --failure-file failures --threads $(threads) --only-file failures --only "$(only)"
 
 clean:
 	${IDRIS2} --clean tests.ipkg

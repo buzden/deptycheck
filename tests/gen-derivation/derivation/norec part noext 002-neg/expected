@@ -1,0 +1,12 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Error during reflection: Target type's argument must be a variable name
+
+DerivedGen:9:27--9:31
+ 5 | %default total
+ 6 | 
+ 7 | %language ElabReflection
+ 8 | 
+ 9 | checkedGen : Fuel -> Gen (Bool, Bool)
+                               ^^^^
+
