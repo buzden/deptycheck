@@ -1,9 +1,14 @@
 module AlternativeCore
 
-import public Test.DepTyCheck.Gen.Auto.Derive
 import Test.DepTyCheck.Gen.Auto.Core
+import public Test.DepTyCheck.Gen.Auto.Derive
+import public Test.DepTyCheck.Gen.Auto.Entry
 
 %default total
+
+export covering %macro
+printDerived : DerivatorCore => Type -> Elab $ IO Unit
+printDerived ty = quote ty >>= \tt => putPretty <$> deriveGenExpr tt
 
 export
 [Empty] DerivatorCore where

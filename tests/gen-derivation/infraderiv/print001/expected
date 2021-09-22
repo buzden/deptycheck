@@ -1,0 +1,16 @@
+1/2: Building AlternativeCore (AlternativeCore.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+  
+  ILocal (ILam.  (MW ExplicitArg {fuel:1199} : IVar Data.Fuel.Fuel)
+              => (IApp. IVar {("Builtin.Unit", []):0} $ IVar {fuel:1199}))
+    IClaim MW
+           Export
+           []
+           (MkTy {("Builtin.Unit", []):0}
+                 (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                     -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                             $ IVar Builtin.Unit)))
+    IDef {("Builtin.Unit", []):0}
+         [ PatClause (IApp. IVar {("Builtin.Unit", []):0} $ Implicit True)
+                     (IVar empty) ]
+
