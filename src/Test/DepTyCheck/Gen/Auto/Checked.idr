@@ -136,7 +136,7 @@ namespace ClojuringCanonicImpl
         pure name
 
       -- call the internal gen
-      pure $ callInternalGen sig internalGenName fuel values
+      pure $ callCanonic sig internalGenName fuel values
 
   --- Canonic-dischagring function ---
 

@@ -12,49 +12,12 @@ import public Test.DepTyCheck.Gen.Auto.Derive
 --- Derivation functions ---
 ----------------------------
 
--- Must respect names from the `givenParams` field, at least for implicit parameters
-export
-canonicSig : GenSignature -> TTImp
-canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) where
-  -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
-
-  arg : Fin sig.targetType.args.length -> Arg False
-  arg idx = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW ExplicitArg (Just name) type
-
-  returnTy : TTImp
-  returnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs where
-
-    targetTypeApplied : TTImp
-    targetTypeApplied = foldr apply (var sig.targetType.name) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => case piInfo of
-                          ExplicitArg   => (.$ var name)
-                          ImplicitArg   => \f => namedApp f name $ var name
-                          DefImplicit _ => \f => namedApp f name $ var name
-                          AutoImplicit  => (`autoApp` var name)
-
-    generatedArgs : List (Name, TTImp)
-    generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
-                      ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (name, type)
-
-callCanonic : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-callCanonic _ = foldl app .: appFuel
-
--- Main meat function --
-
-canonicBody : CanonicGen m => GenSignature -> Name -> m $ List Clause
-canonicBody sig name = do
-
-  -- check that there is at least one constructor
-  let (_::_) = sig.targetType.cons
-    | [] => fail "No constructors found for the type `\{show sig.targetType.name}`"
-
-  ?canonicBody_rhs
-
-------------------------------
---- External user function ---
-------------------------------
-
 export
 DerivatorCore where
-  internalGenSig  = canonicSig
-  callInternalGen = callCanonic
-  internalGenBody = canonicBody
+  canonicBody sig name = do
+
+    -- check that there is at least one constructor
+    let (_::_) = sig.targetType.cons
+      | [] => fail "No constructors found for the type `\{show sig.targetType.name}`"
+
+    ?canonicBody_rhs

@@ -57,18 +57,46 @@ fail = failAt EmptyFC
 
 --- Low-level derivation interface ---
 
+export
+canonicSig : GenSignature -> TTImp
+canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) where
+  -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
+
+  arg : Fin sig.targetType.args.length -> Arg False
+  arg idx = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW ExplicitArg (Just name) type
+
+  returnTy : TTImp
+  returnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs where
+
+    targetTypeApplied : TTImp
+    targetTypeApplied = foldr apply (var sig.targetType.name) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => case piInfo of
+                          ExplicitArg   => (.$ var name)
+                          ImplicitArg   => \f => namedApp f name $ var name
+                          DefImplicit _ => \f => namedApp f name $ var name
+                          AutoImplicit  => (`autoApp` var name)
+
+    generatedArgs : List (Name, TTImp)
+    generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
+                      ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (name, type)
+
+-- Complementary to `canonicSig`
+export
+callCanonic : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callCanonic _ = foldl app .: appFuel
+
 public export
 interface DerivatorCore where
-  internalGenSig  : GenSignature -> TTImp
-  callInternalGen : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
-
-  internalGenBody : CanonicGen m => GenSignature -> Name -> m $ List Clause
+  canonicBody : CanonicGen m => GenSignature -> Name -> m $ List Clause
 
 -- NOTE: Implementation of `internalGenBody` cannot know the `Name` of the called gen, thus it cannot use `callInternalGen` function directly.
 --       It have to use `callGen` function from `CanonicGen` interface instead.
 --       But `callInternalGen` function is still present here because, in some sense, it is a complementary to `internalGenSig`.
 --       Internals and changes in the implementation of `internalGenSig` influence on the implementation of `callInternalGen`.
 
+---------------------------------
+--- External-facing functions ---
+---------------------------------
+
 export
 deriveCanonical : DerivatorCore => CanonicGen m => GenSignature -> Name -> m (Decl, Decl)
-deriveCanonical sig name = pure (export' name (internalGenSig sig), def name !(internalGenBody sig name))
+deriveCanonical sig name = pure (export' name (canonicSig sig), def name !(canonicBody sig name))
