@@ -62,7 +62,7 @@ interface DerivatorCore where
   internalGenSig  : GenSignature -> TTImp
   callInternalGen : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
 
-  internalGenBody : CanonicGen m => GenSignature -> m $ List Clause
+  internalGenBody : CanonicGen m => GenSignature -> Name -> m $ List Clause
 
 -- NOTE: Implementation of `internalGenBody` cannot know the `Name` of the called gen, thus it cannot use `callInternalGen` function directly.
 --       It have to use `callGen` function from `CanonicGen` interface instead.
@@ -71,4 +71,4 @@ interface DerivatorCore where
 
 export
 deriveCanonical : DerivatorCore => CanonicGen m => GenSignature -> Name -> m (Decl, Decl)
-deriveCanonical sig name = pure (export' name (internalGenSig sig), def name !(internalGenBody sig))
+deriveCanonical sig name = pure (export' name (internalGenSig sig), def name !(internalGenBody sig name))

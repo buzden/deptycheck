@@ -40,8 +40,8 @@ callCanonic _ = foldl app .: appFuel
 
 -- Main meat function --
 
-canonicBody : CanonicGen m => GenSignature -> m $ List Clause
-canonicBody sig = do
+canonicBody : CanonicGen m => GenSignature -> Name -> m $ List Clause
+canonicBody sig name = do
 
   -- check that there is at least one constructor
   let (_::_) = sig.targetType.cons
