@@ -274,6 +274,15 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 --- Functions for the user ---
 ------------------------------
 
+export
+deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
+deriveGenExpr signature = do
+  (signature, externals) <- snd <$> checkTypeIsGen signature
+  externals <- assignNames externals
+  fuelArg <- genSym "fuel"
+  (lambda, locals) <- runCanonic (fst <$> externals) $ wrapFuel fuelArg . wrapWithExternalsAutos externals <$> internalGenCallingLambda signature fuelArg
+  pure $ local locals lambda
+
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
 ||| Consider, you have a `data X (a : A) (b : B n) (c : C) where ...` and
@@ -315,8 +324,5 @@ deriveGen : DerivatorCore => Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
-  (signature, externals) <- snd <$> checkTypeIsGen signature
-  externals <- assignNames externals
-  fuelArg <- genSym "fuel"
-  (lambda, locals) <- runCanonic (fst <$> externals) $ wrapFuel fuelArg . wrapWithExternalsAutos externals <$> internalGenCallingLambda signature fuelArg
-  check $ local locals lambda
+  tt <- deriveGenExpr signature
+  check tt
