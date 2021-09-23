@@ -6,6 +6,4 @@ import AlternativeCore
 
 %language ElabReflection
 
-covering
-main : IO Unit
-main = printDerived @{Empty} $ Fuel -> Gen Unit
+%runElab printDerived @{Empty} $ Fuel -> Gen Unit

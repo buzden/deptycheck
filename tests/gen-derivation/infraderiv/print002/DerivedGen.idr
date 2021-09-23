@@ -8,6 +8,4 @@ import Data.Vect
 
 %language ElabReflection
 
-covering
-main : IO Unit
-main = printDerived @{Empty} $ Fuel -> (n : Nat) -> (a : Type) -> Gen (Vect n a)
+%runElab printDerived @{Empty} $ Fuel -> (n : Nat) -> (a : Type) -> Gen (Vect n a)

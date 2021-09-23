@@ -8,6 +8,4 @@ import Data.Vect
 
 %language ElabReflection
 
-covering
-main : IO Unit
-main = printDerived @{Empty} $ Fuel -> (Fuel -> Gen Nat) => Gen Bool
+%runElab printDerived @{Empty} $ Fuel -> (Fuel -> Gen Nat) => Gen Bool

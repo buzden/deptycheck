@@ -9,6 +9,4 @@ import AlternativeCore
 data X : Nat -> Type where
   MkX : X n
 
-covering
-main : IO Unit
-main = printDerived @{Empty} $ Fuel -> (n : Nat) -> Gen (X n)
+%runElab printDerived @{Empty} $ Fuel -> (n : Nat) -> Gen (X n)

@@ -6,9 +6,9 @@ import public Test.DepTyCheck.Gen.Auto.Entry
 
 %default total
 
-export covering %macro
-printDerived : DerivatorCore => Type -> Elab $ IO Unit
-printDerived ty = quote ty >>= \tt => putPretty <$> deriveGenExpr tt
+export covering
+printDerived : DerivatorCore => Type -> Elab Unit
+printDerived ty = logMsg "gen.auto.derive.infra" 0 $ "\n" ++ show !(deriveGenExpr !(quote ty))
 
 export
 [Empty] DerivatorCore where
