@@ -1,3 +1,5 @@
+rm -rf build
+
 $1 --build use-gen.ipkg
 
 rm -rf build

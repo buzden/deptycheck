@@ -1,3 +1,5 @@
+rm -rf build
+
 $1 --build example-usages.ipkg
 
 rm -rf build
