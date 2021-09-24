@@ -1,0 +1,7 @@
+`self run N` are `empty run N` with `@{Empty}` changed to `@{CallSelf}`
+`self print N` are `empty print N` with `@{Empty}` changed to `@{CallSelf}`
+`ext print N` have the same type as `ext run N`
+
+Look types
+- for *print* type: `cat empty\ print\ */DerivedGen.idr | grep 'print'`
+- for *run* type  : `cat empty\ run\ */DerivedGen.idr | grep 'checkedGen : '`
