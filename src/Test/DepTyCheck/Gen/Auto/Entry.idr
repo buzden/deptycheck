@@ -280,8 +280,8 @@ deriveGenExpr signature = do
   (signature, externals) <- snd <$> checkTypeIsGen signature
   externals <- assignNames externals
   fuelArg <- genSym "fuel"
-  (lambda, locals) <- runCanonic (fst <$> externals) $ wrapFuel fuelArg . wrapWithExternalsAutos externals <$> internalGenCallingLambda signature fuelArg
-  pure $ local locals lambda
+  (lambda, locals) <- runCanonic (fst <$> externals) $ internalGenCallingLambda signature fuelArg
+  pure $ wrapFuel fuelArg $ wrapWithExternalsAutos externals $ local locals lambda
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
