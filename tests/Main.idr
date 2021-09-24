@@ -12,7 +12,7 @@ main = runner
   [ !("Lazier list" `atDir` "lazier")
   , !("The `Gen` monad" `atDir` "gen-monad")
   , !("Auto derivation: infrastructure: input validation" `atDir` "gen-derivation/inputvalidation")
+  , !("Auto derivation: infrastructure: canonic signature" `atDir` "gen-derivation/canonicsig")
   , !("Auto derivation: infrastructure: running harness" `atDir` "gen-derivation/infraderiv")
-  , !("Auto derivation: core: canonic signature" `atDir` "gen-derivation/canonicsig")
   , !("Auto derivation: core: derivation itself" `atDir` "gen-derivation/derivation")
   ]
