@@ -23,19 +23,25 @@ Independent metrics:
 
 trivial (norec nodep noext) (+)
   `()`
-  `Void`
+  should refuse the following
+    `Void`
 
 --- Non-recursive ---
 
 norec nodep noext (+)
   `Bool`
   `data X = X0 | X1 Bool | X2 Bool Bool`
+  should refuse the following
+    `data X = MkX Void`
+    `data X = MkX Bool Void`
+    `data X = X0 | X1 Bool | X2 Void Bool`
 
 norec nodep ext (+)
   given gen for `String`, derive for `data X = MkX String`
   given gen for `String`, derive for `data X = MkX String String`
   given gens for `String` and `Nat`, derive for `data X = MkX String Nat`
   given gens for `String` and `Nat`, derive for `data X = X1 String Nat | X2 Nat | X3 String`
+  given gen for `Void` (in fact, empty), derive for `data X = MkX Void`
 
 norec part noext (+)
   will refuse to derive the following, this is expected behaviour for now, to be reworked
