@@ -1,21 +1,22 @@
 1/2: Building AlternativeCore (AlternativeCore.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: 
-ILocal (ILam.  (MW ExplicitArg {fuel:1200} : IVar Data.Fuel.Fuel)
-            => (MW ExplicitArg n : IVar Prelude.Types.Nat)
-            => (IApp. IVar {("DerivedGen.X", [0]):0}
-                    $ IVar {fuel:1200}
-                    $ IVar n))
-  IClaim MW
-         Export
-         []
-         (MkTy {("DerivedGen.X", [0]):0}
-               (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                   -> (MW ExplicitArg {arg:1197} : IVar Prelude.Types.Nat)
-                   -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                           $ (IApp. IVar DerivedGen.X $ IVar {arg:1197}))))
-  IDef {("DerivedGen.X", [0]):0}
-       [ PatClause (IApp. IVar {("DerivedGen.X", [0]):0}
-                        $ Implicit True
-                        $ Implicit True)
-                   (IVar empty) ]
+ILam.  (MW ExplicitArg {fuel:1200} : IVar Data.Fuel.Fuel)
+    => ILocal (ILam.  (MW ExplicitArg n : IVar Prelude.Types.Nat)
+                   => (IApp. IVar {("DerivedGen.X", [0]):0}
+                           $ IVar {fuel:1200}
+                           $ IVar n))
+         IClaim MW
+                Export
+                []
+                (MkTy {("DerivedGen.X", [0]):0}
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (MW ExplicitArg {arg:1197} : IVar Prelude.Types.Nat)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ (IApp. IVar DerivedGen.X
+                                         $ IVar {arg:1197}))))
+         IDef {("DerivedGen.X", [0]):0}
+              [ PatClause (IApp. IVar {("DerivedGen.X", [0]):0}
+                               $ Implicit True
+                               $ Implicit True)
+                          (IVar empty) ]
