@@ -47,7 +47,7 @@ record GenSignatureFC where
 
 record GenExternals where
   constructor MkGenExternals
-  externals : SortedMap ExternalGenSignature TTImp
+  externals : List (ExternalGenSignature, TTImp)
 
 --- Analysis functions ---
 
@@ -220,7 +220,7 @@ checkTypeIsGen sig = do
     | Just (fc, _) => failAt fc.genFC "External generators contain the generator asked to be derived"
 
   -- forget FCs of subparsed externals
-  let autoImplArgs = fromList $ snd <$> autoImplArgs
+  let autoImplArgs = snd <$> autoImplArgs
 
   ------------
   -- Result --
@@ -261,10 +261,10 @@ internalGenCallingLambda sig fuelArg = foldr (map . mkLam) call sig.givenParams.
   call = let Element intSig prf = internalise sig in
          callGen intSig (var fuelArg) $ rewrite prf in fromList sig.givenParams.asList <&> \(_, _, name) => var name
 
-assignNames : GenExternals -> Elab $ SortedMap ExternalGenSignature (Name, TTImp)
-assignNames $ MkGenExternals exts = for exts $ \tti => (,tti) <$> genSym "externalAutoimpl"
+assignNames : GenExternals -> Elab $ List (ExternalGenSignature, Name, TTImp)
+assignNames $ MkGenExternals exts = for exts $ \(sig, tti) => (sig, ,tti) <$> genSym "externalAutoimpl"
 
-wrapWithExternalsAutos : SortedMap ExternalGenSignature (Name, TTImp) -> TTImp -> TTImp
+wrapWithExternalsAutos : Foldable f => f (Name, TTImp) -> TTImp -> TTImp
 wrapWithExternalsAutos = flip $ foldr $ lam . uncurry (MkArg MW AutoImplicit . Just)
 
 wrapFuel : (fuelArg : Name) -> TTImp -> TTImp
@@ -273,6 +273,16 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 ------------------------------
 --- Functions for the user ---
 ------------------------------
+
+export
+deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
+deriveGenExpr signature = do
+  (signature, externals) <- snd <$> checkTypeIsGen signature
+  externals <- assignNames externals
+  let externalsSigToName = fromList $ externals <&> \(sig, name, _) => (sig, name)
+  fuelArg <- genSym "fuel"
+  (lambda, locals) <- runCanonic externalsSigToName $ internalGenCallingLambda signature fuelArg
+  pure $ wrapFuel fuelArg $ wrapWithExternalsAutos (snd <$> externals) $ local locals lambda
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
@@ -315,8 +325,5 @@ deriveGen : DerivatorCore => Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
-  (signature, externals) <- snd <$> checkTypeIsGen signature
-  externals <- assignNames externals
-  fuelArg <- genSym "fuel"
-  (lambda, locals) <- runCanonic (fst <$> externals) $ wrapFuel fuelArg . wrapWithExternalsAutos externals <$> internalGenCallingLambda signature fuelArg
-  check $ local locals lambda
+  tt <- deriveGenExpr signature
+  check tt

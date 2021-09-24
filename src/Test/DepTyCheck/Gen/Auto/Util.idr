@@ -135,6 +135,7 @@ Eq Name where
 
 --- Working around primitive values ---
 
+export
 primTypeInfo : String -> TypeInfo
 primTypeInfo s = MkTypeInfo (UN $ Basic s) [] []
 
