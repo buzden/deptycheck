@@ -83,3 +83,18 @@ export
 [Ext_XSN] DerivatorCore where
   canonicBody sig n =
     pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSN <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callNatGen $ var "fuel"))) ]
+
+--- Dependent type's argument + a constructor's argument taken from external ---
+
+public export
+data X'S : Nat -> Type where
+  MkX'S : String -> X'S n
+
+export
+{n : Nat} -> Show (X'S n) where
+  show (MkX'S s) = "MkX'S \{show s} : X'S \{show n}"
+
+export
+[Ext_X'S] DerivatorCore where
+  canonicBody sig n =
+    pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkX'S <$> ~(!(callStrGen $ var "fuel"))) ]
