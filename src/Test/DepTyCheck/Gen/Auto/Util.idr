@@ -44,6 +44,10 @@ namespace SortedSet
   (.asList) : SortedSet a -> List a
   s.asList = SortedSet.toList s
 
+  public export %inline
+  (.asVect) : (s : SortedSet a) -> Vect (s.asList.length) a
+  s.asVect = fromList s.asList
+
 -----------------------
 --- Lists utilities ---
 -----------------------
@@ -106,6 +110,10 @@ buildDPair = foldr $ \(name, type), res =>
 public export
 appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
 appFuel = app . var
+
+public export
+liftList : List TTImp -> TTImp
+liftList = foldr (\l, r => `(~(l) :: ~(r))) `([])
 
 --- General purpose instances ---
 
