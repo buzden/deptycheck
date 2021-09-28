@@ -1,5 +1,6 @@
-1/2: Building AlternativeCore (AlternativeCore.idr)
-2/2: Building DerivedGen (DerivedGen.idr)
+1/3: Building AlternativeCore (AlternativeCore.idr)
+2/3: Building PrintDerivation (PrintDerivation.idr)
+3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg {fuel:1199} : IVar Data.Fuel.Fuel)
     => ILocal (ILam.  (MW ExplicitArg n : IVar Prelude.Types.Nat)
