@@ -94,7 +94,7 @@ DerivatorCore where
         callConsGen fuel con = callCanonic sig .| consGenName con .| fuel .| varStr <$> defArgNames
 
         callOneOf : List TTImp -> TTImp
-        callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf} .$ liftList variants
+        callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
 
     fuelArg : String
     fuelArg = "fuel_arg_86"
