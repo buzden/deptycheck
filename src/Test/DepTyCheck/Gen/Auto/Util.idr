@@ -2,6 +2,7 @@ module Test.DepTyCheck.Gen.Auto.Util
 
 import public Data.Fin
 import public Data.List.Lazy
+import public Data.Vect.Dependent
 import public Data.Zippable
 
 import public Data.SortedMap
@@ -90,9 +91,9 @@ namespace SortedMap
   mapMaybe : Ord k => (a -> Maybe b) -> SortedMap k a -> SortedMap k b
   mapMaybe f = SortedMap.fromList . mapMaybe (\(k, a) => (k,) <$> f a) . SortedMap.toList
 
----------------------------------
---- `TTImp`-related utilities ---
----------------------------------
+-----------------------------------------------
+--- `Language.Reflection`-related utilities ---
+-----------------------------------------------
 
 --- Parsing and rebuilding `TTImp` stuff ---
 
@@ -177,6 +178,11 @@ typeInfoOfConstant StringType  = Just $ primTypeInfo "String"
 typeInfoOfConstant CharType    = Just $ primTypeInfo "Char"
 typeInfoOfConstant DoubleType  = Just $ primTypeInfo "Double"
 typeInfoOfConstant WorldType   = Nothing
+
+--- Analyzing dependently typed signatures ---
+
+export
+argDeps : (args : List NamedArg) -> DVect args.length $ SortedSet . Fin . Fin.finToNat
 
 -------------------------------------------
 --- Reflection-related additional stuff ---
