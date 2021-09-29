@@ -129,12 +129,12 @@ oneOf (x::xs@(_::_)) = independent x <|> oneOf xs
 
 ||| Choose one of the given generators uniformly (using a list as an input).
 |||
-||| This function behaves similarly to `oneOf` but
-|||   - takes `List` that can be empty and
-|||   - even for non-empty lists has `... <|> empty` at the end of the result.
+||| This function behaves similarly to `oneOf` but takes `List` that can be empty
 public export
 oneOf' : List (Gen a) -> Gen a
-oneOf' = choiceMap independent
+oneOf' []      = empty
+oneOf' [x]     = independent x
+oneOf' (x::xs) = independent x <|> oneOf' xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
