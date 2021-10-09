@@ -9,6 +9,11 @@ variables:
         # get the desired suffix by `git describe --tags`
         - latest
   image: snazzybucket/idris2:${IDRIS2_TAG}
+  rules:
+    - if: $IDRIS2_TAG == "latest"
+      allow_failure: true
+    - if: $IDRIS2_TAG
+
 
 stages:
   - thirdparties
