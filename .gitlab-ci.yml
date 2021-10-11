@@ -1,12 +1,20 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  IDRIS_VERSION_FILE: .idris-version # should contain the result of `git describe --tags`
+
+read-idris-ver:
+  stage: .pre
+  script:
+    - sed 's/^/preferred_idris=/' < "${IDRIS_VERSION_FILE}" > idris.env
+  artifacts:
+    reports:
+      dotenv: idris.env
 
 .depends-on-idris:
   parallel:
     matrix:
       - IDRIS2_TAG:
-        - v0.5.1-27-g1ebe204c
-        # get the desired suffix by `git describe --tags`
+        - ${preferred_idris}
         - latest
   image: snazzybucket/idris2:${IDRIS2_TAG}
   rules:
@@ -25,10 +33,13 @@ stages:
 
 # TODO to cache the results of builds to those jobs that have `needs` for them (transitively).
 
+# TODO to find a way to not to repeat `read-idris-ver` in `needs` for every job that extends `.depends-on-idris`.
+
 thirdparties:build:
   extends: .depends-on-idris
   stage: thirdparties:build
-  needs: []
+  needs:
+    - read-idris-ver
   script:
     - make thirdparties
 
@@ -36,6 +47,7 @@ deptycheck:build:
   extends: .depends-on-idris
   stage: deptycheck:build
   needs:
+    - read-idris-ver
     - thirdparties:build
   script:
     - make deptycheck
@@ -44,6 +56,7 @@ deptycheck:test:lib:
   extends: .depends-on-idris
   stage: deptycheck:test:lib
   needs:
+    - read-idris-ver
     - deptycheck:build
   script:
     - find tests/ -maxdepth 1 -mindepth 1 -type d ! -name gen-derivation | sed 's|^tests/||' | while read r; do
@@ -54,6 +67,7 @@ deptycheck:test:derive:
   extends: .depends-on-idris
   stage: deptycheck:test:derive
   needs:
+    - read-idris-ver
     - deptycheck:build
     - deptycheck:test:lib
   script:
@@ -63,6 +77,7 @@ pil:build:
   extends: .depends-on-idris
   stage: pil:build
   needs:
+    - read-idris-ver
     - deptycheck:build
   script:
     - make pil
@@ -71,6 +86,7 @@ pil:test:
   extends: .depends-on-idris
   stage: pil:test
   needs:
+    - read-idris-ver
     - pil:build
     - deptycheck:test:lib
   script:
