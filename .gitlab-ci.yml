@@ -14,44 +14,65 @@ variables:
       allow_failure: true
     - if: $IDRIS2_TAG
 
-
 stages:
-  - thirdparties
+  - thirdparties:build
   - lint
-  - build-lib
-  - test-lib
-  - build-example
-  - test-example
+  - deptycheck:build
+  - deptycheck:test:lib
+  - deptycheck:test:derive
+  - pil:build
+  - pil:test
 
-# TODO to cache the results of the previous stages to the latter ones.
+# TODO to cache the results of builds to those jobs that have `needs` for them (transitively).
 
-build-thirdparties:
+thirdparties:build:
   extends: .depends-on-idris
-  stage: thirdparties
+  stage: thirdparties:build
+  needs: []
   script:
     - make thirdparties
 
-build-deptycheck-lib:
+deptycheck:build:
   extends: .depends-on-idris
-  stage: build-lib
+  stage: deptycheck:build
+  needs:
+    - thirdparties:build
   script:
     - make deptycheck
 
-test-deptycheck-lib:
+deptycheck:test:lib:
   extends: .depends-on-idris
-  stage: test-lib
+  stage: deptycheck:test:lib
+  needs:
+    - deptycheck:build
   script:
-    - make test-deptycheck
+    - find tests/ -maxdepth 1 -mindepth 1 -type d ! -name gen-derivation | sed 's|^tests/||' | while read r; do
+        make test-deptycheck only="$r";
+      done
 
-build-pil:
+deptycheck:test:derive:
   extends: .depends-on-idris
-  stage: build-example
+  stage: deptycheck:test:derive
+  needs:
+    - deptycheck:build
+    - deptycheck:test:lib
+  script:
+    - make test-deptycheck only=gen-derivation/
+
+pil:build:
+  extends: .depends-on-idris
+  stage: pil:build
+  needs:
+    - deptycheck:build
   script:
     - make pil
 
-test-pil:
+pil:test:
   extends: .depends-on-idris
-  stage: test-example
+  stage: pil:test
+  needs:
+    - pil:build
+    - deptycheck:test:lib
   script:
     - make test-pil
 
@@ -60,5 +81,6 @@ include:
 
 super_linter:
   stage: lint
+  needs: []
   variables:
     FILTER_REGEX_EXCLUDE: ".*/thirdparty/.*"
