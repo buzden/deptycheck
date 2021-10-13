@@ -183,12 +183,3 @@ typeInfoOfConstant WorldType   = Nothing
 
 export
 argDeps : (args : List NamedArg) -> DVect args.length $ SortedSet . Fin . Fin.finToNat
-
--------------------------------------------
---- Reflection-related additional stuff ---
--------------------------------------------
-
--- Workaround of some type inference bug
-public export
-argName : Arg True -> Name
-argName = name
