@@ -81,6 +81,16 @@ mapMaybeI' : (xs : List a) -> (Fin xs.length -> a -> Maybe b) -> List b
 mapMaybeI' []      _ = []
 mapMaybeI' (x::xs) f = maybe id (::) .| f FZ x .| mapMaybeI' xs (f . FS)
 
+export
+inits' : (xs : List a) -> DVect xs.length $ \idx => Vect (S $ finToNat idx) a
+inits' []      = []
+inits' (x::xs) = [x] :: ((x ::) <$> inits' xs)
+
+export
+toListI : Vect n a -> List (a, Fin n)
+toListI []      = []
+toListI (x::xs) = (x, FZ) :: (map FS <$> toListI xs)
+
 -----------------------------
 --- `SortedMap` utilities ---
 -----------------------------
@@ -181,5 +191,10 @@ typeInfoOfConstant WorldType   = Nothing
 
 --- Analyzing dependently typed signatures ---
 
+dependsOnName : TTImp -> Name -> Bool
+
 export
 argDeps : (args : List NamedArg) -> DVect args.length $ SortedSet . Fin . Fin.finToNat
+argDeps args = inits' args <&> \ar => oneArg .| last ar .| init ar where
+  oneArg : forall n. NamedArg -> Vect n NamedArg -> SortedSet $ Fin n
+  oneArg arg = fromList . map snd . filter (dependsOnName arg.type . name . fst) . toListI
