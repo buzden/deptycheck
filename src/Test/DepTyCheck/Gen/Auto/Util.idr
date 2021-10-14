@@ -191,7 +191,51 @@ typeInfoOfConstant WorldType   = Nothing
 
 --- Analyzing dependently typed signatures ---
 
+-- IMPORTANT NOTE: this is only an approximation
 dependsOnName : TTImp -> Name -> Bool
+dependsOnName = assert_total $ flip depTTImp where mutual
+  %default covering -- well, I don't know why those functions below do not pass termination check...
+
+  depTTImp : Name -> TTImp -> Bool
+  depTTImp sn $ IVar _ n                  = n == sn
+  depTTImp sn $ IPi _ _ _ mn _ retTy      = mn /= Just sn && depTTImp sn retTy
+  depTTImp sn $ ILam _ _ _ mn _ lamTy     = mn /= Just sn && depTTImp sn lamTy
+  depTTImp sn $ ILet _ _ _ n _ nVal scope = depTTImp sn nVal || n /= sn && depTTImp sn scope
+  depTTImp sn $ ICase _ expr _ cls        = depTTImp sn expr || any (depClause sn) cls
+  depTTImp sn $ ILocal _ decls expr       = depTTImp sn expr -- to consider if `decls` override the `sn` name
+  depTTImp sn $ IUpdate _ upds expr       = any (depFieldUpdate sn) upds || depTTImp sn expr
+  depTTImp sn $ IApp _ l r                = depTTImp sn l || depTTImp sn r
+  depTTImp sn $ INamedApp _ l _ r         = depTTImp sn l || depTTImp sn r
+  depTTImp sn $ IAutoApp _ l r            = depTTImp sn l || depTTImp sn r
+  depTTImp sn $ IWithApp _ l r            = depTTImp sn l || depTTImp sn r
+  depTTImp sn $ ISearch _ _               = False
+  depTTImp sn $ IAlternative _ _ alts     = any (depTTImp sn) alts -- very rough approximation, but what can I do?
+  depTTImp sn $ IRewrite _ e f            = depTTImp sn e || depTTImp sn f
+  depTTImp sn $ IBindHere _ _ e           = depTTImp sn e
+  depTTImp sn $ IBindVar _ n              = UN (Basic n) == sn
+  depTTImp sn $ IAs _ _ _ n e             = n == sn || depTTImp sn e
+  depTTImp sn $ IMustUnify _ _ e          = depTTImp sn e
+  depTTImp sn $ IDelayed _ _ e            = depTTImp sn e
+  depTTImp sn $ IDelay _ e                = depTTImp sn e
+  depTTImp sn $ IForce _ e                = depTTImp sn e
+  depTTImp sn $ IQuote _ e                = False -- this is too rough
+  depTTImp sn $ IQuoteName _ n            = False
+  depTTImp sn $ IQuoteDecl _ decls        = False -- this is too rough
+  depTTImp sn $ IUnquote _ e              = depTTImp sn e
+  depTTImp sn $ IPrimVal _ _              = False
+  depTTImp sn $ IType _                   = False
+  depTTImp sn $ IHole _ _                 = False
+  depTTImp sn $ Implicit _ _              = False
+  depTTImp sn $ IWithUnambigNames _ ns e  = depTTImp sn e -- I have no idea what's going on here
+
+  depClause : Name -> Clause -> Bool
+  depClause sn $ PatClause _ lhs rhs              = not (depTTImp sn lhs) && depTTImp sn rhs
+  depClause sn $ WithClause _ lhs wval prfn _ cls = not (depTTImp sn lhs) && not (depTTImp sn wval) && prfn /= Just sn && any (depClause sn) cls
+  depClause sn $ ImpossibleClause _ _             = False
+
+  depFieldUpdate : Name -> IFieldUpdate -> Bool
+  depFieldUpdate sn (ISetField    _ expr) = depTTImp sn expr
+  depFieldUpdate sn (ISetFieldApp _ expr) = depTTImp sn expr
 
 export
 argDeps : (args : List NamedArg) -> DVect args.length $ SortedSet . Fin . Fin.finToNat
