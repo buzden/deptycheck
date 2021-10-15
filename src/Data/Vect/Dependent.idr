@@ -147,3 +147,18 @@ forI = flip traverseI
 public export %inline
 for : Applicative f => DVect n a -> ({i : Fin n} -> a i -> f (b i)) -> f (DVect n b)
 for = flip traverse
+
+--- Standard interfaces' implementations ---
+
+public export
+({i : Fin n} -> Eq (a i)) => Eq (DVect n a) where
+  (==) = all id .: downmap id .: zipWith (==)
+
+public export
+({i : Fin n} -> Ord (a i)) => Ord (DVect n a) where
+  compare = concat .: downmap id .: zipWith compare
+
+public export
+({i : Fin n} -> Show (a i)) => Show (DVect n a) where
+  show = concat . ("[" ::) . (`snoc` "]") . intersperse ", " . downmap show
+  -- if you do `show = show . downmap show`, all elements will be wrapped in odd `"`s because of `Show String` instance.
