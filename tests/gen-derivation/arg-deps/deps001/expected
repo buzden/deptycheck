@@ -1,0 +1,29 @@
+1/2: Building DepsCheck (DepsCheck.idr)
+2/2: Building Infra (Infra.idr)
+LOG gen.auto.arg-deps:0: -
+
+========================================
+IVar Builtin.Unit
+----------------
+dependencies: []
+________________________________________
+
+LOG gen.auto.arg-deps:0: -
+
+========================================
+IPi.  (MW ExplicitArg {arg:379} : IVar Prelude.Types.Nat)
+   -> IVar Prelude.Types.Nat
+----------------
+dependencies: [[]]
+________________________________________
+
+LOG gen.auto.arg-deps:0: -
+
+========================================
+IPi.  (MW ImplicitArg a : IType)
+   -> (MW ExplicitArg {arg:378} : IApp. IVar Prelude.Basics.List $ IVar a)
+   -> IVar Prelude.Types.Nat
+----------------
+dependencies: [[], [0]]
+________________________________________
+
