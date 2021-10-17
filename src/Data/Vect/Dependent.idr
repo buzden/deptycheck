@@ -1,6 +1,8 @@
 module Data.Vect.Dependent
 
+import Data.Either
 import Data.Fin
+import Data.Fin.Extra
 import Data.Vect
 
 %default total
@@ -29,6 +31,15 @@ tabulateI {n=S n} f = f FZ :: tabulateI (\i => f $ FS i)
 public export %inline
 tabulate : {n : Nat} -> {0 a : Fin n -> Type} -> ({i : Fin n} -> a i) -> DVect n a
 tabulate = tabulateI
+
+--- Concating ---
+
+public export
+(++) : DVect n a -> DVect m b -> DVect (n + m) $ either a b . Fin.Extra.splitSum
+(++) []      ys = ys
+(++) (x::xs) ys = x :: rewrite funext $ \x => eitherBimapFusion a b FS id $ splitSum x in (xs ++ ys) where
+  0 funext : ((x : _) -> f x = g x) -> f = g
+  funext _ = believe_me $ the (Z = Z) Refl
 
 --- Changes ---
 
