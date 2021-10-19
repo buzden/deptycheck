@@ -1,0 +1,66 @@
+1/2: Building DepsCheck (DepsCheck.idr)
+2/2: Building Infra (Infra.idr)
+LOG gen.auto.arg-deps:0: -
+
+========================================
+IPi.  (MW ImplicitArg n : IVar Prelude.Types.Nat)
+   -> (MW ImplicitArg a : IType)
+   -> (MW ExplicitArg {arg:590} : IApp. IVar Data.Vect.Vect $ IVar n $ IVar a)
+   -> IVar Prelude.Types.Nat
+----------------
+dependencies: [[], [], [0, 1]]
+________________________________________
+
+LOG gen.auto.arg-deps:0: -
+
+========================================
+IPi.  (MW ImplicitArg n : IVar Prelude.Types.Nat)
+   -> (MW ImplicitArg a : IType)
+   -> (MW ExplicitArg v : IApp. IVar Data.Vect.Vect $ IVar n $ IVar a)
+   -> (MW ExplicitArg {arg:583} : IApp. (INamedApp. IVar Builtin.===
+                                                  $ IVar Prelude.Types.Nat)
+                                      $ (IApp. (INamedApp. IVar Data.Vect.length
+                                                         $ IVar a
+                                                         $ IVar n)
+                                             $ IVar v)
+                                      $ (IApp. IVar Prelude.Types.S
+                                             $ (IApp. IVar Prelude.Types.S
+                                                    $ (IApp. IVar Prelude.Types.S
+                                                           $ (IApp. IVar Prelude.Types.S
+                                                                  $ (IApp. IVar Prelude.Types.S
+                                                                         $ IVar Prelude.Types.Z))))))
+   -> IVar Prelude.Types.Nat
+----------------
+dependencies: [[], [], [0, 1], [0, 1, 2]]
+________________________________________
+
+LOG gen.auto.arg-deps:0: -
+
+========================================
+IPi.  (MW ImplicitArg a : IType)
+   -> (MW ExplicitArg xs : IApp. IVar Prelude.Basics.List $ IVar a)
+   -> (MW ExplicitArg {arg:580} : IApp. IVar Data.Vect.Vect
+                                      $ (IApp. (INamedApp. IVar Prelude.Types.List.length
+                                                         $ IVar a)
+                                             $ IVar xs)
+                                      $ IVar a)
+   -> IVar Prelude.Types.Nat
+----------------
+dependencies: [[], [0], [0, 1]]
+________________________________________
+
+LOG gen.auto.arg-deps:0: -
+
+========================================
+IPi.  (MW ImplicitArg a : IType)
+   -> (MW ExplicitArg xs : IApp. IVar Prelude.Basics.List $ IVar a)
+   -> (MW ExplicitArg v : IApp. IVar Data.Vect.Vect
+                              $ (IApp. (INamedApp. IVar Prelude.Types.List.length
+                                                 $ IVar a)
+                                     $ IVar xs)
+                              $ IVar a)
+   -> IVar Prelude.Types.Nat
+----------------
+dependencies: [[], [0], [0, 1]]
+________________________________________
+
