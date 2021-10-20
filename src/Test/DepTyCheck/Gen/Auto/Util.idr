@@ -196,10 +196,14 @@ dependsOnName : TTImp -> Name -> Bool
 dependsOnName = assert_total $ flip depTTImp where mutual
   %default covering -- well, I don't know why those functions below do not pass termination check...
 
+  unAutoMN : Name -> Name
+  unAutoMN (MN s 0) = UN $ Basic s
+  unAutoMN n        = n
+
   depTTImp : Name -> TTImp -> Bool
   depTTImp sn $ IVar _ n                  = n == sn
-  depTTImp sn $ IPi _ _ _ mn _ retTy      = mn /= Just sn && depTTImp sn retTy
-  depTTImp sn $ ILam _ _ _ mn _ lamTy     = mn /= Just sn && depTTImp sn lamTy
+  depTTImp sn $ IPi _ _ _ mn _ retTy      = (unAutoMN <$> mn) /= Just sn && depTTImp sn retTy
+  depTTImp sn $ ILam _ _ _ mn _ lamTy     = (unAutoMN <$> mn) /= Just sn && depTTImp sn lamTy
   depTTImp sn $ ILet _ _ _ n _ nVal scope = depTTImp sn nVal || n /= sn && depTTImp sn scope
   depTTImp sn $ ICase _ expr _ cls        = depTTImp sn expr || any (depClause sn) cls
   depTTImp sn $ ILocal _ decls expr       = depTTImp sn expr -- to consider if `decls` override the `sn` name

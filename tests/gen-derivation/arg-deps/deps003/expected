@@ -11,6 +11,6 @@ IPi.  (MW ExplicitArg x : IVar Prelude.Types.Nat)
                                       $ IVar Prelude.Types.S)
    -> IVar Builtin.Unit
 ----------------
-dependencies: [[], [0]]
+dependencies: [[], []]
 ________________________________________
 
