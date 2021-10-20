@@ -4,10 +4,40 @@ LOG gen.auto.arg-deps:0: -
 
 ========================================
 IPi.  (MW ExplicitArg x : IVar Prelude.Types.Nat)
-   -> (MW ExplicitArg {arg:372} : IApp. (INamedApp. IVar Builtin.=== $ IHole a)
+   -> (MW ExplicitArg {arg:387} : IApp. (INamedApp. IVar Builtin.=== $ IHole a)
                                       $ (ILam.  (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
                                              => (IApp. IVar Prelude.Types.S
                                                      $ IVar x))
+                                      $ IVar Prelude.Types.S)
+   -> IVar Builtin.Unit
+----------------
+dependencies: [[], []]
+________________________________________
+
+LOG gen.auto.arg-deps:0: -
+
+========================================
+IPi.  (MW ExplicitArg x : IVar Prelude.Types.Nat)
+   -> (MW ExplicitArg {arg:383} : IApp. (INamedApp. IVar Builtin.=== $ IHole a)
+                                      $ (ILam.  (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
+                                             => (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
+                                             => (IApp. IVar Prelude.Types.S
+                                                     $ IVar x))
+                                      $ (ILam.  (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
+                                             => IVar Prelude.Types.S))
+   -> IVar Builtin.Unit
+----------------
+dependencies: [[], []]
+________________________________________
+
+LOG gen.auto.arg-deps:0: -
+
+========================================
+IPi.  (MW ExplicitArg x : IVar Prelude.Types.Nat)
+   -> (MW ExplicitArg {arg:378} : IApp. (INamedApp. IVar Builtin.=== $ IHole a)
+                                      $ (ILam.  (MW ExplicitArg y : IVar Prelude.Types.Nat)
+                                             => (IApp. IVar Prelude.Types.S
+                                                     $ IVar y))
                                       $ IVar Prelude.Types.S)
    -> IVar Builtin.Unit
 ----------------
