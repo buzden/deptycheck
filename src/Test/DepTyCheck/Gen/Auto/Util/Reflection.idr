@@ -113,7 +113,7 @@ export
 argDeps : (args : List NamedArg) -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
 argDeps args = foldlM (\curr, idx => (curr <+>) <$> tryToDelete idx (index idx curr)) neutral $ allFins' args.length where
 
-  %unbound_implicits off -- this is needed to be able to use `args` (i.e. lowercase) variable in signatures
+  %unbound_implicits off -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2040
 
   filteredArgs : (excluded : SortedSet $ Fin args.length) -> List NamedArg
   filteredArgs excluded = filterI' args $ \idx, _ => not $ contains idx excluded
@@ -147,3 +147,5 @@ argDeps args = foldlM (\curr, idx => (curr <+>) <$> tryToDelete idx (index idx c
 
   tryToDelete : (idx : Fin args.length) -> (idxDeps : SortedSet $ Fin $ finToNat idx) ->
                 Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
+
+  %unbound_implicits on -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2039
