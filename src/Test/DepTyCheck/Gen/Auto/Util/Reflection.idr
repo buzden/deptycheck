@@ -35,7 +35,7 @@ appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
 appFuel = app . var
 
 public export
-liftList : List TTImp -> TTImp
+liftList : Foldable f => f TTImp -> TTImp
 liftList = foldr (\l, r => `(~(l) :: ~(r))) `([])
 
 --- General purpose instances ---
