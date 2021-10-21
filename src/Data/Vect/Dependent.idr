@@ -140,6 +140,14 @@ public export %inline
 foldr : ({i : Fin n} -> a i -> Lazy acc -> acc) -> acc -> DVect n a -> acc
 foldr = foldrI
 
+public export
+foldlMI : Monad m => ((i : Fin n) -> acc -> a i -> m acc) -> acc -> DVect n a -> m acc
+foldlMI fm = foldlI (\i, ma, b => ma >>= flip (fm i) b) . pure
+
+public export
+foldlM : Monad m => ({i : Fin n} -> acc -> a i -> m acc) -> acc -> DVect n a -> m acc
+foldlM = foldlMI
+
 --- Traversals ---
 
 public export
