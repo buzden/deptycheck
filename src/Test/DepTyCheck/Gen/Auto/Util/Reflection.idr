@@ -12,6 +12,7 @@ import public Language.Reflection.TTImp
 import public Language.Reflection.Types
 
 import public Test.DepTyCheck.Gen.Auto.Util.Fin
+import public Test.DepTyCheck.Gen.Auto.Util.List
 import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 
 %default total
@@ -113,6 +114,36 @@ argDeps : (args : List NamedArg) -> Elab $ DVect args.length $ SortedSet . Fin .
 argDeps args = foldlM (\curr, idx => (curr <+>) <$> tryToDelete idx (index idx curr)) neutral $ allFins' args.length where
 
   %unbound_implicits off -- this is needed to be able to use `args` (i.e. lowercase) variable in signatures
+
+  filteredArgs : (excluded : SortedSet $ Fin args.length) -> List NamedArg
+  filteredArgs excluded = filterI' args $ \idx, _ => not $ contains idx excluded
+
+  partialSig : (retTy : TTImp) -> (excluded : SortedSet $ Fin args.length) -> TTImp
+  partialSig retTy = piAll retTy . map {name $= Just} . filteredArgs
+
+  partialApp : (appliee : Name) -> (excluded : SortedSet $ Fin args.length) -> TTImp
+  partialApp n = appNames n . map name . filteredArgs
+
+  fullSig : (retTy : TTImp) -> TTImp
+  fullSig t = partialSig t empty
+
+  fullApp : (appliee : Name) -> TTImp
+  fullApp n = partialApp n empty
+
+  defaultRet : TTImp
+  defaultRet = `(Builtin.Unit)
+
+  -- check that *meaning* of types are preversed after excluding some of arguments
+  preservationCheckSig : (excluded : SortedSet $ Fin args.length) -> TTImp
+  preservationCheckSig excluded =
+    pi (MkArg MW ExplicitArg .| Just full .| fullSig defaultRet) $
+    pi (MkArg MW ExplicitArg .| Just part .| partialSig defaultRet excluded) $
+    fullSig $
+    `(Builtin.Equal) .$ fullApp full .$ partialApp part excluded
+    where
+      full, part : Name
+      full = MN "full" 1
+      part = MN "part" 1
 
   tryToDelete : (idx : Fin args.length) -> (idxDeps : SortedSet $ Fin $ finToNat idx) ->
                 Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat

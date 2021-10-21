@@ -39,6 +39,12 @@ mapMaybeI' : (xs : List a) -> (Fin xs.length -> a -> Maybe b) -> List b
 mapMaybeI' []      _ = []
 mapMaybeI' (x::xs) f = maybe id (::) .| f FZ x .| mapMaybeI' xs (f . FS)
 
+public export
+filterI' : (xs : List a) -> (Fin xs.length -> a -> Bool) -> List a
+filterI' []      _ = []
+filterI' (x::xs) f = let fxs = filterI' xs $ f . FS in
+                     if f FZ x then x :: fxs else fxs
+
 export
 inits' : (xs : List a) -> DVect xs.length $ \idx => Vect (S $ finToNat idx) a
 inits' []      = []
