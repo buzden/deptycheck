@@ -111,7 +111,7 @@ typeInfoOfConstant WorldType   = Nothing
 
 export
 argDeps : (args : List NamedArg) -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
-argDeps args = foldlM (\curr, idx => (curr <+>) <$> depsOfOne idx) neutral $ allFins' args.length where
+argDeps args = concatMap depsOfOne $ allFins' _ where
 
   %unbound_implicits off -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2040
 
@@ -148,3 +148,9 @@ argDeps args = foldlM (\curr, idx => (curr <+>) <$> depsOfOne idx) neutral $ all
   depsOfOne : Fin args.length -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
 
   %unbound_implicits on -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2039
+
+  Semigroup a => Applicative f => Semigroup (f a) where
+    a <+> b = [| a <+> b |]
+
+  Monoid a => Applicative f => Monoid (f a) where
+    neutral = pure neutral
