@@ -111,7 +111,7 @@ typeInfoOfConstant WorldType   = Nothing
 
 export
 argDeps : (args : List NamedArg) -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
-argDeps args = foldlM (\curr, idx => (curr <+>) <$> tryToDelete idx) neutral $ allFins' args.length where
+argDeps args = foldlM (\curr, idx => (curr <+>) <$> depsOfOne idx) neutral $ allFins' args.length where
 
   %unbound_implicits off -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2040
 
@@ -145,6 +145,6 @@ argDeps args = foldlM (\curr, idx => (curr <+>) <$> tryToDelete idx) neutral $ a
       full = MN "full" 1
       part = MN "part" 1
 
-  tryToDelete : Fin args.length -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
+  depsOfOne : Fin args.length -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
 
   %unbound_implicits on -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2039
