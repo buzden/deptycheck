@@ -145,10 +145,17 @@ argDeps args = concatMap depsOfOne $ allFins' _ where
       full = MN "full" 1
       part = MN "part" 1
 
-  depsOfOne' : Fin args.length -> Elab $ SortedSet $ Fin args.length
+  (-) : (n : Nat) -> Fin n -> Nat
+
+  plus_discards_minus : (n : Nat) -> (f : Fin n) -> (n - f) + finToNat f = n
+
+  depsOfOne' : (idx : Fin args.length) -> Elab $ SortedSet $ Fin (args.length - idx)
 
   depsOfOne : Fin args.length -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
-  depsOfOne idx = concatMap ?foo_set <$> depsOfOne' idx
+  depsOfOne idx = concatMap (\resIdx =>
+                    let x : Fin args.length = rewrite sym $ plus_discards_minus args.length idx in weakenN (finToNat idx) resIdx in
+                    replaceAt x (singleton ?foo_set) neutral
+                  ) <$> depsOfOne' idx
 
   %unbound_implicits on -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2039
 
