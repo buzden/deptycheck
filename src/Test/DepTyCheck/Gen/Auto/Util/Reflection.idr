@@ -11,6 +11,7 @@ import public Data.SortedSet
 import public Language.Reflection.TTImp
 import public Language.Reflection.Types
 
+import public Test.DepTyCheck.Gen.Auto.Util.Fin
 import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 
 %default total
@@ -109,4 +110,9 @@ typeInfoOfConstant WorldType   = Nothing
 
 export
 argDeps : (args : List NamedArg) -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
-argDeps args = ?argDeps_impl
+argDeps args = foldlM (\curr, idx => (curr <+>) <$> tryToDelete idx (index idx curr)) neutral $ allFins' args.length where
+
+  %unbound_implicits off -- this is needed to be able to use `args` (i.e. lowercase) variable in signatures
+
+  tryToDelete : (idx : Fin args.length) -> (idxDeps : SortedSet $ Fin $ finToNat idx) ->
+                Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat

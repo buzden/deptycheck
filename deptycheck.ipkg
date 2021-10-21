@@ -14,6 +14,7 @@ modules = System.Random.Simple
         , Test.DepTyCheck.Gen.Auto.Entry
         , Test.DepTyCheck.Gen.Auto.Util
         , Test.DepTyCheck.Gen.Auto.Util.Alternative
+        , Test.DepTyCheck.Gen.Auto.Util.Fin
         , Test.DepTyCheck.Gen.Auto.Util.List
         , Test.DepTyCheck.Gen.Auto.Util.Reflection
         , Test.DepTyCheck.Gen.Auto.Util.SortedMap
