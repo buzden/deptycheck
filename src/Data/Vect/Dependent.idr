@@ -162,3 +162,12 @@ public export
 ({i : Fin n} -> Show (a i)) => Show (DVect n a) where
   show = concat . ("[" ::) . (`snoc` "]") . intersperse ", " . downmap show
   -- if you do `show = show . downmap show`, all elements will be wrapped in odd `"`s because of `Show String` instance.
+
+public export
+({i : Fin n} -> Semigroup (a i)) => Semigroup (DVect n a) where
+  (<+>) = zipWith (<+>)
+
+public export
+{n : Nat} -> {0 a : Fin n -> Type} ->
+({i : Fin n} -> Monoid (a i)) => Monoid (DVect n a) where
+  neutral = tabulate neutral
