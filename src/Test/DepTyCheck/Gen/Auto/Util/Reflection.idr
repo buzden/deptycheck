@@ -145,7 +145,10 @@ argDeps args = concatMap depsOfOne $ allFins' _ where
       full = MN "full" 1
       part = MN "part" 1
 
+  depsOfOne' : Fin args.length -> Elab $ SortedSet $ Fin args.length
+
   depsOfOne : Fin args.length -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
+  depsOfOne idx = concatMap ?foo_set <$> depsOfOne' idx
 
   %unbound_implicits on -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2039
 
