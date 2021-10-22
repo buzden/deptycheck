@@ -138,7 +138,21 @@ argDeps args = concatMap depsOfOne $ allFins' _ where
   defaultRet : TTImp
   defaultRet = `(Builtin.Unit)
 
-  -- check that *meaning* of types are preversed after excluding some of arguments
+  -- This is for check that *meaning* of types are preversed after excluding some of arguments
+  --
+  -- Example:
+  --   Consider that `args` form the following: `(n : Nat) -> (a : Type) -> (v : Vect n a) -> (x : Nat) -> ...`
+  --   Consider we have `excluded` set containing only index 3 (the `x : Nat` argument).
+  --   For this case this function would return the following type:
+  --   ```
+  --     (full : (n : Nat) -> (a : Type) -> (v : Vect n a) -> (x : Nat) -> Unit) ->
+  --     (part : (n : Nat) -> (a : Type) -> (v : Vect n a) -> Unit) ->
+  --     (n : Nat) -> (a : Type) -> (v : Vect n a) -> (x : Nat) ->
+  --     full n a v x = part n a v
+  --   ```
+  --   As soon as this expression typechecks as `Type`, we are confident that
+  --   corresponding parameters of the full and the partial signatures are compatible, i.e.
+  --   removing of the parameters from `excluded` set does not change left types too much.
   preservationCheckSig : (excluded : SortedSet $ Fin args.length) -> TTImp
   preservationCheckSig excluded =
     pi (MkArg MW ExplicitArg .| Just full .| fullSig defaultRet) $
