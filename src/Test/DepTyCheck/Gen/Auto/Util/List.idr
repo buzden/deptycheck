@@ -45,6 +45,11 @@ filterI' []      _ = []
 filterI' (x::xs) f = let fxs = filterI' xs $ f . FS in
                      if f FZ x then x :: fxs else fxs
 
+public export
+drop' : (xs : List a) -> (count : Fin $ S xs.length) -> List a
+drop' xs      FZ     = xs
+drop' (_::xs) (FS c) = drop' xs c
+
 export
 inits' : (xs : List a) -> DVect xs.length $ \idx => Vect (S $ finToNat idx) a
 inits' []      = []

@@ -11,6 +11,7 @@ import public Data.SortedSet
 import public Language.Reflection.TTImp
 import public Language.Reflection.Types
 
+import public Test.DepTyCheck.Gen.Auto.Util.Alternative
 import public Test.DepTyCheck.Gen.Auto.Util.Fin
 import public Test.DepTyCheck.Gen.Auto.Util.List
 import public Test.DepTyCheck.Gen.Auto.Util.Syntax
@@ -108,6 +109,10 @@ typeInfoOfConstant WorldType   = Nothing
 ----------------------------------------------
 --- Analyzing dependently typed signatures ---
 ----------------------------------------------
+
+export
+doesTypecheckAs : (0 expected : Type) -> TTImp -> Elab Bool
+doesTypecheckAs expected = map isJust . optional . check {expected}
 
 export
 argDeps : (args : List NamedArg) -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
