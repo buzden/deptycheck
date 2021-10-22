@@ -191,12 +191,13 @@ argDeps args = do
   depsOfOne : Fin args.length -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
   depsOfOne idx = do
     whoDependsOnIdx <- depsOfOne' idx
-    let almostDepVect = tabulateI $ \i => if contains i whoDependsOnIdx
-                                            then singleton <$> tryToFit {to=finToNat i} idx
-                                            else Just empty
-    let Just depVect = sequence almostDepVect
-      | Nothing => fail "INTERNAL ERROR: unable to fit fins during dependency calculation"
-    pure depVect
+    sequence $ tabulateI $ \i =>
+      if contains i whoDependsOnIdx
+      then do
+        let Just dep = tryToFit idx
+          | Nothing => fail "INTERNAL ERROR: unable to fit fins during dependency calculation"
+        pure $ singleton dep
+      else pure empty
 
   %unbound_implicits on -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2039
 
