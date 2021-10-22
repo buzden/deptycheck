@@ -7,3 +7,4 @@ import public Test.DepTyCheck.Gen.Auto.Util.Nat
 import public Test.DepTyCheck.Gen.Auto.Util.Reflection
 import public Test.DepTyCheck.Gen.Auto.Util.SortedMap
 import public Test.DepTyCheck.Gen.Auto.Util.Syntax
+import public Test.DepTyCheck.Gen.Auto.Util.Vect

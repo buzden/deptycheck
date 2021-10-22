@@ -54,8 +54,3 @@ export
 inits' : (xs : List a) -> DVect xs.length $ \idx => Vect (S $ finToNat idx) a
 inits' []      = []
 inits' (x::xs) = [x] :: ((x ::) <$> inits' xs)
-
-export
-toListI : Vect n a -> List (a, Fin n)
-toListI []      = []
-toListI (x::xs) = (x, FZ) :: (map FS <$> toListI xs)
