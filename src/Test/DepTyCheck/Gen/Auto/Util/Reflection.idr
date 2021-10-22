@@ -116,7 +116,11 @@ doesTypecheckAs expected = map isJust . optional . check {expected}
 
 export
 argDeps : (args : List NamedArg) -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
-argDeps args = concatMap depsOfOne $ allFins' _ where
+argDeps args = do
+  ignore $ check {expected=Type} $ fullSig defaultRet -- we can't return trustful result if given arguments do not form a nice Pi type
+  concatMap depsOfOne $ allFins' _
+
+  where
 
   %unbound_implicits off -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2040
 
