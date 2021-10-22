@@ -41,3 +41,25 @@ namespace SortedSet
   public export %inline
   (.asVect) : (s : SortedSet a) -> Vect (s.asList.length) a
   s.asVect = fromList s.asList
+
+-----------------------------
+--- Special monadic stuff ---
+-----------------------------
+
+namespace Monad
+
+  -- Monadically lazy on the second argument
+  public export
+  (&&) : Monad m => m Bool -> m Bool -> m Bool
+  l && r = do
+    True <- l
+      | False => pure False
+    r
+
+  -- Monadically lazy on the second argument
+  public export
+  (||) : Monad m => m Bool -> m Bool -> m Bool
+  l || r = do
+    False <- l
+      | True => pure True
+    r

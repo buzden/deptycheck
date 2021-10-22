@@ -164,10 +164,35 @@ argDeps args = concatMap depsOfOne $ allFins' _ where
       full = MN "full" 1
       part = MN "part" 1
 
+  checkExcluded : (excluded : SortedSet $ Fin args.length) -> Elab Bool
+  checkExcluded excluded = doesTypecheckAs Type (partialSig defaultRet excluded)
+                        && doesTypecheckAs Type (preservationCheckSig excluded)
+
+  -- Returns a set of indices of all arguments that do depend on the given
   depsOfOne' : (idx : Fin args.length) -> Elab $ SortedSet $ Fin args.length
+  depsOfOne' idx = do
+    let Just cands = traverse strengthen [FS idx .. Fin.last] {t=List}
+      | Nothing => pure empty
+    let allCands = fromList cands
+    minExcl <- findMinExclude cands allCands
+    pure $ allCands `difference` minExcl
+
+    where
+      findMinExclude : (left : List $ Fin args.length) -> (currExcl : SortedSet $ Fin args.length) -> Elab $ SortedSet $ Fin args.length
+      findMinExclude [] excl = pure excl
+      findMinExclude (x::xs) prevExcl = do
+        let currExcl = delete x prevExcl
+        findMinExclude xs $ if !(checkExcluded currExcl) then currExcl else prevExcl
 
   depsOfOne : Fin args.length -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
-  depsOfOne idx = concatMap ?foo_set <$> depsOfOne' idx
+  depsOfOne idx = do
+    whoDependsOnIdx <- depsOfOne' idx
+    let almostDepVect = tabulateI $ \i => if contains i whoDependsOnIdx
+                                            then singleton <$> tryToFit {to=finToNat i} idx
+                                            else Just empty
+    let Just depVect = sequence almostDepVect
+      | Nothing => fail "INTERNAL ERROR: unable to fit fins during dependency calculation"
+    pure depVect
 
   %unbound_implicits on -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2039
 

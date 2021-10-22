@@ -159,6 +159,10 @@ public export %inline
 traverse : Applicative f => ({i : Fin n} -> a i -> f (b i)) -> DVect n a -> f (DVect n b)
 traverse = traverseI
 
+public export
+sequence : Applicative f => DVect n (f . a) -> f (DVect n a)
+sequence = traverse id
+
 public export %inline
 forI : Applicative f => DVect n a -> ((i : Fin n) -> a i -> f (b i)) -> f (DVect n b)
 forI = flip traverseI

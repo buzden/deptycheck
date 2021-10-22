@@ -15,7 +15,7 @@ ppTy : Type -> Elab Unit
 ppTy ty = do
   expr <- quote ty
   args <- fst <$> unPiNamed expr
-  let deps = SortedSet.toList <$> argDeps args
+  deps <- map SortedSet.toList <$> argDeps args
   logMsg "gen.auto.arg-deps" 0 """
     -
     \n========================================
