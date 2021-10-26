@@ -39,21 +39,9 @@ Ord GenSignature where
 --- Main interface ---
 ----------------------
 
-public export %inline
-CanFailAtFC : (Type -> Type) -> Type
-CanFailAtFC = MonadError (FC, String)
-
 public export
-interface Monad m => CanFailAtFC m => CanonicGen m where
+interface Elaboration m => CanonicGen m where
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
-
-export
-failAt : CanonicGen m => FC -> String -> m a
-failAt fc msg = throwError (fc, msg)
-
-export
-fail : CanonicGen m => String -> m a
-fail = failAt EmptyFC
 
 --- Low-level derivation interface ---
 

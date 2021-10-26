@@ -209,7 +209,7 @@ uniform = Uniform
 
 export
 listOf : Gen a -> {default (choose (0, 10)) length : Gen Nat} -> Gen (List a)
-listOf g = sequence $ replicate !length g
+listOf g = sequence $ List.replicate !length g
 
 export
 vectOf : Gen a -> {n : Nat} -> Gen (Vect n a)

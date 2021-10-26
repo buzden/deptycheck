@@ -105,7 +105,7 @@ namespace ClojuringCanonicImpl
                                       Yes prf => Just $ Element extSig prf
                                       No _    => Nothing
 
-  DerivatorCore => ClojuringContext m => CanFailAtFC m => CanonicGen m where
+  DerivatorCore => ClojuringContext m => Elaboration m => CanonicGen m where
     callGen sig fuel values = do
 
       -- look for external gens, and call it if exists
@@ -144,6 +144,5 @@ namespace ClojuringCanonicImpl
   runCanonic : DerivatorCore => SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
-    let Right (x, defs, bodies) = runIdentity $ runEitherT $ evalRWST calc exts empty {s=SortedMap GenSignature Name} {w=(_, _)} {m=EitherT (_, _) Identity}
-      | Left (fc, msg) => failAt fc msg
+    (x, defs, bodies) <- evalRWST calc exts empty {s=SortedMap GenSignature Name} {w=(_, _)}
     pure (x, defs ++ bodies)

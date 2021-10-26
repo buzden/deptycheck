@@ -20,7 +20,7 @@ alphaChar : Gen Char
 alphaChar = choose ('a', 'z')
 
 alphaString : Gen String
-alphaString = map pack $ sequence $ replicate !(choose (1, 3)) alphaChar
+alphaString = map pack $ sequence $ List.replicate !(choose (1, 3)) alphaChar
 
 %hint
 varName : Gen Name
