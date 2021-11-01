@@ -11,7 +11,7 @@ ________________________________________
 LOG gen.auto.arg-deps:0: -
 
 ========================================
-IPi.  (MW ExplicitArg {arg:379} : IVar Prelude.Types.Nat)
+IPi.  (MW ExplicitArg {arg:384} : IVar Prelude.Types.Nat)
    -> IVar Prelude.Types.Nat
 ----------------
 dependencies: [[]]
@@ -20,8 +20,18 @@ ________________________________________
 LOG gen.auto.arg-deps:0: -
 
 ========================================
+IPi.  (MW ExplicitArg {arg:382} : IVar Prelude.Types.Nat)
+   -> (MW ExplicitArg {arg:383} : IVar Prelude.Types.Nat)
+   -> IVar Prelude.Types.Nat
+----------------
+dependencies: [[], []]
+________________________________________
+
+LOG gen.auto.arg-deps:0: -
+
+========================================
 IPi.  (MW ImplicitArg a : IType)
-   -> (MW ExplicitArg {arg:378} : IApp. IVar Prelude.Basics.List $ IVar a)
+   -> (MW ExplicitArg {arg:381} : IApp. IVar Prelude.Basics.List $ IVar a)
    -> IVar Prelude.Types.Nat
 ----------------
 dependencies: [[], [0]]
