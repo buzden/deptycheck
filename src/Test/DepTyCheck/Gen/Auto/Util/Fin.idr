@@ -21,6 +21,12 @@ rangeFromTo FZ     r      = rangeFrom0To r
 rangeFromTo l      FZ     = reverse $ rangeFrom0To l
 rangeFromTo (FS l) (FS r) = FS <$> rangeFromTo l r
 
+export
+allGreaterThan : {n : _} -> Fin n -> List (Fin n)
+allGreaterThan curr = case strengthen $ FS curr of
+                        Nothing => []
+                        Just next => next :: allGreaterThan (assert_smaller curr next) -- `next` is closer to the upper bound than `curr`
+
 public export
 tryToFit : {to : _} -> Fin from -> Maybe $ Fin to
 tryToFit {to=0}   _      = Nothing

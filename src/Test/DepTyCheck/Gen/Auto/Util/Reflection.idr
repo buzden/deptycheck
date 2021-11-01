@@ -175,8 +175,7 @@ argDeps args = do
   -- Returns a set of indices of all arguments that do depend on the given
   depsOfOne' : (idx : Fin args.length) -> Elab $ SortedSet $ Fin args.length
   depsOfOne' idx = do
-    let Just cands = traverse strengthen [FS idx .. Fin.last] {t=List}
-      | Nothing => pure empty
+    let cands = allGreaterThan idx
     let allCands = fromList cands
     minExcl <- findMinExclude cands allCands
     pure $ allCands `difference` minExcl
