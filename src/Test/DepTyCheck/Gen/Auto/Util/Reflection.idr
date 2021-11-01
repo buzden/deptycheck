@@ -128,7 +128,7 @@ argDeps args = do
   filteredArgs excluded = filterI' args $ \idx, _ => not $ contains idx excluded
 
   partialSig : (retTy : TTImp) -> (excluded : SortedSet $ Fin args.length) -> TTImp
-  partialSig retTy = piAll retTy . map {name $= Just} . filteredArgs
+  partialSig retTy = piAll retTy . map {name $= Just, piInfo := ExplicitArg} . filteredArgs
 
   partialApp : (appliee : Name) -> (excluded : SortedSet $ Fin args.length) -> TTImp
   partialApp n = appNames n . map name . filteredArgs
