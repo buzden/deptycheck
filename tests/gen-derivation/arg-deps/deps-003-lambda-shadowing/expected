@@ -4,7 +4,9 @@ LOG gen.auto.arg-deps:0: -
 
 ========================================
 IPi.  (MW ExplicitArg x : IVar Prelude.Types.Nat)
-   -> (MW ExplicitArg {arg:387} : IApp. (INamedApp. IVar Builtin.=== $ IHole a)
+   -> (MW ExplicitArg {arg:389} : IApp. (INamedApp. IVar Builtin.===
+                                                  $ (IPi.  (MW ExplicitArg {arg:390} : IVar Prelude.Types.Nat)
+                                                        -> IVar Prelude.Types.Nat))
                                       $ (ILam.  (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
                                              => (IApp. IVar Prelude.Types.S
                                                      $ IVar x))
@@ -18,7 +20,10 @@ LOG gen.auto.arg-deps:0: -
 
 ========================================
 IPi.  (MW ExplicitArg x : IVar Prelude.Types.Nat)
-   -> (MW ExplicitArg {arg:383} : IApp. (INamedApp. IVar Builtin.=== $ IHole a)
+   -> (MW ExplicitArg {arg:383} : IApp. (INamedApp. IVar Builtin.===
+                                                  $ (IPi.  (MW ExplicitArg {arg:384} : IVar Prelude.Types.Nat)
+                                                        -> (MW ExplicitArg {arg:385} : IVar Prelude.Types.Nat)
+                                                        -> IVar Prelude.Types.Nat))
                                       $ (ILam.  (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
                                              => (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
                                              => (IApp. IVar Prelude.Types.S
@@ -34,7 +39,9 @@ LOG gen.auto.arg-deps:0: -
 
 ========================================
 IPi.  (MW ExplicitArg x : IVar Prelude.Types.Nat)
-   -> (MW ExplicitArg {arg:378} : IApp. (INamedApp. IVar Builtin.=== $ IHole a)
+   -> (MW ExplicitArg {arg:378} : IApp. (INamedApp. IVar Builtin.===
+                                                  $ (IPi.  (MW ExplicitArg {arg:379} : IVar Prelude.Types.Nat)
+                                                        -> IVar Prelude.Types.Nat))
                                       $ (ILam.  (MW ExplicitArg y : IVar Prelude.Types.Nat)
                                              => (IApp. IVar Prelude.Types.S
                                                      $ IVar y))
