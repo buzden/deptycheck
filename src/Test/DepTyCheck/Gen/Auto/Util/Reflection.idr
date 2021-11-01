@@ -176,16 +176,15 @@ argDeps args = do
   depsOfOne' : (idx : Fin args.length) -> Elab $ SortedSet $ Fin args.length
   depsOfOne' idx = do
     let cands = allGreaterThan idx
-    let allCands = fromList cands
-    minExcl <- findMinExclude cands allCands
-    pure $ allCands `difference` minExcl
+    findMinExclude cands $ fromList cands
 
     where
+      -- tries to add candidates one by one, and leave them if typechecks without the current `idx`
       findMinExclude : (left : List $ Fin args.length) -> (currExcl : SortedSet $ Fin args.length) -> Elab $ SortedSet $ Fin args.length
       findMinExclude [] excl = pure excl
       findMinExclude (x::xs) prevExcl = do
         let currExcl = delete x prevExcl
-        findMinExclude xs $ if !(checkExcluded currExcl) then currExcl else prevExcl
+        findMinExclude xs $ if !(checkExcluded $ insert idx currExcl) then currExcl else prevExcl
 
   depsOfOne : Fin args.length -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
   depsOfOne idx = do
