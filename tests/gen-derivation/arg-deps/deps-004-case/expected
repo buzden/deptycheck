@@ -1,32 +1,8 @@
 1/2: Building DepsCheck (DepsCheck.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.arg-deps:0: -
+LOG gen.auto.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (v : List a) -> (0 arg : case block in listToCheck a xs v) -> Nat
+LOG gen.auto.arg-deps:0: dependencies: [[], [0], [0], [0, 2]]
 
-========================================
-IPi.  (MW ImplicitArg a : IType)
-   -> (MW ExplicitArg xs : IApp. IVar Prelude.Basics.List $ IVar a)
-   -> (MW ExplicitArg v : IApp. IVar Prelude.Basics.List $ IVar a)
-   -> (M0 ExplicitArg {arg:377} : IApp. IVar DepsCheck.case block in "listToCheck"
-                                      $ IVar a
-                                      $ IVar xs
-                                      $ IVar v)
-   -> IVar Prelude.Types.Nat
-----------------
-dependencies: [[], [0], [0], [0, 2]]
-________________________________________
-
-LOG gen.auto.arg-deps:0: -
-
-========================================
-IPi.  (MW ImplicitArg a : IType)
-   -> (MW ExplicitArg xs : IApp. IVar Prelude.Basics.List $ IVar a)
-   -> (MW ExplicitArg v : IApp. IVar Prelude.Basics.List $ IVar a)
-   -> (M0 ExplicitArg {arg:375} : IApp. IVar DepsCheck.case block in "listToCheck"
-                                      $ IVar a
-                                      $ IVar xs
-                                      $ IVar v)
-   -> IVar Prelude.Types.Nat
-----------------
-dependencies: [[], [0], [0], [0, 2]]
-________________________________________
+LOG gen.auto.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (v : List a) -> (0 arg : case block in listToCheck a xs v) -> Nat
+LOG gen.auto.arg-deps:0: dependencies: [[], [0], [0], [0, 2]]
 

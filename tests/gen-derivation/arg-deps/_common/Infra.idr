@@ -14,16 +14,10 @@ import Test.DepTyCheck.Gen.Auto.Util
 ppTy : Type -> Elab Unit
 ppTy ty = do
   expr <- quote ty
-  args <- fst <$> unPiNamed expr
+  (args, ret) <- unPiNamed expr
   deps <- map SortedSet.toList <$> argDeps args
-  logMsg "gen.auto.arg-deps" 0 """
-    -
-    \n========================================
-    \{show expr}
-    ----------------
-    dependencies: \{show deps}
-    ________________________________________
-    \n
-    """
+  let expr' = piAll ret $ {name $= Just, piInfo := ExplicitArg} <$> args -- as if all arguments were explicit
+  logSugaredTerm "gen.auto.arg-deps" 0 "type        " expr'
+  logMsg         "gen.auto.arg-deps" 0 "dependencies: \{show deps}\n"
 
 %runElab for_ listToCheck ppTy

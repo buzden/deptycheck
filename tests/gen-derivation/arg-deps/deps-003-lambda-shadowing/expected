@@ -1,53 +1,11 @@
 1/2: Building DepsCheck (DepsCheck.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.arg-deps:0: -
+LOG gen.auto.arg-deps:0: type        : (x : Nat) -> (arg : \{x:0} => S {x:0} = S) -> ()
+LOG gen.auto.arg-deps:0: dependencies: [[], []]
 
-========================================
-IPi.  (MW ExplicitArg x : IVar Prelude.Types.Nat)
-   -> (MW ExplicitArg {arg:389} : IApp. (INamedApp. IVar Builtin.===
-                                                  $ (IPi.  (MW ExplicitArg {arg:390} : IVar Prelude.Types.Nat)
-                                                        -> IVar Prelude.Types.Nat))
-                                      $ (ILam.  (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
-                                             => (IApp. IVar Prelude.Types.S
-                                                     $ IVar x))
-                                      $ IVar Prelude.Types.S)
-   -> IVar Builtin.Unit
-----------------
-dependencies: [[], []]
-________________________________________
+LOG gen.auto.arg-deps:0: type        : (x : Nat) -> (arg : \{x:0} => \{x:1} => S {x:1} = \{x:0} => S) -> ()
+LOG gen.auto.arg-deps:0: dependencies: [[], []]
 
-LOG gen.auto.arg-deps:0: -
-
-========================================
-IPi.  (MW ExplicitArg x : IVar Prelude.Types.Nat)
-   -> (MW ExplicitArg {arg:383} : IApp. (INamedApp. IVar Builtin.===
-                                                  $ (IPi.  (MW ExplicitArg {arg:384} : IVar Prelude.Types.Nat)
-                                                        -> (MW ExplicitArg {arg:385} : IVar Prelude.Types.Nat)
-                                                        -> IVar Prelude.Types.Nat))
-                                      $ (ILam.  (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
-                                             => (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
-                                             => (IApp. IVar Prelude.Types.S
-                                                     $ IVar x))
-                                      $ (ILam.  (MW ExplicitArg {x:0} : IVar Prelude.Types.Nat)
-                                             => IVar Prelude.Types.S))
-   -> IVar Builtin.Unit
-----------------
-dependencies: [[], []]
-________________________________________
-
-LOG gen.auto.arg-deps:0: -
-
-========================================
-IPi.  (MW ExplicitArg x : IVar Prelude.Types.Nat)
-   -> (MW ExplicitArg {arg:378} : IApp. (INamedApp. IVar Builtin.===
-                                                  $ (IPi.  (MW ExplicitArg {arg:379} : IVar Prelude.Types.Nat)
-                                                        -> IVar Prelude.Types.Nat))
-                                      $ (ILam.  (MW ExplicitArg y : IVar Prelude.Types.Nat)
-                                             => (IApp. IVar Prelude.Types.S
-                                                     $ IVar y))
-                                      $ IVar Prelude.Types.S)
-   -> IVar Builtin.Unit
-----------------
-dependencies: [[], []]
-________________________________________
+LOG gen.auto.arg-deps:0: type        : (x : Nat) -> (arg : \y => S y = S) -> ()
+LOG gen.auto.arg-deps:0: dependencies: [[], []]
 

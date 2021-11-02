@@ -1,39 +1,14 @@
 1/2: Building DepsCheck (DepsCheck.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.arg-deps:0: -
+LOG gen.auto.arg-deps:0: type        : ()
+LOG gen.auto.arg-deps:0: dependencies: []
 
-========================================
-IVar Builtin.Unit
-----------------
-dependencies: []
-________________________________________
+LOG gen.auto.arg-deps:0: type        : (arg : Nat) -> Nat
+LOG gen.auto.arg-deps:0: dependencies: [[]]
 
-LOG gen.auto.arg-deps:0: -
+LOG gen.auto.arg-deps:0: type        : (arg : Nat) -> (arg : Nat) -> Nat
+LOG gen.auto.arg-deps:0: dependencies: [[], []]
 
-========================================
-IPi.  (MW ExplicitArg {arg:384} : IVar Prelude.Types.Nat)
-   -> IVar Prelude.Types.Nat
-----------------
-dependencies: [[]]
-________________________________________
-
-LOG gen.auto.arg-deps:0: -
-
-========================================
-IPi.  (MW ExplicitArg {arg:382} : IVar Prelude.Types.Nat)
-   -> (MW ExplicitArg {arg:383} : IVar Prelude.Types.Nat)
-   -> IVar Prelude.Types.Nat
-----------------
-dependencies: [[], []]
-________________________________________
-
-LOG gen.auto.arg-deps:0: -
-
-========================================
-IPi.  (MW ImplicitArg a : IType)
-   -> (MW ExplicitArg {arg:381} : IApp. IVar Prelude.Basics.List $ IVar a)
-   -> IVar Prelude.Types.Nat
-----------------
-dependencies: [[], [0]]
-________________________________________
+LOG gen.auto.arg-deps:0: type        : (a : Type) -> (arg : List a) -> Nat
+LOG gen.auto.arg-deps:0: dependencies: [[], [0]]
 
