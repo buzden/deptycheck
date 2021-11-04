@@ -24,6 +24,8 @@ import public Test.DepTyCheck.Gen.Auto.Util
 
 %default total
 
+%ambiguity_depth 4
+
 -----------------------------------------------------
 --- Data types for the safe signature formulation ---
 -----------------------------------------------------

@@ -5,11 +5,22 @@ version = 0.0.1
 
 modules = System.Random.Simple
         , Data.List.Lazier
+        , Data.Vect.Dependent
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Auto
         , Test.DepTyCheck.Gen.Auto.Checked
+        , Test.DepTyCheck.Gen.Auto.Core
         , Test.DepTyCheck.Gen.Auto.Derive
         , Test.DepTyCheck.Gen.Auto.Entry
+        , Test.DepTyCheck.Gen.Auto.Util
+        , Test.DepTyCheck.Gen.Auto.Util.Alternative
+        , Test.DepTyCheck.Gen.Auto.Util.Fin
+        , Test.DepTyCheck.Gen.Auto.Util.List
+        , Test.DepTyCheck.Gen.Auto.Util.Nat
+        , Test.DepTyCheck.Gen.Auto.Util.Reflection
+        , Test.DepTyCheck.Gen.Auto.Util.SortedMap
+        , Test.DepTyCheck.Gen.Auto.Util.Syntax
+        , Test.DepTyCheck.Gen.Auto.Util.Vect
 
 depends = contrib
         , elab-util

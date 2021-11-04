@@ -15,7 +15,7 @@ import public Test.DepTyCheck.Gen.Auto.Derive
 --- Expressions generation utils ---
 
 defArgNames : {sig : GenSignature} -> Vect sig.givenParams.asList.length String
-defArgNames = sig.givenParams.asVect <&> show . argName . index' sig.targetType.args
+defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.args
 
 %inline
 canonicDefault : (String -> TTImp) -> GenSignature -> Name -> (fuel : String) -> TTImp
