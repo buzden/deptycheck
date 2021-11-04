@@ -2,20 +2,20 @@
 2/3: Building PrintDerivation (PrintDerivation.idr)
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg {fuel:1366} : IVar Data.Fuel.Fuel)
+ILam.  (MW ExplicitArg {fuel:2337} : IVar Data.Fuel.Fuel)
     => ILocal (ILam.  (MW ExplicitArg n : IVar Prelude.Types.Nat)
                    => (IApp. IVar {("DerivedGen.X", [0]):0}
-                           $ IVar {fuel:1366}
+                           $ IVar {fuel:2337}
                            $ IVar n))
          IClaim MW
                 Export
                 []
                 (MkTy {("DerivedGen.X", [0]):0}
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:1363} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:2317} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar DerivedGen.X
-                                         $ IVar {arg:1363}))))
+                                         $ IVar {arg:2317}))))
          IDef {("DerivedGen.X", [0]):0}
               [ PatClause (IApp. IVar {("DerivedGen.X", [0]):0}
                                $ Implicit True

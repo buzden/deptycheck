@@ -2,11 +2,11 @@
 2/3: Building PrintDerivation (PrintDerivation.idr)
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg {fuel:1367} : IVar Data.Fuel.Fuel)
-    => (MW AutoImplicit {externalAutoimpl:1366} : IPi.  (MW ExplicitArg {arg:1365} : IVar Data.Fuel.Fuel)
+ILam.  (MW ExplicitArg {fuel:2341} : IVar Data.Fuel.Fuel)
+    => (MW AutoImplicit {externalAutoimpl:2340} : IPi.  (MW ExplicitArg {arg:2321} : IVar Data.Fuel.Fuel)
                                                      -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                              $ IPrimVal String))
-    => ILocal (IApp. IVar {("AlternativeCore.XS", []):0} $ IVar {fuel:1367})
+    => ILocal (IApp. IVar {("AlternativeCore.XS", []):0} $ IVar {fuel:2341})
          IClaim MW
                 Export
                 []
@@ -19,5 +19,5 @@ ILam.  (MW ExplicitArg {fuel:1367} : IVar Data.Fuel.Fuel)
                                $ IBindVar fuel)
                           (IApp. IVar <$>
                                $ IVar MkXS
-                               $ (IApp. IVar {externalAutoimpl:1366}
+                               $ (IApp. IVar {externalAutoimpl:2340}
                                       $ IVar fuel)) ]

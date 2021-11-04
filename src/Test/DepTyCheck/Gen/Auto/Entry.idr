@@ -21,7 +21,7 @@ import public Test.DepTyCheck.Gen.Auto.Core
 --- Special `TTImp` parsing stuff ---
 
 unDPairUnAlt : TTImp -> Maybe (List (Arg False), TTImp)
-unDPairUnAlt (IAlternative _ _ alts) = case filter (not . force . null . Builtin.fst) $ unDPair <$> alts of
+unDPairUnAlt (IAlternative _ _ alts) = case filter (not . null . Builtin.fst) $ unDPair <$> alts of
   [x] => Just x
   _   => Nothing
 unDPairUnAlt x = Just $ unDPair x
