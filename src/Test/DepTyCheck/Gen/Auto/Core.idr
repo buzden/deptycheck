@@ -55,7 +55,10 @@ DerivatorCore where
     let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
 
     -- derive bodies for generators per constructors
-    (consBodies, consRecs) <- map unzip $ for sig.targetType.cons $ \con => consBody con <&> bimap (def $ consGenName con) (con,)
+    consBodies <- for sig.targetType.cons $ \con => consBody con <&> def (consGenName con)
+
+    -- calculate which constructors are recursive and which are not
+    consRecs <- for sig.targetType.cons $ \con => consRecursiveness con <&> (con,)
 
     -- generate the case expression decising where will we go into recursive constructors or not
     let outmostRHS = fuelDecisionExpr fuelArg consRecs
@@ -99,7 +102,10 @@ DerivatorCore where
     fuelArg : String
     fuelArg = "fuel_arg_86"
 
-    consBody : Con -> m (List Clause, Recursiveness)
+    consRecursiveness : Con -> m Recursiveness
+    consRecursiveness con = ?consRecursiveness_rhs
+
+    consBody : Con -> m $ List Clause
     consBody con = do
-      pure ([ canonicDefaultLHS sig (consGenName con) fuelArg .= ?cons_body_rhs ], ?recursiveness_v)
-      --pure ([ canonicDefaultLHS sig (consGenName con) fuelArg .= `(empty) ], NonRecursive)
+      pure [ canonicDefaultLHS sig (consGenName con) fuelArg .= ?cons_body_rhs ]
+      --pure [ canonicDefaultLHS sig (consGenName con) fuelArg .= `(empty) ]
