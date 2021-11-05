@@ -13,7 +13,7 @@ numberedArgs : (bind : Bool) -> {n : _} -> Vect n TTImp
 numberedArgs bind = Fin.tabulate $ (if bind then bindVar else varStr) . show
 
 export
-[Empty] DerivatorCore where
+[EmptyBody] DerivatorCore where
   canonicBody sig n = pure [ callCanonic sig n implicitTrue irrelevantArgs .= `(empty) ]
 
 export
