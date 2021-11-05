@@ -1,0 +1,28 @@
+1/3: Building AlternativeCore (AlternativeCore.idr)
+2/3: Building PrintDerivation (PrintDerivation.idr)
+3/3: Building DerivedGen (DerivedGen.idr)
+LOG gen.auto.derive.infra:0: 
+ILam.  (MW ExplicitArg {fuel:2337} : IVar Data.Fuel.Fuel)
+    => ILocal (ILam.  (MW ExplicitArg n : IVar Prelude.Types.Nat)
+                   => (MW ExplicitArg a : IType)
+                   => (IApp. IVar {("Data.Vect.Vect", [0, 1]):0}
+                           $ IVar {fuel:2337}
+                           $ IVar n
+                           $ IVar a))
+         IClaim MW
+                Export
+                []
+                (MkTy {("Data.Vect.Vect", [0, 1]):0}
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (MW ExplicitArg len : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg elem : IType)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ (IApp. IVar Data.Vect.Vect
+                                         $ IVar len
+                                         $ IVar elem))))
+         IDef {("Data.Vect.Vect", [0, 1]):0}
+              [ PatClause (IApp. IVar {("Data.Vect.Vect", [0, 1]):0}
+                               $ Implicit True
+                               $ Implicit True
+                               $ Implicit True)
+                          (IVar empty) ]

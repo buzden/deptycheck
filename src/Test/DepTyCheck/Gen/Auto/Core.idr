@@ -21,11 +21,11 @@ defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.arg
 canonicDefault : (String -> TTImp) -> GenSignature -> Name -> (fuel : String) -> TTImp
 canonicDefault varF sig n fuel = callCanonic sig n .| varF fuel .| varF <$> defArgNames
 
-%inline
+export %inline
 canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
 canonicDefaultLHS = canonicDefault bindVar
 
-%inline
+export %inline
 canonicDefaultRHS : GenSignature -> Name -> (fuel : String) -> TTImp
 canonicDefaultRHS = canonicDefault varStr
 
