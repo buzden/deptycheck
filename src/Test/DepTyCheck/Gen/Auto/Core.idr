@@ -52,8 +52,7 @@ ConstructorDerivator => DerivatorCore where
   canonicBody sig n = do
 
     -- check that there is at least one constructor
-    let (_::_) = sig.targetType.cons
-      | [] => fail "No constructors found for the type `\{show sig.targetType.name}`"
+    when .| null sig.targetType.cons .| fail "No constructors found for the type `\{show sig.targetType.name}`"
 
     -- generate claims for generators per constructors
     let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
