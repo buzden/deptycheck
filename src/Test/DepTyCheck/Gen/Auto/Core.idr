@@ -43,8 +43,12 @@ Eq Recursiveness where
 --- Derivation functions ---
 ----------------------------
 
+public export
+interface ConstructorDerivator where
+  canonicConsBody : CanonicGen m => GenSignature -> Name -> Con -> m $ List Clause
+
 export
-DerivatorCore where
+ConstructorDerivator => DerivatorCore where
   canonicBody sig n = do
 
     -- check that there is at least one constructor
@@ -55,7 +59,13 @@ DerivatorCore where
     let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
 
     -- derive bodies for generators per constructors
-    (consBodies, consRecs) <- map unzip $ for sig.targetType.cons $ \con => consBody con <&> bimap (def $ consGenName con) (con,)
+    consBodies <- for sig.targetType.cons $ \con => canonicConsBody sig (consGenName con) con <&> def (consGenName con)
+
+    -- calculate which constructors are recursive and which are not
+    consRecs <- for sig.targetType.cons $ \con => consRecursiveness con <&> (con,)
+
+    -- decide how to name a fuel argument on the LHS
+    let fuelArg = "fuel_arg_86"
 
     -- generate the case expression decising where will we go into recursive constructors or not
     let outmostRHS = fuelDecisionExpr fuelArg consRecs
@@ -96,10 +106,9 @@ DerivatorCore where
         callOneOf : List TTImp -> TTImp
         callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
 
-    fuelArg : String
-    fuelArg = "fuel_arg_86"
+    consRecursiveness : Con -> m Recursiveness
+    consRecursiveness con = ?consRecursiveness_rhs
 
-    consBody : Con -> m (List Clause, Recursiveness)
-    consBody con = do
-      pure ([ canonicDefaultLHS sig (consGenName con) fuelArg .= ?cons_body_rhs ], ?recursiveness_v)
-      --pure ([ canonicDefaultLHS sig (consGenName con) fuelArg .= `(empty) ], NonRecursive)
+export
+MainCoreDerivator : ConstructorDerivator => DerivatorCore
+MainCoreDerivator = %search
