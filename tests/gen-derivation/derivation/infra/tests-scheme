@@ -1,5 +1,6 @@
-`self run N` are `empty-body run N` with `@{EmptyBody}` changed to `@{CallSelf}`
-`self print N` are `empty-body print N` with `@{EmptyBody}` changed to `@{CallSelf}`
+`self X N`       are `empty-body X N` with `@{EmptyBody}` changed to `@{CallSelf}`
+`empty-cons X N` are `empty-body X N` with `@{EmptyBody}` changed to `@{EmptyCons}`
+
 `ext print N` have the same type as `ext run N`
 
 Look types
