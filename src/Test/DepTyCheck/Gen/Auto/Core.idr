@@ -108,3 +108,7 @@ ConstructorDerivator => DerivatorCore where
 
     consRecursiveness : Con -> m Recursiveness
     consRecursiveness con = ?consRecursiveness_rhs
+
+export
+MainCoreDerivator : ConstructorDerivator => DerivatorCore
+MainCoreDerivator = %search
