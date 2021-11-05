@@ -2,8 +2,8 @@
 2/3: Building PrintDerivation (PrintDerivation.idr)
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg {fuel:2335} : IVar Data.Fuel.Fuel)
-    => ILocal (IApp. IVar {("DerivedGen.X", []):0} $ IVar {fuel:2335})
+ILam.  (MW ExplicitArg {fuel:2334} : IVar Data.Fuel.Fuel)
+    => ILocal (IApp. IVar {("DerivedGen.X", []):0} $ IVar {fuel:2334})
          IClaim MW
                 Export
                 []

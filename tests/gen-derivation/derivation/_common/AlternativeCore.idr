@@ -17,7 +17,7 @@ export
   canonicBody sig n = pure [ callCanonic sig n implicitTrue irrelevantArgs .= `(empty) ]
 
 export
-[CallSelf] (sup : DerivatorCore) => DerivatorCore where
+[CallSelf] DerivatorCore where
   canonicBody sig n = pure
     [ callCanonic sig n (var `{Dry})                    irrelevantArgs      .= `(empty)
     , callCanonic sig n (var `{More} .$ bindVar "fuel") (numberedArgs True) .= !(callGen sig (var "fuel") $ numberedArgs False)
