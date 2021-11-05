@@ -64,6 +64,9 @@ ConstructorDerivator => DerivatorCore where
     -- calculate which constructors are recursive and which are not
     consRecs <- for sig.targetType.cons $ \con => consRecursiveness con <&> (con,)
 
+    -- decide how to name a fuel argument on the LHS
+    let fuelArg = "fuel_arg_86"
+
     -- generate the case expression decising where will we go into recursive constructors or not
     let outmostRHS = fuelDecisionExpr fuelArg consRecs
 
@@ -102,9 +105,6 @@ ConstructorDerivator => DerivatorCore where
 
         callOneOf : List TTImp -> TTImp
         callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
-
-    fuelArg : String
-    fuelArg = "fuel_arg_86"
 
     consRecursiveness : Con -> m Recursiveness
     consRecursiveness con = ?consRecursiveness_rhs
