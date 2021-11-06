@@ -4,6 +4,8 @@ import RunDerivedGen
 
 %default total
 
+%language ElabReflection
+
 -- isn't one of the arguments an index, not a param? Like for `Equal` type, recursively
 data X : Bool -> Bool -> Type where
   X0 : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2

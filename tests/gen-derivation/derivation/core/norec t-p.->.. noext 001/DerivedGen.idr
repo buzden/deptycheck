@@ -4,6 +4,8 @@ import RunDerivedGen
 
 %default total
 
+%language ElabReflection
+
 -- both type arguments are parameters, not indices
 data X : Bool -> Bool -> Type where
   MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2

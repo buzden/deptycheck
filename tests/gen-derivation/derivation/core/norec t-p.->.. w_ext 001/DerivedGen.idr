@@ -4,6 +4,8 @@ import RunDerivedGen
 
 %default total
 
+%language ElabReflection
+
 checkedGen : Fuel -> (Fuel -> Gen a) => Gen (Maybe a)
 --checkedGen = deriveGen
 checkedGen _ = empty

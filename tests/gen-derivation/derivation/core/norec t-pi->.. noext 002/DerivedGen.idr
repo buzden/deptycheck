@@ -4,6 +4,8 @@ import RunDerivedGen
 
 %default total
 
+%language ElabReflection
+
 export
 checkedGen : Fuel -> (a, b : Nat) -> Gen (a = b)
 --checkedGen = deriveGen
