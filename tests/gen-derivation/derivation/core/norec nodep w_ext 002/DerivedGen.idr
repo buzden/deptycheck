@@ -12,8 +12,7 @@ data X = MkX String String
 
 export
 checkedGen : Fuel -> (Fuel -> Gen String) => Gen X
---checkedGen = deriveGen
-checkedGen _ = empty
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs [ G $ \fl => checkedGen fl @{smallStrs} ]

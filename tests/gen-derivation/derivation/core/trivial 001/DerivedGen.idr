@@ -7,8 +7,7 @@ import RunDerivedGen
 %language ElabReflection
 
 checkedGen : Fuel -> Gen Unit
---checkedGen = deriveGen
-checkedGen = const empty
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs [ G $ \fl => checkedGen fl ]

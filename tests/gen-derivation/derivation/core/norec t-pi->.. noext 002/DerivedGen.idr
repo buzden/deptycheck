@@ -4,10 +4,17 @@ import RunDerivedGen
 
 %default total
 
+%language ElabReflection
+
+data EqNat : Nat -> Nat -> Type where
+  MkEqNat : a === b -> EqNat a b
+
+Show (EqNat a b) where
+  show _ = "Refl"
+
 export
-checkedGen : Fuel -> (a, b : Nat) -> Gen (a = b)
---checkedGen = deriveGen
-checkedGen _ _ _ = empty
+checkedGen : Fuel -> (a, b : Nat) -> Gen (EqNat a b) -- Gen (a = b)
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs

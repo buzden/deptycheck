@@ -2,8 +2,6 @@ module DerivedGen
 
 import RunDerivedGen
 
-import Test.DepTyCheck.Gen.Auto.Core.ObligatoryExternals
-
 %default total
 
 %language ElabReflection
