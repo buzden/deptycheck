@@ -1,7 +1,5 @@
 export IDRIS2 ?= idris2
 
-RUNTESTS := build/exec/runtests
-
 MKDIR := mkdir -p
 LN := ln
 

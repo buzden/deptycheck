@@ -2,6 +2,8 @@
 
 IDRIS2 ?= idris2
 
+RUNTESTS := build/exec/runtests
+
 INTERACTIVE ?= --interactive
 ifeq ($(shell uname), FreeBSD)
 	NPROC = sysctl -n hw.ncpu
@@ -18,10 +20,10 @@ runner:
 	${IDRIS2} --build tests.ipkg
 
 test: runner
-	./build/exec/runtests $(IDRIS2) $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only "$(only)"
+	$(RUNTESTS) $(IDRIS2) $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only "$(only)"
 
 retest: runner
-	./build/exec/runtests $(IDRIS2) $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only-file failures --only "$(only)"
+	$(RUNTESTS) $(IDRIS2) $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only-file failures --only "$(only)"
 
 clean:
 	${IDRIS2} --clean tests.ipkg
