@@ -12,8 +12,7 @@ data X = X1 String Nat | X2 Nat | X3 String
 
 export
 checkedGen : Fuel -> (Fuel -> Gen String) => (Fuel -> Gen Nat) => Gen X
---checkedGen = deriveGen
-checkedGen _ = empty
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs [ G $ \fl => checkedGen fl @{smallStrs} @{smallNats} ]

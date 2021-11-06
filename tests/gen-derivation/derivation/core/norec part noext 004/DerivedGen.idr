@@ -12,8 +12,7 @@ data X = MkX (Bool, Bool)
 
 export
 checkedGen : Fuel -> Gen X
---checkedGen = deriveGen
-checkedGen _ = empty
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs [ G checkedGen ]

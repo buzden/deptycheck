@@ -14,8 +14,7 @@ voidsGen : Fuel -> Gen Void
 voidsGen _ = empty
 
 checkedGen : Fuel -> (Fuel -> Gen Void) => Gen X
---checkedGen = deriveGen
-checkedGen _ = empty
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs [ G $ \fl => checkedGen fl @{voidsGen} ]

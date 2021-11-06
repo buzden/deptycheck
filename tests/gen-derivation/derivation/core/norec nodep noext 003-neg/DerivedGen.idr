@@ -11,8 +11,7 @@ data X = MkX Void
 %runElab derive "X" [Generic, Meta, Show]
 
 checkedGen : Fuel -> Gen X
---checkedGen = deriveGen
-checkedGen = const empty
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs [ G checkedGen ]

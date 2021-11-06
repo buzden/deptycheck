@@ -16,8 +16,7 @@ Show (X b1 b2) where
   show X1         = "X1"
 
 checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen (X b1 b2)
---checkedGen = deriveGen
-checkedGen _ _ _ = empty
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs

@@ -14,8 +14,7 @@ Show (X b1 b2) where
   show (MkX b1 b2) = "MkX \{show b1} \{show b2}"
 
 checkedGen : Fuel -> Gen (b1 ** b2 ** X b1 b2)
---checkedGen = deriveGen
-checkedGen _ = empty
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs
