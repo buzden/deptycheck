@@ -22,6 +22,62 @@ ILam.  (MW ExplicitArg {fuel:2335} : IVar Data.Fuel.Fuel)
                                                         $ IVar elem))))))
          IDef {("Data.Vect.Vect", [1]):0}
               [ PatClause (IApp. IVar {("Data.Vect.Vect", [1]):0}
-                               $ Implicit True
-                               $ Implicit True)
-                          (IVar empty) ]
+                               $ IBindVar fuel_arg_86
+                               $ IBindVar elem)
+                          (ILocal (ICase (IVar fuel_arg_86)
+                                         (IVar Data.Fuel.Fuel)
+                                         [ PatClause (IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
+                                                                        $ IVar Data.Fuel.Dry
+                                                                        $ IVar elem)
+                                                                 $ IVar Nil))
+                                         , PatClause (IApp. IVar Data.Fuel.More
+                                                          $ IBindVar sub_fuel_arg_86)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
+                                                                        $ IVar sub_fuel_arg_86
+                                                                        $ IVar elem)
+                                                                 $ (IApp. IVar ::
+                                                                        $ (IApp. IVar {cons_gen_for_Data.Vect.:::7}
+                                                                               $ IVar sub_fuel_arg_86
+                                                                               $ IVar elem)
+                                                                        $ IVar Nil))) ]))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy {cons_gen_for_Data.Vect.Nil:7}
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (MW ExplicitArg elem : IType)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                            $ IVar Prelude.Types.Nat
+                                                            $ (ILam.  (MW ExplicitArg len : IVar Prelude.Types.Nat)
+                                                                   => (IApp. IVar Data.Vect.Vect
+                                                                           $ IVar len
+                                                                           $ IVar elem))))))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy {cons_gen_for_Data.Vect.:::7}
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (MW ExplicitArg elem : IType)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                            $ IVar Prelude.Types.Nat
+                                                            $ (ILam.  (MW ExplicitArg len : IVar Prelude.Types.Nat)
+                                                                   => (IApp. IVar Data.Vect.Vect
+                                                                           $ IVar len
+                                                                           $ IVar elem))))))
+                            IDef {cons_gen_for_Data.Vect.Nil:7}
+                                 [ PatClause (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
+                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar elem)
+                                             (IVar empty) ]
+                            IDef {cons_gen_for_Data.Vect.:::7}
+                                 [ PatClause (IApp. IVar {cons_gen_for_Data.Vect.:::7}
+                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar elem)
+                                             (IVar empty) ] ]

@@ -16,5 +16,35 @@ ILam.  (MW ExplicitArg {fuel:2334} : IVar Data.Fuel.Fuel)
                                                 => (IApp. IVar DerivedGen.X
                                                         $ IVar {arg:2317}))))))
          IDef {("DerivedGen.X", []):0}
-              [ PatClause (IApp. IVar {("DerivedGen.X", []):0} $ Implicit True)
-                          (IVar empty) ]
+              [ PatClause (IApp. IVar {("DerivedGen.X", []):0}
+                               $ IBindVar fuel_arg_86)
+                          (ILocal (ICase (IVar fuel_arg_86)
+                                         (IVar Data.Fuel.Fuel)
+                                         [ PatClause (IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar {cons_gen_for_DerivedGen.MkX:7}
+                                                                        $ IVar Data.Fuel.Dry)
+                                                                 $ IVar Nil))
+                                         , PatClause (IApp. IVar Data.Fuel.More
+                                                          $ IBindVar sub_fuel_arg_86)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar {cons_gen_for_DerivedGen.MkX:7}
+                                                                        $ IVar sub_fuel_arg_86)
+                                                                 $ IVar Nil)) ]))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy {cons_gen_for_DerivedGen.MkX:7}
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                            $ IVar Prelude.Types.Nat
+                                                            $ (ILam.  (MW ExplicitArg {arg:2317} : IVar Prelude.Types.Nat)
+                                                                   => (IApp. IVar DerivedGen.X
+                                                                           $ IVar {arg:2317}))))))
+                            IDef {cons_gen_for_DerivedGen.MkX:7}
+                                 [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.MkX:7}
+                                                  $ IBindVar fuel_cons_arg)
+                                             (IVar empty) ] ]
