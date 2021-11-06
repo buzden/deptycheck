@@ -5,6 +5,7 @@ import public Language.Reflection.Syntax
 import public Language.Reflection.Types
 
 import public Test.DepTyCheck.Gen.Auto.Derive
+import public Test.DepTyCheck.Gen.Auto.Util.Reflection.Syntactic
 
 %default total
 
@@ -106,7 +107,14 @@ ConstructorDerivator => DerivatorCore where
         callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
 
     consRecursiveness : Con -> m Recursiveness
-    consRecursiveness con = ?consRecursiveness_rhs
+    consRecursiveness con = map toRec $ any (hasNameInsideDeep sig.targetType.name) $ map type con.args ++ snd (unApp con.type) where
+
+      toRec : Bool -> Recursiveness
+      toRec True  = Recursive
+      toRec False = NonRecursive
+
+      any : (a -> m Bool) -> List a -> m Bool
+      any = foldl (||) (pure False) .: map
 
 export
 MainCoreDerivator : ConstructorDerivator => DerivatorCore

@@ -1,6 +1,7 @@
 1/3: Building AlternativeCore (AlternativeCore.idr)
 2/3: Building PrintDerivation (PrintDerivation.idr)
 3/3: Building DerivedGen (DerivedGen.idr)
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (n : Nat) -> (a : Type) -> Gen (Vect n a)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg {fuel:2337} : IVar Data.Fuel.Fuel)
     => ILocal (ILam.  (MW ExplicitArg n : IVar Prelude.Types.Nat)
@@ -22,7 +23,64 @@ ILam.  (MW ExplicitArg {fuel:2337} : IVar Data.Fuel.Fuel)
                                          $ IVar elem))))
          IDef {("Data.Vect.Vect", [0, 1]):0}
               [ PatClause (IApp. IVar {("Data.Vect.Vect", [0, 1]):0}
-                               $ Implicit True
-                               $ Implicit True
-                               $ Implicit True)
-                          (IVar empty) ]
+                               $ IBindVar fuel_arg_86
+                               $ IBindVar len
+                               $ IBindVar elem)
+                          (ILocal (ICase (IVar fuel_arg_86)
+                                         (IVar Data.Fuel.Fuel)
+                                         [ PatClause (IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
+                                                                        $ IVar Data.Fuel.Dry
+                                                                        $ IVar len
+                                                                        $ IVar elem)
+                                                                 $ IVar Nil))
+                                         , PatClause (IApp. IVar Data.Fuel.More
+                                                          $ IBindVar sub_fuel_arg_86)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
+                                                                        $ IVar sub_fuel_arg_86
+                                                                        $ IVar len
+                                                                        $ IVar elem)
+                                                                 $ (IApp. IVar ::
+                                                                        $ (IApp. IVar {cons_gen_for_Data.Vect.:::7}
+                                                                               $ IVar sub_fuel_arg_86
+                                                                               $ IVar len
+                                                                               $ IVar elem)
+                                                                        $ IVar Nil))) ]))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy {cons_gen_for_Data.Vect.Nil:7}
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (MW ExplicitArg len : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg elem : IType)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ (IApp. IVar Data.Vect.Vect
+                                                            $ IVar len
+                                                            $ IVar elem))))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy {cons_gen_for_Data.Vect.:::7}
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (MW ExplicitArg len : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg elem : IType)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ (IApp. IVar Data.Vect.Vect
+                                                            $ IVar len
+                                                            $ IVar elem))))
+                            IDef {cons_gen_for_Data.Vect.Nil:7}
+                                 [ PatClause (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
+                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar len
+                                                  $ IBindVar elem)
+                                             (IVar empty) ]
+                            IDef {cons_gen_for_Data.Vect.:::7}
+                                 [ PatClause (IApp. IVar {cons_gen_for_Data.Vect.:::7}
+                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar len
+                                                  $ IBindVar elem)
+                                             (IVar empty) ] ]
