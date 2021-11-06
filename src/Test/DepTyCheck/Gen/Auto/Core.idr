@@ -62,7 +62,7 @@ ConstructorDerivator => DerivatorCore where
     consBodies <- for sig.targetType.cons $ \con => canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
     -- calculate which constructors are recursive and which are not
-    let consRecs = sig.targetType.cons <&> \con => (con,) $ consRecursiveness con
+    consRecs <- for sig.targetType.cons $ \con => consRecursiveness con <&> (con,)
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "fuel_arg_86"
@@ -106,11 +106,15 @@ ConstructorDerivator => DerivatorCore where
         callOneOf : List TTImp -> TTImp
         callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
 
-    consRecursiveness : Con -> Recursiveness
-    consRecursiveness con =
-      if any (hasIVarInside sig.targetType.name) $ map type con.args ++ snd (unApp con.type)
-      then Recursive
-      else NonRecursive
+    consRecursiveness : Con -> m Recursiveness
+    consRecursiveness con = map toRec $ any (hasNameInsideDeep sig.targetType.name) $ map type con.args ++ snd (unApp con.type) where
+
+      toRec : Bool -> Recursiveness
+      toRec True  = Recursive
+      toRec False = NonRecursive
+
+      any : (a -> m Bool) -> List a -> m Bool
+      any = foldl (||) (pure False) .: map
 
 export
 MainCoreDerivator : ConstructorDerivator => DerivatorCore

@@ -84,3 +84,34 @@ allVarNames expr = ttimp expr where mutual
   piInfo ExplicitArg     = []
   piInfo AutoImplicit    = []
   piInfo (DefImplicit x) = ttimp x
+
+covering
+transitiveClosureM : Monad m => Eq a => (a -> m $ List a) -> List a -> m $ List a
+transitiveClosureM f xs = tr xs xs where
+  tr : (curr : List a) -> (new : List a) -> m $ List a
+  tr curr [] = pure curr
+  tr curr st = do
+    next <- join <$> for st f
+    let new = filter (not . (`elem` curr)) next
+    tr (curr ++ new) new
+
+covering
+holdsOnAnyInTrCl : Monad m => Eq a => (a -> Bool) -> (a -> m $ List a) -> List a -> m Bool
+holdsOnAnyInTrCl prop f xs = pure (any prop xs) || tr xs xs where
+  tr : (curr : List a) -> (new : List a) -> m Bool
+  tr curr [] = pure False
+  tr curr st = do
+    next <- join <$> for st f
+    let new = filter (not . (`elem` curr)) next
+    pure (any prop new) || tr (curr ++ new) new
+
+export
+hasNameInsideDeep : Elaboration m => Name -> TTImp -> m Bool
+hasNameInsideDeep nm = assert_total holdsOnAnyInTrCl (== nm) namesOfType . toList . allVarNames where
+  namesOfType : Name -> m $ List Name
+  namesOfType n = try asIfType $ pure [] where
+    asIfType : Elab $ List Name
+    asIfType = do
+      ty <- getInfo' n
+      let subexprs = (map type ty.args) ++ (ty.cons >>= \con => con.type :: map type con.args)
+      pure $ subexprs >>= toList . allVarNames
