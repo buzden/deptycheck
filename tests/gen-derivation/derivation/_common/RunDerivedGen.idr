@@ -38,3 +38,12 @@ runGs checkedGens = do
   let genedValues = checkedGens <&> \(G gen) => map show $ evalState someStdGen $ unGen $ gen $ limit 20
   let delim = (putStrLn "-----" >>)
   for_ genedValues $ delim . traverse_ (delim . putStrLn)
+
+-- To be removed as soon as some nice non-empty `ConstructorDerivator` is implemented.
+-- To be replaced with `import public Test.DepTyCheck.Gen.Auto.Core.<Whatever>`.
+-- This is exactly like one in `AlternativeCore`, copied to not to change `*/core/*` tests.
+export
+ConstructorDerivator where
+  canonicConsBody sig name con = do
+    let fuelArg = "fuel_cons_arg"
+    pure [ canonicDefaultLHS sig name fuelArg .= `(empty) ]
