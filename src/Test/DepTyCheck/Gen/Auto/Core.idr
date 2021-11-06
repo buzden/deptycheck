@@ -108,7 +108,7 @@ ConstructorDerivator => DerivatorCore where
 
     consRecursiveness : Con -> Recursiveness
     consRecursiveness con =
-      if flip any con.args $ hasIVarInside sig.targetType.name . type
+      if any (hasIVarInside sig.targetType.name) $ map type con.args ++ snd (unApp con.type)
       then Recursive
       else NonRecursive
 
