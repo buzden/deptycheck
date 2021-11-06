@@ -96,6 +96,7 @@ checkTypeIsGen sig = do
 
   -- treat the target type as a function application
   let (targetType, targetTypeArgs) = unApp targetType
+  -- TODO to manage named applications here (e.g., `a = b` means `(===) {ty=TypeOfAAndB} a b`)
 
   ------------------------------------------
   -- Working with the target type familly --
