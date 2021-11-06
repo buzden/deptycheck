@@ -5,6 +5,7 @@ import public Language.Reflection.Syntax
 import public Language.Reflection.Types
 
 import public Test.DepTyCheck.Gen.Auto.Derive
+import public Test.DepTyCheck.Gen.Auto.Util.Reflection.Syntactic
 
 %default total
 
@@ -61,7 +62,7 @@ ConstructorDerivator => DerivatorCore where
     consBodies <- for sig.targetType.cons $ \con => canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
     -- calculate which constructors are recursive and which are not
-    consRecs <- for sig.targetType.cons $ \con => consRecursiveness con <&> (con,)
+    let consRecs = sig.targetType.cons <&> \con => (con,) $ consRecursiveness con
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "fuel_arg_86"
@@ -105,8 +106,11 @@ ConstructorDerivator => DerivatorCore where
         callOneOf : List TTImp -> TTImp
         callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
 
-    consRecursiveness : Con -> m Recursiveness
-    consRecursiveness con = ?consRecursiveness_rhs
+    consRecursiveness : Con -> Recursiveness
+    consRecursiveness con =
+      if flip any con.args $ hasIVarInside sig.targetType.name . type
+      then Recursive
+      else NonRecursive
 
 export
 MainCoreDerivator : ConstructorDerivator => DerivatorCore
