@@ -11,7 +11,7 @@ modules = System.Random.Simple
         , Test.DepTyCheck.Gen.Auto.Checked
         , Test.DepTyCheck.Gen.Auto.Core
         , Test.DepTyCheck.Gen.Auto.Core.BestEffortExternals
-        , Test.DepTyCheck.Gen.Auto.Core.IgnoreExternals
+        , Test.DepTyCheck.Gen.Auto.Core.NonObligatoryExternals
         , Test.DepTyCheck.Gen.Auto.Core.ObligatoryExternals
         , Test.DepTyCheck.Gen.Auto.Derive
         , Test.DepTyCheck.Gen.Auto.Entry

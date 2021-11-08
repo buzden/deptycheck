@@ -1,11 +1,14 @@
 Modules inside this folder are here because several tactics for derivation of particular generators can exist
 regarding to how they use externals.
 
-Trivial
--------
+Non-obligatory
+--------------
 
-We can imagine a *trivial* one which *does not use externals* at all.
-It is mainly for simplicity and, maybe, testing.
+We can imagine one which *does not use externals* during taking a decision on the order.
+It uses externals if decided order happens to be given by an external generator,
+but is not obliged to use any.
+It is seemingly most simple to implement, maybe the fastest and
+fits well when external generators are provided for non-dependent types.
 
 Obligatory
 ----------

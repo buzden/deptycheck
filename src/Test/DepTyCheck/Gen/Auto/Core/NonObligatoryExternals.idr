@@ -1,4 +1,4 @@
-module Test.DepTyCheck.Gen.Auto.Core.IgnoreExternals
+module Test.DepTyCheck.Gen.Auto.Core.NonObligatoryExternals
 
 import public Test.DepTyCheck.Gen.Auto.Core
 
