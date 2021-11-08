@@ -4,7 +4,7 @@ module Test.DepTyCheck.Gen.Auto.Core
 import public Language.Reflection.Syntax
 import public Language.Reflection.Types
 
-import public Test.DepTyCheck.Gen.Auto.Derive
+import public Test.DepTyCheck.Gen.Auto.Core.Cons
 import public Test.DepTyCheck.Gen.Auto.Util.Reflection.Syntactic
 
 %default total
@@ -12,23 +12,6 @@ import public Test.DepTyCheck.Gen.Auto.Util.Reflection.Syntactic
 -----------------------------------------
 --- Utility functions and definitions ---
 -----------------------------------------
-
---- Expressions generation utils ---
-
-defArgNames : {sig : GenSignature} -> Vect sig.givenParams.asList.length String
-defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.args
-
-%inline
-canonicDefault : (String -> TTImp) -> GenSignature -> Name -> (fuel : String) -> TTImp
-canonicDefault varF sig n fuel = callCanonic sig n .| varF fuel .| varF <$> defArgNames
-
-export %inline
-canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
-canonicDefaultLHS = canonicDefault bindVar
-
-export %inline
-canonicDefaultRHS : GenSignature -> Name -> (fuel : String) -> TTImp
-canonicDefaultRHS = canonicDefault varStr
 
 --- Ancillary data structures ---
 
@@ -43,10 +26,6 @@ Eq Recursiveness where
 ----------------------------
 --- Derivation functions ---
 ----------------------------
-
-public export
-interface ConstructorDerivator where
-  canonicConsBody : CanonicGen m => GenSignature -> Name -> Con -> m $ List Clause
 
 export
 ConstructorDerivator => DerivatorCore where
@@ -101,7 +80,7 @@ ConstructorDerivator => DerivatorCore where
       where
 
         callConsGen : (fuel : TTImp) -> Con -> TTImp
-        callConsGen fuel con = callCanonic sig .| consGenName con .| fuel .| varStr <$> defArgNames
+        callConsGen fuel con = canonicDefaultRHS sig .| consGenName con .| fuel
 
         callOneOf : List TTImp -> TTImp
         callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
