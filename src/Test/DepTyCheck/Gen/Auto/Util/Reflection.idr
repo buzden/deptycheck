@@ -111,11 +111,11 @@ typeInfoOfConstant WorldType   = Nothing
 ----------------------------------------------
 
 export
-doesTypecheckAs : (0 expected : Type) -> TTImp -> Elab Bool
-doesTypecheckAs expected = map isJust . optional . check {expected}
+doesTypecheckAs : Elaboration m => (0 expected : Type) -> TTImp -> m Bool
+doesTypecheckAs expected expr = try .| check {expected} expr $> True .| pure False
 
 export
-argDeps : (args : List NamedArg) -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
+argDeps : Elaboration m => (args : List NamedArg) -> m $ DVect args.length $ SortedSet . Fin . Fin.finToNat
 argDeps args = do
   ignore $ check {expected=Type} $ fullSig defaultRet -- we can't return trustful result if given arguments do not form a nice Pi type
   concatMap depsOfOne $ allFins' _
@@ -168,25 +168,25 @@ argDeps args = do
       full = MN "full" 1
       part = MN "part" 1
 
-  checkExcluded : (excluded : SortedSet $ Fin args.length) -> Elab Bool
+  checkExcluded : (excluded : SortedSet $ Fin args.length) -> m Bool
   checkExcluded excluded = doesTypecheckAs Type (partialSig defaultRet excluded)
                         && doesTypecheckAs Type (preservationCheckSig excluded)
 
   -- Returns a set of indices of all arguments that do depend on the given
-  depsOfOne' : (idx : Fin args.length) -> Elab $ SortedSet $ Fin args.length
+  depsOfOne' : (idx : Fin args.length) -> m $ SortedSet $ Fin args.length
   depsOfOne' idx = do
     let cands = allGreaterThan idx
     findMinExclude cands $ fromList cands
 
     where
       -- tries to add candidates one by one, and leave them if typechecks without the current `idx`
-      findMinExclude : (left : List $ Fin args.length) -> (currExcl : SortedSet $ Fin args.length) -> Elab $ SortedSet $ Fin args.length
+      findMinExclude : (left : List $ Fin args.length) -> (currExcl : SortedSet $ Fin args.length) -> m $ SortedSet $ Fin args.length
       findMinExclude [] excl = pure excl
       findMinExclude (x::xs) prevExcl = do
         let currExcl = delete x prevExcl
         findMinExclude xs $ if !(checkExcluded $ insert idx currExcl) then currExcl else prevExcl
 
-  depsOfOne : Fin args.length -> Elab $ DVect args.length $ SortedSet . Fin . Fin.finToNat
+  depsOfOne : Fin args.length -> m $ DVect args.length $ SortedSet . Fin . Fin.finToNat
   depsOfOne idx = do
     whoDependsOnIdx <- depsOfOne' idx
     sequence $ tabulateI $ \i =>
