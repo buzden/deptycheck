@@ -67,7 +67,7 @@ ConstructorDerivator => DerivatorCore where
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "fuel_arg_86"
 
-    -- generate the case expression decising where will we go into recursive constructors or not
+    -- generate the case expression deciding whether will we go into recursive constructors or not
     let outmostRHS = fuelDecisionExpr fuelArg consRecs
 
     -- return function definition
