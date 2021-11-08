@@ -80,7 +80,7 @@ ConstructorDerivator => DerivatorCore where
       where
 
         callConsGen : (fuel : TTImp) -> Con -> TTImp
-        callConsGen fuel con = callCanonic sig .| consGenName con .| fuel .| varStr <$> defArgNames
+        callConsGen fuel con = canonicDefaultRHS sig .| consGenName con .| fuel
 
         callOneOf : List TTImp -> TTImp
         callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants

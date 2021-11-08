@@ -11,21 +11,16 @@ import public Test.DepTyCheck.Gen.Auto.Derive
 
 --- Expressions generation utils ---
 
-export
 defArgNames : {sig : GenSignature} -> Vect sig.givenParams.asList.length String
 defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.args
 
-%inline
-canonicDefault : (String -> TTImp) -> GenSignature -> Name -> (fuel : String) -> TTImp
-canonicDefault varF sig n fuel = callCanonic sig n .| varF fuel .| varF <$> defArgNames
-
 export %inline
 canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
-canonicDefaultLHS = canonicDefault bindVar
+canonicDefaultLHS sig n fuel = callCanonic sig n .| bindVar fuel .| bindVar <$> defArgNames
 
 export %inline
-canonicDefaultRHS : GenSignature -> Name -> (fuel : String) -> TTImp
-canonicDefaultRHS = canonicDefault varStr
+canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
+canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 
 -------------------------------------------------
 --- Derivation of a generator for constructor ---
