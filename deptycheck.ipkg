@@ -21,6 +21,7 @@ modules = System.Random.Simple
         , Test.DepTyCheck.Gen.Auto.Util.Reflection
         , Test.DepTyCheck.Gen.Auto.Util.Reflection.Syntactic
         , Test.DepTyCheck.Gen.Auto.Util.SortedMap
+        , Test.DepTyCheck.Gen.Auto.Util.SortedSet
         , Test.DepTyCheck.Gen.Auto.Util.Syntax
         , Test.DepTyCheck.Gen.Auto.Util.Vect
 
