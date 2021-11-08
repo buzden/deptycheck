@@ -41,6 +41,12 @@ public export
 liftList : Foldable f => f TTImp -> TTImp
 liftList = foldr (\l, r => `(~(l) :: ~(r))) `([])
 
+--- Specific expressions ---
+
+export
+callOneOf : List TTImp -> TTImp
+callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
+
 --- General purpose instances ---
 
 public export
