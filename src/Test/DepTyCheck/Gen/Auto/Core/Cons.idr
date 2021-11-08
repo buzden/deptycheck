@@ -1,9 +1,43 @@
 ||| Several tactics for derivation of particular generators for a constructor regarding to how they use externals
 module Test.DepTyCheck.Gen.Auto.Core.Cons
 
-import public Test.DepTyCheck.Gen.Auto.Core
+import public Test.DepTyCheck.Gen.Auto.Derive
 
 %default total
+
+-----------------------------------------
+--- Utility functions and definitions ---
+-----------------------------------------
+
+--- Expressions generation utils ---
+
+export
+defArgNames : {sig : GenSignature} -> Vect sig.givenParams.asList.length String
+defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.args
+
+%inline
+canonicDefault : (String -> TTImp) -> GenSignature -> Name -> (fuel : String) -> TTImp
+canonicDefault varF sig n fuel = callCanonic sig n .| varF fuel .| varF <$> defArgNames
+
+export %inline
+canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
+canonicDefaultLHS = canonicDefault bindVar
+
+export %inline
+canonicDefaultRHS : GenSignature -> Name -> (fuel : String) -> TTImp
+canonicDefaultRHS = canonicDefault varStr
+
+-------------------------------------------------
+--- Derivation of a generator for constructor ---
+-------------------------------------------------
+
+--- Interface ---
+
+public export
+interface ConstructorDerivator where
+  canonicConsBody : CanonicGen m => GenSignature -> Name -> Con -> m $ List Clause
+
+--- Particular tactics ---
 
 ||| "Non-obligatory" means that some present external generator of some type
 ||| may be ignored even if its type is really used in a generated data constructor.
