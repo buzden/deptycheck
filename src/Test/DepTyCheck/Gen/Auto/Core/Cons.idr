@@ -3,6 +3,8 @@ module Test.DepTyCheck.Gen.Auto.Core.Cons
 
 import public Test.DepTyCheck.Gen.Auto.Derive
 
+import public Test.DepTyCheck.Gen.Auto.Util.SortedSet
+
 %default total
 
 -----------------------------------------
@@ -45,8 +47,24 @@ namespace NonObligatoryExts
   export
   [LeastEffort] ConstructorDerivator where
     canonicConsBody sig name con = do
+
+      -- Get dependencies of constructor's arguments
+      deps <- argDeps con.args
+      let weakenedDeps : Vect _ $ SortedSet $ Fin _ := flip downmapI deps $ \_ => mapIn weakenToSuper
+
+      -- Arguments that no other argument depends on
+      let kingArgs = fromFoldable (allFins' _) `difference` concat weakenedDeps
+
+      -- Acquire order(s) in what we will generate arguments
+      -- TODO to permute independent groups of arguments independently
+      let allKingsOrders = allPermutations kingArgs
+
       let fuelArg = "fuel_cons_arg"
-      pure [ canonicDefaultLHS sig name fuelArg .= ?cons_body_leasteff_rhs ]
+
+      let genForKingsOrder : List (Fin con.args.length) -> TTImp
+          genForKingsOrder kings = ?genForKingsOrder_rhs
+
+      pure [ canonicDefaultLHS sig name fuelArg .= callOneOf (genForKingsOrder <$> forget allKingsOrders) ]
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.
