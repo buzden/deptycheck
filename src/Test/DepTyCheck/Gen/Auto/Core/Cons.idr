@@ -61,10 +61,12 @@ namespace NonObligatoryExts
 
       let fuelArg = "fuel_cons_arg"
 
-      let genForKingsOrder : List (Fin con.args.length) -> TTImp
+      let genForKingsOrder : List (Fin con.args.length) -> m TTImp
           genForKingsOrder kings = ?genForKingsOrder_rhs
 
-      pure [ canonicDefaultLHS sig name fuelArg .= callOneOf (genForKingsOrder <$> forget allKingsOrders) ]
+      gensForKingsOrders <- traverse genForKingsOrder $ forget allKingsOrders
+
+      pure [ canonicDefaultLHS sig name fuelArg .= callOneOf gensForKingsOrders ]
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.
