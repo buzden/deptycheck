@@ -44,6 +44,4 @@ runGs checkedGens = do
 -- This is exactly like one in `AlternativeCore`, copied to not to change `*/core/*` tests.
 export
 ConstructorDerivator where
-  canonicConsBody sig name con = do
-    let fuelArg = "fuel_cons_arg"
-    pure [ canonicDefaultLHS sig name fuelArg .= `(empty) ]
+  consGenExpr _ _ _ = pure `(empty)
