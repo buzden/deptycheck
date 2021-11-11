@@ -60,7 +60,7 @@ deptycheck:test:lib:
     - deptycheck:build
   script:
     - find tests/ -maxdepth 1 -mindepth 1 -type d ! -name gen-derivation | sed 's|^tests/||' | while read r; do
-        make test-deptycheck only="$r";
+        make test-deptycheck only="$r" INTERACTIVE="--color";
       done
 
 deptycheck:test:derive:
@@ -71,7 +71,7 @@ deptycheck:test:derive:
     - deptycheck:build
     - deptycheck:test:lib
   script:
-    - make test-deptycheck only=gen-derivation/
+    - make test-deptycheck only=gen-derivation/ INTERACTIVE="--color"
 
 pil:build:
   extends: .depends-on-idris
@@ -90,7 +90,7 @@ pil:test:
     - pil:build
     - deptycheck:test:lib
   script:
-    - make test-pil
+    - make test-pil INTERACTIVE="--color"
 
 include:
   - remote: 'https://jobs.r2devops.io/latest/super_linter.yml'
