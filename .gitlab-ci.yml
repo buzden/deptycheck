@@ -71,7 +71,9 @@ deptycheck:test:derive:
     - deptycheck:build
     - deptycheck:test:lib
   script:
-    - make test-deptycheck only=gen-derivation/ INTERACTIVE="--color"
+    - "thr=$(( `nproc` - 1 ))"
+    - "thr=$(( thr < 1 ? 1 : thr ))"
+    - make test-deptycheck only=gen-derivation/ INTERACTIVE="--color" threads=$thr
 
 pil:build:
   extends: .depends-on-idris
