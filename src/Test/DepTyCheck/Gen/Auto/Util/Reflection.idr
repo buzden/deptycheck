@@ -12,8 +12,8 @@ import public Language.Reflection.TTImp
 import public Language.Reflection.Types
 
 import public Test.DepTyCheck.Gen.Auto.Util.Alternative
+import public Test.DepTyCheck.Gen.Auto.Util.Collections
 import public Test.DepTyCheck.Gen.Auto.Util.Fin
-import public Test.DepTyCheck.Gen.Auto.Util.List
 import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 
 %default total

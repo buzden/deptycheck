@@ -1,8 +1,15 @@
-module Test.DepTyCheck.Gen.Auto.Util.List
+module Test.DepTyCheck.Gen.Auto.Util.Collections
 
+import public Data.List
 import public Data.List.Lazy
+import public Data.List1
+import public Data.SortedMap
+import public Data.SortedMap.Dependent
+import public Data.SortedSet
+import public Data.Vect
 import public Data.Vect.Dependent
 
+import public Test.DepTyCheck.Gen.Auto.Util.Nat
 import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 
 %default total
@@ -54,3 +61,49 @@ export
 inits' : (xs : List a) -> DVect xs.length $ \idx => Vect (S $ finToNat idx) a
 inits' []      = []
 inits' (x::xs) = [x] :: ((x ::) <$> inits' xs)
+
+------------------------
+--- `Vect` utilities ---
+------------------------
+
+export
+toListI : Vect n a -> List (a, Fin n)
+toListI []      = []
+toListI (x::xs) = (x, FZ) :: (map FS <$> toListI xs)
+
+public export
+drop'' : (xs : Vect n a) -> (count : Fin $ S n) -> Vect (n - count) a
+drop'' xs      FZ     = xs
+drop'' (_::xs) (FS c) = drop'' xs c
+
+-----------------------------
+--- `SortedMap` utilities ---
+-----------------------------
+
+namespace SortedMap
+
+  export
+  mapMaybe : Ord k => (a -> Maybe b) -> SortedMap k a -> SortedMap k b
+  mapMaybe f = SortedMap.fromList . mapMaybe (\(k, a) => (k,) <$> f a) . SortedMap.toList
+
+-----------------------------
+--- `SortedSet` utilities ---
+-----------------------------
+
+-- Not really a functor's `map`, because map fusion law does not hold
+export
+mapIn : Ord b => (a -> b) -> SortedSet a -> SortedSet b
+mapIn f = fromList . map f . SortedSet.toList
+
+export
+fromFoldable : Ord a => Foldable f => f a -> SortedSet a
+fromFoldable = foldl (flip insert) empty
+
+export
+allPermutations : Ord a => SortedSet a -> List1 $ List a
+allPermutations s = case fromList s.asList of
+  Nothing => pure []
+  Just ss => do
+    e  <- ss
+    es <- allPermutations $ assert_smaller s $ delete e s
+    pure $ e :: es
