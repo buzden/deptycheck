@@ -3,7 +3,7 @@ module Test.DepTyCheck.Gen.Auto.Core.Cons
 
 import public Test.DepTyCheck.Gen.Auto.Derive
 
-import public Test.DepTyCheck.Gen.Auto.Util.SortedSet
+import public Test.DepTyCheck.Gen.Auto.Util.Collections
 
 %default total
 
