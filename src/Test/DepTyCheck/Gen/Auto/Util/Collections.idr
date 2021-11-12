@@ -62,6 +62,28 @@ inits' : (xs : List a) -> DVect xs.length $ \idx => Vect (S $ finToNat idx) a
 inits' []      = []
 inits' (x::xs) = [x] :: ((x ::) <$> inits' xs)
 
+--- Transitive clojure stuff ---
+
+export covering
+transitiveClosureM : Monad m => Eq a => (a -> m $ List a) -> List a -> m $ List a
+transitiveClosureM f xs = tr xs xs where
+  tr : (curr : List a) -> (new : List a) -> m $ List a
+  tr curr [] = pure curr
+  tr curr st = do
+    next <- join <$> for st f
+    let new = filter (not . (`elem` curr)) next
+    tr (curr ++ new) new
+
+export covering
+holdsOnAnyInTrCl : Monad m => Eq a => (a -> Bool) -> (a -> m $ List a) -> List a -> m Bool
+holdsOnAnyInTrCl prop f xs = pure (any prop xs) || tr xs xs where
+  tr : (curr : List a) -> (new : List a) -> m Bool
+  tr curr [] = pure False
+  tr curr st = do
+    next <- join <$> for st f
+    let new = filter (not . (`elem` curr)) next
+    pure (any prop new) || tr (curr ++ new) new
+
 ------------------------
 --- `Vect` utilities ---
 ------------------------

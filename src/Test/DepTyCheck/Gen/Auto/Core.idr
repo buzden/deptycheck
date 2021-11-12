@@ -5,7 +5,7 @@ import public Language.Reflection.Syntax
 import public Language.Reflection.Types
 
 import public Test.DepTyCheck.Gen.Auto.Core.Cons
-import public Test.DepTyCheck.Gen.Auto.Util.Reflection.Syntactic
+import public Test.DepTyCheck.Gen.Auto.Util.Reflection
 
 %default total
 
