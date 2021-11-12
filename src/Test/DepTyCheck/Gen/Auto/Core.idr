@@ -5,7 +5,7 @@ import public Language.Reflection.Syntax
 import public Language.Reflection.Types
 
 import public Test.DepTyCheck.Gen.Auto.Core.Cons
-import public Test.DepTyCheck.Gen.Auto.Util.Reflection.Syntactic
+import public Test.DepTyCheck.Gen.Auto.Util.Reflection
 
 %default total
 
@@ -81,9 +81,6 @@ ConstructorDerivator => DerivatorCore where
 
         callConsGen : (fuel : TTImp) -> Con -> TTImp
         callConsGen fuel con = canonicDefaultRHS sig .| consGenName con .| fuel
-
-        callOneOf : List TTImp -> TTImp
-        callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
 
     consRecursiveness : Con -> m Recursiveness
     consRecursiveness con = map toRec $ any (hasNameInsideDeep sig.targetType.name) $ map type con.args ++ snd (unApp con.type) where
