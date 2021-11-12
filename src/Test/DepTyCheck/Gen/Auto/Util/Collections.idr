@@ -9,7 +9,7 @@ import public Data.SortedSet
 import public Data.Vect
 import public Data.Vect.Dependent
 
-import public Test.DepTyCheck.Gen.Auto.Util.Nat
+import public Test.DepTyCheck.Gen.Auto.Util.Fin
 import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 
 %default total

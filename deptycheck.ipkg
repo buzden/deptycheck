@@ -17,7 +17,6 @@ modules = System.Random.Simple
         , Test.DepTyCheck.Gen.Auto.Util.Alternative
         , Test.DepTyCheck.Gen.Auto.Util.Collections
         , Test.DepTyCheck.Gen.Auto.Util.Fin
-        , Test.DepTyCheck.Gen.Auto.Util.Nat
         , Test.DepTyCheck.Gen.Auto.Util.Reflection
         , Test.DepTyCheck.Gen.Auto.Util.Syntax
 
