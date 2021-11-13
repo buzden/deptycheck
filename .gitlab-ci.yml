@@ -59,9 +59,7 @@ deptycheck:test:lib:
     - read-idris-ver
     - deptycheck:build
   script:
-    - find tests/ -maxdepth 1 -mindepth 1 -type d ! -name gen-derivation | sed 's|^tests/||' | while read r; do
-        make test-deptycheck only="$r" INTERACTIVE="--color";
-      done
+    - make test-deptycheck only=lib/ INTERACTIVE="--color"
 
 deptycheck:test:derive:
   extends: .depends-on-idris
