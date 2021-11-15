@@ -35,6 +35,23 @@ buildDPair = foldr $ \(name, type), res =>
   var `{Builtin.DPair.DPair} .$ type .$ lam (MkArg MW ExplicitArg (Just name) type) res
 
 public export
+data AnyApp
+  = PosApp TTImp
+  | NamedApp Name TTImp
+  | AutoApp TTImp
+  | WithApp TTImp
+
+public export
+unAppAny : TTImp -> (List AnyApp, TTImp)
+unAppAny = runTR [] where
+  runTR : List AnyApp -> TTImp -> (List AnyApp, TTImp)
+  runTR curr $ IApp      _ lhs   rhs = runTR (PosApp rhs     :: curr) lhs
+  runTR curr $ INamedApp _ lhs n rhs = runTR (NamedApp n rhs :: curr) lhs
+  runTR curr $ IAutoApp  _ lhs   rhs = runTR (AutoApp rhs    :: curr) lhs
+  runTR curr $ IWithApp  _ lhs   rhs = runTR (WithApp rhs    :: curr) lhs
+  runTR curr result                  = (curr, result)
+
+public export
 appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
 appFuel = app . var
 
