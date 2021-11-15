@@ -95,7 +95,7 @@ checkTypeIsGen sig = do
   let targetTypeFC = getFC targetType
 
   -- treat the target type as a function application
-  let (targetTypeArgs, targetType) = unAppAny targetType
+  let (targetType, targetTypeArgs) = unAppAny targetType
 
   -- check out applications types
   targetTypeArgs <- for targetTypeArgs $ \case

@@ -44,7 +44,7 @@ canonicConsBody : ConstructorDerivator => CanonicGen m => GenSignature -> Name -
 canonicConsBody sig name con = do
 
   -- Acquire consturctor's return type arguments
-  let conRetTypeArgs = fst $ unAppAny con.type
+  let conRetTypeArgs = snd $ unAppAny con.type
   conRetTypeArgs <- for conRetTypeArgs $ \case -- resembles similar management from `Entry` module; they must be consistent
     PosApp e     => pure e
     NamedApp _ _ => fail "Named implicit applications are not supported yet as in `\{show con.name}`"
