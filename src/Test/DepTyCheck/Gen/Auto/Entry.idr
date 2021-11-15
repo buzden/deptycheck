@@ -95,8 +95,14 @@ checkTypeIsGen sig = do
   let targetTypeFC = getFC targetType
 
   -- treat the target type as a function application
-  let (targetType, targetTypeArgs) = unApp targetType
-  -- TODO to manage named applications here (e.g., `a = b` means `(===) {ty=TypeOfAAndB} a b`)
+  let (targetTypeArgs, targetType) = unAppAny targetType
+
+  -- check out applications types
+  targetTypeArgs <- for targetTypeArgs $ \case
+    PosApp     arg => pure arg
+    NamedApp n arg => failAt targetTypeFC "Target types with implicit type parameters are not supported yet"
+    AutoApp    arg => failAt targetTypeFC "Target types with `auto` implicit type parameters are not supported yet"
+    WithApp    arg => failAt targetTypeFC "Unexpected `with`-application in the target type"
 
   ------------------------------------------
   -- Working with the target type familly --

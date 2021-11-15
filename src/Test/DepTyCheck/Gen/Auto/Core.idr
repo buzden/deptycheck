@@ -83,7 +83,7 @@ ConstructorDerivator => DerivatorCore where
         callConsGen fuel con = canonicDefaultRHS sig .| consGenName con .| fuel
 
     consRecursiveness : Con -> m Recursiveness
-    consRecursiveness con = map toRec $ any (hasNameInsideDeep sig.targetType.name) $ map type con.args ++ snd (unApp con.type) where
+    consRecursiveness con = map toRec $ any (hasNameInsideDeep sig.targetType.name) $ map type con.args ++ (getExpr <$> fst (unAppAny con.type)) where
 
       toRec : Bool -> Recursiveness
       toRec True  = Recursive

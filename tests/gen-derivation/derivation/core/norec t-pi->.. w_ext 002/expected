@@ -2,11 +2,11 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Error during reflection: Target types with implicit type parameters are not supported yet
 
-DerivedGen:10:43--10:48
- 06 | 
- 07 | %language ElabReflection
- 08 | 
- 09 | export
- 10 | checkedGen : Fuel -> (a, b : Nat) -> Gen (a = b)
-                                                ^^^^^
+DerivedGen:9:52--9:57
+ 5 | %default total
+ 6 | 
+ 7 | %language ElabReflection
+ 8 | 
+ 9 | checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen (x = y)
+                                                        ^^^^^
 
