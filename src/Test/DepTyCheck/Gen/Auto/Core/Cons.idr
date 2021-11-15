@@ -1,6 +1,8 @@
 ||| Several tactics for derivation of particular generators for a constructor regarding to how they use externals
 module Test.DepTyCheck.Gen.Auto.Core.Cons
 
+import public Decidable.Equality
+
 import public Test.DepTyCheck.Gen.Auto.Derive
 
 import public Test.DepTyCheck.Gen.Auto.Util.Collections
@@ -33,20 +35,43 @@ canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 public export
 interface ConstructorDerivator where
   -- TODO to add appropriate post-index-analysis parameters
-  consGenExpr : CanonicGen m => GenSignature -> Con -> (fuel : TTImp) -> m TTImp
+  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
 
 --- Entry function ---
 
--- TODO to analyse which given params are indices and
--- - if it is simply a (maybe deeply nested) constructor call, pattern match on it
--- - if it is a single name equal to another given parameter (or expression?), use `decEq`
--- - if it is a function of a free parameter, use inverted function filtering trick
--- - (temporarily) fail otherwise
 export
 canonicConsBody : ConstructorDerivator => CanonicGen m => GenSignature -> Name -> Con -> m $ List Clause
 canonicConsBody sig name con = do
+
+  -- Acquire consturctor's return type arguments
+  let conRetTypeArgs = fst $ unAppAny con.type
+  conRetTypeArgs <- for conRetTypeArgs $ \case -- resembles similar management from `Entry` module; they must be consistent
+    PosApp e     => pure e
+    NamedApp _ _ => fail "Named implicit applications are not supported yet as in `\{show con.name}`"
+    AutoApp _    => fail "Auto-implicit applications are not supported yet as in `\{show con.name}`"
+    WithApp _    => fail "Unexpected `with` application in the constructor's `\{show con.name}` return type"
+
+  -- Match lengths of `conRetTypeArgs` and `sig.targetType.args`
+  let Yes conRetTypeArgsLengthCorrect = conRetTypeArgs.length `decEq` sig.targetType.args.length
+    | No _ => fail "INTERNAL ERROR: length of the return type of constructor `\{show con.name}` does not equal to the type's arguments count"
+
+  let conRetTypeArg : Fin sig.targetType.args.length -> TTImp
+      conRetTypeArg idx = index' conRetTypeArgs $ rewrite conRetTypeArgsLengthCorrect in idx
+
+  -- For given arguments, determine whether they are
+  --   - just a free name
+  --   - repeated name of another given parameter (need of `decEq`)
+  --   - (maybe, deeply) constructor call (need to match)
+  --   - function call on a free param (need to use "inverted function" filtering trick)
+  --   - something else (cannot manage yet)
+  ?fop_check_con_args
+
+  -- TODO to build a map from a name to `Fin con.args.length`
+
+  -- TODO to form a list of given constructor arguments to `consGenExpr` call
+
   let fuelArg = "fuel_cons_arg"
-  pure [ canonicDefaultLHS sig name fuelArg .= !(consGenExpr sig con $ varStr fuelArg) ]
+  pure [ canonicDefaultLHS sig name fuelArg .= !(consGenExpr sig con ?con_givens $ varStr fuelArg) ]
 
 --- Particular tactics ---
 
@@ -60,7 +85,7 @@ namespace NonObligatoryExts
   ||| fits well when external generators are provided for non-dependent types.
   export
   [LeastEffort] ConstructorDerivator where
-    consGenExpr sig con fuel = do
+    consGenExpr sig con givs fuel = do
 
       -- Get dependencies of constructor's arguments
       deps <- argDeps con.args
@@ -90,7 +115,7 @@ namespace NonObligatoryExts
   ||| but not obligatorily all the external generators at the same time.
   export
   [BestEffort] ConstructorDerivator where
-    consGenExpr sig con fuel = do
+    consGenExpr sig con givs fuel = do
       ?cons_body_besteff_nonoblig_rhs
 
 ||| "Obligatory" means that is some external generator is present and a constructor has
@@ -118,10 +143,10 @@ namespace ObligatoryExts
 
   export
   [FailFast] ConstructorDerivator where
-    consGenExpr sig con fuel = do
+    consGenExpr sig con givs fuel = do
       ?cons_body_obl_ff_rhs
 
   export
   [DecEqConflicts] ConstructorDerivator where
-    consGenExpr sig con fuel = do
+    consGenExpr sig con givs fuel = do
       ?cons_body_obl_deceq_rhs
