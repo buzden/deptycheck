@@ -42,6 +42,13 @@ data AnyApp
   | WithApp TTImp
 
 public export
+getExpr : AnyApp -> TTImp
+getExpr $ PosApp e     = e
+getExpr $ NamedApp _ e = e
+getExpr $ AutoApp e    = e
+getExpr $ WithApp e    = e
+
+public export
 unAppAny : TTImp -> (List AnyApp, TTImp)
 unAppAny = runTR [] where
   runTR : List AnyApp -> TTImp -> (List AnyApp, TTImp)
