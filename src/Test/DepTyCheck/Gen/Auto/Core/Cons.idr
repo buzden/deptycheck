@@ -73,6 +73,29 @@ canonicConsBody sig name con = do
   let fuelArg = "fuel_cons_arg"
   pure [ canonicDefaultLHS sig name fuelArg .= !(consGenExpr sig con ?con_givens $ varStr fuelArg) ]
 
+  where
+
+    isDeepConsApp : Elaboration m => (freeNames : SortedSet Name) -> TTImp -> m $ Maybe ({-applied free names-} SortedSet Name, {-bind expression-} TTImp)
+    isDeepConsApp freeNames e = do
+
+      -- Treat given expression as a function application to some name
+      let (IVar _ lhsName@(UN $ Basic lhsNameStr), args) = unAppAny e
+        | _ => pure Nothing
+
+      -- Check if this is a free name
+      let False = null args && contains lhsName freeNames
+        | True => pure $ Just (singleton lhsName, bindVar lhsNameStr)
+
+      -- Check that this is an application to a constructor's name
+      True <- try .| getCon lhsName $> True .| pure False
+        | False => pure Nothing
+
+      _ <- for args $ \anyApp => case getExpr anyApp of
+        IVar _ n => ?foo_var -- return nothing if not a free name
+        subexpr => ?recursive_call
+
+      ?isDeepConsApp_rhs
+
 --- Particular tactics ---
 
 ||| "Non-obligatory" means that some present external generator of some type
