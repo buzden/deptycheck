@@ -23,6 +23,8 @@ import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 --- Parsing and rebuilding `TTImp` stuff ---
 --------------------------------------------
 
+--- `DPair` parsing and rebuilding stuff ---
+
 public export
 unDPair : TTImp -> (List (Arg False), TTImp)
 unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo mbname _ lamTy)) =
@@ -33,6 +35,8 @@ public export
 buildDPair : (rhs : TTImp) -> List (Name, TTImp) -> TTImp
 buildDPair = foldr $ \(name, type), res =>
   var `{Builtin.DPair.DPair} .$ type .$ lam (MkArg MW ExplicitArg (Just name) type) res
+
+--- Facilities for managing any kind of function application at once ---
 
 public export
 data AnyApp
@@ -48,6 +52,14 @@ getExpr $ NamedApp _ e = e
 getExpr $ AutoApp e    = e
 getExpr $ WithApp e    = e
 
+-- Shallow expression mapping
+public export
+mapExpr : (TTImp -> TTImp) -> AnyApp -> AnyApp
+mapExpr f $ PosApp e     = PosApp $ f e
+mapExpr f $ NamedApp n e = NamedApp n $ f e
+mapExpr f $ AutoApp e    = AutoApp $ f e
+mapExpr f $ WithApp e    = WithApp $ f e
+
 public export
 unAppAny : TTImp -> (TTImp, List AnyApp)
 unAppAny = runTR [] where
@@ -59,14 +71,22 @@ unAppAny = runTR [] where
   runTR curr lhs                     = (lhs, curr)
 
 public export
+reAppAny : TTImp -> List AnyApp -> TTImp
+reAppAny = foldl $ \l => \case
+  PosApp e     => app l e
+  NamedApp n e => namedApp l n e
+  AutoApp e    => autoApp l e
+  WithApp e    => IWithApp EmptyFC l e
+
+--- Specific expressions building helpers ---
+
+public export
 appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
 appFuel = app . var
 
 public export
 liftList : Foldable f => f TTImp -> TTImp
 liftList = foldr (\l, r => `(~(l) :: ~(r))) `([])
-
---- Specific expressions ---
 
 export
 callOneOf : List TTImp -> TTImp
