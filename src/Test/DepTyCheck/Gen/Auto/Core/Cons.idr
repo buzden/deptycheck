@@ -32,6 +32,56 @@ canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 --- Derivation of a generator for constructor ---
 -------------------------------------------------
 
+--- Utilities ---
+
+||| Analyses whether the given expression can be an expression of free variables applies (maybe deeply) to a number of data constructors.
+|||
+||| Returns which of given free names are actually used in the given expression, in order of appearance in the expression.
+||| Notice that applied free names may repeat as soon as one name is used several times in the given expression.
+|||
+||| Also, a function returning a bind expression (an expression replacing all free names with bind names (`IBindVar`))
+||| is also returned.
+||| This function requires bind variable names as input.
+||| It returns correct bind expression only when all given bind names are different.
+-- TODO to use set for the free names at input
+-- TODO to think of using again `Fin n -> String` instead of `Vect n String` because of ease of splitting
+export
+analyseDeepConsApp : Elaboration m =>
+                     (freeNames : List Name) ->
+                     (analysedExpr : TTImp) ->
+                     m $ Maybe (appliedFreeNames : List Name ** (bindNames : Vect appliedFreeNames.length String) -> {-bind expression-} TTImp)
+analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
+
+  isD : TTImp -> Elab (appliedFreeNames : List Name ** Vect appliedFreeNames.length String -> TTImp)
+  isD e = do
+
+    -- Treat given expression as a function application to some name
+    let (IVar _ lhsName, args) = unAppAny e
+      | _ => fail "Not an application for some variable"
+
+    -- Check if this is a free name
+    let False = null args && (lhsName `elem` freeNames)
+      | True => pure (singleton lhsName ** bindVar . index FZ)
+
+    -- Check that this is an application to a constructor's name
+    _ <- getCon lhsName -- or fail if `lhsName` is not a constructor
+
+    -- Analyze deeply all the arguments
+    deepArgs <- for args $ \anyApp => map (anyApp,) $ isD $ assert_smaller e $ getExpr anyApp
+
+    -- Collect all the applied names and form proper application expression with binding variables
+    pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
+
+    where
+      mergeApp : (namesL : List Name ** Vect namesL.length String -> TTImp) ->
+                 (AnyApp, (namesR : List Name ** Vect namesR.length String -> TTImp)) ->
+                 (names : List Name ** Vect names.length String -> TTImp)
+      mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
+        let bindNames : Vect (namesL.length + namesR.length) String := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
+        let (bindNamesL, bindNamesR) = splitAt namesL.length bindNames
+        let (lhs, rhs) = (bindL bindNamesL, bindR bindNamesR)
+        reAppAny1 lhs $ const rhs `mapExpr` anyApp
+
 --- Interface ---
 
 public export
@@ -74,45 +124,6 @@ canonicConsBody sig name con = do
 
   let fuelArg = "fuel_cons_arg"
   pure [ canonicDefaultLHS sig name fuelArg .= !(consGenExpr sig con ?con_givens $ varStr fuelArg) ]
-
-  where
-
-    -- TODO to use set for the free names at input
-    -- TODO to think of using again `Fin n -> String` instead of `Vect n String` because of ease of splitting
-    -- NOTE: Keep in mind that applied names may repeat
-    isDeepConsApp : Elaboration m => (freeNames : List Name) -> TTImp ->
-                    m $ Maybe (appliedFreeNames : List Name ** (bindNames : Vect appliedFreeNames.length String) -> {-bind expression-} TTImp)
-    isDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
-
-      isD : TTImp -> Elab (appliedFreeNames : List Name ** Vect appliedFreeNames.length String -> TTImp)
-      isD e = do
-
-        -- Treat given expression as a function application to some name
-        let (IVar _ lhsName, args) = unAppAny e
-          | _ => fail "Not an application for some variable"
-
-        -- Check if this is a free name
-        let False = null args && (lhsName `elem` freeNames)
-          | True => pure (singleton lhsName ** bindVar . index FZ)
-
-        -- Check that this is an application to a constructor's name
-        _ <- getCon lhsName -- or fail if `lhsName` is not a constructor
-
-        -- Analyze deeply all the arguments
-        deepArgs <- for args $ \anyApp => map (anyApp,) $ isD $ assert_smaller e $ getExpr anyApp
-
-        -- Collect all the applied names and form proper application expression with binding variables
-        pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
-
-        where
-          mergeApp : (namesL : List Name ** Vect namesL.length String -> TTImp) ->
-                     (AnyApp, (namesR : List Name ** Vect namesR.length String -> TTImp)) ->
-                     (names : List Name ** Vect names.length String -> TTImp)
-          mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
-            let bindNames : Vect (namesL.length + namesR.length) String := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
-            let (bindNamesL, bindNamesR) = splitAt namesL.length bindNames
-            let (lhs, rhs) = (bindL bindNamesL, bindR bindNamesR)
-            reAppAny1 lhs $ const rhs `mapExpr` anyApp
 
 --- Particular tactics ---
 
