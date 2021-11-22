@@ -71,12 +71,15 @@ unAppAny = runTR [] where
   runTR curr lhs                     = (lhs, curr)
 
 public export
+reAppAny1 : TTImp -> AnyApp -> TTImp
+reAppAny1 l $ PosApp e     = app l e
+reAppAny1 l $ NamedApp n e = namedApp l n e
+reAppAny1 l $ AutoApp e    = autoApp l e
+reAppAny1 l $ WithApp e    = IWithApp EmptyFC l e
+
+public export
 reAppAny : TTImp -> List AnyApp -> TTImp
-reAppAny = foldl $ \l => \case
-  PosApp e     => app l e
-  NamedApp n e => namedApp l n e
-  AutoApp e    => autoApp l e
-  WithApp e    => IWithApp EmptyFC l e
+reAppAny = foldl reAppAny1
 
 --- Specific expressions building helpers ---
 
