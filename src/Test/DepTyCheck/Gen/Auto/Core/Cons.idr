@@ -60,8 +60,10 @@ analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
       | _ => fail "Not an application for some variable"
 
     -- Check if this is a free name
-    let False = null args && (lhsName `elem` freeNames)
-      | True => pure (singleton lhsName ** bindVar . index FZ)
+    let False = lhsName `elem` freeNames
+      | True => if null args
+                  then pure (singleton lhsName ** bindVar . index FZ)
+                  else fail "Applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
     _ <- getCon lhsName -- or fail if `lhsName` is not a constructor
