@@ -79,24 +79,25 @@ canonicConsBody sig name con = do
     -- NOTE: Keep in mind that applied names may repeat
     isDeepConsApp : Elaboration m => (freeNames : List Name) -> TTImp ->
                     m $ Maybe (appliedFreeNames : List Name ** (bindNames : Vect appliedFreeNames.length String) -> {-bind expression-} TTImp)
-    isDeepConsApp freeNames e = do
+    isDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
 
-      -- Treat given expression as a function application to some name
-      let (IVar _ lhsName, args) = unAppAny e
-        | _ => pure Nothing
+      isD : TTImp -> Elab (appliedFreeNames : List Name ** Vect appliedFreeNames.length String -> TTImp)
+      isD e = do
 
-      -- Check if this is a free name
-      let False = null args && (lhsName `elem` freeNames)
-        | True => pure $ Just (singleton lhsName ** bindVar . index _)
+        -- Treat given expression as a function application to some name
+        let (IVar _ lhsName, args) = unAppAny e
+          | _ => fail "Not an application for some variable"
 
-      -- Check that this is an application to a constructor's name
-      True <- try .| getCon lhsName $> True .| pure False
-        | False => pure Nothing
+        -- Check if this is a free name
+        let False = null args && (lhsName `elem` freeNames)
+          | True => pure (singleton lhsName ** bindVar . index _)
 
-      Just deepArgs <- for @{Applicative.Compose} args $ \anyApp => map @{Functor.Compose} (anyApp,) $ isDeepConsApp freeNames $ assert_smaller e $ getExpr anyApp
-      | Nothing => pure Nothing
+        -- Check that this is an application to a constructor's name
+        _ <- getCon lhsName -- or fail if `lhsName` is not a constructor
 
-      pure @{Applicative.Compose} ?isDeepConsApp_rhs
+        deepArgs <- for args $ \anyApp => map (anyApp,) $ isD $ assert_smaller e $ getExpr anyApp
+
+        pure $ foldl ?isDeepConsApp_rhs ?foo deepArgs
 
 --- Particular tactics ---
 
