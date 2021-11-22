@@ -1,6 +1,8 @@
 ||| Several tactics for derivation of particular generators for a constructor regarding to how they use externals
 module Test.DepTyCheck.Gen.Auto.Core.Cons
 
+import public Data.List.Equalities
+
 import public Decidable.Equality
 
 import public Test.DepTyCheck.Gen.Auto.Derive
@@ -76,6 +78,7 @@ canonicConsBody sig name con = do
   where
 
     -- TODO to use set for the free names at input
+    -- TODO to think of using again `Fin n -> String` instead of `Vect n String` because of ease of splitting
     -- NOTE: Keep in mind that applied names may repeat
     isDeepConsApp : Elaboration m => (freeNames : List Name) -> TTImp ->
                     m $ Maybe (appliedFreeNames : List Name ** (bindNames : Vect appliedFreeNames.length String) -> {-bind expression-} TTImp)
@@ -90,14 +93,26 @@ canonicConsBody sig name con = do
 
         -- Check if this is a free name
         let False = null args && (lhsName `elem` freeNames)
-          | True => pure (singleton lhsName ** bindVar . index _)
+          | True => pure (singleton lhsName ** bindVar . index FZ)
 
         -- Check that this is an application to a constructor's name
         _ <- getCon lhsName -- or fail if `lhsName` is not a constructor
 
+        -- Analyze deeply all the arguments
         deepArgs <- for args $ \anyApp => map (anyApp,) $ isD $ assert_smaller e $ getExpr anyApp
 
-        pure $ foldl ?isDeepConsApp_rhs ?foo deepArgs
+        -- Collect all the applied names and form proper application expression with binding variables
+        pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
+
+        where
+          mergeApp : (namesL : List Name ** Vect namesL.length String -> TTImp) ->
+                     (AnyApp, (namesR : List Name ** Vect namesR.length String -> TTImp)) ->
+                     (names : List Name ** Vect names.length String -> TTImp)
+          mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
+            let bindNames : Vect (namesL.length + namesR.length) String := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
+            let (bindNamesL, bindNamesR) = splitAt namesL.length bindNames
+            let (lhs, rhs) = (bindL bindNamesL, bindR bindNamesR)
+            reAppAny1 lhs $ const rhs `mapExpr` anyApp
 
 --- Particular tactics ---
 
