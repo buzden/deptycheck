@@ -1,0 +1,56 @@
+1/2: Building ConsApps (ConsApps.idr)
+2/2: Building Infra (Infra.idr)
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    []
+LOG gen.auto.deep-cons-app:0: original expression: Nat
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: applied names:   []
+LOG gen.auto.deep-cons-app:0: bind expression: Nat
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [{arg:641}]
+LOG gen.auto.deep-cons-app:0: original expression: Nat
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: applied names:   []
+LOG gen.auto.deep-cons-app:0: bind expression: Nat
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [elem]
+LOG gen.auto.deep-cons-app:0: original expression: Vect 0 elem
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: applied names:   [elem]
+LOG gen.auto.deep-cons-app:0: bind expression: Vect 0 elem0
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [len, elem, x, xs]
+LOG gen.auto.deep-cons-app:0: original expression: Vect (S len) elem
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: applied names:   [len, elem]
+LOG gen.auto.deep-cons-app:0: bind expression: Vect (S len0) elem1
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [{a:1089}]
+LOG gen.auto.deep-cons-app:0: original expression: Split []
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: applied names:   [{a:1089}, {a:1089}]
+LOG gen.auto.deep-cons-app:0: bind expression: Split []
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [{a:1099}, x]
+LOG gen.auto.deep-cons-app:0: original expression: Split [x]
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: applied names:   [{a:1099}, {a:1099}, x, {a:1099}]
+LOG gen.auto.deep-cons-app:0: bind expression: Split [x2]
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [a, n, m, x, xs, y, ys]
+LOG gen.auto.deep-cons-app:0: original expression: Split (x :: (xs ++ (y :: ys)))
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: applied names:   [a, n, m, n, m, a, x, m, a, n, xs, m, a, y, ys]
+LOG gen.auto.deep-cons-app:0: bind expression: Split (x6 :: (xs10 ++ (y13 :: ys14)))
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [a, x]
+LOG gen.auto.deep-cons-app:0: original expression: x = x
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: applied names:   [a, a, x, x]
+LOG gen.auto.deep-cons-app:0: bind expression: x2 = x3
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [a, x]
+LOG gen.auto.deep-cons-app:0: original expression: EqExp a a x x
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: applied names:   [a, a, x, x]
+LOG gen.auto.deep-cons-app:0: bind expression: EqExp a0 a1 x2 x3
