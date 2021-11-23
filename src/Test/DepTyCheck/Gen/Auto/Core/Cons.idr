@@ -49,10 +49,10 @@ export
 analyseDeepConsApp : Elaboration m =>
                      (freeNames : List Name) ->
                      (analysedExpr : TTImp) ->
-                     m $ Maybe (appliedFreeNames : List Name ** (bindNames : Vect appliedFreeNames.length String) -> {-bind expression-} TTImp)
+                     m $ Maybe (appliedFreeNames : List Name ** (bindExpr : Vect appliedFreeNames.length TTImp) -> {-bind expression-} TTImp)
 analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
 
-  isD : TTImp -> Elab (appliedFreeNames : List Name ** Vect appliedFreeNames.length String -> TTImp)
+  isD : TTImp -> Elab (appliedFreeNames : List Name ** Vect appliedFreeNames.length TTImp -> TTImp)
   isD e = do
 
     -- Treat given expression as a function application to some name
@@ -62,7 +62,7 @@ analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
     -- Check if this is a free name
     let False = lhsName `elem` freeNames
       | True => if null args
-                  then pure (singleton lhsName ** bindVar . index FZ)
+                  then pure (singleton lhsName ** index FZ)
                   else fail "Applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
@@ -75,11 +75,11 @@ analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
     pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
 
     where
-      mergeApp : (namesL : List Name ** Vect namesL.length String -> TTImp) ->
-                 (AnyApp, (namesR : List Name ** Vect namesR.length String -> TTImp)) ->
-                 (names : List Name ** Vect names.length String -> TTImp)
+      mergeApp : (namesL : List Name ** Vect namesL.length a -> TTImp) ->
+                 (AnyApp, (namesR : List Name ** Vect namesR.length a -> TTImp)) ->
+                 (names : List Name ** Vect names.length a -> TTImp)
       mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
-        let bindNames : Vect (namesL.length + namesR.length) String := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
+        let bindNames : Vect (namesL.length + namesR.length) a := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
         let (bindNamesL, bindNamesR) = splitAt namesL.length bindNames
         let (lhs, rhs) = (bindL bindNamesL, bindR bindNamesR)
         reAppAny1 lhs $ const rhs `mapExpr` anyApp
