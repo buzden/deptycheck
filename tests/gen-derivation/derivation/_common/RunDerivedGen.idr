@@ -44,4 +44,4 @@ runGs checkedGens = do
 -- This is exactly like one in `AlternativeCore`, copied to not to change `*/core/*` tests.
 export
 ConstructorDerivator where
-  consGenExpr _ _ _ = pure `(empty)
+  consGenExpr _ _ _ _ = pure `(empty)

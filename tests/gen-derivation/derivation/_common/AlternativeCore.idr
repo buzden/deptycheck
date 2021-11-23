@@ -25,7 +25,7 @@ export
 
 export
 [EmptyCons'] ConstructorDerivator where
-  consGenExpr _ _ _ = pure `(empty)
+  consGenExpr _ _ _ _ = pure `(empty)
 
 export
 EmptyCons : DerivatorCore
