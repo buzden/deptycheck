@@ -2,6 +2,9 @@
 module Test.DepTyCheck.Gen.Auto.Core.Cons
 
 import public Data.List.Equalities
+import public Data.Vect.Extra
+
+import public Debug.Reflection
 
 import public Decidable.Equality
 
@@ -97,7 +100,7 @@ export
 canonicConsBody : ConstructorDerivator => CanonicGen m => GenSignature -> Name -> Con -> m $ List Clause
 canonicConsBody sig name con = do
 
-  -- Acquire consturctor's return type arguments
+  -- Acquire constructor's return type arguments
   let conRetTypeArgs = snd $ unAppAny con.type
   conRetTypeArgs <- for conRetTypeArgs $ \case -- resembles similar management from `Entry` module; they must be consistent
     PosApp e     => pure e
@@ -112,12 +115,29 @@ canonicConsBody sig name con = do
   let conRetTypeArg : Fin sig.targetType.args.length -> TTImp
       conRetTypeArg idx = index' conRetTypeArgs $ rewrite conRetTypeArgsLengthCorrect in idx
 
+  -- Determine names of the arguments of the constructor (as a function)
+  let conArgNames = (.name) <$> con.args
+
   -- For given arguments, determine whether they are
   --   - just a free name
   --   - repeated name of another given parameter (need of `decEq`)
   --   - (maybe, deeply) constructor call (need to match)
   --   - function call on a free param (need to use "inverted function" filtering trick)
   --   - something else (cannot manage yet)
+  deepConsApps <- for (Vect.fromList sig.givenParams.asList) $ \idx => do
+    let argExpr = conRetTypeArg idx
+    Just (appliedArgs ** bindExprF) <- analyseDeepConsApp conArgNames argExpr
+      | Nothing => fail "Argument #\{show idx} of constructor \{show con.name} is not supported yet (argument expression: \{show argExpr})"
+                   -- TODO to do `failAt` with nice position
+    let bindVarNames = flip mapWithPos (Vect.fromList appliedArgs) $ \pos, name => "\{show name}_arg_\{show idx}_pos_\{show pos}"
+    pure $ the (TTImp, (appArgs : List Name ** Vect appArgs.length String)) $
+      (bindExprF $ bindVar <$> bindVarNames, (appliedArgs ** bindVarNames))
+
+  -- Acquire LHS bind expressions for the given parameters
+  let givenBindExprs = fst <$> deepConsApps
+
+  -- Determine renaming map and pairs of names which should be `decEq`'ed
+
   ?fop_check_con_args
 
   -- TODO to build a map from a name to `Fin con.args.length`
