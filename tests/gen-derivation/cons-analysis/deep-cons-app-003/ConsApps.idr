@@ -15,8 +15,8 @@ data X : Type -> Type -> Type where
   XX : Either a b -> X a b
 
 public export
-consApps : List (List Name, TTImp)
-consApps =
+consApps : Elab $ List (List Name, TTImp)
+consApps = pure
   [ `(Vect n Nat) @@ ["n", "a"]
   , `(Vect n Nat) @@ ["n"]
   , `(Vect n (Either a b)) @@ ["n", "a", "b"]

@@ -15,8 +15,8 @@ data X : Type -> Type -> Type where
   XX : Either a b -> X a b
 
 public export
-consApps : List (List Name, TTImp)
-consApps =
+consApps : Elab $ List (List Name, TTImp)
+consApps = pure
   [ `(b) @@ ["a"]
   , `(a) @@ []
   , `(X a a) @@ []

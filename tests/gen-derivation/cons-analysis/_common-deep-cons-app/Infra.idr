@@ -20,4 +20,4 @@ printDeepConsApp freeNames tyExpr = do
   let bindExpr = bindExprF $ mapWithPos (\idx, n => show n ++ show idx) $ fromList appliedNames
   logSugaredTerm "gen.auto.deep-cons-app" 0 "bind expression" bindExpr
 
-%runElab for_ consApps $ uncurry printDeepConsApp
+%runElab consApps >>= traverse_ (uncurry printDeepConsApp)

@@ -22,8 +22,8 @@ data MyList : Type -> Type where
 infixr 5 `MC`
 
 public export
-consApps : List (List Name, TTImp)
-consApps =
+consApps : Elab $ List (List Name, TTImp)
+consApps = pure
   [ `(XX $ Right Unit) @@ []
   , `(XX $ Right a) @@ ["a"]
   , `(XX $ Right MkUnit) @@ []
