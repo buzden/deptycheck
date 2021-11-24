@@ -1,6 +1,7 @@
 ||| Several tactics for derivation of particular generators for a constructor regarding to how they use externals
 module Test.DepTyCheck.Gen.Auto.Core.Cons
 
+import public Data.Fin.Extra
 import public Data.List.Equalities
 import public Data.Vect.Extra
 
@@ -47,15 +48,14 @@ canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 ||| This function requires bind variable names as input.
 ||| It returns correct bind expression only when all given bind names are different.
 -- TODO to use set for the free names at input
--- TODO to think of using again `Fin n -> String` instead of `Vect n String` because of ease of splitting
 export
 analyseDeepConsApp : Elaboration m =>
                      (freeNames : List Name) ->
                      (analysedExpr : TTImp) ->
-                     m $ Maybe (appliedFreeNames : List Name ** (bindExpr : Vect appliedFreeNames.length TTImp) -> {-bind expression-} TTImp)
+                     m $ Maybe (appliedFreeNames : List Name ** (bindExpr : Fin appliedFreeNames.length -> TTImp) -> {-bind expression-} TTImp)
 analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
 
-  isD : TTImp -> Elab (appliedFreeNames : List Name ** Vect appliedFreeNames.length TTImp -> TTImp)
+  isD : TTImp -> Elab (appliedFreeNames : List Name ** (Fin appliedFreeNames.length -> TTImp) -> TTImp)
   isD e = do
 
     -- Treat given expression as a function application to some name
@@ -65,7 +65,7 @@ analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
     -- Check if this is a free name
     let False = lhsName `elem` freeNames
       | True => if null args
-                  then pure (singleton lhsName ** index FZ)
+                  then pure (singleton lhsName ** \f => f FZ)
                   else fail "Applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
@@ -78,13 +78,13 @@ analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
     pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
 
     where
-      mergeApp : (namesL : List Name ** Vect namesL.length a -> TTImp) ->
-                 (AnyApp, (namesR : List Name ** Vect namesR.length a -> TTImp)) ->
-                 (names : List Name ** Vect names.length a -> TTImp)
+      mergeApp : (namesL : List Name ** (Fin namesL.length -> a) -> TTImp) ->
+                 (AnyApp, (namesR : List Name ** (Fin namesR.length -> a) -> TTImp)) ->
+                 (names : List Name ** (Fin names.length -> a) -> TTImp)
       mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
-        let bindNames : Vect (namesL.length + namesR.length) a := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
-        let (bindNamesL, bindNamesR) = splitAt namesL.length bindNames
-        let (lhs, rhs) = (bindL bindNamesL, bindR bindNamesR)
+        let bindNames : Fin (namesL.length + namesR.length) -> a := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
+        let lhs = bindL $ bindNames . indexSum . Left
+        let rhs = bindR $ bindNames . indexSum . Right
         reAppAny1 lhs $ const rhs `mapExpr` anyApp
 
 --- Interface ---
@@ -131,7 +131,7 @@ canonicConsBody sig name con = do
                    -- TODO to do `failAt` with nice position
     let bindVarNames = flip mapWithPos (Vect.fromList appliedArgs) $ \pos, name => "\{show name}_arg_\{show idx}_pos_\{show pos}"
     pure $ the (TTImp, (appArgs : List Name ** Vect appArgs.length String)) $
-      (bindExprF $ bindVar <$> bindVarNames, (appliedArgs ** bindVarNames))
+      (bindExprF $ bindVar . flip index bindVarNames, (appliedArgs ** bindVarNames))
 
   -- Acquire LHS bind expressions for the given parameters
   let givenBindExprs = fst <$> deepConsApps

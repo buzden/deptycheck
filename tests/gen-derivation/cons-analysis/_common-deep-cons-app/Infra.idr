@@ -17,7 +17,7 @@ printDeepConsApp freeNames tyExpr = do
   Just (appliedNames ** bindExprF) <- analyseDeepConsApp freeNames tyExpr
   | Nothing => logMsg "gen.auto.deep-cons-app" 0 "not a (deep) constructor application"
   logMsg         "gen.auto.deep-cons-app" 0 "applied names:   \{show appliedNames}"
-  let bindExpr = bindExprF $ mapWithPos (\idx, n => bindVar $ show n ++ show idx) $ fromList appliedNames
+  let bindExpr = bindExprF $ \idx => bindVar $ show (index' appliedNames idx) ++ show idx
   logSugaredTerm "gen.auto.deep-cons-app" 0 "bind expression" bindExpr
 
 %runElab consApps >>= traverse_ (uncurry printDeepConsApp)
