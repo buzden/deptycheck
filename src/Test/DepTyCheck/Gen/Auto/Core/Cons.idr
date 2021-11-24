@@ -129,12 +129,10 @@ canonicConsBody sig name con = do
     Just (appliedArgs ** bindExprF) <- analyseDeepConsApp conArgNames argExpr
       | Nothing => fail "Argument #\{show idx} of constructor \{show con.name} is not supported yet (argument expression: \{show argExpr})"
                    -- TODO to do `failAt` with nice position
-    let bindVarNames = flip mapWithPos (Vect.fromList appliedArgs) $ \pos, name => "\{show name}_arg_\{show idx}_pos_\{show pos}"
-    pure $ the (TTImp, (appArgs : List Name ** Vect appArgs.length String)) $
-      (bindExprF $ bindVar . flip index bindVarNames, (appliedArgs ** bindVarNames))
+    pure $ the (appArgs : List Name ** (Fin appArgs.length -> TTImp) -> TTImp) $
+      (appliedArgs ** bindExprF)
 
   -- Acquire LHS bind expressions for the given parameters
-  let givenBindExprs = fst <$> deepConsApps
 
   -- Determine renaming map and pairs of names which should be `decEq`'ed
 
