@@ -101,12 +101,24 @@ public export
 Eq Namespace where
   MkNS xs == MkNS ys = xs == ys
 
+export
+Ord Namespace where
+  compare = comparing $ \(MkNS xs) => xs
+
 public export
 Eq UserName where
   Basic x    == Basic y    = x == y
   Field x    == Field y    = x == y
   Underscore == Underscore = True
   _ == _ = False
+
+export
+Ord UserName where
+  compare = comparing characteristic where
+    characteristic : UserName -> (Int, String)
+    characteristic $ Basic x    = (0, x)
+    characteristic $ Field x    = (1, x)
+    characteristic $ Underscore = (2, "")
 
 public export
 Eq Name where
@@ -115,11 +127,58 @@ Eq Name where
   NS s n == NS p m = s == p && n == m
   DN x n == DN y m = x == y && n == m
 
-  Nested x n    ==  Nested y m   = x == y && n == m
+  Nested x n    == Nested y m    = x == y && n == m
   CaseBlock x n == CaseBlock y m = x == y && n == m
   WithBlock x n == WithBlock y m = x == y && n == m
 
   _ == _ = False
+
+export
+Ord Name where
+  compare (DN _ x) y        = compare x y
+  compare x        (DN _ y) = compare x y
+
+  compare (NS x y) (NS z w)        = compare x z <+> compare y w
+  compare (NS _ _) (UN _)          = LT
+  compare (NS _ _) (MN _ _)        = LT
+  compare (NS _ _) (Nested _ _)    = LT
+  compare (NS _ _) (CaseBlock _ _) = LT
+  compare (NS _ _) (WithBlock _ _) = LT
+
+  compare (UN _) (NS _ _)        = GT
+  compare (UN x) (UN y)          = compare x y
+  compare (UN _) (MN _ _)        = LT
+  compare (UN _) (Nested _ _)    = LT
+  compare (UN _) (CaseBlock _ _) = LT
+  compare (UN _) (WithBlock _ _) = LT
+
+  compare (MN _ _) (NS _ _)        = GT
+  compare (MN _ _) (UN _)          = GT
+  compare (MN x y) (MN z w)        = compare x z <+> compare y w
+  compare (MN _ _) (Nested _ _)    = LT
+  compare (MN _ _) (CaseBlock _ _) = LT
+  compare (MN _ _) (WithBlock _ _) = LT
+
+  compare (Nested _ _) (NS _ _)        = GT
+  compare (Nested _ _) (UN _)          = GT
+  compare (Nested _ _) (MN _ _)        = GT
+  compare (Nested x y) (Nested z w)    = compare x z <+> compare y w
+  compare (Nested _ _) (CaseBlock _ _) = LT
+  compare (Nested _ _) (WithBlock _ _) = LT
+
+  compare (CaseBlock _ _) (NS _ _)        = GT
+  compare (CaseBlock _ _) (UN _)          = GT
+  compare (CaseBlock _ _) (MN _ _)        = GT
+  compare (CaseBlock _ _) (Nested _ _)    = GT
+  compare (CaseBlock x y) (CaseBlock z w) = compare x z <+> compare y w
+  compare (CaseBlock _ _) (WithBlock _ _) = LT
+
+  compare (WithBlock _ _) (NS _ _)        = GT
+  compare (WithBlock _ _) (UN _)          = GT
+  compare (WithBlock _ _) (MN _ _)        = GT
+  compare (WithBlock _ _) (Nested _ _)    = GT
+  compare (WithBlock _ _) (CaseBlock _ _) = GT
+  compare (WithBlock x y) (WithBlock z w) = compare x z <+> compare y w
 
 ---------------------------------------
 --- Working around primitive values ---
