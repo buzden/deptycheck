@@ -1,6 +1,8 @@
 ||| Several tactics for derivation of particular generators for a constructor regarding to how they use externals
 module Test.DepTyCheck.Gen.Auto.Core.Cons
 
+import public Control.Monad.State.Tuple
+
 import public Data.Fin.Extra
 import public Data.List.Equalities
 import public Data.Vect.Extra
@@ -132,10 +134,23 @@ canonicConsBody sig name con = do
       (appliedArgs ** bindExprF)
 
   -- Acquire LHS bind expressions for the given parameters
-
   -- Determine renaming map and pairs of names which should be `decEq`'ed
-
-  ?fop_check_con_args
+  let getAndInc : forall m. MonadState Nat m => m Nat
+      getAndInc = get <* modify S
+  let ((_, decEqedNames, _), bindExprs) =
+    runState (empty, empty, 0) {stateType=(SortedSet String, SortedSet (String, String), Nat)} $
+      for deepConsApps $ \(appliedNames ** bindExprF) => do
+        renamedAppliedNames <- for (Vect.fromList appliedNames) $ \case
+          UN (Basic name) => do
+            currNames <- get
+            if contains name currNames
+              then do
+                let substName = "to_be_deceqed__" ++ name ++ show !getAndInc
+                modify $ insert (name, substName)
+                pure substName
+              else modify (insert name) $> name
+          _ => ?err
+        pure $ bindExprF $ bindVar . flip index renamedAppliedNames
 
   -- TODO to build a map from a name to `Fin con.args.length`
 
