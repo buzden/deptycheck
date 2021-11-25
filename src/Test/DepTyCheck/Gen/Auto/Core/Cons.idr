@@ -159,8 +159,15 @@ canonicConsBody sig name con = do
       | Nothing => fail "INTERNAL ERROR: calculated given `\{givenArgNameStr}` is not found in an arguments list of the constructor `\{show con.name}`"
     pure idx
 
+  -- TODO to add a `decEq`s sequence managing `decEqedNames`
+
   let fuelArg = "fuel_cons_arg"
-  pure [ canonicDefaultLHS sig name fuelArg .= !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
+  pure $
+    -- Happy case, given arguments conform out constructor's GADT indices
+    [ callCanonic sig name (bindVar fuelArg) bindExprs .= !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
+    ++ if all isSimpleBindVar bindExprs then [] {- do not produce dead code, happy case manages everything already -} else
+      -- The rest case, if given do not conform, return empty generator
+      [ canonicDefaultLHS sig name fuelArg .= `(empty) ]
 
 --- Particular tactics ---
 

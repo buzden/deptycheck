@@ -75,11 +75,22 @@ ILam.  (MW ExplicitArg {fuel:2337} : IVar Data.Fuel.Fuel)
                             IDef {cons_gen_for_Data.Vect.Nil:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
                                                   $ IBindVar fuel_cons_arg
+                                                  $ IVar Prelude.Types.Z
+                                                  $ IBindVar elem)
+                                             (IVar empty)
+                                 , PatClause (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
+                                                  $ IBindVar fuel_cons_arg
                                                   $ IBindVar len
                                                   $ IBindVar elem)
                                              (IVar empty) ]
                             IDef {cons_gen_for_Data.Vect.:::7}
                                  [ PatClause (IApp. IVar {cons_gen_for_Data.Vect.:::7}
+                                                  $ IBindVar fuel_cons_arg
+                                                  $ (IApp. IVar Prelude.Types.S
+                                                         $ IBindVar len)
+                                                  $ IBindVar elem)
+                                             (IVar empty)
+                                 , PatClause (IApp. IVar {cons_gen_for_Data.Vect.:::7}
                                                   $ IBindVar fuel_cons_arg
                                                   $ IBindVar len
                                                   $ IBindVar elem)

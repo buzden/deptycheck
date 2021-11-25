@@ -95,6 +95,11 @@ export
 callOneOf : List TTImp -> TTImp
 callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
 
+export
+isSimpleBindVar : TTImp -> Bool
+isSimpleBindVar $ IBindVar {} = True
+isSimpleBindVar _             = False
+
 --- General purpose instances ---
 
 public export

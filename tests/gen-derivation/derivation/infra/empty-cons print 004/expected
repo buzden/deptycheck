@@ -50,5 +50,5 @@ ILam.  (MW ExplicitArg {fuel:2336} : IVar Data.Fuel.Fuel)
                             IDef {cons_gen_for_DerivedGen.MkX:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.MkX:7}
                                                   $ IBindVar fuel_cons_arg
-                                                  $ IBindVar {arg:2317})
+                                                  $ IBindVar n)
                                              (IVar empty) ] ]
