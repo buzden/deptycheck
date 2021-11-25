@@ -134,21 +134,19 @@ canonicConsBody sig name con = do
       (appliedArgs ** bindExprF)
 
   -- Acquire LHS bind expressions for the given parameters
-  -- Determine renaming map and pairs of names which should be `decEq`'ed
+  -- Determine pairs of names which should be `decEq`'ed
   let getAndInc : forall m. MonadState Nat m => m Nat
       getAndInc = get <* modify S
   ((_, decEqedNames, _), bindExprs) <-
     runStateT (empty, empty, 0) {stateType=(SortedSet String, SortedSet (String, String), Nat)} {m} $
       for deepConsApps $ \(appliedNames ** bindExprF) => do
         renamedAppliedNames <- for (Vect.fromList appliedNames) $ \case
-          UN (Basic name) => do
-            currNames <- get
-            if contains name currNames
-              then do
-                let substName = "to_be_deceqed__" ++ name ++ show !getAndInc
-                modify $ insert (name, substName)
-                pure substName
-              else modify (insert name) $> name
+          UN (Basic name) => if contains name !get
+            then do
+              let substName = "to_be_deceqed__" ++ name ++ show !getAndInc
+              modify $ insert (name, substName)
+              pure substName
+            else modify (insert name) $> name
           badName => fail "Unsupported name `\{show badName}` of a parameter used in the constructor `\{show con.name}`"
         pure $ bindExprF $ bindVar . flip index renamedAppliedNames
 
