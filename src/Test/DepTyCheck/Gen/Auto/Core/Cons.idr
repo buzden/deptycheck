@@ -137,8 +137,8 @@ canonicConsBody sig name con = do
   -- Determine renaming map and pairs of names which should be `decEq`'ed
   let getAndInc : forall m. MonadState Nat m => m Nat
       getAndInc = get <* modify S
-  let ((_, decEqedNames, _), bindExprs) =
-    runState (empty, empty, 0) {stateType=(SortedSet String, SortedSet (String, String), Nat)} $
+  ((_, decEqedNames, _), bindExprs) <-
+    runStateT (empty, empty, 0) {stateType=(SortedSet String, SortedSet (String, String), Nat)} {m} $
       for deepConsApps $ \(appliedNames ** bindExprF) => do
         renamedAppliedNames <- for (Vect.fromList appliedNames) $ \case
           UN (Basic name) => do
@@ -149,7 +149,7 @@ canonicConsBody sig name con = do
                 modify $ insert (name, substName)
                 pure substName
               else modify (insert name) $> name
-          _ => ?err
+          badName => fail "Unsupported name `\{show badName}` of a parameter used in the constructor `\{show con.name}`"
         pure $ bindExprF $ bindVar . flip index renamedAppliedNames
 
   -- TODO to build a map from a name to `Fin con.args.length`
