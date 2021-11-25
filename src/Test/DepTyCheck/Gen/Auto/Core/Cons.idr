@@ -47,10 +47,9 @@ canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 ||| is also returned.
 ||| This function requires bind variable names as input.
 ||| It returns correct bind expression only when all given bind names are different.
--- TODO to use set for the free names at input
 export
 analyseDeepConsApp : Elaboration m =>
-                     (freeNames : List Name) ->
+                     (freeNames : SortedSet Name) ->
                      (analysedExpr : TTImp) ->
                      m $ Maybe (appliedFreeNames : List Name ** (bindExpr : Fin appliedFreeNames.length -> TTImp) -> {-bind expression-} TTImp)
 analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
@@ -63,7 +62,7 @@ analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
       | _ => fail "Not an application for some variable"
 
     -- Check if this is a free name
-    let False = lhsName `elem` freeNames
+    let False = contains lhsName freeNames
       | True => if null args
                   then pure (singleton lhsName ** \f => f FZ)
                   else fail "Applying free name to some arguments"
@@ -116,7 +115,7 @@ canonicConsBody sig name con = do
       conRetTypeArg idx = index' conRetTypeArgs $ rewrite conRetTypeArgsLengthCorrect in idx
 
   -- Determine names of the arguments of the constructor (as a function)
-  let conArgNames = (.name) <$> con.args
+  let conArgNames = fromList $ (.name) <$> con.args
 
   -- For given arguments, determine whether they are
   --   - just a free name
