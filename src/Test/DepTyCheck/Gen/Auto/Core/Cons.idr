@@ -137,7 +137,7 @@ canonicConsBody sig name con = do
   -- Determine pairs of names which should be `decEq`'ed
   let getAndInc : forall m. MonadState Nat m => m Nat
       getAndInc = get <* modify S
-  ((_, decEqedNames, _), bindExprs) <-
+  ((givenConArgs, decEqedNames, _), bindExprs) <-
     runStateT (empty, empty, 0) {stateType=(SortedSet String, SortedSet (String, String), Nat)} {m} $
       for deepConsApps $ \(appliedNames ** bindExprF) => do
         renamedAppliedNames <- for (Vect.fromList appliedNames) $ \case
@@ -150,12 +150,17 @@ canonicConsBody sig name con = do
           badName => fail "Unsupported name `\{show badName}` of a parameter used in the constructor `\{show con.name}`"
         pure $ bindExprF $ bindVar . flip index renamedAppliedNames
 
-  -- TODO to build a map from a name to `Fin con.args.length`
+  -- Build a map from constructor's argument name to its index
+  let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
 
-  -- TODO to form a list of given constructor arguments to `consGenExpr` call
+  -- Determine indices of constructor's arguments that are given
+  givenConArgs <- for givenConArgs.asList $ \givenArgNameStr => do
+    let Just idx = lookup (UN $ Basic givenArgNameStr) conArgIdxs
+      | Nothing => fail "INTERNAL ERROR: calculated given `\{givenArgNameStr}` is not found in an arguments list of the constructor `\{show con.name}`"
+    pure idx
 
   let fuelArg = "fuel_cons_arg"
-  pure [ canonicDefaultLHS sig name fuelArg .= !(consGenExpr sig con ?con_givens $ varStr fuelArg) ]
+  pure [ canonicDefaultLHS sig name fuelArg .= !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
 
 --- Particular tactics ---
 

@@ -219,6 +219,14 @@ typeInfoOfConstant CharType    = Just $ primTypeInfo "Char"
 typeInfoOfConstant DoubleType  = Just $ primTypeInfo "Double"
 typeInfoOfConstant WorldType   = Nothing
 
+-------------------------------------
+--- Working around type inference ---
+-------------------------------------
+
+public export
+argName : NamedArg -> Name
+argName = (.name)
+
 ----------------------------------------------
 --- Analyzing dependently typed signatures ---
 ----------------------------------------------
