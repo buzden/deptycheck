@@ -165,8 +165,8 @@ canonicConsBody sig name con = do
   pure $
     -- Happy case, given arguments conform out constructor's GADT indices
     [ callCanonic sig name (bindVar fuelArg) bindExprs .= !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
-    ++ if all isSimpleBindVar bindExprs then [] {- do not produce dead code, happy case manages everything already -} else
-      -- The rest case, if given do not conform, return empty generator
+    ++ if all isSimpleBindVar bindExprs then [] {- do not produce dead code if the happy case handles everything already -} else
+      -- The rest case, if given arguments do not conform to the current constructor then return empty generator
       [ canonicDefaultLHS sig name fuelArg .= `(empty) ]
 
 --- Particular tactics ---
