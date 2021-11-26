@@ -161,7 +161,11 @@ canonicConsBody sig name con = do
 
   -- Equalise index values which must be propositionally equal to some parameters
   let enrich1WithDecEq : (String, String) -> TTImp -> TTImp
-      enrich1WithDecEq (l, r) subexpr = `(case decEq ~(varStr l) ~(varStr r) of No _ => empty; Yes Refl => ~(subexpr))
+      enrich1WithDecEq (l, r) subexpr = `(
+          case Decidable.Equality.decEq ~(varStr l) ~(varStr r) of
+            Prelude.No  _            => Prelude.empty
+            Prelude.Yes Builtin.Refl => ~(subexpr)
+        )
       deceqise : TTImp -> TTImp
       deceqise = foldr (\ss, f => enrich1WithDecEq ss . f) id decEqedNames
 
