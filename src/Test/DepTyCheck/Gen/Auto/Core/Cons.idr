@@ -92,7 +92,6 @@ analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
 
 public export
 interface ConstructorDerivator where
-  -- TODO to add appropriate post-index-analysis parameters
   consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
 
 --- Entry function ---
