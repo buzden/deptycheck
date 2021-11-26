@@ -3,8 +3,8 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen (DPair Nat (\n => DPair Bool (\b => X n b)))
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg {fuel:2349} : IVar Data.Fuel.Fuel)
-    => ILocal (IApp. IVar {("DerivedGen.X", []):0} $ IVar {fuel:2349})
+ILam.  (MW ExplicitArg {fuel:2348} : IVar Data.Fuel.Fuel)
+    => ILocal (IApp. IVar {("DerivedGen.X", []):0} $ IVar {fuel:2348})
          IClaim MW
                 Export
                 []
@@ -13,13 +13,13 @@ ILam.  (MW ExplicitArg {fuel:2349} : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar Builtin.DPair.DPair
                                          $ IVar Prelude.Types.Nat
-                                         $ (ILam.  (MW ExplicitArg {arg:2317} : IVar Prelude.Types.Nat)
+                                         $ (ILam.  (MW ExplicitArg {arg:2316} : IVar Prelude.Types.Nat)
                                                 => (IApp. IVar Builtin.DPair.DPair
                                                         $ IVar Prelude.Basics.Bool
-                                                        $ (ILam.  (MW ExplicitArg {arg:2320} : IVar Prelude.Basics.Bool)
+                                                        $ (ILam.  (MW ExplicitArg {arg:2319} : IVar Prelude.Basics.Bool)
                                                                => (IApp. IVar DerivedGen.X
-                                                                       $ IVar {arg:2317}
-                                                                       $ IVar {arg:2320}))))))))
+                                                                       $ IVar {arg:2316}
+                                                                       $ IVar {arg:2319}))))))))
          IDef {("DerivedGen.X", []):0}
               [ PatClause (IApp. IVar {("DerivedGen.X", []):0} $ IVar Dry)
                           (IVar empty)
