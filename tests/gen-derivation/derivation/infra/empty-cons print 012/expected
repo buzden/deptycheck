@@ -82,14 +82,32 @@ ILam.  (MW ExplicitArg {fuel:2346} : IVar Data.Fuel.Fuel)
                                                   $ IBindVar fuel_cons_arg
                                                   $ IBindVar n
                                                   $ IBindVar to_be_deceqed__n0)
-                                             (IVar empty) ]
+                                             (ICase (IApp. IVar decEq
+                                                         $ IVar n
+                                                         $ IVar to_be_deceqed__n0)
+                                                    (Implicit False)
+                                                    [ PatClause (IApp. IVar No
+                                                                     $ Implicit True)
+                                                                (IVar empty)
+                                                    , PatClause (IApp. IVar Yes
+                                                                     $ IVar Refl)
+                                                                (IVar empty) ]) ]
                             IDef {cons_gen_for_DerivedGen.XS:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.XS:7}
                                                   $ IBindVar fuel_cons_arg
                                                   $ IBindVar n
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar to_be_deceqed__n0))
-                                             (IVar empty)
+                                             (ICase (IApp. IVar decEq
+                                                         $ IVar n
+                                                         $ IVar to_be_deceqed__n0)
+                                                    (Implicit False)
+                                                    [ PatClause (IApp. IVar No
+                                                                     $ Implicit True)
+                                                                (IVar empty)
+                                                    , PatClause (IApp. IVar Yes
+                                                                     $ IVar Refl)
+                                                                (IVar empty) ])
                                  , PatClause (IApp. IVar {cons_gen_for_DerivedGen.XS:7}
                                                   $ Implicit True
                                                   $ Implicit True

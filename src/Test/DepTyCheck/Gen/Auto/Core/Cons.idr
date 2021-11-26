@@ -159,12 +159,17 @@ canonicConsBody sig name con = do
       | Nothing => fail "INTERNAL ERROR: calculated given `\{givenArgNameStr}` is not found in an arguments list of the constructor `\{show con.name}`"
     pure idx
 
-  -- TODO to add a `decEq`s sequence managing `decEqedNames`
+  -- Equalise index values which must be propositionally equal to some parameters
+  let enrich1WithDecEq : (String, String) -> TTImp -> TTImp
+      enrich1WithDecEq (l, r) subexpr = `(case decEq ~(varStr l) ~(varStr r) of No _ => empty; Yes Refl => ~(subexpr))
+      deceqise : TTImp -> TTImp
+      deceqise = foldr (\ss, f => enrich1WithDecEq ss . f) id decEqedNames
 
+  -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "fuel_cons_arg"
   pure $
     -- Happy case, given arguments conform out constructor's GADT indices
-    [ callCanonic sig name (bindVar fuelArg) bindExprs .= !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
+    [ callCanonic sig name (bindVar fuelArg) bindExprs .= deceqise !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
     ++ if all isSimpleBindVar bindExprs then [] {- do not produce dead code if the happy case handles everything already -} else
       -- The rest case, if given arguments do not conform to the current constructor then return empty generator
       [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(empty) ]
