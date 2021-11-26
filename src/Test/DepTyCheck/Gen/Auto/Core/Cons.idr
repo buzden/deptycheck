@@ -167,7 +167,7 @@ canonicConsBody sig name con = do
     [ callCanonic sig name (bindVar fuelArg) bindExprs .= !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
     ++ if all isSimpleBindVar bindExprs then [] {- do not produce dead code if the happy case handles everything already -} else
       -- The rest case, if given arguments do not conform to the current constructor then return empty generator
-      [ canonicDefaultLHS sig name fuelArg .= `(empty) ]
+      [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(empty) ]
 
 --- Particular tactics ---
 

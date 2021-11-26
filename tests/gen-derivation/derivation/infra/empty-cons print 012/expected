@@ -91,7 +91,7 @@ ILam.  (MW ExplicitArg {fuel:2346} : IVar Data.Fuel.Fuel)
                                                          $ IBindVar to_be_deceqed__n0))
                                              (IVar empty)
                                  , PatClause (IApp. IVar {cons_gen_for_DerivedGen.XS:7}
-                                                  $ IBindVar fuel_cons_arg
-                                                  $ IBindVar {arg:2316}
-                                                  $ IBindVar {arg:2319})
+                                                  $ Implicit True
+                                                  $ Implicit True
+                                                  $ Implicit True)
                                              (IVar empty) ] ]
