@@ -31,10 +31,10 @@ namespace NonObligatoryExts
 
       -- Get dependencies of constructor's arguments
       deps <- argDeps con.args
-      let weakenedDeps : Vect _ $ SortedSet $ Fin _ := flip downmapI deps $ \_ => mapIn weakenToSuper
+      let weakenedDeps = flip downmapI deps $ \_ => (`difference` givs) . mapIn weakenToSuper
 
       -- Arguments that no other argument depends on
-      let kingArgs = fromFoldable (allFins' _) `difference` concat weakenedDeps
+      let kingArgs = (fromFoldable (allFins' _) `difference` givs) `difference` concat weakenedDeps
 
       -- Acquire order(s) in what we will generate arguments
       -- TODO to permute independent groups of arguments independently
