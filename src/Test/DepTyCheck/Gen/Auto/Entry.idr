@@ -181,7 +181,7 @@ checkTypeIsGen sig = do
     | (_, (_, ty)) :: _ => failAt (getFC ty) "Name of the argument is not unique in the dependent pair under the resulting `Gen`"
 
   -- check that all given parameters have different names
-  let [] = findDiffPairWhich ((==) `on` (\(_, n, _) => n)) givenParams
+  let [] = findDiffPairWhich ((==) `on` \(_, n, _) => n) givenParams
     | (_, (_, _, ty)) :: _ => failAt (getFC ty) "Name of the generator function's argument is not unique"
 
   -----------------------------------------------------------------------
