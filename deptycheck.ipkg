@@ -11,7 +11,8 @@ modules = System.Random.Simple
         , Test.DepTyCheck.Gen.Auto
         , Test.DepTyCheck.Gen.Auto.Checked
         , Test.DepTyCheck.Gen.Auto.Core
-        , Test.DepTyCheck.Gen.Auto.Core.Cons
+        , Test.DepTyCheck.Gen.Auto.Core.ConsDerive
+        , Test.DepTyCheck.Gen.Auto.Core.ConsEntry
         , Test.DepTyCheck.Gen.Auto.Derive
         , Test.DepTyCheck.Gen.Auto.Entry
         , Test.DepTyCheck.Gen.Auto.Util
