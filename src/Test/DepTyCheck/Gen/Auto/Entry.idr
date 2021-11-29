@@ -161,10 +161,10 @@ checkTypeIsGen sig = do
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
     MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, name, type)
     MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, name, type)
-    MkArg MW AutoImplicit (MN _ _) type => pure $ Right type
+    MkArg MW AutoImplicit (MN _ _) type => pure $ Right type -- TODO to manage the case when this auto-implicit shadows some other name
 
-    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named"
-    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit argument must be named"
+    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
+    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
     MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit argument must be unnamed"
 
     MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
