@@ -50,6 +50,25 @@ namespace NonObligatoryExts
 
             -- ... state is the set of arguments that are left to be generated
             genForOneKing : (TTImp -> TTImp) -> (king : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
+            genForOneKing leftExprF kingArg = do
+
+              -- Determine which arguments will be on the left of dpair in subgen call
+              let depArgs = index kingArg deps `intersection` !get
+
+              -- Make sure generated arguments will be not generated again
+              modify $ union depArgs
+
+              -- Form a task for subgen
+              let subsig : GenSignature := ?subgen_sig
+
+              -- Form an expression to call the subgen
+              subgenCall <- lift $ callGen subsig fuel ?genForOneKing_rhs
+
+              -- Form an expression of binding the result of subgen
+              let bindSubgenResult = buildDPair ?bind_king ?bind_king_deps
+
+              -- Chain the subgen call with a given continuation
+              pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(cont))
 
             callCons : TTImp
             callCons = ?callCons_rhs -- actually, needs RHS expression for GADT indices as input
