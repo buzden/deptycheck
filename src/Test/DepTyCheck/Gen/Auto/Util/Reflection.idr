@@ -23,6 +23,8 @@ import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 --- Parsing and rebuilding `TTImp` stuff ---
 --------------------------------------------
 
+--- `DPair` parsing and rebuilding stuff ---
+
 public export
 unDPair : TTImp -> (List (Arg False), TTImp)
 unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo mbname _ lamTy)) =
@@ -33,6 +35,8 @@ public export
 buildDPair : (rhs : TTImp) -> List (Name, TTImp) -> TTImp
 buildDPair = foldr $ \(name, type), res =>
   var `{Builtin.DPair.DPair} .$ type .$ lam (MkArg MW ExplicitArg (Just name) type) res
+
+--- Facilities for managing any kind of function application at once ---
 
 public export
 data AnyApp
@@ -48,15 +52,36 @@ getExpr $ NamedApp _ e = e
 getExpr $ AutoApp e    = e
 getExpr $ WithApp e    = e
 
+-- Shallow expression mapping
 public export
-unAppAny : TTImp -> (List AnyApp, TTImp)
+mapExpr : (TTImp -> TTImp) -> AnyApp -> AnyApp
+mapExpr f $ PosApp e     = PosApp $ f e
+mapExpr f $ NamedApp n e = NamedApp n $ f e
+mapExpr f $ AutoApp e    = AutoApp $ f e
+mapExpr f $ WithApp e    = WithApp $ f e
+
+public export
+unAppAny : TTImp -> (TTImp, List AnyApp)
 unAppAny = runTR [] where
-  runTR : List AnyApp -> TTImp -> (List AnyApp, TTImp)
+  runTR : List AnyApp -> TTImp -> (TTImp, List AnyApp)
   runTR curr $ IApp      _ lhs   rhs = runTR (PosApp rhs     :: curr) lhs
   runTR curr $ INamedApp _ lhs n rhs = runTR (NamedApp n rhs :: curr) lhs
   runTR curr $ IAutoApp  _ lhs   rhs = runTR (AutoApp rhs    :: curr) lhs
   runTR curr $ IWithApp  _ lhs   rhs = runTR (WithApp rhs    :: curr) lhs
-  runTR curr result                  = (curr, result)
+  runTR curr lhs                     = (lhs, curr)
+
+public export
+reAppAny1 : TTImp -> AnyApp -> TTImp
+reAppAny1 l $ PosApp e     = app l e
+reAppAny1 l $ NamedApp n e = namedApp l n e
+reAppAny1 l $ AutoApp e    = autoApp l e
+reAppAny1 l $ WithApp e    = IWithApp EmptyFC l e
+
+public export
+reAppAny : TTImp -> List AnyApp -> TTImp
+reAppAny = foldl reAppAny1
+
+--- Specific expressions building helpers ---
 
 public export
 appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
@@ -66,17 +91,24 @@ public export
 liftList : Foldable f => f TTImp -> TTImp
 liftList = foldr (\l, r => `(~(l) :: ~(r))) `([])
 
---- Specific expressions ---
-
 export
 callOneOf : List TTImp -> TTImp
 callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
+
+export
+isSimpleBindVar : TTImp -> Bool
+isSimpleBindVar $ IBindVar {} = True
+isSimpleBindVar _             = False
 
 --- General purpose instances ---
 
 public export
 Eq Namespace where
   MkNS xs == MkNS ys = xs == ys
+
+export
+Ord Namespace where
+  compare = comparing $ \(MkNS xs) => xs
 
 public export
 Eq UserName where
@@ -85,6 +117,14 @@ Eq UserName where
   Underscore == Underscore = True
   _ == _ = False
 
+export
+Ord UserName where
+  compare = comparing characteristic where
+    characteristic : UserName -> (Int, String)
+    characteristic $ Basic x    = (0, x)
+    characteristic $ Field x    = (1, x)
+    characteristic $ Underscore = (2, "")
+
 public export
 Eq Name where
   UN x   == UN y   = x == y
@@ -92,11 +132,58 @@ Eq Name where
   NS s n == NS p m = s == p && n == m
   DN x n == DN y m = x == y && n == m
 
-  Nested x n    ==  Nested y m   = x == y && n == m
+  Nested x n    == Nested y m    = x == y && n == m
   CaseBlock x n == CaseBlock y m = x == y && n == m
   WithBlock x n == WithBlock y m = x == y && n == m
 
   _ == _ = False
+
+export
+Ord Name where
+  compare (DN _ x) y        = compare x y
+  compare x        (DN _ y) = compare x y
+
+  compare (NS x y) (NS z w)        = compare x z <+> compare y w
+  compare (NS _ _) (UN _)          = LT
+  compare (NS _ _) (MN _ _)        = LT
+  compare (NS _ _) (Nested _ _)    = LT
+  compare (NS _ _) (CaseBlock _ _) = LT
+  compare (NS _ _) (WithBlock _ _) = LT
+
+  compare (UN _) (NS _ _)        = GT
+  compare (UN x) (UN y)          = compare x y
+  compare (UN _) (MN _ _)        = LT
+  compare (UN _) (Nested _ _)    = LT
+  compare (UN _) (CaseBlock _ _) = LT
+  compare (UN _) (WithBlock _ _) = LT
+
+  compare (MN _ _) (NS _ _)        = GT
+  compare (MN _ _) (UN _)          = GT
+  compare (MN x y) (MN z w)        = compare x z <+> compare y w
+  compare (MN _ _) (Nested _ _)    = LT
+  compare (MN _ _) (CaseBlock _ _) = LT
+  compare (MN _ _) (WithBlock _ _) = LT
+
+  compare (Nested _ _) (NS _ _)        = GT
+  compare (Nested _ _) (UN _)          = GT
+  compare (Nested _ _) (MN _ _)        = GT
+  compare (Nested x y) (Nested z w)    = compare x z <+> compare y w
+  compare (Nested _ _) (CaseBlock _ _) = LT
+  compare (Nested _ _) (WithBlock _ _) = LT
+
+  compare (CaseBlock _ _) (NS _ _)        = GT
+  compare (CaseBlock _ _) (UN _)          = GT
+  compare (CaseBlock _ _) (MN _ _)        = GT
+  compare (CaseBlock _ _) (Nested _ _)    = GT
+  compare (CaseBlock x y) (CaseBlock z w) = compare x z <+> compare y w
+  compare (CaseBlock _ _) (WithBlock _ _) = LT
+
+  compare (WithBlock _ _) (NS _ _)        = GT
+  compare (WithBlock _ _) (UN _)          = GT
+  compare (WithBlock _ _) (MN _ _)        = GT
+  compare (WithBlock _ _) (Nested _ _)    = GT
+  compare (WithBlock _ _) (CaseBlock _ _) = GT
+  compare (WithBlock x y) (WithBlock z w) = compare x z <+> compare y w
 
 ---------------------------------------
 --- Working around primitive values ---
@@ -136,6 +223,14 @@ typeInfoOfConstant StringType  = Just $ primTypeInfo "String"
 typeInfoOfConstant CharType    = Just $ primTypeInfo "Char"
 typeInfoOfConstant DoubleType  = Just $ primTypeInfo "Double"
 typeInfoOfConstant WorldType   = Nothing
+
+-------------------------------------
+--- Working around type inference ---
+-------------------------------------
+
+public export
+argName : NamedArg -> Name
+argName = (.name)
 
 ----------------------------------------------
 --- Analyzing dependently typed signatures ---

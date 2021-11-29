@@ -4,6 +4,7 @@ authors = "Denis Buzdalov"
 version = 0.0.1
 
 modules = System.Random.Simple
+        , Control.Monad.State.Tuple
         , Data.List.Lazier
         , Data.Vect.Dependent
         , Test.DepTyCheck.Gen

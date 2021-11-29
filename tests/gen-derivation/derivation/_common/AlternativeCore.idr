@@ -25,9 +25,7 @@ export
 
 export
 [EmptyCons'] ConstructorDerivator where
-  canonicConsBody sig name con = do
-    let fuelArg = "fuel_cons_arg"
-    pure [ canonicDefaultLHS sig name fuelArg .= `(empty) ]
+  consGenExpr _ _ _ _ = pure `(empty)
 
 export
 EmptyCons : DerivatorCore
