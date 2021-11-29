@@ -30,11 +30,13 @@ namespace NonObligatoryExts
     consGenExpr sig con givs fuel = do
 
       -- Get dependencies of constructor's arguments
-      deps <- argDeps con.args
-      let weakenedDeps = flip downmapI deps $ \_ => (`difference` givs) . mapIn weakenToSuper
+      deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
+
+      -- Set the goal ;-)
+      let argsToBeGenerated = fromFoldable (allFins' _) `difference` givs
 
       -- Arguments that no other argument depends on
-      let kingArgs = (fromFoldable (allFins' _) `difference` givs) `difference` concat weakenedDeps
+      let kingArgs = argsToBeGenerated `difference` concat deps
 
       -- Acquire order(s) in what we will generate arguments
       -- TODO to permute independent groups of arguments independently
