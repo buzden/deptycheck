@@ -17,23 +17,6 @@ import public Test.DepTyCheck.Gen.Auto.Util.Collections
 
 %default total
 
------------------------------------------
---- Utility functions and definitions ---
------------------------------------------
-
---- Expressions generation utils ---
-
-defArgNames : {sig : GenSignature} -> Vect sig.givenParams.asList.length String
-defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.args
-
-export %inline
-canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
-canonicDefaultLHS sig n fuel = callCanonic sig n .| bindVar fuel .| bindVar <$> defArgNames
-
-export %inline
-canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
-canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
-
 -------------------------------------------------
 --- Derivation of a generator for constructor ---
 -------------------------------------------------

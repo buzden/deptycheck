@@ -81,6 +81,19 @@ interface DerivatorCore where
 --       But `callInternalGen` function is still present here because, in some sense, it is a complementary to `internalGenSig`.
 --       Internals and changes in the implementation of `internalGenSig` influence on the implementation of `callInternalGen`.
 
+--- Expressions generation utils ---
+
+defArgNames : {sig : GenSignature} -> Vect sig.givenParams.asList.length String
+defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.args
+
+export %inline
+canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
+canonicDefaultLHS sig n fuel = callCanonic sig n .| bindVar fuel .| bindVar <$> defArgNames
+
+export %inline
+canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
+canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
+
 ---------------------------------
 --- External-facing functions ---
 ---------------------------------
