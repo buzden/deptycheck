@@ -1,6 +1,8 @@
 ||| Several tactics for derivation of particular generators for a constructor regarding to how they use externals
 module Test.DepTyCheck.Gen.Auto.Core.ConsDerive
 
+import public Control.Monad.State
+
 import public Test.DepTyCheck.Gen.Auto.Derive
 
 %default total
@@ -21,7 +23,7 @@ interface ConstructorDerivator where
 ||| may be ignored even if its type is really used in a generated data constructor.
 namespace NonObligatoryExts
 
-  ||| Leat effort non-obligatory tactic is one which *does not use externals* during taking a decision on the order.
+  ||| Least-effort non-obligatory tactic is one which *does not use externals* during taking a decision on the order.
   ||| It uses externals if decided order happens to be given by an external generator, but is not obliged to use any.
   ||| It is seemingly most simple to implement, maybe the fastest and
   ||| fits well when external generators are provided for non-dependent types.
@@ -42,8 +44,15 @@ namespace NonObligatoryExts
       -- TODO to permute independent groups of arguments independently
       let allKingsOrders = allPermutations kingArgs
 
+      -- Derive constructor calling expression for given order of generation
       let genForKingsOrder : List (Fin con.args.length) -> m TTImp
-          genForKingsOrder kings = ?genForKingsOrder_rhs
+          genForKingsOrder = map (`apply` callCons) . evalStateT argsToBeGenerated . foldlM genForOneKing id where
+
+            -- ... state is the set of arguments that are left to be generated
+            genForOneKing : (TTImp -> TTImp) -> (king : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
+
+            callCons : TTImp
+            callCons = ?callCons_rhs -- actually, needs RHS expression for GADT indices as input
 
       map callOneOf $ traverse genForKingsOrder $ forget allKingsOrders
 
