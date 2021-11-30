@@ -48,6 +48,10 @@ namespace NonObligatoryExts
       let genForKingsOrder : List (Fin con.args.length) -> m TTImp
           genForKingsOrder = map (`apply` callCons) . evalStateT argsToBeGenerated . foldlM genForOneKing id where
 
+            bindNameStr : Name -> m String
+            bindNameStr $ UN $ Basic n = pure n
+            bindNameStr n = fail "Unsupported name \{show n} for the basement of a bind name"
+
             -- ... state is the set of arguments that are left to be generated
             genForOneKing : (TTImp -> TTImp) -> (king : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
             genForOneKing leftExprF kingArg = do
@@ -65,7 +69,8 @@ namespace NonObligatoryExts
               subgenCall <- lift $ callGen subsig fuel ?genForOneKing_rhs
 
               -- Form an expression of binding the result of subgen
-              let bindSubgenResult = buildDPair ?bind_king ?bind_king_deps
+              bindKingArg <- map bindVar $ lift $ bindNameStr $ argName $ index' con.args kingArg
+              let bindSubgenResult = buildDPair bindKingArg ?bind_king_deps
 
               -- Chain the subgen call with a given continuation
               pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(cont))
