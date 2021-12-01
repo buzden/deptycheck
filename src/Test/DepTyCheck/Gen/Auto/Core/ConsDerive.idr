@@ -69,8 +69,9 @@ namespace NonObligatoryExts
               subgenCall <- lift $ callGen subsig fuel ?genForOneKing_rhs
 
               -- Form an expression of binding the result of subgen
-              bindKingArg <- bindName $ argName $ index' con.args kingArg
-              let bindSubgenResult = buildDPair bindKingArg ?bind_king_deps
+              -- TODO to calculate correct order instead of `depArgs.asList` below!
+              bindArgs <- depArgs.asList ++ [kingArg] `for` bindName . argName . index' con.args
+              let bindSubgenResult = appAll `{Builtin.DPair.MkDPair} bindArgs
 
               -- Chain the subgen call with a given continuation
               pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(cont))

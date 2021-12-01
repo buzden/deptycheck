@@ -23,7 +23,7 @@ import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 --- Parsing and rebuilding `TTImp` stuff ---
 --------------------------------------------
 
---- `DPair` parsing and rebuilding stuff ---
+--- `DPair` type parsing and rebuilding stuff ---
 
 public export
 unDPair : TTImp -> (List (Arg False), TTImp)
