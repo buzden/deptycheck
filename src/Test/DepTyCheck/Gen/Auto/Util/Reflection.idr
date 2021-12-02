@@ -4,6 +4,7 @@ module Test.DepTyCheck.Gen.Auto.Util.Reflection
 import public Data.Fin
 import public Data.List.Lazy
 import public Data.Vect.Dependent
+import public Data.Vect.Extra
 
 import public Data.SortedMap
 import public Data.SortedMap.Dependent
@@ -44,6 +45,13 @@ data AnyApp
   | NamedApp Name TTImp
   | AutoApp TTImp
   | WithApp TTImp
+
+public export
+appArg : NamedArg -> TTImp -> AnyApp
+appArg (MkArg {piInfo=ExplicitArg, _})         expr = PosApp expr
+appArg (MkArg {piInfo=ImplicitArg, name, _})   expr = NamedApp name expr
+appArg (MkArg {piInfo=DefImplicit _, name, _}) expr = NamedApp name expr
+appArg (MkArg {piInfo=AutoImplicit, _})        expr = AutoApp expr
 
 public export
 getExpr : AnyApp -> TTImp
@@ -99,6 +107,10 @@ export
 isSimpleBindVar : TTImp -> Bool
 isSimpleBindVar $ IBindVar {} = True
 isSimpleBindVar _             = False
+
+export
+callCon : (con : Con) -> Vect con.args.length TTImp -> TTImp
+callCon con = reAppAny (var con.name) . toList . mapWithPos (appArg . index' con.args)
 
 --- General purpose instances ---
 
