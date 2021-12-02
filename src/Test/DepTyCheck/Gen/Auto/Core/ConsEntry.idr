@@ -74,17 +74,20 @@ export
 canonicConsBody : ConstructorDerivator => CanonicGen m => GenSignature -> Name -> Con -> m $ List Clause
 canonicConsBody sig name con = do
 
+  -- Get file position of the constructor definition (for better error reporting)
+  let conFC = getFC con.type
+
   -- Acquire constructor's return type arguments
   let conRetTypeArgs = snd $ unAppAny con.type
   conRetTypeArgs <- for conRetTypeArgs $ \case -- resembles similar management from `Entry` module; they must be consistent
     PosApp e     => pure e
-    NamedApp _ _ => fail "Named implicit applications are not supported yet as in `\{show con.name}`"
-    AutoApp _    => fail "Auto-implicit applications are not supported yet as in `\{show con.name}`"
-    WithApp _    => fail "Unexpected `with` application in the constructor's `\{show con.name}` return type"
+    NamedApp _ _ => failAt conFC "Named implicit applications are not supported yet"
+    AutoApp _    => failAt conFC "Auto-implicit applications are not supported yet"
+    WithApp _    => failAt conFC "Unexpected `with` application in the constructor's return type"
 
   -- Match lengths of `conRetTypeArgs` and `sig.targetType.args`
   let Yes conRetTypeArgsLengthCorrect = conRetTypeArgs.length `decEq` sig.targetType.args.length
-    | No _ => fail "INTERNAL ERROR: length of the return type of constructor `\{show con.name}` does not equal to the type's arguments count"
+    | No _ => failAt conFC "INTERNAL ERROR: length of the return type does not equal to the type's arguments count"
 
   let conRetTypeArg : Fin sig.targetType.args.length -> TTImp
       conRetTypeArg idx = index' conRetTypeArgs $ rewrite conRetTypeArgsLengthCorrect in idx
@@ -101,8 +104,7 @@ canonicConsBody sig name con = do
   deepConsApps <- for (Vect.fromList sig.givenParams.asList) $ \idx => do
     let argExpr = conRetTypeArg idx
     Just (appliedArgs ** bindExprF) <- analyseDeepConsApp conArgNames argExpr
-      | Nothing => fail "Argument #\{show idx} of constructor \{show con.name} is not supported yet (argument expression: \{show argExpr})"
-                   -- TODO to do `failAt` with nice position
+      | Nothing => failAt conFC "Argument #\{show idx} is not supported yet (argument expression: \{show argExpr})"
     pure $ the (appArgs : List Name ** (Fin appArgs.length -> TTImp) -> TTImp) $
       (appliedArgs ** bindExprF)
 
@@ -120,7 +122,7 @@ canonicConsBody sig name con = do
               modify $ insert (name, substName)
               pure substName
             else modify (insert name) $> name
-          badName => fail "Unsupported name `\{show badName}` of a parameter used in the constructor `\{show con.name}`"
+          badName => failAt conFC "Unsupported name `\{show badName}` of a parameter used in the constructor"
         pure $ bindExprF $ bindVar . flip index renamedAppliedNames
 
   -- Build a map from constructor's argument name to its index
@@ -129,7 +131,7 @@ canonicConsBody sig name con = do
   -- Determine indices of constructor's arguments that are given
   givenConArgs <- for givenConArgs.asList $ \givenArgNameStr => do
     let Just idx = lookup (UN $ Basic givenArgNameStr) conArgIdxs
-      | Nothing => fail "INTERNAL ERROR: calculated given `\{givenArgNameStr}` is not found in an arguments list of the constructor `\{show con.name}`"
+      | Nothing => failAt conFC "INTERNAL ERROR: calculated given `\{givenArgNameStr}` is not found in an arguments list of the constructor"
     pure idx
 
   -- Equalise index values which must be propositionally equal to some parameters

@@ -31,6 +31,9 @@ namespace NonObligatoryExts
   [LeastEffort] ConstructorDerivator where
     consGenExpr sig con givs fuel = do
 
+      -- Get file position of the constructor definition (for better error reporting)
+      let conFC = getFC con.type
+
       -- Get dependencies of constructor's arguments
       deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
 
@@ -50,7 +53,7 @@ namespace NonObligatoryExts
 
             bindName : forall m. Elaboration m => Name -> m TTImp
             bindName $ UN $ Basic n = pure $ bindVar n
-            bindName n = fail "Unsupported name \{show n} for the basement of a bind name"
+            bindName n = failAt conFC "Unsupported name \{show n} for the basement of a bind name"
 
             -- ... state is the set of arguments that are left to be generated
             genForOneKing : (TTImp -> TTImp) -> (king : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
