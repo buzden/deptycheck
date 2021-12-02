@@ -80,7 +80,7 @@ namespace NonObligatoryExts
               pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(cont))
 
             callCons : TTImp
-            callCons = ?callCons_rhs -- actually, needs RHS expression for GADT indices as input
+            callCons = callCon con ?callCons_rhs -- actually, needs RHS expression for GADT indices as input
 
       map callOneOf $ traverse genForKingsOrder $ forget allKingsOrders
 
