@@ -63,32 +63,29 @@ namespace NonObligatoryExts
       -- Compute left-to-right need of generation when there are non-trivial types at the left
       argsTypeApps <- for .| Vect.fromList con.args .| analyseTypeApp . type
 
-      -- Set the goal ;-)
-      let argsToBeGenerated = fromFoldable (allFins' _) `difference` givs
-
       -- Derive constructor calling expression for given order of generation
       let genForOrder : List (Fin con.args.length) -> m TTImp
-          genForOrder = map (`apply` callCons) . evalStateT argsToBeGenerated . foldlM genForOneArg id where
+          genForOrder = map (`apply` callCons) . evalStateT givs . foldlM genForOneArg id where
 
             bindName : forall m. Elaboration m => Name -> m TTImp
             bindName $ UN $ Basic n = pure $ bindVar n
             bindName n = failAt conFC "Unsupported name \{show n} for the basement of a bind name"
 
-            -- ... state is the set of arguments that are left to be generated
+            -- ... state is the set of arguments that are already present (given or generated)
             genForOneArg : (TTImp -> TTImp) -> (gened : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
             genForOneArg leftExprF genedArg = do
 
               -- Get info for the `genedArg`
               let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ TypeApp) argsTypeApps
 
-              -- Acquire the set of arguments left to be generated
-              leftToBeGenerated <- get
+              -- Acquire the set of arguments that are already present
+              presentArguments <- get
 
               -- Filter arguments classification according to the set of arguments that are left to be generated;
               -- Those which are `Right` are given, those which are `Left` are needs to be generated.
               let depArgs : Vect typeOfGened.args.length (Either (Fin con.args.length) TTImp) := argsOfTypeOfGened <&> \case
                 Right expr => Right expr
-                Left i     => if contains i leftToBeGenerated then Left i else Right $ var $ argName $ index' con.args i
+                Left i     => if contains i presentArguments then Right $ var $ argName $ index' con.args i else Left i
 
               -- Determine which arguments will be on the left of dpair in subgen call, in correct order
               let subgeneratedArgs = mapMaybe getLeft $ toList depArgs
@@ -131,7 +128,7 @@ namespace NonObligatoryExts
       deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
 
       -- Arguments that no other argument depends on
-      let kingArgs = argsToBeGenerated `difference` concat deps
+      let kingArgs = fromFoldable (allFins' _) `difference` (givs `union` concat deps)
 
       ---------------------------------------------------------------
       -- Manage different possible variants of generation ordering --
