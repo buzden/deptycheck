@@ -112,7 +112,7 @@ namespace NonObligatoryExts
               let bindSubgenResult = appAll `{Builtin.DPair.MkDPair} bindArgs
 
               -- Chain the subgen call with a given continuation
-              pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(cont))
+              pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(leftExprF cont))
 
             callCons : TTImp
             callCons = `(Prelude.pure ~(callCon con $ fromList con.args <&> var . name))
