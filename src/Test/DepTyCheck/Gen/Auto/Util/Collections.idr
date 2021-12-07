@@ -129,3 +129,7 @@ allPermutations s = case fromList s.asList of
     e  <- ss
     es <- allPermutations $ assert_smaller s $ delete e s
     pure $ e :: es
+
+public export
+allPermutations' : Ord a => SortedSet a -> List $ List a
+allPermutations' = forget . allPermutations

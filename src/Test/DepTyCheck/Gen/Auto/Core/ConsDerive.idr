@@ -117,20 +117,32 @@ namespace NonObligatoryExts
             callCons : TTImp
             callCons = `(Prelude.pure ~(callCon con $ fromList con.args <&> var . name))
 
+      -- Get dependencies of constructor's arguments
+      deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
+
       -------------------------------------------------
       -- Left-to-right generation phase (2nd phase) ---
       -------------------------------------------------
+
+      -- Determine which arguments need to be generated in a left-to-right manner
+      let (leftToRightArgsTypeApp, leftToRightArgs) = unzip $ filter (\((MkTypeApp _ as), _) => any isRight as) $ toListI argsTypeApps
 
       --------------------------------------------------------------------------------
       -- Preparation of input for the left-to-right phase (1st right-to-left phase) --
       --------------------------------------------------------------------------------
 
+      -- Acquire those variables that appear in non-trivial type expressions, i.e. those which needs to be generated before the left-to-right phase
+      let preLTR = leftToRightArgsTypeApp >>= \(MkTypeApp _ as) => rights (toList as) >>= toList . allVarNames
+      let preLTR = SortedSet.fromList $ mapMaybe (flip lookup conArgIdxs) preLTR
+
+      -- Find rightmost arguments among `preLTR`
+      let depsLTR = SortedSet.fromList $
+                      mapMaybe (\(ds, idx) => whenT .| contains idx preLTR && null ds .| idx) $
+                        toListI $ deps <&> intersection preLTR
+
       ---------------------------------------------------------------------------------
       -- Main right-to-left generation phase (3rd phase aka 2nd right-to-left phase) --
       ---------------------------------------------------------------------------------
-
-      -- Get dependencies of constructor's arguments
-      deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
 
       -- Arguments that no other argument depends on
       let rightmostArgs = fromFoldable {f=Vect _} allFins' `difference` (givs `union` concat deps)
@@ -140,10 +152,10 @@ namespace NonObligatoryExts
       ---------------------------------------------------------------
 
       -- Acquire order(s) in what we will generate arguments
-      -- TODO to permute independent groups of arguments independently
-      let allOrders = allPermutations rightmostArgs
+      -- TODO to permute independent groups of rightmost arguments independently
+      let allOrders = [| allPermutations' depsLTR ++ pure leftToRightArgs ++ allPermutations' rightmostArgs |]
 
-      map callOneOf $ traverse genForOrder $ forget allOrders
+      map callOneOf $ traverse genForOrder allOrders
 
       where
 
