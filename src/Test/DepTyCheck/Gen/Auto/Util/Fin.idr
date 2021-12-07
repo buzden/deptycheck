@@ -20,9 +20,9 @@ minus_last_gives_0 Z     = Refl
 minus_last_gives_0 (S k) = minus_last_gives_0 k
 
 public export
-allFins' : (n : Nat) -> Vect n (Fin n)
-allFins' Z     = []
-allFins' (S k) = FZ :: map FS (allFins' k)
+allFins' : {n : Nat} -> Vect n (Fin n)
+allFins' {n=Z  } = []
+allFins' {n=S k} = FZ :: map FS allFins'
 
 public export
 rangeFrom0To : Fin n -> List (Fin n)

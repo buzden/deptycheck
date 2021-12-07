@@ -256,7 +256,7 @@ export
 argDeps : Elaboration m => (args : List NamedArg) -> m $ DVect args.length $ SortedSet . Fin . Fin.finToNat
 argDeps args = do
   ignore $ check {expected=Type} $ fullSig defaultRet -- we can't return trustful result if given arguments do not form a nice Pi type
-  concatMap depsOfOne $ allFins' _
+  concatMap depsOfOne allFins'
 
   where
 

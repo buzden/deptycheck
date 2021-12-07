@@ -94,7 +94,7 @@ namespace NonObligatoryExts
               modify $ union $ fromList subgeneratedArgs
 
               -- Form a task for subgen
-              let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` allFins' _
+              let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` allFins'
               let subsig : GenSignature := MkGenSignature typeOfGened $ fromList $ fst <$> toList subgivens
               let Yes subsigGivensLength = decEq subsig.givenParams.asList.length subgivensLength
                 | No _ => fail "INTERNAL ERROR: error in given params set length computation"
@@ -128,7 +128,7 @@ namespace NonObligatoryExts
       deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
 
       -- Arguments that no other argument depends on
-      let kingArgs = fromFoldable (allFins' _) `difference` (givs `union` concat deps)
+      let kingArgs = fromFoldable {f=Vect _} allFins' `difference` (givs `union` concat deps)
 
       ---------------------------------------------------------------
       -- Manage different possible variants of generation ordering --
