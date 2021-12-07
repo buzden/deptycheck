@@ -133,7 +133,7 @@ namespace NonObligatoryExts
       deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
 
       -- Arguments that no other argument depends on
-      let kingArgs = fromFoldable {f=Vect _} allFins' `difference` (givs `union` concat deps)
+      let rightmostArgs = fromFoldable {f=Vect _} allFins' `difference` (givs `union` concat deps)
 
       ---------------------------------------------------------------
       -- Manage different possible variants of generation ordering --
@@ -141,9 +141,9 @@ namespace NonObligatoryExts
 
       -- Acquire order(s) in what we will generate arguments
       -- TODO to permute independent groups of arguments independently
-      let allKingsOrders = allPermutations kingArgs
+      let allOrders = allPermutations rightmostArgs
 
-      map callOneOf $ traverse genForOrder $ forget allKingsOrders
+      map callOneOf $ traverse genForOrder $ forget allOrders
 
       where
 
