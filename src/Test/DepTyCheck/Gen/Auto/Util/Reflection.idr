@@ -436,3 +436,8 @@ hasNameInsideDeep nm = assert_total holdsOnAnyInTrCl (== nm) namesOfType . toLis
       ty <- getInfo' n
       let subexprs = (map type ty.args) ++ (ty.cons >>= \con => con.type :: map type con.args)
       pure $ subexprs >>= toList . allVarNames
+
+public export
+isVar : TTImp -> Bool
+isVar $ IVar {} = True
+isVar _         = False

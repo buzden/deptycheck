@@ -3,6 +3,10 @@ module Test.DepTyCheck.Gen.Auto.Core.ConsDerive
 
 import public Control.Monad.State
 
+import public Data.Either
+
+import public Debug.Reflection
+
 import public Test.DepTyCheck.Gen.Auto.Derive
 
 %default total
@@ -31,39 +35,64 @@ namespace NonObligatoryExts
   [LeastEffort] ConstructorDerivator where
     consGenExpr sig con givs fuel = do
 
+      -------------------------------------------------------------
+      -- Prepare intermediate data and functions using this data --
+      -------------------------------------------------------------
+
       -- Get file position of the constructor definition (for better error reporting)
       let conFC = getFC con.type
 
-      -- Get dependencies of constructor's arguments
-      deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
+      -- Build a map from constructor's argument name to its index
+      let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
+
+      -- Analyse that we can do subgeneration for each constructor argument
+      -- Fails using `Elaboration` if the given expression is not an application to a type constructor
+      let analyseTypeApp : TTImp -> m TypeApp
+          analyseTypeApp expr = do
+            let (lhs, args) = unAppAny expr
+            let IVar _ lhsName = lhs
+              | _ => failAt (getFC lhs) "Only applications to a name is supported, given \{show lhs}"
+            ty <- try .| getInfo' lhsName
+                      .| failAt (getFC lhs) "Only applications to type constructors are supported at the moment"
+            pure $ MkTypeApp ty $ Vect.fromList ty.args <&> \arg => case arg.type of
+              expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
+              expr            => Right expr
+
+      -- Compute left-to-right need of generation when there are non-trivial types at the left
+      argsTypeApps <- for .| Vect.fromList con.args .| analyseTypeApp . type
 
       -- Set the goal ;-)
       let argsToBeGenerated = fromFoldable (allFins' _) `difference` givs
 
-      -- Arguments that no other argument depends on
-      let kingArgs = argsToBeGenerated `difference` concat deps
-
-      -- Acquire order(s) in what we will generate arguments
-      -- TODO to permute independent groups of arguments independently
-      let allKingsOrders = allPermutations kingArgs
-
       -- Derive constructor calling expression for given order of generation
-      let genForKingsOrder : List (Fin con.args.length) -> m TTImp
-          genForKingsOrder = map (`apply` callCons) . evalStateT argsToBeGenerated . foldlM genForOneKing id where
+      let genForOrder : List (Fin con.args.length) -> m TTImp
+          genForOrder = map (`apply` callCons) . evalStateT argsToBeGenerated . foldlM genForOneArg id where
 
             bindName : forall m. Elaboration m => Name -> m TTImp
             bindName $ UN $ Basic n = pure $ bindVar n
             bindName n = failAt conFC "Unsupported name \{show n} for the basement of a bind name"
 
             -- ... state is the set of arguments that are left to be generated
-            genForOneKing : (TTImp -> TTImp) -> (king : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
-            genForOneKing leftExprF kingArg = do
+            genForOneArg : (TTImp -> TTImp) -> (gened : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
+            genForOneArg leftExprF genedArg = do
 
-              -- Determine which arguments will be on the left of dpair in subgen call
-              let depArgs = index kingArg deps `intersection` !get
+              -- Get info for the `genedArg`
+              let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ TypeApp) argsTypeApps
 
-              -- Make sure generated arguments will be not generated again
-              modify $ union depArgs
+              -- Acquire the set of arguments left to be generated
+              leftToBeGenerated <- get
+
+              -- Filter arguments classification according to the set of arguments that are left to be generated;
+              -- Those which are `Right` are given, those which are `Left` are needs to be generated.
+              let depArgs : Vect typeOfGened.args.length (Either (Fin con.args.length) TTImp) := argsOfTypeOfGened <&> \case
+                Right expr => Right expr
+                Left i     => if contains i leftToBeGenerated then Left i else Right $ var $ argName $ index' con.args i
+
+              -- Determine which arguments will be on the left of dpair in subgen call, in correct order
+              let subgeneratedArgs = mapMaybe getLeft $ toList depArgs
+
+              -- Make sure generated arguments will not be generated again
+              modify $ union $ fromList subgeneratedArgs
 
               -- Form a task for subgen
               let subsig : GenSignature := ?subgen_sig
@@ -72,8 +101,7 @@ namespace NonObligatoryExts
               subgenCall <- lift $ callGen subsig fuel ?genForOneKing_rhs
 
               -- Form an expression of binding the result of subgen
-              -- TODO to calculate correct order instead of `depArgs.asList` below!
-              bindArgs <- depArgs.asList ++ [kingArg] `for` bindName . argName . index' con.args
+              bindArgs <- subgeneratedArgs ++ [genedArg] `for` bindName . argName . index' con.args
               let bindSubgenResult = appAll `{Builtin.DPair.MkDPair} bindArgs
 
               -- Chain the subgen call with a given continuation
@@ -82,7 +110,42 @@ namespace NonObligatoryExts
             callCons : TTImp
             callCons = callCon con ?callCons_rhs -- actually, needs RHS expression for GADT indices as input
 
-      map callOneOf $ traverse genForKingsOrder $ forget allKingsOrders
+      --------------------------------------------------------------------------------
+      -- Preparation of input for the left-to-right phase (1st right-to-left phase) --
+      --------------------------------------------------------------------------------
+
+      -------------------------------------
+      -- Left-to-right generation phase ---
+      -------------------------------------
+
+      -------------------------------------------------------------------
+      -- Main right-to-left generation phase (2nd right-to-left phase) --
+      -------------------------------------------------------------------
+
+      -- Get dependencies of constructor's arguments
+      deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
+
+      -- Arguments that no other argument depends on
+      let kingArgs = argsToBeGenerated `difference` concat deps
+
+      ---------------------------------------------------------------
+      -- Manage different possible variants of generation ordering --
+      ---------------------------------------------------------------
+
+      -- Acquire order(s) in what we will generate arguments
+      -- TODO to permute independent groups of arguments independently
+      let allKingsOrders = allPermutations kingArgs
+
+      map callOneOf $ traverse genForOrder $ forget allKingsOrders
+
+      where
+
+        -- TODO make this to be a `record` as soon as #2177 is fixed
+        data TypeApp : Type where
+          MkTypeApp :
+            (type : TypeInfo) ->
+            (argTypes : Vect type.args.length .| Either (Fin con.args.length) TTImp) ->
+            TypeApp
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.
