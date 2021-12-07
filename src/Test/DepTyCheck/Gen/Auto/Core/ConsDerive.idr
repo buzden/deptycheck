@@ -81,6 +81,11 @@ namespace NonObligatoryExts
               -- Acquire the set of arguments that are already present
               presentArguments <- get
 
+              -- TODO to put the following check as up as possible as soon as it typecheks O_O
+              -- Check that those argument that we need to generate is not already present
+              let False = contains genedArg presentArguments
+                | True => pure leftExprF
+
               -- Filter arguments classification according to the set of arguments that are left to be generated;
               -- Those which are `Right` are given, those which are `Left` are needs to be generated.
               let depArgs : Vect typeOfGened.args.length (Either (Fin con.args.length) TTImp) := argsOfTypeOfGened <&> \case
