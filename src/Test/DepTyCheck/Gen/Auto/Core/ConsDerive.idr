@@ -113,7 +113,7 @@ namespace NonObligatoryExts
               pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(cont))
 
             callCons : TTImp
-            callCons = callCon con ?callCons_rhs -- actually, needs RHS expression for GADT indices as input
+            callCons = `(Prelude.pure ~(callCon con $ fromList con.args <&> var . name))
 
       --------------------------------------------------------------------------------
       -- Preparation of input for the left-to-right phase (1st right-to-left phase) --
