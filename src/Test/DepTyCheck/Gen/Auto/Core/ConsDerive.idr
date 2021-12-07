@@ -115,17 +115,17 @@ namespace NonObligatoryExts
             callCons : TTImp
             callCons = `(Prelude.pure ~(callCon con $ fromList con.args <&> var . name))
 
+      -------------------------------------------------
+      -- Left-to-right generation phase (2nd phase) ---
+      -------------------------------------------------
+
       --------------------------------------------------------------------------------
       -- Preparation of input for the left-to-right phase (1st right-to-left phase) --
       --------------------------------------------------------------------------------
 
-      -------------------------------------
-      -- Left-to-right generation phase ---
-      -------------------------------------
-
-      -------------------------------------------------------------------
-      -- Main right-to-left generation phase (2nd right-to-left phase) --
-      -------------------------------------------------------------------
+      ---------------------------------------------------------------------------------
+      -- Main right-to-left generation phase (3rd phase aka 2nd right-to-left phase) --
+      ---------------------------------------------------------------------------------
 
       -- Get dependencies of constructor's arguments
       deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
