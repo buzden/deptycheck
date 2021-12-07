@@ -153,7 +153,10 @@ namespace NonObligatoryExts
 
       -- Acquire order(s) in what we will generate arguments
       -- TODO to permute independent groups of rightmost arguments independently
-      let allOrders = [| allPermutations' depsLTR ++ pure leftToRightArgs ++ allPermutations' rightmostArgs |]
+      let allOrders = do
+        leftmost  <- allPermutations' depsLTR
+        rightmost <- allPermutations' rightmostArgs
+        pure $ leftmost ++ leftToRightArgs ++ rightmost
 
       map callOneOf $ traverse genForOrder allOrders
 
