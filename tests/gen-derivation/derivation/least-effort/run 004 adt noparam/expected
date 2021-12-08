@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+E
+-----
+R (R (E) 0) 0
+-----
+R (R (E) 0) 1
+-----
+R (R (E) 0) 5
+-----
+R (R (E) 0) 6
+-----
+R (R (E) 0) 7
+-----
+R (R (E) 0) 8
+-----
+R (R (E) 0) 9
+-----
+R (R (E) 0) 11
+-----
+R (R (E) 0) 12
