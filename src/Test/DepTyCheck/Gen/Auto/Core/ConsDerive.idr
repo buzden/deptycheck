@@ -108,7 +108,11 @@ namespace NonObligatoryExts
 
               -- Form an expression of binding the result of subgen
               let bindArgs = subgeneratedArgs ++ [genedArg] <&> bindVar . flip Vect.index bindNames
-              let bindSubgenResult = appAll `{Builtin.DPair.MkDPair} bindArgs
+              let bindLHS : List TTImp -> m TTImp
+                  bindLHS []  = failAt conFC "INTERNAL ERROR: empty bind args for subgeneration"
+                  bindLHS [x] = pure x
+                  bindLHS as  = pure $ appAll `{Builtin.DPair.MkDPair} as
+              bindSubgenResult <- lift $ bindLHS bindArgs
 
               -- Chain the subgen call with a given continuation
               pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(leftExprF cont))
