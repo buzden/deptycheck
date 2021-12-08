@@ -69,8 +69,8 @@ deptycheck:test:derive:
     - deptycheck:build
     - deptycheck:test:lib
   script:
-    - "thr=$(( `nproc` - 1 ))"
-    - "thr=$(( thr < 1 ? 1 : thr ))"
+    - "thr=$(( `nproc` / 2 ))"
+    - "thr=$(( thr < 2 ? 2 : thr ))"
     - make test-deptycheck only=gen-derivation/ INTERACTIVE="--color" threads=$thr
 
 pil:build:
