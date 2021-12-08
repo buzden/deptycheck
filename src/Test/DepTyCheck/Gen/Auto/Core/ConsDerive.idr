@@ -67,9 +67,8 @@ namespace NonObligatoryExts
       let genForOrder : List (Fin con.args.length) -> m TTImp
           genForOrder = map (`apply` callCons) . evalStateT givs . foldlM genForOneArg id where
 
-            bindName : forall m. Elaboration m => Name -> m TTImp
-            bindName $ UN $ Basic n = pure $ bindVar n
-            bindName n = failAt conFC "Unsupported name \{show n} for the basement of a bind name"
+            bindNames : Vect (con.args.length) String
+            bindNames = fromList con.args <&> ("__bnd_" ++) . show . name
 
             -- ... state is the set of arguments that are already present (given or generated)
             genForOneArg : (TTImp -> TTImp) -> (gened : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
@@ -108,14 +107,14 @@ namespace NonObligatoryExts
               subgenCall <- lift $ callGen subsig fuel $ rewrite subsigGivensLength in snd <$> subgivens
 
               -- Form an expression of binding the result of subgen
-              bindArgs <- subgeneratedArgs ++ [genedArg] `for` bindName . argName . index' con.args
+              let bindArgs = subgeneratedArgs ++ [genedArg] <&> bindVar . flip Vect.index bindNames
               let bindSubgenResult = appAll `{Builtin.DPair.MkDPair} bindArgs
 
               -- Chain the subgen call with a given continuation
               pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(leftExprF cont))
 
             callCons : TTImp
-            callCons = `(Prelude.pure ~(callCon con $ fromList con.args <&> var . name))
+            callCons = `(Prelude.pure ~(callCon con $ bindNames <&> varStr))
 
       -- Get dependencies of constructor's arguments
       deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
