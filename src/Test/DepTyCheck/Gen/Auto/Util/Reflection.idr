@@ -396,16 +396,16 @@ allVarNames expr = ttimp expr where mutual
   ity $ MkTy _ _ _ ty = ttimp ty
 
   decl : Decl -> LazyList Name
-  decl $ IClaim _ _ _ _ t                     = ity t
-  decl $ IData _ _ z                          = data_ z
-  decl $ IDef _ _ xs                          = foldMap clause xs
-  decl $ IParameters _ xs ys                  = lncpt xs ++ assert_total (foldMap decl ys)
-  decl $ IRecord _ _ _ $ MkRecord _ _ ps _ fs = lncpt ps ++ foldMap (\(MkIField _ _ pii _ tt) => piInfo pii ++ ttimp tt) fs
-  decl $ INamespace _ _ xs                    = assert_total $ foldMap decl xs
-  decl $ ITransform _ _ z w                   = ttimp z ++ ttimp w
-  decl $ IRunElabDecl _ y                     = ttimp y
-  decl $ ILog _                               = []
-  decl $ IBuiltin _ _ _                       = []
+  decl $ IClaim _ _ _ _ t                       = ity t
+  decl $ IData _ _ _ z                          = data_ z
+  decl $ IDef _ _ xs                            = foldMap clause xs
+  decl $ IParameters _ xs ys                    = lncpt xs ++ assert_total (foldMap decl ys)
+  decl $ IRecord _ _ _ _ $ MkRecord _ _ ps _ fs = lncpt ps ++ foldMap (\(MkIField _ _ pii _ tt) => piInfo pii ++ ttimp tt) fs
+  decl $ INamespace _ _ xs                      = assert_total $ foldMap decl xs
+  decl $ ITransform _ _ z w                     = ttimp z ++ ttimp w
+  decl $ IRunElabDecl _ y                       = ttimp y
+  decl $ ILog _                                 = []
+  decl $ IBuiltin _ _ _                         = []
 
   data_ : Data -> LazyList Name
   data_ $ MkData x n tycon _ datacons = ttimp tycon ++ foldMap ity datacons
