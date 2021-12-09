@@ -2,6 +2,8 @@ module Test.DepTyCheck.Gen.Auto.Util.Fin
 
 import public Data.Vect
 
+--- Special subtraction ---
+
 public export
 (-) : (n : Nat) -> Fin (S n) -> Nat
 n   - FZ   = n
@@ -18,6 +20,8 @@ export
 minus_last_gives_0 : (n : Nat) -> n - Fin.last = 0
 minus_last_gives_0 Z     = Refl
 minus_last_gives_0 (S k) = minus_last_gives_0 k
+
+--- Collections of `Fin`s ---
 
 public export
 allFins' : {n : Nat} -> Vect n (Fin n)
@@ -42,6 +46,8 @@ allGreaterThan curr = case strengthen $ FS curr of
                         Nothing => []
                         Just next => next :: allGreaterThan (assert_smaller curr next) -- `next` is closer to the upper bound than `curr`
 
+--- Conversions of `Fin`s ---
+
 public export
 tryToFit : {to : _} -> Fin from -> Maybe $ Fin to
 tryToFit {to=0}   _      = Nothing
@@ -57,3 +63,37 @@ export
 weakenToSuper_correct : {i : Fin n} -> (x : Fin $ finToNat i) -> finToNat (weakenToSuper {i} x) = finToNat x
 weakenToSuper_correct {i = FS _} FZ     = Refl
 weakenToSuper_correct {i = FS _} (FS x) = cong S $ weakenToSuper_correct x
+
+--- Min/max stuff ---
+
+public export
+min : Fin n -> Fin n -> Fin n
+min FZ     _      = FZ
+min (FS _) FZ     = FZ
+min (FS l) (FS r) = FS $ min l r
+
+public export
+max : Fin n -> Fin n -> Fin n
+max FZ       r      = r
+max l@(FS _) FZ     = l
+max (FS l)   (FS r) = FS $ max l r
+
+namespace Semigroup
+
+  public export
+  [Minimum] Semigroup (Fin n) where
+    (<+>) = Fin.min
+
+  public export
+  [Maximum] Semigroup (Fin n) where
+    (<+>) = Fin.max
+
+namespace Monoid
+
+  public export
+  [Minimum] {n : Nat} -> Monoid (Fin $ S n) using Fin.Semigroup.Minimum where
+    neutral = last
+
+  public export
+  [Maximum] Monoid (Fin $ S n) using Fin.Semigroup.Maximum where
+    neutral = FZ

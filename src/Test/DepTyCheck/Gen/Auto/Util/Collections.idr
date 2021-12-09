@@ -98,6 +98,11 @@ drop'' : (xs : Vect n a) -> (count : Fin $ S n) -> Vect (n - count) a
 drop'' xs      FZ     = xs
 drop'' (_::xs) (FS c) = drop'' xs c
 
+export
+mapPre : ((i : Fin n) -> Vect (finToNat i) b -> a -> b) -> Vect n a -> Vect n b
+mapPre f []      = []
+mapPre f (x::xs) = let y = f FZ [] x in y :: mapPre (\i, ys => f (FS i) (y::ys)) xs
+
 -----------------------------
 --- `SortedMap` utilities ---
 -----------------------------
@@ -116,6 +121,10 @@ namespace SortedMap
 export
 mapIn : Ord b => (a -> b) -> SortedSet a -> SortedSet b
 mapIn f = fromList . map f . SortedSet.toList
+
+export
+mapInMaybe : Ord b => (a -> Maybe b) -> SortedSet a -> SortedSet b
+mapInMaybe f = fromList . mapMaybe f . SortedSet.toList
 
 export
 fromFoldable : Ord a => Foldable f => f a -> SortedSet a
