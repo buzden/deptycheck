@@ -144,23 +144,4 @@ ILam.  (MW ExplicitArg {fuel:826} : IVar Data.Fuel.Fuel)
                                                                                                                                   $ (IApp. IVar DerivedGen.R
                                                                                                                                          $ IVar __bnd_{arg:811}
                                                                                                                                          $ IVar __bnd_{arg:814})) ])) ]))
-                                                         $ (IApp. IVar ::
-                                                                $ (IApp. IVar >>=
-                                                                       $ (IApp. IVar {("DerivedGen.X", []):0}
-                                                                              $ IVar fuel_cons_arg)
-                                                                       $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                                              => ICase (IVar {lamc:0})
-                                                                                       (Implicit False)
-                                                                                       [ PatClause (IBindVar __bnd_{arg:811})
-                                                                                                   (IApp. IVar >>=
-                                                                                                        $ (IApp. IVar {("Prelude.Types.Nat", []):0}
-                                                                                                               $ IVar fuel_cons_arg)
-                                                                                                        $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                                                                               => ICase (IVar {lamc:0})
-                                                                                                                        (Implicit False)
-                                                                                                                        [ PatClause (IBindVar __bnd_{arg:814})
-                                                                                                                                    (IApp. IVar Prelude.pure
-                                                                                                                                         $ (IApp. IVar DerivedGen.R
-                                                                                                                                                $ IVar __bnd_{arg:811}
-                                                                                                                                                $ IVar __bnd_{arg:814})) ])) ]))
-                                                                $ IVar Nil))) ] ]
+                                                         $ IVar Nil)) ] ]

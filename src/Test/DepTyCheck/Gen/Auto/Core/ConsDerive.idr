@@ -11,6 +11,8 @@ import public Decidable.Equality
 
 import public Test.DepTyCheck.Gen.Auto.Derive
 
+import public Test.DepTyCheck.Gen.Auto.Util.DepPerm
+
 %default total
 
 -------------------------------------------------
@@ -121,7 +123,8 @@ namespace NonObligatoryExts
             callCons = `(Prelude.pure ~(callCon con $ bindNames <&> varStr))
 
       -- Get dependencies of constructor's arguments
-      deps <- downmap ((`difference` givs) . mapIn weakenToSuper) <$> argDeps con.args
+      rawDeps <- argDeps con.args
+      let deps = downmap ((`difference` givs) . mapIn weakenToSuper) rawDeps
 
       -------------------------------------------------
       -- Left-to-right generation phase (2nd phase) ---
@@ -154,11 +157,13 @@ namespace NonObligatoryExts
       -- Manage different possible variants of generation ordering --
       ---------------------------------------------------------------
 
+      -- Prepare info about which arguments are independent and thus can be ordered arbitrarily
+      let disjDeps = disjointDepSets rawDeps givs
+
       -- Acquire order(s) in what we will generate arguments
-      -- TODO to permute independent groups of rightmost arguments independently
       let allOrders = do
-        leftmost  <- allPermutations' depsLTR
-        rightmost <- allPermutations' rightmostArgs
+        leftmost  <- indepPermutations' disjDeps depsLTR
+        rightmost <- indepPermutations' disjDeps rightmostArgs
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
       map callOneOf $ traverse genForOrder allOrders
