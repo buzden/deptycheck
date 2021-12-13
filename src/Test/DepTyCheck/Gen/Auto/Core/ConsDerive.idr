@@ -70,7 +70,8 @@ namespace NonObligatoryExts
           genForOrder = map (`apply` callCons) . evalStateT givs . foldlM genForOneArg id where
 
             bindNames : Vect (con.args.length) String
-            bindNames = fromList con.args <&> ("__bnd_" ++) . show . name
+            bindNames = flip mapWithPos .| fromList con.args .| \idx, arg =>
+                          (if contains idx givs then id else ("__bnd_" ++)) $ show arg.name
 
             -- ... state is the set of arguments that are already present (given or generated)
             genForOneArg : (TTImp -> TTImp) -> (gened : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
