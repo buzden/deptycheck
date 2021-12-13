@@ -103,11 +103,11 @@ namespace NonObligatoryExts
               -- Form a task for subgen
               let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` allFins'
               let subsig : GenSignature := MkGenSignature typeOfGened $ fromList $ fst <$> toList subgivens
-              let Yes subsigGivensLength = decEq subsig.givenParams.asList.length subgivensLength
+              let Yes Refl = decEq subsig.givenParams.asList.length subgivensLength
                 | No _ => fail "INTERNAL ERROR: error in given params set length computation"
 
               -- Form an expression to call the subgen
-              subgenCall <- lift $ callGen subsig fuel $ rewrite subsigGivensLength in snd <$> subgivens
+              subgenCall <- lift $ callGen subsig fuel $ snd <$> subgivens
 
               -- Form an expression of binding the result of subgen
               let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
