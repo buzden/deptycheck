@@ -98,7 +98,7 @@ namespace NonObligatoryExts
               let subgeneratedArgs = mapMaybe getLeft $ toList depArgs
 
               -- Make sure generated arguments will not be generated again
-              modify $ union $ fromList subgeneratedArgs
+              modify $ insert genedArg . union (fromList subgeneratedArgs)
 
               -- Form a task for subgen
               let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` allFins'
