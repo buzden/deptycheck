@@ -97,7 +97,7 @@ appFuel = app . var
 
 public export
 liftList : Foldable f => f TTImp -> TTImp
-liftList = foldr (\l, r => `(~(l) :: ~(r))) `([])
+liftList = foldr (\l, r => `(~l :: ~r)) `([])
 
 export
 callOneOf : List TTImp -> TTImp

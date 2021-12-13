@@ -118,7 +118,7 @@ namespace NonObligatoryExts
               bindSubgenResult <- lift $ bindLHS bindArgs
 
               -- Chain the subgen call with a given continuation
-              pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(leftExprF cont))
+              pure $ \cont => `(~subgenCall >>= \ ~bindSubgenResult => ~(leftExprF cont))
 
             callCons : TTImp
             callCons = `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen} ~(callCon con $ bindNames <&> varStr))
