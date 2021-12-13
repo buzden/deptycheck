@@ -55,7 +55,8 @@ ILam.  (MW ExplicitArg {fuel:814} : IVar Data.Fuel.Fuel)
                                                   $ IBindVar fuel_cons_arg)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
-                                                         $ (IApp. IVar Prelude.pure
+                                                         $ (IApp. (INamedApp. IVar Prelude.pure
+                                                                            $ IVar Test.DepTyCheck.Gen.Gen)
                                                                 $ IVar Prelude.Basics.False)
                                                          $ IVar Nil)) ]
                             IDef {cons_gen_for_Prelude.Basics.True:7}
@@ -63,6 +64,7 @@ ILam.  (MW ExplicitArg {fuel:814} : IVar Data.Fuel.Fuel)
                                                   $ IBindVar fuel_cons_arg)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
-                                                         $ (IApp. IVar Prelude.pure
+                                                         $ (IApp. (INamedApp. IVar Prelude.pure
+                                                                            $ IVar Test.DepTyCheck.Gen.Gen)
                                                                 $ IVar Prelude.Basics.True)
                                                          $ IVar Nil)) ] ]

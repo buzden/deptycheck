@@ -53,7 +53,8 @@ ILam.  (MW ExplicitArg {fuel:827} : IVar Data.Fuel.Fuel)
                                                   $ IBindVar n)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
-                                                         $ (IApp. IVar Prelude.pure
+                                                         $ (IApp. (INamedApp. IVar Prelude.pure
+                                                                            $ IVar Test.DepTyCheck.Gen.Gen)
                                                                 $ (INamedApp. IVar DerivedGen.MkX
                                                                             $ IVar n))
                                                          $ IVar Nil)) ] ]

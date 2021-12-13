@@ -121,7 +121,7 @@ namespace NonObligatoryExts
               pure $ \cont => `(~(subgenCall) >>= \ ~(bindSubgenResult) => ~(leftExprF cont))
 
             callCons : TTImp
-            callCons = `(Prelude.pure ~(callCon con $ bindNames <&> varStr))
+            callCons = `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen} ~(callCon con $ bindNames <&> varStr))
 
       -- Get dependencies of constructor's arguments
       rawDeps <- argDeps con.args

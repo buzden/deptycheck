@@ -59,7 +59,8 @@ ILam.  (MW ExplicitArg {fuel:826} : IVar Data.Fuel.Fuel)
                                                   $ IBindVar fuel_cons_arg)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
-                                                         $ (IApp. IVar Prelude.pure
+                                                         $ (IApp. (INamedApp. IVar Prelude.pure
+                                                                            $ IVar Test.DepTyCheck.Gen.Gen)
                                                                 $ IVar Prelude.Types.Z)
                                                          $ IVar Nil)) ]
                             IDef {cons_gen_for_Prelude.Types.S:7}
@@ -74,7 +75,8 @@ ILam.  (MW ExplicitArg {fuel:826} : IVar Data.Fuel.Fuel)
                                                                        => ICase (IVar {lamc:0})
                                                                                 (Implicit False)
                                                                                 [ PatClause (IBindVar __bnd_{arg:641})
-                                                                                            (IApp. IVar Prelude.pure
+                                                                                            (IApp. (INamedApp. IVar Prelude.pure
+                                                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
                                                                                                  $ (IApp. IVar Prelude.Types.S
                                                                                                         $ IVar __bnd_{arg:641})) ]))
                                                          $ IVar Nil)) ] ]
@@ -118,7 +120,8 @@ ILam.  (MW ExplicitArg {fuel:826} : IVar Data.Fuel.Fuel)
                                                   $ IBindVar fuel_cons_arg)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
-                                                         $ (IApp. IVar Prelude.pure
+                                                         $ (IApp. (INamedApp. IVar Prelude.pure
+                                                                            $ IVar Test.DepTyCheck.Gen.Gen)
                                                                 $ IVar DerivedGen.E)
                                                          $ IVar Nil)) ]
                             IDef {cons_gen_for_DerivedGen.R:7}
@@ -140,7 +143,8 @@ ILam.  (MW ExplicitArg {fuel:826} : IVar Data.Fuel.Fuel)
                                                                                                         => ICase (IVar {lamc:0})
                                                                                                                  (Implicit False)
                                                                                                                  [ PatClause (IBindVar __bnd_{arg:811})
-                                                                                                                             (IApp. IVar Prelude.pure
+                                                                                                                             (IApp. (INamedApp. IVar Prelude.pure
+                                                                                                                                              $ IVar Test.DepTyCheck.Gen.Gen)
                                                                                                                                   $ (IApp. IVar DerivedGen.R
                                                                                                                                          $ IVar __bnd_{arg:811}
                                                                                                                                          $ IVar __bnd_{arg:814})) ])) ]))
