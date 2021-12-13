@@ -121,7 +121,13 @@ namespace NonObligatoryExts
               pure $ \cont => `(~subgenCall >>= \ ~bindSubgenResult => ~(leftExprF cont))
 
             callCons : TTImp
-            callCons = `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen} ~(callCon con $ bindNames <&> varStr))
+            callCons = do
+              let constructorCall = callCon con $ bindNames <&> varStr
+              let wrapImpls : Nat -> TTImp
+                  wrapImpls Z     = constructorCall
+                  wrapImpls (S n) = var `{Builtin.DPair.MkDPair} .$ implicitTrue .$ wrapImpls n
+              let consExpr = wrapImpls $ sig.targetType.args.length `minus` sig.givenParams.asList.length
+              `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen} ~consExpr)
 
       -- Get dependencies of constructor's arguments
       rawDeps <- argDeps con.args
