@@ -58,7 +58,9 @@ namespace NonObligatoryExts
               | _ => failAt (getFC lhs) "Only applications to a name is supported, given \{show lhs}"
             ty <- try .| getInfo' lhsName
                       .| failAt (getFC lhs) "Only applications to type constructors are supported at the moment"
-            pure $ MkTypeApp ty $ Vect.fromList ty.args <&> \arg => case arg.type of
+            let Yes lengthCorrect = decEq ty.args.length args.length
+              | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
+            pure $ MkTypeApp ty $ rewrite lengthCorrect in Vect.fromList args <&> \arg => case getExpr arg of
               expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
               expr            => Right expr
 
