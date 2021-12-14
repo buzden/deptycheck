@@ -130,19 +130,19 @@ ILam.  (MW ExplicitArg {fuel:826} : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar {("Prelude.Types.Nat", []):0}
+                                                                $ (IApp. IVar {("DerivedGen.X", []):0}
                                                                        $ IVar fuel_cons_arg)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})
                                                                                 (Implicit False)
-                                                                                [ PatClause (IBindVar __bnd_{arg:814})
+                                                                                [ PatClause (IBindVar __bnd_{arg:811})
                                                                                             (IApp. IVar >>=
-                                                                                                 $ (IApp. IVar {("DerivedGen.X", []):0}
+                                                                                                 $ (IApp. IVar {("Prelude.Types.Nat", []):0}
                                                                                                         $ IVar fuel_cons_arg)
                                                                                                  $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                                                         => ICase (IVar {lamc:0})
                                                                                                                  (Implicit False)
-                                                                                                                 [ PatClause (IBindVar __bnd_{arg:811})
+                                                                                                                 [ PatClause (IBindVar __bnd_{arg:814})
                                                                                                                              (IApp. (INamedApp. IVar Prelude.pure
                                                                                                                                               $ IVar Test.DepTyCheck.Gen.Gen)
                                                                                                                                   $ (IApp. IVar DerivedGen.R

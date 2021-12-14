@@ -118,7 +118,7 @@ namespace NonObligatoryExts
               let bindSubgenResult = foldr (\l, r => var `{Builtin.DPair.MkDPair} .$ l .$ r) genedArg subgeneratedArgs
 
               -- Chain the subgen call with a given continuation
-              pure $ \cont => `(~subgenCall >>= \ ~bindSubgenResult => ~(leftExprF cont))
+              pure $ \cont => leftExprF `(~subgenCall >>= \ ~bindSubgenResult => ~cont)
 
             callCons : TTImp
             callCons = do
