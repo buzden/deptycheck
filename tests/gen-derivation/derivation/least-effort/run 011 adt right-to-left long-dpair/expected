@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+MkY (MkX {n=0} {m=()})
+-----
+MkY (MkX {n=4} {m=()})
+-----
+MkY (MkX {n=5} {m=()})
+-----
+MkY (MkX {n=8} {m=()})
+-----
+MkY (MkX {n=9} {m=()})
+-----
+MkY (MkX {n=12} {m=()})
+-----
+MkY (MkX {n=14} {m=()})
+-----
+MkY (MkX {n=15} {m=()})
+-----
+MkY (MkX {n=16} {m=()})
+-----
+MkY (MkX {n=17} {m=()})
