@@ -124,11 +124,11 @@ ILam.  (MW ExplicitArg {fuel:828} : IVar Data.Fuel.Fuel)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})
                                                                                 (Implicit False)
-                                                                                [ PatClause (IBindVar __bnd_n)
+                                                                                [ PatClause (IBindVar n)
                                                                                             (IApp. (INamedApp. IVar Prelude.pure
                                                                                                              $ IVar Test.DepTyCheck.Gen.Gen)
                                                                                                  $ (IApp. IVar Builtin.DPair.MkDPair
                                                                                                         $ Implicit True
                                                                                                         $ (INamedApp. IVar DerivedGen.MkX
-                                                                                                                    $ IVar __bnd_n))) ]))
+                                                                                                                    $ IVar n))) ]))
                                                          $ IVar Nil)) ] ]

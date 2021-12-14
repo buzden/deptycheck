@@ -67,13 +67,15 @@ namespace NonObligatoryExts
       -- Compute left-to-right need of generation when there are non-trivial types at the left
       argsTypeApps <- for .| Vect.fromList con.args .| analyseTypeApp . type
 
+      -- Decide how constructor arguments would be named during generation
+      let bindNames : Vect (con.args.length) String
+          bindNames = flip mapWithPos .| fromList con.args .| \idx, arg => case argName arg of
+                        UN (Basic n) => n
+                        n            => (if contains idx givs then id else ("__bnd_" ++)) $ show n
+
       -- Derive constructor calling expression for given order of generation
       let genForOrder : List (Fin con.args.length) -> m TTImp
           genForOrder = map (`apply` callCons) . evalStateT givs . foldlM genForOneArg id where
-
-            bindNames : Vect (con.args.length) String
-            bindNames = flip mapWithPos .| fromList con.args .| \idx, arg =>
-                          (if contains idx givs then id else ("__bnd_" ++)) $ show arg.name
 
             -- ... state is the set of arguments that are already present (given or generated)
             genForOneArg : (TTImp -> TTImp) -> (gened : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
