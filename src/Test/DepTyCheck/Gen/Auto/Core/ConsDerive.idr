@@ -55,9 +55,10 @@ namespace NonObligatoryExts
           analyseTypeApp expr = do
             let (lhs, args) = unAppAny expr
             ty <- case lhs of
-              IVar _ lhsName => try .| getInfo' lhsName
+              IVar _ lhsName => try .| getInfo' lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
                                     .| failAt (getFC lhs) "Only applications to type constructors are supported at the moment"
               IPrimVal _ c   => maybe (failAt (getFC lhs) "Cannot use primitive value as a target type") pure $ typeInfoOfConstant c
+              IType _        => pure $ primTypeInfo "Type"
               lhs            => failAt (getFC lhs) "Only applications to a name is supported, given \{show lhs}"
             let Yes lengthCorrect = decEq ty.args.length args.length
               | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"

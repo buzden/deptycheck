@@ -129,6 +129,8 @@ checkTypeIsGen sig = do
       -- check that given contant is a (primitive) type
       maybe (failAt targetTypeFC "Cannot use primitive value as a target type") pure $ typeInfoOfConstant c
 
+    IType _ => pure $ primTypeInfo "Type"
+
     _ => failAt targetTypeFC "Target type is not a simple name"
 
   --------------------------------------------------
