@@ -16,7 +16,7 @@ read-idris-ver:
       - IDRIS2_TAG:
         - ${preferred_idris}
         - latest
-  image: snazzybucket/idris2:${IDRIS2_TAG}
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/snazzybucket/idris2:${IDRIS2_TAG}
   rules:
     - if: $IDRIS2_TAG == "latest"
       allow_failure: true
