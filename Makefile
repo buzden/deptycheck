@@ -52,6 +52,12 @@ pil: deptycheck
 test-pil: pil
 	${MAKE} -C example -f pil.mk test only="${only}"
 
+.PHONY: docs
+
+docs:
+	alias sh=bash
+	${MAKE} -C docs dirhtml SPHINXOPTS="--color -W --keep-going"
+
 .PHONY: print-v-delimiter
 
 print-v-delimiter:

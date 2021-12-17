@@ -1,0 +1,41 @@
+### This script should be POSIX-shell compilant ###
+
+# Pre-cleanup
+rm -rf build src docs.ipkg
+
+# Where to look for literate Idris files
+DOCSDIR=../../../docs/source/
+
+# Generate `src` dir and symlinks to all `*.md` files (upper-case renamed)
+all_modules=$(
+find "$DOCSDIR" -type f -name '*.md' -print | while read r; do
+  # capitalization idea taken from https://stackoverflow.com/questions/27703739/capitalize-words-in-a-bash-variable-using-sed
+  capname=$(echo "${r#$DOCSDIR}" | sed 's/^./\u&/; s|/\(.\)|/\u\1|g; s/-\(.\)/\u\1/g')
+
+  localname="src/$capname"
+  localdir=$(dirname "$localname")/
+
+  mkdir -p "$localdir"
+  ln -s "$(echo "$localdir" | sed 's|[^/]*/|\.\./|g')$r" "$localname"
+
+  modulename=$(echo "${capname%.md}" | sed 's|/|\.|g')
+  echo -n ", $modulename"
+done
+)
+
+# Generate `docs.ipkg` containing all `*.md` files (upper-case renamed)
+[ -n "$all_modules" ] && echo \
+"
+package docs
+modules = ${all_modules#, }
+depends = deptycheck, contrib, elab-util
+sourcedir = \"src\"
+" > docs.ipkg
+
+# Build the docs
+if [ -e docs.ipkg ]; then
+  $1 --build docs.ipkg
+fi
+
+# Post-cleanup
+rm -rf build src docs.ipkg

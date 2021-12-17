@@ -11,6 +11,7 @@ main : IO ()
 main = runner
   [ !("Lazier list" `atDir` "lib/lazier")
   , !("The `Gen` monad" `atDir` "lib/gen-monad")
+  , !("The library documentation" `atDir` "docs")
   , !("Auto derivation: infrastructure: input validation" `atDir` "gen-derivation/inputvalidation")
   , !("Auto derivation: infrastructure: canonic signature" `atDir` "gen-derivation/canonicsig")
   , !("Auto derivation: infrastructure: constructors analysis" `atDir` "gen-derivation/cons-analysis")
