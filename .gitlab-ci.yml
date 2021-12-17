@@ -68,6 +68,14 @@ deptycheck:test:derive:
     - read-idris-ver
     - deptycheck:build
     - deptycheck:test:lib
+  only:
+    changes:
+      - "*"
+      - src/**/*
+      - tests/*
+      - tests/gen-derivation/**/*
+      - thirdparty/**/*
+      - depends/**/*
   script:
     - "thr=$(( `nproc` / 2 ))"
     - "thr=$(( thr < 2 ? 2 : thr ))"
