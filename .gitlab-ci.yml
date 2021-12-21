@@ -17,10 +17,6 @@ read-idris-ver:
         - ${preferred_idris}
         - latest
   image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/snazzybucket/idris2:${IDRIS2_TAG}
-  rules:
-    - if: $IDRIS2_TAG == "latest"
-      allow_failure: true
-    - if: $IDRIS2_TAG
 
 stages:
   - thirdparties:build
