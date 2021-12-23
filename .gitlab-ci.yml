@@ -73,9 +73,7 @@ deptycheck:test:derive:
       - thirdparty/**/*
       - depends/**/*
   script:
-    - "thr=$(( `nproc` / 2 ))"
-    - "thr=$(( thr < 2 ? 2 : thr ))"
-    - make test-deptycheck only=gen-derivation/ INTERACTIVE="--color" threads=$thr
+    - make test-deptycheck only=gen-derivation/ INTERACTIVE="--color" threads=2
 
 pil:build:
   extends: .depends-on-idris
