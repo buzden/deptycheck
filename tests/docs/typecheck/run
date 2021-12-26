@@ -8,7 +8,7 @@ DOCSDIR=../../../docs/source/
 
 # Generate `src` dir and symlinks to all `*.md` files (upper-case renamed)
 all_modules=$(
-find "$DOCSDIR" -type f -name '*.md' -print | while read r; do
+find "$DOCSDIR" -type f -name '*.md' -print | sort | while read r; do
   # capitalization idea taken from https://stackoverflow.com/questions/27703739/capitalize-words-in-a-bash-variable-using-sed
   capname=$(echo "${r#$DOCSDIR}" | sed 's/^./\u&/; s|/\(.\)|/\u\1|g; s/-\(.\)/\u\1/g')
 
