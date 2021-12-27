@@ -7,8 +7,27 @@ Limitations
 Temporary design decisions
 ==========================
 
-- all params of derived generators must be omega (runtime)
-- ``Gen`` monad is significantly finite, thus explicit fuel pattern of derived gens for totality
+Fuel pattern
+------------
+
+- explicit fuel pattern of derived gens for totality because ``Gen`` monad is only finite
+
+- explicit fuel pattern is required even for non-recursive data types
+
+Regular parameters
+------------------
+
+- all params of derived generators must
+
+  - be omega (runtime)
+  - have the same name as such parameter in the original type
+
+Auto parameters
+---------------
+
+- only of ``Gen`` type is supported to be in ``auto``-parameters of the derived generators
+
+- external ``Gen`` (passed as ``auto``-parameter) must have the signature of generated one (i.e. fuel pattern, omega, names as in the type, etc.)
 
 To be fixed/reworked
 ====================
@@ -20,4 +39,3 @@ To be fixed/reworked
 - GADT structure does not influence on the ordering of cons params generation
 - no support for additional ``auto`` arguments of derived gens (even if they are needed for the generated data)
 - only constructors (and bare variables) are supported on the RHS of GADTs constructors
-

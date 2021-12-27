@@ -1,8 +1,8 @@
 .. _explanation-index:
 
-===========================
-Explanation and discussions
-===========================
+===========
+Explanation
+===========
 
 Explanation is the *understanding-oriented* part of the documentation.
 It may contain information about design decisions, alternatives, context and related works.
@@ -11,8 +11,7 @@ You can look at the `original framework <https://diataxis.fr/explanation/>`_ to 
 
 .. toctree::
   :caption: Contents
+  :maxdepth: 2
 
-  limitations
-  design/generators/index
-  design/derivation/index
-  tbd
+  generators/index
+  derivation/index

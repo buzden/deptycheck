@@ -1,6 +1,6 @@
-==========================
-Design of value generators
-==========================
+====================
+Design of generators
+====================
 
 .. comparison to the design of QuickCheck and Hedgehog
    (in particular, in shrinking)

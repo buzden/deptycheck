@@ -1,6 +1,6 @@
-=========================================
-Design of automatic generators derivation
-=========================================
+====================
+Design of derivation
+====================
 
 .. staged derivation
 
