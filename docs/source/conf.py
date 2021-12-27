@@ -31,6 +31,21 @@ extensions = [
     "myst_parser",
 ]
 
+myst_enable_extensions = [
+    # support for needed constructions
+    "colon_fence",
+    # math support
+    "amsmath",
+    "dollarmath",
+    # fancy lists
+    "deflist",
+    "fieldlist",
+    "tasklist",
+    # automatic characters
+    "replacements",
+    "smartquotes",
+]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
