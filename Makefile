@@ -14,6 +14,8 @@ clean:
 	${IDRIS2} --clean deptycheck.ipkg
 	${RM} -r build
 	@
+	${MAKE} -C docs clean
+	@
 	${MAKE} -C tests -f tests.mk clean
 	${MAKE} -C example -f pil.mk clean
 	@
