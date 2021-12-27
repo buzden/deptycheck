@@ -6,6 +6,8 @@ Things to be done
 
 .. more constructor derivator tactics
 
+.. "caching" derived generators (for similar derivation tasks)
+
 .. tuning of generators combinators
 
 .. getting rid of fuel pattern

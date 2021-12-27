@@ -1,21 +1,45 @@
 # Design of derivation
 
-% staged derivation
+## Overview
+
+% ad hoc a-la staged derivation
+
+:::{note}
+We love the idea of truly staged derivation, like described
+[in this paper](https://mpickering.github.io/papers/staged-sop.pdf).
+However, we don't know yet how this approach works with dependent types,
+thus we focus on more ad-hoc direct derivation.
+:::
+
+## Derivation task
 
 % derivation task (given/generated type arguments, external generators)
 
   % incl. problem of target type with external generators without fuel pattern
 
+## Type parameters and type indices
+
 % distinction between type parameters and type indices,
 % relativity of these terms to the derivation task
+
+## Closure of derived generators
 
 % closure of (potentially) mutually recursive generators
 
   % potential caching of generators of common types
 
+## Design of a single generator
+
 % design of single-type generator
+
+## Derivation for a single constructor
 
 % design of constructor derivator, order and staff
 
+### Strategies of constructor derivation
+
   % incl. different strategies of constructor derivators
+
+### Least-effort strategy
+
   % incl, least-effort and the company
