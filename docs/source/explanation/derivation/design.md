@@ -5,7 +5,9 @@
 By *derivation* we mean automatic creation of a generator given a datatype definition and,
 possibly, some configuration and additional stuff.
 
-% ad hoc a-la staged derivation
+:::{todo}
+ad hoc a-la staged derivation
+:::
 
 :::{note}
 We love the idea of truly staged derivation, like described
@@ -18,36 +20,49 @@ thus we focus on more ad-hoc direct derivation.
 
 ## Derivation task
 
-%We are working in dependently typed context, so in general case generator is a function
-%rather than just a data instance.
+:::{todo}
+We are working in dependently typed context, so in general case generator is a function
+rather than just a data instance.
 
-% derivation task (given/generated type arguments, external generators)
-
-  % incl. problem of target type with external generators without fuel pattern
+- derivation task (given/generated type arguments, external generators)
+  - incl. problem of target type with external generators without fuel pattern
+:::
 
 ## Type parameters and type indices
 
-% distinction between type parameters and type indices,
-% relativity of these terms to the derivation task
+:::{todo}
+distinction between type parameters and type indices,
+relativity of these terms to the derivation task
+:::
 
 ## Closure of derived generators
 
-% closure of (potentially) mutually recursive generators
+:::{todo}
+closure of (potentially) mutually recursive generators
 
-  % potential caching of generators of common types
+- potential caching of generators of common types
+:::
 
 ## Design of a single generator
 
-% design of single-type generator
+:::{todo}
+design of single-type generator
+:::
 
 ## Derivation for a single constructor
 
-% design of constructor derivator, order and staff
+:::{todo}
+design of constructor derivator, order and staff
+:::
 
 ### Strategies of constructor derivation
 
-  % incl. different strategies of constructor derivators
+:::{todo}
+incl. different strategies of constructor derivators
+:::
 
 ### Least-effort strategy
 
-  % incl, least-effort and the company
+:::{todo}
+least-effort strategy and the company
+:::

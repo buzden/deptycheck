@@ -24,10 +24,15 @@ This documentation is organised using the following principles.
   - Only code blocks are checked during this test, inline snippets like :idris:`the (Vect 3 Nat) [1, 2, 3]` are not checked.
   - Although, small letter filenames are meant to be used,
     fully qualified module name (if used) should use capitalised names, as Idris would expect,
-    There is some machinery that capitalises file and dir names during docs testing.
+    There is some machinery that capitalises file and directory names during docs testing.
     You can look at :ref:`this section <sect-literate-sample>` for the example.
+
+This documentation is likely to be not yet full.
+There are a lot of places still to be filled.
+You can look at the list of places that are marked as "todos" :any:`here <todos>`.
 
 .. toctree::
   :hidden:
 
   test
+  todos

@@ -7,16 +7,20 @@ import Test.DepTyCheck.Gen
 # Design of generators
 
 (sect-gen-general-design)=
+
 ## What is a generator
 
 Different property-based testing libraries have slightly different notions of generators.
 The common beside the purely functional ones is that generator is a polymorphic type that
 has a way to compute a value of type `a` out of generator of `a` being possibly given some context.
 
-% Generator on very high level of abstraction is a calculation of a value (or values) of some particular type in particular context.
+:::{todo}
+Generator on very high level of abstraction is a calculation of a value (or values) of some particular type in particular context.
+:::
 
-% comparison to the design of QuickCheck and Hedgehog
-% (in particular, in shrinking)
+:::{todo}
+comparison to the design of QuickCheck and Hedgehog (in particular, in shrinking)
+:::
 
 We are working in dependently typed context, so in general case generator is a function
 rather than just a data value.
@@ -84,10 +88,15 @@ vectOfLength (S n) = [| genA :: vectOfLength n |]
 
 ## Result of generation
 
-% ability to index possible generated values
+:::{todo} ability to index possible generated values
+:::
 
-% close values (until shuffled) are likely to be similar (but still different)
+:::{todo} close values (until shuffled) are likely to be similar (but still different)
+:::
+
+(sect-gen-totality)=
 
 ## Totality of generation
 
-% finiteness of generators
+:::{todo} finiteness of generators
+:::

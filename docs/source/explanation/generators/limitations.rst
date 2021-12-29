@@ -2,12 +2,10 @@
 Limitations
 ===========
 
-.. todo to add links to `design/...` sections
-
 Temporary design decisions
 ==========================
 
-- ``Gen`` monad is significantly finite
+- ``Gen`` monad :ref:`is <sect-gen-totality>` significantly finite
 
 To be fixed/reworked
 ====================
