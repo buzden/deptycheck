@@ -2,6 +2,9 @@
 
 ## Overview
 
+By *derivation* we mean automatic creation of a generator given a datatype definition and,
+possibly, some configuration and additional stuff.
+
 % ad hoc a-la staged derivation
 
 :::{note}
@@ -11,7 +14,12 @@ However, we don't know yet how this approach works with dependent types,
 thus we focus on more ad-hoc direct derivation.
 :::
 
+(sect-derivation-task)=
+
 ## Derivation task
+
+%We are working in dependently typed context, so in general case generator is a function
+%rather than just a data instance.
 
 % derivation task (given/generated type arguments, external generators)
 

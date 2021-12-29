@@ -7,7 +7,6 @@ import Test.DepTyCheck.Gen
 # Design of generators
 
 (sect-gen-general-design)=
-
 ## What is a generator
 
 Different property-based testing libraries have slightly different notions of generators.
@@ -18,6 +17,9 @@ has a way to compute a value of type `a` out of generator of `a` being possibly 
 
 % comparison to the design of QuickCheck and Hedgehog
 % (in particular, in shrinking)
+
+We are working in dependently typed context, so in general case generator is a function
+rather than just a data value.
 
 ## `Gen` used as interface
 
