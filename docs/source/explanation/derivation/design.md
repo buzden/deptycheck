@@ -1,3 +1,7 @@
+<!-- idris
+module Explanation.Derivation.Design
+-->
+
 # Design of derivation
 
 By *derivation* we mean automatic creation of a generator given a datatype definition and,
@@ -107,8 +111,51 @@ Examples should contain:
 
 ## Type parameters and type indices
 
+Not a surprise, datatypes can have *type arguments*.
+Consider an `Either` datatype with two of them:
+
+<!-- idris
+%hide Prelude.Either
+-->
+
+```idris
+data Either a b = Left a | Right b
+```
+
+This has a lot of use in *generic programming*; you can have *polymorphic functions* that act on data disregarding particular type arguments.
+For example, you can map over values inside the `Either`:
+
+```idris
+bimap : (a -> c) -> (b -> d) -> Either a b -> Either c d
+bimap f _ (Left x)  = Left  (f x)
+bimap _ g (Right y) = Right (g y)
+```
+
+Such type of type arguments is called *type parameters*.
+Such data and functions are *parametric* on these parameters,
+because they behave in the same way given any types for the parameters.
+
+However, in richer type systems (which support dependent types or at least GADTs) types can be *indexed*.
+Consider a classical example of constant-size vectors:
+
+```idris
+data Vect : Nat -> Type -> Type where
+  Nil  :                  Vect 0       a
+  (::) : a -> Vect n a -> Vect (1 + n) a
+```
+
+In this case, the second type argument is still a parameter, it is same in all constructors.
+However, the first type argument is an *index*.
+Depending on the value of this index, the set of available constructors can differ.
+
 :::{todo}
-distinction between type parameters and type indices,
+Maybe, some function, demonstrating index nature.
+:::
+
+So, value of type parameter cannot influence on the set of available data constructors,
+but the value of type index can.
+
+:::{todo}
 relativity of these terms to the derivation task
 :::
 
