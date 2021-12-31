@@ -10,6 +10,8 @@ Things to be done
 
 .. todo:: tuning of generators combinators
 
+.. todo:: support of external generators from the context of derivation, not from the context of generation
+
 .. todo:: getting rid of fuel pattern
 
 .. todo:: wider class of data structures which are supporrted for automatic derivation

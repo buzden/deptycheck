@@ -1,5 +1,3 @@
-.. _explanation-index:
-
 ===========
 Explanation
 ===========

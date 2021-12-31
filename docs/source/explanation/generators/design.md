@@ -100,3 +100,10 @@ vectOfLength (S n) = [| genA :: vectOfLength n |]
 
 :::{todo} finiteness of generators
 :::
+
+(sect-fuel-pattern-workaround)=
+
+### Fuel pattern workaround
+
+:::{todo} fuel-pattern as a workaround for infinite datatypes
+:::
