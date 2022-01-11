@@ -148,9 +148,18 @@ In this case, the second type argument is still a parameter, it is same in all c
 However, the first type argument is an *index*.
 Depending on the value of this index, the set of available constructors can differ.
 
-:::{todo}
-Maybe, some function, demonstrating index nature.
-:::
+For example, once you known that the size of the vector is greater than zero,
+you do not need to match on the `Nil` constructor.
+In these examples, all matches are against the `(::)` constructor:
+
+```idris
+head : Vect (1 + n) a -> a
+head (x :: _) = x
+
+last : Vect (1 + n) a -> a
+last (x :: Nil)       = x
+last (_ :: tl@(_::_)) = last tl
+```
 
 So, value of type parameter cannot influence on the set of available data constructors,
 but the value of type index can.
