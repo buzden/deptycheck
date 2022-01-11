@@ -29,6 +29,12 @@ Auto parameters
 
 - external ``Gen`` (passed as ``auto``-parameter) must have the signature of generated one (i.e. fuel pattern, omega, names as in the type, etc.)
 
+Structure of derived generator
+------------------------------
+
+- now all derived subgenerators needed for the current type are generated as local functions inside the derived generator function
+  even if there are some common generators between different derivation tasks
+
 To be fixed/reworked
 ====================
 

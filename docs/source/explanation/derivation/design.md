@@ -1,5 +1,9 @@
 <!-- idris
 module Explanation.Derivation.Design
+
+import Data.Fuel
+
+import Test.DepTyCheck.Gen
 -->
 
 # Design of derivation
@@ -170,11 +174,53 @@ relativity of these terms to the derivation task
 
 ## Closure of derived generators
 
-:::{todo}
-closure of (potentially) mutually recursive generators
+Datatype for which generator is derived can contain some other datatypes as parts.
+There is a need to have generators for them in the case when these generators are not present as external in the derivation task.
+Notice also, that these datatypes can be mutually recursive and we need to tackle this also during derivation.
 
-- potential caching of generators of common types
+That is why single derivation task actually produces a closure of generators.
+And since they can be mutually recursive, then in the derived code all function signatures goes before all function bodies.
+
+For example, consider the following data structure and the following derivation task.
+
+```idris
+mutual
+  data X = X0 | X1 | X2 Y
+  data Y = Y0 | Y1 X
+```
+
+:::idris
+genX : Fuel -> Gen X
+genX = deriveGen
 :::
+
+In this case, derived generator function would have the following structure.
+
+```idris
+genX : Fuel -> Gen X
+genX fuel = gX fuel
+  where
+    gX : Fuel -> Gen X
+    gY : Fuel -> Gen Y
+    gX fuel = ?xs_gen_body
+    gY fuel = ?ys_gen_body
+```
+
+:::{todo}
+Maybe, more realistic example, e.g. alternating list of e.g. `Nat`s and `String`s.
+:::
+
+The current design decision is that all subgenerators that are derived for the particular derivation task
+are local to the function for that derivation task.
+That is, if some other derivation task will need a derived generator for the datatype `Y`,
+now function of type `Fuel -> Gen Y` would be derived twice, both times as a local function of derived generator for particular derivation task.
+
+This is done because each call to the `deriveGen` macro is fully independent.
+No state is shared between calls to macros.
+In the future, such derived generators caching can be implemented either by implementing some state sharing in the compiler,
+or with changing the way which derivation task is expressed (for now, this is the call to the `deriveGen` macro).
+Maybe, some bunched derivation macro should be also considered,
+this would give user a way to express where derived generators should be shared and where should not.
 
 ## Design of a single generator
 
