@@ -113,6 +113,8 @@ Examples should contain:
 - example for a data type with dependent type arguments.
 :::
 
+(sect-type-indices)=
+
 ## Type parameters and type indices
 
 Not a surprise, datatypes can have *type arguments*.
@@ -270,7 +272,7 @@ genX fuel = data_X fuel
 
     data_X fuel = case fuel of
         Dry    => oneOf' [con_X0 Dry, con_X1 Dry]
-        More f => oneOf' [con_X0 f, con_X1 f, con_X2 f]
+        More f => oneOf' [con_X0 f  , con_X1 f  , con_X2 f]
       where
         con_X0 : Fuel -> Gen X
         con_X1 : Fuel -> Gen X
@@ -282,7 +284,7 @@ genX fuel = data_X fuel
 
     data_Y fuel = case fuel of
         Dry    => oneOf' [con_Y0 Dry]
-        More f => oneOf' [con_Y0 f, con_Y1 f]
+        More f => oneOf' [con_Y0 f  , con_Y1 f]
       where
         con_Y0 : Fuel -> Gen Y
         con_Y1 : Fuel -> Gen Y
@@ -296,17 +298,118 @@ genX fuel = data_X fuel
 
 ## Derivation for a single constructor
 
-:::{todo}
-design of constructor derivator, order and staff
+### Simple case
+
+In a simple case when there are no type indices and no dependent types are present,
+derived code for generation of a value for a single constructor is also simple.
+Generation can be boiled down to calling to subgenerators and then calling the selected constructor.
+Finishing the example from above, we could derive something like the following.
+
+<!-- idris
+namespace SingleCon_Simple {
+-->
+```idris
+genX : Fuel -> Gen X
+genX fuel = data_X fuel
+  where
+    data_X : Fuel -> Gen X
+    data_Y : Fuel -> Gen Y
+
+    data_X fuel = case fuel of
+        Dry    => oneOf' [con_X0 Dry, con_X1 Dry]
+        More f => oneOf' [con_X0 f  , con_X1 f  , con_X2 f]
+      where
+        con_X0 : Fuel -> Gen X
+        con_X1 : Fuel -> Gen X
+        con_X2 : Fuel -> Gen X
+
+        con_X0 fuel = [| X0               |]
+        con_X1 fuel = [| X1               |]
+        con_X2 fuel = [| X2 (data_Y fuel) |]
+
+    data_Y fuel = case fuel of
+        Dry    => oneOf' [con_Y0 Dry]
+        More f => oneOf' [con_Y0 f  , con_Y1 f]
+      where
+        con_Y0 : Fuel -> Gen Y
+        con_Y1 : Fuel -> Gen Y
+
+        con_Y0 fuel = [| Y0               |]
+        con_Y1 fuel = [| Y1 (data_X fuel) |]
+```
+<!-- idris
+  }
+-->
+
+As you can see, the power of `Applicative` interface is enough for building more complex generators out of subgenerators.
+
+But, actually, this is the case only when we do not consider dependently typed data.
+We have to use monadic interface when some of constructor's arguments depend on each other.
+
+Also, there are issues on non-determinism in the order of such generation, which will be explained below.
+Because all of that, and for the sake of simplicity of the derivation mechanism,
+actual derived code slightly differ even for the simple case.
+The following code would be derived.
+
+<!-- idris
+namespace SingleCon_Full {
+-->
+```idris
+genX : Fuel -> Gen X
+genX fuel = data_X fuel
+  where
+    data_X : Fuel -> Gen X
+    data_Y : Fuel -> Gen Y
+
+    data_X fuel = case fuel of
+        Dry    => oneOf' [con_X0 Dry, con_X1 Dry]
+        More f => oneOf' [con_X0 f  , con_X1 f  , con_X2 f]
+      where
+        con_X0 : Fuel -> Gen X
+        con_X1 : Fuel -> Gen X
+        con_X2 : Fuel -> Gen X
+
+        con_X0 fuel = oneOf' [ pure X0 ]
+        con_X1 fuel = oneOf' [ pure X1 ]
+        con_X2 fuel = oneOf' [ do y <- data_Y fuel
+                                  pure $ X2 y
+                             ]
+
+    data_Y fuel = case fuel of
+        Dry    => oneOf' [con_Y0 Dry]
+        More f => oneOf' [con_Y0 f  , con_Y1 f]
+      where
+        con_Y0 : Fuel -> Gen Y
+        con_Y1 : Fuel -> Gen Y
+
+        con_Y0 fuel = oneOf' [ pure Y0 ]
+        con_Y1 fuel = oneOf' [ do x <- data_X fuel
+                                  pure $ Y1 x
+                             ]
+```
+<!-- idris
+  }
+-->
+
+### Managing type indices
+
+We are working with dependently typed data, which may have type indices.
+:::{note}
+[Remember](sect-type-indices) that set of available constructors may differ depending on the value of a type index.
+Also, particular derivation task may influence in whether or not some type argument would be a type index.
 :::
 
-### Strategies of constructor derivation
+:::{todo}
+on GADTs, matching, `DecEq` and invertible functions
+:::
+
+### Strategies of constructor's arguments derivation
 
 :::{todo}
 incl. different strategies of constructor derivators
 :::
 
-### Least-effort strategy
+#### Least-effort strategy
 
 :::{todo}
 least-effort strategy and the company
