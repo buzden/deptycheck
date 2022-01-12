@@ -16,10 +16,7 @@ By *derivation* we mean automatic creation of a generator given a datatype defin
 possibly, some configuration and additional stuff.
 
 :::{todo}
-Each of section in this part seems to deserve its own subpart (separate file).
-At the moment, we completely lack technical description, i.e. explanation on *how exactly*
-this or that thing was done (e.g. how exactly we organised derivation closure or how we analyse for recursive constructors).
-The current description is more an examply one, showing *what* is derived in these or that circumstances.
+Almost every section here should have a reference to some section in `reference/contributors` for technical explanations.
 :::
 
 ## When derivation happens

@@ -4,13 +4,12 @@ Reference
 
 Reference is the *information-oriented* piece of the documentation.
 It contains technical descriptions of the machinery.
-It is meant for users of the library to be used for... hmm... reference!
+It is meant for users or contributors of the library to be used for... hmm... reference!
 
 You can learn more about what is meant to be in the reference part in the `original framework <https://diataxis.fr/reference/>`_.
 
 .. toctree::
-  :maxDepth: 2
+  :maxDepth: 3
 
-  pbt
-  gen-monad
-  derivation
+  users/index
+  contributors/index
