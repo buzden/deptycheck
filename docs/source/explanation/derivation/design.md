@@ -417,7 +417,6 @@ genX fuel = data_X fuel
   }
 -->
 
-
 ### Managing type indices
 
 We are working with dependently typed data, which may have type indices.
@@ -522,7 +521,6 @@ Example of deep constructors index with propositional equality inside
 :::{todo}
 What we'd want to support, e.g. invertible single-argument functions
 :::
-
 
 ### Strategies of constructor's arguments derivation
 
