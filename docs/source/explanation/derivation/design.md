@@ -391,6 +391,7 @@ genX fuel = data_X fuel
   }
 -->
 
+
 ### Managing type indices
 
 We are working with dependently typed data, which may have type indices.
@@ -399,9 +400,46 @@ We are working with dependently typed data, which may have type indices.
 Also, particular derivation task may influence in whether or not some type argument would be a type index.
 :::
 
-:::{todo}
-on GADTs, matching, `DecEq` and invertible functions
+An arbitrary well-typed expression can be on the place of type index in a constructor's definition.
+For now, we support only two cases: data constructors and values that are propositionally equal to some other type arguments.
+
+#### Data constructor indices
+
+There is no problem or much difference with the simple case from above in the case when type index is a generated value
+according to the particular derivation task.
+Consider the following indexed data type and a derivation task, where this index is generated.
+
+```idris
+data D : Bool -> Type where
+  JJ : Nat -> Nat ->        D b
+  FN : Nat -> D True ->     D False
+  TL : String ->            D True
+  TR : String -> D False -> D True
+```
+
+:::idris
+genD : Fuel -> Gen (b ** D b)
+genD = deriveGen
 :::
+
+:::{todo}
+Example of data with boolean index, 4 constrs, one parametric, one for false, two for true
+:::
+
+#### Equality of index to another argument
+
+#### Superposition of both
+
+:::{todo}
+Example of deep constructors index with propositional equality inside
+:::
+
+#### Other index expressions
+
+:::{todo}
+What we'd want to support, e.g. invertible single-argument functions
+:::
+
 
 ### Strategies of constructor's arguments derivation
 
