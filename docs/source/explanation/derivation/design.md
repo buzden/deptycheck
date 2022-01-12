@@ -1,9 +1,13 @@
 <!-- idris
 module Explanation.Derivation.Design
 
-import Data.Fuel
+import Test.DepTyCheck.Gen.Auto
 
-import Test.DepTyCheck.Gen
+%language ElabReflection
+
+-- Empty body derivation
+DerivatorCore where
+  canonicBody sig n = pure [ callCanonic sig n implicitTrue (replicate _ implicitTrue) .= `(empty) ]
 -->
 
 # Design of derivation
@@ -144,6 +148,10 @@ because they behave in the same way given any types for the parameters.
 However, in richer type systems (which support dependent types or at least GADTs) types can be *indexed*.
 Consider a classical example of constant-size vectors:
 
+<!-- idris
+%hide Data.Vect.Vect
+-->
+
 ```idris
 data Vect : Nat -> Type -> Type where
   Nil  :                  Vect 0       a
@@ -157,6 +165,11 @@ Depending on the value of this index, the set of available constructors can diff
 For example, once you known that the size of the vector is greater than zero,
 you do not need to match on the `Nil` constructor.
 In these examples, all matches are against the `(::)` constructor:
+
+<!-- idris
+%hide Data.Vect.head
+%hide Data.Vect.last
+-->
 
 ```idris
 head : Vect (1 + n) a -> a
@@ -191,10 +204,16 @@ mutual
   data Y = Y0 | Y1 X
 ```
 
-:::idris
+<!-- idris
+namespace GenCloj_DerivTask {
+-->
+```idris
 genX : Fuel -> Gen X
 genX = deriveGen
-:::
+```
+<!-- idris
+  }
+-->
 
 In this case, derived generator function would have the following structure.
 
@@ -417,10 +436,16 @@ data D : Bool -> Type where
   TR : String -> D False -> D True
 ```
 
-:::idris
+<!-- idris
+namespace TypIdx_DerivTask {
+-->
+```idris
 genD : Fuel -> Gen (b ** D b)
 genD = deriveGen
-:::
+```
+<!-- idris
+  }
+-->
 
 :::{todo}
 Example of data with boolean index, 4 constrs, one parametric, one for false, two for true
