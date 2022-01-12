@@ -399,8 +399,7 @@ genX fuel = data_X fuel
         con_X0 fuel = oneOf' [ pure X0 ]
         con_X1 fuel = oneOf' [ pure X1 ]
         con_X2 fuel = oneOf' [ do y <- data_Y fuel
-                                  pure $ X2 y
-                             ]
+                                  pure $ X2 y ]
 
     data_Y fuel = case fuel of
         Dry    => oneOf' [con_Y0 Dry]
@@ -411,8 +410,7 @@ genX fuel = data_X fuel
 
         con_Y0 fuel = oneOf' [ pure Y0 ]
         con_Y1 fuel = oneOf' [ do x <- data_X fuel
-                                  pure $ Y1 x
-                             ]
+                                  pure $ Y1 x ]
 ```
 <!-- idris
   }
@@ -488,19 +486,18 @@ genD_idx_generated @{data_Nat} @{data_String} fuel = data_D_giv_no fuel
         con_JJ fuel = oneOf' [ do b  <- data_Bool fuel
                                   n1 <- data_Nat fuel
                                   n2 <- data_Nat fuel
-                                  pure (_ ** JJ {b} n1 n2)
-                             ]
+                                  pure (_ ** JJ {b} n1 n2) ]
+
         con_FN fuel = oneOf' [ do n        <- data_Nat fuel
                                   (b ** d) <- data_D_giv_no fuel
-                                  pure (_ ** FN {b} n d)
-                             ]
+                                  pure (_ ** FN {b} n d) ]
+
         con_TL fuel = oneOf' [ do s <- data_String fuel
-                                  pure (_ ** TL s)
-                             ]
+                                  pure (_ ** TL s) ]
+
         con_TR fuel = oneOf' [ do s        <- data_String fuel
                                   (b ** d) <- data_D_giv_no fuel
-                                  pure (_ ** TR {b} s d)
-                             ]
+                                  pure (_ ** TR {b} s d) ]
 ```
 <!-- idris
   }
@@ -641,24 +638,20 @@ genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
 
         con_JJ fuel b = oneOf' [ do n1 <- data_Nat fuel
                                     n2 <- data_Nat fuel
-                                    pure $ JJ {b} n1 n2
-                               ]
+                                    pure $ JJ {b} n1 n2 ]
 
         con_FN fuel False = oneOf' [ do n        <- data_Nat fuel
                                         (b ** d) <- data_D_giv_no fuel
-                                        pure $ FN {b} n d
-                                   ]
+                                        pure $ FN {b} n d ]
         con_FN _ _ = empty
 
         con_TL fuel True = oneOf' [ do s <- data_String fuel
-                                       pure $ TL s
-                                  ]
+                                       pure $ TL s ]
         con_TL _ _ = empty
 
         con_TR fuel True = oneOf' [ do s        <- data_String fuel
                                        (b ** d) <- data_D_giv_no fuel
-                                       pure $ TR {b} s d
-                                  ]
+                                       pure $ TR {b} s d ]
         con_TR _ _ = empty
 ```
 <!-- idris
