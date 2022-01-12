@@ -125,6 +125,8 @@ Examples should contain:
 
 ## Type parameters and type indices
 
+### Distinction between the two
+
 Not a surprise, datatypes can have *type arguments*.
 Consider an `Either` datatype with two of them:
 
@@ -186,6 +188,8 @@ last (_ :: tl@(_::_)) = last tl
 
 So, value of type parameter cannot influence on the set of available data constructors,
 but the value of type index can.
+
+### Relativity of the type index status
 
 :::{todo}
 relativity of these terms to the derivation task
