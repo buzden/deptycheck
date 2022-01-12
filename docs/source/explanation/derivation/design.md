@@ -15,6 +15,13 @@ DerivatorCore where
 By *derivation* we mean automatic creation of a generator given a datatype definition and,
 possibly, some configuration and additional stuff.
 
+:::{todo}
+Each of section in this part seems to deserve its own subpart (separate file).
+At the moment, we completely lack technical description, i.e. explanation on *how exactly*
+this or that thing was done (e.g. how exactly we organised derivation closure or how we analyse for recursive constructors).
+The current description is more an examply one, showing *what* is derived in these or that circumstances.
+:::
+
 ## When derivation happens
 
 In principle, derivation can happen both at *runtime* or at the *compile time*.
@@ -430,18 +437,69 @@ Consider the following indexed data type and a derivation task, where this index
 
 ```idris
 data D : Bool -> Type where
-  JJ : Nat -> Nat ->        D b
-  FN : Nat -> D True ->     D False
-  TL : String ->            D True
-  TR : String -> D False -> D True
+  JJ : Nat ->    Nat -> D b
+  FN : Nat ->    D b -> D False
+  TL : String ->        D True
+  TR : String -> D b -> D True
 ```
 
 <!-- idris
-namespace TypIdx_DerivTask {
+namespace TypIdx_Gend_DerivTask {
 -->
 ```idris
-genD : Fuel -> Gen (b ** D b)
-genD = deriveGen
+genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => Gen (b ** D b)
+genD_idx_generated = deriveGen
+```
+<!-- idris
+  }
+-->
+
+For this derivation task the following generator function would be derived.
+
+<!-- idris
+namespace TypIdx_Gend_DerivedExample {
+-->
+```idris
+genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => Gen (b ** D b)
+genD_idx_generated @{data_Nat} @{data_String} fuel = data_D_giv_no fuel
+  where
+    data_Bool : Fuel -> Gen Bool
+    data_Bool fuel = case fuel of
+        Dry    => oneOf' [con_True Dry, con_False Dry]
+        More f => oneOf' [con_True f, con_False f]
+      where
+        con_True  : Fuel -> Gen Bool
+        con_False : Fuel -> Gen Bool
+
+        con_True  fuel = oneOf' [pure True]
+        con_False fuel = oneOf' [pure False]
+
+    data_D_giv_no : Fuel -> Gen (b ** D b)
+    data_D_giv_no fuel = case fuel of
+        Dry    => oneOf' [con_JJ Dry, con_TL Dry]
+        More f => oneOf' [con_JJ f, con_FN f, con_TL f, con_TR f]
+      where
+        con_JJ : Fuel -> Gen (b ** D b)
+        con_FN : Fuel -> Gen (b ** D b)
+        con_TL : Fuel -> Gen (b ** D b)
+        con_TR : Fuel -> Gen (b ** D b)
+
+        con_JJ fuel = oneOf' [ do b  <- data_Bool fuel
+                                  n1 <- data_Nat fuel
+                                  n2 <- data_Nat fuel
+                                  pure (_ ** JJ {b} n1 n2)
+                             ]
+        con_FN fuel = oneOf' [ do n        <- data_Nat fuel
+                                  (b ** d) <- data_D_giv_no fuel
+                                  pure (_ ** FN {b} n d)
+                             ]
+        con_TL fuel = oneOf' [ do s <- data_String fuel
+                                  pure (_ ** TL s)
+                             ]
+        con_TR fuel = oneOf' [ do s        <- data_String fuel
+                                  (b ** d) <- data_D_giv_no fuel
+                                  pure (_ ** TR {b} s d)
+                             ]
 ```
 <!-- idris
   }
