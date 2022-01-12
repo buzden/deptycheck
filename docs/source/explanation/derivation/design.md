@@ -660,10 +660,41 @@ genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
 
 #### Equality of index to another argument
 
+```idris
+data EqualN : Nat -> Nat -> Type where
+  ReflN : EqualN x x
+```
+
+:::{todo}
+To show the work with the decidable equality in type arguments.
+:::
+
+:::{todo}
+Again, no problem when all type arguments are generated
+:::
+
+:::{todo}
+No very big deal when one type argument is given and another one is generated being propositionally equal to the given.
+Note that which type argument is an index is relative to which type argument is given.
+:::
+
+:::{todo}
+Need of decidable propositional equality when two are given.
+:::
+
 #### Superposition of both
 
 :::{todo}
 Example of deep constructors index with propositional equality inside
+
+For example, type like this:
+
+```idris
+data LT2 : Nat -> Nat -> Type where
+  Base : x `LT2` S (S x)
+  Step : x `LT2` y -> x `LT2` S y
+```
+
 :::
 
 #### Other index expressions
