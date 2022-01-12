@@ -464,6 +464,8 @@ genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => Gen (b
 genD_idx_generated @{data_Nat} @{data_String} fuel = data_D_giv_no fuel
   where
     data_Bool : Fuel -> Gen Bool
+    data_D_giv_no : Fuel -> Gen (b ** D b)
+
     data_Bool fuel = case fuel of
         Dry    => oneOf' [con_True Dry, con_False Dry]
         More f => oneOf' [con_True f, con_False f]
@@ -474,7 +476,6 @@ genD_idx_generated @{data_Nat} @{data_String} fuel = data_D_giv_no fuel
         con_True  fuel = oneOf' [pure True]
         con_False fuel = oneOf' [pure False]
 
-    data_D_giv_no : Fuel -> Gen (b ** D b)
     data_D_giv_no fuel = case fuel of
         Dry    => oneOf' [con_JJ Dry, con_TL Dry]
         More f => oneOf' [con_JJ f, con_FN f, con_TL f, con_TR f]
@@ -505,9 +506,164 @@ genD_idx_generated @{data_Nat} @{data_String} fuel = data_D_giv_no fuel
   }
 -->
 
-:::{todo}
-Example of data with boolean index, 4 constrs, one parametric, one for false, two for true
-:::
+You can see that is has the similar structure as the one from the simple case example above
+except for the fact that the result of recursive call to the `data_D_giv_no` generator needs to be pattern matched.
+All functions for constructor generation have dependent parameter wildcarded since it is fully determined by the constructor's application
+and automatically set to constants in constructors `FN`, `TL` and `TR`, and is determined by constructor's argument in the case of `JJ`.
+
+You also can see that the value of the type argument is generated in the most economic way.
+When there is no place where to get it, a subgenerator for the `Bool` type is used.
+But when the boolean parameter can be acquired from some other generator which produces the dependently typed value,
+this parameter is taken from there.
+You can see this in the cases for constructors `FN` and `TR`.
+
+But since the target data type has a type argument, we can have a derivation task where this parameter is given, not generated:
+
+<!-- idris
+namespace TypIdx_Givn_DerivTask {
+-->
+```idris
+genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => (b : Bool) -> Gen (D b)
+genD_idx_generated = deriveGen
+```
+<!-- idris
+  }
+-->
+
+It means that all the internal generators would also have additional argument and the structure of the derived generator would be the following.
+
+<!-- idris
+namespace TypIdx_Givn_DerivedStructure_BeforeMatch {
+-->
+```idris
+genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => (b : Bool) -> Gen (D b)
+genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
+  where
+    data_D_giv_b : Fuel -> (b : Bool) -> Gen (D b)
+    data_D_giv_b fuel b = case fuel of
+        Dry    => oneOf' [con_JJ Dry b, con_TL Dry b]
+        More f => oneOf' [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
+      where
+        con_JJ : Fuel -> (b : Bool) -> Gen (D b)
+        con_FN : Fuel -> (b : Bool) -> Gen (D b)
+        con_TL : Fuel -> (b : Bool) -> Gen (D b)
+        con_TR : Fuel -> (b : Bool) -> Gen (D b)
+
+        con_JJ fuel b = ?body_for_JJ_cons
+        con_FN fuel b = ?body_for_FN_cons
+        con_TL fuel b = ?body_for_TL_cons
+        con_TR fuel b = ?body_for_TR_cons
+```
+<!-- idris
+  }
+-->
+
+Argument `b` here is significantly a type index.
+It means that depending on its value, some constructors cannot be generated.
+
+Since, expressions that are used to the type index value in the data definitions are just type constructor,
+we can pattern match on them in generators.
+We would produce a value for the appropriate value of the given index and produce an empty generator for the rest.
+Empty generator is available since `Gen` implements the `Alternative` interface.
+
+So, the structure of the derived generator with the given type index would be the following for the `D` example.
+
+<!-- idris
+namespace TypIdx_Givn_DerivedStructure_WithMatch {
+-->
+```idris
+genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => (b : Bool) -> Gen (D b)
+genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
+  where
+    data_D_giv_b : Fuel -> (b : Bool) -> Gen (D b)
+    data_D_giv_b fuel b = case fuel of
+        Dry    => oneOf' [con_JJ Dry b, con_TL Dry b]
+        More f => oneOf' [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
+      where
+        con_JJ : Fuel -> (b : Bool) -> Gen (D b)
+        con_FN : Fuel -> (b : Bool) -> Gen (D b)
+        con_TL : Fuel -> (b : Bool) -> Gen (D b)
+        con_TR : Fuel -> (b : Bool) -> Gen (D b)
+
+        con_JJ fuel b = ?body_for_JJ_cons
+
+        con_FN fuel False = ?body_for_FN_cons
+        con_FN _ _ = empty
+
+        con_TL fuel True = ?body_for_TL_cons
+        con_TL _ _ = empty
+
+        con_TR fuel True = ?body_for_TR_cons
+        con_TR _ _ = empty
+```
+<!-- idris
+  }
+-->
+
+In this case, generation of non-recursive constructors `JJ` and `TL` is straightforward,
+the only difference is that `b` is a function argument, not a result of subgeneration.
+
+Recursive cases are not so easy.
+Surely, we can first generate value `b` using derived `data_Bool` generator (as we did before for `JJ` constructor)
+and then use `data_D_giv_b` recursively, but this approach as least two drawbacks:
+it is not effective (especially when generation for some particular index value is hard) and
+it gives strange distribution of generated values.
+In this example, constructor `JJ` would appear for both values of argument `b` when all other constructors
+will appear only once.
+
+That's why, it is better to reverse the order of generation and to use generator from previous derivation task,
+i.e. to generate type index simultaneously with the recursive value of `D`.
+So, to derive a generator of type `D` of one derivation task, we need also to do derivation for the same type of another derivation task.
+The final structure of the derived generator would be the following.
+
+<!-- idris
+namespace TypIdx_Givn_DerivedFinal {
+-->
+```idris
+genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => (b : Bool) -> Gen (D b)
+genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
+  where
+    data_Bool : Fuel -> Gen Bool
+    data_D_giv_no : Fuel -> Gen (b ** D b)
+    data_D_giv_b : Fuel -> (b : Bool) -> Gen (D b)
+
+    data_Bool fuel = ?gen_for_Bool_as_above
+    data_D_giv_no fuel = ?gen_for_D_with_no_given_as_above
+
+    data_D_giv_b fuel b = case fuel of
+        Dry    => oneOf' [con_JJ Dry b, con_TL Dry b]
+        More f => oneOf' [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
+      where
+        con_JJ : Fuel -> (b : Bool) -> Gen (D b)
+        con_FN : Fuel -> (b : Bool) -> Gen (D b)
+        con_TL : Fuel -> (b : Bool) -> Gen (D b)
+        con_TR : Fuel -> (b : Bool) -> Gen (D b)
+
+        con_JJ fuel b = oneOf' [ do n1 <- data_Nat fuel
+                                    n2 <- data_Nat fuel
+                                    pure $ JJ {b} n1 n2
+                               ]
+
+        con_FN fuel False = oneOf' [ do n        <- data_Nat fuel
+                                        (b ** d) <- data_D_giv_no fuel
+                                        pure $ FN {b} n d
+                                   ]
+        con_FN _ _ = empty
+
+        con_TL fuel True = oneOf' [ do s <- data_String fuel
+                                       pure $ TL s
+                                  ]
+        con_TL _ _ = empty
+
+        con_TR fuel True = oneOf' [ do s        <- data_String fuel
+                                       (b ** d) <- data_D_giv_no fuel
+                                       pure $ TR {b} s d
+                                  ]
+        con_TR _ _ = empty
+```
+<!-- idris
+  }
+-->
 
 #### Equality of index to another argument
 
