@@ -829,24 +829,77 @@ thus giving us an ability to use `ReflN` data constructor with its parameter `x`
 
 #### Superposition of both
 
-:::{todo}
-Example of deep constructors index with propositional equality inside
+We can also consider expressions in type index which are a combination of
+arbitrarily deep constructors application and a variable propositionally equal to a part of another type argument.
 
-For example, type like this:
+Consider the following data structure.
 
 ```idris
 data LT2 : Nat -> Nat -> Type where
-  Base : x `LT2` S (S x)
+  Base :              x `LT2` S (S x)
   Step : x `LT2` y -> x `LT2` S y
 ```
 
-:::
+It denotes to a proof that one natural number is strictly less than another natural number minimum by 2.
+You can see that this datatype's second parameter is actually a type index and
+the `Base` case has both nested constructors and propositional equality.
+
+Consider the hardest derivation task, the one, where both type arguments are given.
+
+<!-- idris
+namespace DeepEq_AllGiven_DerivTask {
+-->
+```idris
+genLT2_all_given : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
+genLT2_all_given = deriveGen
+```
+<!-- idris
+  }
+-->
+
+<!-- idris
+namespace DeepEq_AllGiven_Derivation {
+-->
+```idris
+genLT2_all_given : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
+genLT2_all_given fuel n m = data_LT2_given_l_r fuel n m
+  where
+    data_LT2_given_l_r : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
+    data_LT2_given_l_r fuel n m = case fuel of
+        Dry    => oneOf' [ con_Base Dry n m ]
+        More f => oneOf' [ con_Base f   n m, con_Step f n m ]
+      where
+        con_Base : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
+        con_Step : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
+
+        con_Base fuel n (S (S m)) = case decEq n m of
+          No  _    => empty
+          Yes Refl => oneOf' [ pure $ Base {x=n} ]
+        con_Base _ _ _ = empty
+
+        con_Step fuel n (S m) = oneOf' [ do lt <- data_LT2_given_l_r fuel n m
+                                            pure $ Step {x=n, y=m} lt ]
+        con_Step _ _ _ = empty
+```
+<!-- idris
+  }
+-->
+
+As you can see, both approaches to type indices described above, are compatible with each other.
 
 #### Other index expressions
 
-:::{todo}
-What we'd want to support, e.g. invertible single-argument functions
-:::
+Of course, deep constructor application and propositional equality to other type arguments
+are not the only possible expression types in type indices.
+And of course those two are not the only ones which can be used in automatic derivation.
+
+For example, we can think of an arbitrary (non-reversible in the general case) single-argument function application
+as such a supportable expression.
+In this case, we can perform filtering of generated data for producibility by the given function.
+
+There are a lot of cases possible to be supported.
+This is a point of a future research.
+We really want to add support of more such an expressions to widen the class of dependently types data for which automatic derivation works.
 
 ### Strategies of constructor's arguments derivation
 
