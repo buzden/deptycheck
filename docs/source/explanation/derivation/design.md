@@ -660,27 +660,172 @@ genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
 
 #### Equality of index to another argument
 
+Another important case of type index which is supported by the described derivation mechanism
+is when type index is propositionally equal to another type argument.
+
+Consider a type of propositional equality for natural numbers.
+
 ```idris
 data EqualN : Nat -> Nat -> Type where
   ReflN : EqualN x x
 ```
 
-:::{todo}
-To show the work with the decidable equality in type arguments.
+:::{note}
+This type is a particular case of general propositional equality type `Equal`.
+For the moment, we cannot use this type for illustrations, because it is polymorphic on the `Type` argument
+which is not yet supported by derivation.
 :::
 
-:::{todo}
-Again, no problem when all type arguments are generated
-:::
+As you can see, there is a single type constructor but it is available not for every combination of type arguments.
+For example, type `EqualN 5 5` is inhabited while `EqualN 4 5` is not.
 
-:::{todo}
+Let us consider different variants of derivation tasks.
+As in the previous example, there is no much problem for the case where all type arguments are generated.
+Consider the following derivation task.
+
+<!-- idris
+namespace Eq_AllGened_DerivTask {
+-->
+```idris
+genEqN_all_gened : Fuel -> (Fuel -> Gen Nat) => Gen (n ** m ** EqualN n m)
+genEqN_all_gened = deriveGen
+```
+<!-- idris
+  }
+-->
+
+For this case, derivation of a generator is straightforward:
+
+<!-- idris
+namespace Eq_AllGened_Derived {
+-->
+```idris
+genEqN_all_gened : Fuel -> (Fuel -> Gen Nat) => Gen (n ** m ** EqualN n m)
+genEqN_all_gened @{data_Nat} fuel = data_EqualN_giv_no fuel
+  where
+    data_EqualN_giv_no : Fuel -> Gen (n ** m ** EqualN n m)
+    data_EqualN_giv_no fuel = case fuel of
+        Dry    => oneOf' [ con_ReflN Dry ]
+        More f => oneOf' [ con_ReflN f   ]
+      where
+        con_ReflN : Fuel -> Gen (n ** m ** EqualN n m)
+        con_ReflN fuel = oneOf' [ do x <- data_Nat fuel
+                                     pure (_ ** _ ** ReflN {x}) ]
+
+```
+<!-- idris
+  }
+-->
+
+The fact that we have a dependency of presence of a constructor depending on values of the type arguments does not matter
+since we are generating all of them.
+
 No very big deal when one type argument is given and another one is generated being propositionally equal to the given.
-Note that which type argument is an index is relative to which type argument is given.
+Consider we have the following derivation task.
+
+<!-- idris
+namespace Eq_LeftGened_DerivTask {
+-->
+```idris
+genEqN_right_gened : Fuel -> (n : Nat) -> Gen (m ** EqualN n m)
+genEqN_right_gened = deriveGen
+```
+<!-- idris
+  }
+-->
+
+The only difference with the previous one is that one of naturals is simply given rather than generated with an external generator.
+
+<!-- idris
+namespace Eq_LeftGened_Derived {
+-->
+```idris
+genEqN_right_gened : Fuel -> (Fuel -> Gen Nat) => (n : Nat) -> Gen (m ** EqualN n m)
+genEqN_right_gened @{data_Nat} fuel n = data_EqualN_giv_l fuel n
+  where
+    data_EqualN_giv_l : Fuel -> (n : Nat) -> Gen (m ** EqualN n m)
+    data_EqualN_giv_l fuel n = case fuel of
+        Dry    => oneOf' [ con_ReflN Dry n ]
+        More f => oneOf' [ con_ReflN f   n ]
+      where
+        con_ReflN : Fuel -> (n : Nat) -> Gen (m ** EqualN n m)
+        con_ReflN fuel n = oneOf' [ do pure (_ ** ReflN {x=n}) ]
+```
+<!-- idris
+  }
+-->
+
+:::{note}
+Note that when the left type argument is given in the derivation task,
+then the right one becomes a type index, since depending on its value type is inhabited or not.
+But when the right argument is given, then the left one becomes a type index.
+
+So, which type argument is an index is relative to which type argument is given, i.e. to the derivation task in general.
 :::
 
-:::{todo}
-Need of decidable propositional equality when two are given.
-:::
+The hard part with this kind of type index is when all type arguments are given.
+So, consider the following derivation task.
+
+<!-- idris
+namespace Eq_AllGiven_DerivTask {
+-->
+```idris
+genEqN_all_given : Fuel -> (n, m : Nat) -> Gen $ EqualN n m
+genEqN_all_given = deriveGen
+```
+<!-- idris
+  }
+-->
+
+The return type contains both given values `n` and `m`,
+but (according to the datatype definition) we can use (the only) data constructor `ReflN` only in the case,
+when `n` and `m` are propositionally equal.
+
+We could try to match on both arguments recursively and try to cover all cases when both arguments are indeed propositionally equal.
+Unfortunately, it does not work for datatypes that contain built-in types like `String` or `Integer` inside;
+and more importantly, it cannot work in polymorphic case
+(which is not supported yet, but is meant to be supported later, thus used approach should support this case too).
+
+It means that we need to determine propositional equality of given arguments during the generation.
+Luckily, there is a standard way of doing so and is depicted with the interface `DecEq` of the standard library.
+`DecEq` stands for "decidable (propositional) equality" and contains a function of signature `decEq : (x, y : a) -> Dec (x = y)`
+where `Dec` is a standard type for decidable constructive problems.
+`Dec a` contains two constructors:
+one called `Yes` containing the inhabitant (i.e. a proof presence) of type `a`;
+the other called `No` containing the proof of uninhabitance of `a`, i.e. a value of type `Not a` (or, equivalently, `Void -> a`).
+
+It means, that using `DecEq` for the type of propositionally equal given type arguments,
+we can universally solve the problem of determining whether can we generate a value of a constructor with propositionally equal type arguments.
+
+For the last derivation task, derived generator would be the following.
+
+<!-- idris
+namespace Eq_AllGiven_Derived {
+-->
+```idris
+genEqN_all_given : Fuel -> (Fuel -> Gen Nat) => (n, m : Nat) -> Gen $ EqualN n m
+genEqN_all_given @{data_Nat} fuel n = data_EqualN_giv_l_r fuel n
+  where
+    data_EqualN_giv_l_r : Fuel -> (n, m : Nat) -> Gen $ EqualN n m
+    data_EqualN_giv_l_r fuel n m = case fuel of
+        Dry    => oneOf' [ con_ReflN Dry n m ]
+        More f => oneOf' [ con_ReflN f   n m ]
+      where
+        con_ReflN : Fuel -> (n, m : Nat) -> Gen $ EqualN n m
+        con_ReflN fuel n m = case decEq n m of
+          No  _    => empty
+          Yes Refl => oneOf' [ pure $ ReflN {x=n} ]
+```
+<!-- idris
+  }
+-->
+
+Here all the important stuff in types alignment is done by the `Yes Refl` matching.
+It is always possible here because as least one argument of `decEq` is a free variable (in fact, both are),
+thus it can be unified with some other expression.
+In this example, after matching `Yes Refl` expressions `n` and `m` are unified,
+thus the return type of the whole function became `EqualN n n`,
+thus giving us an ability to use `ReflN` data constructor with its parameter `x` being set to `n`.
 
 #### Superposition of both
 
