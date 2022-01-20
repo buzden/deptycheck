@@ -261,6 +261,34 @@ or with changing the way which derivation task is expressed (for now, this is th
 Maybe, some bunched derivation macro should be also considered,
 this would give user a way to express where derived generators should be shared and where should not.
 
+:::{note}
+There is one problem with such bunched generation, though.
+It looks at the first glance as very technical, however, it has one much more fundamental problem deep inside.
+
+The current derivation metaprogram (entered with a macro `deriveGen`)
+gets the type of generator-to-be-derived through the type of expression at the macro's use site.
+I.e. depending on the type of expression `deriveGen`, it will derive different generators.
+This is a way of passing type argument to an elaboration script and works well with any kind of types.
+
+However, if we want to perform bunched or cached derivation,
+we will need some other mechanism of passing the type argument to an elaboration script.
+Since Idris is a dependently typed language, there is a possibility to pass arguments of type `Type` as a regular argument.
+Since Idris is based on QTT even type argument can be a "runtime", i.e. observable inside a function's body
+(which is definitely needed during derivation).
+
+But this approach has one unpleasant consequence,
+namely that the type that is value of the "runtime" (i.e. observable) argument,
+cannot have non-runtime (i.e. erased) arguments.
+You can see some discussion in the compiler's [issue #2021](https://github.com/idris-lang/Idris2/pull/2021).
+The digested idea is that the current {math}`\{0, 1, \omega\}` semiring which is selected as the parameter of QTT in Idris,
+is not sufficient for a language with metaprogramming facility, because *erased* parameters notion splits into two:
+one is for values that *must not* be present at runtime, the other is for values that are available only at the compile-time.
+The first one cannot be exposed to runtime by elaboration script, the second can.
+
+So, there is a need of research on more appropriate semiring that covers metaprogramming cases too.
+Some work already is been doing by researchers (in particular by Andre Videla) but it may require additional efforts.
+:::
+
 ## Design of a single generator
 
 Generator of a single type simply attempts to call for all possible constructors of this type (in the given context of the derivation task).
