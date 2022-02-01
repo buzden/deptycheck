@@ -66,27 +66,15 @@ weakenToSuper_correct {i = FS _} (FS x) = cong S $ weakenToSuper_correct x
 
 --- Min/max stuff ---
 
-public export
-min : Fin n -> Fin n -> Fin n
-min FZ     _      = FZ
-min (FS _) FZ     = FZ
-min (FS l) (FS r) = FS $ min l r
-
-public export
-max : Fin n -> Fin n -> Fin n
-max FZ       r      = r
-max l@(FS _) FZ     = l
-max (FS l)   (FS r) = FS $ max l r
-
 namespace Semigroup
 
   public export
   [Minimum] Semigroup (Fin n) where
-    (<+>) = Fin.min
+    (<+>) = min
 
   public export
   [Maximum] Semigroup (Fin n) where
-    (<+>) = Fin.max
+    (<+>) = max
 
 namespace Monoid
 
