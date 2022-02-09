@@ -2,26 +2,17 @@ module Control.Monad.State.Tuple
 
 import public Control.Monad.State
 
---- For pairs ---
+%default total
 
 export
-Monad m => MonadState l (StateT (l, _) m) where
+Monad m => MonadState l (StateT (l, r) m) where
   get = Builtin.fst <$> get
   put = modify . mapFst . const
 
-export
-Monad m => MonadState r (StateT (_, r) m) where
-  get = Builtin.snd <$> get
-  put = modify . mapSnd . const
-
---- For triples ---
+wrapFst : Functor m => StateT r m a -> StateT (l, r) m a
+wrapFst act = ST $ \(x, y) => mapFst (x,) <$> runStateT y act
 
 export
-Monad m => MonadState s (StateT (_, s, _) m) where
-  get = Builtin.fst . snd <$> get
-  put = modify . mapSnd . mapFst . const
-
-export
-Monad m => MonadState s (StateT (_, _, s) m) where
-  get = Builtin.snd . snd <$> get
-  put = modify . mapSnd . mapSnd . const
+MonadState s (StateT r m) => Monad m => MonadState s (StateT (l, r) m) where
+  get = wrapFst get
+  put = wrapFst . put

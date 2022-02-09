@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+MkY_LR (MkXG_4) (MkX 4 0)
+-----
+MkY_LR (MkXG_4) (MkX 4 2)
+-----
+MkY_LR (MkXG_4) (MkX 4 4)
+-----
+MkY_LR (MkXG_4) (MkX 4 6)
+-----
+MkY_LR (MkXG_4) (MkX 4 7)
+-----
+MkY_LR (MkXG_4) (MkX 4 11)
+-----
+MkY_LR (MkXG_4) (MkX 4 12)
+-----
+MkY_LR (MkXG_4) (MkX 4 15)
+-----
+MkY_LR (MkXG_4) (MkX 4 16)
+-----
+MkY_LR (MkXG_4) (MkX 4 17)

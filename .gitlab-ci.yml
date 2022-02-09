@@ -5,22 +5,20 @@ variables:
 read-idris-ver:
   stage: .pre
   script:
-    - sed 's/^/preferred_idris=/' < "${IDRIS_VERSION_FILE}" > idris.env
+    - IDRIS2_TAG="$( if [[ "$CI_PIPELINE_SOURCE" != "schedule" ]]; then cat "${IDRIS_VERSION_FILE}"; else echo "latest"; fi )"
+    - echo "IDRIS2_TAG=$IDRIS2_TAG" > idris.env
   artifacts:
     reports:
       dotenv: idris.env
 
 .depends-on-idris:
-  parallel:
-    matrix:
-      - IDRIS2_TAG:
-        - ${preferred_idris}
-        - latest
-  image: snazzybucket/idris2:${IDRIS2_TAG}
-  rules:
-    - if: $IDRIS2_TAG == "latest"
-      allow_failure: true
-    - if: $IDRIS2_TAG
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/snazzybucket/idris2:${IDRIS2_TAG}
+
+.idris-build-job:
+  artifacts:
+    paths:
+      - "**/build/**/*.tt[cm]"
+    expire_in: 3 hrs
 
 stages:
   - thirdparties:build
@@ -31,12 +29,12 @@ stages:
   - pil:build
   - pil:test
 
-# TODO to cache the results of builds to those jobs that have `needs` for them (transitively).
-
 # TODO to find a way to not to repeat `read-idris-ver` in `needs` for every job that extends `.depends-on-idris`.
 
 thirdparties:build:
-  extends: .depends-on-idris
+  extends:
+    - .depends-on-idris
+    - .idris-build-job
   stage: thirdparties:build
   needs:
     - read-idris-ver
@@ -44,7 +42,9 @@ thirdparties:build:
     - make thirdparties
 
 deptycheck:build:
-  extends: .depends-on-idris
+  extends:
+    - .depends-on-idris
+    - .idris-build-job
   stage: deptycheck:build
   needs:
     - read-idris-ver
@@ -68,13 +68,32 @@ deptycheck:test:derive:
     - read-idris-ver
     - deptycheck:build
     - deptycheck:test:lib
+  only:
+    changes:
+      - "*"
+      - src/**/*
+      - tests/*
+      - tests/gen-derivation/**/*
+      - thirdparty/**/*
+      - depends/**/*
+  parallel:
+    matrix:
+      - test_set:
+        - inputvalidation/
+        - canonicsig/
+        - cons-analysis/
+        - derivation/infra/
+        - arg-deps/
+        - derivation/least-effort/print
+        - derivation/least-effort/run
+        - derivation/core/
   script:
-    - "thr=$(( `nproc` - 1 ))"
-    - "thr=$(( thr < 1 ? 1 : thr ))"
-    - make test-deptycheck only=gen-derivation/ INTERACTIVE="--color" threads=$thr
+    - make test-deptycheck only=gen-derivation/"$test_set" INTERACTIVE="--color" threads=2
 
 pil:build:
-  extends: .depends-on-idris
+  extends:
+    - .depends-on-idris
+    - .idris-build-job
   stage: pil:build
   needs:
     - read-idris-ver

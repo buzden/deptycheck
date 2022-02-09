@@ -35,7 +35,7 @@ export
 runGs : List GenForRun -> IO Unit
 runGs checkedGens = do
   putStrLn "Generated values:"
-  let genedValues = checkedGens <&> \(G gen) => map show $ evalState someStdGen $ unGen $ gen $ limit 20
+  let genedValues = checkedGens <&> \(G gen) => map show $ take 10 $ evalState someStdGen $ unGen $ gen $ limit 20
   let delim = (putStrLn "-----" >>)
   for_ genedValues $ delim . traverse_ (delim . putStrLn)
 

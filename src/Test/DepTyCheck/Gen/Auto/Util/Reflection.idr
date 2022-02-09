@@ -4,6 +4,7 @@ module Test.DepTyCheck.Gen.Auto.Util.Reflection
 import public Data.Fin
 import public Data.List.Lazy
 import public Data.Vect.Dependent
+import public Data.Vect.Extra
 
 import public Data.SortedMap
 import public Data.SortedMap.Dependent
@@ -23,7 +24,7 @@ import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 --- Parsing and rebuilding `TTImp` stuff ---
 --------------------------------------------
 
---- `DPair` parsing and rebuilding stuff ---
+--- `DPair` type parsing and rebuilding stuff ---
 
 public export
 unDPair : TTImp -> (List (Arg False), TTImp)
@@ -44,6 +45,13 @@ data AnyApp
   | NamedApp Name TTImp
   | AutoApp TTImp
   | WithApp TTImp
+
+public export
+appArg : NamedArg -> TTImp -> AnyApp
+appArg (MkArg {piInfo=ExplicitArg, _})         expr = PosApp expr
+appArg (MkArg {piInfo=ImplicitArg, name, _})   expr = NamedApp name expr
+appArg (MkArg {piInfo=DefImplicit _, name, _}) expr = NamedApp name expr
+appArg (MkArg {piInfo=AutoImplicit, _})        expr = AutoApp expr
 
 public export
 getExpr : AnyApp -> TTImp
@@ -89,7 +97,7 @@ appFuel = app . var
 
 public export
 liftList : Foldable f => f TTImp -> TTImp
-liftList = foldr (\l, r => `(~(l) :: ~(r))) `([])
+liftList = foldr (\l, r => `(~l :: ~r)) `([])
 
 export
 callOneOf : List TTImp -> TTImp
@@ -99,6 +107,10 @@ export
 isSimpleBindVar : TTImp -> Bool
 isSimpleBindVar $ IBindVar {} = True
 isSimpleBindVar _             = False
+
+export
+callCon : (con : Con) -> Vect con.args.length TTImp -> TTImp
+callCon con = reAppAny (var con.name) . toList . mapWithPos (appArg . index' con.args)
 
 --- General purpose instances ---
 
@@ -244,7 +256,7 @@ export
 argDeps : Elaboration m => (args : List NamedArg) -> m $ DVect args.length $ SortedSet . Fin . Fin.finToNat
 argDeps args = do
   ignore $ check {expected=Type} $ fullSig defaultRet -- we can't return trustful result if given arguments do not form a nice Pi type
-  concatMap depsOfOne $ allFins' _
+  concatMap depsOfOne allFins'
 
   where
 
@@ -384,16 +396,16 @@ allVarNames expr = ttimp expr where mutual
   ity $ MkTy _ _ _ ty = ttimp ty
 
   decl : Decl -> LazyList Name
-  decl $ IClaim _ _ _ _ t                     = ity t
-  decl $ IData _ _ z                          = data_ z
-  decl $ IDef _ _ xs                          = foldMap clause xs
-  decl $ IParameters _ xs ys                  = lncpt xs ++ assert_total (foldMap decl ys)
-  decl $ IRecord _ _ _ $ MkRecord _ _ ps _ fs = lncpt ps ++ foldMap (\(MkIField _ _ pii _ tt) => piInfo pii ++ ttimp tt) fs
-  decl $ INamespace _ _ xs                    = assert_total $ foldMap decl xs
-  decl $ ITransform _ _ z w                   = ttimp z ++ ttimp w
-  decl $ IRunElabDecl _ y                     = ttimp y
-  decl $ ILog _                               = []
-  decl $ IBuiltin _ _ _                       = []
+  decl $ IClaim _ _ _ _ t                       = ity t
+  decl $ IData _ _ _ z                          = data_ z
+  decl $ IDef _ _ xs                            = foldMap clause xs
+  decl $ IParameters _ xs ys                    = lncpt xs ++ assert_total (foldMap decl ys)
+  decl $ IRecord _ _ _ _ $ MkRecord _ _ ps _ fs = lncpt ps ++ foldMap (\(MkIField _ _ pii _ tt) => piInfo pii ++ ttimp tt) fs
+  decl $ INamespace _ _ xs                      = assert_total $ foldMap decl xs
+  decl $ ITransform _ _ z w                     = ttimp z ++ ttimp w
+  decl $ IRunElabDecl _ y                       = ttimp y
+  decl $ ILog _                                 = []
+  decl $ IBuiltin _ _ _                         = []
 
   data_ : Data -> LazyList Name
   data_ $ MkData x n tycon _ datacons = ttimp tycon ++ foldMap ity datacons
@@ -424,3 +436,8 @@ hasNameInsideDeep nm = assert_total holdsOnAnyInTrCl (== nm) namesOfType . toLis
       ty <- getInfo' n
       let subexprs = (map type ty.args) ++ (ty.cons >>= \con => con.type :: map type con.args)
       pure $ subexprs >>= toList . allVarNames
+
+public export
+isVar : TTImp -> Bool
+isVar $ IVar {} = True
+isVar _         = False

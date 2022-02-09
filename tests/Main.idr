@@ -16,5 +16,6 @@ main = runner
   , !("Auto derivation: infrastructure: constructors analysis" `atDir` "gen-derivation/cons-analysis")
   , !("Auto derivation: infrastructure: running harness" `atDir` "gen-derivation/derivation/infra")
   , !("Auto derivation: infrastructure: argument dependencies" `atDir` "gen-derivation/arg-deps")
+  , !("Auto derivation: core: cons: least effort" `atDir` "gen-derivation/derivation/least-effort")
   , !("Auto derivation: core: derivation itself" `atDir` "gen-derivation/derivation/core")
   ]

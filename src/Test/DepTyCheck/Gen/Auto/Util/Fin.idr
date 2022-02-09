@@ -2,6 +2,8 @@ module Test.DepTyCheck.Gen.Auto.Util.Fin
 
 import public Data.Vect
 
+--- Special subtraction ---
+
 public export
 (-) : (n : Nat) -> Fin (S n) -> Nat
 n   - FZ   = n
@@ -19,10 +21,12 @@ minus_last_gives_0 : (n : Nat) -> n - Fin.last = 0
 minus_last_gives_0 Z     = Refl
 minus_last_gives_0 (S k) = minus_last_gives_0 k
 
+--- Collections of `Fin`s ---
+
 public export
-allFins' : (n : Nat) -> Vect n (Fin n)
-allFins' Z     = []
-allFins' (S k) = FZ :: map FS (allFins' k)
+allFins' : {n : Nat} -> Vect n (Fin n)
+allFins' {n=Z  } = []
+allFins' {n=S k} = FZ :: map FS allFins'
 
 public export
 rangeFrom0To : Fin n -> List (Fin n)
@@ -41,6 +45,8 @@ allGreaterThan : {n : _} -> Fin n -> List (Fin n)
 allGreaterThan curr = case strengthen $ FS curr of
                         Nothing => []
                         Just next => next :: allGreaterThan (assert_smaller curr next) -- `next` is closer to the upper bound than `curr`
+
+--- Conversions of `Fin`s ---
 
 public export
 tryToFit : {to : _} -> Fin from -> Maybe $ Fin to

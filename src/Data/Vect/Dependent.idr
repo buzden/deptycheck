@@ -5,6 +5,9 @@ import Data.Fin
 import Data.Fin.Extra
 import Data.Vect
 
+-- TODO to refactor utils to not to have dependency to `Test.*` packages from here
+import Test.DepTyCheck.Gen.Auto.Util.Fin
+
 %default total
 
 public export
@@ -71,6 +74,15 @@ public export %inline
 public export %inline
 (<&>) : DVect n a -> ({i : Fin n} -> a i -> b i) -> DVect n b
 (<&>) = flip map
+
+public export
+mapPreI : ((i : Fin n) -> DVect (finToNat i) (b . weakenToSuper {i}) -> a i -> b i) -> DVect n a -> DVect n b
+mapPreI f []      = []
+mapPreI f (x::xs) = let y = f FZ [] x in y :: mapPreI (\i, ys => f (FS i) (y::ys)) xs
+
+public export %inline
+mapPre : ({i : Fin n} -> DVect (finToNat i) (b . weakenToSuper {i}) -> a i -> b i) -> DVect n a -> DVect n b
+mapPre = mapPreI
 
 --- Conversions ---
 

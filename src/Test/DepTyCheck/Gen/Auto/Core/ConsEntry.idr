@@ -3,14 +3,12 @@ module Test.DepTyCheck.Gen.Auto.Core.ConsEntry
 
 import public Control.Monad.State.Tuple
 
-import public Data.Fin.Extra
-import public Data.List.Equalities
-
 import public Debug.Reflection
 
 import public Decidable.Equality
 
 import public Test.DepTyCheck.Gen.Auto.Core.ConsDerive
+import public Test.DepTyCheck.Gen.Auto.Core.Util
 
 %default total
 
@@ -18,73 +16,26 @@ import public Test.DepTyCheck.Gen.Auto.Core.ConsDerive
 --- Derivation of a generator for constructor ---
 -------------------------------------------------
 
---- Utilities ---
-
-||| Analyses whether the given expression can be an expression of free variables applies (maybe deeply) to a number of data constructors.
-|||
-||| Returns which of given free names are actually used in the given expression, in order of appearance in the expression.
-||| Notice that applied free names may repeat as soon as one name is used several times in the given expression.
-|||
-||| Also, a function returning a bind expression (an expression replacing all free names with bind names (`IBindVar`))
-||| is also returned.
-||| This function requires bind variable names as input.
-||| It returns correct bind expression only when all given bind names are different.
-export
-analyseDeepConsApp : Elaboration m =>
-                     (freeNames : SortedSet Name) ->
-                     (analysedExpr : TTImp) ->
-                     m $ Maybe (appliedFreeNames : List Name ** (bindExpr : Fin appliedFreeNames.length -> TTImp) -> {-bind expression-} TTImp)
-analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
-
-  isD : TTImp -> Elab (appliedFreeNames : List Name ** (Fin appliedFreeNames.length -> TTImp) -> TTImp)
-  isD e = do
-
-    -- Treat given expression as a function application to some name
-    let (IVar _ lhsName, args) = unAppAny e
-      | _ => fail "Not an application for some variable"
-
-    -- Check if this is a free name
-    let False = contains lhsName freeNames
-      | True => if null args
-                  then pure (singleton lhsName ** \f => f FZ)
-                  else fail "Applying free name to some arguments"
-
-    -- Check that this is an application to a constructor's name
-    _ <- getCon lhsName -- or fail if `lhsName` is not a constructor
-
-    -- Analyze deeply all the arguments
-    deepArgs <- for args $ \anyApp => map (anyApp,) $ isD $ assert_smaller e $ getExpr anyApp
-
-    -- Collect all the applied names and form proper application expression with binding variables
-    pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
-
-    where
-      mergeApp : (namesL : List Name ** (Fin namesL.length -> a) -> TTImp) ->
-                 (AnyApp, (namesR : List Name ** (Fin namesR.length -> a) -> TTImp)) ->
-                 (names : List Name ** (Fin names.length -> a) -> TTImp)
-      mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
-        let bindNames : Fin (namesL.length + namesR.length) -> a := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
-        let lhs = bindL $ bindNames . indexSum . Left
-        let rhs = bindR $ bindNames . indexSum . Right
-        reAppAny1 lhs $ const rhs `mapExpr` anyApp
-
 --- Entry function ---
 
 export
 canonicConsBody : ConstructorDerivator => CanonicGen m => GenSignature -> Name -> Con -> m $ List Clause
 canonicConsBody sig name con = do
 
+  -- Get file position of the constructor definition (for better error reporting)
+  let conFC = getFC con.type
+
   -- Acquire constructor's return type arguments
   let conRetTypeArgs = snd $ unAppAny con.type
   conRetTypeArgs <- for conRetTypeArgs $ \case -- resembles similar management from `Entry` module; they must be consistent
     PosApp e     => pure e
-    NamedApp _ _ => fail "Named implicit applications are not supported yet as in `\{show con.name}`"
-    AutoApp _    => fail "Auto-implicit applications are not supported yet as in `\{show con.name}`"
-    WithApp _    => fail "Unexpected `with` application in the constructor's `\{show con.name}` return type"
+    NamedApp _ _ => failAt conFC "Named implicit applications are not supported yet"
+    AutoApp _    => failAt conFC "Auto-implicit applications are not supported yet"
+    WithApp _    => failAt conFC "Unexpected `with` application in the constructor's return type"
 
   -- Match lengths of `conRetTypeArgs` and `sig.targetType.args`
   let Yes conRetTypeArgsLengthCorrect = conRetTypeArgs.length `decEq` sig.targetType.args.length
-    | No _ => fail "INTERNAL ERROR: length of the return type of constructor `\{show con.name}` does not equal to the type's arguments count"
+    | No _ => failAt conFC "INTERNAL ERROR: length of the return type does not equal to the type's arguments count"
 
   let conRetTypeArg : Fin sig.targetType.args.length -> TTImp
       conRetTypeArg idx = index' conRetTypeArgs $ rewrite conRetTypeArgsLengthCorrect in idx
@@ -101,8 +52,7 @@ canonicConsBody sig name con = do
   deepConsApps <- for (Vect.fromList sig.givenParams.asList) $ \idx => do
     let argExpr = conRetTypeArg idx
     Just (appliedArgs ** bindExprF) <- analyseDeepConsApp conArgNames argExpr
-      | Nothing => fail "Argument #\{show idx} of constructor \{show con.name} is not supported yet (argument expression: \{show argExpr})"
-                   -- TODO to do `failAt` with nice position
+      | Nothing => failAt conFC "Argument #\{show idx} is not supported yet (argument expression: \{show argExpr})"
     pure $ the (appArgs : List Name ** (Fin appArgs.length -> TTImp) -> TTImp) $
       (appliedArgs ** bindExprF)
 
@@ -120,7 +70,7 @@ canonicConsBody sig name con = do
               modify $ insert (name, substName)
               pure substName
             else modify (insert name) $> name
-          badName => fail "Unsupported name `\{show badName}` of a parameter used in the constructor `\{show con.name}`"
+          badName => failAt conFC "Unsupported name `\{show badName}` of a parameter used in the constructor"
         pure $ bindExprF $ bindVar . flip index renamedAppliedNames
 
   -- Build a map from constructor's argument name to its index
@@ -129,7 +79,7 @@ canonicConsBody sig name con = do
   -- Determine indices of constructor's arguments that are given
   givenConArgs <- for givenConArgs.asList $ \givenArgNameStr => do
     let Just idx = lookup (UN $ Basic givenArgNameStr) conArgIdxs
-      | Nothing => fail "INTERNAL ERROR: calculated given `\{givenArgNameStr}` is not found in an arguments list of the constructor `\{show con.name}`"
+      | Nothing => failAt conFC "INTERNAL ERROR: calculated given `\{givenArgNameStr}` is not found in an arguments list of the constructor"
     pure idx
 
   -- Equalise index values which must be propositionally equal to some parameters
