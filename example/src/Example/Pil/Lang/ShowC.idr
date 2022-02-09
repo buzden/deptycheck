@@ -11,7 +11,7 @@ import Example.Pil.Lang.Statement
 
 looksLikeInfixOperator : String -> Bool
 looksLikeInfixOperator =
-  flip Prelude.elem ["+", "-", "*", "/", "%", "==", "!=", "<", ">", ">=", "<=", "&&", "||", "&", "|", "^", "<<", ">>"]
+  flip elem $ the (List _) ["+", "-", "*", "/", "%", "==", "!=", "<", ">", ">=", "<=", "&&", "||", "&", "|", "^", "<<", ">>"]
 
 makeFuncName : String -> String
 makeFuncName = pack . map (\k => if isAlphaNum k then k else '_') . unpack

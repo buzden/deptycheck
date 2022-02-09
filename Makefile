@@ -50,7 +50,7 @@ pil: deptycheck
 	${MAKE} -C example -f pil.mk
 
 test-pil: pil
-	${MAKE} -C example -f pil.mk test only=${only}
+	${MAKE} -C example -f pil.mk test only="${only}"
 
 .PHONY: print-v-delimiter
 

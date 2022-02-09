@@ -63,25 +63,3 @@ export
 weakenToSuper_correct : {i : Fin n} -> (x : Fin $ finToNat i) -> finToNat (weakenToSuper {i} x) = finToNat x
 weakenToSuper_correct {i = FS _} FZ     = Refl
 weakenToSuper_correct {i = FS _} (FS x) = cong S $ weakenToSuper_correct x
-
---- Min/max stuff ---
-
-namespace Semigroup
-
-  public export
-  [Minimum] Semigroup (Fin n) where
-    (<+>) = min
-
-  public export
-  [Maximum] Semigroup (Fin n) where
-    (<+>) = max
-
-namespace Monoid
-
-  public export
-  [Minimum] {n : Nat} -> Monoid (Fin $ S n) using Fin.Semigroup.Minimum where
-    neutral = last
-
-  public export
-  [Maximum] Monoid (Fin $ S n) using Fin.Semigroup.Maximum where
-    neutral = FZ
