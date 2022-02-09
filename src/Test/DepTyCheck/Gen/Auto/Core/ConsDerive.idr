@@ -56,7 +56,7 @@ namespace NonObligatoryExts
             let (lhs, args) = unAppAny expr
             ty <- case lhs of
               IVar _ lhsName => try .| getInfo' lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
-                                    .| failAt (getFC lhs) "Only applications to type constructors are supported at the moment"
+                                    .| failAt (getFC lhs) "Only applications to non-polymorphic type constructors are supported at the moment"
               IPrimVal _ c   => maybe (failAt (getFC lhs) "Cannot use primitive value as a target type") pure $ typeInfoOfConstant c
               IType _        => pure $ primTypeInfo "Type"
               lhs            => failAt (getFC lhs) "Only applications to a name is supported, given \{show lhs}"

@@ -2,3 +2,7 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Generated values:
 -----
+-----
+False
+-----
+True

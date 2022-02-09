@@ -1,4 +1,12 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Generated values:
------
+Error: While processing right hand side of checkedGen. Error during reflection: No constructors found for the type `Builtin.Void`
+
+DerivedGen:14:14--14:23
+ 10 | 
+ 11 | %runElab derive "X" [Generic, Meta, Show]
+ 12 | 
+ 13 | checkedGen : Fuel -> Gen X
+ 14 | checkedGen = deriveGen
+                   ^^^^^^^^^
+

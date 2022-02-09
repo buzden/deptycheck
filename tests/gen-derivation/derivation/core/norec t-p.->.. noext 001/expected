@@ -3,5 +3,13 @@
 Generated values:
 -----
 -----
+MkX True False
 -----
 -----
+MkX True True
+-----
+-----
+MkX False True
+-----
+-----
+MkX False False
