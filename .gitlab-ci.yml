@@ -14,6 +14,12 @@ read-idris-ver:
 .depends-on-idris:
   image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/snazzybucket/idris2:${IDRIS2_TAG}
 
+.idris-build-job:
+  artifacts:
+    paths:
+      - "**/build/**/*.tt[cm]"
+    expire_in: 3 hrs
+
 stages:
   - thirdparties:build
   - lint
@@ -23,12 +29,12 @@ stages:
   - pil:build
   - pil:test
 
-# TODO to cache the results of builds to those jobs that have `needs` for them (transitively).
-
 # TODO to find a way to not to repeat `read-idris-ver` in `needs` for every job that extends `.depends-on-idris`.
 
 thirdparties:build:
-  extends: .depends-on-idris
+  extends:
+    - .depends-on-idris
+    - .idris-build-job
   stage: thirdparties:build
   needs:
     - read-idris-ver
@@ -36,7 +42,9 @@ thirdparties:build:
     - make thirdparties
 
 deptycheck:build:
-  extends: .depends-on-idris
+  extends:
+    - .depends-on-idris
+    - .idris-build-job
   stage: deptycheck:build
   needs:
     - read-idris-ver
@@ -83,7 +91,9 @@ deptycheck:test:derive:
     - make test-deptycheck only=gen-derivation/"$test_set" INTERACTIVE="--color" threads=2
 
 pil:build:
-  extends: .depends-on-idris
+  extends:
+    - .depends-on-idris
+    - .idris-build-job
   stage: pil:build
   needs:
     - read-idris-ver
