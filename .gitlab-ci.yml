@@ -5,17 +5,13 @@ variables:
 read-idris-ver:
   stage: .pre
   script:
-    - sed 's/^/preferred_idris=/' < "${IDRIS_VERSION_FILE}" > idris.env
+    - IDRIS2_TAG="$( if [[ "$CI_PIPELINE_SOURCE" != "schedule" ]]; then cat "${IDRIS_VERSION_FILE}"; else echo "latest"; fi )"
+    - echo "IDRIS2_TAG=$IDRIS2_TAG" > idris.env
   artifacts:
     reports:
       dotenv: idris.env
 
 .depends-on-idris:
-  parallel:
-    matrix:
-      - IDRIS2_TAG:
-        - ${preferred_idris}
-        - latest
   image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/snazzybucket/idris2:${IDRIS2_TAG}
 
 stages:
