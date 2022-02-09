@@ -68,8 +68,19 @@ deptycheck:test:derive:
       - tests/gen-derivation/**/*
       - thirdparty/**/*
       - depends/**/*
+  parallel:
+    matrix:
+      - test_set:
+        - inputvalidation/
+        - canonicsig/
+        - cons-analysis/
+        - derivation/infra/
+        - arg-deps/
+        - derivation/least-effort/print
+        - derivation/least-effort/run
+        - derivation/core/
   script:
-    - make test-deptycheck only=gen-derivation/ INTERACTIVE="--color" threads=2
+    - make test-deptycheck only=gen-derivation/"$test_set" INTERACTIVE="--color" threads=2
 
 pil:build:
   extends: .depends-on-idris
