@@ -1,0 +1,165 @@
+1/3: Building AlternativeCore (AlternativeCore.idr)
+2/3: Building PrintDerivation (PrintDerivation.idr)
+3/3: Building DerivedGen (DerivedGen.idr)
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (n : Nat) -> (m : Nat) -> (p : Nat) -> (k : Nat) -> Gen (X n m p k)
+LOG gen.auto.derive.infra:0: 
+ILam.  (MW ExplicitArg {fuel:858} : IVar Data.Fuel.Fuel)
+    => ILocal (ILam.  (MW ExplicitArg n : IVar Prelude.Types.Nat)
+                   => (MW ExplicitArg m : IVar Prelude.Types.Nat)
+                   => (MW ExplicitArg p : IVar Prelude.Types.Nat)
+                   => (MW ExplicitArg k : IVar Prelude.Types.Nat)
+                   => (IApp. IVar {("DerivedGen.X", [0, 1, 2, 3]):0}
+                           $ IVar {fuel:858}
+                           $ IVar n
+                           $ IVar m
+                           $ IVar p
+                           $ IVar k))
+         IClaim MW
+                Export
+                []
+                (MkTy {("DerivedGen.X", [0, 1, 2, 3]):0}
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (MW ExplicitArg {arg:808} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:811} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:814} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:817} : IVar Prelude.Types.Nat)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ (IApp. IVar DerivedGen.X
+                                         $ IVar {arg:808}
+                                         $ IVar {arg:811}
+                                         $ IVar {arg:814}
+                                         $ IVar {arg:817}))))
+         IDef {("DerivedGen.X", [0, 1, 2, 3]):0}
+              [ PatClause (IApp. IVar {("DerivedGen.X", [0, 1, 2, 3]):0}
+                               $ IBindVar fuel_arg_86
+                               $ IBindVar {arg:808}
+                               $ IBindVar {arg:811}
+                               $ IBindVar {arg:814}
+                               $ IBindVar {arg:817})
+                          (ILocal (ICase (IVar fuel_arg_86)
+                                         (IVar Data.Fuel.Fuel)
+                                         [ PatClause (IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar {cons_gen_for_DerivedGen.XE:7}
+                                                                        $ IVar Data.Fuel.Dry
+                                                                        $ IVar {arg:808}
+                                                                        $ IVar {arg:811}
+                                                                        $ IVar {arg:814}
+                                                                        $ IVar {arg:817})
+                                                                 $ (IApp. IVar ::
+                                                                        $ (IApp. IVar {cons_gen_for_DerivedGen.XS:7}
+                                                                               $ IVar Data.Fuel.Dry
+                                                                               $ IVar {arg:808}
+                                                                               $ IVar {arg:811}
+                                                                               $ IVar {arg:814}
+                                                                               $ IVar {arg:817})
+                                                                        $ IVar Nil)))
+                                         , PatClause (IApp. IVar Data.Fuel.More
+                                                          $ IBindVar sub_fuel_arg_86)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar {cons_gen_for_DerivedGen.XE:7}
+                                                                        $ IVar sub_fuel_arg_86
+                                                                        $ IVar {arg:808}
+                                                                        $ IVar {arg:811}
+                                                                        $ IVar {arg:814}
+                                                                        $ IVar {arg:817})
+                                                                 $ (IApp. IVar ::
+                                                                        $ (IApp. IVar {cons_gen_for_DerivedGen.XS:7}
+                                                                               $ IVar sub_fuel_arg_86
+                                                                               $ IVar {arg:808}
+                                                                               $ IVar {arg:811}
+                                                                               $ IVar {arg:814}
+                                                                               $ IVar {arg:817})
+                                                                        $ IVar Nil))) ]))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy {cons_gen_for_DerivedGen.XE:7}
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (MW ExplicitArg {arg:808} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:811} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:814} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:817} : IVar Prelude.Types.Nat)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ (IApp. IVar DerivedGen.X
+                                                            $ IVar {arg:808}
+                                                            $ IVar {arg:811}
+                                                            $ IVar {arg:814}
+                                                            $ IVar {arg:817}))))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy {cons_gen_for_DerivedGen.XS:7}
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (MW ExplicitArg {arg:808} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:811} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:814} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:817} : IVar Prelude.Types.Nat)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ (IApp. IVar DerivedGen.X
+                                                            $ IVar {arg:808}
+                                                            $ IVar {arg:811}
+                                                            $ IVar {arg:814}
+                                                            $ IVar {arg:817}))))
+                            IDef {cons_gen_for_DerivedGen.XE:7}
+                                 [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.XE:7}
+                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar n
+                                                  $ (IApp. IVar Prelude.Types.S
+                                                         $ IBindVar to_be_deceqed__n0)
+                                                  $ IBindVar m
+                                                  $ IBindVar to_be_deceqed__n1)
+                                             (ICase (IApp. IVar Decidable.Equality.decEq
+                                                         $ IVar n
+                                                         $ IVar to_be_deceqed__n0)
+                                                    (Implicit False)
+                                                    [ PatClause (IApp. IVar Prelude.No
+                                                                     $ Implicit True)
+                                                                (IVar Prelude.empty)
+                                                    , PatClause (IApp. IVar Prelude.Yes
+                                                                     $ IVar Builtin.Refl)
+                                                                (ICase (IApp. IVar Decidable.Equality.decEq
+                                                                            $ IVar n
+                                                                            $ IVar to_be_deceqed__n1)
+                                                                       (Implicit False)
+                                                                       [ PatClause (IApp. IVar Prelude.No
+                                                                                        $ Implicit True)
+                                                                                   (IVar Prelude.empty)
+                                                                       , PatClause (IApp. IVar Prelude.Yes
+                                                                                        $ IVar Builtin.Refl)
+                                                                                   (IVar empty) ]) ])
+                                 , PatClause (IApp. IVar {cons_gen_for_DerivedGen.XE:7}
+                                                  $ Implicit True
+                                                  $ Implicit True
+                                                  $ Implicit True
+                                                  $ Implicit True
+                                                  $ Implicit True)
+                                             (IVar empty) ]
+                            IDef {cons_gen_for_DerivedGen.XS:7}
+                                 [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.XS:7}
+                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar n
+                                                  $ IBindVar to_be_deceqed__n0
+                                                  $ IBindVar m
+                                                  $ IBindVar to_be_deceqed__m1)
+                                             (ICase (IApp. IVar Decidable.Equality.decEq
+                                                         $ IVar m
+                                                         $ IVar to_be_deceqed__m1)
+                                                    (Implicit False)
+                                                    [ PatClause (IApp. IVar Prelude.No
+                                                                     $ Implicit True)
+                                                                (IVar Prelude.empty)
+                                                    , PatClause (IApp. IVar Prelude.Yes
+                                                                     $ IVar Builtin.Refl)
+                                                                (ICase (IApp. IVar Decidable.Equality.decEq
+                                                                            $ IVar n
+                                                                            $ IVar to_be_deceqed__n0)
+                                                                       (Implicit False)
+                                                                       [ PatClause (IApp. IVar Prelude.No
+                                                                                        $ Implicit True)
+                                                                                   (IVar Prelude.empty)
+                                                                       , PatClause (IApp. IVar Prelude.Yes
+                                                                                        $ IVar Builtin.Refl)
+                                                                                   (IVar empty) ]) ]) ] ]

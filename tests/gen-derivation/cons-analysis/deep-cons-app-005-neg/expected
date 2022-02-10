@@ -1,0 +1,42 @@
+1/2: Building ConsApps (ConsApps.idr)
+2/2: Building Infra (Infra.idr)
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    []
+LOG gen.auto.deep-cons-app:0: original expression: XX (Rigt Unit)
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: not a (deep) constructor application
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [a]
+LOG gen.auto.deep-cons-app:0: original expression: XX (Rigt a)
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: not a (deep) constructor application
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    []
+LOG gen.auto.deep-cons-app:0: original expression: XX (Rigt MkUnit)
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: not a (deep) constructor application
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    []
+LOG gen.auto.deep-cons-app:0: original expression: XX (Rigt [])
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: not a (deep) constructor application
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b]
+LOG gen.auto.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S m)) `MC` MM))))
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: not a (deep) constructor application
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    []
+LOG gen.auto.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S Z)) `MC` MX))))
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: not a (deep) constructor application
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b]
+LOG gen.auto.deep-cons-app:0: original expression: XX (Left (a `MC` (b `MC` (c `MC` MM))))
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: not a (deep) constructor application
+LOG gen.auto.deep-cons-app:0: 
+LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b]
+LOG gen.auto.deep-cons-app:0: original expression: XX (Left (a `MC` (Z `MC` (c `MC` MM))))
+LOG gen.auto.deep-cons-app:0: ------------------------
+LOG gen.auto.deep-cons-app:0: not a (deep) constructor application

@@ -6,4 +6,7 @@ import public Test.DepTyCheck.Gen.Auto.Entry
 
 export covering
 printDerived : DerivatorCore => Type -> Elab Unit
-printDerived ty = logMsg "gen.auto.derive.infra" 0 $ "\n" ++ show !(deriveGenExpr !(quote ty))
+printDerived ty = do
+  ty <- quote ty
+  logSugaredTerm "gen.auto.derive.infra" 0 "type" ty
+  logMsg "gen.auto.derive.infra" 0 $ "\n" ++ show !(deriveGenExpr ty)

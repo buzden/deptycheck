@@ -21,7 +21,7 @@ import public Test.DepTyCheck.Gen.Auto.Core
 --- Special `TTImp` parsing stuff ---
 
 unDPairUnAlt : TTImp -> Maybe (List (Arg False), TTImp)
-unDPairUnAlt (IAlternative _ _ alts) = case filter (not . force . null . Builtin.fst) $ unDPair <$> alts of
+unDPairUnAlt (IAlternative _ _ alts) = case filter (not . null . Builtin.fst) $ unDPair <$> alts of
   [x] => Just x
   _   => Nothing
 unDPairUnAlt x = Just $ unDPair x
@@ -95,7 +95,14 @@ checkTypeIsGen sig = do
   let targetTypeFC = getFC targetType
 
   -- treat the target type as a function application
-  let (targetType, targetTypeArgs) = unApp targetType
+  let (targetType, targetTypeArgs) = unAppAny targetType
+
+  -- check out applications types
+  targetTypeArgs <- for targetTypeArgs $ \case
+    PosApp     arg => pure arg
+    NamedApp n arg => failAt targetTypeFC "Target types with implicit type parameters are not supported yet"
+    AutoApp    arg => failAt targetTypeFC "Target types with `auto` implicit type parameters are not supported yet"
+    WithApp    arg => failAt targetTypeFC "Unexpected `with`-application in the target type"
 
   ------------------------------------------
   -- Working with the target type familly --
@@ -106,17 +113,23 @@ checkTypeIsGen sig = do
 
     IVar _ targetType => do
 
+      -- check we can analyze the target type itself
+      ti <- getInfo' targetType <|> failAt genFC "Target type `\{show targetType}` is not a top-level data definition"
+      -- this check must be before `isSameTypeAs` call because `isSameTypeAs` calls `getInfo'` itself.
+
       -- check that desired `Gen` is not a generator of `Gen`s
       when !(targetType `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
         failAt targetTypeFC "Target type of a derived `Gen` cannot be a `Gen`"
 
-      -- check we can analyze the target type itself
-      getInfo' targetType
+      -- return the type info
+      pure ti
 
     IPrimVal _ c =>
 
       -- check that given contant is a (primitive) type
       maybe (failAt targetTypeFC "Cannot use primitive value as a target type") pure $ typeInfoOfConstant c
+
+    IType _ => pure $ primTypeInfo "Type"
 
     _ => failAt targetTypeFC "Target type is not a simple name"
 
@@ -150,10 +163,10 @@ checkTypeIsGen sig = do
   sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
     MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, name, type)
     MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, name, type)
-    MkArg MW AutoImplicit (MN _ _) type => pure $ Right type
+    MkArg MW AutoImplicit (MN _ _) type => pure $ Right type -- TODO to manage the case when this auto-implicit shadows some other name
 
-    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named"
-    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit argument must be named"
+    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
+    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
     MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit argument must be unnamed"
 
     MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
@@ -170,7 +183,7 @@ checkTypeIsGen sig = do
     | (_, (_, ty)) :: _ => failAt (getFC ty) "Name of the argument is not unique in the dependent pair under the resulting `Gen`"
 
   -- check that all given parameters have different names
-  let [] = findDiffPairWhich ((==) `on` (\(_, n, _) => n)) givenParams
+  let [] = findDiffPairWhich ((==) `on` \(_, n, _) => n) givenParams
     | (_, (_, _, ty)) :: _ => failAt (getFC ty) "Name of the generator function's argument is not unique"
 
   -----------------------------------------------------------------------

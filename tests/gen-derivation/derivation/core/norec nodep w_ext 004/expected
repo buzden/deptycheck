@@ -2,3 +2,23 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Generated values:
 -----
+-----
+X1 "a" 10
+-----
+X1 "a" 0
+-----
+X1 "a" 10
+-----
+X1 "bc" 10
+-----
+X1 "bc" 0
+-----
+X1 "bc" 10
+-----
+X1 "" 0
+-----
+X1 "" 10
+-----
+X1 "a" 0
+-----
+X1 "a" 10

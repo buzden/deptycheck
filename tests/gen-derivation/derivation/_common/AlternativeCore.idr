@@ -1,6 +1,6 @@
 module AlternativeCore
 
-import public Test.DepTyCheck.Gen.Auto.Derive
+import public Test.DepTyCheck.Gen.Auto.Core
 
 %default total
 
@@ -13,15 +13,23 @@ numberedArgs : (bind : Bool) -> {n : _} -> Vect n TTImp
 numberedArgs bind = Fin.tabulate $ (if bind then bindVar else varStr) . show
 
 export
-[Empty] DerivatorCore where
+[EmptyBody] DerivatorCore where
   canonicBody sig n = pure [ callCanonic sig n implicitTrue irrelevantArgs .= `(empty) ]
 
 export
-[CallSelf] (sup : DerivatorCore) => DerivatorCore where
+[CallSelf] DerivatorCore where
   canonicBody sig n = pure
     [ callCanonic sig n (var `{Dry})                    irrelevantArgs      .= `(empty)
     , callCanonic sig n (var `{More} .$ bindVar "fuel") (numberedArgs True) .= !(callGen sig (var "fuel") $ numberedArgs False)
     ]
+
+export
+[EmptyCons'] ConstructorDerivator where
+  consGenExpr _ _ _ _ = pure `(empty)
+
+export
+EmptyCons : DerivatorCore
+EmptyCons = MainCoreDerivator @{EmptyCons'}
 
 ------------------------------
 --- Working with externals ---

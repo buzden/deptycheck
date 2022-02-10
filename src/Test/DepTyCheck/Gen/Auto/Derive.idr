@@ -39,21 +39,9 @@ Ord GenSignature where
 --- Main interface ---
 ----------------------
 
-public export %inline
-CanFailAtFC : (Type -> Type) -> Type
-CanFailAtFC = MonadError (FC, String)
-
 public export
-interface Monad m => CanFailAtFC m => CanonicGen m where
+interface Elaboration m => CanonicGen m where
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
-
-export
-failAt : CanonicGen m => FC -> String -> m a
-failAt fc msg = throwError (fc, msg)
-
-export
-fail : CanonicGen m => String -> m a
-fail = failAt EmptyFC
 
 --- Low-level derivation interface ---
 
@@ -92,6 +80,19 @@ interface DerivatorCore where
 --       It have to use `callGen` function from `CanonicGen` interface instead.
 --       But `callInternalGen` function is still present here because, in some sense, it is a complementary to `internalGenSig`.
 --       Internals and changes in the implementation of `internalGenSig` influence on the implementation of `callInternalGen`.
+
+--- Expressions generation utils ---
+
+defArgNames : {sig : GenSignature} -> Vect sig.givenParams.asList.length String
+defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.args
+
+export %inline
+canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
+canonicDefaultLHS sig n fuel = callCanonic sig n .| bindVar fuel .| bindVar <$> defArgNames
+
+export %inline
+canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
+canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 
 ---------------------------------
 --- External-facing functions ---

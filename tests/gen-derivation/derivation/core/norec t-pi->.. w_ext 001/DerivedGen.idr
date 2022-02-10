@@ -4,9 +4,16 @@ import RunDerivedGen
 
 %default total
 
-checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen (x = y)
---checkedGen = deriveGen
-checkedGen _ _ _ = empty
+%language ElabReflection
+
+data EqA : (a : Type) -> a -> a -> Type where
+  MkEqA : {x, y : a} -> (x = y) -> EqA a x y
+
+Show (EqA a x y) where
+  show _ = "Refl"
+
+checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen (EqA a x y)
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs

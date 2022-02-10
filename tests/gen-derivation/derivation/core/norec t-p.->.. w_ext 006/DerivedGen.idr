@@ -12,8 +12,7 @@ Show a => Show b => Show (X a b) where
   show (MkX m) = "MkX \{show m}"
 
 checkedGen : Fuel -> (Fuel -> Gen a) => (Fuel -> Gen b) => Gen (X a b)
---checkedGen = deriveGen
-checkedGen _ = empty
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs

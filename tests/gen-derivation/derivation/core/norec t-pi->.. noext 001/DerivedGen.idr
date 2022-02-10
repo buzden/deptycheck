@@ -4,9 +4,10 @@ import RunDerivedGen
 
 %default total
 
+%language ElabReflection
+
 checkedGen : Fuel -> (a, b : Bool) -> Gen (a = b)
---checkedGen = deriveGen
-checkedGen _ _ _ = empty
+checkedGen = deriveGen
 
 main : IO ()
 main = runGs
