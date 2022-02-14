@@ -416,9 +416,9 @@ allVarNames expr = ttimp expr where mutual
   fieldUpdate $ ISetFieldApp _ x = ttimp x
 
   clause : Clause -> LazyList Name
-  clause $ PatClause _ lhs rhs          = ttimp lhs ++ ttimp rhs
-  clause $ WithClause _ lhs wval _ _ xs = ttimp lhs ++ ttimp wval ++ assert_total (foldMap clause xs)
-  clause $ ImpossibleClause _ lhs       = ttimp lhs
+  clause $ PatClause _ lhs rhs            = ttimp lhs ++ ttimp rhs
+  clause $ WithClause _ lhs _ wval _ _ xs = ttimp lhs ++ ttimp wval ++ assert_total (foldMap clause xs)
+  clause $ ImpossibleClause _ lhs         = ttimp lhs
 
   piInfo : PiInfo TTImp -> LazyList Name
   piInfo ImplicitArg     = []
