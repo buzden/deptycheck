@@ -17,8 +17,8 @@ clean:
 	${MAKE} -C tests -f tests.mk clean
 	${MAKE} -C example -f pil.mk clean
 	@
-	${IDRIS2} --clean thirdparty/elab-util/elab-util.ipkg
-	${RM} -r thirdparty/elab-util/build
+	for pkg in thirdparty/*/*.ipkg; do ${IDRIS2} --clean "$${pkg}"; done
+	${RM} -r thirdparty/*/build
 
 .PHONY: test test-all test-deptycheck
 

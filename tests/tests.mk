@@ -28,8 +28,8 @@ retest: runner
 clean:
 	${IDRIS2} --clean tests.ipkg
 	$(RM) failures
-	@find . -type d -name build -exec rm -rf '{}' \;
-	@find . -type f -name 'output' -exec rm -rf '{}' \;
-	@find . -type f -name '*.ttc' -exec rm -f '{}' \;
-	@find . -type f -name '*.ttm' -exec rm -f '{}' \;
-	@find . -type f -name '*.ibc' -exec rm -f '{}' \;
+	@find . -depth -type d -name build -exec rm -rf '{}' \;
+	@find . -type f -name 'output' -delete
+	@find . -type f -name '*.ttc'  -delete
+	@find . -type f -name '*.ttm'  -delete
+	@find . -type f -name '*.ibc'  -delete
