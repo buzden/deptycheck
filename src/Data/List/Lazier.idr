@@ -207,9 +207,7 @@ Traversable LzList where
     Replic n x   => replicate n <$> f x
     Map g xs     => traverse (f . g) xs
     Concat ls rs => [| traverse f ls ++ traverse f rs |]
-    Cart _ _     => foldr (\curr, rest => [| f curr :: rest |]) (pure []) ll
-                    -- This particular case is rather inffective. It loses the original lazy structure.
-                    -- I don't know how to do better when we don't have `Monad LzList`.
+    Cart os is   => Lazier.concatMap @{MonoidApplicative} (\x => traverse (f . (x,)) is) os
 
 --- Filtering ---
 
@@ -221,9 +219,7 @@ mapMaybe f ll@(MkLzList {contents=Delay lv, _}) = case lv of
   Replic n x   => maybe [] (replicate n) $ f x
   Map g xs     => mapMaybe (f . g) xs
   Concat ls rs => mapMaybe f ls ++ mapMaybe f rs
-  Cart os is   => foldr (fo . f) [] ll where -- This does not preverse the shape in the general case.
-    fo : Maybe b -> LzList b -> LzList b
-    fo mb tl = maybe tl (::tl) mb
+  Cart os is   => os >>= \x => mapMaybe (f . (x,)) is
 
 --- Show ---
 
