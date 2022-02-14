@@ -1,0 +1,24 @@
+1/3: Building AlternativeCore (AlternativeCore.idr)
+2/3: Building PrintDerivation (PrintDerivation.idr)
+3/3: Building DerivedGen (DerivedGen.idr)
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen String)} -> Gen XS
+LOG gen.auto.derive.infra:0: 
+ILam.  (MW ExplicitArg {fuel:832} : IVar Data.Fuel.Fuel)
+    => (MW AutoImplicit {externalAutoimpl:831} : IPi.  (MW ExplicitArg {arg:812} : IVar Data.Fuel.Fuel)
+                                                    -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                            $ IPrimVal String))
+    => ILocal (IApp. IVar {("AlternativeCore.XS", []):0} $ IVar {fuel:832})
+         IClaim MW
+                Export
+                []
+                (MkTy {("AlternativeCore.XS", []):0}
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar AlternativeCore.XS)))
+         IDef {("AlternativeCore.XS", []):0}
+              [ PatClause (IApp. IVar {("AlternativeCore.XS", []):0}
+                               $ IBindVar fuel)
+                          (IApp. IVar <$>
+                               $ IVar MkXS
+                               $ (IApp. IVar {externalAutoimpl:831}
+                                      $ IVar fuel)) ]

@@ -1,21 +1,21 @@
 module Main
 
+import Data.String
+
 import Test.Golden
 
-lazierList : TestPool
-lazierList = MkTestPool "Lazier list" [] Nothing $ ("lazier/" ++) <$>
-  [ "basic001"
-  -- TODO to add tests to check that lazier list is really lazy. "laziness001"
-  ]
-
-genMonad : TestPool
-genMonad = MkTestPool "The `Gen` monad" [] Nothing $ ("gen-monad/" ++) <$>
-  [ "basic001"
-  ]
+atDir : (poolName : String) -> (dir : String) -> IO TestPool
+atDir poolName dir = testsInDir dir (not . isPrefixOf "_") poolName [] Nothing
 
 main : IO ()
-main = do
-  runner
-    [ lazierList
-    , genMonad
-    ]
+main = runner
+  [ !("Lazier list" `atDir` "lib/lazier")
+  , !("The `Gen` monad" `atDir` "lib/gen-monad")
+  , !("Auto derivation: infrastructure: input validation" `atDir` "gen-derivation/inputvalidation")
+  , !("Auto derivation: infrastructure: canonic signature" `atDir` "gen-derivation/canonicsig")
+  , !("Auto derivation: infrastructure: constructors analysis" `atDir` "gen-derivation/cons-analysis")
+  , !("Auto derivation: infrastructure: running harness" `atDir` "gen-derivation/derivation/infra")
+  , !("Auto derivation: infrastructure: argument dependencies" `atDir` "gen-derivation/arg-deps")
+  , !("Auto derivation: core: cons: least effort" `atDir` "gen-derivation/derivation/least-effort")
+  , !("Auto derivation: core: derivation itself" `atDir` "gen-derivation/derivation/core")
+  ]

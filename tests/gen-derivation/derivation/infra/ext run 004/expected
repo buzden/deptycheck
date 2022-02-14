@@ -1,0 +1,18 @@
+1/3: Building AlternativeCore (AlternativeCore.idr)
+2/3: Building RunDerivedGen (RunDerivedGen.idr)
+3/3: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+MkX'S "" : X'S 0
+-----
+MkX'S "a" : X'S 0
+-----
+MkX'S "bc" : X'S 0
+-----
+-----
+MkX'S "" : X'S 18
+-----
+MkX'S "a" : X'S 18
+-----
+MkX'S "bc" : X'S 18

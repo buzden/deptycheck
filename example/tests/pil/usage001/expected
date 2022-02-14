@@ -1,8 +1,11 @@
 1/3: Building Common (Common.idr)
 2/3: Building Positive (Positive.idr)
 3/3: Building Negative (Negative.idr)
-Error: While processing right hand side of bad_for. When unifying Type' and FS (FS (FS FZ)) rc regs vars -> Maybe Type' rc regs vars.
-Mismatch between: Type' and FS (FS (FS FZ)) rc regs vars -> Maybe Type' rc regs vars.
+Error: While processing right hand side of bad_for. When unifying:
+    Type'
+and:
+    ?b -> ?c
+Mismatch between: Type' and ?b -> ?c.
 
 Negative:11:19--11:23
  07 | 
@@ -12,7 +15,7 @@ Negative:11:19--11:23
  11 | bad_for = for (do Int'. "x" #= C 0; Int'. "y" #= C 0)
                         ^^^^
 
-Error: While processing right hand side of bad_read_reg_base. Can't find an implementation for IsJust (index (with block in fromInteger 4 1 (integerToFin 1 4) ItIsJust) (Base [Nothing, Nothing, Just Int', Nothing])).
+Error: While processing right hand side of bad_read_reg_base. Can't find an implementation for IsJust (index (natToFinLt 1) (Base [Nothing, Nothing, Just Int', Nothing])).
 
 Negative:20:17--20:20
  16 | -- Registers-related --
@@ -22,7 +25,7 @@ Negative:20:17--20:20
  20 |   Int'. "x" !#= R 1
                       ^^^
 
-Error: While processing right hand side of bad_read_reg_undef_with. Can't find an implementation for IsJust (index (with block in fromInteger 4 2 (integerToFin 2 4) ItIsJust) (With AllUndefined (FS (FS (FS FZ)), Just Int'))).
+Error: While processing right hand side of bad_read_reg_undef_with. Can't find an implementation for IsJust (index (natToFinLt 2) (With AllUndefined (FS (FS (FS FZ)), Just Int'))).
 
 Negative:25:17--25:20
  21 | 
@@ -32,7 +35,7 @@ Negative:25:17--25:20
  25 |   Int'. "x" !#= R 2
                       ^^^
 
-Error: While processing right hand side of bad_read_reg_with. Can't find an implementation for IsJust (index (with block in fromInteger 5 2 (integerToFin 2 5) ItIsJust) (With regs (FS (FS (FS FZ)), Just Int'))).
+Error: While processing right hand side of bad_read_reg_with. Can't find an implementation for IsJust (index (natToFinLt 2) (With regs (FS (FS (FS FZ)), Just Int'))).
 
 Negative:29:17--29:20
  25 |   Int'. "x" !#= R 2
@@ -42,13 +45,17 @@ Negative:29:17--29:20
  29 |   Int'. "x" !#= R 2 + C 0
                       ^^^
 
-Error: While processing right hand side of bad_registers_ass. Can't find an implementation for IsJust (integerToFin 6 5).
+Error: While processing right hand side of bad_registers_ass. When unifying:
+    FS (natToFinLt 5)
+and:
+    FS (FS (FS FZ))
+Mismatch between: FS (natToFinLt 2) and FZ.
 
-Negative:34:3--34:4
+Negative:33:3--33:20
+ 29 |   Int'. "x" !#= R 2 + C 0
  30 | 
  31 | bad_registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `With` (3, Just Int')
  32 | bad_registers_ass = block $ do
  33 |   Int'. "x" !#= C 0
- 34 |   6 %= V "x"
-        ^
+        ^^^^^^^^^^^^^^^^^
 

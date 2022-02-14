@@ -1,0 +1,12 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Error during reflection: Target type `a` is not a top-level data definition
+
+DerivedGen:14:31--14:34
+ 10 | 
+ 11 | Show a => Show (X a) where
+ 12 |   show (MkX m) = "MkX \{show m}"
+ 13 | 
+ 14 | checkedGen : Fuel -> (Fuel -> Gen a) => Gen (X a)
+                                    ^^^
+

@@ -1,0 +1,20 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+(True ** (False ** X0 True False))
+-----
+(True ** (True ** X0 True True))
+-----
+(False ** (False ** X0 False False))
+-----
+(False ** (True ** X0 False True))
+-----
+(True ** (True ** X1))
+-----
+(False ** (True ** X1))
+-----
+(True ** (False ** X1))
+-----
+(False ** (False ** X1))

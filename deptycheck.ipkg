@@ -4,9 +4,26 @@ authors = "Denis Buzdalov"
 version = 0.0.1
 
 modules = System.Random.Simple
+        , Control.Monad.State.Tuple
         , Data.List.Lazier
+        , Data.Vect.Dependent
         , Test.DepTyCheck.Gen
+        , Test.DepTyCheck.Gen.Auto
+        , Test.DepTyCheck.Gen.Auto.Checked
+        , Test.DepTyCheck.Gen.Auto.Core
+        , Test.DepTyCheck.Gen.Auto.Core.ConsDerive
+        , Test.DepTyCheck.Gen.Auto.Core.ConsEntry
+        , Test.DepTyCheck.Gen.Auto.Derive
+        , Test.DepTyCheck.Gen.Auto.Entry
+        , Test.DepTyCheck.Gen.Auto.Util
+        , Test.DepTyCheck.Gen.Auto.Util.Alternative
+        , Test.DepTyCheck.Gen.Auto.Util.Collections
+        , Test.DepTyCheck.Gen.Auto.Util.DepPerm
+        , Test.DepTyCheck.Gen.Auto.Util.Fin
+        , Test.DepTyCheck.Gen.Auto.Util.Reflection
+        , Test.DepTyCheck.Gen.Auto.Util.Syntax
 
 depends = contrib
+        , elab-util
 
 sourcedir = "src"

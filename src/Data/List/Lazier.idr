@@ -82,7 +82,7 @@ Monoid (LzList a) where
 
 export
 Foldable LzList where
-  null = delay . lzNull
+  null = lzNull
   foldr f n $ MkLzList {contents=Delay lv, _} = case lv of
     Eager xs     => foldr f n xs
     Replic c x   => foldr f n $ Lazy.replicate c x
@@ -175,7 +175,7 @@ splitAt (MkLzList {contents=Delay lv, _}) i = case lv of
                       topSq = MkLzList _ $ Cart os ibef
                   in case uncons iaft of
                     Nothing => (topSq, []) -- Actually, impossible case since the second element (i.e. `iaft`) cannot be empty
-                    Just (p, ibot) => let (middleBef, middleAft) = splitAt (map (, p) os) oi
+                    Just (p, ibot) => let (middleBef, middleAft) = splitAt (assert_smaller lv $ map (, p) os) oi
                                           botSq = MkLzList _ $ Cart os ibot
                                       in (topSq ++ middleBef, middleAft ++ botSq)
 

@@ -124,17 +124,17 @@ independent other = other
 ||| The resulting generator is not independent, i.e. `oneOf [a, b, c] <|> oneOf [d, e]` is equivalent to `oneOf [a, b, c, d, e]`.
 public export
 oneOf : Vect (S n) (Gen a) -> Gen a
-oneOf [x] = x
+oneOf [x]            = independent x
 oneOf (x::xs@(_::_)) = independent x <|> oneOf xs
 
 ||| Choose one of the given generators uniformly (using a list as an input).
 |||
-||| This function behaves similarly to `oneOf` but
-|||   - takes `List` that can be empty and
-|||   - even for non-empty lists has `... <|> empty` at the end of the result.
+||| This function behaves similarly to `oneOf` but takes `List` that can be empty
 public export
 oneOf' : List (Gen a) -> Gen a
-oneOf' = choiceMap independent
+oneOf' []      = empty
+oneOf' [x]     = independent x
+oneOf' (x::xs) = independent x <|> oneOf' xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -209,7 +209,7 @@ uniform = Uniform
 
 export
 listOf : Gen a -> {default (choose (0, 10)) length : Gen Nat} -> Gen (List a)
-listOf g = sequence $ replicate !length g
+listOf g = sequence $ List.replicate !length g
 
 export
 vectOf : Gen a -> {n : Nat} -> Gen (Vect n a)

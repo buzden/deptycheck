@@ -1,0 +1,75 @@
+1/3: Building AlternativeCore (AlternativeCore.idr)
+2/3: Building PrintDerivation (PrintDerivation.idr)
+3/3: Building DerivedGen (DerivedGen.idr)
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen Nat
+LOG gen.auto.derive.infra:0: 
+ILam.  (MW ExplicitArg {fuel:814} : IVar Data.Fuel.Fuel)
+    => ILocal (IApp. IVar {("Prelude.Types.Nat", []):0} $ IVar {fuel:814})
+         IClaim MW
+                Export
+                []
+                (MkTy {("Prelude.Types.Nat", []):0}
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Prelude.Types.Nat)))
+         IDef {("Prelude.Types.Nat", []):0}
+              [ PatClause (IApp. IVar {("Prelude.Types.Nat", []):0}
+                               $ IBindVar fuel_arg_86)
+                          (ILocal (ICase (IVar fuel_arg_86)
+                                         (IVar Data.Fuel.Fuel)
+                                         [ PatClause (IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar {cons_gen_for_Prelude.Types.Z:7}
+                                                                        $ IVar Data.Fuel.Dry)
+                                                                 $ IVar Nil))
+                                         , PatClause (IApp. IVar Data.Fuel.More
+                                                          $ IBindVar sub_fuel_arg_86)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar {cons_gen_for_Prelude.Types.Z:7}
+                                                                        $ IVar sub_fuel_arg_86)
+                                                                 $ (IApp. IVar ::
+                                                                        $ (IApp. IVar {cons_gen_for_Prelude.Types.S:7}
+                                                                               $ IVar sub_fuel_arg_86)
+                                                                        $ IVar Nil))) ]))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy {cons_gen_for_Prelude.Types.Z:7}
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Prelude.Types.Nat)))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy {cons_gen_for_Prelude.Types.S:7}
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Prelude.Types.Nat)))
+                            IDef {cons_gen_for_Prelude.Types.Z:7}
+                                 [ PatClause (IApp. IVar {cons_gen_for_Prelude.Types.Z:7}
+                                                  $ IBindVar fuel_cons_arg)
+                                             (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. (INamedApp. IVar Prelude.pure
+                                                                            $ IVar Test.DepTyCheck.Gen.Gen)
+                                                                $ IVar Prelude.Types.Z)
+                                                         $ IVar Nil)) ]
+                            IDef {cons_gen_for_Prelude.Types.S:7}
+                                 [ PatClause (IApp. IVar {cons_gen_for_Prelude.Types.S:7}
+                                                  $ IBindVar fuel_cons_arg)
+                                             (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. IVar >>=
+                                                                $ (IApp. IVar {("Prelude.Types.Nat", []):0}
+                                                                       $ IVar fuel_cons_arg)
+                                                                $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                       => ICase (IVar {lamc:0})
+                                                                                (Implicit False)
+                                                                                [ PatClause (IBindVar __bnd_{arg:641})
+                                                                                            (IApp. (INamedApp. IVar Prelude.pure
+                                                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
+                                                                                                 $ (IApp. IVar Prelude.Types.S
+                                                                                                        $ IVar __bnd_{arg:641})) ]))
+                                                         $ IVar Nil)) ] ]

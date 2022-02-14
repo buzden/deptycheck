@@ -1,0 +1,7 @@
+[submodule "thirdparty/elab-util"]
+	path = thirdparty/elab-util
+	url = https://github.com/stefan-hoeck/idris2-elab-util
+	branch = main
+[submodule "thirdparty/sop"]
+	path = thirdparty/sop
+	url = https://github.com/stefan-hoeck/idris2-sop

@@ -1,45 +1,121 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  IDRIS_VERSION_FILE: .idris-version # should contain the result of `git describe --tags`
+
+read-idris-ver:
+  stage: .pre
+  script:
+    - IDRIS2_TAG="$( if [[ "$CI_PIPELINE_SOURCE" != "schedule" ]]; then cat "${IDRIS_VERSION_FILE}"; else echo "latest"; fi )"
+    - echo "IDRIS2_TAG=$IDRIS2_TAG" > idris.env
+  artifacts:
+    reports:
+      dotenv: idris.env
+
 .depends-on-idris:
-  parallel:
-    matrix:
-      - IDRIS2_TAG:
-        - v0.4.0-270-g15ccebbc
-        # get the desired suffix by `git describe --tags`
-        - latest
-  image: snazzybucket/idris2:${IDRIS2_TAG}
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/snazzybucket/idris2:${IDRIS2_TAG}
+
+.idris-build-job:
+  artifacts:
+    paths:
+      - "**/build/**/*.tt[cm]"
+    expire_in: 3 hrs
 
 stages:
+  - thirdparties:build
   - lint
-  - build-lib
-  - test-lib
-  - build-example
-  - test-example
+  - deptycheck:build
+  - deptycheck:test:lib
+  - deptycheck:test:derive
+  - pil:build
+  - pil:test
 
-build-deptycheck-lib:
-  extends: .depends-on-idris
-  stage: build-lib
+# TODO to find a way to not to repeat `read-idris-ver` in `needs` for every job that extends `.depends-on-idris`.
+
+thirdparties:build:
+  extends:
+    - .depends-on-idris
+    - .idris-build-job
+  stage: thirdparties:build
+  needs:
+    - read-idris-ver
+  script:
+    - make thirdparties
+
+deptycheck:build:
+  extends:
+    - .depends-on-idris
+    - .idris-build-job
+  stage: deptycheck:build
+  needs:
+    - read-idris-ver
+    - thirdparties:build
   script:
     - make deptycheck
 
-test-deptycheck-lib:
+deptycheck:test:lib:
   extends: .depends-on-idris
-  stage: test-lib
+  stage: deptycheck:test:lib
+  needs:
+    - read-idris-ver
+    - deptycheck:build
   script:
-    - make test-deptycheck
+    - make test-deptycheck only=lib/ INTERACTIVE="--color"
 
-build-pil:
+deptycheck:test:derive:
   extends: .depends-on-idris
-  stage: build-example
+  stage: deptycheck:test:derive
+  needs:
+    - read-idris-ver
+    - deptycheck:build
+    - deptycheck:test:lib
+  only:
+    changes:
+      - "*"
+      - src/**/*
+      - tests/*
+      - tests/gen-derivation/**/*
+      - thirdparty/**/*
+      - depends/**/*
+  parallel:
+    matrix:
+      - test_set:
+        - inputvalidation/
+        - canonicsig/
+        - cons-analysis/
+        - derivation/infra/
+        - arg-deps/
+        - derivation/least-effort/print
+        - derivation/least-effort/run
+        - derivation/core/
+  script:
+    - make test-deptycheck only=gen-derivation/"$test_set" INTERACTIVE="--color" threads=2
+
+pil:build:
+  extends:
+    - .depends-on-idris
+    - .idris-build-job
+  stage: pil:build
+  needs:
+    - read-idris-ver
+    - deptycheck:build
   script:
     - make pil
 
-test-pil:
+pil:test:
   extends: .depends-on-idris
-  stage: test-example
+  stage: pil:test
+  needs:
+    - read-idris-ver
+    - pil:build
+    - deptycheck:test:lib
   script:
-    - make test-pil
+    - make test-pil INTERACTIVE="--color"
 
 include:
   - remote: 'https://jobs.r2devops.io/latest/super_linter.yml'
 
 super_linter:
   stage: lint
+  needs: []
+  variables:
+    FILTER_REGEX_EXCLUDE: ".*/thirdparty/.*"

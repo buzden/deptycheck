@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+(0 ** (0 ** ReflN : EqualN 0 0))
+-----
+(4 ** (4 ** ReflN : EqualN 4 4))
+-----
+(5 ** (5 ** ReflN : EqualN 5 5))
+-----
+(8 ** (8 ** ReflN : EqualN 8 8))
+-----
+(9 ** (9 ** ReflN : EqualN 9 9))
+-----
+(12 ** (12 ** ReflN : EqualN 12 12))
+-----
+(14 ** (14 ** ReflN : EqualN 14 14))
+-----
+(15 ** (15 ** ReflN : EqualN 15 15))
+-----
+(16 ** (16 ** ReflN : EqualN 16 16))
+-----
+(17 ** (17 ** ReflN : EqualN 17 17))
