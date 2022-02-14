@@ -14,6 +14,8 @@ clean:
 	${IDRIS2} --clean deptycheck.ipkg
 	${RM} -r build
 	@
+	${MAKE} -C docs clean
+	@
 	${MAKE} -C tests -f tests.mk clean
 	${MAKE} -C example -f pil.mk clean
 	@
@@ -51,6 +53,12 @@ pil: deptycheck
 
 test-pil: pil
 	${MAKE} -C example -f pil.mk test only="${only}"
+
+.PHONY: docs
+
+docs:
+	alias sh=bash
+	${MAKE} -C docs dirhtml SPHINXOPTS="--color -W --keep-going"
 
 .PHONY: print-v-delimiter
 
