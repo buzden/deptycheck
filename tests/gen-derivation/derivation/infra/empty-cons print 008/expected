@@ -3,8 +3,8 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen (DPair Nat (\n => DPair Type (\a => Vect n a)))
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg {fuel:826} : IVar Data.Fuel.Fuel)
-    => ILocal (IApp. IVar {("Data.Vect.Vect", []):0} $ IVar {fuel:826})
+ILam.  (MW ExplicitArg {fuel:844} : IVar Data.Fuel.Fuel)
+    => ILocal (IApp. IVar {("Data.Vect.Vect", []):0} $ IVar {fuel:844})
          IClaim MW
                 Export
                 []
