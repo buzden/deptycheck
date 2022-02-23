@@ -62,7 +62,8 @@ registers_ass = block $ do
   Int'. "x" !#= C 0
   3 %= V "x"
 
-registers_multiple_ass : {0 regs : Registers 5} -> Statement vars regs vars $ ((regs `With` (3, Just Bool')) `With` (3, Just Int')) `With` (3, Just String')
+registers_multiple_ass : {0 regs : Registers 5} ->
+                         Statement vars regs vars $ ((regs `With` (3, Just Bool')) `With` (3, Just Int')) `With` (3, Just String')
 registers_multiple_ass = do
   3 %= C False
   3 %= C 42
@@ -78,7 +79,8 @@ if_local_vars = block $ do
 
 -- Registers are correctly merged in if clauses --
 
-if_merge_two_branches : {0 regs : Registers 3} -> {cond : Expression vars regs Bool'} -> Statement vars regs (("x", Int')::vars) $ (regs `With` (1, Just Int')) `Merge` (regs `With` (1, Just Int'))
+if_merge_two_branches : {0 regs : Registers 3} -> {cond : Expression vars regs Bool'} ->
+                        Statement vars regs (("x", Int')::vars) $ (regs `With` (1, Just Int')) `Merge` (regs `With` (1, Just Int'))
 if_merge_two_branches = do
     if__ cond thenBranch elseBranch
     Int' . "x" !#= R 1
@@ -100,7 +102,12 @@ if_merge_two_branches' = do
     elseBranch : Statement vars regs vars $ regs `With` (1, Just Int')
     elseBranch = 1 %= C 2
 
-if_merge_one_branch : {0 regs : Registers 3} -> {cond : Expression (("x", Int')::vars) (regs `With` (1, Just Int')) Bool'} -> Statement vars regs (("x", Int')::vars) $ (regs `With` (1, Just Int')) `Merge` ((regs `With` (1, Just Int')) `With` (1, Just Int'))
+if_merge_one_branch : {0 regs : Registers 3} -> {cond : Expression (("x", Int')::vars) (regs `With` (1, Just Int')) Bool'} ->
+                      Statement
+                        vars
+                        regs
+                        (("x", Int')::vars)
+                        ((regs `With` (1, Just Int')) `Merge` ((regs `With` (1, Just Int')) `With` (1, Just Int')))
 if_merge_one_branch = do
   Int' . "x" !#= C 1
   1 %= C 2
