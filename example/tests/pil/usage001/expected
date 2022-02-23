@@ -1,48 +1,96 @@
 1/3: Building Common (Common.idr)
 2/3: Building Positive (Positive.idr)
 3/3: Building Negative (Negative.idr)
+Error: While processing right hand side of bad_ass_no_var. Can't find an implementation for Lookup (MkName "x") vars.
+
+Negative:12:3--12:14
+ 08 | -- Simple tests --
+ 09 | 
+ 10 | bad_ass_no_var : Statement vars regs vars regs
+ 11 | bad_ass_no_var = do
+ 12 |   "x" #= C 42
+        ^^^^^^^^^^^
+
+Error: While processing right hand side of bad_ass_type_mismatch. Can't find an implementation for FromString (idrTypeOf ((Here Int') .reveal)).
+
+Negative:17:12--17:17
+ 13 | 
+ 14 | bad_ass_type_mismatch : Statement vars regs (("x", Int')::vars) regs
+ 15 | bad_ass_type_mismatch = do
+ 16 |   Int'. "x"
+ 17 |   "x" #= C "foo"
+                 ^^^^^
+
+Error: While processing right hand side of bad_ass_var_to_var_type_mismatch. When unifying:
+    Statement ?midV ?midR ((MkName "y", Bool') :: ((MkName "x", Int') :: vars)) regs
+and:
+    Statement ?midV ?midR ((MkName "y", Bool') :: ((MkName "x", Int') :: vars)) regs
+When unifying:
+    Int'
+and:
+    Bool'
+Mismatch between: Int' and Bool'.
+
+Negative:24:10--24:15
+ 20 | bad_ass_var_to_var_type_mismatch = do
+ 21 |   Int'. "x"
+ 22 |   "x" #= C 42
+ 23 |   Bool'. "y"
+ 24 |   "y" #= V "x"
+               ^^^^^
+
+Error: While processing right hand side of bad_block_local_vars. Can't find an implementation for Lookup (MkName "x") vars.
+
+Negative:30:3--30:13
+ 26 | bad_block_local_vars : Statement vars regs vars regs
+ 27 | bad_block_local_vars = do
+ 28 |   block $ do
+ 29 |     Int'. "x"
+ 30 |   "x" #= C 1
+        ^^^^^^^^^^
+
 Error: While processing right hand side of bad_for. When unifying:
     Type'
 and:
     ?b -> ?c
 Mismatch between: Type' and ?b -> ?c.
 
-Negative:11:19--11:23
- 07 | 
- 08 | --- Example statements ---
- 09 | 
- 10 | bad_for : Statement vars regs vars regs
- 11 | bad_for = for (do Int'. "x" #= C 0; Int'. "y" #= C 0)
+Negative:35:19--35:23
+ 31 | 
+ 32 | --- Example statements ---
+ 33 | 
+ 34 | bad_for : Statement vars regs vars regs
+ 35 | bad_for = for (do Int'. "x" #= C 0; Int'. "y" #= C 0)
                         ^^^^
 
 Error: While processing right hand side of bad_read_reg_base. Can't find an implementation for IsJust (index (natToFinLt 1) (Base [Nothing, Nothing, Just Int', Nothing])).
 
-Negative:20:17--20:20
- 16 | -- Registers-related --
- 17 | 
- 18 | bad_read_reg_base : Statement vars (Base [Nothing, Nothing, Just Int', Nothing]) vars (Base [Nothing, Nothing, Just Int', Nothing])
- 19 | bad_read_reg_base = block $ do
- 20 |   Int'. "x" !#= R 1
+Negative:44:17--44:20
+ 40 | -- Registers-related --
+ 41 | 
+ 42 | bad_read_reg_base : Statement vars (Base [Nothing, Nothing, Just Int', Nothing]) vars (Base [Nothing, Nothing, Just Int', Nothing])
+ 43 | bad_read_reg_base = block $ do
+ 44 |   Int'. "x" !#= R 1
                       ^^^
 
 Error: While processing right hand side of bad_read_reg_undef_with. Can't find an implementation for IsJust (index (natToFinLt 2) (With AllUndefined (FS (FS (FS FZ)), Just Int'))).
 
-Negative:25:17--25:20
- 21 | 
- 22 | bad_read_reg_undef_with : Statement vars (AllUndefined {rc=4} `With` (3, Just Int'))
- 23 |                                     vars (AllUndefined {rc=4} `With` (3, Just Int'))
- 24 | bad_read_reg_undef_with = block $ do
- 25 |   Int'. "x" !#= R 2
+Negative:49:17--49:20
+ 45 | 
+ 46 | bad_read_reg_undef_with : Statement vars (AllUndefined {rc=4} `With` (3, Just Int'))
+ 47 |                                     vars (AllUndefined {rc=4} `With` (3, Just Int'))
+ 48 | bad_read_reg_undef_with = block $ do
+ 49 |   Int'. "x" !#= R 2
                       ^^^
 
 Error: While processing right hand side of bad_read_reg_with. Can't find an implementation for IsJust (index (natToFinLt 2) (With regs (FS (FS (FS FZ)), Just Int'))).
 
-Negative:29:17--29:20
- 25 |   Int'. "x" !#= R 2
- 26 | 
- 27 | bad_read_reg_with : {0 regs : Registers 5} -> Statement vars (regs `With` (3, Just Int')) vars (regs `With` (3, Just Int'))
- 28 | bad_read_reg_with = block $ do
- 29 |   Int'. "x" !#= R 2 + C 0
+Negative:53:17--53:20
+ 49 |   Int'. "x" !#= R 2
+ 50 | 
+ 51 | bad_read_reg_with : {0 regs : Registers 5} -> Statement vars (regs `With` (3, Just Int')) vars (regs `With` (3, Just Int'))
+ 52 | bad_read_reg_with = block $ do
+ 53 |   Int'. "x" !#= R 2 + C 0
                       ^^^
 
 Error: While processing right hand side of bad_registers_ass. When unifying:
@@ -51,11 +99,51 @@ and:
     FS (FS (FS FZ))
 Mismatch between: FS (natToFinLt 2) and FZ.
 
-Negative:33:3--33:20
- 29 |   Int'. "x" !#= R 2 + C 0
- 30 | 
- 31 | bad_registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `With` (3, Just Int')
- 32 | bad_registers_ass = block $ do
- 33 |   Int'. "x" !#= C 0
+Negative:57:3--57:20
+ 53 |   Int'. "x" !#= R 2 + C 0
+ 54 | 
+ 55 | bad_registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `With` (3, Just Int')
+ 56 | bad_registers_ass = block $ do
+ 57 |   Int'. "x" !#= C 0
         ^^^^^^^^^^^^^^^^^
+
+Error: While processing right hand side of bad_registers_infer_nothing. Can't find an implementation for IsJust (index (natToFinLt 0) AllUndefined).
+
+Negative:62:11--62:14
+ 58 |   6 %= V "x"
+ 59 | 
+ 60 | bad_registers_infer_nothing : Statement vars (AllUndefined {rc=4}) vars (AllUndefined {rc=4})
+ 61 | bad_registers_infer_nothing = block $ do
+ 62 |   "x" ?#= R 0
+                ^^^
+
+Error: While processing right hand side of bad_if_access_local. Can't find an implementation for Lookup (MkName "x") ((Int' . MkName "y") :: vars).
+
+Negative:69:17--69:22
+ 65 | 
+ 66 | bad_if_access_local : {cond : Expression vars regs Bool'} -> Statement vars regs vars $ regs `Merge` regs
+ 67 | bad_if_access_local = block $ do
+ 68 |   if__ cond (Int'. "x" !#= C 1) (Int'. "x" !#= C 2)
+ 69 |   Int'. "y" !#= V "x"
+                      ^^^^^
+
+Error: While processing right hand side of bad_if_taints_register. Can't find an implementation for IsJust (index (natToFinLt 3) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Int')) (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Bool')))).
+
+Negative:77:17--77:20
+ 73 | bad_if_taints_register : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
+ 74 | bad_if_taints_register = block $ do
+ 75 |   3 %= C 1
+ 76 |   if__ cond (3 %= C 2) (3 %= C True)
+ 77 |   Int'. "x" !#= R 3
+                      ^^^
+
+Error: While processing right hand side of bad_if_single_branch_taint. Can't find an implementation for IsJust (index (natToFinLt 3) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just String')) (With regs (FS (FS (FS FZ)), Just Int')))).
+
+Negative:83:18--83:21
+ 79 | bad_if_single_branch_taint : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
+ 80 | bad_if_single_branch_taint = block $ do
+ 81 |   3 %= C 1
+ 82 |   if__ cond (3 %= C "foo") nop
+ 83 |   Int' . "x" !#= R 3
+                       ^^^
 
