@@ -9,7 +9,7 @@ import Positive -- this import insures that negative tests would compile after p
 
 bad_ass_no_var : Statement vars regs vars regs
 bad_ass_no_var = do
-  "x" #= C 42
+  "x" #= C' 42
 
 bad_ass_type_mismatch : Statement vars regs (("x", Int')::vars) regs
 bad_ass_type_mismatch = do
@@ -27,7 +27,7 @@ bad_block_local_vars : Statement vars regs vars regs
 bad_block_local_vars = do
   block $ do
     Int'. "x"
-  "x" #= C 1
+  "x" #= C' 1
 
 --- Example statements ---
 
@@ -81,3 +81,7 @@ bad_if_single_branch_taint = block $ do
   3 %= C 1
   if__ cond (3 %= C "foo") nop
   Int' . "x" !#= R 3
+
+-- NOTE: some tests below uses `C` and some `C'` for the constant expressions
+-- because `C` is generally more convenient way but it gives worse error when type is unknown,
+-- e.g. because of lacking variable beings assigned to.

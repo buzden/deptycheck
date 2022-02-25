@@ -95,8 +95,8 @@ if_merge_two_branches = do
 if_merge_two_branches' : {0 regs : Registers 3} -> {cond : Expression vars regs Bool'} -> Exists2 $ Statement vars regs
 if_merge_two_branches' = Evidence2 _ _ $ do
     if__ cond
-      (1 %= C 1 {ty=Int'})
-      (1 %= C 2 {ty=Int'})
+      (1 %= C 1)
+      (1 %= C 2)
     Int' . "x" !#= R 1
 
 if_merge_one_branch : {0 regs : Registers 3} -> {cond : Expression (("x", Int')::vars) (regs `With` (1, Just Int')) Bool'} ->
