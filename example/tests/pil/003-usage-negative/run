@@ -1,0 +1,5 @@
+rm -rf build
+
+$1 --find-ipkg --check Negative.idr
+
+rm -rf build

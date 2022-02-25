@@ -3,7 +3,7 @@ module Negative
 import Example.Pil.Lang
 
 import Common
-import Positive -- this import insures that negative tests would compile after positive
+
 
 -- Simple tests --
 
