@@ -1,5 +1,6 @@
 module Common
 
+import public Data.DPair
 import Example.Pil.Lang
 
 %default total
@@ -45,3 +46,11 @@ export %inline
 export %inline
 show : Show (idrTypeOf ty) => Expression vars regs ty -> Expression vars regs String'
 show = U show {opName="toString"}
+
+public export %inline
+Exists2 : (a -> b -> Type) -> Type
+Exists2 ty = Exists $ \x => Exists $ \y => ty x y
+
+public export %inline
+Evidence2 : (0 x : a) -> (0 y : b) -> ty x y -> Exists2 ty
+Evidence2 x y v = Evidence x $ Evidence y v

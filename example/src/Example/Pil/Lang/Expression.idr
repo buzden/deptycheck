@@ -11,7 +11,7 @@ import public Example.Pil.Lang.Aspects.Registers
 public export
 data Expression : (vars : Variables) -> (regs : Registers rc) -> (res : Type') -> Type where
   -- Constant expression
-  C : {ty : Type'} -> (x : idrTypeOf ty) -> Expression vars regs ty
+  C' : {ty : Type'} -> (x : idrTypeOf ty) -> Expression vars regs ty
 
   -- Value of the variable
   V : (n : Name) -> (0 lk : Lookup n vars) => Expression vars regs lk.reveal
@@ -28,3 +28,21 @@ data Expression : (vars : Variables) -> (regs : Registers rc) -> (res : Type') -
   B : {default "??" opName : String} ->
       (f : idrTypeOf a -> idrTypeOf b -> idrTypeOf c) ->
       Expression vars regs a -> Expression vars regs b -> Expression vars regs c
+
+namespace Int
+
+  public export %inline
+  C : Int -> Expression vars regs Int'
+  C x = C' x
+
+namespace Bool
+
+  public export %inline
+  C : Bool -> Expression vars regs Bool'
+  C x = C' x
+
+namespace String
+
+  public export %inline
+  C : String -> Expression vars regs String'
+  C x = C' x
