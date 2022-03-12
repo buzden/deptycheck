@@ -201,40 +201,29 @@ Ord Name where
 --- Working around primitive values ---
 ---------------------------------------
 
-export
 primTypeInfo : String -> TypeInfo
 primTypeInfo s = MkTypeInfo (UN $ Basic s) [] []
 
 export
-typeInfoOfConstant : Constant -> Maybe TypeInfo
-typeInfoOfConstant (I _)       = Nothing
-typeInfoOfConstant (BI _)      = Nothing
-typeInfoOfConstant (I8 _)      = Nothing
-typeInfoOfConstant (I16 _)     = Nothing
-typeInfoOfConstant (I32 _)     = Nothing
-typeInfoOfConstant (I64 _)     = Nothing
-typeInfoOfConstant (B8 _)      = Nothing
-typeInfoOfConstant (B16 _)     = Nothing
-typeInfoOfConstant (B32 _)     = Nothing
-typeInfoOfConstant (B64 _)     = Nothing
-typeInfoOfConstant (Str _)     = Nothing
-typeInfoOfConstant (Ch _)      = Nothing
-typeInfoOfConstant (Db _)      = Nothing
-typeInfoOfConstant WorldVal    = Nothing
-typeInfoOfConstant IntType     = Just $ primTypeInfo "Int"
-typeInfoOfConstant IntegerType = Just $ primTypeInfo "Integer"
-typeInfoOfConstant Int8Type    = Just $ primTypeInfo "Int8"
-typeInfoOfConstant Int16Type   = Just $ primTypeInfo "Int16"
-typeInfoOfConstant Int32Type   = Just $ primTypeInfo "Int32"
-typeInfoOfConstant Int64Type   = Just $ primTypeInfo "Int64"
-typeInfoOfConstant Bits8Type   = Just $ primTypeInfo "Bits8"
-typeInfoOfConstant Bits16Type  = Just $ primTypeInfo "Bits16"
-typeInfoOfConstant Bits32Type  = Just $ primTypeInfo "Bits32"
-typeInfoOfConstant Bits64Type  = Just $ primTypeInfo "Bits64"
-typeInfoOfConstant StringType  = Just $ primTypeInfo "String"
-typeInfoOfConstant CharType    = Just $ primTypeInfo "Char"
-typeInfoOfConstant DoubleType  = Just $ primTypeInfo "Double"
-typeInfoOfConstant WorldType   = Nothing
+typeInfoForPrimType : PrimType -> TypeInfo
+typeInfoForPrimType IntType     = primTypeInfo "Int"
+typeInfoForPrimType IntegerType = primTypeInfo "Integer"
+typeInfoForPrimType Int8Type    = primTypeInfo "Int8"
+typeInfoForPrimType Int16Type   = primTypeInfo "Int16"
+typeInfoForPrimType Int32Type   = primTypeInfo "Int32"
+typeInfoForPrimType Int64Type   = primTypeInfo "Int64"
+typeInfoForPrimType Bits8Type   = primTypeInfo "Bits8"
+typeInfoForPrimType Bits16Type  = primTypeInfo "Bits16"
+typeInfoForPrimType Bits32Type  = primTypeInfo "Bits32"
+typeInfoForPrimType Bits64Type  = primTypeInfo "Bits64"
+typeInfoForPrimType StringType  = primTypeInfo "String"
+typeInfoForPrimType CharType    = primTypeInfo "Char"
+typeInfoForPrimType DoubleType  = primTypeInfo "Double"
+typeInfoForPrimType WorldType   = primTypeInfo "%World"
+
+export
+typeInfoForTypeOfTypes : TypeInfo
+typeInfoForTypeOfTypes = primTypeInfo "Type"
 
 -------------------------------------
 --- Working around type inference ---

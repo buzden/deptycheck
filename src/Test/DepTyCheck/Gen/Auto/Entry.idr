@@ -111,6 +111,7 @@ checkTypeIsGen sig = do
   -- acquire `TypeInfo` out of the target type `TTImp` expression
   targetType <- case targetType of
 
+    -- Normal type
     IVar _ targetType => do
 
       -- check we can analyze the target type itself
@@ -124,12 +125,11 @@ checkTypeIsGen sig = do
       -- return the type info
       pure ti
 
-    IPrimVal _ c =>
+    -- Primitive type
+    IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
 
-      -- check that given contant is a (primitive) type
-      maybe (failAt targetTypeFC "Cannot use primitive value as a target type") pure $ typeInfoOfConstant c
-
-    IType _ => pure $ primTypeInfo "Type"
+    -- Type of types
+    IType _ => pure typeInfoForTypeOfTypes
 
     _ => failAt targetTypeFC "Target type is not a simple name"
 
