@@ -10,16 +10,16 @@ ILam.  (MW ExplicitArg {fuel:868} : IVar Data.Fuel.Fuel)
     => (MW AutoImplicit {externalAutoimpl:867} : IPi.  (MW ExplicitArg {arg:837} : IVar Data.Fuel.Fuel)
                                                     -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                             $ IVar Prelude.Types.Nat))
-    => ILocal (IApp. IVar {("AlternativeCore.XSN", []):0} $ IVar {fuel:868})
+    => ILocal (IApp. IVar <AlternativeCore.XSN>[] $ IVar {fuel:868})
          IClaim MW
                 Export
                 []
-                (MkTy {("AlternativeCore.XSN", []):0}
+                (MkTy <AlternativeCore.XSN>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar AlternativeCore.XSN)))
-         IDef {("AlternativeCore.XSN", []):0}
-              [ PatClause (IApp. IVar {("AlternativeCore.XSN", []):0}
+         IDef <AlternativeCore.XSN>[]
+              [ PatClause (IApp. IVar <AlternativeCore.XSN>[]
                                $ IBindVar fuel)
                           (IApp. IVar <*>
                                $ (IApp. IVar <$>

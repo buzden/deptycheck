@@ -4,18 +4,18 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen (DPair Nat (\a => DPair Nat (\b => EqualN a b)))
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg {fuel:856} : IVar Data.Fuel.Fuel)
-    => ILocal (IApp. IVar {("DerivedGen.EqualN", []):0} $ IVar {fuel:856})
+    => ILocal (IApp. IVar <DerivedGen.EqualN>[] $ IVar {fuel:856})
          IClaim MW
                 Export
                 []
-                (MkTy {("Prelude.Types.Nat", []):0}
+                (MkTy <Prelude.Types.Nat>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar Prelude.Types.Nat)))
          IClaim MW
                 Export
                 []
-                (MkTy {("DerivedGen.EqualN", []):0}
+                (MkTy <DerivedGen.EqualN>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar Builtin.DPair.DPair
@@ -27,8 +27,8 @@ ILam.  (MW ExplicitArg {fuel:856} : IVar Data.Fuel.Fuel)
                                                                => (IApp. IVar DerivedGen.EqualN
                                                                        $ IVar {arg:826}
                                                                        $ IVar {arg:829}))))))))
-         IDef {("Prelude.Types.Nat", []):0}
-              [ PatClause (IApp. IVar {("Prelude.Types.Nat", []):0}
+         IDef <Prelude.Types.Nat>[]
+              [ PatClause (IApp. IVar <Prelude.Types.Nat>[]
                                $ IBindVar fuel_arg_86)
                           (ILocal (ICase (IVar fuel_arg_86)
                                          (IVar Data.Fuel.Fuel)
@@ -77,7 +77,7 @@ ILam.  (MW ExplicitArg {fuel:856} : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar {("Prelude.Types.Nat", []):0}
+                                                                $ (IApp. IVar <Prelude.Types.Nat>[]
                                                                        $ IVar fuel_cons_arg)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})
@@ -88,8 +88,8 @@ ILam.  (MW ExplicitArg {fuel:856} : IVar Data.Fuel.Fuel)
                                                                                                  $ (IApp. IVar Prelude.Types.S
                                                                                                         $ IVar __bnd_{arg:682})) ]))
                                                          $ IVar Nil)) ] ]
-         IDef {("DerivedGen.EqualN", []):0}
-              [ PatClause (IApp. IVar {("DerivedGen.EqualN", []):0}
+         IDef <DerivedGen.EqualN>[]
+              [ PatClause (IApp. IVar <DerivedGen.EqualN>[]
                                $ IBindVar fuel_arg_86)
                           (ILocal (ICase (IVar fuel_arg_86)
                                          (IVar Data.Fuel.Fuel)
@@ -127,7 +127,7 @@ ILam.  (MW ExplicitArg {fuel:856} : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar {("Prelude.Types.Nat", []):0}
+                                                                $ (IApp. IVar <Prelude.Types.Nat>[]
                                                                        $ IVar fuel_cons_arg)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})

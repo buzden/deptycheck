@@ -7,16 +7,16 @@ ILam.  (MW ExplicitArg {fuel:850} : IVar Data.Fuel.Fuel)
     => (MW AutoImplicit {externalAutoimpl:849} : IPi.  (MW ExplicitArg {arg:830} : IVar Data.Fuel.Fuel)
                                                     -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                             $ IPrimVal String))
-    => ILocal (IApp. IVar {("AlternativeCore.XSS", []):0} $ IVar {fuel:850})
+    => ILocal (IApp. IVar <AlternativeCore.XSS>[] $ IVar {fuel:850})
          IClaim MW
                 Export
                 []
-                (MkTy {("AlternativeCore.XSS", []):0}
+                (MkTy <AlternativeCore.XSS>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar AlternativeCore.XSS)))
-         IDef {("AlternativeCore.XSS", []):0}
-              [ PatClause (IApp. IVar {("AlternativeCore.XSS", []):0}
+         IDef <AlternativeCore.XSS>[]
+              [ PatClause (IApp. IVar <AlternativeCore.XSS>[]
                                $ IBindVar fuel)
                           (IApp. IVar <*>
                                $ (IApp. IVar <$>

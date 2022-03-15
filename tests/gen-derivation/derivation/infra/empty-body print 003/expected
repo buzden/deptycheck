@@ -7,15 +7,15 @@ ILam.  (MW ExplicitArg {fuel:850} : IVar Data.Fuel.Fuel)
     => (MW AutoImplicit {externalAutoimpl:849} : IPi.  (MW ExplicitArg {arg:830} : IVar Data.Fuel.Fuel)
                                                     -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                             $ IVar Prelude.Types.Nat))
-    => ILocal (IApp. IVar {("Prelude.Basics.Bool", []):0} $ IVar {fuel:850})
+    => ILocal (IApp. IVar <Prelude.Basics.Bool>[] $ IVar {fuel:850})
          IClaim MW
                 Export
                 []
-                (MkTy {("Prelude.Basics.Bool", []):0}
+                (MkTy <Prelude.Basics.Bool>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar Prelude.Basics.Bool)))
-         IDef {("Prelude.Basics.Bool", []):0}
-              [ PatClause (IApp. IVar {("Prelude.Basics.Bool", []):0}
+         IDef <Prelude.Basics.Bool>[]
+              [ PatClause (IApp. IVar <Prelude.Basics.Bool>[]
                                $ Implicit True)
                           (IVar empty) ]

@@ -6,14 +6,14 @@ LOG gen.auto.derive.infra:0:
 ILam.  (MW ExplicitArg {fuel:860} : IVar Data.Fuel.Fuel)
     => ILocal (ILam.  (MW ExplicitArg a : IVar Prelude.Types.Nat)
                    => (MW ExplicitArg b : IVar Prelude.Types.Nat)
-                   => (IApp. IVar {("DerivedGen.LT2", [0, 1]):0}
+                   => (IApp. IVar <DerivedGen.LT2>[0, 1]
                            $ IVar {fuel:860}
                            $ IVar a
                            $ IVar b))
          IClaim MW
                 Export
                 []
-                (MkTy {("DerivedGen.LT2", [0, 1]):0}
+                (MkTy <DerivedGen.LT2>[0, 1]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:826} : IVar Prelude.Types.Nat)
                           -> (MW ExplicitArg {arg:829} : IVar Prelude.Types.Nat)
@@ -21,8 +21,8 @@ ILam.  (MW ExplicitArg {fuel:860} : IVar Data.Fuel.Fuel)
                                   $ (IApp. IVar DerivedGen.LT2
                                          $ IVar {arg:826}
                                          $ IVar {arg:829}))))
-         IDef {("DerivedGen.LT2", [0, 1]):0}
-              [ PatClause (IApp. IVar {("DerivedGen.LT2", [0, 1]):0}
+         IDef <DerivedGen.LT2>[0, 1]
+              [ PatClause (IApp. IVar <DerivedGen.LT2>[0, 1]
                                $ IBindVar fuel_arg_86
                                $ IBindVar {arg:826}
                                $ IBindVar {arg:829})
@@ -109,7 +109,7 @@ ILam.  (MW ExplicitArg {fuel:860} : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar {("DerivedGen.LT2", [0, 1]):0}
+                                                                $ (IApp. IVar <DerivedGen.LT2>[0, 1]
                                                                        $ IVar fuel_cons_arg
                                                                        $ IVar x
                                                                        $ IVar y)

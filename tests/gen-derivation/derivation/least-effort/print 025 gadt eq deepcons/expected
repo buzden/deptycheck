@@ -7,11 +7,11 @@ ILam.  (MW ExplicitArg {fuel:879} : IVar Data.Fuel.Fuel)
     => (MW AutoImplicit {externalAutoimpl:878} : IPi.  (MW ExplicitArg {arg:846} : IVar Data.Fuel.Fuel)
                                                     -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                             $ IVar Prelude.Types.Nat))
-    => ILocal (IApp. IVar {("DerivedGen.LT2", []):0} $ IVar {fuel:879})
+    => ILocal (IApp. IVar <DerivedGen.LT2>[] $ IVar {fuel:879})
          IClaim MW
                 Export
                 []
-                (MkTy {("DerivedGen.LT2", []):0}
+                (MkTy <DerivedGen.LT2>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar Builtin.DPair.DPair
@@ -23,8 +23,8 @@ ILam.  (MW ExplicitArg {fuel:879} : IVar Data.Fuel.Fuel)
                                                                => (IApp. IVar DerivedGen.LT2
                                                                        $ IVar {arg:826}
                                                                        $ IVar {arg:829}))))))))
-         IDef {("DerivedGen.LT2", []):0}
-              [ PatClause (IApp. IVar {("DerivedGen.LT2", []):0}
+         IDef <DerivedGen.LT2>[]
+              [ PatClause (IApp. IVar <DerivedGen.LT2>[]
                                $ IBindVar fuel_arg_86)
                           (ILocal (ICase (IVar fuel_arg_86)
                                          (IVar Data.Fuel.Fuel)
@@ -101,7 +101,7 @@ ILam.  (MW ExplicitArg {fuel:879} : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar {("DerivedGen.LT2", []):0}
+                                                                $ (IApp. IVar <DerivedGen.LT2>[]
                                                                        $ IVar fuel_cons_arg)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})

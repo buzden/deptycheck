@@ -4,16 +4,16 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen Nat
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg {fuel:832} : IVar Data.Fuel.Fuel)
-    => ILocal (IApp. IVar {("Prelude.Types.Nat", []):0} $ IVar {fuel:832})
+    => ILocal (IApp. IVar <Prelude.Types.Nat>[] $ IVar {fuel:832})
          IClaim MW
                 Export
                 []
-                (MkTy {("Prelude.Types.Nat", []):0}
+                (MkTy <Prelude.Types.Nat>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar Prelude.Types.Nat)))
-         IDef {("Prelude.Types.Nat", []):0}
-              [ PatClause (IApp. IVar {("Prelude.Types.Nat", []):0}
+         IDef <Prelude.Types.Nat>[]
+              [ PatClause (IApp. IVar <Prelude.Types.Nat>[]
                                $ IBindVar fuel_arg_86)
                           (ILocal (ICase (IVar fuel_arg_86)
                                          (IVar Data.Fuel.Fuel)
@@ -62,7 +62,7 @@ ILam.  (MW ExplicitArg {fuel:832} : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar {("Prelude.Types.Nat", []):0}
+                                                                $ (IApp. IVar <Prelude.Types.Nat>[]
                                                                        $ IVar fuel_cons_arg)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})

@@ -8,7 +8,7 @@ ILam.  (MW ExplicitArg {fuel:876} : IVar Data.Fuel.Fuel)
                    => (MW ExplicitArg m : IVar Prelude.Types.Nat)
                    => (MW ExplicitArg p : IVar Prelude.Types.Nat)
                    => (MW ExplicitArg k : IVar Prelude.Types.Nat)
-                   => (IApp. IVar {("DerivedGen.X", [0, 1, 2, 3]):0}
+                   => (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]
                            $ IVar {fuel:876}
                            $ IVar n
                            $ IVar m
@@ -17,7 +17,7 @@ ILam.  (MW ExplicitArg {fuel:876} : IVar Data.Fuel.Fuel)
          IClaim MW
                 Export
                 []
-                (MkTy {("DerivedGen.X", [0, 1, 2, 3]):0}
+                (MkTy <DerivedGen.X>[0, 1, 2, 3]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:826} : IVar Prelude.Types.Nat)
                           -> (MW ExplicitArg {arg:829} : IVar Prelude.Types.Nat)
@@ -29,8 +29,8 @@ ILam.  (MW ExplicitArg {fuel:876} : IVar Data.Fuel.Fuel)
                                          $ IVar {arg:829}
                                          $ IVar {arg:832}
                                          $ IVar {arg:835}))))
-         IDef {("DerivedGen.X", [0, 1, 2, 3]):0}
-              [ PatClause (IApp. IVar {("DerivedGen.X", [0, 1, 2, 3]):0}
+         IDef <DerivedGen.X>[0, 1, 2, 3]
+              [ PatClause (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]
                                $ IBindVar fuel_arg_86
                                $ IBindVar {arg:826}
                                $ IBindVar {arg:829}
