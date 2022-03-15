@@ -21,6 +21,5 @@ ILam.  (MW ExplicitArg {fuel:844} : IVar Data.Fuel.Fuel)
                                                                        $ IVar len
                                                                        $ IVar elem))))))))
          IDef <Data.Vect.Vect>[]
-              [ PatClause (IApp. IVar <Data.Vect.Vect>[]
-                               $ Implicit True)
+              [ PatClause (IApp. IVar <Data.Vect.Vect>[] $ Implicit True)
                           (IVar empty) ]

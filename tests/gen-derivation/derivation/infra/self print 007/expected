@@ -21,8 +21,7 @@ ILam.  (MW ExplicitArg {fuel:858} : IVar Data.Fuel.Fuel)
                                                                        $ IVar {arg:826}
                                                                        $ IVar {arg:829}))))))))
          IDef <DerivedGen.X>[]
-              [ PatClause (IApp. IVar <DerivedGen.X>[] $ IVar Dry)
-                          (IVar empty)
+              [ PatClause (IApp. IVar <DerivedGen.X>[] $ IVar Dry) (IVar empty)
               , PatClause (IApp. IVar <DerivedGen.X>[]
                                $ (IApp. IVar More $ IBindVar fuel))
                           (IApp. IVar <DerivedGen.X>[] $ IVar fuel) ]

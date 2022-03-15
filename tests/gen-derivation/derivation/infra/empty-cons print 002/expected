@@ -23,10 +23,10 @@ ILam.  (MW ExplicitArg {fuel:846} : IVar Data.Fuel.Fuel)
                                          $ IVar elem))))
          IDef <Data.Vect.Vect>[0, 1]
               [ PatClause (IApp. IVar <Data.Vect.Vect>[0, 1]
-                               $ IBindVar fuel_arg_86
+                               $ IBindVar ^fuel_arg^
                                $ IBindVar len
                                $ IBindVar elem)
-                          (ILocal (ICase (IVar fuel_arg_86)
+                          (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
@@ -37,16 +37,16 @@ ILam.  (MW ExplicitArg {fuel:846} : IVar Data.Fuel.Fuel)
                                                                         $ IVar elem)
                                                                  $ IVar Nil))
                                          , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar sub_fuel_arg_86)
+                                                          $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
-                                                                        $ IVar sub_fuel_arg_86
+                                                                        $ IVar ^sub^fuel_arg^
                                                                         $ IVar len
                                                                         $ IVar elem)
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar {cons_gen_for_Data.Vect.:::7}
-                                                                               $ IVar sub_fuel_arg_86
+                                                                               $ IVar ^sub^fuel_arg^
                                                                                $ IVar len
                                                                                $ IVar elem)
                                                                         $ IVar Nil))) ]))
@@ -74,7 +74,7 @@ ILam.  (MW ExplicitArg {fuel:846} : IVar Data.Fuel.Fuel)
                                                             $ IVar elem))))
                             IDef {cons_gen_for_Data.Vect.Nil:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
-                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar ^cons_fuel^
                                                   $ IVar Prelude.Types.Z
                                                   $ IBindVar elem)
                                              (IVar empty)
@@ -85,7 +85,7 @@ ILam.  (MW ExplicitArg {fuel:846} : IVar Data.Fuel.Fuel)
                                              (IVar empty) ]
                             IDef {cons_gen_for_Data.Vect.:::7}
                                  [ PatClause (IApp. IVar {cons_gen_for_Data.Vect.:::7}
-                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar ^cons_fuel^
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar len)
                                                   $ IBindVar elem)

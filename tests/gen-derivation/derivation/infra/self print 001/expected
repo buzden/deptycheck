@@ -13,8 +13,7 @@ ILam.  (MW ExplicitArg {fuel:832} : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar Builtin.Unit)))
          IDef <Builtin.Unit>[]
-              [ PatClause (IApp. IVar <Builtin.Unit>[] $ IVar Dry)
-                          (IVar empty)
+              [ PatClause (IApp. IVar <Builtin.Unit>[] $ IVar Dry) (IVar empty)
               , PatClause (IApp. IVar <Builtin.Unit>[]
                                $ (IApp. IVar More $ IBindVar fuel))
                           (IApp. IVar <Builtin.Unit>[] $ IVar fuel) ]

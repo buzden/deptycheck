@@ -13,9 +13,8 @@ ILam.  (MW ExplicitArg {fuel:832} : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar Builtin.Unit)))
          IDef <Builtin.Unit>[]
-              [ PatClause (IApp. IVar <Builtin.Unit>[]
-                               $ IBindVar fuel_arg_86)
-                          (ILocal (ICase (IVar fuel_arg_86)
+              [ PatClause (IApp. IVar <Builtin.Unit>[] $ IBindVar ^fuel_arg^)
+                          (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
@@ -24,11 +23,11 @@ ILam.  (MW ExplicitArg {fuel:832} : IVar Data.Fuel.Fuel)
                                                                         $ IVar Data.Fuel.Dry)
                                                                  $ IVar Nil))
                                          , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar sub_fuel_arg_86)
+                                                          $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar {cons_gen_for_Builtin.MkUnit:7}
-                                                                        $ IVar sub_fuel_arg_86)
+                                                                        $ IVar ^sub^fuel_arg^)
                                                                  $ IVar Nil)) ]))
                             IClaim MW
                                    Export
@@ -39,5 +38,5 @@ ILam.  (MW ExplicitArg {fuel:832} : IVar Data.Fuel.Fuel)
                                                      $ IVar Builtin.Unit)))
                             IDef {cons_gen_for_Builtin.MkUnit:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_Builtin.MkUnit:7}
-                                                  $ IBindVar fuel_cons_arg)
+                                                  $ IBindVar ^cons_fuel^)
                                              (IVar empty) ] ]

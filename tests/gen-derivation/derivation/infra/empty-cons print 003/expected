@@ -17,8 +17,8 @@ ILam.  (MW ExplicitArg {fuel:850} : IVar Data.Fuel.Fuel)
                                   $ IVar Prelude.Basics.Bool)))
          IDef <Prelude.Basics.Bool>[]
               [ PatClause (IApp. IVar <Prelude.Basics.Bool>[]
-                               $ IBindVar fuel_arg_86)
-                          (ILocal (ICase (IVar fuel_arg_86)
+                               $ IBindVar ^fuel_arg^)
+                          (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
@@ -30,14 +30,14 @@ ILam.  (MW ExplicitArg {fuel:850} : IVar Data.Fuel.Fuel)
                                                                                $ IVar Data.Fuel.Dry)
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar sub_fuel_arg_86)
+                                                          $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar {cons_gen_for_Prelude.Basics.False:7}
-                                                                        $ IVar sub_fuel_arg_86)
+                                                                        $ IVar ^sub^fuel_arg^)
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar {cons_gen_for_Prelude.Basics.True:7}
-                                                                               $ IVar sub_fuel_arg_86)
+                                                                               $ IVar ^sub^fuel_arg^)
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export
@@ -55,9 +55,9 @@ ILam.  (MW ExplicitArg {fuel:850} : IVar Data.Fuel.Fuel)
                                                      $ IVar Prelude.Basics.Bool)))
                             IDef {cons_gen_for_Prelude.Basics.False:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_Prelude.Basics.False:7}
-                                                  $ IBindVar fuel_cons_arg)
+                                                  $ IBindVar ^cons_fuel^)
                                              (IVar empty) ]
                             IDef {cons_gen_for_Prelude.Basics.True:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_Prelude.Basics.True:7}
-                                                  $ IBindVar fuel_cons_arg)
+                                                  $ IBindVar ^cons_fuel^)
                                              (IVar empty) ] ]

@@ -28,8 +28,7 @@ ILam.  (MW ExplicitArg {fuel:856} : IVar Data.Fuel.Fuel)
                                   $ (IApp. IVar AlternativeCore.X'S
                                          $ IVar {arg:4636}))))
          IDef <Prelude.Types.Nat>[]
-              [ PatClause (IApp. IVar <Prelude.Types.Nat>[]
-                               $ IBindVar fuel)
+              [ PatClause (IApp. IVar <Prelude.Types.Nat>[] $ IBindVar fuel)
                           (IApp. IVar <*>
                                $ (IApp. IVar <$>
                                       $ IVar MkXSN

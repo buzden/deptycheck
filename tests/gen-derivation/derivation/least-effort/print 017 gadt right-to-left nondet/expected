@@ -62,8 +62,8 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                   $ IVar DerivedGen.Y)))
          IDef <Prelude.Types.Nat>[]
               [ PatClause (IApp. IVar <Prelude.Types.Nat>[]
-                               $ IBindVar fuel_arg_86)
-                          (ILocal (ICase (IVar fuel_arg_86)
+                               $ IBindVar ^fuel_arg^)
+                          (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
@@ -72,14 +72,14 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                         $ IVar Data.Fuel.Dry)
                                                                  $ IVar Nil))
                                          , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar sub_fuel_arg_86)
+                                                          $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar {cons_gen_for_Prelude.Types.Z:7}
-                                                                        $ IVar sub_fuel_arg_86)
+                                                                        $ IVar ^sub^fuel_arg^)
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar {cons_gen_for_Prelude.Types.S:7}
-                                                                               $ IVar sub_fuel_arg_86)
+                                                                               $ IVar ^sub^fuel_arg^)
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export
@@ -97,7 +97,7 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                      $ IVar Prelude.Types.Nat)))
                             IDef {cons_gen_for_Prelude.Types.Z:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_Prelude.Types.Z:7}
-                                                  $ IBindVar fuel_cons_arg)
+                                                  $ IBindVar ^cons_fuel^)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. (INamedApp. IVar Prelude.pure
@@ -106,25 +106,25 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                          $ IVar Nil)) ]
                             IDef {cons_gen_for_Prelude.Types.S:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_Prelude.Types.S:7}
-                                                  $ IBindVar fuel_cons_arg)
+                                                  $ IBindVar ^cons_fuel^)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
                                                                 $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                                       $ IVar fuel_cons_arg)
+                                                                       $ IVar ^cons_fuel^)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})
                                                                                 (Implicit False)
-                                                                                [ PatClause (IBindVar __bnd_{arg:682})
+                                                                                [ PatClause (IBindVar ^bnd^{arg:682})
                                                                                             (IApp. (INamedApp. IVar Prelude.pure
                                                                                                              $ IVar Test.DepTyCheck.Gen.Gen)
                                                                                                  $ (IApp. IVar Prelude.Types.S
-                                                                                                        $ IVar __bnd_{arg:682})) ]))
+                                                                                                        $ IVar ^bnd^{arg:682})) ]))
                                                          $ IVar Nil)) ] ]
          IDef <DerivedGen.X_GADT>[]
               [ PatClause (IApp. IVar <DerivedGen.X_GADT>[]
-                               $ IBindVar fuel_arg_86)
-                          (ILocal (ICase (IVar fuel_arg_86)
+                               $ IBindVar ^fuel_arg^)
+                          (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
@@ -136,14 +136,14 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                                $ IVar Data.Fuel.Dry)
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar sub_fuel_arg_86)
+                                                          $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar {cons_gen_for_DerivedGen.MkXG_4:7}
-                                                                        $ IVar sub_fuel_arg_86)
+                                                                        $ IVar ^sub^fuel_arg^)
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar {cons_gen_for_DerivedGen.MkXG_5:7}
-                                                                               $ IVar sub_fuel_arg_86)
+                                                                               $ IVar ^sub^fuel_arg^)
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export
@@ -177,7 +177,7 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                                           $ IVar {arg:829}))))))))
                             IDef {cons_gen_for_DerivedGen.MkXG_4:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.MkXG_4:7}
-                                                  $ IBindVar fuel_cons_arg)
+                                                  $ IBindVar ^cons_fuel^)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. (INamedApp. IVar Prelude.pure
@@ -190,12 +190,12 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                          $ IVar Nil)) ]
                             IDef {cons_gen_for_DerivedGen.MkXG_5:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.MkXG_5:7}
-                                                  $ IBindVar fuel_cons_arg)
+                                                  $ IBindVar ^cons_fuel^)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
                                                                 $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                                       $ IVar fuel_cons_arg)
+                                                                       $ IVar ^cons_fuel^)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})
                                                                                 (Implicit False)
@@ -211,9 +211,9 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                          $ IVar Nil)) ] ]
          IDef <DerivedGen.X_GADT>[0]
               [ PatClause (IApp. IVar <DerivedGen.X_GADT>[0]
-                               $ IBindVar fuel_arg_86
+                               $ IBindVar ^fuel_arg^
                                $ IBindVar {arg:826})
-                          (ILocal (ICase (IVar fuel_arg_86)
+                          (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
@@ -227,15 +227,15 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                                $ IVar {arg:826})
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar sub_fuel_arg_86)
+                                                          $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar {cons_gen_for_DerivedGen.MkXG_4:7}
-                                                                        $ IVar sub_fuel_arg_86
+                                                                        $ IVar ^sub^fuel_arg^
                                                                         $ IVar {arg:826})
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar {cons_gen_for_DerivedGen.MkXG_5:7}
-                                                                               $ IVar sub_fuel_arg_86
+                                                                               $ IVar ^sub^fuel_arg^
                                                                                $ IVar {arg:826})
                                                                         $ IVar Nil))) ]))
                             IClaim MW
@@ -266,7 +266,7 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                            $ IVar {arg:829}))))))
                             IDef {cons_gen_for_DerivedGen.MkXG_4:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.MkXG_4:7}
-                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar ^cons_fuel^
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ (IApp. IVar Prelude.Types.S
                                                                 $ (IApp. IVar Prelude.Types.S
@@ -286,7 +286,7 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                              (IVar empty) ]
                             IDef {cons_gen_for_DerivedGen.MkXG_5:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.MkXG_5:7}
-                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar ^cons_fuel^
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ (IApp. IVar Prelude.Types.S
                                                                 $ (IApp. IVar Prelude.Types.S
@@ -297,7 +297,7 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
                                                                 $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                                       $ IVar fuel_cons_arg)
+                                                                       $ IVar ^cons_fuel^)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})
                                                                                 (Implicit False)
@@ -315,9 +315,9 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                              (IVar empty) ] ]
          IDef <DerivedGen.X_GADT>[1]
               [ PatClause (IApp. IVar <DerivedGen.X_GADT>[1]
-                               $ IBindVar fuel_arg_86
+                               $ IBindVar ^fuel_arg^
                                $ IBindVar {arg:829})
-                          (ILocal (ICase (IVar fuel_arg_86)
+                          (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
@@ -331,15 +331,15 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                                $ IVar {arg:829})
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar sub_fuel_arg_86)
+                                                          $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar {cons_gen_for_DerivedGen.MkXG_4:7}
-                                                                        $ IVar sub_fuel_arg_86
+                                                                        $ IVar ^sub^fuel_arg^
                                                                         $ IVar {arg:829})
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar {cons_gen_for_DerivedGen.MkXG_5:7}
-                                                                               $ IVar sub_fuel_arg_86
+                                                                               $ IVar ^sub^fuel_arg^
                                                                                $ IVar {arg:829})
                                                                         $ IVar Nil))) ]))
                             IClaim MW
@@ -370,7 +370,7 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                            $ IVar {arg:829}))))))
                             IDef {cons_gen_for_DerivedGen.MkXG_4:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.MkXG_4:7}
-                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar ^cons_fuel^
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ (IApp. IVar Prelude.Types.S
                                                                 $ (IApp. IVar Prelude.Types.S
@@ -391,7 +391,7 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                              (IVar empty) ]
                             IDef {cons_gen_for_DerivedGen.MkXG_5:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.MkXG_5:7}
-                                                  $ IBindVar fuel_cons_arg
+                                                  $ IBindVar ^cons_fuel^
                                                   $ IBindVar m)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
@@ -403,8 +403,8 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                                    $ IVar m)))
                                                          $ IVar Nil)) ] ]
          IDef <DerivedGen.Y>[]
-              [ PatClause (IApp. IVar <DerivedGen.Y>[] $ IBindVar fuel_arg_86)
-                          (ILocal (ICase (IVar fuel_arg_86)
+              [ PatClause (IApp. IVar <DerivedGen.Y>[] $ IBindVar ^fuel_arg^)
+                          (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
@@ -416,14 +416,14 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                                $ IVar Data.Fuel.Dry)
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar sub_fuel_arg_86)
+                                                          $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar {cons_gen_for_DerivedGen.MkY1:7}
-                                                                        $ IVar sub_fuel_arg_86)
+                                                                        $ IVar ^sub^fuel_arg^)
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar {cons_gen_for_DerivedGen.MkY2:7}
-                                                                               $ IVar sub_fuel_arg_86)
+                                                                               $ IVar ^sub^fuel_arg^)
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export
@@ -441,12 +441,12 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                      $ IVar DerivedGen.Y)))
                             IDef {cons_gen_for_DerivedGen.MkY1:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.MkY1:7}
-                                                  $ IBindVar fuel_cons_arg)
+                                                  $ IBindVar ^cons_fuel^)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
                                                                 $ (IApp. IVar <DerivedGen.X_GADT>[]
-                                                                       $ IVar fuel_cons_arg)
+                                                                       $ IVar ^cons_fuel^)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})
                                                                                 (Implicit False)
@@ -454,34 +454,34 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                                                  $ IBindVar n
                                                                                                  $ (IApp. IVar Builtin.DPair.MkDPair
                                                                                                         $ IBindVar k
-                                                                                                        $ IBindVar __bnd_{arg:856}))
+                                                                                                        $ IBindVar ^bnd^{arg:856}))
                                                                                             (IApp. IVar >>=
                                                                                                  $ (IApp. IVar <DerivedGen.X_GADT>[0]
-                                                                                                        $ IVar fuel_cons_arg
+                                                                                                        $ IVar ^cons_fuel^
                                                                                                         $ IVar n)
                                                                                                  $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                                                         => ICase (IVar {lamc:0})
                                                                                                                  (Implicit False)
                                                                                                                  [ PatClause (IApp. IVar Builtin.DPair.MkDPair
                                                                                                                                   $ IBindVar m
-                                                                                                                                  $ IBindVar __bnd_{arg:853})
+                                                                                                                                  $ IBindVar ^bnd^{arg:853})
                                                                                                                              (IApp. (INamedApp. IVar Prelude.pure
                                                                                                                                               $ IVar Test.DepTyCheck.Gen.Gen)
                                                                                                                                   $ (IApp. (INamedApp. IVar DerivedGen.MkY1
                                                                                                                                                      $ IVar k
                                                                                                                                                      $ IVar m
                                                                                                                                                      $ IVar n)
-                                                                                                                                         $ IVar __bnd_{arg:853}
-                                                                                                                                         $ IVar __bnd_{arg:856})) ])) ]))
+                                                                                                                                         $ IVar ^bnd^{arg:853}
+                                                                                                                                         $ IVar ^bnd^{arg:856})) ])) ]))
                                                          $ IVar Nil)) ]
                             IDef {cons_gen_for_DerivedGen.MkY2:7}
                                  [ PatClause (IApp. IVar {cons_gen_for_DerivedGen.MkY2:7}
-                                                  $ IBindVar fuel_cons_arg)
+                                                  $ IBindVar ^cons_fuel^)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
                                                                 $ (IApp. IVar <DerivedGen.X_GADT>[]
-                                                                       $ IVar fuel_cons_arg)
+                                                                       $ IVar ^cons_fuel^)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})
                                                                                 (Implicit False)
@@ -489,23 +489,23 @@ ILam.  (MW ExplicitArg {fuel:877} : IVar Data.Fuel.Fuel)
                                                                                                  $ IBindVar k
                                                                                                  $ (IApp. IVar Builtin.DPair.MkDPair
                                                                                                         $ IBindVar m
-                                                                                                        $ IBindVar __bnd_{arg:865}))
+                                                                                                        $ IBindVar ^bnd^{arg:865}))
                                                                                             (IApp. IVar >>=
                                                                                                  $ (IApp. IVar <DerivedGen.X_GADT>[1]
-                                                                                                        $ IVar fuel_cons_arg
+                                                                                                        $ IVar ^cons_fuel^
                                                                                                         $ IVar m)
                                                                                                  $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                                                         => ICase (IVar {lamc:0})
                                                                                                                  (Implicit False)
                                                                                                                  [ PatClause (IApp. IVar Builtin.DPair.MkDPair
                                                                                                                                   $ IBindVar n
-                                                                                                                                  $ IBindVar __bnd_{arg:862})
+                                                                                                                                  $ IBindVar ^bnd^{arg:862})
                                                                                                                              (IApp. (INamedApp. IVar Prelude.pure
                                                                                                                                               $ IVar Test.DepTyCheck.Gen.Gen)
                                                                                                                                   $ (IApp. (INamedApp. IVar DerivedGen.MkY2
                                                                                                                                                      $ IVar k
                                                                                                                                                      $ IVar m
                                                                                                                                                      $ IVar n)
-                                                                                                                                         $ IVar __bnd_{arg:862}
-                                                                                                                                         $ IVar __bnd_{arg:865})) ])) ]))
+                                                                                                                                         $ IVar ^bnd^{arg:862}
+                                                                                                                                         $ IVar ^bnd^{arg:865})) ])) ]))
                                                          $ IVar Nil)) ] ]

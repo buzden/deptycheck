@@ -16,8 +16,7 @@ ILam.  (MW ExplicitArg {fuel:850} : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar AlternativeCore.XSS)))
          IDef <AlternativeCore.XSS>[]
-              [ PatClause (IApp. IVar <AlternativeCore.XSS>[]
-                               $ IBindVar fuel)
+              [ PatClause (IApp. IVar <AlternativeCore.XSS>[] $ IBindVar fuel)
                           (IApp. IVar <*>
                                $ (IApp. IVar <$>
                                       $ IVar MkXSS
