@@ -20,38 +20,38 @@ ILam.  (MW ExplicitArg {fuel:832} : IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
-                                                                 $ (IApp. IVar {cons_gen_for_Prelude.Basics.False:7}
+                                                                 $ (IApp. IVar <<Prelude.Basics.False>>
                                                                         $ IVar Data.Fuel.Dry)
                                                                  $ (IApp. IVar ::
-                                                                        $ (IApp. IVar {cons_gen_for_Prelude.Basics.True:7}
+                                                                        $ (IApp. IVar <<Prelude.Basics.True>>
                                                                                $ IVar Data.Fuel.Dry)
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
-                                                                 $ (IApp. IVar {cons_gen_for_Prelude.Basics.False:7}
+                                                                 $ (IApp. IVar <<Prelude.Basics.False>>
                                                                         $ IVar ^sub^fuel_arg^)
                                                                  $ (IApp. IVar ::
-                                                                        $ (IApp. IVar {cons_gen_for_Prelude.Basics.True:7}
+                                                                        $ (IApp. IVar <<Prelude.Basics.True>>
                                                                                $ IVar ^sub^fuel_arg^)
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export
                                    []
-                                   (MkTy {cons_gen_for_Prelude.Basics.False:7}
+                                   (MkTy <<Prelude.Basics.False>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                      $ IVar Prelude.Basics.Bool)))
                             IClaim MW
                                    Export
                                    []
-                                   (MkTy {cons_gen_for_Prelude.Basics.True:7}
+                                   (MkTy <<Prelude.Basics.True>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                      $ IVar Prelude.Basics.Bool)))
-                            IDef {cons_gen_for_Prelude.Basics.False:7}
-                                 [ PatClause (IApp. IVar {cons_gen_for_Prelude.Basics.False:7}
+                            IDef <<Prelude.Basics.False>>
+                                 [ PatClause (IApp. IVar <<Prelude.Basics.False>>
                                                   $ IBindVar ^cons_fuel^)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
@@ -59,8 +59,8 @@ ILam.  (MW ExplicitArg {fuel:832} : IVar Data.Fuel.Fuel)
                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
                                                                 $ IVar Prelude.Basics.False)
                                                          $ IVar Nil)) ]
-                            IDef {cons_gen_for_Prelude.Basics.True:7}
-                                 [ PatClause (IApp. IVar {cons_gen_for_Prelude.Basics.True:7}
+                            IDef <<Prelude.Basics.True>>
+                                 [ PatClause (IApp. IVar <<Prelude.Basics.True>>
                                                   $ IBindVar ^cons_fuel^)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                   $ (IApp. IVar ::
