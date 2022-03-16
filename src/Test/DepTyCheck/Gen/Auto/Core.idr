@@ -55,7 +55,7 @@ ConstructorDerivator => DerivatorCore where
   where
 
     consGenName : Con -> Name
-    consGenName con = UN $ Basic $ "<<" ++ show con.name ++ ">>"
+    consGenName con = UN $ Basic $ "<<\{show con.name}>>"
     -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend
 
     fuelDecisionExpr : (fuelArg : String) -> List (Con, Recursiveness) -> TTImp
