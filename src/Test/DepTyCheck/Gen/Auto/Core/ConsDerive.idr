@@ -73,7 +73,7 @@ namespace NonObligatoryExts
       let bindNames : Vect (con.args.length) String
           bindNames = flip mapWithPos .| fromList con.args .| \idx, arg => case argName arg of
                         UN (Basic n) => n
-                        n            => (if contains idx givs then id else ("__bnd_" ++)) $ show n
+                        n            => (if contains idx givs then id else ("^bnd^" ++)) $ show n
 
       -- Derive constructor calling expression for given order of generation
       let genForOrder : List (Fin con.args.length) -> m TTImp

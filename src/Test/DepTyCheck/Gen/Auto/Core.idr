@@ -44,7 +44,7 @@ ConstructorDerivator => DerivatorCore where
     consRecs <- for sig.targetType.cons $ \con => consRecursiveness con <&> (con,)
 
     -- decide how to name a fuel argument on the LHS
-    let fuelArg = "fuel_arg_86"
+    let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
 
     -- generate the case expression deciding whether will we go into recursive constructors or not
     let outmostRHS = fuelDecisionExpr fuelArg consRecs
@@ -55,7 +55,8 @@ ConstructorDerivator => DerivatorCore where
   where
 
     consGenName : Con -> Name
-    consGenName con = MN "cons_gen_for_\{show con.name}" 7
+    consGenName con = UN $ Basic $ "<<\{show con.name}>>"
+    -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend
 
     fuelDecisionExpr : (fuelArg : String) -> List (Con, Recursiveness) -> TTImp
     fuelDecisionExpr fuelAr consRecs = do
@@ -73,7 +74,7 @@ ConstructorDerivator => DerivatorCore where
           let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf (nonRecCons <&> callConsGen dry)
 
         , -- if fuel is `More`, spend one fuel and call all constructors on the rest
-          let subFuelArg = "sub_" ++ fuelAr in
+          let subFuelArg = "^sub" ++ fuelAr in -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
           var `{Data.Fuel.More} .$ bindVar subFuelArg .= callOneOf (allCons <&> callConsGen (varStr subFuelArg))
         ]
 

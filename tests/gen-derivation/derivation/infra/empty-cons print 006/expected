@@ -5,13 +5,13 @@ LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (a : Type) -> Gen (DPair Nat 
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg {fuel:844} : IVar Data.Fuel.Fuel)
     => ILocal (ILam.  (MW ExplicitArg a : IType)
-                   => (IApp. IVar {("Data.Vect.Vect", [1]):0}
+                   => (IApp. IVar <Data.Vect.Vect>[1]
                            $ IVar {fuel:844}
                            $ IVar a))
          IClaim MW
                 Export
                 []
-                (MkTy {("Data.Vect.Vect", [1]):0}
+                (MkTy <Data.Vect.Vect>[1]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg elem : IType)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
@@ -21,35 +21,35 @@ ILam.  (MW ExplicitArg {fuel:844} : IVar Data.Fuel.Fuel)
                                                 => (IApp. IVar Data.Vect.Vect
                                                         $ IVar len
                                                         $ IVar elem))))))
-         IDef {("Data.Vect.Vect", [1]):0}
-              [ PatClause (IApp. IVar {("Data.Vect.Vect", [1]):0}
-                               $ IBindVar fuel_arg_86
+         IDef <Data.Vect.Vect>[1]
+              [ PatClause (IApp. IVar <Data.Vect.Vect>[1]
+                               $ IBindVar ^fuel_arg^
                                $ IBindVar elem)
-                          (ILocal (ICase (IVar fuel_arg_86)
+                          (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
-                                                                 $ (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
+                                                                 $ (IApp. IVar <<Data.Vect.Nil>>
                                                                         $ IVar Data.Fuel.Dry
                                                                         $ IVar elem)
                                                                  $ IVar Nil))
                                          , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar sub_fuel_arg_86)
+                                                          $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
-                                                                 $ (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
-                                                                        $ IVar sub_fuel_arg_86
+                                                                 $ (IApp. IVar <<Data.Vect.Nil>>
+                                                                        $ IVar ^sub^fuel_arg^
                                                                         $ IVar elem)
                                                                  $ (IApp. IVar ::
-                                                                        $ (IApp. IVar {cons_gen_for_Data.Vect.:::7}
-                                                                               $ IVar sub_fuel_arg_86
+                                                                        $ (IApp. IVar <<Data.Vect.::>>
+                                                                               $ IVar ^sub^fuel_arg^
                                                                                $ IVar elem)
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export
                                    []
-                                   (MkTy {cons_gen_for_Data.Vect.Nil:7}
+                                   (MkTy <<Data.Vect.Nil>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg elem : IType)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
@@ -62,7 +62,7 @@ ILam.  (MW ExplicitArg {fuel:844} : IVar Data.Fuel.Fuel)
                             IClaim MW
                                    Export
                                    []
-                                   (MkTy {cons_gen_for_Data.Vect.:::7}
+                                   (MkTy <<Data.Vect.::>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg elem : IType)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
@@ -72,13 +72,13 @@ ILam.  (MW ExplicitArg {fuel:844} : IVar Data.Fuel.Fuel)
                                                                    => (IApp. IVar Data.Vect.Vect
                                                                            $ IVar len
                                                                            $ IVar elem))))))
-                            IDef {cons_gen_for_Data.Vect.Nil:7}
-                                 [ PatClause (IApp. IVar {cons_gen_for_Data.Vect.Nil:7}
-                                                  $ IBindVar fuel_cons_arg
+                            IDef <<Data.Vect.Nil>>
+                                 [ PatClause (IApp. IVar <<Data.Vect.Nil>>
+                                                  $ IBindVar ^cons_fuel^
                                                   $ IBindVar elem)
                                              (IVar empty) ]
-                            IDef {cons_gen_for_Data.Vect.:::7}
-                                 [ PatClause (IApp. IVar {cons_gen_for_Data.Vect.:::7}
-                                                  $ IBindVar fuel_cons_arg
+                            IDef <<Data.Vect.::>>
+                                 [ PatClause (IApp. IVar <<Data.Vect.::>>
+                                                  $ IBindVar ^cons_fuel^
                                                   $ IBindVar elem)
                                              (IVar empty) ] ]

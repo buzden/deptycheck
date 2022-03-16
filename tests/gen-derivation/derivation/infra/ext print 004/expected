@@ -8,37 +8,36 @@ ILam.  (MW ExplicitArg {fuel:856} : IVar Data.Fuel.Fuel)
                                                     -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                             $ IPrimVal String))
     => ILocal (ILam.  (MW ExplicitArg n : IVar Prelude.Types.Nat)
-                   => (IApp. IVar {("AlternativeCore.X'S", [0]):0}
+                   => (IApp. IVar <AlternativeCore.X'S>[0]
                            $ IVar {fuel:856}
                            $ IVar n))
          IClaim MW
                 Export
                 []
-                (MkTy {("Prelude.Types.Nat", []):0}
+                (MkTy <Prelude.Types.Nat>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar Prelude.Types.Nat)))
          IClaim MW
                 Export
                 []
-                (MkTy {("AlternativeCore.X'S", [0]):0}
+                (MkTy <AlternativeCore.X'S>[0]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:4636} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar AlternativeCore.X'S
                                          $ IVar {arg:4636}))))
-         IDef {("Prelude.Types.Nat", []):0}
-              [ PatClause (IApp. IVar {("Prelude.Types.Nat", []):0}
-                               $ IBindVar fuel)
+         IDef <Prelude.Types.Nat>[]
+              [ PatClause (IApp. IVar <Prelude.Types.Nat>[] $ IBindVar fuel)
                           (IApp. IVar <*>
                                $ (IApp. IVar <$>
                                       $ IVar MkXSN
                                       $ (IApp. IVar {externalAutoimpl:855}
                                              $ IVar fuel))
-                               $ (IApp. IVar {("Prelude.Types.Nat", []):0}
+                               $ (IApp. IVar <Prelude.Types.Nat>[]
                                       $ IVar fuel)) ]
-         IDef {("AlternativeCore.X'S", [0]):0}
-              [ PatClause (IApp. IVar {("AlternativeCore.X'S", [0]):0}
+         IDef <AlternativeCore.X'S>[0]
+              [ PatClause (IApp. IVar <AlternativeCore.X'S>[0]
                                $ IBindVar fuel
                                $ Implicit True)
                           (IApp. IVar <*>
@@ -46,5 +45,5 @@ ILam.  (MW ExplicitArg {fuel:856} : IVar Data.Fuel.Fuel)
                                       $ IVar MkXSN
                                       $ (IApp. IVar {externalAutoimpl:855}
                                              $ IVar fuel))
-                               $ (IApp. IVar {("Prelude.Types.Nat", []):0}
+                               $ (IApp. IVar <Prelude.Types.Nat>[]
                                       $ IVar fuel)) ]

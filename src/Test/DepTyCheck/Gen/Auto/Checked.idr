@@ -97,7 +97,8 @@ namespace ClojuringCanonicImpl
     )
 
   nameForGen : GenSignature -> Name
-  nameForGen = (`MN` 0) . show . characteristics
+  nameForGen sig = let (ty, givs) = characteristics sig in UN $ Basic $ "<\{ty}>\{show givs}"
+  -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
 
   -- Instead of staticly ensuring that map holds only correct values, we check dynamically, because it's hard to go through `==`-based lookup of maps.
   lookupLengthChecked : (intSig : GenSignature) -> SortedMap GenSignature (ExternalGenSignature, Name) ->

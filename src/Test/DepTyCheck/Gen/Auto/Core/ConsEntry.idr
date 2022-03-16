@@ -66,7 +66,8 @@ canonicConsBody sig name con = do
         renamedAppliedNames <- for (Vect.fromList appliedNames) $ \case
           UN (Basic name) => if contains name !get
             then do
-              let substName = "to_be_deceqed__" ++ name ++ show !getAndInc
+              -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
+              let substName = "to_be_deceqed^^" ++ name ++ show !getAndInc
               modify $ insert (name, substName)
               pure substName
             else modify (insert name) $> name
@@ -93,7 +94,7 @@ canonicConsBody sig name con = do
       deceqise = foldr (\ss, f => enrich1WithDecEq ss . f) id decEqedNames
 
   -- Form the declaration cases of a function generating values of particular constructor
-  let fuelArg = "fuel_cons_arg"
+  let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
   pure $
     -- Happy case, given arguments conform out constructor's GADT indices
     [ callCanonic sig name (bindVar fuelArg) bindExprs .= deceqise !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]

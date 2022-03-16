@@ -4,11 +4,11 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen (DPair Nat (\n => DPair Type (\a => Vect n a)))
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg {fuel:844} : IVar Data.Fuel.Fuel)
-    => ILocal (IApp. IVar {("Data.Vect.Vect", []):0} $ IVar {fuel:844})
+    => ILocal (IApp. IVar <Data.Vect.Vect>[] $ IVar {fuel:844})
          IClaim MW
                 Export
                 []
-                (MkTy {("Data.Vect.Vect", []):0}
+                (MkTy <Data.Vect.Vect>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar Builtin.DPair.DPair
@@ -20,7 +20,6 @@ ILam.  (MW ExplicitArg {fuel:844} : IVar Data.Fuel.Fuel)
                                                                => (IApp. IVar Data.Vect.Vect
                                                                        $ IVar len
                                                                        $ IVar elem))))))))
-         IDef {("Data.Vect.Vect", []):0}
-              [ PatClause (IApp. IVar {("Data.Vect.Vect", []):0}
-                               $ Implicit True)
+         IDef <Data.Vect.Vect>[]
+              [ PatClause (IApp. IVar <Data.Vect.Vect>[] $ Implicit True)
                           (IVar empty) ]
