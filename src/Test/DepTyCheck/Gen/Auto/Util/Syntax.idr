@@ -36,6 +36,10 @@ namespace SortedMap
   (.size) : SortedMap k v -> Nat
   m.size = m.asList.length
 
+  public export %inline
+  (.asVect) : (m : SortedMap k v) -> Vect m.size (k, v)
+  s.asVect = fromList s.asList
+
 namespace SortedSet
 
   public export %inline

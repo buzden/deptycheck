@@ -49,7 +49,7 @@ canonicConsBody sig name con = do
   --   - (maybe, deeply) constructor call (need to match)
   --   - function call on a free param (need to use "inverted function" filtering trick)
   --   - something else (cannot manage yet)
-  deepConsApps <- for (Vect.fromList sig.givenParams.asList) $ \idx => do
+  deepConsApps <- for sig.givenParams.asVect $ \idx => do
     let argExpr = conRetTypeArg idx
     Just (appliedArgs ** bindExprF) <- analyseDeepConsApp conArgNames argExpr
       | Nothing => failAt conFC "Argument #\{show idx} is not supported yet (argument expression: \{show argExpr})"

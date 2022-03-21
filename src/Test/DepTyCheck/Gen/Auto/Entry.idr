@@ -272,7 +272,7 @@ internalGenCallingLambda sig fuelArg = foldr (map . mkLam) call sig.givenParams.
 
   call : m TTImp
   call = let Element intSig prf = internalise sig in
-         callGen intSig (var fuelArg) $ rewrite prf in fromList sig.givenParams.asList <&> \(_, _, name) => var name
+         callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
 
 assignNames : GenExternals -> Elab $ List (ExternalGenSignature, Name, TTImp)
 assignNames $ MkGenExternals exts = for exts $ \(sig, tti) => (sig, ,tti) <$> genSym "externalAutoimpl"
