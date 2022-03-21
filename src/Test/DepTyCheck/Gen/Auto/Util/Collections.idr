@@ -142,3 +142,31 @@ allPermutations s = case fromList s.asList of
 public export
 allPermutations' : Ord a => SortedSet a -> List $ List a
 allPermutations' = forget . allPermutations
+
+----------------------------------------------------------
+--- Properties of collections (most actually unproved) ---
+----------------------------------------------------------
+
+namespace SortedMap
+
+  export
+  mapAsList : (f : v -> w) -> (m : SortedMap k v) -> (map f m).asList === map (mapSnd f) m.asList
+  mapAsList f m = believe_me $ Refl {x=Z}
+
+  export
+  mapSize : (f : v -> w) -> (m : SortedMap k v) -> (map f m).size = m.size
+  mapSize f m = rewrite mapAsList f m in lengthMap _
+
+  export
+  keySetSize : (m : SortedMap k v) -> (keySet m).size = m.size
+  keySetSize m = believe_me $ Refl {x=Z}
+
+  export
+  keysThruAsList : (m : SortedMap k v) -> keys m === (Builtin.fst <$> m.asList)
+  keysThruAsList m = believe_me $ Refl {x=Z}
+
+namespace SortedDMap
+
+  export
+  mapSize : {0 v, w : k -> Type} -> (f : {x : k} -> v x -> w x) -> (m : SortedDMap k v) -> (map f m).size = m.size
+  mapSize f m = believe_me $ Refl {x=Z}
