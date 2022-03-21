@@ -32,6 +32,10 @@ namespace SortedMap
   (.asList) : SortedMap k v -> List (k, v)
   m.asList = SortedMap.toList m
 
+  public export %inline
+  (.size) : SortedMap k v -> Nat
+  m.size = m.asList.length
+
 namespace SortedSet
 
   public export %inline
@@ -39,7 +43,11 @@ namespace SortedSet
   s.asList = SortedSet.toList s
 
   public export %inline
-  (.asVect) : (s : SortedSet a) -> Vect (s.asList.length) a
+  (.size) : SortedSet a -> Nat
+  m.size = m.asList.length
+
+  public export %inline
+  (.asVect) : (s : SortedSet a) -> Vect s.size a
   s.asVect = fromList s.asList
 
 -----------------------------

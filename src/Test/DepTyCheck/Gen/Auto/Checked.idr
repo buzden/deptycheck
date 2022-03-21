@@ -72,7 +72,7 @@ Ord ExternalGenSignature where
   compare = comparing characteristics
 
 export
-internalise : (extSig : ExternalGenSignature) -> Subset GenSignature $ \sig => sig.givenParams.asList.length = extSig.givenParams.asList.length
+internalise : (extSig : ExternalGenSignature) -> Subset GenSignature $ \sig => sig.givenParams.size = extSig.givenParams.size
 internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySet giv) $ believe_me $ the (0 = 0) Refl
             -- Dirty-dirty `believe_me` hack! It's true but hard to prove with the current implementation
 
@@ -80,7 +80,7 @@ internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySe
 --- Infrastructural functions ---
 ---------------------------------
 
-callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> TTImp
 callExternalGen sig topmost fuel values = foldl (flip apply) (appFuel topmost fuel) $ fromList sig.givenParams.asList `zip` values <&> \case
   ((_, ExplicitArg, _   ), value) => (.$ value)
   ((_, ImplicitArg, name), value) => \f => namedApp f name value
@@ -102,9 +102,9 @@ namespace ClojuringCanonicImpl
 
   -- Instead of staticly ensuring that map holds only correct values, we check dynamically, because it's hard to go through `==`-based lookup of maps.
   lookupLengthChecked : (intSig : GenSignature) -> SortedMap GenSignature (ExternalGenSignature, Name) ->
-                        Maybe (Name, Subset ExternalGenSignature $ \extSig => extSig.givenParams.asList.length = intSig.givenParams.asList.length)
+                        Maybe (Name, Subset ExternalGenSignature $ \extSig => extSig.givenParams.size = intSig.givenParams.size)
   lookupLengthChecked intSig m = lookup intSig m >>= \(extSig, name) => (name,) <$>
-                                   case decEq extSig.givenParams.asList.length intSig.givenParams.asList.length of
+                                   case decEq extSig.givenParams.size intSig.givenParams.size of
                                       Yes prf => Just $ Element extSig prf
                                       No _    => Nothing
 
