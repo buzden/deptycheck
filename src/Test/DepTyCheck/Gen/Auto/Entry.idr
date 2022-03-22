@@ -325,6 +325,23 @@ deriveGenExpr signature = do
 |||   genX = deriveGen
 |||   ```
 |||
+||| Also, if a given parameter is a parameter of type `Type`, it must be followed by a generator of this type, e.g.:
+|||
+|||   ```idris
+|||   genPair : Fuel -> {a : _} -> (Fuel -> Gen a) => {b : _} -> (Fuel -> Gen b) => Gen $ Pair a b
+|||   ```
+|||
+||| Having the generated parameter of type `Type` requires the external generators to have a generator of type `Fuel -> Gen (x : Type ** x)`:
+|||
+|||   ```idris
+|||   genPair : Fuel -> (Fuel -> Gen (x : Type ** x)) => {a : _} -> (Fuel -> Gen a) => Gen (b : Type ** Pair a b)
+|||   ```
+|||
+||| Passing of generators for higher-kinded type parameters (i.e. parameter of type of functions returning `Type`) is not supported yet
+||| due to lack of management of different possible generator's type.
+||| For example, of parameter `a` is of type `Type -> Type`, there are two possible generators:
+||| `Fuel -> {x : Type} -> (Fuel -> Gen x) => Gen (a x)` and `Fuel -> (Fuel -> Gen (x : Type ** x)) => Gen (x ** a x)`.
+||| We do not have power of decide which to ask for and use the only that is given during the derivation.
 |||
 export %macro
 deriveGen : DerivatorCore => Elab a
