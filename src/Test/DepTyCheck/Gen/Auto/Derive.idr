@@ -41,7 +41,7 @@ Ord GenSignature where
 
 public export
 interface Elaboration m => CanonicGen m where
-  callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> m TTImp
+  callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m TTImp
 
 --- Low-level derivation interface ---
 
@@ -69,7 +69,7 @@ canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel)
 
 -- Complementary to `canonicSig`
 export
-callCanonic : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.asList.length TTImp -> TTImp
+callCanonic : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> TTImp
 callCanonic _ = foldl app .: appFuel
 
 public export
@@ -83,7 +83,7 @@ interface DerivatorCore where
 
 --- Expressions generation utils ---
 
-defArgNames : {sig : GenSignature} -> Vect sig.givenParams.asList.length String
+defArgNames : {sig : GenSignature} -> Vect sig.givenParams.size String
 defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.args
 
 export %inline

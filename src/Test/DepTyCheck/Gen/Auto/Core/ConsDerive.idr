@@ -109,7 +109,7 @@ namespace NonObligatoryExts
               -- Form a task for subgen
               let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` allFins'
               let subsig : GenSignature := MkGenSignature typeOfGened $ fromList $ fst <$> toList subgivens
-              let Yes Refl = decEq subsig.givenParams.asList.length subgivensLength
+              let Yes Refl = decEq subsig.givenParams.size subgivensLength
                 | No _ => fail "INTERNAL ERROR: error in given params set length computation"
 
               -- Form an expression to call the subgen
@@ -128,7 +128,7 @@ namespace NonObligatoryExts
               let wrapImpls : Nat -> TTImp
                   wrapImpls Z     = constructorCall
                   wrapImpls (S n) = var `{Builtin.DPair.MkDPair} .$ implicitTrue .$ wrapImpls n
-              let consExpr = wrapImpls $ sig.targetType.args.length `minus` sig.givenParams.asList.length
+              let consExpr = wrapImpls $ sig.targetType.args.length `minus` sig.givenParams.size
               `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen} ~consExpr)
 
       -- Get dependencies of constructor's arguments
