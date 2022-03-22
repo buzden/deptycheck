@@ -73,8 +73,7 @@ Ord ExternalGenSignature where
 
 export
 internalise : (extSig : ExternalGenSignature) -> Subset GenSignature $ \sig => sig.givenParams.size = extSig.givenParams.size
-internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySet giv) $ believe_me $ the (0 = 0) Refl
-            -- Dirty-dirty `believe_me` hack! It's true but hard to prove with the current implementation
+internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySet giv) $ keySetSize giv
 
 ---------------------------------
 --- Infrastructural functions ---
