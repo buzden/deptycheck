@@ -3,9 +3,9 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (n : Nat) -> Gen (Fin n)
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg {fuel:838} : IVar Data.Fuel.Fuel)
+ILam.  (MW ExplicitArg {fuel:842} : IVar Data.Fuel.Fuel)
     => ILocal (ILam.  (MW ExplicitArg n : IVar Prelude.Types.Nat)
-                   => (IApp. IVar <Data.Fin.Fin>[0] $ IVar {fuel:838} $ IVar n))
+                   => (IApp. IVar <Data.Fin.Fin>[0] $ IVar {fuel:842} $ IVar n))
          IClaim MW
                 Export
                 []
@@ -87,12 +87,12 @@ ILam.  (MW ExplicitArg {fuel:838} : IVar Data.Fuel.Fuel)
                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                        => ICase (IVar {lamc:0})
                                                                                 (Implicit False)
-                                                                                [ PatClause (IBindVar ^bnd^{arg:1030})
+                                                                                [ PatClause (IBindVar ^bnd^{arg:1035})
                                                                                             (IApp. (INamedApp. IVar Prelude.pure
                                                                                                              $ IVar Test.DepTyCheck.Gen.Gen)
                                                                                                  $ (IApp. (INamedApp. IVar Data.Fin.FS
                                                                                                                     $ IVar k)
-                                                                                                        $ IVar ^bnd^{arg:1030})) ]))
+                                                                                                        $ IVar ^bnd^{arg:1035})) ]))
                                                          $ IVar Nil))
                                  , PatClause (IApp. IVar <<Data.Fin.FS>>
                                                   $ Implicit True
