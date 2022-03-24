@@ -11,5 +11,5 @@ You can learn more about what is meant to be in the reference part in the `origi
 .. toctree::
   :maxDepth: 3
 
-  users/index
-  contributors/index
+  reference/users
+  reference/contributors

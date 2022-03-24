@@ -9,6 +9,6 @@ It may contain information about design decisions, alternatives, context and rel
   :caption: Contents
   :maxdepth: 2
 
-  design
-  limitations
-  tbd
+  derivation/design
+  derivation/limitations
+  derivation/tbd

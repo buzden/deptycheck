@@ -9,6 +9,6 @@ For users
 .. toctree::
   :maxDepth: 2
 
-  pbt
-  gen-monad
-  derivation
+  users/pbt
+  users/gen-monad
+  users/derivation
