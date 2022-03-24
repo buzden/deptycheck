@@ -9,5 +9,5 @@ For contributors
 .. toctree::
   :maxDepth: 2
 
-  gen-monad
-  derivation
+  contributors/gen-monad
+  contributors/derivation

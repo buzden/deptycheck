@@ -11,5 +11,5 @@ You can look at the `original framework <https://diataxis.fr/explanation/>`_ to 
   :caption: Contents
   :maxdepth: 2
 
-  generators/index
-  derivation/index
+  explanation/generators
+  explanation/derivation

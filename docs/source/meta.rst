@@ -29,10 +29,10 @@ This documentation is organised using the following principles.
 
 This documentation is likely to be not yet full.
 There are a lot of places still to be filled.
-You can look at the list of places that are marked as "todos" :any:`here <todos>`.
+You can look at the list of places that are marked as "todos" :any:`here <meta/todos>`.
 
 .. toctree::
   :hidden:
 
-  test
-  todos
+  meta/test
+  meta/todos

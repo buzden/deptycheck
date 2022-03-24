@@ -10,8 +10,8 @@ Welcome to Deptycheck's documentation!
 .. toctree::
   :maxdepth: 2
 
-  meta/index
-  tutorials/index
-  how-to/index
-  reference/index
-  explanation/index
+  meta
+  tutorials
+  how-to
+  reference
+  explanation
