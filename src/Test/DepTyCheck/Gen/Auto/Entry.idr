@@ -201,11 +201,11 @@ checkTypeIsGen sig = do
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
   -- check the increasing order of generated params
-  let [] = nonIncreasingsBy snd paramsToBeGenerated
+  let [] = findConsequentsWhich ((>=) `on` snd) paramsToBeGenerated
     | (_, (ty, _)) :: _ => failAt (getFC ty) "Generated arguments must go in the same order as in the target type"
 
   -- check the increasing order of given params
-  let [] = nonIncreasingsBy (\(_, n, _) => n) givenParams
+  let [] = findConsequentsWhich ((>=) `on` \(_, n, _) => n) givenParams
     | (_, (ty, _, _)) :: _ => failAt (getFC ty) "Given arguments must go in the same order as in the target type"
 
   -- make unable to use generated params list
@@ -254,13 +254,6 @@ checkTypeIsGen sig = do
       (fc, s, MkGenExternals ext) => if null ext
         then pure (fc, s)
         else failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
-
-    nonIncreasingsBy : Ord b => (a -> b) -> List a -> LazyList (a, a)
-    nonIncreasingsBy f xs =
-      let xs = Lazy.fromList xs in
-      case tail' xs of
-        Nothing => []
-        Just tl => filter .| uncurry ((>=) `on` f) .| xs `zip` tl
 
 --- Boundaries between external and internal generator functions ---
 
