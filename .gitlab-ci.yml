@@ -136,5 +136,8 @@ include:
 super_linter:
   stage: lint
   needs: []
+  image:
+    name: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/github/super-linter:slim-v4
   variables:
     FILTER_REGEX_EXCLUDE: ".*/thirdparty/.*"
+    VALIDATE_JSCPD_ALL_CODEBASE: "true"

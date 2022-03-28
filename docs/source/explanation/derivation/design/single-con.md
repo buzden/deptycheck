@@ -259,6 +259,9 @@ Empty generator is available since `Gen` implements the `Alternative` interface.
 
 So, the structure of the derived generator with the given type index would be the following for the `D` example.
 
+<!--
+// jscpd:ignore-start
+-->
 <!-- idris
 namespace TypIdx_Givn_DerivedStructure_WithMatch {
 -->
@@ -289,6 +292,9 @@ genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
 ```
 <!-- idris
   }
+-->
+<!--
+// jscpd:ignore-end
 -->
 
 In this case, generation of non-recursive constructors `JJ` and `TL` is straightforward,

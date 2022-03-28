@@ -26,7 +26,7 @@ Also, a hybrid approach exists, when the task of derivation based on the datatyp
 - compile-time derivation of transformations to and from some *universal intermediate representation*, and
 - usual higher-order runtime function that does derivation being given an instance of this universal intermediate representation.
 
-If a compiler or some library implements the first step, then this approach is the simplest way for the end-user to write a derivation,
+If a compiler or some library implements the first step, then this approach is the simplest way for the end user to write a derivation,
 because there is a need to implement only the second step using regular code, without deep dive into metaprogramming details.
 
 This hybrid approach is widely used, for example

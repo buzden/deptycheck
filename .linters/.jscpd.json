@@ -1,0 +1,7 @@
+{
+  "ignore": [
+    "**/thirdparty/**"
+  ],
+  "noSymlinks": "true",
+  "exitCode": 10
+}
