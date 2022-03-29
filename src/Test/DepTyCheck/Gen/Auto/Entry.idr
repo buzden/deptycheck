@@ -46,9 +46,13 @@ isExternalGen : GenCheckSide -> Bool
 isExternalGen ExternalGen = True
 isExternalGen _           = False
 
+CheckResult : GenCheckSide -> Type
+CheckResult DerivationTask = (ExternalGenSignature, GenExternals)
+CheckResult ExternalGen    = (GenSignatureFC, ExternalGenSignature)
+
 --- Analysis functions ---
 
-checkTypeIsGen : GenCheckSide -> TTImp -> Elab (GenSignatureFC, ExternalGenSignature, GenExternals)
+checkTypeIsGen : (checkSide : GenCheckSide) -> TTImp -> Elab $ CheckResult checkSide
 checkTypeIsGen checkSide sig = do
 
   -- check the given expression is a type
@@ -222,8 +226,13 @@ checkTypeIsGen checkSide sig = do
   -- Auto-implicit generators checks --
   -------------------------------------
 
+  -- check that external gen does not have its own external gens
+  when (isExternalGen checkSide) $
+    when (not $ null autoImplArgs) $
+      failAt genFC "Auto-implicit argument should not contain its own auto-implicit arguments"
+
   -- check all auto-implicit arguments pass the checks for the `Gen` in an appropriate context
-  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> subCheck (assert_smaller sig tti)
+  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> checkTypeIsGen ExternalGen (assert_smaller sig tti)
 
   -- check that all auto-imlicit arguments are unique
   let [] = findDiffPairWhich ((==) `on` \(_, sig, _) => sig) autoImplArgs
@@ -240,21 +249,11 @@ checkTypeIsGen checkSide sig = do
   -- Result --
   ------------
 
-  let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
-  let externals = MkGenExternals autoImplArgs
-  pure (fc, genSig, externals)
-
-  -----------------------
-  -- Utility functions --
-  -----------------------
-
-  where
-
-    subCheck : TTImp -> Elab (GenSignatureFC, ExternalGenSignature)
-    subCheck subSig = checkTypeIsGen ExternalGen subSig >>= \case
-      (fc, s, MkGenExternals ext) => if null ext
-        then pure (fc, s)
-        else failAt fc.genFC "Auto-implicit argument should not contain its own auto-implicit arguments"
+  case checkSide of
+    DerivationTask => pure (genSig, MkGenExternals autoImplArgs)
+    ExternalGen    => do
+      let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
+      pure (fc, genSig)
 
 --- Boundaries between external and internal generator functions ---
 
@@ -284,7 +283,7 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 export
 deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
-  (signature, externals) <- snd <$> checkTypeIsGen DerivationTask signature
+  (signature, externals) <- checkTypeIsGen DerivationTask signature
   externals <- assignNames externals
   let externalsSigToName = fromList $ externals <&> \(sig, name, _) => (sig, name)
   fuelArg <- genSym "fuel"
