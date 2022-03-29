@@ -31,24 +31,31 @@ record GenExternals where
 
 --- Info for distinguishing signature checking context ---
 
+record ExternalGenCtxt where
+  constructor MkExternalGenCtxt
+  polyTypeParams : SortedSet UserName
+
+emptyCtxt : ExternalGenCtxt
+emptyCtxt = MkExternalGenCtxt empty
+
 data GenCheckSide
   = DerivationTask
-  | ExternalGen
+  | ExternalGen ExternalGenCtxt
 
 isDerivationTask : GenCheckSide -> Bool
 isDerivationTask DerivationTask = True
 isDerivationTask _              = False
 
 isExternalGen : GenCheckSide -> Bool
-isExternalGen ExternalGen = True
-isExternalGen _           = False
+isExternalGen $ ExternalGen {} = True
+isExternalGen _                = False
 
 OriginalSignatureInfo : ExternalGenSignature -> GenExternals -> Type
 OriginalSignatureInfo sig exts = SortedSet $ Fin $ sig.givenParams.size + exts.externals.length
 
 CheckResult : GenCheckSide -> Type
-CheckResult DerivationTask = (sig : ExternalGenSignature ** exts : GenExternals ** OriginalSignatureInfo sig exts)
-CheckResult ExternalGen    = (GenSignatureFC, ExternalGenSignature)
+CheckResult DerivationTask   = (sig : ExternalGenSignature ** exts : GenExternals ** OriginalSignatureInfo sig exts)
+CheckResult $ ExternalGen {} = (GenSignatureFC, ExternalGenSignature)
 
 --- Analysis functions ---
 
@@ -221,7 +228,7 @@ checkTypeIsGen checkSide sig = do
       failAt genFC "Auto-implicit argument should not contain its own auto-implicit arguments"
 
   -- check all auto-implicit arguments pass the checks for the `Gen` in an appropriate context
-  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> checkTypeIsGen ExternalGen (assert_smaller sig tti)
+  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> checkTypeIsGen (ExternalGen emptyCtxt) (assert_smaller sig tti)
 
   -- check that all auto-imlicit arguments are unique
   let [] = findDiffPairWhich ((==) `on` \(_, sig, _) => sig) autoImplArgs
@@ -244,7 +251,7 @@ checkTypeIsGen checkSide sig = do
         | No _ => fail $ "INTERNAL ERROR: positions length is incorrect"
                       ++ ", \{show sigArgs.length} is not \{show genSig.givenParams.size} + \{show autoImplArgs.length}"
       pure (genSig ** MkGenExternals autoImplArgs ** rewrite prf in givenParamsPositions)
-    ExternalGen    => do
+    ExternalGen {} => do
       let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
       pure (fc, genSig)
 
