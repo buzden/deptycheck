@@ -33,6 +33,13 @@ unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo 
 unDPair expr = ([], expr)
 
 public export
+unDPairUnAlt : TTImp -> Maybe (List (Arg False), TTImp)
+unDPairUnAlt (IAlternative _ _ alts) = case filter (not . null . Builtin.fst) $ unDPair <$> alts of
+  [x] => Just x
+  _   => Nothing
+unDPairUnAlt x = Just $ unDPair x
+
+public export
 buildDPair : (rhs : TTImp) -> List (Name, TTImp) -> TTImp
 buildDPair = foldr $ \(name, type), res =>
   var `{Builtin.DPair.DPair} .$ type .$ lam (MkArg MW ExplicitArg (Just name) type) res
@@ -335,6 +342,11 @@ argDeps args = do
 -------------------------------------------------
 --- Syntactic analysis of `TTImp` expressions ---
 -------------------------------------------------
+
+-- fails is given names are not types
+public export
+isSameTypeAs : Name -> Name -> Elab Bool
+isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `eq` getInfo' expected |]
 
 -- simple syntactic search of a `IVar`, disregarding shadowing or whatever
 export

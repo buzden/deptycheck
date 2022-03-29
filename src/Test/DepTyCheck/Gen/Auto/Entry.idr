@@ -14,23 +14,6 @@ import public Test.DepTyCheck.Gen.Auto.Core
 
 %default total
 
------------------------------------------
---- Utility `TTImp`-related functions ---
------------------------------------------
-
---- Special `TTImp` parsing stuff ---
-
-unDPairUnAlt : TTImp -> Maybe (List (Arg False), TTImp)
-unDPairUnAlt (IAlternative _ _ alts) = case filter (not . null . Builtin.fst) $ unDPair <$> alts of
-  [x] => Just x
-  _   => Nothing
-unDPairUnAlt x = Just $ unDPair x
-
---- Utility functions working on `TTImp`-related values ---
-
-isSameTypeAs : Name -> Name -> Elab Bool
-isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `eq` getInfo' expected |]
-
 ----------------------------------------
 --- Internal functions and instances ---
 ----------------------------------------
