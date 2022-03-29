@@ -222,7 +222,7 @@ checkTypeIsGen sig = do
   -------------------------------------
 
   -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
-  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> subCheck "Auto-implicit" tti
+  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> subCheck tti
 
   -- check that all auto-imlicit arguments are unique
   let [] = findDiffPairWhich ((==) `on` \(_, sig, _) => sig) autoImplArgs
@@ -249,11 +249,11 @@ checkTypeIsGen sig = do
 
   where
 
-    subCheck : (desc : String) -> TTImp -> Elab (GenSignatureFC, ExternalGenSignature)
-    subCheck desc = assert_total checkTypeIsGen >=> \case
+    subCheck : TTImp -> Elab (GenSignatureFC, ExternalGenSignature)
+    subCheck = assert_total checkTypeIsGen >=> \case
       (fc, s, MkGenExternals ext) => if null ext
         then pure (fc, s)
-        else failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
+        else failAt fc.genFC "Auto-implicit argument should not contain its own auto-implicit arguments"
 
 --- Boundaries between external and internal generator functions ---
 
