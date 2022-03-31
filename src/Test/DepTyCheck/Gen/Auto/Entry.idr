@@ -156,14 +156,22 @@ checkTypeIsGen checkSide sig = do
     MkArg MW ExplicitArg (Just $ UN nm) t => pure (nm, t)
     _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
 
-  -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
+  -- check that all arguments
+  --   - are omega, not erased or linear;
+  --   - are properly named;
+  -- remember polymorphic types context for each external generator;
+  -- divide all arguments on related to external generators and the others;
   (givenParams, autoImplArgs, givenParamsPositions) <- do
     let
-      classifyArg : forall m. Elaboration m =>
-                    NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
-      classifyArg $ MkArg MW ImplicitArg (UN name) type = pure $ Left (Checked.ImplicitArg, name, type)
-      classifyArg $ MkArg MW ExplicitArg (UN name) type = pure $ Left (Checked.ExplicitArg, name, type)
-      classifyArg $ MkArg MW AutoImplicit (MN _ _) type = pure $ Right type
+      rememberIfType : forall m. MonadState ExternalGenCtxt m => UserName -> TTImp -> m Unit
+      rememberIfType nm $ IType {} = modify {polyTypeParams $= insert nm}
+      rememberIfType _  _          = pure ()
+
+      classifyArg : forall m. Elaboration m => MonadState ExternalGenCtxt m =>
+                    NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) (ExternalGenCtxt, TTImp)
+      classifyArg $ MkArg MW ImplicitArg (UN name) type = rememberIfType name type $> Left (Checked.ImplicitArg, name, type)
+      classifyArg $ MkArg MW ExplicitArg (UN name) type = rememberIfType name type $> Left (Checked.ExplicitArg, name, type)
+      classifyArg $ MkArg MW AutoImplicit (MN _ _) type = get <&> \ctxt => Right (ctxt, type)
 
       classifyArg $ MkArg MW ImplicitArg     _ ty = failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
       classifyArg $ MkArg MW ExplicitArg     _ ty = failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
@@ -173,7 +181,7 @@ checkTypeIsGen checkSide sig = do
       classifyArg $ MkArg M1 _               _ ty = failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
       classifyArg $ MkArg MW (DefImplicit _) _ ty = failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
 
-    map partitionEithersPos $ for sigArgs.asVect classifyArg
+    map partitionEithersPos $ evalStateT emptyCtxt $ for sigArgs.asVect classifyArg
 
   ----------------------------------------------------------------------
   -- Check that generated and given parameter lists are actually sets --
@@ -228,7 +236,7 @@ checkTypeIsGen checkSide sig = do
       failAt genFC "Auto-implicit argument should not contain its own auto-implicit arguments"
 
   -- check all auto-implicit arguments pass the checks for the `Gen` in an appropriate context
-  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> checkTypeIsGen (ExternalGen emptyCtxt) (assert_smaller sig tti)
+  autoImplArgs <- for autoImplArgs $ \(ctxt, tti) => mapSnd (,tti) <$> checkTypeIsGen (ExternalGen ctxt) (assert_smaller sig tti)
 
   -- check that all auto-imlicit arguments are unique
   let [] = findDiffPairWhich ((==) `on` \(_, sig, _) => sig) autoImplArgs
