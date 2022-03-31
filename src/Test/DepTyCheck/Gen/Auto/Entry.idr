@@ -149,7 +149,7 @@ checkTypeIsGen sig = do
                     NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
       classifyArg $ MkArg MW ImplicitArg (UN name) type = pure $ Left (Checked.ImplicitArg, name, type)
       classifyArg $ MkArg MW ExplicitArg (UN name) type = pure $ Left (Checked.ExplicitArg, name, type)
-      classifyArg $ MkArg MW AutoImplicit (MN _ _) type = pure $ Right type -- TODO to manage the case when this auto-implicit shadows some other name
+      classifyArg $ MkArg MW AutoImplicit (MN _ _) type = pure $ Right type
 
       classifyArg $ MkArg MW ImplicitArg     _ ty = failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
       classifyArg $ MkArg MW ExplicitArg     _ ty = failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
