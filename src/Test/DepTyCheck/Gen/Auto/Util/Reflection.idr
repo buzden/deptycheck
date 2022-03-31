@@ -237,6 +237,10 @@ export
 typeInfoForTypeOfTypes : TypeInfo
 typeInfoForTypeOfTypes = primTypeInfo "Type"
 
+export
+typeInfoForPolyType : UserName -> TypeInfo
+typeInfoForPolyType un = primTypeInfo "poly^<\{show un}>"
+
 ----------------------------------------------
 --- Analyzing dependently typed signatures ---
 ----------------------------------------------
@@ -440,6 +444,11 @@ public export
 isVar : TTImp -> Bool
 isVar $ IVar {} = True
 isVar _         = False
+
+public export
+getUN : Name -> Maybe UserName
+getUN (UN x) = Just x
+getUN _      = Nothing
 
 namespace UpToRenaming
 

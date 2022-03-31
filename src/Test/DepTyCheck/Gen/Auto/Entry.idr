@@ -50,6 +50,10 @@ isExternalGen : GenCheckSide -> Bool
 isExternalGen $ ExternalGen {} = True
 isExternalGen _                = False
 
+(.extGenCtxt) : GenCheckSide -> ExternalGenCtxt
+(.extGenCtxt) DerivationTask  = emptyCtxt
+(.extGenCtxt) (ExternalGen x) = x
+
 OriginalSignatureInfo : ExternalGenSignature -> GenExternals -> Type
 OriginalSignatureInfo sig exts = SortedSet $ Fin $ sig.givenParams.size + exts.externals.length
 
@@ -120,7 +124,13 @@ checkTypeIsGen checkSide sig = do
   targetType <- case targetType of
 
     -- Normal type
-    IVar _ targetType => getInfo' targetType <|> failAt genFC "Target type `\{show targetType}` is not a top-level data definition"
+    IVar _ targetType =>
+      -- determine whether this target type is a polymorphic type (in the given external gens context)
+      case (getUN targetType >>= \un => if contains un checkSide.extGenCtxt.polyTypeParams then Just un else Nothing) of
+        -- non-polymorphic type; treat as a concrete type
+        Nothing => getInfo' targetType <|> failAt genFC "Target type `\{show targetType}` is not a top-level data definition"
+        -- return the special shell for polymorphic types as the type info
+        Just targetType => pure $ typeInfoForPolyType targetType
 
     -- Primitive type
     IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
