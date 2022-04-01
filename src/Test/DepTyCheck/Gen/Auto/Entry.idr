@@ -143,22 +143,23 @@ checkTypeIsGen sig = do
     _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
-  let
-    classifyArg : forall m. Elaboration m =>
-                  NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
-    classifyArg $ MkArg MW ImplicitArg (UN name) type = pure $ Left (Checked.ImplicitArg, name, type)
-    classifyArg $ MkArg MW ExplicitArg (UN name) type = pure $ Left (Checked.ExplicitArg, name, type)
-    classifyArg $ MkArg MW AutoImplicit (MN _ _) type = pure $ Right type -- TODO to manage the case when this auto-implicit shadows some other name
+  (givenParams, autoImplArgs) <- do
+    let
+      classifyArg : forall m. Elaboration m =>
+                    NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
+      classifyArg $ MkArg MW ImplicitArg (UN name) type = pure $ Left (Checked.ImplicitArg, name, type)
+      classifyArg $ MkArg MW ExplicitArg (UN name) type = pure $ Left (Checked.ExplicitArg, name, type)
+      classifyArg $ MkArg MW AutoImplicit (MN _ _) type = pure $ Right type -- TODO to manage the case when this auto-implicit shadows some other name
 
-    classifyArg $ MkArg MW ImplicitArg     _ ty = failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
-    classifyArg $ MkArg MW ExplicitArg     _ ty = failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
-    classifyArg $ MkArg MW AutoImplicit    _ ty = failAt (getFC ty) "Auto-implicit argument must be unnamed"
+      classifyArg $ MkArg MW ImplicitArg     _ ty = failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
+      classifyArg $ MkArg MW ExplicitArg     _ ty = failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
+      classifyArg $ MkArg MW AutoImplicit    _ ty = failAt (getFC ty) "Auto-implicit argument must be unnamed"
 
-    classifyArg $ MkArg M0 _               _ ty = failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
-    classifyArg $ MkArg M1 _               _ ty = failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
-    classifyArg $ MkArg MW (DefImplicit _) _ ty = failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
-  sigArgs <- for sigArgs classifyArg
-  let (givenParams, autoImplArgs) := partitionEithers sigArgs
+      classifyArg $ MkArg M0 _               _ ty = failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
+      classifyArg $ MkArg M1 _               _ ty = failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
+      classifyArg $ MkArg MW (DefImplicit _) _ ty = failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
+
+    map partitionEithers $ for sigArgs classifyArg
 
   ----------------------------------------------------------------------
   -- Check that generated and given parameter lists are actually sets --
