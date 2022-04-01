@@ -11,7 +11,7 @@ import Data.Fin
 data EqualN : Nat -> Nat -> Type where
   ReflN : EqualN x x
 
-{a : Nat} -> {b : Nat} -> Show (EqualN a b) where
+{a, b : Nat} -> Show (EqualN a b) where
   show ReflN = "ReflN : EqualN \{show a} \{show b}"
 
 checkedGen : Fuel -> (a, b : Nat) -> Gen $ EqualN a b

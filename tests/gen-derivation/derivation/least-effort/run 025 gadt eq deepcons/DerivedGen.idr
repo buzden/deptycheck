@@ -16,7 +16,7 @@ show' : (a, b : Nat) -> LT2 x y -> String
 show' a b Base      = "! \{show a} <<= \{show b}"
 show' a b $ Step lt = ".\{show' a b lt}"
 
-{a : Nat} -> {b : Nat} -> Show (LT2 a b) where
+{a, b : Nat} -> Show (LT2 a b) where
   show = show' a b
 
 checkedGen : Fuel -> (Fuel -> Gen Nat) => Gen (a ** b ** LT2 a b)
