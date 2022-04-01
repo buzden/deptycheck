@@ -32,10 +32,24 @@ record GenExternals where
   constructor MkGenExternals
   externals : List (ExternalGenSignature, TTImp)
 
+--- Info for distinguishing signature checking context ---
+
+data GenCheckSide
+  = DerivationTask
+  | ExternalGen
+
+isDerivationTask : GenCheckSide -> Bool
+isDerivationTask DerivationTask = True
+isDerivationTask _              = False
+
+isExternalGen : GenCheckSide -> Bool
+isExternalGen ExternalGen = True
+isExternalGen _           = False
+
 --- Analysis functions ---
 
-checkTypeIsGen : TTImp -> Elab (GenSignatureFC, ExternalGenSignature, GenExternals)
-checkTypeIsGen sig = do
+checkTypeIsGen : GenCheckSide -> TTImp -> Elab (GenSignatureFC, ExternalGenSignature, GenExternals)
+checkTypeIsGen checkSide sig = do
 
   -- check the given expression is a type
   _ <- check {expected=Type} sig
@@ -208,7 +222,7 @@ checkTypeIsGen sig = do
   -- Auto-implicit generators checks --
   -------------------------------------
 
-  -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
+  -- check all auto-implicit arguments pass the checks for the `Gen` in an appropriate context
   autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> subCheck (assert_smaller sig tti)
 
   -- check that all auto-imlicit arguments are unique
@@ -237,7 +251,7 @@ checkTypeIsGen sig = do
   where
 
     subCheck : TTImp -> Elab (GenSignatureFC, ExternalGenSignature)
-    subCheck subSig = checkTypeIsGen subSig >>= \case
+    subCheck subSig = checkTypeIsGen ExternalGen subSig >>= \case
       (fc, s, MkGenExternals ext) => if null ext
         then pure (fc, s)
         else failAt fc.genFC "Auto-implicit argument should not contain its own auto-implicit arguments"
@@ -270,7 +284,7 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 export
 deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
-  (signature, externals) <- snd <$> checkTypeIsGen signature
+  (signature, externals) <- snd <$> checkTypeIsGen DerivationTask signature
   externals <- assignNames externals
   let externalsSigToName = fromList $ externals <&> \(sig, name, _) => (sig, name)
   fuelArg <- genSym "fuel"
