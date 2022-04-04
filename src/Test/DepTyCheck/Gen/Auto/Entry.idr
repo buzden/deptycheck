@@ -68,7 +68,7 @@ checkTypeIsGen : (checkSide : GenCheckSide) -> TTImp -> Elab $ CheckResult check
 checkTypeIsGen checkSide sig = do
 
   -- check the given expression is a type
-  _ <- check {expected=Type} sig
+  _ <- check {expected=Type} $ wrapWithPolyTypes checkSide.extGenCtxt.polyTypeParams sig
 
   -- treat the given type expression as a (possibly 0-ary) function type
   (sigArgs, sigResult) <- unPiNamed sig
