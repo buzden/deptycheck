@@ -7,15 +7,18 @@ Limitations
 Temporary design decisions
 ==========================
 
+Signature of derived generator
+------------------------------
+
 Fuel pattern
-------------
+````````````
 
 - explicit fuel pattern of derived gens for totality because ``Gen`` monad is only finite
 
 - explicit fuel pattern is required even for non-recursive data types
 
 Regular parameters
-------------------
+``````````````````
 
 - all params of derived generators must
 
@@ -23,7 +26,7 @@ Regular parameters
   - have the same name as such parameter in the original type
 
 Auto parameters
----------------
+```````````````
 
 - only of ``Gen`` type is supported to be in ``auto``-parameters of the derived generators
 

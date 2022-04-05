@@ -13,7 +13,7 @@ data X : Nat -> Nat -> Type where
   XE : X n n
   XS : X n (S n)
 
-{n : Nat} -> {m : Nat} -> Show (X n m) where
+{n, m : Nat} -> Show (X n m) where
   show XE = "XE \{show n} \{show m}"
   show XS = "XS \{show n} \{show m}"
 

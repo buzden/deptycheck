@@ -5,6 +5,8 @@ import public Data.SortedMap.Dependent
 import public Data.SortedSet
 import public Data.Vect
 
+import public Language.Reflection.Types
+
 %default total
 
 ----------------------------
@@ -89,3 +91,15 @@ namespace Monad
     False <- l
       | True => pure True
     r
+
+------------------------
+--- Ambiguous `args` ---
+------------------------
+
+public export %inline
+(.tyArgs) : TypeInfo -> List NamedArg
+(.tyArgs) = args
+
+public export %inline
+(.conArgs) : Con -> List NamedArg
+(.conArgs) = args

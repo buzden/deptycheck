@@ -32,6 +32,14 @@ public export
 findPairWhich : (a -> b -> Bool) -> List a -> List b -> LazyList (a, b)
 findPairWhich p xs ys = filter (uncurry p) $ fromList xs `zip` fromList ys
 
+public export
+findConsequentsWhich : (a -> a -> Bool) -> List a -> LazyList (a, a)
+findConsequentsWhich f xs =
+  let xs = Lazy.fromList xs in
+  case tail' xs of
+    Nothing => []
+    Just tl => filter .| uncurry f .| xs `zip` tl
+
 public export %inline
 toNatList : Foldable f => f (Fin n) -> List Nat
 toNatList = map finToNat . toList

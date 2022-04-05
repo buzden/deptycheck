@@ -14,23 +14,6 @@ import public Test.DepTyCheck.Gen.Auto.Core
 
 %default total
 
------------------------------------------
---- Utility `TTImp`-related functions ---
------------------------------------------
-
---- Special `TTImp` parsing stuff ---
-
-unDPairUnAlt : TTImp -> Maybe (List (Arg False), TTImp)
-unDPairUnAlt (IAlternative _ _ alts) = case filter (not . null . Builtin.fst) $ unDPair <$> alts of
-  [x] => Just x
-  _   => Nothing
-unDPairUnAlt x = Just $ unDPair x
-
---- Utility functions working on `TTImp`-related values ---
-
-isSameTypeAs : Name -> Name -> Elab Bool
-isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `eq` getInfo' expected |]
-
 ----------------------------------------
 --- Internal functions and instances ---
 ----------------------------------------
@@ -49,10 +32,28 @@ record GenExternals where
   constructor MkGenExternals
   externals : List (ExternalGenSignature, TTImp)
 
+--- Info for distinguishing signature checking context ---
+
+data GenCheckSide
+  = DerivationTask
+  | ExternalGen
+
+isDerivationTask : GenCheckSide -> Bool
+isDerivationTask DerivationTask = True
+isDerivationTask _              = False
+
+isExternalGen : GenCheckSide -> Bool
+isExternalGen ExternalGen = True
+isExternalGen _           = False
+
+CheckResult : GenCheckSide -> Type
+CheckResult DerivationTask = (ExternalGenSignature, GenExternals)
+CheckResult ExternalGen    = (GenSignatureFC, ExternalGenSignature)
+
 --- Analysis functions ---
 
-checkTypeIsGen : TTImp -> Elab (GenSignatureFC, ExternalGenSignature, GenExternals)
-checkTypeIsGen sig = do
+checkTypeIsGen : (checkSide : GenCheckSide) -> TTImp -> Elab $ CheckResult checkSide
+checkTypeIsGen checkSide sig = do
 
   -- check the given expression is a type
   _ <- check {expected=Type} sig
@@ -160,19 +161,23 @@ checkTypeIsGen sig = do
     _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
-  sigArgs <- for {b = Either _ TTImp} sigArgs $ \case
-    MkArg MW ImplicitArg (UN name) type => pure $ Left (Checked.ImplicitArg, name, type)
-    MkArg MW ExplicitArg (UN name) type => pure $ Left (Checked.ExplicitArg, name, type)
-    MkArg MW AutoImplicit (MN _ _) type => pure $ Right type -- TODO to manage the case when this auto-implicit shadows some other name
+  (givenParams, autoImplArgs) <- do
+    let
+      classifyArg : forall m. Elaboration m =>
+                    NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
+      classifyArg $ MkArg MW ImplicitArg (UN name) type = pure $ Left (Checked.ImplicitArg, name, type)
+      classifyArg $ MkArg MW ExplicitArg (UN name) type = pure $ Left (Checked.ExplicitArg, name, type)
+      classifyArg $ MkArg MW AutoImplicit (MN _ _) type = pure $ Right type
 
-    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
-    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
-    MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit argument must be unnamed"
+      classifyArg $ MkArg MW ImplicitArg     _ ty = failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
+      classifyArg $ MkArg MW ExplicitArg     _ ty = failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
+      classifyArg $ MkArg MW AutoImplicit    _ ty = failAt (getFC ty) "Auto-implicit argument must be unnamed"
 
-    MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
-    MkArg M1 _               _ ty => failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
-    MkArg MW (DefImplicit _) _ ty => failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
-  let (givenParams, autoImplArgs) := partitionEithers sigArgs
+      classifyArg $ MkArg M0 _               _ ty = failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
+      classifyArg $ MkArg M1 _               _ ty = failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
+      classifyArg $ MkArg MW (DefImplicit _) _ ty = failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
+
+    map partitionEithers $ for sigArgs classifyArg
 
   ----------------------------------------------------------------------
   -- Check that generated and given parameter lists are actually sets --
@@ -201,11 +206,11 @@ checkTypeIsGen sig = do
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
   -- check the increasing order of generated params
-  let [] = nonIncreasingsBy snd paramsToBeGenerated
+  let [] = findConsequentsWhich ((>=) `on` snd) paramsToBeGenerated
     | (_, (ty, _)) :: _ => failAt (getFC ty) "Generated arguments must go in the same order as in the target type"
 
   -- check the increasing order of given params
-  let [] = nonIncreasingsBy (\(_, n, _) => n) givenParams
+  let [] = findConsequentsWhich ((>=) `on` \(_, n, _) => n) givenParams
     | (_, (ty, _, _)) :: _ => failAt (getFC ty) "Given arguments must go in the same order as in the target type"
 
   -- make unable to use generated params list
@@ -221,8 +226,13 @@ checkTypeIsGen sig = do
   -- Auto-implicit generators checks --
   -------------------------------------
 
-  -- check all auto-implicit arguments pass the checks for the `Gen` and do not contain their own auto-implicits
-  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> subCheck "Auto-implicit" tti
+  -- check that external gen does not have its own external gens
+  when (isExternalGen checkSide) $
+    when (not $ null autoImplArgs) $
+      failAt genFC "Auto-implicit argument should not contain its own auto-implicit arguments"
+
+  -- check all auto-implicit arguments pass the checks for the `Gen` in an appropriate context
+  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> checkTypeIsGen ExternalGen (assert_smaller sig tti)
 
   -- check that all auto-imlicit arguments are unique
   let [] = findDiffPairWhich ((==) `on` \(_, sig, _) => sig) autoImplArgs
@@ -239,28 +249,11 @@ checkTypeIsGen sig = do
   -- Result --
   ------------
 
-  let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
-  let externals = MkGenExternals autoImplArgs
-  pure (fc, genSig, externals)
-
-  -----------------------
-  -- Utility functions --
-  -----------------------
-
-  where
-
-    subCheck : (desc : String) -> TTImp -> Elab (GenSignatureFC, ExternalGenSignature)
-    subCheck desc = assert_total checkTypeIsGen >=> \case
-      (fc, s, MkGenExternals ext) => if null ext
-        then pure (fc, s)
-        else failAt fc.genFC "\{desc} argument should not contain its own auto-implicit arguments"
-
-    nonIncreasingsBy : Ord b => (a -> b) -> List a -> LazyList (a, a)
-    nonIncreasingsBy f xs =
-      let xs = Lazy.fromList xs in
-      case tail' xs of
-        Nothing => []
-        Just tl => filter .| uncurry ((>=) `on` f) .| xs `zip` tl
+  case checkSide of
+    DerivationTask => pure (genSig, MkGenExternals autoImplArgs)
+    ExternalGen    => do
+      let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
+      pure (fc, genSig)
 
 --- Boundaries between external and internal generator functions ---
 
@@ -290,7 +283,7 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 export
 deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
-  (signature, externals) <- snd <$> checkTypeIsGen signature
+  (signature, externals) <- checkTypeIsGen DerivationTask signature
   externals <- assignNames externals
   let externalsSigToName = fromList $ externals <&> \(sig, name, _) => (sig, name)
   fuelArg <- genSym "fuel"

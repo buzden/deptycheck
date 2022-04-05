@@ -13,7 +13,7 @@ data X : Nat -> Nat -> Nat -> Nat -> Type where
   XE : X n (S n) m n
   XS : X n n m m
 
-{n : Nat} -> {m : Nat} -> {p : Nat} -> {k : Nat} -> Show (X n m p k) where
+{n, m, p, k : Nat} -> Show (X n m p k) where
   show XE = "XE \{show n} \{show m} \{show p} \{show k}"
   show XS = "XS \{show n} \{show m} \{show p} \{show k}"
 

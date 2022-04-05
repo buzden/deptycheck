@@ -12,7 +12,7 @@ import Data.Vect
 data X : (a : Type) -> a -> a -> Type where
   E : X a x x
 
-{a : Type} -> {x : a} -> {y : a} -> Show a => Show (X a x y) where
+{a : Type} -> {x, y : a} -> Show a => Show (X a x y) where
   show E = "E \{show x} \{show y}"
 
 -- `DecEq a` must go after the declaration of the `a : Type` parameter.
