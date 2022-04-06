@@ -31,17 +31,17 @@ record GenExternals where
 
 --- Info for distinguishing signature checking context ---
 
-record ExternalGenCtxt where
-  constructor MkExternalGenCtxt
+record PolyTypeArgsCtxt where
+  constructor MkPolyTypeArgsCtxt
   -- higher-kinded arguments of the type for each type designed with a name
   polyTypeParams : SortedMap UserName $ List $ Arg False
 
-emptyCtxt : ExternalGenCtxt
-emptyCtxt = MkExternalGenCtxt empty
+emptyPolyCtxt : PolyTypeArgsCtxt
+emptyPolyCtxt = MkPolyTypeArgsCtxt empty
 
 data GenCheckSide
   = DerivationTask
-  | ExternalGen ExternalGenCtxt
+  | ExternalGen PolyTypeArgsCtxt
 
 isDerivationTask : GenCheckSide -> Bool
 isDerivationTask DerivationTask = True
@@ -51,8 +51,8 @@ isExternalGen : GenCheckSide -> Bool
 isExternalGen $ ExternalGen {} = True
 isExternalGen _                = False
 
-(.extGenCtxt) : GenCheckSide -> ExternalGenCtxt
-(.extGenCtxt) DerivationTask  = emptyCtxt
+(.extGenCtxt) : GenCheckSide -> PolyTypeArgsCtxt
+(.extGenCtxt) DerivationTask  = emptyPolyCtxt
 (.extGenCtxt) (ExternalGen x) = x
 
 OriginalSignatureInfo : ExternalGenSignature -> GenExternals -> Type
@@ -174,15 +174,15 @@ checkTypeIsGen checkSide sig = do
   -- divide all arguments on related to external generators and the others;
   (givenParams, autoImplArgs, givenParamsPositions) <- do
     let
-      rememberIfType : forall m. MonadState ExternalGenCtxt m => UserName -> TTImp -> m Unit
+      rememberIfType : forall m. MonadState PolyTypeArgsCtxt m => UserName -> TTImp -> m Unit
       rememberIfType nm ty = do
         let (hkArgs, polyType) = unPi ty
         case polyType of
           IType {} => modify {polyTypeParams $= insert nm hkArgs}
           _        => pure ()
 
-      classifyArg : forall m. Elaboration m => MonadState ExternalGenCtxt m =>
-                    NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) (ExternalGenCtxt, TTImp)
+      classifyArg : forall m. Elaboration m => MonadState PolyTypeArgsCtxt m =>
+                    NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) (PolyTypeArgsCtxt, TTImp)
       classifyArg $ MkArg MW ImplicitArg (UN name) type = rememberIfType name type $> Left (Checked.ImplicitArg, name, type)
       classifyArg $ MkArg MW ExplicitArg (UN name) type = rememberIfType name type $> Left (Checked.ExplicitArg, name, type)
       classifyArg $ MkArg MW AutoImplicit (MN _ _) type = get <&> \ctxt => Right (ctxt, type)
@@ -195,7 +195,7 @@ checkTypeIsGen checkSide sig = do
       classifyArg $ MkArg M1 _               _ ty = failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
       classifyArg $ MkArg MW (DefImplicit _) _ ty = failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
 
-    map partitionEithersPos $ evalStateT emptyCtxt $ for sigArgs.asVect classifyArg
+    map partitionEithersPos $ evalStateT emptyPolyCtxt $ for sigArgs.asVect classifyArg
 
   ----------------------------------------------------------------------
   -- Check that generated and given parameter lists are actually sets --
