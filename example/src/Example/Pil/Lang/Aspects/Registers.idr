@@ -70,9 +70,7 @@ namespace MergeSameProperties
   mergeSame_commutative (Just _) Nothing  = Refl
   mergeSame_commutative (Just x) (Just y) with (decEq x y)
     mergeSame_commutative (Just x) (Just x) | Yes Refl = rewrite decEqSelfIsYes {x} in Refl
-    mergeSame_commutative (Just x) (Just y) | No uxy with (decEq y x)
-      mergeSame_commutative (Just _) (Just _) | No _   | No  _  = Refl
-      mergeSame_commutative (Just _) (Just _) | No uxy | Yes yx = absurd $ uxy $ sym yx
+    _                                       | No uxy   = rewrite snd $ decEqContraIsNo $ negEqSym uxy in Refl
 
   export
   mergeSame_nothing_absorbs_r : (x : _) -> mergeSame x Nothing = Nothing
@@ -84,13 +82,11 @@ namespace MergeSameProperties
   mergeSame_associative Nothing  _        _        = Refl
   mergeSame_associative (Just x) Nothing  _        = Refl
   mergeSame_associative (Just x) (Just y) Nothing  = mergeSame_nothing_absorbs_r _
-  mergeSame_associative (Just x) (Just y) (Just z) with (decEq x y)
-    mergeSame_associative (Just y) (Just y) (Just z) | Yes Refl with (decEq y z)
-      mergeSame_associative (Just _) (Just _) (Just z) | Yes Refl | Yes Refl = rewrite decEqSelfIsYes {x=z} in Refl
-      mergeSame_associative (Just _) (Just _) (Just _) | Yes Refl | No _     = Refl
-    mergeSame_associative (Just x) (Just y) (Just z) | No uxy with (decEq y z)
-      mergeSame_associative (Just x) (Just y) (Just z) | No uxy | Yes _  = rewrite snd $ decEqContraIsNo uxy in Refl
-      mergeSame_associative (Just x) (Just y) (Just z) | No uxy | No uyz = Refl
+  mergeSame_associative (Just x) (Just y) (Just z) with (decEq x y) | (decEq y z)
+    mergeSame_associative (Just x) (Just x) (Just x) | Yes Refl | Yes Refl = rewrite decEqSelfIsYes {x} in Refl
+    mergeSame_associative (Just _) (Just _) (Just _) | Yes Refl | No uyz   = rewrite snd $ decEqContraIsNo uyz in Refl
+    _                                                | No uxy   | Yes _    = rewrite snd $ decEqContraIsNo uxy in Refl
+    _                                                | No _     | No _     = Refl
 
 --- Eliminators for the `Registers` type ---
 
