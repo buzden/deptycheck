@@ -9,10 +9,10 @@ X1 True
 -----
 X1 False
 -----
-X2 False True
------
-X2 False False
+X2 True False
 -----
 X2 True True
 -----
-X2 True False
+X2 False False
+-----
+X2 False True

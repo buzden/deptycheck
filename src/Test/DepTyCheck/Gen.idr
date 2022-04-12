@@ -166,7 +166,8 @@ elements = Uniform . fromList
 export
 Monad Gen where
   Uniform gs >>= c = if null gs then Uniform [] else AlternG $ c <$> gs
-  g >>= c = Raw $ unGen g >>= map join . traverseSt . map (unGen . c)
+  AlternG gs >>= c = AlternG $ assert_total (>>= c) <$> gs
+  Raw sf     >>= c = Raw $ sf >>= map join . traverseSt . map (unGen . c)
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b

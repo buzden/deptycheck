@@ -17,11 +17,11 @@ TL "a"
 -----
 TL "bc"
 -----
-TR "a" (FN 10 (FN 10 (FN 10 (FN 0 (FN 10 (FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (JJ 0 10))))))))))))
+TR "bc" (FN 0 (FN 0 (FN 0 (FN 0 (FN 0 (JJ 10 10))))))
 -----
-TR "bc" (FN 10 (FN 10 (FN 10 (FN 0 (FN 10 (FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (JJ 0 10))))))))))))
+TR "" (FN 0 (FN 0 (FN 0 (FN 0 (FN 0 (JJ 10 10))))))
 -----
-TR "" (FN 10 (FN 10 (FN 10 (FN 0 (FN 10 (FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (JJ 0 10))))))))))))
+TR "a" (FN 0 (FN 0 (FN 0 (FN 0 (FN 0 (JJ 10 10))))))
 -----
 -----
 JJ 10 0
@@ -32,14 +32,14 @@ JJ 0 10
 -----
 JJ 0 0
 -----
-FN 0 (FN 10 (FN 0 (FN 0 (FN 0 (JJ 0 0)))))
+FN 10 (FN 10 (FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 0 (JJ 0 10)))))))))))))
 -----
-FN 10 (FN 10 (FN 0 (FN 0 (FN 0 (JJ 0 0)))))
+FN 0 (FN 10 (FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 0 (JJ 0 10)))))))))))))
 -----
-FN 0 (FN 0 (FN 0 (FN 0 (FN 0 (JJ 0 0)))))
+FN 10 (FN 0 (FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 0 (JJ 0 10)))))))))))))
 -----
-FN 10 (FN 0 (FN 0 (FN 0 (FN 0 (JJ 0 0)))))
+FN 0 (FN 0 (FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 0 (JJ 0 10)))))))))))))
 -----
-FN 0 (FN 0 (FN 10 (FN 0 (FN 0 (JJ 0 0)))))
+FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 0 (JJ 0 10)))))))))))))
 -----
-FN 10 (FN 0 (FN 10 (FN 0 (FN 0 (JJ 0 0)))))
+FN 10 (FN 0 (FN 10 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 10 (FN 10 (FN 0 (FN 0 (JJ 0 10)))))))))))))
