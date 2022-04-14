@@ -34,6 +34,9 @@ ConstructorDerivator => DerivatorCore where
     -- check that there is at least one constructor
     when .| null sig.targetType.cons .| fail "No constructors found for the type `\{show sig.targetType.name}`"
 
+    -- check that desired `Gen` is not a generator of `Gen`s
+    when .| sig.targetType.name == `{Test.DepTyCheck.Gen.Gen} .| fail "Target type of a derived `Gen` cannot be a `Gen`"
+
     -- generate claims for generators per constructors
     let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
 

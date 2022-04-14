@@ -1,0 +1,12 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Error during reflection: Target type of a derived `Gen` cannot be a `Gen`
+
+DerivedGen:13:14--13:23
+ 09 | Show (Gen x) where
+ 10 |   show _ = "a generator"
+ 11 | 
+ 12 | checkedGen : Fuel -> (a : Type) -> Gen $ Gen a
+ 13 | checkedGen = deriveGen
+                   ^^^^^^^^^
+

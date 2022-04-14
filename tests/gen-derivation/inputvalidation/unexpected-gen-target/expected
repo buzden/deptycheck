@@ -1,20 +1,20 @@
 1/1: Building ValidateInput (ValidateInput.idr)
-Error: While processing right hand side of genOfGens. Error during reflection: Target type of a derived `Gen` cannot be a `Gen`
+Error: While processing right hand side of genOfConcreteGen. Error during reflection: Target type's argument must be a variable name
 
-ValidateInput:16:27--16:32
+ValidateInput:16:38--16:39
  12 |   MkY : Y Int String
  13 | 
  14 | --- Gen of strange things ---
  15 | 
- 16 | genOfGens : Fuel -> Gen $ Gen X
-                                ^^^^^
+ 16 | genOfConcreteGen : Fuel -> Gen $ Gen X
+                                           ^
 
 Error: While processing right hand side of genOfLazies. Error during reflection: Target type is not a simple name
 
 ValidateInput:19:29--19:35
  15 | 
- 16 | genOfGens : Fuel -> Gen $ Gen X
- 17 | genOfGens = deriveGen
+ 16 | genOfConcreteGen : Fuel -> Gen $ Gen X
+ 17 | genOfConcreteGen = deriveGen
  18 | 
  19 | genOfLazies : Fuel -> Gen $ Lazy X
                                   ^^^^^^

@@ -13,8 +13,8 @@ data Y : Type -> Type -> Type where
 
 --- Gen of strange things ---
 
-genOfGens : Fuel -> Gen $ Gen X
-genOfGens = deriveGen
+genOfConcreteGen : Fuel -> Gen $ Gen X
+genOfConcreteGen = deriveGen
 
 genOfLazies : Fuel -> Gen $ Lazy X
 genOfLazies = deriveGen

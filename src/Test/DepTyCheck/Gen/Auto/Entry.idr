@@ -113,18 +113,7 @@ checkTypeIsGen checkSide sig = do
   targetType <- case targetType of
 
     -- Normal type
-    IVar _ targetType => do
-
-      -- check we can analyze the target type itself
-      ti <- getInfo' targetType <|> failAt genFC "Target type `\{show targetType}` is not a top-level data definition"
-      -- this check must be before `isSameTypeAs` call because `isSameTypeAs` calls `getInfo'` itself.
-
-      -- check that desired `Gen` is not a generator of `Gen`s
-      when !(targetType `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
-        failAt targetTypeFC "Target type of a derived `Gen` cannot be a `Gen`"
-
-      -- return the type info
-      pure ti
+    IVar _ targetType => getInfo' targetType <|> failAt genFC "Target type `\{show targetType}` is not a top-level data definition"
 
     -- Primitive type
     IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
