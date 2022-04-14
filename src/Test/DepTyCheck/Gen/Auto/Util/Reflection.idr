@@ -244,8 +244,8 @@ typeInfoForTypeOfTypes : TypeInfo
 typeInfoForTypeOfTypes = primTypeInfo "Type"
 
 export
-typeInfoForPolyType : UserName -> TypeInfo
-typeInfoForPolyType un = primTypeInfo "poly^<\{show un}>"
+typeInfoForPolyType : UserName -> List NamedArg -> TypeInfo
+typeInfoForPolyType un args = MkTypeInfo (UN $ Basic "poly^<\{show un}>") args []
 
 ----------------------------------------------
 --- Analyzing dependently typed signatures ---

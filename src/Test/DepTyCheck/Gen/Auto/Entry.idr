@@ -127,11 +127,11 @@ checkTypeIsGen checkSide sig = do
     -- Normal type
     IVar _ targetType =>
       -- determine whether this target type is a polymorphic type (in the given external gens context)
-      case (getUN targetType >>= \un => lookup un checkSide.extGenCtxt.polyTypeParams $> un) of
+      case (getUN targetType >>= \un => lookup un checkSide.extGenCtxt.polyTypeParams <&> (un,)) of
         -- non-polymorphic type; treat as a concrete type
         Nothing => getInfo' targetType <|> failAt genFC "Target type `\{show targetType}` is not a top-level data definition"
         -- return the special shell for polymorphic types as the type info
-        Just targetType => pure $ typeInfoForPolyType targetType
+        Just (targetType, type'sArgs) => pure $ typeInfoForPolyType targetType !(for type'sArgs namedArg)
 
     -- Primitive type
     IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
