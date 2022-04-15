@@ -34,7 +34,7 @@ record GenExternals where
 record PolyTypeArgsCtxt where
   constructor MkPolyTypeArgsCtxt
   -- higher-kinded arguments of the type for each type designed with a name
-  polyTypeParams : SortedMap UserName $ List $ Arg False
+  polyTypeParams : SortedMap UserName $ List NamedArg
 
 emptyPolyCtxt : PolyTypeArgsCtxt
 emptyPolyCtxt = MkPolyTypeArgsCtxt empty
@@ -131,7 +131,7 @@ checkTypeIsGen checkSide sig = do
         -- non-polymorphic type; treat as a concrete type
         Nothing => getInfo' targetType <|> failAt genFC "Target type `\{show targetType}` is not a top-level data definition"
         -- return the special shell for polymorphic types as the type info
-        Just (targetType, type'sArgs) => pure $ typeInfoForPolyType targetType !(for type'sArgs namedArg)
+        Just (targetType, type'sArgs) => pure $ typeInfoForPolyType targetType type'sArgs
 
     -- Primitive type
     IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
@@ -174,9 +174,9 @@ checkTypeIsGen checkSide sig = do
   -- divide all arguments on related to external generators and the others;
   (givenParams, autoImplArgs, givenParamsPositions) <- do
     let
-      rememberIfType : forall m. MonadState PolyTypeArgsCtxt m => UserName -> TTImp -> m Unit
+      rememberIfType : forall m. MonadState PolyTypeArgsCtxt m => Elaboration m => UserName -> TTImp -> m Unit
       rememberIfType nm ty = do
-        let (hkArgs, polyType) = unPi ty
+        (hkArgs, polyType) <- unPiNamed ty
         case polyType of
           IType {} => modify {polyTypeParams $= insert nm hkArgs}
           _        => pure ()

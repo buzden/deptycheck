@@ -149,10 +149,10 @@ callCon : (con : Con) -> Vect con.args.length TTImp -> TTImp
 callCon con = reAppAny (var con.name) . toList . mapWithPos (appArg . index' con.args)
 
 export
-wrapWithPolyTypes : SortedMap UserName (List $ Arg False) -> TTImp -> TTImp
+wrapWithPolyTypes : SortedMap UserName (List NamedArg) -> TTImp -> TTImp
 wrapWithPolyTypes polyTypes expr =
   piAll expr $ SortedMap.toList polyTypes <&> \(un, args) =>
-    MkArg MW ExplicitArg (Just $ UN un) $ piAll type args
+    MkArg MW ExplicitArg (Just $ UN un) $ piAll type $ args <&> {name $= Just}
 
 --- General purpose instances ---
 
