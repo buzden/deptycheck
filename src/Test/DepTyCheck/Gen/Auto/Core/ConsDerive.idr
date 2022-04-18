@@ -88,17 +88,17 @@ namespace NonObligatoryExts
                            CanonicGen m =>
                            MonadState (SortedSet $ Fin con.args.length) m =>
                            (TTImp -> TTImp) -> (gened : Fin con.args.length) -> m $ TTImp -> TTImp
-            genForOneArg leftExprF genedArg = do
+            genForOneArg leftExprF genedArgIdx = do
 
               -- Acquire the set of arguments that are already present
               presentArguments <- get
 
               -- Check that those argument that we need to generate is not already present
-              let False = contains genedArg presentArguments
+              let False = contains genedArgIdx presentArguments
                 | True => pure leftExprF
 
-              -- Get info for the `genedArg`
-              let MkTypeApp typeOfGened argsOfTypeOfGened = Vect.index genedArg argsTypeApps
+              -- Get info for the `genedArgIdx`
+              let MkTypeApp typeOfGened argsOfTypeOfGened = Vect.index genedArgIdx argsTypeApps
 
               -- Filter arguments classification according to the set of arguments that are left to be generated;
               -- Those which are `Right` are given, those which are `Left` are needs to be generated.
@@ -107,10 +107,10 @@ namespace NonObligatoryExts
                 Left i     => if contains i presentArguments then Right $ var $ argName $ index' con.args i else Left i
 
               -- Determine which arguments will be on the left of dpair in subgen call, in correct order
-              let subgeneratedArgs = mapMaybe getLeft $ toList depArgs
+              let subgeneratedArgIdxs = mapMaybe getLeft $ toList depArgs
 
               -- Make sure generated arguments will not be generated again
-              modify $ insert genedArg . union (fromList subgeneratedArgs)
+              modify $ insert genedArgIdx . union (fromList subgeneratedArgIdxs)
 
               -- Form a task for subgen
               let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` allFins'
@@ -122,7 +122,7 @@ namespace NonObligatoryExts
               subgenCall <- callGen subsig fuel $ snd <$> subgivens
 
               -- Form an expression of binding the result of subgen
-              let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
+              let genedArg:::subgeneratedArgs = genedArgIdx:::subgeneratedArgIdxs <&> bindVar . flip Vect.index bindNames
               let bindSubgenResult = foldr (\l, r => var `{Builtin.DPair.MkDPair} .$ l .$ r) genedArg subgeneratedArgs
 
               -- Form an expression of the RHS of a bind; simplify lambda if subgeneration result type does not require pattern matching
