@@ -29,6 +29,14 @@ interface ConstructorDerivator where
 ||| may be ignored even if its type is really used in a generated data constructor.
 namespace NonObligatoryExts
 
+  -- This data definition should have been inside a `LeastEffort` instance, but addition of some line makes it to stop to typecheck
+  -- TODO make this to be a `record` as soon as #2177 is fixed
+  data TypeApp : Con -> Type where
+    MkTypeApp :
+      (type : TypeInfo) ->
+      (argTypes : Vect type.args.length .| Either (Fin con.args.length) TTImp) ->
+      TypeApp con
+
   ||| Least-effort non-obligatory tactic is one which *does not use externals* during taking a decision on the order.
   ||| It uses externals if decided order happens to be given by an external generator, but is not obliged to use any.
   ||| It is seemingly most simple to implement, maybe the fastest and
@@ -49,7 +57,7 @@ namespace NonObligatoryExts
 
       -- Analyse that we can do subgeneration for each constructor argument
       -- Fails using `Elaboration` if the given expression is not an application to a type constructor
-      let analyseTypeApp : TTImp -> m TypeApp
+      let analyseTypeApp : TTImp -> m $ TypeApp con
           analyseTypeApp expr = do
             let (lhs, args) = unAppAny expr
             ty <- case lhs of
@@ -85,7 +93,7 @@ namespace NonObligatoryExts
             genForOneArg leftExprF genedArg = do
 
               -- Get info for the `genedArg`
-              let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ TypeApp) argsTypeApps
+              let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
 
               -- Acquire the set of arguments that are already present
               presentArguments <- get
@@ -182,15 +190,6 @@ namespace NonObligatoryExts
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
       map callOneOf $ traverse genForOrder allOrders
-
-      where
-
-        -- TODO make this to be a `record` as soon as #2177 is fixed
-        data TypeApp : Type where
-          MkTypeApp :
-            (type : TypeInfo) ->
-            (argTypes : Vect type.args.length .| Either (Fin con.args.length) TTImp) ->
-            TypeApp
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.
