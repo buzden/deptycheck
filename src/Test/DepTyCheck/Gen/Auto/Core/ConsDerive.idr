@@ -53,14 +53,26 @@ namespace NonObligatoryExts
       -- Build a map from constructor's argument name to its index
       let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
 
+      -- Get all polymorphic parameters of the constructor
+      polyConArgs <- map (SortedMap.fromList . catMaybes) $
+                       for con.args $ \arg => unPiNamed arg.type <&> \case
+                         (type'sArgs, IType _) => Just (argName arg, type'sArgs)
+                         _                     => Nothing
+
       -- Analyse that we can do subgeneration for each constructor argument
       -- Fails using `Elaboration` if the given expression is not an application to a type constructor
       let analyseTypeApp : TTImp -> m $ TypeApp con
           analyseTypeApp expr = do
             let (lhs, args) = unAppAny expr
             ty <- case lhs of
-              IVar _ lhsName     => try .| getInfo' lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
-                                        .| failAt (getFC lhs) "Only applications to non-polymorphic type constructors are supported at the moment"
+              IVar _ lhsName => case lookup lhsName polyConArgs of
+                -- Not a polymorphic type
+                Nothing => try
+                  .| getInfo' lhsName
+                  .| failAt (getFC lhs) "When deriving a constructor `\{show con.name}`: Not a concrete type name: \{show lhsName}"
+                -- Some polymorphic type
+                Just type'sArgs =>
+                  ?foo -- to find which name of the external gen corresponds to the `lhsName`
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
               lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{lhs}"
