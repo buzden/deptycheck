@@ -98,11 +98,11 @@ namespace NonObligatoryExts
                 | True => pure leftExprF
 
               -- Get info for the `genedArgIdx`
-              let MkTypeApp typeOfGened argsOfTypeOfGened = Vect.index genedArgIdx argsTypeApps
+              let genedArg = Vect.index genedArgIdx argsTypeApps
 
               -- Filter arguments classification according to the set of arguments that are left to be generated;
               -- Those which are `Right` are given, those which are `Left` are needs to be generated.
-              let depArgs : Vect _ $ Either _ _ := argsOfTypeOfGened <&> \case
+              let depArgs : Vect _ $ Either _ _ := genedArg.argTypes <&> \case
                 Right expr => Right expr
                 Left i     => if contains i presentArguments then Right $ var $ argName $ index' con.args i else Left i
 
@@ -114,7 +114,7 @@ namespace NonObligatoryExts
 
               -- Form a task for subgen
               let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` allFins'
-              let subsig : GenSignature := MkGenSignature typeOfGened $ fromList $ fst <$> toList subgivens
+              let subsig : GenSignature := MkGenSignature genedArg.type $ fromList $ fst <$> toList subgivens
               let Yes Refl = decEq subsig.givenParams.size subgivensLength
                 | No _ => fail "INTERNAL ERROR: error in given params set length computation"
 
