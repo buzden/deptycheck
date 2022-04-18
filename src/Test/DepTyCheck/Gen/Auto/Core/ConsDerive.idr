@@ -30,12 +30,10 @@ interface ConstructorDerivator where
 namespace NonObligatoryExts
 
   -- This data definition should have been inside a `LeastEffort` instance, but addition of some line makes it to stop to typecheck
-  -- TODO make this to be a `record` as soon as #2177 is fixed
-  data TypeApp : Con -> Type where
-    MkTypeApp :
-      (type : TypeInfo) ->
-      (argTypes : Vect type.args.length .| Either (Fin con.args.length) TTImp) ->
-      TypeApp con
+  record TypeApp (0 con : Con) where
+    constructor MkTypeApp
+    type : TypeInfo
+    argTypes : Vect type.args.length $ Either (Fin con.args.length) TTImp
 
   ||| Least-effort non-obligatory tactic is one which *does not use externals* during taking a decision on the order.
   ||| It uses externals if decided order happens to be given by an external generator, but is not obliged to use any.
