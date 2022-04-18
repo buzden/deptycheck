@@ -90,20 +90,19 @@ namespace NonObligatoryExts
                            (TTImp -> TTImp) -> (gened : Fin con.args.length) -> m $ TTImp -> TTImp
             genForOneArg leftExprF genedArg = do
 
-              -- Get info for the `genedArg`
-              let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
-
               -- Acquire the set of arguments that are already present
               presentArguments <- get
 
-              -- TODO to put the following check as up as possible as soon as it typecheks O_O
               -- Check that those argument that we need to generate is not already present
               let False = contains genedArg presentArguments
                 | True => pure leftExprF
 
+              -- Get info for the `genedArg`
+              let MkTypeApp typeOfGened argsOfTypeOfGened = Vect.index genedArg argsTypeApps
+
               -- Filter arguments classification according to the set of arguments that are left to be generated;
               -- Those which are `Right` are given, those which are `Left` are needs to be generated.
-              let depArgs : Vect typeOfGened.args.length (Either (Fin con.args.length) TTImp) := argsOfTypeOfGened <&> \case
+              let depArgs : Vect _ $ Either _ _ := argsOfTypeOfGened <&> \case
                 Right expr => Right expr
                 Left i     => if contains i presentArguments then Right $ var $ argName $ index' con.args i else Left i
 
