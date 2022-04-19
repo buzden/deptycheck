@@ -53,6 +53,9 @@ namespace NonObligatoryExts
       -- Build a map from constructor's argument name to its index
       let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
 
+      -- Build a set of all names of constructor's arguments
+      let conArgNames = keySet conArgIdxs
+
       -- Get all polymorphic parameters of the constructor
       polyConArgs <- map (SortedMap.fromList . catMaybes) $
                        for con.args $ \arg => unPiNamed arg.type <&> \case
@@ -71,7 +74,10 @@ namespace NonObligatoryExts
                   .| getInfo' lhsName
                   .| failAt (getFC lhs) "When deriving a constructor `\{show con.name}`: Not a concrete type name: \{show lhsName}"
                 -- Some polymorphic type
-                Just type'sArgs =>
+                Just type'sArgs => do
+                  -- If this type is higher-kinded and significantly dependent, names in `type'sArgs` may be incorrect
+                  when .| any @{Compose} (flip contains conArgNames) (type'sArgs <&> allVarNames . type)
+                    .| failAt (getFC lhs) "Higher-kinded and significantly dependent polymorphic types are not supported in constructors yet"
                   ?foo -- to find which name of the external gen corresponds to the `lhsName`
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
