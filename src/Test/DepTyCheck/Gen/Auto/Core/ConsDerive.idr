@@ -56,6 +56,22 @@ namespace NonObligatoryExts
       -- Build a set of all names of constructor's arguments
       let conArgNames = keySet conArgIdxs
 
+      -- Build a map from constructor's argument name to an index of the whole type, if this argument is used in the con's type.
+      -- Also, it returns a boolean of whether the con's type uses the constructor's argument as is (`True`) or inside an exression (`False`).
+      -- For example, for `Vect`'s `(::) : a -> Vect n a -> Vect (S n) a` the map would be
+      -- `fromList [(`{a}, fromList [(1, True)]), (`{n}, fromList [(0, False)])]`
+      -- TODO To replace it with a function that may answer the question
+      --      "which type arguments are sufficient to be given to determine constructor's polymorphic type arguments"
+      --      to be able to use such types that are present in the constructor's return type in complex expressions.
+      let (_, conRetTyArgs) = unAppAny con.type
+      let Yes consRetTyLengthCorrect = decEq sig.targetType.args.length conRetTyArgs.length
+        | No _ => failAt conFC "INTERNAL ERROR: wrong count of unapp when analysing constructor's \{show con.name} return type"
+      let conArgToTypeIdx : SortedMap Name $ SortedSet (Fin sig.targetType.args.length, Bool) := SortedMap.fromList $
+            con.args <&> \conArg => (conArg.name,) $ SortedSet.fromList $ rewrite consRetTyLengthCorrect in
+              mapMaybeI' conRetTyArgs $ \idx, retArg => case getExpr retArg of
+                IVar _ retArgName => if retArgName == conArg.name then Just (idx, True) else Nothing
+                ex                => head' (filter (== conArg.name) $ allVarNames ex) $> (idx, False)
+
       -- Get all polymorphic parameters of the constructor
       polyConArgs <- map (SortedMap.fromList . catMaybes) $
                        for con.args $ \arg => unPiNamed arg.type <&> \case
@@ -78,7 +94,20 @@ namespace NonObligatoryExts
                   -- If this type is higher-kinded and significantly dependent, names in `type'sArgs` may be incorrect
                   when .| any @{Compose} (flip contains conArgNames) (type'sArgs <&> allVarNames . type)
                     .| failAt (getFC lhs) "Higher-kinded and significantly dependent polymorphic types are not supported in constructors yet"
-                  ?foo -- to find which name of the external gen corresponds to the `lhsName`
+                  let tyArgs = fromMaybe empty $ lookup lhsName conArgToTypeIdx
+                  -- TODO to improve effectiveness of the checks below
+                  if not (null tyArgs) && all (\(idx, asIs) => contains idx sig.givenParams && not asIs) tyArgs
+                    then failAt (getFC lhs) $ "LeastEffort derivation algorithm goes not support " ++
+                      "type argument \{show lhsName} of constructor \{show con.name} since " ++
+                      "it is present in the return type in a complex expression of some given parameter"
+                    else case head' $ filter (\(idx, asIs) => contains idx sig.givenParams && asIs) $ SortedSet.toList tyArgs of
+                      -- TODO to think: I use the leftmost parameter above, maybe I'd need the rightmost one.
+                      --      It may influence on which virtual poly-type-info I construct: I may construct not those which is given
+                      --      when several type arguments are propositionally the same for this data constructor.
+                      Just (idx, _) => case argName $ index' sig.targetType.args idx of
+                                         UN un => pure $ typeInfoForPolyType un type'sArgs
+                                         nm    => pure $ typeInfoForPolyType (Basic $ "^MN^" ++ show nm) type'sArgs -- a dirty workaround :-(
+                      Nothing       => ?need_a_universal_generator
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
               lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{lhs}"
