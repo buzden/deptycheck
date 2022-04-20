@@ -25,6 +25,7 @@ stages:
   - lint
   - deptycheck:build
   - deptycheck:docs
+  - deptycheck:install
   - deptycheck:test:lib
   - deptycheck:test:docs
   - deptycheck:test:derive
@@ -61,6 +62,23 @@ deptycheck:docs:
   script:
     - pip3 install -r docs/requirements.txt
     - make docs
+
+deptycheck:install:after_build:
+  extends: .depends-on-idris
+  stage: deptycheck:install
+  needs:
+    - read-idris-ver
+    - deptycheck:build
+  script:
+    - make install
+
+deptycheck:install:clean:
+  extends: .depends-on-idris
+  stage: deptycheck:install
+  needs:
+    - read-idris-ver
+  script:
+    - make install
 
 deptycheck:test:lib:
   extends: .depends-on-idris
