@@ -1,8 +1,8 @@
 module Debug.Reflection
 
-import Language.Reflection
-import Language.Reflection.Pretty
-import Language.Reflection.Syntax
+import public Language.Reflection
+import public Language.Reflection.Pretty
+import public Language.Reflection.Syntax
 
 %default total
 

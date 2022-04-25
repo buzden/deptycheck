@@ -121,20 +121,9 @@ callCon con = reAppAny (var con.name) . toList . mapWithPos (appArg . index' con
 
 --- General purpose instances ---
 
-public export
-Eq Namespace where
-  MkNS xs == MkNS ys = xs == ys
-
 export
 Ord Namespace where
   compare = comparing $ \(MkNS xs) => xs
-
-public export
-Eq UserName where
-  Basic x    == Basic y    = x == y
-  Field x    == Field y    = x == y
-  Underscore == Underscore = True
-  _ == _ = False
 
 export
 Ord UserName where
@@ -143,19 +132,6 @@ Ord UserName where
     characteristic $ Basic x    = (0, x)
     characteristic $ Field x    = (1, x)
     characteristic $ Underscore = (2, "")
-
-public export
-Eq Name where
-  UN x   == UN y   = x == y
-  MN x n == MN y m = x == y && n == m
-  NS s n == NS p m = s == p && n == m
-  DN x n == DN y m = x == y && n == m
-
-  Nested x n    == Nested y m    = x == y && n == m
-  CaseBlock x n == CaseBlock y m = x == y && n == m
-  WithBlock x n == WithBlock y m = x == y && n == m
-
-  _ == _ = False
 
 export
 Ord Name where
