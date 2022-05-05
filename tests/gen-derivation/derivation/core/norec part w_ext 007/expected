@@ -1,0 +1,12 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Error during reflection: Auto-implicit argument should not contain its own auto-implicit arguments
+
+DerivedGen:14:131--14:134
+ 10 | 
+ 11 | %runElab derive "X" [Generic, Meta, Show]
+ 12 | 
+ 13 | export
+ 14 | checkedGen : Fuel -> (Fuel -> Gen String) => (Fuel -> Gen Nat) => (Fuel -> (a, b : Type) -> (Fuel -> Gen a) => (Fuel -> Gen b) => Gen (a, b)) => Gen X
+                                                                                                                                        ^^^
+

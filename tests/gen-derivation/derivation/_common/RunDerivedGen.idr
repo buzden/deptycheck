@@ -19,6 +19,10 @@ aVect : Fuel -> (Fuel -> Gen a) => (n : Nat) -> Gen (Vect n a)
 aVect f Z             = [| [] |]
 aVect f (S n) @{genA} = [| genA f :: aVect f n @{genA} |]
 
+export
+aPair : Fuel -> (a, b : Type) -> (Fuel -> Gen a) => (Fuel -> Gen b) => Gen (a, b)
+aPair fuel _ @{genA} _ @{genB} = (,) <$> genA fuel <*> genB fuel
+
 export %hint
 someTypes : Fuel -> Gen Type
 someTypes _ = elements [Nat, String, Bool]
