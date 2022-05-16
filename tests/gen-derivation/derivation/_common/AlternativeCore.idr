@@ -14,18 +14,18 @@ numberedArgs bind = Fin.tabulate $ (if bind then bindVar else varStr) . show
 
 export
 [EmptyBody] DerivatorCore where
-  canonicBody sig n = pure [ callCanonic sig n implicitTrue irrelevantArgs .= `(empty) ]
+  canonicBody sig n = pure $ (, the AdditionalGens neutral) [ callCanonic sig n implicitTrue irrelevantArgs .= `(empty) ]
 
 export
 [CallSelf] DerivatorCore where
-  canonicBody sig n = pure
+  canonicBody sig n = pure $ (, the AdditionalGens neutral)
     [ callCanonic sig n (var `{Dry})                    irrelevantArgs      .= `(empty)
     , callCanonic sig n (var `{More} .$ bindVar "fuel") (numberedArgs True) .= !(callGen sig (var "fuel") $ numberedArgs False)
     ]
 
 export
 [EmptyCons'] ConstructorDerivator where
-  consGenExpr _ _ _ _ = pure `(empty)
+  consGenExpr _ _ _ _ = pure $ (, the AdditionalGens neutral) `(empty)
 
 export
 EmptyCons : DerivatorCore
@@ -55,8 +55,8 @@ Show XS where
 
 export
 [Ext_XS] DerivatorCore where
-  canonicBody sig n =
-    pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXS <$> ~(!(callStrGen $ var "fuel"))) ]
+  canonicBody sig n = pure $ (, the AdditionalGens neutral)
+    [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXS <$> ~(!(callStrGen $ var "fuel"))) ]
 
 --- Two (string) arguments taken from external ---
 
@@ -69,8 +69,8 @@ Show XSS where
 
 export
 [Ext_XSS] DerivatorCore where
-  canonicBody sig n =
-    pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSS <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callStrGen $ var "fuel"))) ]
+  canonicBody sig n = pure $ (, the AdditionalGens neutral)
+    [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSS <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callStrGen $ var "fuel"))) ]
 
 --- Two (string and nat) arguments taken from external ---
 
@@ -83,8 +83,8 @@ Show XSN where
 
 export
 [Ext_XSN] DerivatorCore where
-  canonicBody sig n =
-    pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSN <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callNatGen $ var "fuel"))) ]
+  canonicBody sig n = pure $ (, the AdditionalGens neutral)
+    [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSN <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callNatGen $ var "fuel"))) ]
 
 --- Dependent type's argument + a constructor's argument taken from external ---
 
@@ -98,5 +98,5 @@ export
 
 export
 [Ext_X'S] DerivatorCore where
-  canonicBody sig n =
-    pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkX'S <$> ~(!(callStrGen $ var "fuel"))) ]
+  canonicBody sig n = pure $ (, the AdditionalGens neutral)
+    [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkX'S <$> ~(!(callStrGen $ var "fuel"))) ]

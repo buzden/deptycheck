@@ -243,7 +243,7 @@ export
 typeInfoForTypeOfTypes : TypeInfo
 typeInfoForTypeOfTypes = primTypeInfo "Type"
 
-export
+public export
 typeInfoForPolyType : UserName -> List NamedArg -> TypeInfo
 typeInfoForPolyType un args = MkTypeInfo (UN $ Basic "poly^<\{show un}>") args []
 

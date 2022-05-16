@@ -1,0 +1,10 @@
+1/2: Building Infra (Infra.idr)
+2/2: Building CanonicSigCheck (CanonicSigCheck.idr)
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all named; with additional; no givens; universal:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all named; with additional; no givens'; universal + additional Nat:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all named; with additional; impl `a` given; additional `a`:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all named; with additional; `a` and `n` given; additional `a`:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all named; with additional; all given; additional `a`:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all named; with additional; impl `a` given; universal + additional `a`:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all named; with additional; `a` and `n` given; universal + additional `a`:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type + mixed explicitness; all named; with additional; all given; universal + additional `a`:	OKAY

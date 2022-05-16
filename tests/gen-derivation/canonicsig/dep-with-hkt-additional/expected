@@ -1,0 +1,10 @@
+1/2: Building Infra (Infra.idr)
+2/2: Building CanonicSigCheck (CanonicSigCheck.idr)
+LOG gen.auto.canonic.check-sig:0: dependent type with higher-kinded additional; hkt given; empty hkt givs:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type with higher-kinded additional; hkt given; empty hkt givs + universal:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type with higher-kinded additional; hkt given; hkt givs:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type with higher-kinded additional; hkt given; hkt givs + universal:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type with higher-kinded additional; all given; empty hkt givs:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type with higher-kinded additional; all given; empty hkt givs + universal:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type with higher-kinded additional; all given; hkt givs:	OKAY
+LOG gen.auto.canonic.check-sig:0: dependent type with higher-kinded additional; all given; hkt givs + universal:	OKAY

@@ -21,7 +21,7 @@ import public Test.DepTyCheck.Gen.Auto.Util.DepPerm
 
 public export
 interface ConstructorDerivator where
-  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
+  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m (TTImp, AdditionalGens)
 
 --- Particular tactics ---
 
@@ -233,7 +233,7 @@ namespace NonObligatoryExts
         rightmost <- indepPermutations' disjDeps rightmostArgs
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
-      map callOneOf $ traverse genForOrder allOrders
+      map (, neutral) $ map callOneOf $ traverse genForOrder allOrders
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.

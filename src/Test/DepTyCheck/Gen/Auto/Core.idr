@@ -37,11 +37,14 @@ ConstructorDerivator => DerivatorCore where
     -- check that desired `Gen` is not a generator of `Gen`s
     when .| sig.targetType.name == `{Test.DepTyCheck.Gen.Gen} .| fail "Target type of a derived `Gen` cannot be a `Gen`"
 
-    -- generate claims for generators per constructors
-    let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
+    -- derive bodies, generate claims and acquire additional gens for generators per constructors
+    (consAdditions, consClaims, consBodies) <- map unzip3 $ for sig.targetType.cons $ \con => do
+      let consName = consGenName con
+      (bodyClauses, additionalGens) <- canonicConsBody sig consName con
+      pure (additionalGens, export' consName $ canonicSig sig additionalGens, def consName bodyClauses)
 
-    -- derive bodies for generators per constructors
-    consBodies <- for sig.targetType.cons $ \con => canonicConsBody sig (consGenName con) con <&> def (consGenName con)
+    -- compute composite additional gens value fir the whole generator
+    let additionalGens = concat consAdditions
 
     -- calculate which constructors are recursive and which are not
     consRecs <- for sig.targetType.cons $ \con => consRecursiveness con <&> (con,)
@@ -53,7 +56,7 @@ ConstructorDerivator => DerivatorCore where
     let outmostRHS = fuelDecisionExpr fuelArg consRecs
 
     -- return function definition
-    pure [ canonicDefaultLHS sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
+    pure $ (, additionalGens) [ canonicDefaultLHS sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
 
   where
 

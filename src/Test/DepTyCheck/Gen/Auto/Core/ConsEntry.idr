@@ -17,7 +17,7 @@ import public Test.DepTyCheck.Gen.Auto.Core.Util
 --- Entry function ---
 
 export
-canonicConsBody : ConstructorDerivator => CanonicGen m => GenSignature -> Name -> Con -> m $ List Clause
+canonicConsBody : ConstructorDerivator => CanonicGen m => GenSignature -> Name -> Con -> m (List Clause, AdditionalGens)
 canonicConsBody sig name con = do
 
   -- Get file position of the constructor definition (for better error reporting)
@@ -96,9 +96,10 @@ canonicConsBody sig name con = do
 
   -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-  pure $
+  (consGen, addition) <- consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg
+  pure $ (, addition) $
     -- Happy case, given arguments conform out constructor's GADT indices
-    [ callCanonic sig name (bindVar fuelArg) bindExprs .= deceqise !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
+    [ callCanonic sig name (bindVar fuelArg) bindExprs .= deceqise consGen ]
     ++ if all isSimpleBindVar bindExprs then [] {- do not produce dead code if the happy case handles everything already -} else
       -- The rest case, if given arguments do not conform to the current constructor then return empty generator
       [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(empty) ]
