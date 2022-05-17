@@ -87,7 +87,7 @@ canonicSig sig addition = piAll returnTy $
   returnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs where
 
     targetTypeApplied : TTImp
-    targetTypeApplied = foldr apply (var sig.targetType.name) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => case piInfo of
+    targetTypeApplied = foldr apply (var sig.targetType.unpolyName) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => case piInfo of
                           ExplicitArg   => (.$ var name)
                           ImplicitArg   => \f => namedApp f name $ var name
                           DefImplicit _ => \f => namedApp f name $ var name

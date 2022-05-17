@@ -131,7 +131,7 @@ checkTypeIsGen checkSide sig = do
         -- non-polymorphic type; treat as a concrete type
         Nothing => getInfo' targetType <|> failAt genFC "Target type `\{show targetType}` is not a top-level data definition"
         -- return the special shell for polymorphic types as the type info
-        Just (targetType, type'sArgs) => pure $ typeInfoForPolyType targetType type'sArgs
+        Just (targetType, type'sArgs) => pure $ typeInfoForPolyType (UN targetType) type'sArgs
 
     -- Primitive type
     IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t

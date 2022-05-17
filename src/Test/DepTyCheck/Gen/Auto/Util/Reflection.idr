@@ -243,9 +243,15 @@ export
 typeInfoForTypeOfTypes : TypeInfo
 typeInfoForTypeOfTypes = primTypeInfo "Type"
 
-public export
-typeInfoForPolyType : UserName -> List NamedArg -> TypeInfo
-typeInfoForPolyType un args = MkTypeInfo (UN $ Basic "poly^<\{show un}>") args []
+public export -- `public` only for `canonicsig` tests, namely `dep-with-*`
+typeInfoForPolyType : Name -> List NamedArg -> TypeInfo
+typeInfoForPolyType nm args = MkTypeInfo (NS (MkNS ["^poly^"]) nm) args []
+
+export
+(.unpolyName) : TypeInfo -> Name
+ti.unpolyName = case ti.name of
+  NS (MkNS ["^poly^"]) nm => nm
+  nm                      => nm
 
 ----------------------------------------------
 --- Analyzing dependently typed signatures ---

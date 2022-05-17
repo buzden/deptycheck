@@ -104,14 +104,12 @@ namespace NonObligatoryExts
                       -- TODO to think: I use the leftmost parameter above, maybe I'd need the rightmost one.
                       --      It may influence on which virtual poly-type-info I construct: I may construct not those which is given
                       --      when several type arguments are propositionally the same for this data constructor.
-                      Just (idx, _) => case argName $ index' sig.targetType.args idx of
-                                         UN un => pure $ typeInfoForPolyType un type'sArgs
-                                         nm    => pure $ typeInfoForPolyType (Basic $ "^MN^" ++ show nm) type'sArgs -- a dirty workaround :-(
+                      Just (idx, _) => pure $ typeInfoForPolyType (argName $ index' sig.targetType.args idx) type'sArgs
                       Nothing       => ?need_a_universal_generator
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
               lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{lhs}"
-            let Yes lengthCorrect = decEq ty.args.length args.length
+            let Yes lengthCorrect = decEq ty.tyArgs.length args.length
               | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
             pure $ MkTypeApp ty $ rewrite lengthCorrect in Vect.fromList args <&> \arg => case getExpr arg of
               expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs

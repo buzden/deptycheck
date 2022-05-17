@@ -14,7 +14,7 @@ un, hte, htf : AdditionalGens -> AdditionalGens
 un = {universalGen := True}
 
 h : TypeInfo
-h = typeInfoForPolyType (Basic "h") [MkArg MW ExplicitArg (UN $ Basic "p") `(Prelude.Types.Nat)]
+h = typeInfoForPolyType `{h} [MkArg MW ExplicitArg `{p} `(Prelude.Types.Nat)]
 
 data Z : (h : Nat -> Type) -> Nat -> Type where
   Z0 : hh 0 -> Z hh n

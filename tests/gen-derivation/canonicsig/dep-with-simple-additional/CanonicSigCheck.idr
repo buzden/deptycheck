@@ -23,7 +23,7 @@ un, Na, at : AdditionalGens -> AdditionalGens
 
 un = {universalGen := True}
 Na = {additionalGens $= insert $ MkGenSignature NatInfo empty}
-at = {additionalGens $= insert $ MkGenSignature (typeInfoForPolyType (Basic "a") []) empty}
+at = {additionalGens $= insert $ MkGenSignature (typeInfoForPolyType `{a} []) empty}
 
 cases : List TestCaseDesc
 cases = mapFst ("dependent type + mixed explicitness; all named; with additional; " ++) <$>
