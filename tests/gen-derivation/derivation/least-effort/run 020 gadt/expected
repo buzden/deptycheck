@@ -3,43 +3,43 @@
 Generated values:
 -----
 -----
+JJ 10 0
+-----
+JJ 10 10
+-----
 JJ 0 10
 -----
 JJ 0 0
 -----
-JJ 0 10
------
-JJ 10 10
------
-JJ 10 0
------
-JJ 10 10
+TL ""
 -----
 TL "a"
 -----
 TL "bc"
 -----
-TL ""
+TR "a" (FN 10 (FN 10 (FN 10 (FN 0 (FN 10 (FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (JJ 0 10))))))))))))
 -----
-TR "" (FN 10 (JJ 10 10))
+TR "bc" (FN 10 (FN 10 (FN 10 (FN 0 (FN 10 (FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (JJ 0 10))))))))))))
 -----
+TR "" (FN 10 (FN 10 (FN 10 (FN 0 (FN 10 (FN 0 (FN 0 (FN 10 (FN 0 (FN 10 (FN 10 (JJ 0 10))))))))))))
 -----
-JJ 0 10
------
-JJ 0 0
------
-JJ 0 10
------
-JJ 10 10
 -----
 JJ 10 0
 -----
 JJ 10 10
 -----
-FN 10 (FN 10 (FN 10 (JJ 10 10)))
+JJ 0 10
 -----
-FN 0 (FN 10 (FN 10 (JJ 10 10)))
+JJ 0 0
 -----
-FN 10 (FN 10 (FN 10 (JJ 10 10)))
+FN 0 (FN 10 (FN 0 (FN 0 (FN 0 (JJ 0 0)))))
 -----
-FN 10 (FN 0 (FN 10 (JJ 10 10)))
+FN 10 (FN 10 (FN 0 (FN 0 (FN 0 (JJ 0 0)))))
+-----
+FN 0 (FN 0 (FN 0 (FN 0 (FN 0 (JJ 0 0)))))
+-----
+FN 10 (FN 0 (FN 0 (FN 0 (FN 0 (JJ 0 0)))))
+-----
+FN 0 (FN 0 (FN 10 (FN 0 (FN 0 (JJ 0 0)))))
+-----
+FN 10 (FN 0 (FN 10 (FN 0 (FN 0 (JJ 0 0)))))

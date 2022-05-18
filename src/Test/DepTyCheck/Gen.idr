@@ -156,6 +156,13 @@ export
 frequency_dep : List (Nat, Gen a) -> Gen a
 frequency_dep = AlternG . concatMap (uncurry replicate)
 
+||| Choose one of the given values uniformly.
+|||
+||| The resulting generator is not independent, i.e. `elements xs <|> elements ys` is equivalent to `elements (xs ++ ys)`.
+export
+elements : List a -> Gen a
+elements = Uniform . fromList
+
 export
 Monad Gen where
   Uniform gs >>= c = if null gs then Uniform [] else AlternG $ c <$> gs

@@ -3,14 +3,6 @@
 Generated values:
 -----
 -----
-(True ** JJ 10 10)
------
-(True ** JJ 10 0)
------
-(True ** JJ 10 10)
------
-(True ** JJ 0 10)
------
 (True ** JJ 0 0)
 -----
 (True ** JJ 0 10)
@@ -19,6 +11,14 @@ Generated values:
 -----
 (True ** JJ 10 10)
 -----
-(False ** JJ 10 0)
+(False ** JJ 0 10)
+-----
+(False ** JJ 0 0)
 -----
 (False ** JJ 10 10)
+-----
+(False ** JJ 10 0)
+-----
+(False ** FN 0 (FN 0 (FN 0 (JJ 10 10))))
+-----
+(False ** FN 10 (FN 0 (FN 0 (JJ 10 10))))

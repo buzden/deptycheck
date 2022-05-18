@@ -8,11 +8,11 @@ import public Test.DepTyCheck.Gen.Auto
 
 export %hint
 smallStrs : Fuel -> Gen String
-smallStrs _ = choiceMap pure ["", "a", "bc"]
+smallStrs _ = elements ["", "a", "bc"]
 
 export %hint
 smallNats : Fuel -> Gen Nat
-smallNats _ = choiceMap pure [0, 10]
+smallNats _ = elements [0, 10]
 
 export
 aVect : Fuel -> (Fuel -> Gen a) => (n : Nat) -> Gen (Vect n a)
@@ -21,7 +21,7 @@ aVect f (S n) @{genA} = [| genA f :: aVect f n @{genA} |]
 
 export %hint
 someTypes : Fuel -> Gen Type
-someTypes _ = choiceMap pure [Nat, String, Bool]
+someTypes _ = elements [Nat, String, Bool]
 
 export
 Show (a = b) where
