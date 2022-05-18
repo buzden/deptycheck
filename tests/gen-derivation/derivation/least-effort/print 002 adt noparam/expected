@@ -18,7 +18,7 @@ ILam.  (MW ExplicitArg {fuel:836} : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<Prelude.Basics.False>>
                                                                         $ IVar Data.Fuel.Dry)
@@ -28,7 +28,7 @@ ILam.  (MW ExplicitArg {fuel:836} : IVar Data.Fuel.Fuel)
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<Prelude.Basics.False>>
                                                                         $ IVar ^sub^fuel_arg^)
@@ -53,7 +53,7 @@ ILam.  (MW ExplicitArg {fuel:836} : IVar Data.Fuel.Fuel)
                             IDef <<Prelude.Basics.False>>
                                  [ PatClause (IApp. IVar <<Prelude.Basics.False>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                             (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                   $ (IApp. IVar ::
                                                          $ (IApp. (INamedApp. IVar Prelude.pure
                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
@@ -62,7 +62,7 @@ ILam.  (MW ExplicitArg {fuel:836} : IVar Data.Fuel.Fuel)
                             IDef <<Prelude.Basics.True>>
                                  [ PatClause (IApp. IVar <<Prelude.Basics.True>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                             (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                   $ (IApp. IVar ::
                                                          $ (IApp. (INamedApp. IVar Prelude.pure
                                                                             $ IVar Test.DepTyCheck.Gen.Gen)

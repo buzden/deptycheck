@@ -37,8 +37,8 @@ genX fuel = data_X fuel
     data_Y : Fuel -> Gen Y
 
     data_X fuel = case fuel of
-        Dry    => oneOf' [con_X0 Dry, con_X1 Dry]
-        More f => oneOf' [con_X0 f  , con_X1 f  , con_X2 f]
+        Dry    => oneOf [con_X0 Dry, con_X1 Dry]
+        More f => oneOf [con_X0 f  , con_X1 f  , con_X2 f]
       where
         con_X0 : Fuel -> Gen X
         con_X1 : Fuel -> Gen X
@@ -49,8 +49,8 @@ genX fuel = data_X fuel
         con_X2 fuel = [| X2 (data_Y fuel) |]
 
     data_Y fuel = case fuel of
-        Dry    => oneOf' [con_Y0 Dry]
-        More f => oneOf' [con_Y0 f  , con_Y1 f]
+        Dry    => oneOf [con_Y0 Dry]
+        More f => oneOf [con_Y0 f  , con_Y1 f]
       where
         con_Y0 : Fuel -> Gen Y
         con_Y1 : Fuel -> Gen Y
@@ -83,28 +83,28 @@ genX fuel = data_X fuel
     data_Y : Fuel -> Gen Y
 
     data_X fuel = case fuel of
-        Dry    => oneOf' [con_X0 Dry, con_X1 Dry]
-        More f => oneOf' [con_X0 f  , con_X1 f  , con_X2 f]
+        Dry    => oneOf [con_X0 Dry, con_X1 Dry]
+        More f => oneOf [con_X0 f  , con_X1 f  , con_X2 f]
       where
         con_X0 : Fuel -> Gen X
         con_X1 : Fuel -> Gen X
         con_X2 : Fuel -> Gen X
 
-        con_X0 fuel = oneOf' [ pure X0 ]
-        con_X1 fuel = oneOf' [ pure X1 ]
-        con_X2 fuel = oneOf' [ do y <- data_Y fuel
-                                  pure $ X2 y ]
+        con_X0 fuel = oneOf [ pure X0 ]
+        con_X1 fuel = oneOf [ pure X1 ]
+        con_X2 fuel = oneOf [ do y <- data_Y fuel
+                                 pure $ X2 y ]
 
     data_Y fuel = case fuel of
-        Dry    => oneOf' [con_Y0 Dry]
-        More f => oneOf' [con_Y0 f  , con_Y1 f]
+        Dry    => oneOf [con_Y0 Dry]
+        More f => oneOf [con_Y0 f  , con_Y1 f]
       where
         con_Y0 : Fuel -> Gen Y
         con_Y1 : Fuel -> Gen Y
 
-        con_Y0 fuel = oneOf' [ pure Y0 ]
-        con_Y1 fuel = oneOf' [ do x <- data_X fuel
-                                  pure $ Y1 x ]
+        con_Y0 fuel = oneOf [ pure Y0 ]
+        con_Y1 fuel = oneOf [ do x <- data_X fuel
+                                 pure $ Y1 x ]
 ```
 <!-- idris
   }
@@ -159,39 +159,39 @@ genD_idx_generated @{data_Nat} @{data_String} fuel = data_D_giv_no fuel
     data_D_giv_no : Fuel -> Gen (b ** D b)
 
     data_Bool fuel = case fuel of
-        Dry    => oneOf' [con_True Dry, con_False Dry]
-        More f => oneOf' [con_True f, con_False f]
+        Dry    => oneOf [con_True Dry, con_False Dry]
+        More f => oneOf [con_True f, con_False f]
       where
         con_True  : Fuel -> Gen Bool
         con_False : Fuel -> Gen Bool
 
-        con_True  fuel = oneOf' [pure True]
-        con_False fuel = oneOf' [pure False]
+        con_True  fuel = oneOf [pure True]
+        con_False fuel = oneOf [pure False]
 
     data_D_giv_no fuel = case fuel of
-        Dry    => oneOf' [con_JJ Dry, con_TL Dry]
-        More f => oneOf' [con_JJ f, con_FN f, con_TL f, con_TR f]
+        Dry    => oneOf [con_JJ Dry, con_TL Dry]
+        More f => oneOf [con_JJ f, con_FN f, con_TL f, con_TR f]
       where
         con_JJ : Fuel -> Gen (b ** D b)
         con_FN : Fuel -> Gen (b ** D b)
         con_TL : Fuel -> Gen (b ** D b)
         con_TR : Fuel -> Gen (b ** D b)
 
-        con_JJ fuel = oneOf' [ do b  <- data_Bool fuel
-                                  n1 <- data_Nat fuel
-                                  n2 <- data_Nat fuel
-                                  pure (_ ** JJ {b} n1 n2) ]
+        con_JJ fuel = oneOf [ do b  <- data_Bool fuel
+                                 n1 <- data_Nat fuel
+                                 n2 <- data_Nat fuel
+                                 pure (_ ** JJ {b} n1 n2) ]
 
-        con_FN fuel = oneOf' [ do n        <- data_Nat fuel
-                                  (b ** d) <- data_D_giv_no fuel
-                                  pure (_ ** FN {b} n d) ]
+        con_FN fuel = oneOf [ do n        <- data_Nat fuel
+                                 (b ** d) <- data_D_giv_no fuel
+                                 pure (_ ** FN {b} n d) ]
 
-        con_TL fuel = oneOf' [ do s <- data_String fuel
-                                  pure (_ ** TL s) ]
+        con_TL fuel = oneOf [ do s <- data_String fuel
+                                 pure (_ ** TL s) ]
 
-        con_TR fuel = oneOf' [ do s        <- data_String fuel
-                                  (b ** d) <- data_D_giv_no fuel
-                                  pure (_ ** TR {b} s d) ]
+        con_TR fuel = oneOf [ do s        <- data_String fuel
+                                 (b ** d) <- data_D_giv_no fuel
+                                 pure (_ ** TR {b} s d) ]
 ```
 <!-- idris
   }
@@ -232,8 +232,8 @@ genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
   where
     data_D_giv_b : Fuel -> (b : Bool) -> Gen (D b)
     data_D_giv_b fuel b = case fuel of
-        Dry    => oneOf' [con_JJ Dry b, con_TL Dry b]
-        More f => oneOf' [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
+        Dry    => oneOf [con_JJ Dry b, con_TL Dry b]
+        More f => oneOf [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
       where
         con_JJ : Fuel -> (b : Bool) -> Gen (D b)
         con_FN : Fuel -> (b : Bool) -> Gen (D b)
@@ -271,8 +271,8 @@ genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
   where
     data_D_giv_b : Fuel -> (b : Bool) -> Gen (D b)
     data_D_giv_b fuel b = case fuel of
-        Dry    => oneOf' [con_JJ Dry b, con_TL Dry b]
-        More f => oneOf' [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
+        Dry    => oneOf [con_JJ Dry b, con_TL Dry b]
+        More f => oneOf [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
       where
         con_JJ : Fuel -> (b : Bool) -> Gen (D b)
         con_FN : Fuel -> (b : Bool) -> Gen (D b)
@@ -328,30 +328,30 @@ genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
     data_D_giv_no fuel = ?gen_for_D_with_no_given_as_above
 
     data_D_giv_b fuel b = case fuel of
-        Dry    => oneOf' [con_JJ Dry b, con_TL Dry b]
-        More f => oneOf' [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
+        Dry    => oneOf [con_JJ Dry b, con_TL Dry b]
+        More f => oneOf [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
       where
         con_JJ : Fuel -> (b : Bool) -> Gen (D b)
         con_FN : Fuel -> (b : Bool) -> Gen (D b)
         con_TL : Fuel -> (b : Bool) -> Gen (D b)
         con_TR : Fuel -> (b : Bool) -> Gen (D b)
 
-        con_JJ fuel b = oneOf' [ do n1 <- data_Nat fuel
-                                    n2 <- data_Nat fuel
-                                    pure $ JJ {b} n1 n2 ]
+        con_JJ fuel b = oneOf [ do n1 <- data_Nat fuel
+                                   n2 <- data_Nat fuel
+                                   pure $ JJ {b} n1 n2 ]
 
-        con_FN fuel False = oneOf' [ do n        <- data_Nat fuel
-                                        (b ** d) <- data_D_giv_no fuel
-                                        pure $ FN {b} n d ]
+        con_FN fuel False = oneOf [ do n        <- data_Nat fuel
+                                       (b ** d) <- data_D_giv_no fuel
+                                       pure $ FN {b} n d ]
         con_FN _ _ = empty
 
-        con_TL fuel True = oneOf' [ do s <- data_String fuel
-                                       pure $ TL s ]
+        con_TL fuel True = oneOf [ do s <- data_String fuel
+                                      pure $ TL s ]
         con_TL _ _ = empty
 
-        con_TR fuel True = oneOf' [ do s        <- data_String fuel
-                                       (b ** d) <- data_D_giv_no fuel
-                                       pure $ TR {b} s d ]
+        con_TR fuel True = oneOf [ do s        <- data_String fuel
+                                      (b ** d) <- data_D_giv_no fuel
+                                      pure $ TR {b} s d ]
         con_TR _ _ = empty
 ```
 <!-- idris
@@ -405,12 +405,12 @@ genEqN_all_gened @{data_Nat} fuel = data_EqualN_giv_no fuel
   where
     data_EqualN_giv_no : Fuel -> Gen (n ** m ** EqualN n m)
     data_EqualN_giv_no fuel = case fuel of
-        Dry    => oneOf' [ con_ReflN Dry ]
-        More f => oneOf' [ con_ReflN f   ]
+        Dry    => oneOf [ con_ReflN Dry ]
+        More f => oneOf [ con_ReflN f   ]
       where
         con_ReflN : Fuel -> Gen (n ** m ** EqualN n m)
-        con_ReflN fuel = oneOf' [ do x <- data_Nat fuel
-                                     pure (_ ** _ ** ReflN {x}) ]
+        con_ReflN fuel = oneOf [ do x <- data_Nat fuel
+                                    pure (_ ** _ ** ReflN {x}) ]
 
 ```
 <!-- idris
@@ -445,11 +445,11 @@ genEqN_right_gened @{data_Nat} fuel n = data_EqualN_giv_l fuel n
   where
     data_EqualN_giv_l : Fuel -> (n : Nat) -> Gen (m ** EqualN n m)
     data_EqualN_giv_l fuel n = case fuel of
-        Dry    => oneOf' [ con_ReflN Dry n ]
-        More f => oneOf' [ con_ReflN f   n ]
+        Dry    => oneOf [ con_ReflN Dry n ]
+        More f => oneOf [ con_ReflN f   n ]
       where
         con_ReflN : Fuel -> (n : Nat) -> Gen (m ** EqualN n m)
-        con_ReflN fuel n = oneOf' [ do pure (_ ** ReflN {x=n}) ]
+        con_ReflN fuel n = oneOf [ do pure (_ ** ReflN {x=n}) ]
 ```
 <!-- idris
   }
@@ -508,13 +508,13 @@ genEqN_all_given @{data_Nat} fuel n = data_EqualN_giv_l_r fuel n
   where
     data_EqualN_giv_l_r : Fuel -> (n, m : Nat) -> Gen $ EqualN n m
     data_EqualN_giv_l_r fuel n m = case fuel of
-        Dry    => oneOf' [ con_ReflN Dry n m ]
-        More f => oneOf' [ con_ReflN f   n m ]
+        Dry    => oneOf [ con_ReflN Dry n m ]
+        More f => oneOf [ con_ReflN f   n m ]
       where
         con_ReflN : Fuel -> (n, m : Nat) -> Gen $ EqualN n m
         con_ReflN fuel n m = case decEq n m of
           No  _    => empty
-          Yes Refl => oneOf' [ pure $ ReflN {x=n} ]
+          Yes Refl => oneOf [ pure $ ReflN {x=n} ]
 ```
 <!-- idris
   }
@@ -566,19 +566,19 @@ genLT2_all_given fuel n m = data_LT2_given_l_r fuel n m
   where
     data_LT2_given_l_r : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
     data_LT2_given_l_r fuel n m = case fuel of
-        Dry    => oneOf' [ con_Base Dry n m ]
-        More f => oneOf' [ con_Base f   n m, con_Step f n m ]
+        Dry    => oneOf [ con_Base Dry n m ]
+        More f => oneOf [ con_Base f   n m, con_Step f n m ]
       where
         con_Base : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
         con_Step : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
 
         con_Base fuel n (S (S m)) = case decEq n m of
           No  _    => empty
-          Yes Refl => oneOf' [ pure $ Base {x=n} ]
+          Yes Refl => oneOf [ pure $ Base {x=n} ]
         con_Base _ _ _ = empty
 
-        con_Step fuel n (S m) = oneOf' [ do lt <- data_LT2_given_l_r fuel n m
-                                            pure $ Step {x=n, y=m} lt ]
+        con_Step fuel n (S m) = oneOf [ do lt <- data_LT2_given_l_r fuel n m
+                                           pure $ Step {x=n, y=m} lt ]
         con_Step _ _ _ = empty
 ```
 <!-- idris
