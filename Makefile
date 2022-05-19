@@ -22,14 +22,17 @@ clean:
 	for pkg in thirdparty/*/*.ipkg; do ${IDRIS2} --clean "$${pkg}"; done
 	${RM} -r thirdparty/*/build
 
-.PHONY: install install-all install-deptycheck
+.PHONY: install install-all install-deptycheck install-dependencies
 
 install: install-all
 
-install-all: install-deptycheck
+install-all: install-dependencies install-deptycheck
 
 install-deptycheck: deptycheck
 	${IDRIS2} --install deptycheck.ipkg
+
+install-dependencies: thirdparty-elab-util
+	${MAKE} -C thirdparty/elab-util install
 
 .PHONY: test test-all test-deptycheck
 
