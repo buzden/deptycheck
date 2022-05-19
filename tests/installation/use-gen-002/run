@@ -1,0 +1,5 @@
+rm -rf build
+
+$1 --build deptycheck-usage.ipkg && ./build/exec/deptycheck-usage-example
+
+rm -rf build

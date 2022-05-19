@@ -1,0 +1,9 @@
+package non-hermetic-deptycheck-tests
+
+authors = "Denis Buzdalov"
+version = 0.0.1
+
+main = Main
+executable = runtests
+
+depends = contrib, test

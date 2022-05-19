@@ -40,6 +40,11 @@ test-all: test-deptycheck print-v-delimiter test-pil
 test-deptycheck: deptycheck thirdparty-sop
 	${MAKE} -C tests -f tests.mk only="${only}"
 
+.PHONY: test-installation
+
+test-installation:
+	${MAKE} -C tests/installation -f non-hermetic-tests.mk only="${only}"
+
 .PHONY: thirdparties thirdparty-elab-util thirdparty-sop
 
 thirdparties: thirdparty-elab-util thirdparty-sop

@@ -1,0 +1,107 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  VERSIONS_FILE: .versions
+  DEPTYCHECK_REPO: "vmver/deptycheck"
+
+default:
+  artifacts:
+    expire_in: 3 hrs
+
+read-versions:
+  stage: .pre
+  script:
+    - if [[ "$CI_PIPELINE_SOURCE" == "schedule" ]]; then
+        echo -e "IDRIS2_TAG=latest\nDEPTYCHECK_GIT_REF=master" > .versions;
+      fi
+    - grep '^IDRIS2_TAG=[^ ]\+$' .versions
+    - grep '^DEPTYCHECK_GIT_REF=[^ ]\+$' .versions
+  artifacts:
+    reports:
+      dotenv: .versions
+
+.depends-on-idris:
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/snazzybucket/idris2:${IDRIS2_TAG}
+
+.idris-local-build-job:
+  artifacts:
+    paths:
+      - "**/build/**/*.tt[cm]"
+
+stages:
+  - dependencies
+  - lint
+  - build
+  - run
+  - test
+
+# TODO to find a way to not to repeat `read-versions` in `needs` for every job that extends `.depends-on-idris`.
+
+dependencies:
+  extends:
+    - .depends-on-idris
+  stage: dependencies
+  needs:
+    - read-versions
+  script:
+    - apt-get update && apt-get -y install git
+    - git clone --recurse-submodules "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${DEPTYCHECK_REPO}.git" deptycheck
+    - cd deptycheck
+    - git checkout "$DEPTYCHECK_GIT_REF"
+    - rm -rf docs tests example
+    - make install
+  artifacts:
+    paths:
+      - deptycheck
+      # - "$HOME/.idris2/idris2-*/deptycheck*/**/*.tt[cm]" # We can't go out the working dir with the artifacts :-(
+
+.depends-on-deptycheck:
+  before_script:
+    - make -C deptycheck install
+    - rm -rf deptycheck
+
+build:
+  extends:
+    - .depends-on-idris
+    - .depends-on-deptycheck
+    - .idris-local-build-job
+  stage: build
+  needs:
+    - read-versions
+    - dependencies
+  script:
+    - make build
+
+run:
+  extends:
+    - .depends-on-idris
+    - .depends-on-deptycheck
+  stage: run
+  needs:
+    - read-versions
+    - dependencies
+    - build
+  script:
+    - make run
+
+test:
+  extends:
+    - .depends-on-idris
+    - .depends-on-deptycheck
+  stage: test
+  needs:
+    - read-versions
+    - dependencies
+    - build
+  script:
+    - make test INTERACTIVE="--color"
+
+include:
+  - remote: 'https://jobs.r2devops.io/latest/super_linter.yml'
+
+super_linter:
+  stage: lint
+  needs: []
+  image:
+    name: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/github/super-linter:slim-v4
+  variables:
+    VALIDATE_JSCPD_ALL_CODEBASE: "true"
