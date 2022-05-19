@@ -3,6 +3,7 @@ module Test.DepTyCheck.Gen.Auto.Util.Reflection
 
 import public Data.Fin
 import public Data.List.Lazy
+import public Data.These
 import public Data.Vect.Dependent
 import public Data.Vect.Extra
 
@@ -419,3 +420,72 @@ public export
 isVar : TTImp -> Bool
 isVar $ IVar {} = True
 isVar _         = False
+
+namespace UpToRenaming
+
+  mutual
+
+    compWithSubst : (subst : List $ These Name Name) => (from, to : Maybe Name) -> TTImp -> TTImp -> Bool
+    compWithSubst (Just n) (Just n') e e' = n == n' && (e == e') @{UpToSubst} || (e == e') @{UpToSubst @{Both n n' :: subst}}
+    compWithSubst (Just n) Nothing   e e' = (e == e') @{UpToSubst @{This n  :: subst}}
+    compWithSubst Nothing  (Just n') e e' = (e == e') @{UpToSubst @{That n' :: subst}}
+    compWithSubst Nothing  Nothing   e e' = (e == e') @{UpToSubst}
+
+    [UpToSubst] (subst : List $ These Name Name) => Eq TTImp where
+      IVar _ v == IVar _ v' = maybe (v == v') (== Both v v') $ flip find subst $ \ior => fromThis ior == Just v || fromThat ior == Just v'
+      IPi _ c i n a r == IPi _ c' i' n' a' r' =
+        c == c' && (assert_total $ i == i') && a == a' && (assert_total $ compWithSubst n n' r r')
+      ILam _ c i n a r == ILam _ c' i' n' a' r' =
+        c == c' && (assert_total $ i == i') && a == a' && (assert_total $ compWithSubst n n' r r')
+      ILet _ _ c n ty val s == ILet _ _ c' n' ty' val' s' =
+        c == c' && ty == ty' && val == val' && (assert_total $ compWithSubst (Just n) (Just n') s s')
+
+      ICase _ t ty cs == ICase _ t' ty' cs' =
+        t == t' && ty == ty' && (assert_total $ cs == cs')
+      ILocal _ ds e == ILocal _ ds' e' =
+        (assert_total $ ds == ds') && e == e'
+      IUpdate _ fs t == IUpdate _ fs' t' =
+        (assert_total $ fs == fs') && t == t'
+
+      IApp _ f x == IApp _ f' x' = f == f' && x == x'
+      INamedApp _ f n x == INamedApp _ f' n' x' =
+        f == f' && n == n' && x == x'
+      IAutoApp _ f x == IAutoApp _ f' x' = f == f' && x == x'
+      IWithApp _ f x == IWithApp _ f' x' = f == f' && x == x'
+
+      ISearch _ n == ISearch _ n' = n == n'
+      IAlternative _ t as == IAlternative _ t' as' =
+        (assert_total $ t == t') && (assert_total $ as == as')
+      IRewrite _ p q == IRewrite _ p' q' =
+        p == p' && q == q'
+
+      IBindHere _ m t == IBindHere _ m' t' =
+        m == m' && t == t'
+      IBindVar _ s == IBindVar _ s' = s == s'
+      IAs _ _ u n t == IAs _ _ u' n' t' =
+        u == u' && n == n' && t == t'
+      IMustUnify _ r t == IMustUnify _ r' t' =
+        r == r' && t == t'
+
+      IDelayed _ r t == IDelayed _ r' t' = r == r' && t == t'
+      IDelay _ t == IDelay _ t' = t == t'
+      IForce _ t == IForce _ t' = t == t'
+
+      IQuote _ tm == IQuote _ tm' = tm == tm'
+      IQuoteName _ n == IQuoteName _ n' = n == n'
+      IQuoteDecl _ ds == IQuoteDecl _ ds' = assert_total $ ds == ds'
+      IUnquote _ tm == IUnquote _ tm' = tm == tm'
+
+      IPrimVal _ c == IPrimVal _ c' = c == c'
+      IType _ == IType _ = True
+      IHole _ s == IHole _ s' = s == s'
+
+      Implicit _ b == Implicit _ b' = b == b'
+      IWithUnambigNames _ ns t == IWithUnambigNames _ ns' t' =
+        map snd ns == map snd ns' && t == t'
+
+      _ == _ = False
+
+  export
+  [UpToRenaming] Eq TTImp where
+    x == y = (x == y) @{UpToSubst @{empty}}

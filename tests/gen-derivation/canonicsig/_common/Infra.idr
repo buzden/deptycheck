@@ -23,18 +23,11 @@ export
 chk : (ty : TypeInfo) -> List (Fin ty.args.length) -> Type -> TestCaseData
 chk ty giv expr = (canonicSig (MkGenSignature ty $ fromList giv), Fuel -> expr)
 
--- The following is a non-complete trick, dealing with the fact that unnamed arguments are named after compler's check for being `Type`
--- It works only for the top-level `Pi` type and only when `Pi` type is on the top level.
-similarTo : TTImp -> TTImp -> Bool
-IPi _ MW ExplicitArg Nothing argTy retTy `similarTo` IPi _ MW ExplicitArg (Just $ MN _ _) argTy' retTy' =
-    (argTy `similarTo` argTy') && (retTy `similarTo` retTy')
-x `similarTo` y = x == y
-
 export
 caseVerdict : TestCaseDesc -> Elab String
 caseVerdict (desc, given, expected) = do
   expected <- quote expected
-  pure $ if given `similarTo` expected
+  pure $ if (given == expected) @{UpToRenaming}
     then "\{desc}:\tOKAY"
     else """
          \{desc}:\tFAILED
