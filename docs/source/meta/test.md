@@ -12,5 +12,5 @@ This module contains a simple gen example:
 
 ```idris
 genN : Gen Nat
-genN = choiceMap pure [0, 1]
+genN = elements [0, 1]
 ```

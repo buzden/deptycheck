@@ -14,7 +14,7 @@ import Example.Pil.Lang.ShowC
 
 %hint
 interestingType : Gen Type'
-interestingType = oneOf $ map pure $ [Int', String', Bool']
+interestingType = elements [Int', String', Bool']
 
 alphaChar : Gen Char
 alphaChar = choose ('a', 'z')

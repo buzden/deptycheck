@@ -10,4 +10,10 @@ MkXSS "bc" ""
 -----
 MkXSS "" "a"
 -----
+MkXSS "a" "a"
+-----
+MkXSS "bc" "a"
+-----
+MkXSS "a" "bc"
+-----
 MkXSS "" ""

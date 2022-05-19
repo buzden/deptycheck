@@ -123,18 +123,15 @@ independent other = other
 |||
 ||| The resulting generator is not independent, i.e. `oneOf [a, b, c] <|> oneOf [d, e]` is equivalent to `oneOf [a, b, c, d, e]`.
 public export
-oneOf : Vect (S n) (Gen a) -> Gen a
-oneOf [x]            = independent x
-oneOf (x::xs@(_::_)) = independent x <|> oneOf xs
+oneOf : List (Gen a) -> Gen a
+oneOf []      = empty
+oneOf [x]     = independent x
+oneOf (x::xs) = independent x <|> oneOf xs
 
-||| Choose one of the given generators uniformly (using a list as an input).
-|||
-||| This function behaves similarly to `oneOf` but takes `List` that can be empty
-public export
+||| Choose one of the given generators uniformly. This function is a deprecated historical alias for `oneOf`.
+public export %inline %deprecate
 oneOf' : List (Gen a) -> Gen a
-oneOf' []      = empty
-oneOf' [x]     = independent x
-oneOf' (x::xs) = independent x <|> oneOf' xs
+oneOf' = oneOf
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -158,6 +155,13 @@ frequency = AlternG . concatMap (uncurry replicate . map independent)
 export
 frequency_dep : List (Nat, Gen a) -> Gen a
 frequency_dep = AlternG . concatMap (uncurry replicate)
+
+||| Choose one of the given values uniformly.
+|||
+||| The resulting generator is not independent, i.e. `elements xs <|> elements ys` is equivalent to `elements (xs ++ ys)`.
+export
+elements : List a -> Gen a
+elements = Uniform . fromList
 
 export
 Monad Gen where

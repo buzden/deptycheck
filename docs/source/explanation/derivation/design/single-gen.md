@@ -52,8 +52,8 @@ genX fuel = data_X fuel
     data_Y : Fuel -> Gen Y
 
     data_X fuel = case fuel of
-        Dry    => oneOf' [con_X0 Dry, con_X1 Dry]
-        More f => oneOf' [con_X0 f  , con_X1 f  , con_X2 f]
+        Dry    => oneOf [con_X0 Dry, con_X1 Dry]
+        More f => oneOf [con_X0 f  , con_X1 f  , con_X2 f]
       where
         con_X0 : Fuel -> Gen X
         con_X1 : Fuel -> Gen X
@@ -64,8 +64,8 @@ genX fuel = data_X fuel
         con_X2 fuel = ?gen_body_for_constructor_X2
 
     data_Y fuel = case fuel of
-        Dry    => oneOf' [con_Y0 Dry]
-        More f => oneOf' [con_Y0 f  , con_Y1 f]
+        Dry    => oneOf [con_Y0 Dry]
+        More f => oneOf [con_Y0 f  , con_Y1 f]
       where
         con_Y0 : Fuel -> Gen Y
         con_Y1 : Fuel -> Gen Y

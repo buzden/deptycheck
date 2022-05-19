@@ -11,7 +11,7 @@ data X = MkX Bool
 %runElab derive "X" [Generic, Meta, Show]
 
 gensGen : Fuel -> Gen (a ** Gen a)
-gensGen fuel = oneOf' $ pure <$>
+gensGen fuel = elements
   [ (String ** smallStrs fuel)
   , (Nat    ** smallNats fuel)
   ]
