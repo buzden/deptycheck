@@ -1,0 +1,31 @@
+1/2: Building GenForSome (src/GenForSome.idr)
+2/2: Building Run (src/Run.idr)
+
+---------
+
+define `y1`
+use `y1`
+-- post defs: ["y1"]
+
+---------
+
+define `y3`
+define `y2`
+-- post defs: ["y2", "y3"]
+
+---------
+
+define `x2`
+-- post defs: ["x2"]
+
+---------
+
+define `y1`
+define `z2`
+-- post defs: ["z2", "y1"]
+
+---------
+
+define `z3`
+define `x2`
+-- post defs: ["x2", "z3"]

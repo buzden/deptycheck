@@ -1,0 +1,5 @@
+rm -rf build
+
+$1 --build derive.ipkg && ./build/exec/run-derived-gen
+
+rm -rf build

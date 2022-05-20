@@ -1,0 +1,10 @@
+package derive-test
+
+authors = "Denis Buzdalov"
+
+depends = deptycheck, contrib, elab-util
+
+modules = DerivedGen
+
+main = DerivedGen
+executable = run-derived-gen

@@ -1,0 +1,11 @@
+package deptycheck-usage
+
+authors = "Denis Buzdalov"
+
+sourcedir = "src"
+
+depends = contrib, deptycheck
+
+main = Run
+
+executable = deptycheck-usage-example
