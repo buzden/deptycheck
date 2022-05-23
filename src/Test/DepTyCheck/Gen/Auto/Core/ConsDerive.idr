@@ -2,6 +2,7 @@
 module Test.DepTyCheck.Gen.Auto.Core.ConsDerive
 
 import public Control.Monad.State
+import public Control.Monad.Writer
 
 import public Data.Either
 
@@ -80,7 +81,7 @@ namespace NonObligatoryExts
 
       -- Analyse that we can do subgeneration for each constructor argument
       -- Fails using `Elaboration` if the given expression is not an application to a type constructor
-      let analyseTypeApp : TTImp -> m $ TypeApp con
+      let analyseTypeApp : forall m. Elaboration m => MonadWriter AdditionalGens m => TTImp -> m $ TypeApp con
           analyseTypeApp expr = do
             let (lhs, args) = unAppAny expr
             ty <- case lhs of
@@ -104,8 +105,13 @@ namespace NonObligatoryExts
                       -- TODO to think: I use the leftmost parameter above, maybe I'd need the rightmost one.
                       --      It may influence on which virtual poly-type-info I construct: I may construct not those which is given
                       --      when several type arguments are propositionally the same for this data constructor.
-                      Just (idx, _) => pure $ typeInfoForPolyType (argName $ index' sig.targetType.args idx) type'sArgs
-                      Nothing       => ?need_a_universal_generator
+                      Just (idx, _) => do
+                        let polyTypeInfo = typeInfoForPolyType (argName $ index' sig.targetType.args idx) type'sArgs
+                        tell $ {additionalGens $= insert $ MkGenSignature polyTypeInfo empty} neutral
+                        pure polyTypeInfo
+                      Nothing => do
+                        tell $ {universalGen := True} neutral
+                        ?need_a_typeinfo_for_universal_generator
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
               lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{lhs}"
@@ -116,7 +122,7 @@ namespace NonObligatoryExts
               expr            => Right expr
 
       -- Compute left-to-right need of generation when there are non-trivial types at the left
-      argsTypeApps <- for .| Vect.fromList con.args .| analyseTypeApp . type
+      (argsTypeApps, additionalGens) <- runWriterT {m} $ for .| Vect.fromList con.args .| analyseTypeApp . type
 
       -- Decide how constructor arguments would be named during generation
       let bindNames : Vect (con.args.length) String
@@ -231,7 +237,7 @@ namespace NonObligatoryExts
         rightmost <- indepPermutations' disjDeps rightmostArgs
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
-      map (, neutral) $ map callOneOf $ traverse genForOrder allOrders
+      map (, additionalGens) $ map callOneOf $ traverse genForOrder allOrders
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.
