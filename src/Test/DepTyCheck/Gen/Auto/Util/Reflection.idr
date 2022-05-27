@@ -253,6 +253,11 @@ ti.unpolyName = case ti.name of
   NS (MkNS ["^poly^"]) nm => nm
   nm                      => nm
 
+export
+isPolyType : TypeInfo -> Bool
+isPolyType $ MkTypeInfo {name = NS (MkNS ["^poly^"]) nm, _} = True
+isPolyType _                                                = False
+
 ----------------------------------------------
 --- Analyzing dependently typed signatures ---
 ----------------------------------------------

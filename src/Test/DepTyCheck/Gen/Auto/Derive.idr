@@ -143,5 +143,7 @@ canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 export
 deriveCanonical : DerivatorCore => CanonicGen m => GenSignature -> Name -> m (Decl, Decl)
 deriveCanonical sig name = do
+  when (isPolyType sig.targetType) $
+    fail "INTERNAL ERROR: attempt to derive generator for polymorphic type `\{show $ sig.targetType.name}`"
   (bodyClauses, additionalGens) <- canonicBody sig name
   pure (export' name (canonicSig sig additionalGens), def name bodyClauses)
