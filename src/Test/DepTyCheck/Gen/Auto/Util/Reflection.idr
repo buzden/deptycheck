@@ -478,7 +478,7 @@ namespace UpToRenaming
 
       IPrimVal _ c == IPrimVal _ c' = c == c'
       IType _ == IType _ = True
-      IHole _ s == IHole _ s' = s == s'
+      IHole _ s == IHole _ s' = True -- Holes are anyway unique and does not matter what the names are.
 
       Implicit _ b == Implicit _ b' = b == b'
       IWithUnambigNames _ ns t == IWithUnambigNames _ ns' t' =
