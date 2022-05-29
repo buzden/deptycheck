@@ -23,10 +23,10 @@ ILam.  (MW ExplicitArg {fuel:860} : IVar Data.Fuel.Fuel)
                 []
                 (MkTy <AlternativeCore.X'S>[0]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:5975} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:5973} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar AlternativeCore.X'S
-                                         $ IVar {arg:5975}))))
+                                         $ IVar {arg:5973}))))
          IDef <Prelude.Types.Nat>[]
               [ PatClause (IApp. IVar <Prelude.Types.Nat>[] $ IBindVar fuel)
                           (IApp. IVar <*>
