@@ -99,7 +99,7 @@ canonicConsBody sig name con = do
   (consGen, addition) <- consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg
   pure $ (, addition) $
     -- Happy case, given arguments conform out constructor's GADT indices
-    [ callCanonic sig name (bindVar fuelArg) bindExprs .= deceqise consGen ]
+    [ wrapAdditionalGensLHS addition (callCanonic sig name (bindVar fuelArg) bindExprs) .= deceqise consGen ]
     ++ if all isSimpleBindVar bindExprs then [] {- do not produce dead code if the happy case handles everything already -} else
       -- The rest case, if given arguments do not conform to the current constructor then return empty generator
       [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(empty) ]

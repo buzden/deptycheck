@@ -96,10 +96,6 @@ namespace ClojuringCanonicImpl
     , MonadWriter (List Decl, List Decl) m -- function declarations and bodies
     )
 
-  nameForGen : GenSignature -> Name
-  nameForGen sig = let (ty, givs) = characteristics sig in UN $ Basic $ "<\{ty}>\{show givs}"
-  -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
-
   -- Instead of staticly ensuring that map holds only correct values, we check dynamically, because it's hard to go through `==`-based lookup of maps.
   lookupLengthChecked : (intSig : GenSignature) -> SortedMap GenSignature (ExternalGenSignature, Name) ->
                         Maybe (Name, Subset ExternalGenSignature $ \extSig => extSig.givenParams.size = intSig.givenParams.size)
@@ -117,6 +113,10 @@ namespace ClojuringCanonicImpl
 
       -- get the name of internal gen, derive if necessary
       internalGenName <- do
+
+        -- manage if we were asked to call for polymorphic gen
+        let False = isPolyType $ sig.targetType
+          | True => pure $ nameForGen sig
 
         -- look for existing (already derived) internals, use it if exists
         let Nothing = lookup sig !get

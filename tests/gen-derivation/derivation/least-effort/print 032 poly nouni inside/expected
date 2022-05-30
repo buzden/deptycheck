@@ -77,31 +77,21 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                             $ IVar {arg:22}
                                                             $ IVar {arg:26}))))
                             IDef <<Builtin.MkPair>>
-                                 [ PatClause (IApp. IVar <<Builtin.MkPair>>
-                                                  $ IBindVar ^cons_fuel^
-                                                  $ IBindVar a
-                                                  $ IBindVar b)
+                                 [ PatClause (IAutoApp. (IApp. IVar <<Builtin.MkPair>>
+                                                             $ IBindVar ^cons_fuel^
+                                                             $ IBindVar a
+                                                             $ IBindVar b)
+                                                      $ IBindVar <^poly^.{arg:22}>[]
+                                                      $ IBindVar <^poly^.{arg:26}>[])
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ ILet MW
-                                                                       ^summoned_poly_gen^{arg:22}
-                                                                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                                                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                   $ IVar {arg:22}))
-                                                                       (ISearch 50)
-                                                                       (IApp. IVar ^summoned_poly_gen^{arg:22}
-                                                                            $ IVar ^cons_fuel^)
+                                                                $ (IApp. IVar <^poly^.{arg:22}>[]
+                                                                       $ IVar ^cons_fuel^)
                                                                 $ (ILam.  (MW ExplicitArg x : Implicit False)
                                                                        => (IApp. IVar >>=
-                                                                               $ ILet MW
-                                                                                      ^summoned_poly_gen^{arg:26}
-                                                                                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                                                                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                                  $ IVar {arg:26}))
-                                                                                      (ISearch 50)
-                                                                                      (IApp. IVar ^summoned_poly_gen^{arg:26}
-                                                                                           $ IVar ^cons_fuel^)
+                                                                               $ (IApp. IVar <^poly^.{arg:26}>[]
+                                                                                      $ IVar ^cons_fuel^)
                                                                                $ (ILam.  (MW ExplicitArg y : Implicit False)
                                                                                       => (IApp. (INamedApp. IVar Prelude.pure
                                                                                                           $ IVar Test.DepTyCheck.Gen.Gen)

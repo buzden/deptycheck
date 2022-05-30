@@ -85,20 +85,15 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                             $ IVar ty))
                                                          $ IVar Nil)) ]
                             IDef <<Prelude.Types.Just>>
-                                 [ PatClause (IApp. IVar <<Prelude.Types.Just>>
-                                                  $ IBindVar ^cons_fuel^
-                                                  $ IBindVar ty)
+                                 [ PatClause (IAutoApp. (IApp. IVar <<Prelude.Types.Just>>
+                                                             $ IBindVar ^cons_fuel^
+                                                             $ IBindVar ty)
+                                                      $ IBindVar <^poly^.ty>[])
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ ILet MW
-                                                                       ^summoned_poly_gen^ty
-                                                                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                                                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                   $ IVar ty))
-                                                                       (ISearch 50)
-                                                                       (IApp. IVar ^summoned_poly_gen^ty
-                                                                            $ IVar ^cons_fuel^)
+                                                                $ (IApp. IVar <^poly^.ty>[]
+                                                                       $ IVar ^cons_fuel^)
                                                                 $ (ILam.  (MW ExplicitArg x : Implicit False)
                                                                        => (IApp. (INamedApp. IVar Prelude.pure
                                                                                            $ IVar Test.DepTyCheck.Gen.Gen)

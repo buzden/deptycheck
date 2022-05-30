@@ -35,6 +35,14 @@ public export
 Ord GenSignature where
   compare = comparing characteristics
 
+nameForGen' : GenSignature -> String
+nameForGen' sig = let (ty, givs) = characteristics sig in "<\{ty}>\{show givs}"
+-- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
+
+export
+nameForGen : GenSignature -> Name
+nameForGen = UN . Basic . nameForGen'
+
 --------------------------------------------
 --- Additional generators representation ---
 --------------------------------------------
@@ -135,6 +143,18 @@ canonicDefaultLHS sig n fuel = callCanonic sig n .| bindVar fuel .| bindVar <$> 
 export %inline
 canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
 canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
+
+export
+wrapAdditionalGensLHS : AdditionalGens -> TTImp -> TTImp
+wrapAdditionalGensLHS ags expr = foldl addGen (wrapUni expr) $ SortedSet.toList ags.additionalGens where
+
+  addGen : TTImp -> GenSignature -> TTImp
+  addGen r = autoApp r . bindVar . nameForGen'
+
+  wrapUni : TTImp -> TTImp
+  wrapUni = if ags.universalGen
+              then flip autoApp $ bindVar "universal^gen"
+              else id
 
 ---------------------------------
 --- External-facing functions ---
