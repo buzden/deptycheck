@@ -119,8 +119,13 @@ namespace NonObligatoryExts
               let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
               let bindSubgenResult = foldr (\l, r => var `{Builtin.DPair.MkDPair} .$ l .$ r) genedArg subgeneratedArgs
 
+              -- Form an expression of the RHS of a bind; simplify lambda if subgeneration result type does not require pattern matching
+              let bindRHS = \cont => case bindSubgenResult of
+                                       IBindVar _ n => lam (MkArg MW ExplicitArg (Just $ UN $ Basic n) implicitFalse) cont
+                                       _            => `(\ ~bindSubgenResult => ~cont)
+
               -- Chain the subgen call with a given continuation
-              pure $ \cont => leftExprF `(~subgenCall >>= \ ~bindSubgenResult => ~cont)
+              pure $ \cont => leftExprF `(~subgenCall >>= ~(bindRHS cont))
 
             callCons : TTImp
             callCons = do

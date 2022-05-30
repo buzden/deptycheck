@@ -113,16 +113,13 @@ ILam.  (MW ExplicitArg {fuel:864} : IVar Data.Fuel.Fuel)
                                                                        $ IVar ^cons_fuel^
                                                                        $ IVar x
                                                                        $ IVar y)
-                                                                $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                                       => ICase (IVar {lamc:0})
-                                                                                (Implicit False)
-                                                                                [ PatClause (IBindVar ^bnd^{arg:841})
-                                                                                            (IApp. (INamedApp. IVar Prelude.pure
-                                                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
-                                                                                                 $ (IApp. (INamedApp. IVar DerivedGen.Step
-                                                                                                                    $ IVar y
-                                                                                                                    $ IVar x)
-                                                                                                        $ IVar ^bnd^{arg:841})) ]))
+                                                                $ (ILam.  (MW ExplicitArg ^bnd^{arg:841} : Implicit False)
+                                                                       => (IApp. (INamedApp. IVar Prelude.pure
+                                                                                           $ IVar Test.DepTyCheck.Gen.Gen)
+                                                                               $ (IApp. (INamedApp. IVar DerivedGen.Step
+                                                                                                  $ IVar y
+                                                                                                  $ IVar x)
+                                                                                      $ IVar ^bnd^{arg:841}))))
                                                          $ IVar Nil))
                                  , PatClause (IApp. IVar <<DerivedGen.Step>>
                                                   $ Implicit True
