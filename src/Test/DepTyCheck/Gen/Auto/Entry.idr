@@ -323,3 +323,22 @@ deriveGen = do
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
   tt <- deriveGenExpr signature
   check tt
+
+||| Alternative entry-point function of automatic derivation of `Gen`'s.
+|||
+||| This function can be used precisely as the `deriveGen`.
+||| The only difference is that this function does not rely on somewhat fragile goal mechanism
+||| allowing the user to pass the desired type explicitly.
+|||
+||| Since Idris allows simple top-level definitions to not to contain type signature,
+||| one can use this derivation function as a one-liner without repetition of a desired type, e.g.
+|||
+|||   ```idris
+|||   genX = deriveGenFor $ Fuel -> (Fuel -> Gen Y) => (a : A) -> (c : C) -> Gen (b ** X a b c)
+|||   ```
+export %macro
+deriveGenFor : DerivatorCore => (0 a : Type) -> Elab a
+deriveGenFor a = do
+  sig <- quote a
+  tt <- deriveGenExpr sig
+  check tt
