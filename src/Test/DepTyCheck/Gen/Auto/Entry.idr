@@ -301,7 +301,7 @@ deriveGenExpr signature = do
 ||| you can define your function in the following way:
 |||
 |||   ```idris
-|||   genX : Gen Y => Gen Z1 => ({n : _} -> {b : B n} -> Gen (Z2 b)) => {n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)
+|||   genX : Gen Y => Gen Z1 => ({n : _} -> {b : B n} -> Gen (Z2 b)) => {n : _} -> (a : A) -> (c : C) -> Gen (b : B n ** X a b c)
 |||   genX = deriveGen
 |||   ```
 |||
@@ -310,7 +310,8 @@ deriveGenExpr signature = do
 ||| So, the example from above will look like this:
 |||
 |||   ```idris
-|||   genX : Fuel -> (Fuel -> Gen Y) => (Fuel -> Gen Z1) => (Fuel -> {n : _} -> {b : B n} -> Gen (Z2 b)) => {n : _} -> (a : A) -> (c : C) -> (b : B n ** X a b c)
+|||   genX : Fuel -> (Fuel -> Gen Y) => (Fuel -> Gen Z1) => (Fuel -> {n : _} -> {b : B n} -> Gen (Z2 b)) =>
+|||          {n : _} -> (a : A) -> (c : C) -> Gen (b : B n ** X a b c)
 |||   genX = deriveGen
 |||   ```
 |||
