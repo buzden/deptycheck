@@ -252,24 +252,27 @@ checkTypeIsGen checkSide sig = do
 
 --- Boundaries between external and internal generator functions ---
 
-internalGenCallingLambda : CanonicGen m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
-internalGenCallingLambda sig fuelArg = foldr (map . mkLam) call sig.givenParams.asList where
+nameForGen : ExternalGenSignature -> Name
+nameForGen sig = let (ty, givs) = characteristics sig in UN $ Basic $ "external^<\{ty}>\{show givs}"
+-- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
 
-  mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
-  mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just name .| (index' sig.targetType.args idx).type
+internalGenCallingLambda : CanonicGen m => CheckResult DerivationTask -> (fuelArg : Name) -> m TTImp
+internalGenCallingLambda (sig ** exts ** givsPos) fuelArg = do
+    let Just args = joinEithersPos sig.givenParams.asList exts.externals givsPos
+      | Nothing => fail "INTERNAL ERROR: can't join partitioned args back"
+    foldr (map . mkLam) call args
+
+  where
+
+  -- either given param or auto param
+  mkLam : Either (Fin sig.targetType.args.length, ArgExplicitness, Name) (ExternalGenSignature, TTImp) -> TTImp -> TTImp
+  mkLam $ Left (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just name .| (index' sig.targetType.args idx).type
+  mkLam $ Right (extSig, ty)     = lam $ MkArg MW AutoImplicit .| Just (nameForGen extSig) .| ty
+                                   -- TODO to think whether it's okay to calculate the name twice: here and below for a map
 
   call : m TTImp
   call = let Element intSig prf = internalise sig in
          callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
-
-assignNames : GenExternals -> List (ExternalGenSignature, Name, TTImp)
-assignNames $ MkGenExternals exts = exts <&> \(sig, tti) => (sig, nameForGen sig, tti) where
-  nameForGen : ExternalGenSignature -> Name
-  nameForGen sig = let (ty, givs) = characteristics sig in UN $ Basic $ "external^<\{ty}>\{show givs}"
-  -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
-
-wrapWithExternalsAutos : Foldable f => f (Name, TTImp) -> TTImp -> TTImp
-wrapWithExternalsAutos = flip $ foldr $ lam . uncurry (MkArg MW AutoImplicit . Just)
 
 wrapFuel : (fuelArg : Name) -> TTImp -> TTImp
 wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
@@ -281,12 +284,11 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 export
 deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
-  (signature ** externals ** givenArgsPositions) <- checkTypeIsGen DerivationTask signature
-  let externals = assignNames externals
-  let externalsSigToName = fromList $ externals <&> \(sig, name, _) => (sig, name)
+  checkResult@(_ ** externals ** _) <- checkTypeIsGen DerivationTask signature
+  let externalsSigToName = fromList $ externals.externals <&> \(sig, _) => (sig, nameForGen sig)
   let fuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-  (lambda, locals) <- runCanonic externalsSigToName $ internalGenCallingLambda signature fuelArg
-  pure $ wrapFuel fuelArg $ wrapWithExternalsAutos (snd <$> externals) $ local locals lambda
+  (lambda, locals) <- runCanonic externalsSigToName $ internalGenCallingLambda checkResult fuelArg
+  pure $ wrapFuel fuelArg $ local locals lambda
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
