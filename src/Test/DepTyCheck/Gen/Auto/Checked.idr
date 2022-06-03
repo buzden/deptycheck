@@ -60,6 +60,7 @@ record ExternalGenSignature where
 
 namespace ExternalGenSignature
 
+  export
   characteristics : ExternalGenSignature -> (String, List Nat)
   characteristics $ MkExternalGenSignature ty giv = (show ty.name, toNatList $ keys giv)
 

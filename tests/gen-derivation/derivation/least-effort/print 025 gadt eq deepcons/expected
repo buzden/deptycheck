@@ -3,11 +3,11 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen Nat)} -> Gen (DPair Nat (\a => DPair Nat (\b => LT2 a b)))
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg {fuel:883} : IVar Data.Fuel.Fuel)
-    => (MW AutoImplicit {externalAutoimpl:882} : IPi.  (MW ExplicitArg {arg:850} : IVar Data.Fuel.Fuel)
-                                                    -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                            $ IVar Prelude.Types.Nat))
-    => ILocal (IApp. IVar <DerivedGen.LT2>[] $ IVar {fuel:883})
+ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
+    => (MW AutoImplicit external^<Prelude.Types.Nat>[] : IPi.  (MW ExplicitArg {arg:850} : IVar Data.Fuel.Fuel)
+                                                            -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                    $ IVar Prelude.Types.Nat))
+    => ILocal (IApp. IVar <DerivedGen.LT2>[] $ IVar ^outmost-fuel^)
          IClaim MW
                 Export
                 []
@@ -79,7 +79,7 @@ ILam.  (MW ExplicitArg {fuel:883} : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar {externalAutoimpl:882}
+                                                                $ (IApp. IVar external^<Prelude.Types.Nat>[]
                                                                        $ IVar ^cons_fuel^)
                                                                 $ (ILam.  (MW ExplicitArg x : Implicit False)
                                                                        => (IApp. (INamedApp. IVar Prelude.pure

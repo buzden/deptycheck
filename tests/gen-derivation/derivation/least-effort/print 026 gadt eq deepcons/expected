@@ -3,10 +3,10 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (a : Nat) -> Gen (DPair Nat (\b => LT2 a b))
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg {fuel:865} : IVar Data.Fuel.Fuel)
+ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => ILocal (ILam.  (MW ExplicitArg a : IVar Prelude.Types.Nat)
                    => (IApp. IVar <DerivedGen.LT2>[0]
-                           $ IVar {fuel:865}
+                           $ IVar ^outmost-fuel^
                            $ IVar a))
          IClaim MW
                 Export

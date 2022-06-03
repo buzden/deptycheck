@@ -256,8 +256,11 @@ internalGenCallingLambda sig fuelArg = foldr (map . mkLam) call sig.givenParams.
   call = let Element intSig prf = internalise sig in
          callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
 
-assignNames : GenExternals -> Elab $ List (ExternalGenSignature, Name, TTImp)
-assignNames $ MkGenExternals exts = for exts $ \(sig, tti) => (sig, ,tti) <$> genSym "externalAutoimpl"
+assignNames : GenExternals -> List (ExternalGenSignature, Name, TTImp)
+assignNames $ MkGenExternals exts = exts <&> \(sig, tti) => (sig, nameForGen sig, tti) where
+  nameForGen : ExternalGenSignature -> Name
+  nameForGen sig = let (ty, givs) = characteristics sig in UN $ Basic $ "external^<\{ty}>\{show givs}"
+  -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
 
 wrapWithExternalsAutos : Foldable f => f (Name, TTImp) -> TTImp -> TTImp
 wrapWithExternalsAutos = flip $ foldr $ lam . uncurry (MkArg MW AutoImplicit . Just)
@@ -273,9 +276,9 @@ export
 deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
   (signature, externals) <- checkTypeIsGen DerivationTask signature
-  externals <- assignNames externals
+  let externals = assignNames externals
   let externalsSigToName = fromList $ externals <&> \(sig, name, _) => (sig, name)
-  fuelArg <- genSym "fuel"
+  let fuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
   (lambda, locals) <- runCanonic externalsSigToName $ internalGenCallingLambda signature fuelArg
   pure $ wrapFuel fuelArg $ wrapWithExternalsAutos (snd <$> externals) $ local locals lambda
 
