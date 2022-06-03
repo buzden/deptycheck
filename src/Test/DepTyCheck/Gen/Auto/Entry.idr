@@ -1,7 +1,6 @@
 ||| Derivation interface for an end-point user
 module Test.DepTyCheck.Gen.Auto.Entry
 
-import public Data.Either
 import public Data.Fuel
 
 import public Decidable.Equality
@@ -150,7 +149,7 @@ checkTypeIsGen checkSide sig = do
     _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
-  (givenParams, autoImplArgs) <- do
+  (givenParams, autoImplArgs, givenParamsPositions) <- do
     let
       classifyArg : forall m. Elaboration m =>
                     NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
@@ -166,7 +165,7 @@ checkTypeIsGen checkSide sig = do
       classifyArg $ MkArg M1 _               _ ty = failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
       classifyArg $ MkArg MW (DefImplicit _) _ ty = failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
 
-    map partitionEithers $ for sigArgs classifyArg
+    map partitionEithersPos $ for sigArgs.asVect classifyArg
 
   ----------------------------------------------------------------------
   -- Check that generated and given parameter lists are actually sets --
