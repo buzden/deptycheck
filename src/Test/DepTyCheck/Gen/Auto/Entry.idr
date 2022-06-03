@@ -45,8 +45,11 @@ isExternalGen : GenCheckSide -> Bool
 isExternalGen ExternalGen = True
 isExternalGen _           = False
 
+OriginalSignatureInfo : ExternalGenSignature -> GenExternals -> Type
+OriginalSignatureInfo sig exts = SortedSet $ Fin $ sig.givenParams.size + exts.externals.length
+
 CheckResult : GenCheckSide -> Type
-CheckResult DerivationTask = (ExternalGenSignature, GenExternals)
+CheckResult DerivationTask = (sig : ExternalGenSignature ** exts : GenExternals ** OriginalSignatureInfo sig exts)
 CheckResult ExternalGen    = (GenSignatureFC, ExternalGenSignature)
 
 --- Analysis functions ---
@@ -238,7 +241,11 @@ checkTypeIsGen checkSide sig = do
   ------------
 
   case checkSide of
-    DerivationTask => pure (genSig, MkGenExternals autoImplArgs)
+    DerivationTask => do
+      let Yes prf = genSig.givenParams.size + autoImplArgs.length `decEq` sigArgs.length
+        | No _ => fail $ "INTERNAL ERROR: positions length is incorrect"
+                      ++ ", \{show sigArgs.length} is not \{show genSig.givenParams.size} + \{show autoImplArgs.length}"
+      pure (genSig ** MkGenExternals autoImplArgs ** rewrite prf in givenParamsPositions)
     ExternalGen    => do
       let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
       pure (fc, genSig)
@@ -274,7 +281,7 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 export
 deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
-  (signature, externals) <- checkTypeIsGen DerivationTask signature
+  (signature ** externals ** givenArgsPositions) <- checkTypeIsGen DerivationTask signature
   let externals = assignNames externals
   let externalsSigToName = fromList $ externals <&> \(sig, name, _) => (sig, name)
   let fuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
