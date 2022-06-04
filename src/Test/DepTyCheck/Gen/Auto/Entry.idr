@@ -256,11 +256,11 @@ nameForGen : ExternalGenSignature -> Name
 nameForGen sig = let (ty, givs) = characteristics sig in UN $ Basic $ "external^<\{ty}>\{show givs}"
 -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
 
-internalGenCallingLambda : CanonicGen m => CheckResult DerivationTask -> (fuelArg : Name) -> m TTImp
-internalGenCallingLambda (sig ** exts ** givsPos) fuelArg = do
+internalGenCallingLambda : Elaboration m => CheckResult DerivationTask -> TTImp -> m TTImp
+internalGenCallingLambda (sig ** exts ** givsPos) call = do
     let Just args = joinEithersPos sig.givenParams.asList exts.externals givsPos
       | Nothing => fail "INTERNAL ERROR: can't join partitioned args back"
-    foldr (map . mkLam) call args
+    pure $ foldr mkLam call args
 
   where
 
@@ -270,9 +270,10 @@ internalGenCallingLambda (sig ** exts ** givsPos) fuelArg = do
   mkLam $ Right (extSig, ty)     = lam $ MkArg MW AutoImplicit .| Just (nameForGen extSig) .| ty
                                    -- TODO to think whether it's okay to calculate the name twice: here and below for a map
 
-  call : m TTImp
-  call = let Element intSig prf = internalise sig in
-         callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
+callMainDerivedGen : CanonicGen m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
+callMainDerivedGen sig fuelArg =
+  let Element intSig prf = internalise sig in
+  callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
 
 wrapFuel : (fuelArg : Name) -> TTImp -> TTImp
 wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
@@ -284,11 +285,11 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 export
 deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
-  checkResult@(_ ** externals ** _) <- checkTypeIsGen DerivationTask signature
+  checkResult@(signature ** externals ** _) <- checkTypeIsGen DerivationTask signature
   let externalsSigToName = fromList $ externals.externals <&> \(sig, _) => (sig, nameForGen sig)
   let fuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-  (lambda, locals) <- runCanonic externalsSigToName $ internalGenCallingLambda checkResult fuelArg
-  pure $ wrapFuel fuelArg $ local locals lambda
+  (callExpr, locals) <- runCanonic externalsSigToName $ callMainDerivedGen signature fuelArg
+  wrapFuel fuelArg <$> internalGenCallingLambda checkResult (local locals callExpr)
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||
