@@ -1,7 +1,6 @@
 ||| Derivation interface for an end-point user
 module Test.DepTyCheck.Gen.Auto.Entry
 
-import public Data.Either
 import public Data.Fuel
 
 import public Decidable.Equality
@@ -46,8 +45,11 @@ isExternalGen : GenCheckSide -> Bool
 isExternalGen ExternalGen = True
 isExternalGen _           = False
 
+OriginalSignatureInfo : ExternalGenSignature -> GenExternals -> Type
+OriginalSignatureInfo sig exts = SortedSet $ Fin $ sig.givenParams.size + exts.externals.length
+
 CheckResult : GenCheckSide -> Type
-CheckResult DerivationTask = (ExternalGenSignature, GenExternals)
+CheckResult DerivationTask = (sig : ExternalGenSignature ** exts : GenExternals ** OriginalSignatureInfo sig exts)
 CheckResult ExternalGen    = (GenSignatureFC, ExternalGenSignature)
 
 --- Analysis functions ---
@@ -150,7 +152,7 @@ checkTypeIsGen checkSide sig = do
     _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
-  (givenParams, autoImplArgs) <- do
+  (givenParams, autoImplArgs, givenParamsPositions) <- do
     let
       classifyArg : forall m. Elaboration m =>
                     NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
@@ -166,7 +168,7 @@ checkTypeIsGen checkSide sig = do
       classifyArg $ MkArg M1 _               _ ty = failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
       classifyArg $ MkArg MW (DefImplicit _) _ ty = failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
 
-    map partitionEithers $ for sigArgs classifyArg
+    map partitionEithersPos $ for sigArgs.asVect classifyArg
 
   ----------------------------------------------------------------------
   -- Check that generated and given parameter lists are actually sets --
@@ -239,31 +241,39 @@ checkTypeIsGen checkSide sig = do
   ------------
 
   case checkSide of
-    DerivationTask => pure (genSig, MkGenExternals autoImplArgs)
+    DerivationTask => do
+      let Yes prf = genSig.givenParams.size + autoImplArgs.length `decEq` sigArgs.length
+        | No _ => fail $ "INTERNAL ERROR: positions length is incorrect"
+                      ++ ", \{show sigArgs.length} is not \{show genSig.givenParams.size} + \{show autoImplArgs.length}"
+      pure (genSig ** MkGenExternals autoImplArgs ** rewrite prf in givenParamsPositions)
     ExternalGen    => do
       let fc = MkGenSignatureFC {sigFC=getFC sig, genFC, targetTypeFC}
       pure (fc, genSig)
 
 --- Boundaries between external and internal generator functions ---
 
-internalGenCallingLambda : CanonicGen m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
-internalGenCallingLambda sig fuelArg = foldr (map . mkLam) call sig.givenParams.asList where
+nameForGen : ExternalGenSignature -> Name
+nameForGen sig = let (ty, givs) = characteristics sig in UN $ Basic $ "external^<\{ty}>\{show givs}"
+-- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
 
-  mkLam : (Fin sig.targetType.args.length, ArgExplicitness, Name) -> TTImp -> TTImp
-  mkLam (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just name .| (index' sig.targetType.args idx).type
+internalGenCallingLambda : Elaboration m => CheckResult DerivationTask -> TTImp -> m TTImp
+internalGenCallingLambda (sig ** exts ** givsPos) call = do
+    let Just args = joinEithersPos sig.givenParams.asList exts.externals givsPos
+      | Nothing => fail "INTERNAL ERROR: can't join partitioned args back"
+    pure $ foldr mkLam call args
 
-  call : m TTImp
-  call = let Element intSig prf = internalise sig in
-         callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
+  where
 
-assignNames : GenExternals -> List (ExternalGenSignature, Name, TTImp)
-assignNames $ MkGenExternals exts = exts <&> \(sig, tti) => (sig, nameForGen sig, tti) where
-  nameForGen : ExternalGenSignature -> Name
-  nameForGen sig = let (ty, givs) = characteristics sig in UN $ Basic $ "external^<\{ty}>\{show givs}"
-  -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
+  -- either given param or auto param
+  mkLam : Either (Fin sig.targetType.args.length, ArgExplicitness, Name) (ExternalGenSignature, TTImp) -> TTImp -> TTImp
+  mkLam $ Left (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just name .| (index' sig.targetType.args idx).type
+  mkLam $ Right (extSig, ty)     = lam $ MkArg MW AutoImplicit .| Just (nameForGen extSig) .| ty
+                                   -- TODO to think whether it's okay to calculate the name twice: here and below for a map
 
-wrapWithExternalsAutos : Foldable f => f (Name, TTImp) -> TTImp -> TTImp
-wrapWithExternalsAutos = flip $ foldr $ lam . uncurry (MkArg MW AutoImplicit . Just)
+callMainDerivedGen : CanonicGen m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
+callMainDerivedGen sig fuelArg =
+  let Element intSig prf = internalise sig in
+  callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
 
 wrapFuel : (fuelArg : Name) -> TTImp -> TTImp
 wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
@@ -275,12 +285,11 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 export
 deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
-  (signature, externals) <- checkTypeIsGen DerivationTask signature
-  let externals = assignNames externals
-  let externalsSigToName = fromList $ externals <&> \(sig, name, _) => (sig, name)
+  checkResult@(signature ** externals ** _) <- checkTypeIsGen DerivationTask signature
+  let externalsSigToName = fromList $ externals.externals <&> \(sig, _) => (sig, nameForGen sig)
   let fuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-  (lambda, locals) <- runCanonic externalsSigToName $ internalGenCallingLambda signature fuelArg
-  pure $ wrapFuel fuelArg $ wrapWithExternalsAutos (snd <$> externals) $ local locals lambda
+  (callExpr, locals) <- runCanonic externalsSigToName $ callMainDerivedGen signature fuelArg
+  wrapFuel fuelArg <$> internalGenCallingLambda checkResult (local locals callExpr)
 
 ||| The entry-point function of automatic derivation of `Gen`'s.
 |||

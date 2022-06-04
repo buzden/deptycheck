@@ -9,6 +9,8 @@ import public Data.SortedSet
 import public Data.Vect
 import public Data.Vect.Dependent
 
+import public Control.Monad.State
+
 import public Test.DepTyCheck.Gen.Auto.Util.Fin
 import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 
@@ -110,6 +112,33 @@ export
 mapPre : ((i : Fin n) -> Vect (finToNat i) b -> a -> b) -> Vect n a -> Vect n b
 mapPre f []      = []
 mapPre f (x::xs) = let y = f FZ [] x in y :: mapPre (\i, ys => f (FS i) (y::ys)) xs
+
+-- Returns also original positions of `Left`'s
+export
+partitionEithersPos : Vect n (Either a b) -> (List a, List b, SortedSet $ Fin n)
+partitionEithersPos = map @{Compose} fromList . p where
+  p : forall n. Vect n (Either a b) -> (List a, List b, List $ Fin n)
+  p []        = ([], [], empty)
+  p (ab::abs) = let (as, bs, lefts) = p abs
+                    lefts = FS <$> lefts
+                in case ab of
+                  Left  a => (a::as,    bs, FZ::lefts)
+                  Right b => (   as, b::bs,     lefts)
+
+export
+joinEithersPos : (as : List a) -> (bs : List b) -> SortedSet (Fin $ as.length + bs.length) -> Maybe $ Vect (as.length + bs.length) $ Either a b
+joinEithersPos as bs lefts =
+  evalState (as, bs) $ for @{Compose} allFins' $ \idx => if contains idx lefts
+    then do
+      (x::as, bs) <- get
+        | ([], _) => pure $ Nothing
+      put (as, bs)
+      pure $ Just $ Left x
+    else do
+      (as, x::bs) <- get
+        | (_, []) => pure $ Nothing
+      put (as, bs)
+      pure $ Just $ Right x
 
 -----------------------------
 --- `SortedMap` utilities ---

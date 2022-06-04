@@ -24,9 +24,15 @@ public export %inline
 --- Nice postfix notation ---
 -----------------------------
 
-public export %inline
-(.length) : List a -> Nat
-xs.length = length xs
+namespace List
+
+  public export %inline
+  (.length) : List a -> Nat
+  xs.length = length xs
+
+  public export %inline
+  (.asVect) : (xs : List a) -> Vect xs.length a
+  xs.asVect = fromList xs
 
 namespace SortedMap
 
