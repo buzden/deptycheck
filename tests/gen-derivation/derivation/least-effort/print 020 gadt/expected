@@ -10,10 +10,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => (MW AutoImplicit external^<String>[] : IPi.  (MW ExplicitArg {arg:879} : IVar Data.Fuel.Fuel)
                                                  -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                          $ IPrimVal String))
-    => ILocal (ILam.  (MW ExplicitArg b : IVar Prelude.Basics.Bool)
-                   => (IApp. IVar <DerivedGen.D>[0]
-                           $ IVar ^outmost-fuel^
-                           $ IVar b))
+    => (MW ExplicitArg b : IVar Prelude.Basics.Bool)
+    => ILocal (IApp. IVar <DerivedGen.D>[0] $ IVar ^outmost-fuel^ $ IVar b)
          IClaim MW
                 Export
                 []
