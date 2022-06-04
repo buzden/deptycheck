@@ -34,28 +34,34 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                          $ IVar {arg:22}
                                          $ IVar {arg:26}))))
          IDef <Builtin.Pair>[0, 1]
-              [ PatClause (IApp. IVar <Builtin.Pair>[0, 1]
-                               $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:22}
-                               $ IBindVar {arg:26})
+              [ PatClause (IAutoApp. (IApp. IVar <Builtin.Pair>[0, 1]
+                                          $ IBindVar ^fuel_arg^
+                                          $ IBindVar {arg:22}
+                                          $ IBindVar {arg:26})
+                                   $ IBindVar <^poly^.{arg:22}>[]
+                                   $ IBindVar <^poly^.{arg:26}>[])
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                           $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<Builtin.MkPair>>
-                                                                        $ IVar Data.Fuel.Dry
-                                                                        $ IVar {arg:22}
-                                                                        $ IVar {arg:26})
+                                                                 $ (IAutoApp. (IApp. IVar <<Builtin.MkPair>>
+                                                                                   $ IVar Data.Fuel.Dry
+                                                                                   $ IVar {arg:22}
+                                                                                   $ IVar {arg:26})
+                                                                            $ IVar <^poly^.{arg:22}>[]
+                                                                            $ IVar <^poly^.{arg:26}>[])
                                                                  $ IVar Nil))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                           $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<Builtin.MkPair>>
-                                                                        $ IVar ^sub^fuel_arg^
-                                                                        $ IVar {arg:22}
-                                                                        $ IVar {arg:26})
+                                                                 $ (IAutoApp. (IApp. IVar <<Builtin.MkPair>>
+                                                                                   $ IVar ^sub^fuel_arg^
+                                                                                   $ IVar {arg:22}
+                                                                                   $ IVar {arg:26})
+                                                                            $ IVar <^poly^.{arg:22}>[]
+                                                                            $ IVar <^poly^.{arg:26}>[])
                                                                  $ IVar Nil)) ]))
                             IClaim MW
                                    Export

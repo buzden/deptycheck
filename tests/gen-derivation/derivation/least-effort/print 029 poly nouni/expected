@@ -24,9 +24,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                   $ (IApp. IVar Prelude.Types.Maybe
                                          $ IVar ty))))
          IDef <Prelude.Types.Maybe>[0]
-              [ PatClause (IApp. IVar <Prelude.Types.Maybe>[0]
-                               $ IBindVar ^fuel_arg^
-                               $ IBindVar ty)
+              [ PatClause (IAutoApp. (IApp. IVar <Prelude.Types.Maybe>[0]
+                                          $ IBindVar ^fuel_arg^
+                                          $ IBindVar ty)
+                                   $ IBindVar <^poly^.ty>[])
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
@@ -36,9 +37,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                         $ IVar Data.Fuel.Dry
                                                                         $ IVar ty)
                                                                  $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<Prelude.Types.Just>>
-                                                                               $ IVar Data.Fuel.Dry
-                                                                               $ IVar ty)
+                                                                        $ (IAutoApp. (IApp. IVar <<Prelude.Types.Just>>
+                                                                                          $ IVar Data.Fuel.Dry
+                                                                                          $ IVar ty)
+                                                                                   $ IVar <^poly^.ty>[])
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
@@ -48,9 +50,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                         $ IVar ^sub^fuel_arg^
                                                                         $ IVar ty)
                                                                  $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<Prelude.Types.Just>>
-                                                                               $ IVar ^sub^fuel_arg^
-                                                                               $ IVar ty)
+                                                                        $ (IAutoApp. (IApp. IVar <<Prelude.Types.Just>>
+                                                                                          $ IVar ^sub^fuel_arg^
+                                                                                          $ IVar ty)
+                                                                                   $ IVar <^poly^.ty>[])
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export

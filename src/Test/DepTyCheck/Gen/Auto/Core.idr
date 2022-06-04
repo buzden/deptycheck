@@ -47,7 +47,7 @@ ConstructorDerivator => DerivatorCore where
     let additionalGens = concat consAdditions
 
     -- calculate which constructors are recursive and which are not
-    consRecs <- for sig.targetType.cons $ \con => consRecursiveness con <&> (con,)
+    consRecs <- for (sig.targetType.cons `zip` consAdditions) $ \(con, adds) => consRecursiveness con <&> ((con, adds),)
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
@@ -56,7 +56,9 @@ ConstructorDerivator => DerivatorCore where
     let outmostRHS = fuelDecisionExpr fuelArg consRecs
 
     -- return function definition
-    pure $ (, additionalGens) [ canonicDefaultLHS sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
+    pure $ (, additionalGens) [
+      wrapAdditionalGensLHS additionalGens (canonicDefaultLHS sig n fuelArg) .= local (consClaims ++ consBodies) outmostRHS
+    ]
 
   where
 
@@ -64,7 +66,7 @@ ConstructorDerivator => DerivatorCore where
     consGenName con = UN $ Basic $ "<<\{show con.name}>>"
     -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend
 
-    fuelDecisionExpr : (fuelArg : String) -> List (Con, Recursiveness) -> TTImp
+    fuelDecisionExpr : (fuelArg : String) -> List ((Con, AdditionalGens), Recursiveness) -> TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
       -- find out non-recursive constructors
@@ -86,8 +88,8 @@ ConstructorDerivator => DerivatorCore where
 
       where
 
-        callConsGen : (fuel : TTImp) -> Con -> TTImp
-        callConsGen fuel con = canonicDefaultRHS sig .| consGenName con .| fuel
+        callConsGen : (fuel : TTImp) -> (Con, AdditionalGens) -> TTImp
+        callConsGen fuel (con, adds) = wrapAdditionalGensRHS adds $ canonicDefaultRHS sig .| consGenName con .| fuel
 
     consRecursiveness : Con -> m Recursiveness
     consRecursiveness con = map toRec $ any (hasNameInsideDeep sig.targetType.name) $ map type con.args ++ (getExpr <$> snd (unAppAny con.type)) where

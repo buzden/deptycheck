@@ -144,17 +144,24 @@ export %inline
 canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
 canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 
-export
-wrapAdditionalGensLHS : AdditionalGens -> TTImp -> TTImp
-wrapAdditionalGensLHS ags expr = foldl addGen (wrapUni expr) $ SortedSet.toList ags.additionalGens where
+wrapAdditionalGens : (varUse : String -> TTImp) -> AdditionalGens -> TTImp -> TTImp
+wrapAdditionalGens varUse ags expr = foldl addGen (wrapUni expr) $ SortedSet.toList ags.additionalGens where
 
   addGen : TTImp -> GenSignature -> TTImp
-  addGen r = autoApp r . bindVar . nameForGen'
+  addGen r = autoApp r . varUse . nameForGen'
 
   wrapUni : TTImp -> TTImp
   wrapUni = if ags.universalGen
-              then flip autoApp $ bindVar "universal^gen"
+              then flip autoApp $ varUse "universal^gen"
               else id
+
+export
+wrapAdditionalGensLHS : AdditionalGens -> TTImp -> TTImp
+wrapAdditionalGensLHS = wrapAdditionalGens bindVar
+
+export
+wrapAdditionalGensRHS : AdditionalGens -> TTImp -> TTImp
+wrapAdditionalGensRHS = wrapAdditionalGens $ var . UN . Basic -- can't use `varStr` because I expect strings to contain dots
 
 ---------------------------------
 --- External-facing functions ---
