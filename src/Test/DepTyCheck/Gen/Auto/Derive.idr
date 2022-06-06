@@ -168,9 +168,9 @@ wrapAdditionalGensRHS = wrapAdditionalGens $ var . UN . Basic -- can't use `varS
 ---------------------------------
 
 export
-deriveCanonical : DerivatorCore => CanonicGen m => GenSignature -> Name -> m (Decl, Decl)
+deriveCanonical : DerivatorCore => CanonicGen m => GenSignature -> Name -> m (Decl, Decl, AdditionalGens)
 deriveCanonical sig name = do
   when (isPolyType sig.targetType) $
     fail "INTERNAL ERROR: attempt to derive generator for polymorphic type `\{show $ sig.targetType.name}`"
   (bodyClauses, additionalGens) <- canonicBody sig name
-  pure (export' name (canonicSig sig additionalGens), def name bodyClauses)
+  pure (export' name (canonicSig sig additionalGens), def name bodyClauses, additionalGens)

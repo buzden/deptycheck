@@ -4,6 +4,7 @@ module Test.DepTyCheck.Gen.Auto.Checked
 import public Control.Monad.Either
 import public Control.Monad.Reader
 import public Control.Monad.State
+import public Control.Monad.State.Tuple
 import public Control.Monad.Writer
 import public Control.Monad.RWS
 
@@ -93,6 +94,7 @@ namespace ClojuringCanonicImpl
   ClojuringContext m =
     ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
     , MonadState  (SortedMap GenSignature Name) m -- gens already asked to be derived
+    , MonadState  (SortedMap GenSignature AdditionalGens) m -- actual additional gens required for the gen
     , MonadWriter (List Decl, List Decl) m -- function declarations and bodies
     )
 
@@ -112,15 +114,19 @@ namespace ClojuringCanonicImpl
         | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name fuel $ rewrite lenEq in values
 
       -- get the name of internal gen, derive if necessary
-      internalGenName <- do
+      (internalGenName, additionals) <- do
 
         -- manage if we were asked to call for polymorphic gen
         let False = isPolyType $ sig.targetType
-          | True => pure $ nameForGen sig
+          | True => pure (nameForGen sig, neutral)
 
         -- look for existing (already derived) internals, use it if exists
-        let Nothing = lookup sig !get
-          | Just name => pure name
+        let Nothing = SortedMap.lookup sig !get
+          | Just name => do
+              adds <- case SortedMap.lookup sig !get of
+                        Nothing  => modify (insert sig $ the AdditionalGens neutral) $> neutral -- remember for future consistency check
+                        Just ads => pure ads
+              pure (name, adds)
 
         -- nothing found, then derive! acquire the name
         let name = nameForGen sig
@@ -129,13 +135,25 @@ namespace ClojuringCanonicImpl
         modify $ insert sig name
 
         -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
-        (genFunClaim, genFunBody) <- assert_total $ deriveCanonical sig name
+        (genFunClaim, genFunBody, additionals) <- assert_total $ deriveCanonical sig name
 
         -- remember the derived stuff
         tell ([genFunClaim], [genFunBody])
 
-        -- return the name of the newly derived generator
-        pure name
+        -- check that so inconsistency in additional gens, i.e. that it was not used due to mutual recursion before generation
+        case SortedMap.lookup sig !get of
+          Nothing => pure ()
+          Just savedAdds => when (additionals /= savedAdds) $
+            fail $ "Can't derive generator for \{show $ sig.targetType.name} because of polymorphic parameters AND mutual recursion"
+                ++ ", this combination is not supported yet"
+
+        -- remember the additionals of the derived generator
+        modify $ insert sig additionals
+
+        -- return the name and additional generators of newly derived generator
+        pure (name, additionals)
+
+      -- TODO to prepare the wrapper of the call that adds appropriate `IAutoApp`s according to the `additionals`
 
       -- call the internal gen
       pure $ callCanonic sig internalGenName fuel values
@@ -146,5 +164,5 @@ namespace ClojuringCanonicImpl
   runCanonic : DerivatorCore => SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
-    (x, defs, bodies) <- evalRWST exts empty calc {s=SortedMap GenSignature Name} {w=(_, _)}
+    (x, defs, bodies) <- evalRWST exts (empty, empty) calc {s=(SortedMap GenSignature Name, SortedMap GenSignature AdditionalGens)} {w=(_, _)}
     pure (x, defs ++ bodies)
