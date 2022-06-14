@@ -43,6 +43,10 @@ public export
 interface Elaboration m => CanonicGen m where
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m TTImp
 
+export
+CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
+  callGen sig fuel params = lift $ callGen sig fuel params
+
 --- Low-level derivation interface ---
 
 export
