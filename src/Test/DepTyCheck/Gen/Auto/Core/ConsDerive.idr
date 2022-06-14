@@ -1,6 +1,7 @@
 ||| Several tactics for derivation of particular generators for a constructor regarding to how they use externals
 module Test.DepTyCheck.Gen.Auto.Core.ConsDerive
 
+import public Control.Monad.RWS
 import public Control.Monad.State
 import public Control.Monad.Writer
 
@@ -131,13 +132,14 @@ namespace NonObligatoryExts
                         n            => (if contains idx givs then id else ("^bnd^" ++)) $ show n
 
       -- Derive constructor calling expression for given order of generation
-      let genForOrder : List (Fin con.args.length) -> m TTImp
-          genForOrder = map (`apply` callCons) . evalStateT givs . foldlM genForOneArg id where
+      let genForOrder : List (Fin con.args.length) -> m (TTImp, AdditionalGens)
+          genForOrder = map (mapFst (`apply` callCons)) . evalRWST () givs . foldlM genForOneArg id where
 
             -- ... state is the set of arguments that are already present (given or generated)
             genForOneArg : forall m.
                            CanonicGen m =>
                            MonadState (SortedSet $ Fin con.args.length) m =>
+                           MonadWriter AdditionalGens m =>
                            (TTImp -> TTImp) -> (gened : Fin con.args.length) -> m $ TTImp -> TTImp
             genForOneArg leftExprF genedArgIdx = do
 
@@ -170,7 +172,10 @@ namespace NonObligatoryExts
                 | No _ => fail "INTERNAL ERROR: error in given params set length computation"
 
               -- Form an expression to call the subgen
-              subgenCall <- callGen subsig fuel $ snd <$> subgivens
+              (subgenCall, subgenAdditionals) <- callGen subsig fuel $ snd <$> subgivens
+
+              -- Remember additional generators of the call
+              tell subgenAdditionals
 
               -- Form an expression of binding the result of subgen
               let genedArg:::subgeneratedArgs = genedArgIdx:::subgeneratedArgIdxs <&> bindVar . flip Vect.index bindNames
@@ -237,7 +242,8 @@ namespace NonObligatoryExts
         rightmost <- indepPermutations' disjDeps rightmostArgs
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
-      map (, additionalGens) $ map callOneOf $ traverse genForOrder allOrders
+      (allCalls, allCallAdds) <- unzip <$> traverse genForOrder allOrders
+      pure (callOneOf allCalls, additionalGens <+> concat allCallAdds)
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.

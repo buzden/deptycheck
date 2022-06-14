@@ -298,9 +298,11 @@ internalGenCallingLambda (sig ** exts ** givsPos) call = do
                                    -- TODO to think whether it's okay to calculate the name twice: here and below for a map
 
 callMainDerivedGen : CanonicGen m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
-callMainDerivedGen sig fuelArg =
-  let Element intSig prf = internalise sig in
-  callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
+callMainDerivedGen sig fuelArg = do
+  let Element intSig prf = internalise sig
+  (callExpr, additionals) <- callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
+  -- TODO to check that all additionals are present in the outermost signature
+  pure callExpr
 
 wrapFuel : (fuelArg : Name) -> TTImp -> TTImp
 wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)

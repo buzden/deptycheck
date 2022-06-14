@@ -111,7 +111,8 @@ namespace ClojuringCanonicImpl
 
       -- look for external gens, and call it if exists
       let Nothing = lookupLengthChecked sig !ask
-        | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name fuel $ rewrite lenEq in values
+        | Just (name, Element extSig lenEq) => pure (callExternalGen extSig name fuel $ rewrite lenEq in values, neutral)
+                                               -- TODO to support non-trivial additional gens for external generators
 
       -- get the name of internal gen, derive if necessary
       (internalGenName, additionals) <- do
@@ -153,10 +154,19 @@ namespace ClojuringCanonicImpl
         -- return the name and additional generators of newly derived generator
         pure (name, additionals)
 
+      -- form the basic expression to call the internal generator (required additional generators are not considered yet)
+      let callExpr = callCanonic sig internalGenName fuel values
+
       -- TODO to prepare the wrapper of the call that adds appropriate `IAutoApp`s according to the `additionals`
 
+      -- form appropriate outer additionals
+      let outerAdditionalsOfCall : AdditionalGens := neutral -- TODO to form correct ones
+
+      -- remember the need for the universal generator
+      let outerAdditionalsOfCall = {universalGen $= (|| additionals.universalGen)} outerAdditionalsOfCall
+
       -- call the internal gen
-      pure $ callCanonic sig internalGenName fuel values
+      pure (callExpr, outerAdditionalsOfCall)
 
   --- Canonic-dischagring function ---
 

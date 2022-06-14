@@ -74,7 +74,7 @@ Eq AdditionalGens where
 
 public export
 interface Elaboration m => CanonicGen m where
-  callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m TTImp
+  callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m (TTImp, AdditionalGens)
 
 export
 CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
