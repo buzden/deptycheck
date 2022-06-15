@@ -9,4 +9,4 @@ printDerived : DerivatorCore => Type -> Elab Unit
 printDerived ty = do
   ty <- quote ty
   logSugaredTerm "gen.auto.derive.infra" 0 "type" ty
-  logMsg "gen.auto.derive.infra" 0 $ "\n" ++ show !(deriveGenExpr ty)
+  logMsg "gen.auto.derive.infra" 0 "\n\{!(deriveGenExpr ty)}"

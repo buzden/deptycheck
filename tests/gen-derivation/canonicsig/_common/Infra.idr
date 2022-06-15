@@ -29,8 +29,8 @@ caseVerdict (desc, given, expected) = do
     then "\{desc}:\tOKAY"
     else """
          \{desc}:\tFAILED
-           - given: \{show given}
-           - expected: \{show expected}
+           - given: \{given}
+           - expected: \{expected}
          """
 
 export

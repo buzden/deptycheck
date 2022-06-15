@@ -44,8 +44,8 @@ checkEq desc res e1 e2 = do
           then "\{desc}: OKAY"
           else """
                \{desc}: FAILED
-                 - expr1: \{show e1}
-                 - expr2: \{show e2}
+                 - expr1: \{e1}
+                 - expr2: \{e2}
                  - should equal: \{show res}
                """
 

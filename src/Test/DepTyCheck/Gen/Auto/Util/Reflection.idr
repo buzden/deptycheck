@@ -27,8 +27,8 @@ import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 -----------------------
 
 export
-Show TTImp where
-  show expr = show $ assert_total $ pretty {ann=Unit} expr
+Interpolation TTImp where
+  interpolate expr = show $ assert_total $ pretty {ann=Unit} expr
 
 --------------------------------------------
 --- Parsing and rebuilding `TTImp` stuff ---
