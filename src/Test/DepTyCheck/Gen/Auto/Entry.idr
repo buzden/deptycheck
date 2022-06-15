@@ -5,8 +5,6 @@ import public Data.Fuel
 
 import public Decidable.Equality
 
-import public Debug.Reflection
-
 import public Test.DepTyCheck.Gen -- for `Gen` data type
 import public Test.DepTyCheck.Gen.Auto.Checked
 import public Test.DepTyCheck.Gen.Auto.Core

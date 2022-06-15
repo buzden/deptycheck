@@ -2,8 +2,6 @@ module Infra
 
 import public Data.Fuel
 
-import public Debug.Reflection
-
 import public Test.DepTyCheck.Gen
 import public Test.DepTyCheck.Gen.Auto.Core
 
@@ -31,8 +29,8 @@ caseVerdict (desc, given, expected) = do
     then "\{desc}:\tOKAY"
     else """
          \{desc}:\tFAILED
-           - given: \{show given}
-           - expected: \{show expected}
+           - given: \{given}
+           - expected: \{expected}
          """
 
 export

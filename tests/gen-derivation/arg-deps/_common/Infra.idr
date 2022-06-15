@@ -1,7 +1,5 @@
 module Infra
 
-import Debug.Reflection
-
 import DepsCheck
 
 import Language.Reflection
