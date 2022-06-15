@@ -3,8 +3,6 @@ module Test.DepTyCheck.Gen.Auto.Core.ConsEntry
 
 import public Control.Monad.State.Tuple
 
-import public Debug.Reflection
-
 import public Decidable.Equality
 
 import public Test.DepTyCheck.Gen.Auto.Core.ConsDerive

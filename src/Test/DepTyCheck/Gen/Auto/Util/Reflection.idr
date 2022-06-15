@@ -13,6 +13,7 @@ import public Data.SortedSet
 
 import public Language.Reflection.TTImp
 import public Language.Reflection.Types
+import public Language.Reflection.Pretty
 
 import public Test.DepTyCheck.Gen.Auto.Util.Alternative
 import public Test.DepTyCheck.Gen.Auto.Util.Collections
@@ -20,6 +21,14 @@ import public Test.DepTyCheck.Gen.Auto.Util.Fin
 import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 
 %default total
+
+-----------------------
+--- Pretty-printing ---
+-----------------------
+
+export
+Show TTImp where
+  show expr = show $ assert_total $ pretty {ann=Unit} expr
 
 --------------------------------------------
 --- Parsing and rebuilding `TTImp` stuff ---

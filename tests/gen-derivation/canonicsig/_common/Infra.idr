@@ -2,8 +2,6 @@ module Infra
 
 import public Data.Fuel
 
-import public Debug.Reflection
-
 import public Test.DepTyCheck.Gen
 import public Test.DepTyCheck.Gen.Auto.Core
 

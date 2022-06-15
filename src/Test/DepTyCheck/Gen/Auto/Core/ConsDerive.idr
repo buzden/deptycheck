@@ -5,8 +5,6 @@ import public Control.Monad.State
 
 import public Data.Either
 
-import public Debug.Reflection
-
 import public Decidable.Equality
 
 import public Test.DepTyCheck.Gen.Auto.Derive

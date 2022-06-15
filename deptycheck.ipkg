@@ -6,7 +6,6 @@ version = 0.0.1
 modules = Control.Monad.State.Tuple
         , Data.Vect.Dependent
         , Data.List.Lazier
-        , Debug.Reflection
         , System.Random.Simple
         , Test.DepTyCheck.Gen.Auto
         , Test.DepTyCheck.Gen.Auto.Derive

@@ -1,7 +1,5 @@
 module Infra
 
-import public Debug.Reflection
-
 import public Test.DepTyCheck.Gen.Auto.Util.Reflection
 
 import public Language.Reflection.Syntax
