@@ -125,17 +125,16 @@ namespace ClojuringCanonicImpl
         -- nothing found, then derive! acquire the name
         let name = nameForGen sig
 
-        do -- actually derive the stuff!
+        -- remember that we're responsible for this signature derivation
+        modify $ insert sig name
 
-          -- remember that we're responsible for this signature derivation
-          modify $ insert sig name
+        -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
+        (genFunClaim, genFunBody) <- assert_total $ deriveCanonical sig name
 
-          -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
-          (genFunClaim, genFunBody) <- assert_total $ deriveCanonical sig name
+        -- remember the derived stuff
+        tell ([genFunClaim], [genFunBody])
 
-          -- remember the derived stuff
-          tell ([genFunClaim], [genFunBody])
-
+        -- return the name of the newly derived generator
         pure name
 
       -- call the internal gen
