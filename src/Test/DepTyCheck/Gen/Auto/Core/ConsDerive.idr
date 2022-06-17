@@ -23,7 +23,12 @@ import public Test.DepTyCheck.Gen.Auto.Util.DepPerm
 
 public export
 interface ConstructorDerivator where
-  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m (TTImp, AdditionalGens)
+  consGenExpr : CanonicGen m =>
+                (sig : GenSignature) ->
+                (con : Con) ->
+                (given : SortedSet $ Fin con.args.length) ->
+                (fuel : TTImp) ->
+                m (TTImp, AdditionalGensFor sig)
 
 --- Particular tactics ---
 
@@ -82,7 +87,7 @@ namespace NonObligatoryExts
 
       -- Analyse that we can do subgeneration for each constructor argument
       -- Fails using `Elaboration` if the given expression is not an application to a type constructor
-      let analyseTypeApp : forall m. Elaboration m => MonadWriter AdditionalGens m => TTImp -> m $ TypeApp con
+      let analyseTypeApp : forall m. Elaboration m => MonadWriter (AdditionalGensFor sig) m => TTImp -> m $ TypeApp con
           analyseTypeApp expr = do
             let (lhs, args) = unAppAny expr
             ty <- case lhs of
@@ -108,10 +113,10 @@ namespace NonObligatoryExts
                       --      when several type arguments are propositionally the same for this data constructor.
                       Just (idx, _) => do
                         let polyTypeInfo = typeInfoForPolyType (argName $ index' sig.targetType.args idx) type'sArgs
-                        tell $ {additionalGens $= insert $ MkGenSignature polyTypeInfo empty} neutral
+                        tell $ MkAdditionalGens (singleton $ MkGenSignature polyTypeInfo empty) False
                         pure polyTypeInfo
                       Nothing => do
-                        tell $ {universalGen := True} neutral
+                        tell justUniversalGen
                         ?need_a_typeinfo_for_universal_generator
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
@@ -132,14 +137,14 @@ namespace NonObligatoryExts
                         n            => (if contains idx givs then id else ("^bnd^" ++)) $ show n
 
       -- Derive constructor calling expression for given order of generation
-      let genForOrder : List (Fin con.args.length) -> m (TTImp, AdditionalGens)
+      let genForOrder : List (Fin con.args.length) -> m (TTImp, AdditionalGensFor sig)
           genForOrder = map (mapFst (`apply` callCons)) . evalRWST () givs . foldlM genForOneArg id where
 
             -- ... state is the set of arguments that are already present (given or generated)
             genForOneArg : forall m.
                            CanonicGen m =>
                            MonadState (SortedSet $ Fin con.args.length) m =>
-                           MonadWriter AdditionalGens m =>
+                           MonadWriter (AdditionalGensFor sig) m =>
                            (TTImp -> TTImp) -> (gened : Fin con.args.length) -> m $ TTImp -> TTImp
             genForOneArg leftExprF genedArgIdx = do
 

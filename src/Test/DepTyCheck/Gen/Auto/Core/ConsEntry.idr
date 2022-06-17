@@ -17,7 +17,7 @@ import public Test.DepTyCheck.Gen.Auto.Core.Util
 --- Entry function ---
 
 export
-canonicConsBody : ConstructorDerivator => CanonicGen m => GenSignature -> Name -> Con -> m (List Clause, AdditionalGens)
+canonicConsBody : ConstructorDerivator => CanonicGen m => (sig : GenSignature) -> Name -> Con -> m (List Clause, AdditionalGensFor sig)
 canonicConsBody sig name con = do
 
   -- Get file position of the constructor definition (for better error reporting)

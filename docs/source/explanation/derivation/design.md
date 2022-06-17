@@ -8,7 +8,7 @@ import public Test.DepTyCheck.Gen.Auto
 -- Empty body derivation
 export
 DerivatorCore where
-  canonicBody sig n = pure $ (, the AdditionalGens neutral) [ callCanonic sig n implicitTrue (replicate _ implicitTrue) .= `(empty) ]
+  canonicBody sig n = pure $ (, the (AdditionalGensFor sig) neutral) [ callCanonic sig n implicitTrue (replicate _ implicitTrue) .= `(empty) ]
 -->
 
 # Design of derivation

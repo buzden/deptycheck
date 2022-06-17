@@ -6,10 +6,10 @@ import public Infra
 
 %language ElabReflection
 
-ne : AdditionalGens
+ne : AdditionalGensFor sig
 ne = neutral
 
-un, hte, htf : AdditionalGens -> AdditionalGens
+un, hte, htf : AdditionalGensFor sig -> AdditionalGensFor sig
 
 un = {universalGen := True}
 

@@ -66,7 +66,7 @@ ConstructorDerivator => DerivatorCore where
     consGenName con = UN $ Basic $ "<<\{show con.name}>>"
     -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend
 
-    fuelDecisionExpr : (fuelArg : String) -> List ((Con, AdditionalGens), Recursiveness) -> TTImp
+    fuelDecisionExpr : (fuelArg : String) -> List ((Con, AdditionalGensFor sig), Recursiveness) -> TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
       -- find out non-recursive constructors
@@ -88,7 +88,7 @@ ConstructorDerivator => DerivatorCore where
 
       where
 
-        callConsGen : (fuel : TTImp) -> (Con, AdditionalGens) -> TTImp
+        callConsGen : (fuel : TTImp) -> (Con, AdditionalGensFor sig) -> TTImp
         callConsGen fuel (con, adds) = wrapAdditionalGensRHS adds $ canonicDefaultRHS sig .| consGenName con .| fuel
 
     consRecursiveness : Con -> m Recursiveness

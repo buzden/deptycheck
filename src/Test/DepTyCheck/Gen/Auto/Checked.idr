@@ -94,7 +94,7 @@ namespace ClojuringCanonicImpl
   ClojuringContext m =
     ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
     , MonadState  (SortedMap GenSignature Name) m -- gens already asked to be derived
-    , MonadState  (SortedMap GenSignature AdditionalGens) m -- actual additional gens required for the gen
+    , MonadState  (SortedDMap GenSignature $ \sig => AdditionalGensFor sig) m -- actual additional gens required for the gen
     , MonadWriter (List Decl, List Decl) m -- function declarations and bodies
     )
 
@@ -124,9 +124,9 @@ namespace ClojuringCanonicImpl
         -- look for existing (already derived) internals, use it if exists
         let Nothing = SortedMap.lookup sig !get
           | Just name => do
-              adds <- case SortedMap.lookup sig !get of
-                        Nothing  => modify (insert sig $ the AdditionalGens neutral) $> neutral -- remember for future consistency check
-                        Just ads => pure ads
+              adds <- case SortedMap.Dependent.lookup sig !(get {stateType=SortedDMap GenSignature $ \sig => AdditionalGensFor sig}) of
+                        Nothing         => modify (insert sig $ the (AdditionalGensFor sig) neutral) $> neutral -- remember for future consistency check
+                        Just (_ ** ads) => tryTranspCompatSig ads
               pure (name, adds)
 
         -- nothing found, then derive! acquire the name
@@ -142,14 +142,16 @@ namespace ClojuringCanonicImpl
         tell ([genFunClaim], [genFunBody])
 
         -- check that so inconsistency in additional gens, i.e. that it was not used due to mutual recursion before generation
-        case SortedMap.lookup sig !get of
+        case SortedMap.Dependent.lookup sig !(get {stateType=SortedDMap GenSignature $ \sig => AdditionalGensFor sig}) of
           Nothing => pure ()
-          Just savedAdds => when (additionals /= savedAdds) $
-            fail $ "Can't derive generator for \{show $ sig.targetType.name} because of polymorphic parameters AND mutual recursion"
-                ++ ", this combination is not supported yet"
+          Just (_ ** savedAdds) => do
+            savedAdds <- tryTranspCompatSig savedAdds
+            when (additionals /= savedAdds) $
+              fail $ "Can't derive generator for \{show $ sig.targetType.name} because of polymorphic parameters AND mutual recursion"
+                  ++ ", this combination is not supported yet"
 
         -- remember the additionals of the derived generator
-        modify $ insert sig additionals
+        modify $ SortedMap.Dependent.insert sig additionals
 
         -- return the name and additional generators of newly derived generator
         pure (name, additionals)
@@ -158,7 +160,7 @@ namespace ClojuringCanonicImpl
       let callExpr = callCanonic sig internalGenName fuel values
 
       -- prepare wrappers of the call that set additionals to the main gen call + form next-level additionals, if any
-      (callWrappers, outerAdditionalsOfCall) <- runWriterT {m} $ for additionals.additionalGens.asList $ \askedAdditional => do
+      (callWrappers, outerAdditionalsOfCall) <- runWriterT {w=AdditionalGensFor outerSig} {m} $ for additionals.additionalGens.asList $ \askedAdditional => do
         pure $ \exp => autoApp exp $ `(%search)
 
       -- apply all wrappers that add additional generators to the call expression
@@ -176,5 +178,5 @@ namespace ClojuringCanonicImpl
   runCanonic : DerivatorCore => SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
-    (x, defs, bodies) <- evalRWST exts (empty, empty) calc {s=(SortedMap GenSignature Name, SortedMap GenSignature AdditionalGens)} {w=(_, _)}
+    (x, defs, bodies) <- evalRWST exts (empty, empty) calc {s=(SortedMap GenSignature Name, SortedDMap GenSignature $ \sig => AdditionalGensFor sig)} {w=(_, _)}
     pure (x, defs ++ bodies)
