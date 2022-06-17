@@ -43,7 +43,7 @@ ValidateInput:21:1--21:49
  21 | genY_with_repeating_name_difflytyped = deriveGen
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Did you mean: genY_with_repeating_name_equityped?
-Error: While processing right hand side of genY_with_repeating_name_difflytyped'. When unifying:
+Error: While processing right hand side of genY_with_repeating_name_difflytyped'. Error during reflection: When unifying:
     Nat
 and:
     Type
