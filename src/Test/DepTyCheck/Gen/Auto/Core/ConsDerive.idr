@@ -78,7 +78,10 @@ namespace NonObligatoryExts
           genForOrder = map (`apply` callCons) . evalStateT givs . foldlM genForOneArg id where
 
             -- ... state is the set of arguments that are already present (given or generated)
-            genForOneArg : (TTImp -> TTImp) -> (gened : Fin con.args.length) -> StateT (SortedSet $ Fin con.args.length) m $ TTImp -> TTImp
+            genForOneArg : forall m.
+                           CanonicGen m =>
+                           MonadState (SortedSet $ Fin con.args.length) m =>
+                           (TTImp -> TTImp) -> (gened : Fin con.args.length) -> m $ TTImp -> TTImp
             genForOneArg leftExprF genedArg = do
 
               -- Get info for the `genedArg`
@@ -111,7 +114,7 @@ namespace NonObligatoryExts
                 | No _ => fail "INTERNAL ERROR: error in given params set length computation"
 
               -- Form an expression to call the subgen
-              subgenCall <- lift $ callGen subsig fuel $ snd <$> subgivens
+              subgenCall <- callGen subsig fuel $ snd <$> subgivens
 
               -- Form an expression of binding the result of subgen
               let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
