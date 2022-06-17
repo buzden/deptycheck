@@ -135,9 +135,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar <Prelude.Types.Maybe>[0]
-                                                                       $ IVar ^cons_fuel^
-                                                                       $ IVar Prelude.Basics.Bool)
+                                                                $ (IAutoApp. (IApp. IVar <Prelude.Types.Maybe>[0]
+                                                                                  $ IVar ^cons_fuel^
+                                                                                  $ IVar Prelude.Basics.Bool)
+                                                                           $ ISearch 50)
                                                                 $ (ILam.  (MW ExplicitArg ^bnd^{arg:832} : Implicit False)
                                                                        => (IApp. (INamedApp. IVar Prelude.pure
                                                                                            $ IVar Test.DepTyCheck.Gen.Gen)

@@ -157,10 +157,12 @@ namespace ClojuringCanonicImpl
       -- form the basic expression to call the internal generator (required additional generators are not considered yet)
       let callExpr = callCanonic sig internalGenName fuel values
 
-      -- TODO to prepare the wrapper of the call that adds appropriate `IAutoApp`s according to the `additionals`
+      -- prepare wrappers of the call that set additionals to the main gen call + form next-level additionals, if any
+      (callWrappers, outerAdditionalsOfCall) <- runWriterT {m} $ for additionals.additionalGens.asList $ \askedAdditional => do
+        pure $ \exp => autoApp exp $ `(%search)
 
-      -- form appropriate outer additionals
-      let outerAdditionalsOfCall : AdditionalGens := neutral -- TODO to form correct ones
+      -- apply all wrappers that add additional generators to the call expression
+      let callExpr = foldl (\exp, wr => wr exp) callExpr callWrappers
 
       -- remember the need for the universal generator
       let outerAdditionalsOfCall = {universalGen $= (|| additionals.universalGen)} outerAdditionalsOfCall

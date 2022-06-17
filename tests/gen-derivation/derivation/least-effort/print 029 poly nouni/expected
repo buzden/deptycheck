@@ -8,9 +8,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => (MW AutoImplicit external^<^poly^.a>[] : IPi.  (MW ExplicitArg {arg:837} : IVar Data.Fuel.Fuel)
                                                    -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                            $ IVar a))
-    => ILocal (IApp. IVar <Prelude.Types.Maybe>[0]
-                   $ IVar ^outmost-fuel^
-                   $ IVar a)
+    => ILocal (IAutoApp. (IApp. IVar <Prelude.Types.Maybe>[0]
+                              $ IVar ^outmost-fuel^
+                              $ IVar a)
+                       $ ISearch 50)
          IClaim MW
                 Export
                 []

@@ -137,12 +137,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar <Builtin.Pair>[0, 1]
-                                                                       $ IVar ^cons_fuel^
-                                                                       $ IPrimVal String
-                                                                       $ (IApp. IVar Builtin.Pair
-                                                                              $ IVar Prelude.Types.Nat
-                                                                              $ IPrimVal String))
+                                                                $ (IAutoApp. (IApp. IVar <Builtin.Pair>[0, 1]
+                                                                                  $ IVar ^cons_fuel^
+                                                                                  $ IPrimVal String
+                                                                                  $ (IApp. IVar Builtin.Pair
+                                                                                         $ IVar Prelude.Types.Nat
+                                                                                         $ IPrimVal String))
+                                                                           $ ISearch 50
+                                                                           $ ISearch 50)
                                                                 $ (ILam.  (MW ExplicitArg ^bnd^{arg:832} : Implicit False)
                                                                        => (IApp. (INamedApp. IVar Prelude.pure
                                                                                            $ IVar Test.DepTyCheck.Gen.Gen)
