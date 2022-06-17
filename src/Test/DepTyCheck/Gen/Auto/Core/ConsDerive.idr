@@ -113,7 +113,7 @@ namespace NonObligatoryExts
                       --      when several type arguments are propositionally the same for this data constructor.
                       Just (idx, _) => do
                         let polyTypeInfo = typeInfoForPolyType (argName $ index' sig.targetType.args idx) type'sArgs
-                        tell $ MkAdditionalGens (singleton $ MkGenSignature polyTypeInfo empty) False
+                        tell $ MkAdditionalGens .| singleton (idx, MkGenSignature polyTypeInfo empty) .| False
                         pure polyTypeInfo
                       Nothing => do
                         tell justUniversalGen

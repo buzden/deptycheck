@@ -55,7 +55,7 @@ nameForGen = UN . Basic . nameForGen'
 public export
 record AdditionalGensFor (0 sig : GenSignature) where
   constructor MkAdditionalGens
-  additionalGens : SortedSet GenSignature
+  additionalGens : SortedSet (Fin sig.targetType.args.length, GenSignature)
   universalGen : Bool
 
 namespace TransportAdditionalGens
@@ -64,11 +64,11 @@ namespace TransportAdditionalGens
   -- In a tight case is can be, say, `So (sig == sig')`, but this may lead to a lot of useless runtime checks during `tryTranspCompatSig`.
   export
   CompatSigs : (sig, sig' : GenSignature) -> Type
-  CompatSigs sig sig' = Unit
+  CompatSigs sig sig' = So (sig.targetType.name == sig'.targetType.name && sig.targetType.args.length == sig'.targetType.args.length)
 
   export
   decCompatSigs : (sig, sig' : GenSignature) -> Dec $ CompatSigs sig sig'
-  decCompatSigs sig sig' = Yes ()
+  decCompatSigs _ _ = decSo _
 
   export
   transpCompatSig : CompatSigs sig sig' -> AdditionalGensFor sig -> AdditionalGensFor sig'
@@ -147,7 +147,7 @@ canonicSig sig addition = piAll returnTy $
                 `(Data.Fuel.Fuel -> Test.DepTyCheck.Gen.Gen (ty : Type ** Data.Fuel.Fuel -> Test.DepTyCheck.Gen.Gen ty))
 
   additional : List TTImp
-  additional = SortedSet.toList addition.additionalGens <&> \subsig => assert_total $ canonicSig subsig neutral
+  additional = SortedSet.toList addition.additionalGens <&> \(_, subsig) => assert_total $ canonicSig subsig neutral
                -- above totality assertion is valid at least because if addition is `neutral`, no recursive call is done inside
 
 -- Complementary to `canonicSig`
@@ -181,8 +181,8 @@ canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 wrapAdditionalGens : (varUse : String -> TTImp) -> AdditionalGensFor sig -> TTImp -> TTImp
 wrapAdditionalGens varUse ags expr = foldl addGen (wrapUni expr) $ SortedSet.toList ags.additionalGens where
 
-  addGen : TTImp -> GenSignature -> TTImp
-  addGen r = autoApp r . varUse . nameForGen'
+  addGen : TTImp -> (a, GenSignature) -> TTImp
+  addGen r = autoApp r . varUse . nameForGen' . snd
 
   wrapUni : TTImp -> TTImp
   wrapUni = if ags.universalGen

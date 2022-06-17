@@ -43,3 +43,15 @@ logCheck = \s => logMsg "gen.auto.canonic.check-sig" 0 s
 export
 checkAndLog : TestCaseDesc -> Elab ()
 checkAndLog = logCheck <=< caseVerdict
+
+public export
+ne : AdditionalGensFor sig
+ne = neutral
+
+public export
+un : AdditionalGensFor sig -> AdditionalGensFor sig
+un = {universalGen := True}
+
+public export
+data IsS : Nat -> Type where
+  ItIsS : IsS (S n)

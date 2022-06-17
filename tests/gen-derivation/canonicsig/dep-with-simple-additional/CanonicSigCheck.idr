@@ -13,17 +13,15 @@ data Y : (n : Nat) -> (v : Vect n a) -> Type where
 YInfo : TypeInfo
 YInfo = getInfo `{Y}
 
-ne : AdditionalGensFor sig
-ne = neutral
-
 NatInfo : TypeInfo
 NatInfo = getInfo `{Nat}
 
-un, Na, at : AdditionalGensFor sig -> AdditionalGensFor sig
+Na, at : {sig : _} -> IsS (sig.targetType.args.length) => AdditionalGensFor sig -> AdditionalGensFor sig
 
-un = {universalGen := True}
-Na = {additionalGens $= insert $ MkGenSignature NatInfo empty}
-at = {additionalGens $= insert $ MkGenSignature (typeInfoForPolyType `{a} []) empty}
+Na with (sig.targetType.args.length) proof p
+  _ | S _ = {additionalGens $= insert (rewrite p in FZ, MkGenSignature NatInfo empty)}
+at with (sig.targetType.args.length) proof p
+  _ | S _ = {additionalGens $= insert (rewrite p in FZ, MkGenSignature (typeInfoForPolyType `{a} []) empty)}
 
 cases : List TestCaseDesc
 cases = mapFst ("dependent type + mixed explicitness; all named; with additional; " ++) <$>
