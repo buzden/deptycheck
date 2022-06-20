@@ -107,13 +107,15 @@ namespace NonObligatoryExts
                     then failAt (getFC lhs) $ "LeastEffort derivation algorithm goes not support " ++
                       "type argument \{show lhsName} of constructor \{show con.name} since " ++
                       "it is present in the return type in a complex expression of some given parameter"
-                    else case find (\(idx, asIs) => asIs && contains idx sig.givenParams) $ SortedSet.toList tyArgs of
+                    else let givenParams = sig.givenParams.asVect in
+                         case find (\(idx, asIs) => asIs && contains idx sig.givenParams) (SortedSet.toList tyArgs) >>=
+                                \(idx, _) => findIndex (== idx) givenParams <&> (idx,) of
                       -- TODO to think: I use the leftmost parameter above, maybe I'd need the rightmost one.
                       --      It may influence on which virtual poly-type-info I construct: I may construct not those which is given
                       --      when several type arguments are propositionally the same for this data constructor.
-                      Just (idx, _) => do
+                      Just (idx, givIdx) => do
                         let polyTypeInfo = typeInfoForPolyType (argName $ index' sig.targetType.args idx) type'sArgs
-                        tell $ MkAdditionalGens .| singleton (idx, MkGenSignature polyTypeInfo empty) .| False
+                        tell $ MkAdditionalGens .| singleton (givIdx, MkGenSignature polyTypeInfo empty) .| False
                         pure polyTypeInfo
                       Nothing => do
                         tell justUniversalGen

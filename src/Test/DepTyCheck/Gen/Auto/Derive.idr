@@ -55,7 +55,7 @@ nameForGen = UN . Basic . nameForGen'
 public export
 record AdditionalGensFor (0 sig : GenSignature) where
   constructor MkAdditionalGens
-  additionalGens : SortedSet (Fin sig.targetType.args.length, GenSignature)
+  additionalGens : SortedSet (Fin sig.givenParams.size, GenSignature)
   universalGen : Bool
 
 namespace TransportAdditionalGens
