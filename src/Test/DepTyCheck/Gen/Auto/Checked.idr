@@ -120,6 +120,7 @@ namespace ClojuringCanonicImpl
         -- manage if we were asked to call for polymorphic gen
         let False = isPolyType $ sig.targetType
           | True => pure (nameForGen sig, neutral)
+                    -- TODO actually, there new additional gens should be created, not in particular cons derivator
 
         -- look for existing (already derived) internals, use it if exists
         let Nothing = SortedMap.lookup sig !get
@@ -160,8 +161,14 @@ namespace ClojuringCanonicImpl
       let callExpr = callCanonic sig internalGenName fuel values
 
       -- prepare wrappers of the call that set additionals to the main gen call + form next-level additionals, if any
-      (callWrappers, outerAdditionalsOfCall) <- runWriterT {w=AdditionalGensFor outerSig} {m} $ for additionals.additionalGens.asList $ \askedAdditional => do
-        pure $ \exp => autoApp exp $ `(%search)
+      (callWrappers, outerAdditionalsOfCall) <- runWriterT {w=AdditionalGensFor outerSig} {m} $ for additionals.additionalGens.asList $
+        \(askedAdditionalPolyIdx, askedAdditionalSig) => do
+
+          -- get which expression in the call is on the place of the current poly gen
+          let exprForPolyType = index askedAdditionalPolyIdx values
+
+          -- form a generator substitution expression
+          pure $ \exp => autoApp exp $ ?foo
 
       -- apply all wrappers that add additional generators to the call expression
       let callExpr = foldl (\exp, wr => wr exp) callExpr callWrappers
