@@ -103,11 +103,11 @@ namespace NonObligatoryExts
                     .| failAt (getFC lhs) "Higher-kinded and significantly dependent polymorphic types are not supported in constructors yet"
                   let tyArgs = fromMaybe empty $ lookup lhsName conArgToTypeIdx
                   -- TODO to improve effectiveness of the checks below
-                  if not (null tyArgs) && all (\(idx, asIs) => contains idx sig.givenParams && not asIs) tyArgs
+                  if not (null tyArgs) && all (\(idx, asIs) => not asIs && contains idx sig.givenParams) tyArgs
                     then failAt (getFC lhs) $ "LeastEffort derivation algorithm goes not support " ++
                       "type argument \{show lhsName} of constructor \{show con.name} since " ++
                       "it is present in the return type in a complex expression of some given parameter"
-                    else case head' $ filter (\(idx, asIs) => contains idx sig.givenParams && asIs) $ SortedSet.toList tyArgs of
+                    else case find (\(idx, asIs) => asIs && contains idx sig.givenParams) $ SortedSet.toList tyArgs of
                       -- TODO to think: I use the leftmost parameter above, maybe I'd need the rightmost one.
                       --      It may influence on which virtual poly-type-info I construct: I may construct not those which is given
                       --      when several type arguments are propositionally the same for this data constructor.
