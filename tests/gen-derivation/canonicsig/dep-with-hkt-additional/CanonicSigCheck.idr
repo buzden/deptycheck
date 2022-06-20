@@ -6,7 +6,12 @@ import public Infra
 
 %language ElabReflection
 
-hte, htf : {sig : _} -> IsS (sig.targetType.args.length) => AdditionalGensFor sig -> AdditionalGensFor sig
+ne : AdditionalGensFor sig
+ne = neutral
+
+un, hte, htf : AdditionalGensFor sig -> AdditionalGensFor sig
+
+un = {universalGen := True}
 
 h : TypeInfo
 h = typeInfoForPolyType `{h} [MkArg MW ExplicitArg `{p} `(Prelude.Types.Nat)]
@@ -18,10 +23,8 @@ data Z : (h : Nat -> Type) -> Nat -> Type where
 ZInfo : TypeInfo
 ZInfo = getInfo `{Z}
 
-hte with (sig.targetType.args.length) proof p
-  _ | S _ = {additionalGens $= insert (rewrite p in FZ, MkGenSignature h empty)}
-htf with (sig.targetType.args.length) proof p
-  _ | S _ = {additionalGens $= insert (rewrite p in FZ, MkGenSignature h $ singleton 0)}
+hte = {additionalGens $= insert $ MkGenSignature h empty}
+htf = {additionalGens $= insert $ MkGenSignature h $ singleton 0}
 
 cases : List TestCaseDesc
 cases = mapFst ("dependent type with higher-kinded additional; " ++) <$>

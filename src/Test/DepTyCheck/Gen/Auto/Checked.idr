@@ -162,10 +162,10 @@ namespace ClojuringCanonicImpl
 
       -- prepare wrappers of the call that set additionals to the main gen call + form next-level additionals, if any
       (callWrappers, outerAdditionalsOfCall) <- runWriterT {w=AdditionalGensFor outerSig} {m} $ for additionals.additionalGens.asList $
-        \(askedAdditionalPolyIdx, askedAdditionalSig) => do
+        \askedAdditionalSig => do
 
           -- get which expression in the call is on the place of the current poly gen
-          let exprForPolyType = index askedAdditionalPolyIdx values
+          --let exprForPolyType = index askedAdditionalPolyIdx values
 
           -- form a generator substitution expression
           pure $ \exp => autoApp exp $ ?foo

@@ -302,7 +302,7 @@ callMainDerivedGen sig fuelArg = do
   let Element intSig prf = internalise sig
   (callExpr, additionals) <- callGen {outerSig=dummySig} intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
   let [] = additionals.additionalGens.asList
-    | neAdds => fail "INTERNAL ERROR: insufficient outmost additionals: \{show $ name . targetType . snd <$> neAdds}"
+    | neAdds => fail "INTERNAL ERROR: insufficient outmost additionals: \{show $ name . targetType <$> neAdds}"
   -- TODO to check that universal generator is present in the outermost signature if it is required by `additionals.universalGen`
   pure callExpr
 
