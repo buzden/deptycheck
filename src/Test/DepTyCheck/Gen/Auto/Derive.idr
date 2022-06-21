@@ -99,6 +99,10 @@ public export
 justUniversalGen : AdditionalGensFor sig
 justUniversalGen = MkAdditionalGens empty True
 
+public export
+justOneAdditional : GenSignature -> AdditionalGensFor sig
+justOneAdditional sig = MkAdditionalGens (singleton sig) False
+
 ----------------------
 --- Main interface ---
 ----------------------
