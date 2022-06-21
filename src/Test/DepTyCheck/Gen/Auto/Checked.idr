@@ -164,11 +164,57 @@ namespace ClojuringCanonicImpl
       (callWrappers, outerAdditionalsOfCall) <- runWriterT {w=AdditionalGensFor outerSig} {m} $ for additionals.additionalGens.asList $
         \askedAdditionalSig => do
 
+          -- get which given agrument corresponds to the asked additional signature
+          let Just askedAdditionalPolyIdx =
+                findIndex (\giv => (argName $ index' sig.targetType.args giv) == askedAdditionalSig.targetType.unpolyName) sig.givenParams.asList
+            | Nothing => fail $ "INTERNAL ERROR: can't find asked additional signature `\{show askedAdditionalSig.targetType.name}`"
+                             ++ " when calling for `\{show sig.targetType.name}` from `\{show outerSig.targetType.name}`"
+                         -- TODO maybe, to manage universal generator here too, if `askedAdditionalSig` is in the `outerSig.targetType.args`,
+                         --      but not in `outerSig.givenParams`.
+
           -- get which expression in the call is on the place of the current poly gen
-          --let exprForPolyType = index askedAdditionalPolyIdx values
+          let exprForPolyType = index askedAdditionalPolyIdx values
+
+          -- treat this expression as an application of (potentially) a type to an arguments
+          let (subTyExpr, subTyArgs) = unAppAny exprForPolyType
+
+          -- check if what's all applied to is actually a type and acquire a `TypeInfo`
+          ti <- case subTyExpr of -- TODO check of this form is present at least three times throughout the code, simplify it
+                  IVar fc nm         => getInfo' nm
+                                  `try` (if null subTyArgs
+                                           then pure $ typeInfoForPolyType nm []
+                                           else failAt fc "Higher-order polymorphic types are not supported yet")
+                                        -- TODO to think what if this parameter is a not present in the context
+                  IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
+                  IType _            => pure $ typeInfoForTypeOfTypes
+                  expr               => failAt (getFC expr) "Given expression must be a name of a type"
+
+          -- form a derivation task for generation of this type
+          let subsig = MkGenSignature ti $ fromList $ toList $ allFins' {n=ti.args.length}
+
+          -- decide the name for the small fuel argument
+          let subfuel = "add^fuel"
+
+          -- check that we can deal with actual arguments of the type being called for
+          subTyArgs <- for subTyArgs $ \case
+            PosApp exp     => pure exp
+            NamedApp n exp => failAt (getFC exp) "Implicit arguments are not supported yet"
+            AutoApp exp    => failAt (getFC exp) "Auto arguments application is not supported"
+            WithApp exp    => failAt (getFC exp) "With arguments application is not supported"
+
+          -- align the lengths of actual and expected arguments
+          let Yes lengthCorrect = subsig.givenParams.size `decEq` subTyArgs.length
+            | No _ => fail "INTERNAL ERROR: lengths of actual and expected arg lists in application of `\{show sig.targetType.name}` do not match"
+          let subTyArgs = Vect.fromList subTyArgs
+
+          -- form a generator call expression
+          (addCallExpr, addAdds) <- assert_total $ callGen {outerSig} subsig (var subfuel) $ rewrite lengthCorrect in subTyArgs
+
+          -- remember recursive additionals, if any
+          tell addAdds
 
           -- form a generator substitution expression
-          pure $ \exp => autoApp exp $ ?foo
+          pure $ \exp => autoApp exp $ lambdaArg subfuel .=> addCallExpr
 
       -- apply all wrappers that add additional generators to the call expression
       let callExpr = foldl (\exp, wr => wr exp) callExpr callWrappers

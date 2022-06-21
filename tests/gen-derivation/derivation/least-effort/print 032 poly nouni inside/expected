@@ -143,8 +143,20 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                   $ (IApp. IVar Builtin.Pair
                                                                                          $ IVar Prelude.Types.Nat
                                                                                          $ IPrimVal String))
-                                                                           $ ISearch 50
-                                                                           $ ISearch 50)
+                                                                           $ (ILam.  (MW ExplicitArg add^fuel : Implicit False)
+                                                                                  => (IApp. IVar external^<String>[]
+                                                                                          $ IVar add^fuel))
+                                                                           $ (ILam.  (MW ExplicitArg add^fuel : Implicit False)
+                                                                                  => (IAutoApp. (IApp. IVar <Builtin.Pair>[0, 1]
+                                                                                                     $ IVar add^fuel
+                                                                                                     $ IVar Prelude.Types.Nat
+                                                                                                     $ IPrimVal String)
+                                                                                              $ (ILam.  (MW ExplicitArg add^fuel : Implicit False)
+                                                                                                     => (IApp. IVar external^<Prelude.Types.Nat>[]
+                                                                                                             $ IVar add^fuel))
+                                                                                              $ (ILam.  (MW ExplicitArg add^fuel : Implicit False)
+                                                                                                     => (IApp. IVar external^<String>[]
+                                                                                                             $ IVar add^fuel)))))
                                                                 $ (ILam.  (MW ExplicitArg ^bnd^{arg:832} : Implicit False)
                                                                        => (IApp. (INamedApp. IVar Prelude.pure
                                                                                            $ IVar Test.DepTyCheck.Gen.Gen)

@@ -11,7 +11,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => ILocal (IAutoApp. (IApp. IVar <Prelude.Types.Maybe>[0]
                               $ IVar ^outmost-fuel^
                               $ IVar a)
-                       $ ISearch 50)
+                       $ (ILam.  (MW ExplicitArg add^fuel : Implicit False)
+                              => (IApp. IVar external^<^poly^.a>[]
+                                      $ IVar add^fuel)))
          IClaim MW
                 Export
                 []

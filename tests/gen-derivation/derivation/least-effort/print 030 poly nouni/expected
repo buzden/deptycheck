@@ -16,8 +16,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                               $ IVar ^outmost-fuel^
                               $ IVar a
                               $ IVar b)
-                       $ ISearch 50
-                       $ ISearch 50)
+                       $ (ILam.  (MW ExplicitArg add^fuel : Implicit False)
+                              => (IApp. IVar external^<^poly^.a>[]
+                                      $ IVar add^fuel))
+                       $ (ILam.  (MW ExplicitArg add^fuel : Implicit False)
+                              => (IApp. IVar external^<^poly^.b>[]
+                                      $ IVar add^fuel)))
          IClaim MW
                 Export
                 []
