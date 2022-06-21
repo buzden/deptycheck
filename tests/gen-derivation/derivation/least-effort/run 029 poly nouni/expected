@@ -3,10 +3,17 @@
 Generated values:
 -----
 -----
-MkX (Just "a")
+Nothing
 -----
-MkX (Just "bc")
+Just 10
 -----
-MkX (Just "")
+Just 0
 -----
-MkX Nothing
+-----
+Nothing
+-----
+Just "bc"
+-----
+Just ""
+-----
+Just "a"
