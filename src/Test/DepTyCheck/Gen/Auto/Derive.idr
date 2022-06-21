@@ -109,14 +109,14 @@ justOneAdditional sig = MkAdditionalGens (singleton sig) False
 
 public export
 interface Elaboration m => CanonicGen m where
-  callGen : {outerSig : GenSignature} ->
+  callGen : (outerSig : GenSignature) ->
             (sig : GenSignature) ->
             (fuel : TTImp) ->
             Vect sig.givenParams.size TTImp -> m (TTImp, AdditionalGensFor outerSig)
 
 export
 CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
-  callGen sig fuel params = lift $ callGen sig fuel params
+  callGen outerSig sig fuel params = lift $ callGen outerSig sig fuel params
 
 --- Low-level derivation interface ---
 

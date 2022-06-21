@@ -177,7 +177,7 @@ namespace NonObligatoryExts
                 | No _ => fail "INTERNAL ERROR: error in given params set length computation"
 
               -- Form an expression to call the subgen
-              (subgenCall, subgenAdditionals) <- callGen subsig fuel $ snd <$> subgivens
+              (subgenCall, subgenAdditionals) <- callGen sig subsig fuel $ snd <$> subgivens
 
               -- Remember additional generators of the call
               tell subgenAdditionals

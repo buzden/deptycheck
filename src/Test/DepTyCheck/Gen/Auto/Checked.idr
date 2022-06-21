@@ -107,7 +107,7 @@ namespace ClojuringCanonicImpl
                                       No _    => Nothing
 
   DerivatorCore => ClojuringContext m => Elaboration m => CanonicGen m where
-    callGen sig fuel values = do
+    callGen outerSig sig fuel values = do
 
       -- look for external gens, and call it if exists
       let Nothing = lookupLengthChecked sig !ask
@@ -208,7 +208,7 @@ namespace ClojuringCanonicImpl
           let subTyArgs = Vect.fromList subTyArgs
 
           -- form a generator call expression
-          (addCallExpr, addAdds) <- assert_total $ callGen {outerSig} subsig (var subfuel) $ rewrite lengthCorrect in subTyArgs
+          (addCallExpr, addAdds) <- assert_total $ callGen outerSig subsig (var subfuel) $ rewrite lengthCorrect in subTyArgs
 
           -- remember recursive additionals, if any
           tell addAdds
