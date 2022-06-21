@@ -13,13 +13,13 @@ data Y : (n : Nat) -> (v : Vect n a) -> Type where
 YInfo : TypeInfo
 YInfo = getInfo `{Y}
 
-ne : AdditionalGensFor sig
+ne : AdditionalGens
 ne = neutral
 
 NatInfo : TypeInfo
 NatInfo = getInfo `{Nat}
 
-un, Na, at : AdditionalGensFor sig -> AdditionalGensFor sig
+un, Na, at : AdditionalGens -> AdditionalGens
 
 un = {universalGen := True}
 Na = {additionalGens $= insert $ MkGenSignature NatInfo empty}

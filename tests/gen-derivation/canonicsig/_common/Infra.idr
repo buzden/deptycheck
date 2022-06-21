@@ -20,7 +20,7 @@ TestCaseDesc = (String, TestCaseData)
 export
 chk : (ty : TypeInfo) ->
       (giv  : List $ Fin ty.args.length) ->
-      {default neutral additional : AdditionalGensFor $ MkGenSignature ty $ fromList giv} ->
+      {default neutral additional : AdditionalGens} ->
       Type -> TestCaseData
 chk ty giv expr = (canonicSig (MkGenSignature ty $ fromList giv) additional, Fuel -> expr)
 

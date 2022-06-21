@@ -53,54 +53,32 @@ nameForGen = UN . Basic . nameForGen'
 --------------------------------------------
 
 public export
-record AdditionalGensFor (0 sig : GenSignature) where
+record AdditionalGens where
   constructor MkAdditionalGens
   additionalGens : SortedSet GenSignature
   universalGen : Bool
 
-namespace TransportAdditionalGens
-
-  -- This type should consider all non-trivial usages of `sig` parameter inside the `AdditionalGensFor sig` record.
-  -- In a tight case is can be, say, `So (sig == sig')`, but this may lead to a lot of useless runtime checks during `tryTranspCompatSig`.
-  export
-  CompatSigs : (sig, sig' : GenSignature) -> Type
-  CompatSigs sig sig' = Unit
-
-  export
-  decCompatSigs : (sig, sig' : GenSignature) -> Dec $ CompatSigs sig sig'
-  decCompatSigs sig sig' = Yes ()
-
-  export
-  transpCompatSig : CompatSigs sig sig' -> AdditionalGensFor sig -> AdditionalGensFor sig'
-  transpCompatSig _ sig = believe_me sig
-
-  export
-  tryTranspCompatSig : Elaboration m => {sig, sig' : _} -> AdditionalGensFor sig -> m $ AdditionalGensFor sig'
-  tryTranspCompatSig adds with (decCompatSigs sig sig')
-    _ | Yes p = pure $ transpCompatSig p adds
-    _ | No _  = fail "Unable to change signatire for additional gens: incompatible signatures"
-
 public export
-Semigroup (AdditionalGensFor sig) where
+Semigroup AdditionalGens where
   l <+> r = MkAdditionalGens
             { additionalGens = ((<+>) `on` additionalGens) l r
             , universalGen = l.universalGen || r.universalGen
             }
 
 public export
-Monoid (AdditionalGensFor sig) where
+Monoid AdditionalGens where
   neutral = MkAdditionalGens empty False
 
 export
-Eq (AdditionalGensFor sig) where
+Eq AdditionalGens where
   al == ar = al.additionalGens == ar.additionalGens && al.universalGen == ar.universalGen
 
 public export
-justUniversalGen : AdditionalGensFor sig
+justUniversalGen : AdditionalGens
 justUniversalGen = MkAdditionalGens empty True
 
 public export
-justOneAdditional : GenSignature -> AdditionalGensFor sig
+justOneAdditional : GenSignature -> AdditionalGens
 justOneAdditional sig = MkAdditionalGens (singleton sig) False
 
 ----------------------
@@ -112,7 +90,7 @@ interface Elaboration m => CanonicGen m where
   callGen : (outerSig : GenSignature) ->
             (sig : GenSignature) ->
             (fuel : TTImp) ->
-            Vect sig.givenParams.size TTImp -> m (TTImp, AdditionalGensFor outerSig)
+            Vect sig.givenParams.size TTImp -> m (TTImp, AdditionalGens)
 
 export
 CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
@@ -121,7 +99,7 @@ CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
 --- Low-level derivation interface ---
 
 export
-canonicSig : (sig : GenSignature) -> AdditionalGensFor sig -> TTImp
+canonicSig : (sig : GenSignature) -> AdditionalGens -> TTImp
 canonicSig sig addition = piAll returnTy $
   MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) ++ map extGenArg (universal ++ additional) where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
@@ -162,7 +140,7 @@ callCanonic _ = foldl app .: appFuel
 
 public export
 interface DerivatorCore where
-  canonicBody : CanonicGen m => (sig : GenSignature) -> Name -> m (List Clause, AdditionalGensFor sig)
+  canonicBody : CanonicGen m => (sig : GenSignature) -> Name -> m (List Clause, AdditionalGens)
 
 -- NOTE: Implementation of `internalGenBody` cannot know the `Name` of the called gen, thus it cannot use `callInternalGen` function directly.
 --       It have to use `callGen` function from `CanonicGen` interface instead.
@@ -182,7 +160,7 @@ export %inline
 canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
 canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 
-wrapAdditionalGens : (varUse : String -> TTImp) -> AdditionalGensFor sig -> TTImp -> TTImp
+wrapAdditionalGens : (varUse : String -> TTImp) -> AdditionalGens -> TTImp -> TTImp
 wrapAdditionalGens varUse ags expr = foldl addGen (wrapUni expr) $ SortedSet.toList ags.additionalGens where
 
   addGen : TTImp -> GenSignature -> TTImp
@@ -194,11 +172,11 @@ wrapAdditionalGens varUse ags expr = foldl addGen (wrapUni expr) $ SortedSet.toL
               else id
 
 export
-wrapAdditionalGensLHS : AdditionalGensFor sig -> TTImp -> TTImp
+wrapAdditionalGensLHS : AdditionalGens -> TTImp -> TTImp
 wrapAdditionalGensLHS = wrapAdditionalGens bindVar
 
 export
-wrapAdditionalGensRHS : AdditionalGensFor sig -> TTImp -> TTImp
+wrapAdditionalGensRHS : AdditionalGens -> TTImp -> TTImp
 wrapAdditionalGensRHS = wrapAdditionalGens $ var . UN . Basic -- can't use `varStr` because I expect strings to contain dots
 
 ---------------------------------
@@ -206,7 +184,7 @@ wrapAdditionalGensRHS = wrapAdditionalGens $ var . UN . Basic -- can't use `varS
 ---------------------------------
 
 export
-deriveCanonical : DerivatorCore => CanonicGen m => (sig : GenSignature) -> Name -> m (Decl, Decl, AdditionalGensFor sig)
+deriveCanonical : DerivatorCore => CanonicGen m => (sig : GenSignature) -> Name -> m (Decl, Decl, AdditionalGens)
 deriveCanonical sig name = do
   when (isPolyType sig.targetType) $
     fail "INTERNAL ERROR: attempt to derive generator for polymorphic type `\{show $ sig.targetType.name}`"

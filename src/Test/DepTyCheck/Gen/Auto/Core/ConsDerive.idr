@@ -28,7 +28,7 @@ interface ConstructorDerivator where
                 (con : Con) ->
                 (given : SortedSet $ Fin con.args.length) ->
                 (fuel : TTImp) ->
-                m (TTImp, AdditionalGensFor sig)
+                m (TTImp, AdditionalGens)
 
 --- Particular tactics ---
 
@@ -87,7 +87,7 @@ namespace NonObligatoryExts
 
       -- Analyse that we can do subgeneration for each constructor argument
       -- Fails using `Elaboration` if the given expression is not an application to a type constructor
-      let analyseTypeApp : forall m. Elaboration m => MonadWriter (AdditionalGensFor sig) m => TTImp -> m $ TypeApp con
+      let analyseTypeApp : forall m. Elaboration m => MonadWriter AdditionalGens m => TTImp -> m $ TypeApp con
           analyseTypeApp expr = do
             let (lhs, args) = unAppAny expr
             ty <- case lhs of
@@ -137,14 +137,14 @@ namespace NonObligatoryExts
                         n            => (if contains idx givs then id else ("^bnd^" ++)) $ show n
 
       -- Derive constructor calling expression for given order of generation
-      let genForOrder : List (Fin con.args.length) -> m (TTImp, AdditionalGensFor sig)
+      let genForOrder : List (Fin con.args.length) -> m (TTImp, AdditionalGens)
           genForOrder = map (mapFst (`apply` callCons)) . evalRWST () givs . foldlM genForOneArg id where
 
             -- ... state is the set of arguments that are already present (given or generated)
             genForOneArg : forall m.
                            CanonicGen m =>
                            MonadState (SortedSet $ Fin con.args.length) m =>
-                           MonadWriter (AdditionalGensFor sig) m =>
+                           MonadWriter AdditionalGens m =>
                            (TTImp -> TTImp) -> (gened : Fin con.args.length) -> m $ TTImp -> TTImp
             genForOneArg leftExprF genedArgIdx = do
 
