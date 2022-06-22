@@ -163,9 +163,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                        => (IApp. IVar >>=
                                                                                $ (IApp. IVar <DerivedGen.X>[0]
                                                                                       $ IVar ^cons_fuel^
-                                                                                      $ (IApp. (INamedApp. IVar Prelude.Num.*
-                                                                                                         $ IVar Prelude.Types.Nat
-                                                                                                         $ IVar Prelude.Types.Num implementation at Prelude.Types:66:1--71:33)
+                                                                                      $ (IApp. IVar Prelude.Types.mult
                                                                                              $ IVar n
                                                                                              $ (IApp. IVar Prelude.Types.S
                                                                                                     $ (IApp. IVar Prelude.Types.S

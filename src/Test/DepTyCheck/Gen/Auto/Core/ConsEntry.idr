@@ -23,6 +23,9 @@ canonicConsBody sig name con = do
   -- Get file position of the constructor definition (for better error reporting)
   let conFC = getFC con.type
 
+  -- Normalise the types in constructor; expand functions that are used as types, if possible
+  con <- normaliseCon con
+
   -- Acquire constructor's return type arguments
   let (conRetTy, conRetTypeArgs) = unAppAny con.type
   conRetTypeArgs <- for conRetTypeArgs $ \case -- resembles similar management from `Entry` module; they must be consistent
