@@ -1,0 +1,12 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Error during reflection: Only applications to non-polymorphic type constructors are supported at the moment
+
+DerivedGen:16:22--16:46
+ 12 | 
+ 13 | data X : Type where
+ 14 |   X0 : X
+ 15 |   X1 : Bool -> X
+ 16 |   X2 : (b : Bool) -> NonReducibleUseTypeAlias b -> X
+                           ^^^^^^^^^^^^^^^^^^^^^^^^
+

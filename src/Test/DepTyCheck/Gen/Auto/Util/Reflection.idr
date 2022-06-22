@@ -30,6 +30,23 @@ export
 Interpolation TTImp where
   interpolate expr = show $ assert_total $ pretty {ann=Unit} expr
 
+----------------------------------------------
+--- Compiler-based `TTImp` transformations ---
+----------------------------------------------
+
+export
+normaliseAsType : Elaboration m => TTImp -> m TTImp
+normaliseAsType expr = quote !(check {expected=Type} expr)
+
+-- This is a workaround to not to change `elab-util`'s `gitInfo'`
+export
+normaliseCon : Elaboration m => Con -> m Con
+normaliseCon $ MkCon n args ty = do
+  let whole = piAll ty $ args <&> {name $= Just}
+  whole <- normaliseAsType whole
+  (args, ty) <- unPiNamed whole
+  pure $ MkCon n args ty
+
 --------------------------------------------
 --- Parsing and rebuilding `TTImp` stuff ---
 --------------------------------------------

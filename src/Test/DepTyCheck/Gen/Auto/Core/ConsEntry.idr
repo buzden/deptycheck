@@ -23,13 +23,16 @@ canonicConsBody sig name con = do
   -- Get file position of the constructor definition (for better error reporting)
   let conFC = getFC con.type
 
+  -- Normalise the types in constructor; expand functions that are used as types, if possible
+  con <- normaliseCon con
+
   -- Acquire constructor's return type arguments
-  let conRetTypeArgs = snd $ unAppAny con.type
+  let (conRetTy, conRetTypeArgs) = unAppAny con.type
   conRetTypeArgs <- for conRetTypeArgs $ \case -- resembles similar management from `Entry` module; they must be consistent
     PosApp e     => pure e
-    NamedApp _ _ => failAt conFC "Named implicit applications are not supported yet"
-    AutoApp _    => failAt conFC "Auto-implicit applications are not supported yet"
-    WithApp _    => failAt conFC "Unexpected `with` application in the constructor's return type"
+    NamedApp _ _ => failAt conFC "Named implicit applications (like to `\{show conRetTy}`) are not supported yet"
+    AutoApp _    => failAt conFC "Auto-implicit applications (like to `\{show conRetTy}`) are not supported yet"
+    WithApp _    => failAt conFC "Unexpected `with` application to `\{show conRetTy}` in a constructor's argument"
 
   -- Match lengths of `conRetTypeArgs` and `sig.targetType.args`
   let Yes conRetTypeArgsLengthCorrect = conRetTypeArgs.length `decEq` sig.targetType.args.length
