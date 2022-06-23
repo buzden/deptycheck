@@ -44,7 +44,9 @@ normaliseCon : Elaboration m => Con -> m Con
 normaliseCon $ MkCon n args ty = do
   let whole = piAll ty $ args <&> {name $= Just}
   whole <- normaliseAsType whole
-  (args, ty) <- unPiNamed whole
+  (args', ty) <- unPiNamed whole
+  -- `quote` may corrupt names, workaround it:
+  let args = args `zip` args' <&> \(pre, normd) => {name := argName pre} normd
   pure $ MkCon n args ty
 
 --------------------------------------------
@@ -234,14 +236,6 @@ typeInfoForPrimType WorldType   = primTypeInfo "%World"
 export
 typeInfoForTypeOfTypes : TypeInfo
 typeInfoForTypeOfTypes = primTypeInfo "Type"
-
--------------------------------------
---- Working around type inference ---
--------------------------------------
-
-public export
-argName : NamedArg -> Name
-argName = (.name)
 
 ----------------------------------------------
 --- Analyzing dependently typed signatures ---

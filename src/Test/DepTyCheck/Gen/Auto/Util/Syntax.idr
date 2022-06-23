@@ -98,9 +98,13 @@ namespace Monad
       | True => pure True
     r
 
-------------------------
---- Ambiguous `args` ---
-------------------------
+-------------------------------------
+--- Working around type inference ---
+-------------------------------------
+
+public export
+argName : NamedArg -> Name
+argName = (.name)
 
 public export %inline
 (.tyArgs) : TypeInfo -> List NamedArg

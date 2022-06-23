@@ -7,7 +7,7 @@ import RunDerivedGen
 %language ElabReflection
 
 data EqA : (a : Type) -> a -> a -> Type where
-  MkEqA : {x, y : b} -> (x = y) -> EqA b x y
+  MkEqA : {x, y : a} -> (x = y) -> EqA a x y
 
 Show (EqA a x y) where
   show _ = "Refl"
