@@ -37,7 +37,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                  $ (IApp. IVar <<Data.Vect.Nil>>
                                                                         $ IVar ^sub^fuel_arg^)
                                                                  $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<Data.Vect.::>>
+                                                                        $ (IApp. IVar <<Data.Vect.(::)>>
                                                                                $ IVar ^sub^fuel_arg^)
                                                                         $ IVar Nil))) ]))
                             IClaim MW
@@ -58,7 +58,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IClaim MW
                                    Export
                                    []
-                                   (MkTy <<Data.Vect.::>>
+                                   (MkTy <<Data.Vect.(::)>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                      $ (IApp. IVar Builtin.DPair.DPair
@@ -74,7 +74,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                  [ PatClause (IApp. IVar <<Data.Vect.Nil>>
                                                   $ IBindVar ^cons_fuel^)
                                              (IVar empty) ]
-                            IDef <<Data.Vect.::>>
-                                 [ PatClause (IApp. IVar <<Data.Vect.::>>
+                            IDef <<Data.Vect.(::)>>
+                                 [ PatClause (IApp. IVar <<Data.Vect.(::)>>
                                                   $ IBindVar ^cons_fuel^)
                                              (IVar empty) ] ]

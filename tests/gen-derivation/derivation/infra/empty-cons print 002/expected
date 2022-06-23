@@ -45,7 +45,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                         $ IVar len
                                                                         $ IVar elem)
                                                                  $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<Data.Vect.::>>
+                                                                        $ (IApp. IVar <<Data.Vect.(::)>>
                                                                                $ IVar ^sub^fuel_arg^
                                                                                $ IVar len
                                                                                $ IVar elem)
@@ -64,7 +64,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IClaim MW
                                    Export
                                    []
-                                   (MkTy <<Data.Vect.::>>
+                                   (MkTy <<Data.Vect.(::)>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg len : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg elem : IType)
@@ -83,14 +83,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ Implicit True
                                                   $ Implicit True)
                                              (IVar empty) ]
-                            IDef <<Data.Vect.::>>
-                                 [ PatClause (IApp. IVar <<Data.Vect.::>>
+                            IDef <<Data.Vect.(::)>>
+                                 [ PatClause (IApp. IVar <<Data.Vect.(::)>>
                                                   $ IBindVar ^cons_fuel^
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar len)
                                                   $ IBindVar elem)
                                              (IVar empty)
-                                 , PatClause (IApp. IVar <<Data.Vect.::>>
+                                 , PatClause (IApp. IVar <<Data.Vect.(::)>>
                                                   $ Implicit True
                                                   $ Implicit True
                                                   $ Implicit True)

@@ -40,7 +40,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                         $ IVar ^sub^fuel_arg^
                                                                         $ IVar elem)
                                                                  $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<Data.Vect.::>>
+                                                                        $ (IApp. IVar <<Data.Vect.(::)>>
                                                                                $ IVar ^sub^fuel_arg^
                                                                                $ IVar elem)
                                                                         $ IVar Nil))) ]))
@@ -60,7 +60,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IClaim MW
                                    Export
                                    []
-                                   (MkTy <<Data.Vect.::>>
+                                   (MkTy <<Data.Vect.(::)>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg elem : IType)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
@@ -75,8 +75,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar ^cons_fuel^
                                                   $ IBindVar elem)
                                              (IVar empty) ]
-                            IDef <<Data.Vect.::>>
-                                 [ PatClause (IApp. IVar <<Data.Vect.::>>
+                            IDef <<Data.Vect.(::)>>
+                                 [ PatClause (IApp. IVar <<Data.Vect.(::)>>
                                                   $ IBindVar ^cons_fuel^
                                                   $ IBindVar elem)
                                              (IVar empty) ] ]
