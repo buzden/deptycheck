@@ -1,0 +1,12 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Error during reflection: Named implicit applications (like to `Builtin.Equal`) are not supported yet
+
+DerivedGen:19:14--19:23
+ 15 | genBool : Fuel -> Gen Bool
+ 16 | genBool = deriveGen
+ 17 | 
+ 18 | checkedGen : Fuel -> {a : Type} -> (x : a) -> (Fuel -> Gen a) => Gen (EqA a x)
+ 19 | checkedGen = deriveGen
+                   ^^^^^^^^^
+
