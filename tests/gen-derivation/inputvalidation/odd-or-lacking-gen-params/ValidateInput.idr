@@ -27,3 +27,8 @@ genY_with_repeating_name_difflytyped' = deriveGen
 
 genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
 genY_unused_argument = deriveGen
+
+--- Badly placed implicit arguments ---
+
+genY_badly_placed_impl : Fuel -> Gen $ Y a b
+genY_badly_placed_impl = deriveGen

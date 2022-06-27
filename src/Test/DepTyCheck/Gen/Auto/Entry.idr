@@ -231,6 +231,16 @@ checkTypeIsGen checkSide sig = do
   let [] = findConsequentsWhich ((>=) `on` \(_, n, _) => n) givenParams
     | (_, (ty, _, _)) :: _ => failAt (getFC ty) "Given arguments must go in the same order as in the target type"
 
+  -- check that all target type's parameter are either given or generated
+  let idxOfGenerated = snd <$> paramsToBeGenerated
+  let idxOfGiven     = givenParams <&> \(_, n, _) => n
+  let givenAndGenerated = fromList idxOfGenerated `union` fromList idxOfGiven
+  let danglingIndices = fromList (toList $ allFins' {n=targetType.args.length}) `difference` givenAndGenerated
+  unless (null danglingIndices) $ do
+    let danglingNames = danglingIndices.asList <&> \idx => "`\{show $ index' targetTypeArgs $ rewrite sym targetTypeArgsLengthCorrect in idx}`"
+    failAt targetTypeFC $ "The following arguments are not present in the given or generated argument lists: \{joinBy "," danglingNames}"
+                       ++ "; make sure they are declared after the fuel argument"
+
   -- make unable to use generated params list
   let 0 paramsToBeGenerated = paramsToBeGenerated
 

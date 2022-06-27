@@ -1,0 +1,12 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Error during reflection: The following arguments are not present in the given or generated argument lists: `a`; make sure they are declared after the fuel argument
+
+DerivedGen:10:42--10:49
+ 06 | 
+ 07 | %language ElabReflection
+ 08 | 
+ 09 | -- `a` is placed *before* the fuel parameter, which is unsupported
+ 10 | checkedGen : {a : Type} -> Fuel -> Gen $ Maybe a
+                                               ^^^^^^^
+

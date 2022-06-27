@@ -67,3 +67,13 @@ ValidateInput:28:54--28:57
  28 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
                                                            ^^^
 
+Error: While processing right hand side of genY_badly_placed_impl. Error during reflection: The following arguments are not present in the given or generated argument lists: `a`,`b`; make sure they are declared after the fuel argument
+
+ValidateInput:33:40--33:45
+ 29 | genY_unused_argument = deriveGen
+ 30 | 
+ 31 | --- Badly placed implicit arguments ---
+ 32 | 
+ 33 | genY_badly_placed_impl : Fuel -> Gen $ Y a b
+                                             ^^^^^
+
