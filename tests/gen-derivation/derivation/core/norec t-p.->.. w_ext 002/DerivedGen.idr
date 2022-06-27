@@ -6,7 +6,7 @@ import RunDerivedGen
 
 %language ElabReflection
 
-checkedGen : Fuel -> (Fuel -> Gen b) => (Fuel -> Gen a) => Gen (a, b)
+checkedGen : Fuel -> {a, b : _} -> (Fuel -> Gen b) => (Fuel -> Gen a) => Gen (a, b)
 checkedGen = deriveGen
 
 main : IO ()

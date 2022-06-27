@@ -1,12 +1,19 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Target type `a` is not a top-level data definition
-
-DerivedGen:9:31--9:34
- 5 | %default total
- 6 | 
- 7 | %language ElabReflection
- 8 | 
- 9 | checkedGen : Fuel -> (Fuel -> Gen a) => Gen (Maybe a)
-                                   ^^^
-
+Generated values:
+-----
+-----
+Nothing
+-----
+Just "bc"
+-----
+Just ""
+-----
+Just "a"
+-----
+-----
+Nothing
+-----
+Just 10
+-----
+Just 0
