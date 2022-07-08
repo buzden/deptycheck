@@ -146,5 +146,5 @@ namespace ClojuringCanonicImpl
   runCanonic : DerivatorCore => SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
-    (x, defs, bodies) <- evalRWST calc exts empty {s=SortedMap GenSignature Name} {w=(_, _)}
+    (x, defs, bodies) <- evalRWST exts empty calc {s=SortedMap GenSignature Name} {w=(_, _)}
     pure (x, defs ++ bodies)
