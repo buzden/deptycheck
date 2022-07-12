@@ -1,0 +1,15 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Error during reflection: While processing right hand side of $resolved16594,<DerivedGen.X>[0]. While processing right hand side of $resolved16594,<DerivedGen.X>[0],<<DerivedGen.MkX>>. When unifying:
+    Gen a
+and:
+    Gen a
+Mismatch between: a and a.
+
+Error: While processing right hand side of checkedGen. Error during reflection: While processing right hand side of $resolved16594,<DerivedGen.X>[0]. While processing right hand side of $resolved16594,<DerivedGen.X>[0],<<DerivedGen.MkX>>. When unifying:
+    Gen a
+and:
+    Gen a
+Mismatch between: a and a.
+
+Warning: compiling hole DerivedGen.checkedGen
