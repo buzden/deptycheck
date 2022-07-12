@@ -213,9 +213,9 @@ uniform : LzList a -> Gen a
 uniform = Uniform
 
 export
-listOf : Gen a -> {default (choose (0, 10)) length : Gen Nat} -> Gen (List a)
+listOf : {default (choose (0, 10)) length : Gen Nat} -> Gen a -> Gen (List a)
 listOf g = sequence $ List.replicate !length g
 
 export
-vectOf : Gen a -> {n : Nat} -> Gen (Vect n a)
+vectOf : {n : Nat} -> Gen a -> Gen (Vect n a)
 vectOf g = sequence $ replicate n g
