@@ -25,14 +25,6 @@ public export %inline
 Seed : Type
 Seed = StdGen
 
--------------------------------------------------
---- General utility functions and definitions ---
--------------------------------------------------
-
-public export
-HavingTrue : (a : Type) -> (a -> Bool) -> Type
-HavingTrue a p = Subset a $ \x => p x = True
-
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
@@ -176,11 +168,11 @@ mapMaybe p (AlternG l) = AlternG $ assert_total $ mapMaybe p <$> l
 mapMaybe p (Raw sf)    = Raw $ mapMaybe p <$> sf
 
 export
-suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `HavingTrue` p
+suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `Subset` So . p
 suchThat_withPrf g p = mapMaybe lp g where
-  lp : a -> Maybe $ a `HavingTrue` p
+  lp : a -> Maybe $ a `Subset` So . p
   lp x with (p x) proof prf
-    lp x | True  = Just $ Element x prf
+    lp x | True  = Just $ Element x $ eqToSo prf
     lp x | False = Nothing
 
 infixl 4 `suchThat`
