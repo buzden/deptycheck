@@ -7,9 +7,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => (MW AutoImplicit external^<Prelude.Types.Nat>[] : IPi.  (MW ExplicitArg {arg:872} : IVar Data.Fuel.Fuel)
                                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                                     $ IVar Prelude.Types.Nat))
-    => (MW AutoImplicit external^<String>[] : IPi.  (MW ExplicitArg {arg:879} : IVar Data.Fuel.Fuel)
-                                                 -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                         $ IPrimVal String))
+    => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:879} : IVar Data.Fuel.Fuel)
+                                                        -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                $ IPrimVal String))
     => ILocal (IApp. IVar <DerivedGen.D>[] $ IVar ^outmost-fuel^)
          IClaim MW
                 Export
@@ -217,7 +217,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar external^<String>[]
+                                                                $ (IApp. IVar external^<^prim^.String>[]
                                                                        $ IVar ^cons_fuel^)
                                                                 $ (ILam.  (MW ExplicitArg ^bnd^{arg:854} : Implicit False)
                                                                        => (IApp. (INamedApp. IVar Prelude.pure
@@ -242,7 +242,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                                  $ IBindVar b
                                                                                                  $ IBindVar ^bnd^{arg:862})
                                                                                             (IApp. IVar >>=
-                                                                                                 $ (IApp. IVar external^<String>[]
+                                                                                                 $ (IApp. IVar external^<^prim^.String>[]
                                                                                                         $ IVar ^cons_fuel^)
                                                                                                  $ (ILam.  (MW ExplicitArg ^bnd^{arg:859} : Implicit False)
                                                                                                         => (IApp. (INamedApp. IVar Prelude.pure

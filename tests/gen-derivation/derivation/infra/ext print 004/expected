@@ -4,9 +4,9 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen String)} -> (n : Nat) -> Gen (X'S n)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW AutoImplicit external^<String>[] : IPi.  (MW ExplicitArg {arg:834} : IVar Data.Fuel.Fuel)
-                                                 -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                         $ IPrimVal String))
+    => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:834} : IVar Data.Fuel.Fuel)
+                                                        -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                $ IPrimVal String))
     => (MW ExplicitArg n : IVar Prelude.Types.Nat)
     => ILocal (IApp. IVar <AlternativeCore.X'S>[0]
                    $ IVar ^outmost-fuel^
@@ -32,7 +32,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (IApp. IVar <*>
                                $ (IApp. IVar <$>
                                       $ IVar MkXSN
-                                      $ (IApp. IVar external^<String>[]
+                                      $ (IApp. IVar external^<^prim^.String>[]
                                              $ IVar fuel))
                                $ (IApp. IVar <Prelude.Types.Nat>[]
                                       $ IVar fuel)) ]
@@ -43,7 +43,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (IApp. IVar <*>
                                $ (IApp. IVar <$>
                                       $ IVar MkXSN
-                                      $ (IApp. IVar external^<String>[]
+                                      $ (IApp. IVar external^<^prim^.String>[]
                                              $ IVar fuel))
                                $ (IApp. IVar <Prelude.Types.Nat>[]
                                       $ IVar fuel)) ]
