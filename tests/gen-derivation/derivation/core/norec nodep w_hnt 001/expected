@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+MkX "a" ""
+-----
+MkX "" ""
+-----
+MkX "" "a"
+-----
+MkX "a" "a"
+-----
+MkX "" "a"
+-----
+MkX "a" "bc"
+-----
+MkX "" ""
+-----
+MkX "bc" "a"
+-----
+MkX "a" "a"
+-----
+MkX "a" ""

@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+MkX MkSomeTestType "very-external" [10, 0] MkSomeTestType "very-external" [0, 0, 0]
+-----
+MkX MkSomeTestType "very-external" [10, 10] MkSomeTestType "very-external" [10, 10, 10]
+-----
+MkX MkSomeTestType "very-external" [0, 10] MkSomeTestType "very-external" [10, 0, 0]
+-----
+MkX MkSomeTestType "very-external" [10, 0] MkSomeTestType "very-external" [0, 10, 10]
+-----
+MkX MkSomeTestType "very-external" [10, 10] MkSomeTestType "very-external" [10, 0, 0]
+-----
+MkX MkSomeTestType "very-external" [0, 10] MkSomeTestType "very-external" [10, 10, 0]
+-----
+MkX MkSomeTestType "very-external" [0, 0] MkSomeTestType "very-external" [10, 0, 10]
+-----
+MkX MkSomeTestType "very-external" [10, 10] MkSomeTestType "very-external" [10, 0, 10]
+-----
+MkX MkSomeTestType "very-external" [0, 10] MkSomeTestType "very-external" [10, 10, 10]
+-----
+MkX MkSomeTestType "very-external" [10, 0] MkSomeTestType "very-external" [10, 0, 0]

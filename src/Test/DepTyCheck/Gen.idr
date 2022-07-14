@@ -32,6 +32,7 @@ import Test.DepTyCheck.Gen.NonEmpty
 
 export
 data Gen : Type -> Type where
+  [noHints]
   Empty    : Gen a
   NonEmpty : Lazy (Gen1 $ Maybe a) -> Gen a
 

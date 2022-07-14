@@ -114,6 +114,12 @@ namespace ClojuringCanonicImpl
       let Nothing = lookupLengthChecked sig !ask
         | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values
 
+      -- look for very external gens, i.e. those that can be reached with `%search`
+      canonicSigType <- try .| check (canonicSig sig)
+                            .| fail "INTERNAL ERROR: canonic signature of \{show sig.targetType.name} is not a type"
+      Nothing <- search canonicSigType
+        | Just found => flip (foldl app) values <$> flip app fuel <$> quote found
+
       -- get the name of internal gen, derive if necessary
       internalGenName <- do
 

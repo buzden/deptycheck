@@ -38,6 +38,7 @@ transport z Refl = z
 --------------------------------
 
 record RawGen a where
+  [noHints]
   constructor MkRawGen
   unRawGen : forall m. MonadRandom m => m a
 
@@ -45,12 +46,14 @@ record OneOfAlternatives (0 a : Type)
 
 export
 data Gen1 : Type -> Type where
+  [noHints]
   Pure  : a -> Gen1 a
   Raw   : RawGen a -> Gen1 a
   OneOf : OneOfAlternatives a -> Gen1 a
   Bind  : RawGen c -> (c -> Gen1 a) -> Gen1 a
 
 record OneOfAlternatives (0 a : Type) where
+  [noHints]
   constructor MkOneOf
   desc : Maybe String
   gens : LazyLst1 (PosNat, Lazy (Gen1 a))
