@@ -61,7 +61,7 @@ canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel)
   returnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs where
 
     targetTypeApplied : TTImp
-    targetTypeApplied = foldr apply (var sig.targetType.name) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => case piInfo of
+    targetTypeApplied = foldr apply (extractTargetTyExpr sig.targetType) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => case piInfo of
                           ExplicitArg   => (.$ var name)
                           ImplicitArg   => \f => namedApp f name $ var name
                           DefImplicit _ => \f => namedApp f name $ var name
