@@ -1,3 +1,9 @@
+- Refactoring
+
+  - ``Test.Deptycheck.Gen.Auto`` -> ``Derivation.Deptycheck.Gen``
+  - тесты в ``least-effort`` разбить по папкам, скажем, ``adt``, ``gadt``, ``poly``;
+    но надо оставить возможность запуска ``print`` и ``run`` по отдельности
+
 - CI
 
   - Сборка библиотеки deptycheck
