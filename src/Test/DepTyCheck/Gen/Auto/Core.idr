@@ -93,9 +93,6 @@ ConstructorDerivator => DerivatorCore where
       toRec True  = Recursive
       toRec False = NonRecursive
 
-      any : (a -> m Bool) -> List a -> m Bool
-      any = foldl (||) (pure False) .: map
-
 export
 MainCoreDerivator : ConstructorDerivator => DerivatorCore
 MainCoreDerivator = %search
