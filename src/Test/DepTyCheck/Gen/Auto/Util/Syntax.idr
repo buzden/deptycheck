@@ -98,6 +98,10 @@ namespace Monad
       | True => pure True
     r
 
+  public export
+  any : Monad n => (a -> n Bool) -> List a -> n Bool
+  any = foldl (||) (pure False) .: map
+
 -------------------------------------
 --- Working around type inference ---
 -------------------------------------

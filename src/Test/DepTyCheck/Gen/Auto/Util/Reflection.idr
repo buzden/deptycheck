@@ -427,14 +427,91 @@ allVarNames expr = ttimp expr where
 
 export
 hasNameInsideDeep : Elaboration m => Name -> TTImp -> m Bool
-hasNameInsideDeep nm = assert_total holdsOnAnyInTrCl (== nm) namesOfType . toList . allVarNames where
-  namesOfType : Name -> m $ List Name
-  namesOfType n = try asIfType $ pure [] where
-    asIfType : Elab $ List Name
-    asIfType = do
-      ty <- getInfo' n
-      let subexprs = (map type ty.args) ++ (ty.cons >>= \con => con.type :: map type con.args)
-      pure $ subexprs >>= toList . allVarNames
+hasNameInsideDeep nm expr = evalStateT .| the (SortedSet Name) empty .| hasInside where
+
+  hasInside : forall mm. Elaboration mm => MonadState (SortedSet Name) mm => mm Bool
+  hasInside = ttimp expr where
+    mutual
+
+      ttimp : TTImp -> mm Bool
+      ttimp $ IVar _ n                        = if n == nm then pure True else
+                                                  if contains n !get then pure False else do
+                                                    modify $ insert n
+                                                    Just ty <- catch (getInfo' n)
+                                                      | Nothing => pure False
+                                                    let subexprs = (map type ty.args) ++ (ty.cons >>= \con => con.type :: map type con.args)
+                                                    assert_total $ any ttimp subexprs
+      ttimp $ IPi _ _ z _ argTy retTy         = ttimp argTy || ttimp retTy || piInfo z
+      ttimp $ ILam _ _ z _ argTy lamTy        = ttimp argTy || ttimp lamTy || piInfo z
+      ttimp $ ILet _ _ _ _ nTy nVal sc        = ttimp nTy || ttimp nVal || ttimp sc -- should we check `nTy` here?
+      ttimp $ ICase _ _ ty xs                 = ttimp ty || assert_total (any clause xs)
+      ttimp $ ILocal _ xs y                   = assert_total (any decl xs) || ttimp y
+      ttimp $ IUpdate _ xs y                  = assert_total (any fieldUpdate xs) || ttimp y
+      ttimp $ IApp _ y z                      = ttimp y || ttimp z
+      ttimp $ INamedApp _ y _ w               = ttimp y || ttimp w
+      ttimp $ IAutoApp _ y z                  = ttimp y || ttimp z
+      ttimp $ IWithApp _ y z                  = ttimp y || ttimp z
+      ttimp $ ISearch _ _                     = pure False
+      ttimp $ IAlternative _ y xs             = altType y || assert_total (any ttimp xs)
+      ttimp $ IRewrite _ y z                  = ttimp y || ttimp z
+      ttimp $ IBindHere _ _ z                 = ttimp z
+      ttimp $ IBindVar _ _                    = pure False
+      ttimp $ IAs _ _ _ _ w                   = ttimp w
+      ttimp $ IMustUnify _ _ z                = ttimp z
+      ttimp $ IDelayed _ _ z                  = ttimp z
+      ttimp $ IDelay _ y                      = ttimp y
+      ttimp $ IForce _ y                      = ttimp y
+      ttimp $ IQuote _ y                      = ttimp y
+      ttimp $ IQuoteName _ _                  = pure False
+      ttimp $ IQuoteDecl _ xs                 = assert_total $ any decl xs
+      ttimp $ IUnquote _ y                    = ttimp y
+      ttimp $ IPrimVal _ _                    = pure False
+      ttimp $ IType _                         = pure False
+      ttimp $ IHole _ _                       = pure False
+      ttimp $ Implicit _ _                    = pure False
+      ttimp $ IWithUnambigNames _ _ y         = ttimp y
+
+      altType : AltType -> mm Bool
+      altType FirstSuccess      = pure False
+      altType Unique            = pure False
+      altType (UniqueDefault x) = ttimp x
+
+      lncpt : List (Name, Count, PiInfo TTImp, TTImp) -> mm Bool
+      lncpt = any (\(_, _, pii, tt) => piInfo pii || ttimp tt)
+
+      ity : ITy -> mm Bool
+      ity $ MkTy _ _ _ ty = ttimp ty
+
+      decl : Decl -> mm Bool
+      decl $ IClaim _ _ _ _ t                       = ity t
+      decl $ IData _ _ _ z                          = data_ z
+      decl $ IDef _ _ xs                            = any clause xs
+      decl $ IParameters _ xs ys                    = lncpt xs || assert_total (any decl ys)
+      decl $ IRecord _ _ _ _ $ MkRecord _ _ ps _ fs = lncpt ps || any (\(MkIField _ _ pii _ tt) => piInfo pii || ttimp tt) fs
+      decl $ INamespace _ _ xs                      = assert_total $ any decl xs
+      decl $ ITransform _ _ z w                     = ttimp z || ttimp w
+      decl $ IRunElabDecl _ y                       = ttimp y
+      decl $ ILog _                                 = pure False
+      decl $ IBuiltin _ _ _                         = pure False
+
+      data_ : Data -> mm Bool
+      data_ $ MkData x n tycon _ datacons = ttimp tycon || any ity datacons
+      data_ $ MkLater x n tycon           = ttimp tycon
+
+      fieldUpdate : IFieldUpdate -> mm Bool
+      fieldUpdate $ ISetField    _ x = ttimp x
+      fieldUpdate $ ISetFieldApp _ x = ttimp x
+
+      clause : Clause -> mm Bool
+      clause $ PatClause _ lhs rhs            = ttimp lhs || ttimp rhs
+      clause $ WithClause _ lhs _ wval _ _ xs = ttimp lhs || ttimp wval || assert_total (any clause xs)
+      clause $ ImpossibleClause _ lhs         = ttimp lhs
+
+      piInfo : PiInfo TTImp -> mm Bool
+      piInfo ImplicitArg     = pure False
+      piInfo ExplicitArg     = pure False
+      piInfo AutoImplicit    = pure False
+      piInfo (DefImplicit x) = ttimp x
 
 public export
 isVar : TTImp -> Bool
