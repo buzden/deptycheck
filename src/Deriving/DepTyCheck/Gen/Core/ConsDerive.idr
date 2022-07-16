@@ -182,10 +182,7 @@ namespace NonObligatoryExts
       let disjDeps = disjointDepSets rawDeps givs
 
       -- Acquire order(s) in what we will generate arguments
-      let allOrders = do
-        leftmost  <- indepPermutations' disjDeps depsLTR
-        rightmost <- indepPermutations' disjDeps rightmostArgs
-        pure $ leftmost ++ leftToRightArgs ++ rightmost
+      let allOrders = List.singleton $ depsLTR.asList ++ leftToRightArgs ++ rightmostArgs.asList
 
       --------------------------
       -- Producing the result --
