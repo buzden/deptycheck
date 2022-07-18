@@ -110,9 +110,15 @@ namespace ClojuringCanonicImpl
   DerivatorCore => ClojuringContext m => Elaboration m => CanonicGen m where
     callGen sig fuel values = do
 
+      --- check if no derivation is needed ---
+
       -- look for external gens, and call it if exists
       let Nothing = lookupLengthChecked sig !ask
         | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values
+
+      -- look for existing already derived (internal) gen, use it if exists
+      let Nothing = lookup sig !get
+        | Just internalGenName => pure $ callCanonic sig internalGenName fuel values
 
       -- look for very external gens, i.e. those that can be reached with `%search`
       canonicSigType <- try .| check (canonicSig sig)
@@ -120,27 +126,19 @@ namespace ClojuringCanonicImpl
       Nothing <- search canonicSigType
         | Just found => flip (foldl app) values <$> flip app fuel <$> quote found
 
-      -- get the name of internal gen, derive if necessary
-      internalGenName <- do
+      --- nothing's found, then derive! ---
 
-        -- look for existing (already derived) internals, use it if exists
-        let Nothing = lookup sig !get
-          | Just name => pure name
+      -- acquire the name
+      let internalGenName = nameForGen sig
 
-        -- nothing found, then derive! acquire the name
-        let name = nameForGen sig
+      -- remember that we're responsible for this signature derivation
+      modify $ insert sig internalGenName
 
-        -- remember that we're responsible for this signature derivation
-        modify $ insert sig name
+      -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
+      (genFunClaim, genFunBody) <- logBounds "type" [sig] $ assert_total $ deriveCanonical sig internalGenName
 
-        -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
-        (genFunClaim, genFunBody) <- logBounds "type" [sig] $ assert_total $ deriveCanonical sig name
-
-        -- remember the derived stuff
-        tell ([genFunClaim], [genFunBody])
-
-        -- return the name of the newly derived generator
-        pure name
+      -- remember the derived stuff
+      tell ([genFunClaim], [genFunBody])
 
       -- call the internal gen
       pure $ callCanonic sig internalGenName fuel values
