@@ -25,11 +25,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                          $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<Data.Vect.Nil>>
-                                                                        $ IVar Data.Fuel.Dry)
-                                                                 $ IVar Nil))
+                                                     (IApp. IVar <<Data.Vect.Nil>>
+                                                          $ IVar Data.Fuel.Dry)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf

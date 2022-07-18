@@ -29,13 +29,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                          $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<DerivedGen.Base>>
-                                                                        $ IVar Data.Fuel.Dry
-                                                                        $ IVar {arg:830}
-                                                                        $ IVar {arg:833})
-                                                                 $ IVar Nil))
+                                                     (IApp. IVar <<DerivedGen.Base>>
+                                                          $ IVar Data.Fuel.Dry
+                                                          $ IVar {arg:830}
+                                                          $ IVar {arg:833})
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf
@@ -88,13 +85,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                 (IVar Prelude.empty)
                                                     , PatClause (IApp. IVar Prelude.Yes
                                                                      $ IVar Builtin.Refl)
-                                                                (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                                     $ (IApp. IVar ::
-                                                                            $ (IApp. (INamedApp. IVar Prelude.pure
-                                                                                               $ IVar Test.DepTyCheck.Gen.Gen)
-                                                                                   $ (INamedApp. IVar DerivedGen.Base
-                                                                                               $ IVar x))
-                                                                            $ IVar Nil)) ])
+                                                                (IApp. (INamedApp. IVar Prelude.pure
+                                                                                 $ IVar Test.DepTyCheck.Gen.Gen)
+                                                                     $ (INamedApp. IVar DerivedGen.Base
+                                                                                 $ IVar x)) ])
                                  , PatClause (IApp. IVar <<DerivedGen.Base>>
                                                   $ Implicit True
                                                   $ Implicit True
@@ -106,21 +100,18 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar x
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar y))
-                                             (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                  $ (IApp. IVar ::
-                                                         $ (IApp. IVar >>=
-                                                                $ (IApp. IVar <DerivedGen.LT2>[0, 1]
-                                                                       $ IVar ^cons_fuel^
-                                                                       $ IVar x
-                                                                       $ IVar y)
-                                                                $ (ILam.  (MW ExplicitArg ^bnd^{arg:841} : Implicit False)
-                                                                       => (IApp. (INamedApp. IVar Prelude.pure
-                                                                                           $ IVar Test.DepTyCheck.Gen.Gen)
-                                                                               $ (IApp. (INamedApp. IVar DerivedGen.Step
-                                                                                                  $ IVar y
-                                                                                                  $ IVar x)
-                                                                                      $ IVar ^bnd^{arg:841}))))
-                                                         $ IVar Nil))
+                                             (IApp. IVar >>=
+                                                  $ (IApp. IVar <DerivedGen.LT2>[0, 1]
+                                                         $ IVar ^cons_fuel^
+                                                         $ IVar x
+                                                         $ IVar y)
+                                                  $ (ILam.  (MW ExplicitArg ^bnd^{arg:841} : Implicit False)
+                                                         => (IApp. (INamedApp. IVar Prelude.pure
+                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
+                                                                 $ (IApp. (INamedApp. IVar DerivedGen.Step
+                                                                                    $ IVar y
+                                                                                    $ IVar x)
+                                                                        $ IVar ^bnd^{arg:841}))))
                                  , PatClause (IApp. IVar <<DerivedGen.Step>>
                                                   $ Implicit True
                                                   $ Implicit True

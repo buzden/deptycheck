@@ -3,22 +3,22 @@
 Generated values:
 -----
 -----
+MkY {n=0} (MkX {n=0})
+-----
 MkY {n=3} (MkX {n=6})
 -----
-MkY {n=5} (MkX {n=10})
+MkY {n=4} (MkX {n=8})
+-----
+MkY {n=6} (MkX {n=12})
+-----
+MkY {n=7} (MkX {n=14})
 -----
 MkY {n=10} (MkX {n=20})
 -----
-MkY {n=13} (MkX {n=26})
------
-MkY {n=15} (MkX {n=30})
------
-MkY {n=18} (MkX {n=36})
------
-MkY {n=19} (MkX {n=38})
+MkY {n=16} (MkX {n=32})
 -----
 MkY {n=17} (MkX {n=34})
 -----
-MkY {n=16} (MkX {n=32})
+MkY {n=19} (MkX {n=38})
 -----
-MkY {n=14} (MkX {n=28})
+MkY {n=18} (MkX {n=36})

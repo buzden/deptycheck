@@ -9,16 +9,16 @@ X1 True
 -----
 X1 False
 -----
-X2 True 0
+X2 False 0
 -----
-X2 True 3
+X2 False 4
 -----
-X2 True 5
+X2 False 6
 -----
-X2 True 7
+X2 False 7
 -----
-X2 True 9
+X2 False 8
 -----
-X2 True 10
+X2 False 14
 -----
-X2 True 12
+X2 False 15
