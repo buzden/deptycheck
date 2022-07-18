@@ -75,14 +75,14 @@ namespace NonObligatoryExts
 
       -- Derive constructor calling expression for given order of generation
       let genForOrder : List (Fin con.args.length) -> m TTImp
-          genForOrder = map (`apply` callCons) . evalStateT givs . foldlM genForOneArg id where
+          genForOrder order = foldr apply callCons <$> evalStateT givs (for order genForOneArg) where
 
             -- ... state is the set of arguments that are already present (given or generated)
             genForOneArg : forall m.
                            CanonicGen m =>
                            MonadState (SortedSet $ Fin con.args.length) m =>
-                           (TTImp -> TTImp) -> (gened : Fin con.args.length) -> m $ TTImp -> TTImp
-            genForOneArg leftExprF genedArg = do
+                           (gened : Fin con.args.length) -> m $ TTImp -> TTImp
+            genForOneArg genedArg = do
 
               -- Get info for the `genedArg`
               let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ TypeApp) argsTypeApps
@@ -93,7 +93,7 @@ namespace NonObligatoryExts
               -- TODO to put the following check as up as possible as soon as it typecheks O_O
               -- Check that those argument that we need to generate is not already present
               let False = contains genedArg presentArguments
-                | True => pure leftExprF
+                | True => pure id
 
               -- Filter arguments classification according to the set of arguments that are left to be generated;
               -- Those which are `Right` are given, those which are `Left` are needs to be generated.
@@ -126,7 +126,7 @@ namespace NonObligatoryExts
                                        _            => `(\ ~bindSubgenResult => ~cont)
 
               -- Chain the subgen call with a given continuation
-              pure $ \cont => leftExprF `(~subgenCall >>= ~(bindRHS cont))
+              pure $ \cont => `(~subgenCall >>= ~(bindRHS cont))
 
             callCons : TTImp
             callCons = do
