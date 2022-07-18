@@ -41,12 +41,18 @@ ConstructorDerivator => DerivatorCore where
     let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
 
     -- derive bodies for generators per constructors
-    consBodies <- for sig.targetType.cons $ \con => canonicConsBody sig (consGenName con) con <&> def (consGenName con)
+    consBodies <- for sig.targetType.cons $ \con => do
+      logMsg "deptycheck.derive.consBody" 5 "\{show sig.targetType.name}\{show sig.givenParams.asList} \{show con.name} __ start __"
+      r <- canonicConsBody sig (consGenName con) con <&> def (consGenName con)
+      logMsg "deptycheck.derive.consBody" 5 "\{show sig.targetType.name}\{show sig.givenParams.asList} \{show con.name} ^^  end  ^^"
+      pure r
 
     -- calculate which constructors are recursive and which are not
     consRecs <- for sig.targetType.cons $ \con => do
+      logMsg "deptycheck.derive.consRec" 5 "\{show sig.targetType.name}\{show sig.givenParams.asList} \{show con.name} __ start __"
       let conExprs = map type con.args ++ (getExpr <$> snd (unAppAny con.type))
       r <- any (hasNameInsideDeep sig.targetType.name) conExprs
+      logMsg "deptycheck.derive.consRec" 5 "\{show sig.targetType.name}\{show sig.givenParams.asList} \{show con.name} ^^  end  ^^"
       pure (con, toRec r)
 
     -- decide how to name a fuel argument on the LHS
