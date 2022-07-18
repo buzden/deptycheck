@@ -4,9 +4,9 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen String)} -> {auto conArg : ((arg : Fuel) -> Gen Nat)} -> Gen Y
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW AutoImplicit external^<String>[] : IPi.  (MW ExplicitArg {arg:864} : IVar Data.Fuel.Fuel)
-                                                 -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                         $ IPrimVal String))
+    => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:864} : IVar Data.Fuel.Fuel)
+                                                        -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                $ IPrimVal String))
     => (MW AutoImplicit external^<Prelude.Types.Nat>[] : IPi.  (MW ExplicitArg {arg:871} : IVar Data.Fuel.Fuel)
                                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                                     $ IVar Prelude.Types.Nat))
@@ -84,7 +84,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                   $ (IApp. IVar ::
                                                          $ (IApp. IVar >>=
-                                                                $ (IApp. IVar external^<String>[]
+                                                                $ (IApp. IVar external^<^prim^.String>[]
                                                                        $ IVar ^cons_fuel^)
                                                                 $ (ILam.  (MW ExplicitArg n : Implicit False)
                                                                        => (IApp. IVar >>=
