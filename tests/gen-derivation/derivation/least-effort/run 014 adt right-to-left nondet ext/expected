@@ -3,22 +3,22 @@
 Generated values:
 -----
 -----
-MkY (MkX "a" 0) (MkX "a" 0)
+MkY (MkX "" 0) (MkX "" 10)
 -----
-MkY (MkX "a" 10) (MkX "a" 0)
+MkY (MkX "" 10) (MkX "" 10)
+-----
+MkY (MkX "" 10) (MkX "" 0)
+-----
+MkY (MkX "" 0) (MkX "" 0)
 -----
 MkY (MkX "a" 0) (MkX "a" 10)
 -----
 MkY (MkX "a" 10) (MkX "a" 10)
 -----
-MkY (MkX "bc" 0) (MkX "bc" 10)
+MkY (MkX "a" 10) (MkX "a" 0)
 -----
-MkY (MkX "bc" 10) (MkX "bc" 10)
+MkY (MkX "a" 0) (MkX "a" 0)
 -----
 MkY (MkX "bc" 0) (MkX "bc" 0)
 -----
 MkY (MkX "bc" 10) (MkX "bc" 0)
------
-MkY (MkX "" 0) (MkX "" 0)
------
-MkY (MkX "" 10) (MkX "" 0)

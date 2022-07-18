@@ -29,22 +29,16 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                          $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<DerivedGen.ReflN>>
-                                                                        $ IVar Data.Fuel.Dry
-                                                                        $ IVar {arg:830}
-                                                                        $ IVar {arg:833})
-                                                                 $ IVar Nil))
+                                                     (IApp. IVar <<DerivedGen.ReflN>>
+                                                          $ IVar Data.Fuel.Dry
+                                                          $ IVar {arg:830}
+                                                          $ IVar {arg:833})
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                          $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<DerivedGen.ReflN>>
-                                                                        $ IVar ^sub^fuel_arg^
-                                                                        $ IVar {arg:830}
-                                                                        $ IVar {arg:833})
-                                                                 $ IVar Nil)) ]))
+                                                     (IApp. IVar <<DerivedGen.ReflN>>
+                                                          $ IVar ^sub^fuel_arg^
+                                                          $ IVar {arg:830}
+                                                          $ IVar {arg:833}) ]))
                             IClaim MW
                                    Export
                                    []
@@ -70,10 +64,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                 (IVar Prelude.empty)
                                                     , PatClause (IApp. IVar Prelude.Yes
                                                                      $ IVar Builtin.Refl)
-                                                                (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                                     $ (IApp. IVar ::
-                                                                            $ (IApp. (INamedApp. IVar Prelude.pure
-                                                                                               $ IVar Test.DepTyCheck.Gen.Gen)
-                                                                                   $ (INamedApp. IVar DerivedGen.ReflN
-                                                                                               $ IVar x))
-                                                                            $ IVar Nil)) ]) ] ]
+                                                                (IApp. (INamedApp. IVar Prelude.pure
+                                                                                 $ IVar Test.DepTyCheck.Gen.Gen)
+                                                                     $ (INamedApp. IVar DerivedGen.ReflN
+                                                                                 $ IVar x)) ]) ] ]

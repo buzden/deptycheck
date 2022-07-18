@@ -3,22 +3,22 @@
 Generated values:
 -----
 -----
-(3 ** (3 ** ReflN : EqualN 3 3))
+(0 ** (0 ** ReflN : EqualN 0 0))
 -----
-(4 ** (4 ** ReflN : EqualN 4 4))
+(2 ** (2 ** ReflN : EqualN 2 2))
 -----
-(5 ** (5 ** ReflN : EqualN 5 5))
------
-(6 ** (6 ** ReflN : EqualN 6 6))
------
-(7 ** (7 ** ReflN : EqualN 7 7))
+(11 ** (11 ** ReflN : EqualN 11 11))
 -----
 (14 ** (14 ** ReflN : EqualN 14 14))
 -----
-(17 ** (17 ** ReflN : EqualN 17 17))
------
-(18 ** (18 ** ReflN : EqualN 18 18))
+(16 ** (16 ** ReflN : EqualN 16 16))
 -----
 (19 ** (19 ** ReflN : EqualN 19 19))
 -----
-(16 ** (16 ** ReflN : EqualN 16 16))
+(18 ** (18 ** ReflN : EqualN 18 18))
+-----
+(17 ** (17 ** ReflN : EqualN 17 17))
+-----
+(15 ** (15 ** ReflN : EqualN 15 15))
+-----
+(13 ** (13 ** ReflN : EqualN 13 13))

@@ -137,6 +137,7 @@ liftList = foldr (\l, r => `(~l :: ~r)) `([])
 
 export
 callOneOf : List TTImp -> TTImp
+callOneOf [v]      = v
 callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf} .$ liftList variants
 
 export

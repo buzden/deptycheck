@@ -53,18 +53,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<Prelude.Basics.False>>
                                  [ PatClause (IApp. IVar <<Prelude.Basics.False>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                  $ (IApp. IVar ::
-                                                         $ (IApp. (INamedApp. IVar Prelude.pure
-                                                                            $ IVar Test.DepTyCheck.Gen.Gen)
-                                                                $ IVar Prelude.Basics.False)
-                                                         $ IVar Nil)) ]
+                                             (IApp. (INamedApp. IVar Prelude.pure
+                                                              $ IVar Test.DepTyCheck.Gen.Gen)
+                                                  $ IVar Prelude.Basics.False) ]
                             IDef <<Prelude.Basics.True>>
                                  [ PatClause (IApp. IVar <<Prelude.Basics.True>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                  $ (IApp. IVar ::
-                                                         $ (IApp. (INamedApp. IVar Prelude.pure
-                                                                            $ IVar Test.DepTyCheck.Gen.Gen)
-                                                                $ IVar Prelude.Basics.True)
-                                                         $ IVar Nil)) ] ]
+                                             (IApp. (INamedApp. IVar Prelude.pure
+                                                              $ IVar Test.DepTyCheck.Gen.Gen)
+                                                  $ IVar Prelude.Basics.True) ] ]
