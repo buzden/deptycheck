@@ -8,7 +8,7 @@ atDir : (poolName : String) -> (dir : String) -> IO TestPool
 atDir poolName dir = testsInDir dir (not . isPrefixOf "_") poolName [] Nothing
 
 main : IO ()
-main = runner
+main = runner $
   [ !("Lazier list" `atDir` "lib/lazier")
   , !("The `Gen` monad" `atDir` "lib/gen-monad")
   , !("The library documentation" `atDir` "docs")
@@ -18,6 +18,10 @@ main = runner
   , !("Auto derivation: infrastructure: constructors analysis" `atDir` "gen-derivation/cons-analysis")
   , !("Auto derivation: infrastructure: running harness" `atDir` "gen-derivation/derivation/infra")
   , !("Auto derivation: infrastructure: argument dependencies" `atDir` "gen-derivation/arg-deps")
-  , !("Auto derivation: core: cons: least effort" `atDir` "gen-derivation/derivation/least-effort")
-  , !("Auto derivation: core: derivation itself" `atDir` "gen-derivation/derivation/core")
+  ] ++
+  !(sequence [
+    "Auto derivation: core: cons: least effort (\{p}, \{w})" `atDir` "gen-derivation/derivation/least-effort/\{p}/\{w}"
+    | p <- ["print", "run"], w <- ["adt", "gadt"]
+  ]) ++
+  [ !("Auto derivation: core: derivation itself" `atDir` "gen-derivation/derivation/core")
   ]
