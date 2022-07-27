@@ -43,6 +43,11 @@ test-all: test-deptycheck print-v-delimiter test-pil
 test-deptycheck: deptycheck thirdparty-sop
 	${MAKE} -C tests -f tests.mk only="${only}"
 
+.PHONY: retest-deptycheck
+
+retest-deptycheck: deptycheck thirdparty-sop
+	${MAKE} -C tests -f tests.mk retest
+
 .PHONY: test-installation
 
 test-installation:

@@ -23,7 +23,7 @@ test: runner
 	$(RUNTESTS) $(IDRIS2) $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only "$(only)"
 
 retest: runner
-	$(RUNTESTS) $(IDRIS2) $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only-file failures --only "$(only)"
+	$(RUNTESTS) $(IDRIS2) $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only-file failures
 
 clean:
 	${IDRIS2} --clean tests.ipkg
