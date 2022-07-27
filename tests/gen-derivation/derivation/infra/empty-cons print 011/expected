@@ -34,10 +34,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<DerivedGen.X0>>
-                                                                        $ IVar ^sub^fuel_arg^)
+                                                                        $ IVar ^fuel_arg^)
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar <<DerivedGen.X1>>
-                                                                               $ IVar ^sub^fuel_arg^)
+                                                                               $ IVar ^fuel_arg^)
                                                                         $ (IApp. IVar ::
                                                                                $ (IApp. IVar <<DerivedGen.X2>>
                                                                                       $ IVar ^sub^fuel_arg^)

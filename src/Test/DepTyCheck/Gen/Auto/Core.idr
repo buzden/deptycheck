@@ -73,21 +73,19 @@ ConstructorDerivator => DerivatorCore where
             -- no recursive constructors, thus just call all without spending fuel
             callOneOf (consRecs <&> callConsGen (varStr fuelAr) . fst)
 
-      -- find out non-recursive constructors
-      let nonRecCons = fst <$> filter ((== NonRecursive) . snd) consRecs
-
-      -- acquire all constructors
-      let allCons = fst <$> consRecs
-
       -- pattern match on the fuel argument
       iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
+          let nonRecCons = fst <$> filter ((== NonRecursive) . snd) consRecs in
           let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf (nonRecCons <&> callConsGen dry)
 
-        , -- if fuel is `More`, spend one fuel and call all constructors on the rest
-          let subFuelArg = "^sub" ++ fuelAr in -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callOneOf (allCons <&> callConsGen (varStr subFuelArg))
+        , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
+          let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
+          let selectFuel : Recursiveness -> String
+              selectFuel Recursive    = subFuelArg
+              selectFuel NonRecursive = fuelAr
+          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callOneOf (consRecs <&> \(con, rec) => callConsGen (varStr $ selectFuel rec) con)
         ]
 
       where
