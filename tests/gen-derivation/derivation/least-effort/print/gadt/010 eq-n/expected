@@ -26,19 +26,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                $ IBindVar ^fuel_arg^
                                $ IBindVar {arg:830}
                                $ IBindVar {arg:833})
-                          (ILocal (ICase (IVar ^fuel_arg^)
-                                         (IVar Data.Fuel.Fuel)
-                                         [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar <<DerivedGen.ReflN>>
-                                                          $ IVar Data.Fuel.Dry
-                                                          $ IVar {arg:830}
-                                                          $ IVar {arg:833})
-                                         , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar <<DerivedGen.ReflN>>
-                                                          $ IVar ^sub^fuel_arg^
-                                                          $ IVar {arg:830}
-                                                          $ IVar {arg:833}) ]))
+                          (ILocal (IApp. IVar <<DerivedGen.ReflN>>
+                                       $ IVar ^fuel_arg^
+                                       $ IVar {arg:830}
+                                       $ IVar {arg:833}))
                             IClaim MW
                                    Export
                                    []

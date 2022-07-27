@@ -67,6 +67,12 @@ ConstructorDerivator => DerivatorCore where
     fuelDecisionExpr : (fuelArg : String) -> List (Con, Recursiveness) -> TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
+      -- check if there are any recursive constructors
+      let True = isJust $ find ((== Recursive) . snd) consRecs
+        | False =>
+            -- no recursive constructors, thus just call all without spending fuel
+            callOneOf (consRecs <&> callConsGen (varStr fuelAr) . fst)
+
       -- find out non-recursive constructors
       let nonRecCons = fst <$> filter ((== NonRecursive) . snd) consRecs
 

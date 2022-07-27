@@ -92,15 +92,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                         $ IVar ^bnd^{arg:641})))) ] ]
          IDef <DerivedGen.X1>[]
               [ PatClause (IApp. IVar <DerivedGen.X1>[] $ IBindVar ^fuel_arg^)
-                          (ILocal (ICase (IVar ^fuel_arg^)
-                                         (IVar Data.Fuel.Fuel)
-                                         [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar <<DerivedGen.MkX1>>
-                                                          $ IVar Data.Fuel.Dry)
-                                         , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar <<DerivedGen.MkX1>>
-                                                          $ IVar ^sub^fuel_arg^) ]))
+                          (ILocal (IApp. IVar <<DerivedGen.MkX1>>
+                                       $ IVar ^fuel_arg^))
                             IClaim MW
                                    Export
                                    []
@@ -127,15 +120,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                $ IVar n))))) ] ]
          IDef <DerivedGen.X2>[]
               [ PatClause (IApp. IVar <DerivedGen.X2>[] $ IBindVar ^fuel_arg^)
-                          (ILocal (ICase (IVar ^fuel_arg^)
-                                         (IVar Data.Fuel.Fuel)
-                                         [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar <<DerivedGen.MkX2>>
-                                                          $ IVar Data.Fuel.Dry)
-                                         , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar <<DerivedGen.MkX2>>
-                                                          $ IVar ^sub^fuel_arg^) ]))
+                          (ILocal (IApp. IVar <<DerivedGen.MkX2>>
+                                       $ IVar ^fuel_arg^))
                             IClaim MW
                                    Export
                                    []
@@ -168,15 +154,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                                  $ IVar ^bnd^{arg:850}))) ])) ] ]
          IDef <DerivedGen.Y>[]
               [ PatClause (IApp. IVar <DerivedGen.Y>[] $ IBindVar ^fuel_arg^)
-                          (ILocal (ICase (IVar ^fuel_arg^)
-                                         (IVar Data.Fuel.Fuel)
-                                         [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar <<DerivedGen.MkY>>
-                                                          $ IVar Data.Fuel.Dry)
-                                         , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar <<DerivedGen.MkY>>
-                                                          $ IVar ^sub^fuel_arg^) ]))
+                          (ILocal (IApp. IVar <<DerivedGen.MkY>>
+                                       $ IVar ^fuel_arg^))
                             IClaim MW
                                    Export
                                    []
