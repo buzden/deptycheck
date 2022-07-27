@@ -39,43 +39,22 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                $ IBindVar {arg:833}
                                $ IBindVar {arg:836}
                                $ IBindVar {arg:839})
-                          (ILocal (ICase (IVar ^fuel_arg^)
-                                         (IVar Data.Fuel.Fuel)
-                                         [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                          $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<DerivedGen.XE>>
-                                                                        $ IVar Data.Fuel.Dry
-                                                                        $ IVar {arg:830}
-                                                                        $ IVar {arg:833}
-                                                                        $ IVar {arg:836}
-                                                                        $ IVar {arg:839})
-                                                                 $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<DerivedGen.XS>>
-                                                                               $ IVar Data.Fuel.Dry
-                                                                               $ IVar {arg:830}
-                                                                               $ IVar {arg:833}
-                                                                               $ IVar {arg:836}
-                                                                               $ IVar {arg:839})
-                                                                        $ IVar Nil)))
-                                         , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                          $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<DerivedGen.XE>>
-                                                                        $ IVar ^sub^fuel_arg^
-                                                                        $ IVar {arg:830}
-                                                                        $ IVar {arg:833}
-                                                                        $ IVar {arg:836}
-                                                                        $ IVar {arg:839})
-                                                                 $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<DerivedGen.XS>>
-                                                                               $ IVar ^sub^fuel_arg^
-                                                                               $ IVar {arg:830}
-                                                                               $ IVar {arg:833}
-                                                                               $ IVar {arg:836}
-                                                                               $ IVar {arg:839})
-                                                                        $ IVar Nil))) ]))
+                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                       $ (IApp. IVar ::
+                                              $ (IApp. IVar <<DerivedGen.XE>>
+                                                     $ IVar ^fuel_arg^
+                                                     $ IVar {arg:830}
+                                                     $ IVar {arg:833}
+                                                     $ IVar {arg:836}
+                                                     $ IVar {arg:839})
+                                              $ (IApp. IVar ::
+                                                     $ (IApp. IVar <<DerivedGen.XS>>
+                                                            $ IVar ^fuel_arg^
+                                                            $ IVar {arg:830}
+                                                            $ IVar {arg:833}
+                                                            $ IVar {arg:836}
+                                                            $ IVar {arg:839})
+                                                     $ IVar Nil))))
                             IClaim MW
                                    Export
                                    []

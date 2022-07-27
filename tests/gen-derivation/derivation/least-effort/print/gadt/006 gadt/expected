@@ -42,27 +42,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <Prelude.Basics.Bool>[]
               [ PatClause (IApp. IVar <Prelude.Basics.Bool>[]
                                $ IBindVar ^fuel_arg^)
-                          (ILocal (ICase (IVar ^fuel_arg^)
-                                         (IVar Data.Fuel.Fuel)
-                                         [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                          $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<Prelude.Basics.False>>
-                                                                        $ IVar Data.Fuel.Dry)
-                                                                 $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<Prelude.Basics.True>>
-                                                                               $ IVar Data.Fuel.Dry)
-                                                                        $ IVar Nil)))
-                                         , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
-                                                          $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<Prelude.Basics.False>>
-                                                                        $ IVar ^sub^fuel_arg^)
-                                                                 $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<Prelude.Basics.True>>
-                                                                               $ IVar ^sub^fuel_arg^)
-                                                                        $ IVar Nil))) ]))
+                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                       $ (IApp. IVar ::
+                                              $ (IApp. IVar <<Prelude.Basics.False>>
+                                                     $ IVar ^fuel_arg^)
+                                              $ (IApp. IVar ::
+                                                     $ (IApp. IVar <<Prelude.Basics.True>>
+                                                            $ IVar ^fuel_arg^)
+                                                     $ IVar Nil))))
                             IClaim MW
                                    Export
                                    []
@@ -107,13 +94,13 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<DerivedGen.JJ>>
-                                                                        $ IVar ^sub^fuel_arg^)
+                                                                        $ IVar ^fuel_arg^)
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar <<DerivedGen.FN>>
                                                                                $ IVar ^sub^fuel_arg^)
                                                                         $ (IApp. IVar ::
                                                                                $ (IApp. IVar <<DerivedGen.TL>>
-                                                                                      $ IVar ^sub^fuel_arg^)
+                                                                                      $ IVar ^fuel_arg^)
                                                                                $ (IApp. IVar ::
                                                                                       $ (IApp. IVar <<DerivedGen.TR>>
                                                                                              $ IVar ^sub^fuel_arg^)
@@ -268,7 +255,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<DerivedGen.JJ>>
-                                                                        $ IVar ^sub^fuel_arg^
+                                                                        $ IVar ^fuel_arg^
                                                                         $ IVar {arg:830})
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar <<DerivedGen.FN>>
@@ -276,7 +263,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                $ IVar {arg:830})
                                                                         $ (IApp. IVar ::
                                                                                $ (IApp. IVar <<DerivedGen.TL>>
-                                                                                      $ IVar ^sub^fuel_arg^
+                                                                                      $ IVar ^fuel_arg^
                                                                                       $ IVar {arg:830})
                                                                                $ (IApp. IVar ::
                                                                                       $ (IApp. IVar <<DerivedGen.TR>>

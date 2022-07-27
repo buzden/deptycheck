@@ -32,7 +32,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                      (IApp. IVar Test.DepTyCheck.Gen.oneOf
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<Data.Vect.Nil>>
-                                                                        $ IVar ^sub^fuel_arg^)
+                                                                        $ IVar ^fuel_arg^)
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar <<Data.Vect.(::)>>
                                                                                $ IVar ^sub^fuel_arg^)
