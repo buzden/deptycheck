@@ -1,0 +1,260 @@
+name: Build and test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - '**'
+  pull_request:
+    branches:
+      - main
+      - master
+  schedule:
+    # We want to run right after the `latest` image is published.
+    # So, let's do it an hour right after. Look the schedule of publishing here:
+    # https://github.com/alexhumphreys/idris2-dockerfile/blob/main/.github/workflows/docker-image.yml
+    - cron: '0 1 * * *'
+
+defaults:
+  run:
+    shell: bash
+
+# TODO to reduce duplication, e.g. by using https://docs.github.com/en/actions/using-workflows/reusing-workflows
+#      and remove `.github` from excluded if jscpd linter
+
+jobs:
+
+  ################
+  # Preparations #
+  ################
+
+  read-ver:
+    name: Aquire compiler version
+    runs-on: ubuntu-latest
+    env:
+      IDRIS_VERSION_FILE: .idris-version
+    outputs:
+      idris-ver: ${{ steps.read-ver.outputs.idris-ver }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Read the version
+        id: read-ver
+        run: |
+          echo -n "::set-output name=idris-ver::"
+          if [[ '${{ github.event_name }}' == 'schedule' ]]; then
+            echo "latest"
+          else
+            cat "${IDRIS_VERSION_FILE}"
+          fi
+
+  thirdparties-build:
+    name: Build thirdparties
+    needs: read-ver
+    runs-on: ubuntu-latest
+    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    steps:
+      - name: Install Git in order to enable checkout with submodules
+        run: |
+          apt-get update
+          apt-get -y install git
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - run: make thirdparties
+      - name: Save built thirdparties
+        uses: actions/upload-artifact@v3
+        with:
+          name: built-thirdparties
+          path: thirdparty/
+
+  ############################################
+  # Build and test deptycheck library itself #
+  ############################################
+
+  deptycheck-build-lib:
+    name: Build DepTyCheck lib
+    needs:
+      - read-ver
+      - thirdparties-build
+    runs-on: ubuntu-latest
+    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore built thirdparties
+        uses: actions/download-artifact@v3
+        with:
+          name: built-thirdparties
+          path: thirdparty/
+      - run: make deptycheck
+      - name: Save built DepTyCheck
+        uses: actions/upload-artifact@v3
+        with:
+          name: built-deptycheck
+          path: |
+            build/
+            thirdparty/
+
+  deptycheck-test-lib:
+    name: Test DepTyCheck lib
+    needs:
+      - read-ver
+      - deptycheck-build-lib
+    runs-on: ubuntu-latest
+    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore built DepTyCheck
+        uses: actions/download-artifact@v3
+        with:
+          name: built-deptycheck
+      - run: make test-deptycheck INTERACTIVE="--color" only=lib/
+
+  ##################################
+  # Test deptycheck's installation #
+  ##################################
+
+  deptycheck-install-built:
+    name: Install DepTyCheck after build
+    needs:
+      - read-ver
+      - deptycheck-build-lib
+    runs-on: ubuntu-latest
+    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore built DepTyCheck
+        uses: actions/download-artifact@v3
+        with:
+          name: built-deptycheck
+      - run: make install
+      - run: make test-installation
+
+  deptycheck-install-clean:
+    name: Install DepTyCheck clean
+    needs:
+      - read-ver
+      - deptycheck-build-lib
+    runs-on: ubuntu-latest
+    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    steps:
+      - name: Install Git in order to enable checkout with submodules
+        run: |
+          apt-get update
+          apt-get -y install git
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - run: make install
+      - run: make test-installation
+
+  ##########################
+  # Test deptycheck's docs #
+  ##########################
+
+  deptycheck-build-docs:
+    name: Build DepTyCheck docs
+    runs-on: ubuntu-latest
+    container: sphinxdoc/sphinx:latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: pip3 install -r docs/requirements.txt
+      - run: make docs
+
+  deptycheck-test-docs:
+    name: Test DepTyCheck docs
+    needs:
+      - read-ver
+      - deptycheck-build-lib
+    runs-on: ubuntu-latest
+    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore built DepTyCheck
+        uses: actions/download-artifact@v3
+        with:
+          name: built-deptycheck
+      - name: Test
+        run: make test-deptycheck INTERACTIVE="--color" only=docs/
+
+  ################################
+  # Test deptycheck's derivation #
+  ################################
+
+  deptycheck-test-derivation:
+    name: Test DepTyCheck's derivation
+    needs:
+      - read-ver
+      - deptycheck-build-lib
+      - deptycheck-test-lib
+    runs-on: ubuntu-latest
+    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    strategy:
+      matrix:
+        test_set:
+          - inputvalidation/
+          - up-to-renaming-ttimp-eq/
+          - canonicsig/
+          - cons-analysis/
+          - derivation/infra/
+          - arg-deps/
+          - derivation/least-effort/print
+          - derivation/least-effort/run
+          - derivation/core/
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Restore built DepTyCheck
+        uses: actions/download-artifact@v3
+        with:
+          name: built-deptycheck
+      - name: Test
+        run: make test-deptycheck INTERACTIVE="--color" only="gen-derivation/${{matrix.test_set}}"
+
+  #################
+  # Test examples #
+  #################
+
+  pil-build:
+    name: Build PIL example
+    needs:
+      - read-ver
+      - deptycheck-build-lib
+    runs-on: ubuntu-latest
+    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore built DepTyCheck
+        uses: actions/download-artifact@v3
+        with:
+          name: built-deptycheck
+      - run: make pil
+      - name: Save built PIL
+        uses: actions/upload-artifact@v3
+        with:
+          name: built-pil
+          path: example/build/
+
+  pil-test:
+    name: Test PIL example
+    needs:
+      - read-ver
+      - deptycheck-build-lib
+      - pil-build
+    runs-on: ubuntu-latest
+    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore built DepTyCheck
+        uses: actions/download-artifact@v3
+        with:
+          name: built-deptycheck
+      - name: Restore built PIL
+        uses: actions/download-artifact@v3
+        with:
+          name: built-pil
+          path: example/build/
+      - run: make test-pil INTERACTIVE="--color"

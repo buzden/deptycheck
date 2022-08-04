@@ -14,6 +14,8 @@ import Test.DepTyCheck.Gen.Auto
 
 # DepTyCheck
 
+[![Build and test](https://github.com/buzden/deptycheck/actions/workflows/ci-deptycheck.yml/badge.svg?branch=master)](https://github.com/buzden/deptycheck/actions/workflows/ci-deptycheck.yml)
+[![Lint](https://github.com/buzden/deptycheck/actions/workflows/ci-super-linter.yml/badge.svg?branch=master)](https://github.com/buzden/deptycheck/actions/workflows/ci-super-linter.yml)
 [![Documentation Status](https://readthedocs.org/projects/deptycheck/badge/?version=latest)](https://deptycheck.readthedocs.io/en/latest/?badge=latest)
 
 A library for property-based testing with dependent types and automatic derivation of generators for Idris 2
