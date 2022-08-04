@@ -1,0 +1,19 @@
+DepTyCheck
+Copyright (c) 2020-2022 Denis Buzdalov
+Copyright (c) 2020-2022 Ivannikov Institute for System Programming
+                        of the Russian Academy of Sciences
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+Alternatively, the contents of all source files from inside all
+directories named `docs`, `tests`, `Util`, `Control` or `Data` may
+be used under the terms of the Apache-2.0 license. You may obtain a
+copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Also, the contents of files listed above can be used under the
+terms of the license which is used for distributing the Idris 2
+programming language (https://github.com/idris-lang/Idris2/) if
+they are used in it. In this case, copyright of particular files is
+dedicated to the copyright holders of Idris 2.

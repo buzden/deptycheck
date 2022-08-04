@@ -1,0 +1,5 @@
+package test
+
+authors = "Denis Buzdalov"
+
+depends = deptycheck, elab-util, contrib

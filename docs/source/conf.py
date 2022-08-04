@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = "Deptycheck"
+project = "DepTyCheck"
 copyright = "2021-2022, Denis Buzdalov"
 author = "Denis Buzdalov"
 
