@@ -14,13 +14,13 @@ Show X where
   show Nil = "[]"
   show (x :: xs) = "()::" ++ show xs
 
+Injective (DerivedGen.(::) ()) where injective Refl = Refl
+
 DecEq X where
   [] `decEq` [] = Yes Refl
   [] `decEq` (y :: ys) = No $ \case Refl impossible
   (x :: xs) `decEq` [] = No $ \case Refl impossible
-  (() :: xs) `decEq` (() :: ys) = case xs `decEq` ys of
-                                    (Yes prf) => rewrite prf in Yes Refl
-                                    (No contra) => No $ \case Refl => contra Refl
+  (() :: xs) `decEq` (() :: ys) = decEqCong $ decEq xs ys
 
 data Y : (xs : X) -> (ys : X) -> Type where
   A : Y (x :: xs) (x :: xs)
