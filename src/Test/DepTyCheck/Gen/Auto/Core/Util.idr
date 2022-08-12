@@ -9,6 +9,10 @@ import public Test.DepTyCheck.Gen.Auto.Derive
 
 --- Utilities ---
 
+public export
+DeepConsAnalysisRes : Type
+DeepConsAnalysisRes = (appliedFreeNames : List Name ** (bindExpr : Fin appliedFreeNames.length -> TTImp) -> {-bind expression-} TTImp)
+
 ||| Analyses whether the given expression can be an expression of free variables applies (maybe deeply) to a number of data constructors.
 |||
 ||| Returns which of given free names are actually used in the given expression, in order of appearance in the expression.
@@ -22,10 +26,10 @@ export
 analyseDeepConsApp : Elaboration m =>
                      (freeNames : SortedSet Name) ->
                      (analysedExpr : TTImp) ->
-                     m $ Maybe (appliedFreeNames : List Name ** (bindExpr : Fin appliedFreeNames.length -> TTImp) -> {-bind expression-} TTImp)
+                     m $ Maybe DeepConsAnalysisRes
 analyseDeepConsApp freeNames = catch . isD where
 
-  isD : TTImp -> Elab (appliedFreeNames : List Name ** (Fin appliedFreeNames.length -> TTImp) -> TTImp)
+  isD : TTImp -> Elab DeepConsAnalysisRes
   isD e = do
 
     -- Treat given expression as a function application to some name
@@ -48,11 +52,9 @@ analyseDeepConsApp freeNames = catch . isD where
     pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
 
     where
-      mergeApp : (namesL : List Name ** (Fin namesL.length -> a) -> TTImp) ->
-                 (AnyApp, (namesR : List Name ** (Fin namesR.length -> a) -> TTImp)) ->
-                 (names : List Name ** (Fin names.length -> a) -> TTImp)
+      mergeApp : DeepConsAnalysisRes -> (AnyApp, DeepConsAnalysisRes) -> DeepConsAnalysisRes
       mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
-        let bindNames : Fin (namesL.length + namesR.length) -> a := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
+        let bindNames : Fin (namesL.length + namesR.length) -> _ := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
         let lhs = bindL $ bindNames . indexSum . Left
         let rhs = bindR $ bindNames . indexSum . Right
         reAppAny1 lhs $ const rhs `mapExpr` anyApp
