@@ -23,7 +23,7 @@ analyseDeepConsApp : Elaboration m =>
                      (freeNames : SortedSet Name) ->
                      (analysedExpr : TTImp) ->
                      m $ Maybe (appliedFreeNames : List Name ** (bindExpr : Fin appliedFreeNames.length -> TTImp) -> {-bind expression-} TTImp)
-analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
+analyseDeepConsApp freeNames = catch . isD where
 
   isD : TTImp -> Elab (appliedFreeNames : List Name ** (Fin appliedFreeNames.length -> TTImp) -> TTImp)
   isD e = do
