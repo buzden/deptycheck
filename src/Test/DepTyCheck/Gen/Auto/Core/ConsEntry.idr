@@ -52,7 +52,7 @@ canonicConsBody sig name con = do
   --   - something else (cannot manage yet)
   deepConsApps <- for sig.givenParams.asVect $ \idx => do
     let argExpr = conRetTypeArg idx
-    Just (appliedArgs ** bindExprF) <- analyseDeepConsApp conArgNames argExpr
+    Just (appliedArgs ** bindExprF) <- analyseDeepConsApp False conArgNames argExpr
       | Nothing => failAt conFC "Argument #\{show idx} is not supported yet (argument expression: \{show argExpr})"
     pure $ the (appArgs : List Name ** (Fin appArgs.length -> TTImp) -> TTImp) $
       (appliedArgs ** bindExprF)

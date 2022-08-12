@@ -10,8 +10,25 @@ import public Test.DepTyCheck.Gen.Auto.Derive
 --- Utilities ---
 
 public export
-DeepConsAnalysisRes : Type
-DeepConsAnalysisRes = (appliedFreeNames : List Name ** (bindExpr : Fin appliedFreeNames.length -> TTImp) -> {-bind expression-} TTImp)
+data ConsDetermInfo = DeterminedByType | NotDeterminedByType
+
+export
+Semigroup ConsDetermInfo where
+  DeterminedByType <+> DeterminedByType = DeterminedByType
+  NotDeterminedByType <+> x = x
+  x <+> NotDeterminedByType = x
+
+export
+Monoid ConsDetermInfo where
+  neutral = NotDeterminedByType
+
+public export
+DeepConsAnalysisRes : (collectConsDetermInfo : Bool) -> Type
+DeepConsAnalysisRes c = (appliedFreeNames : List (FreeName c) ** (bindExpr : Fin appliedFreeNames.length -> TTImp) -> {-bind expression-} TTImp)
+  where
+    FreeName : Bool -> Type
+    FreeName False = Name
+    FreeName True  = (Name, ConsDetermInfo)
 
 ||| Analyses whether the given expression can be an expression of free variables applies (maybe deeply) to a number of data constructors.
 |||
@@ -24,12 +41,13 @@ DeepConsAnalysisRes = (appliedFreeNames : List Name ** (bindExpr : Fin appliedFr
 ||| It returns correct bind expression only when all given bind names are different.
 export
 analyseDeepConsApp : Elaboration m =>
+                     (collectConsDetermInfo : Bool) ->
                      (freeNames : SortedSet Name) ->
                      (analysedExpr : TTImp) ->
-                     m $ Maybe DeepConsAnalysisRes
-analyseDeepConsApp freeNames = catch . isD where
+                     m $ Maybe $ DeepConsAnalysisRes collectConsDetermInfo
+analyseDeepConsApp ccdi freeNames = catch . isD where
 
-  isD : TTImp -> Elab DeepConsAnalysisRes
+  isD : TTImp -> Elab $ DeepConsAnalysisRes ccdi
   isD e = do
 
     -- Treat given expression as a function application to some name
@@ -39,7 +57,9 @@ analyseDeepConsApp freeNames = catch . isD where
     -- Check if this is a free name
     let False = contains lhsName freeNames
       | True => if null args
-                  then pure (singleton lhsName ** \f => f FZ)
+                  then do
+                    let n = if ccdi then (lhsName, neutral) else lhsName
+                    pure (singleton n ** \f => f FZ)
                   else fail "Applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
@@ -52,7 +72,7 @@ analyseDeepConsApp freeNames = catch . isD where
     pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
 
     where
-      mergeApp : DeepConsAnalysisRes -> (AnyApp, DeepConsAnalysisRes) -> DeepConsAnalysisRes
+      mergeApp : DeepConsAnalysisRes ccdi -> (AnyApp, DeepConsAnalysisRes ccdi) -> DeepConsAnalysisRes ccdi
       mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
         let bindNames : Fin (namesL.length + namesR.length) -> _ := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
         let lhs = bindL $ bindNames . indexSum . Left
