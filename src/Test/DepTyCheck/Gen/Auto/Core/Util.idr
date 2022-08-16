@@ -15,6 +15,16 @@ public export
 data ConsDetermInfo = DeterminedByType | NotDeterminedByType
 
 export
+Cast Bool ConsDetermInfo where
+  cast True  = DeterminedByType
+  cast False = NotDeterminedByType
+
+export
+Cast ConsDetermInfo Bool where
+  cast DeterminedByType    = True
+  cast NotDeterminedByType = False
+
+export
 Semigroup ConsDetermInfo where
   DeterminedByType <+> DeterminedByType = DeterminedByType
   NotDeterminedByType <+> x = x
@@ -23,10 +33,6 @@ Semigroup ConsDetermInfo where
 export
 Monoid ConsDetermInfo where
   neutral = NotDeterminedByType
-
-||| Determines which constructor's arguments would be definitely determined by fully known result type.
-export
-typeDeterminedArgs : (con : Con) -> Vect con.args.length ConsDetermInfo
 
 public export
 BindExprFun : Nat -> Type
@@ -84,7 +90,8 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
       | No _ => fail "INTERNAL ERROR: lengths do not correspond"
 
     -- Aquire type-determination info, if needed
-    let typeDetermInfo : Vect con.args.length (MaybeConsDetermInfo ccdi) := if ccdi then typeDeterminedArgs con else replicate _ ()
+    typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
+    let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := typeDetermInfo
     -- TODO to think can the order be incorrect, say, implicit arguments applied not in the same order as defined?
 
     -- Analyze deeply all the arguments
@@ -107,3 +114,11 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
 
       mapLstDPair : (a -> b) -> (x : List a ** BindExprFun x.length) -> (x : List b ** BindExprFun x.length)
       mapLstDPair f (lst ** d) = (map f lst ** rewrite lengthMap {f} lst in d)
+
+      ||| Determines which constructor's arguments would be definitely determined by fully known result type.
+      typeDeterminedArgs : forall m. Elaboration m => (con : Con) -> m $ Vect con.args.length ConsDetermInfo
+      typeDeterminedArgs con = do
+        let conArgNames = fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
+        determined <- fromMaybe [] <$> map fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
+        let determined = mapMaybe (flip lookup conArgNames) determined
+        pure $ map cast $ presenceVect $ fromList determined
