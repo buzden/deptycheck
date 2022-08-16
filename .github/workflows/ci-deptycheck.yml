@@ -54,7 +54,7 @@ jobs:
     name: Build thirdparties
     needs: read-ver
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
     steps:
       - name: Install Git in order to enable checkout with submodules
         run: |
@@ -80,7 +80,7 @@ jobs:
       - read-ver
       - thirdparties-build
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
     steps:
       - uses: actions/checkout@v3
       - name: Restore built thirdparties
@@ -103,7 +103,7 @@ jobs:
       - read-ver
       - deptycheck-build-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
@@ -122,7 +122,7 @@ jobs:
       - read-ver
       - deptycheck-build-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
@@ -138,7 +138,7 @@ jobs:
       - read-ver
       - deptycheck-build-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
     steps:
       - name: Install Git in order to enable checkout with submodules
         run: |
@@ -170,7 +170,7 @@ jobs:
       - read-ver
       - deptycheck-build-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
@@ -191,7 +191,7 @@ jobs:
       - deptycheck-build-lib
       - deptycheck-test-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
     strategy:
       matrix:
         test_set:
@@ -224,7 +224,7 @@ jobs:
       - read-ver
       - deptycheck-build-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
@@ -245,7 +245,7 @@ jobs:
       - deptycheck-build-lib
       - pil-build
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2api:${{ needs.read-ver.outputs.idris-ver }}
+    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
