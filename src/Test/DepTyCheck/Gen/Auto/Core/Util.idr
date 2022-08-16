@@ -85,17 +85,15 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
     -- Check that this is an application to a constructor's name
     con <- getCon lhsName -- or fail if `lhsName` is not a constructor
 
-    -- Get equality of arguments lengths at definition- and call-site
-    let Yes lengthsCorrect = args.length `decEq` con.args.length
-      | No _ => fail "INTERNAL ERROR: lengths do not correspond"
-
     -- Aquire type-determination info, if needed
     typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
     let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := typeDetermInfo
-    -- TODO to think can the order be incorrect, say, implicit arguments applied not in the same order as defined?
+
+    let Just typeDetermInfo = reorder typeDetermInfo
+      | Nothing => fail "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
 
     -- Analyze deeply all the arguments
-    deepArgs <- for (Vect.fromList args `zip` rewrite lengthsCorrect in typeDetermInfo) $
+    deepArgs <- for (Vect.fromList args `zip` typeDetermInfo) $
       \(anyApp, typeDetermined) => do
         subResult <- isD $ assert_smaller e $ getExpr anyApp
         let subResult = if ccdi then mapSnd (<+> typeDetermined) `mapLstDPair` subResult else subResult
@@ -122,3 +120,21 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
         determined <- fromMaybe [] <$> map fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
         let determined = mapMaybe (flip lookup conArgNames) determined
         pure $ map cast $ presenceVect $ fromList determined
+
+      reorder : {formalArgs : List NamedArg} -> {apps : List AnyApp} -> Vect formalArgs.length a -> Maybe $ Vect apps.length a
+      reorder xs = reorder' (fromList formalArgs `zip` xs) apps where
+        reorder' : Vect n (NamedArg, a) -> (apps : List AnyApp) -> Maybe $ Vect apps.length a
+        reorder' xs        []      = if isJust $ find ((== ExplicitArg) . piInfo . fst) xs
+                                       then Nothing {- not all explicit parameters are used -} else Just []
+        reorder' []        (_::_)  = Nothing
+        reorder' xs@(_::_) (a::as) = do
+          let searchFun : NamedArg -> Bool
+              searchFun = case a of
+                            PosApp _      => (== ExplicitArg) . piInfo
+                            NamedApp nm _ => \na => isImplicit na.piInfo && argName na == nm
+                            AutoApp _     => (== AutoImplicit) . piInfo
+                            WithApp _     => const False
+          let Just i = findIndex (searchFun . fst) xs
+            | Nothing => Nothing
+          let restxs = deleteAt i xs
+          (snd (index i xs) ::) <$> reorder' restxs as
