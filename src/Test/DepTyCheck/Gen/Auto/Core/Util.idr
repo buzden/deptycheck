@@ -3,6 +3,8 @@ module Test.DepTyCheck.Gen.Auto.Core.Util
 import public Data.Fin.Extra
 import public Data.List.Equalities
 
+import public Decidable.Equality
+
 import public Test.DepTyCheck.Gen.Auto.Derive
 
 %default total
@@ -22,13 +24,25 @@ export
 Monoid ConsDetermInfo where
   neutral = NotDeterminedByType
 
+||| Determines which constructor's arguments would be definitely determined by fully known result type.
+export
+typeDeterminedArgs : (con : Con) -> Vect con.args.length ConsDetermInfo
+
+public export
+BindExprFun : Nat -> Type
+BindExprFun n = (bindExpr : Fin n -> TTImp) -> {-bind expression-} TTImp
+
 public export
 DeepConsAnalysisRes : (collectConsDetermInfo : Bool) -> Type
-DeepConsAnalysisRes c = (appliedFreeNames : List (FreeName c) ** (bindExpr : Fin appliedFreeNames.length -> TTImp) -> {-bind expression-} TTImp)
+DeepConsAnalysisRes c = (appliedFreeNames : List (FreeName c) ** BindExprFun appliedFreeNames.length)
   where
     FreeName : Bool -> Type
     FreeName False = Name
     FreeName True  = (Name, ConsDetermInfo)
+
+MaybeConsDetermInfo : Bool -> Type
+MaybeConsDetermInfo True  = ConsDetermInfo
+MaybeConsDetermInfo False = Unit
 
 ||| Analyses whether the given expression can be an expression of free variables applies (maybe deeply) to a number of data constructors.
 |||
@@ -63,10 +77,22 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
                   else fail "Applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
-    _ <- getCon lhsName -- or fail if `lhsName` is not a constructor
+    con <- getCon lhsName -- or fail if `lhsName` is not a constructor
+
+    -- Get equality of arguments lengths at definition- and call-site
+    let Yes lengthsCorrect = args.length `decEq` con.args.length
+      | No _ => fail "INTERNAL ERROR: lengths do not correspond"
+
+    -- Aquire type-determination info, if needed
+    let typeDetermInfo : Vect con.args.length (MaybeConsDetermInfo ccdi) := if ccdi then typeDeterminedArgs con else replicate _ ()
+    -- TODO to think can the order be incorrect, say, implicit arguments applied not in the same order as defined?
 
     -- Analyze deeply all the arguments
-    deepArgs <- for args $ \anyApp => map (anyApp,) $ isD $ assert_smaller e $ getExpr anyApp
+    deepArgs <- for (Vect.fromList args `zip` rewrite lengthsCorrect in typeDetermInfo) $
+      \(anyApp, typeDetermined) => do
+        subResult <- isD $ assert_smaller e $ getExpr anyApp
+        let subResult = if ccdi then mapSnd (<+> typeDetermined) `mapLstDPair` subResult else subResult
+        pure (anyApp, subResult)
 
     -- Collect all the applied names and form proper application expression with binding variables
     pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
@@ -78,3 +104,6 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
         let lhs = bindL $ bindNames . indexSum . Left
         let rhs = bindR $ bindNames . indexSum . Right
         reAppAny1 lhs $ const rhs `mapExpr` anyApp
+
+      mapLstDPair : (a -> b) -> (x : List a ** BindExprFun x.length) -> (x : List b ** BindExprFun x.length)
+      mapLstDPair f (lst ** d) = (map f lst ** rewrite lengthMap {f} lst in d)
