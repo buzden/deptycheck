@@ -91,24 +91,26 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar m
                                                   $ IBindVar to_be_deceqed^^n1)
                                              (ICase (IApp. IVar Decidable.Equality.decEq
-                                                         $ IVar n
-                                                         $ IVar to_be_deceqed^^n0)
+                                                         $ IVar to_be_deceqed^^n0
+                                                         $ IVar n)
                                                     (Implicit False)
                                                     [ PatClause (IApp. IVar Prelude.No
                                                                      $ Implicit True)
                                                                 (IVar Prelude.empty)
                                                     , PatClause (IApp. IVar Prelude.Yes
-                                                                     $ IVar Builtin.Refl)
-                                                                (ICase (IApp. IVar Decidable.Equality.decEq
-                                                                            $ IVar n
-                                                                            $ IVar to_be_deceqed^^n1)
-                                                                       (Implicit False)
-                                                                       [ PatClause (IApp. IVar Prelude.No
-                                                                                        $ Implicit True)
-                                                                                   (IVar Prelude.empty)
-                                                                       , PatClause (IApp. IVar Prelude.Yes
-                                                                                        $ IVar Builtin.Refl)
-                                                                                   (IVar empty) ]) ])
+                                                                     $ IVar elim^to_be_deceqed^^n0^prf)
+                                                                (IRewrite (IVar elim^to_be_deceqed^^n0^prf)
+                                                                          (ICase (IApp. IVar Decidable.Equality.decEq
+                                                                                      $ IVar to_be_deceqed^^n1
+                                                                                      $ IVar n)
+                                                                                 (Implicit False)
+                                                                                 [ PatClause (IApp. IVar Prelude.No
+                                                                                                  $ Implicit True)
+                                                                                             (IVar Prelude.empty)
+                                                                                 , PatClause (IApp. IVar Prelude.Yes
+                                                                                                  $ IVar elim^to_be_deceqed^^n1^prf)
+                                                                                             (IRewrite (IVar elim^to_be_deceqed^^n1^prf)
+                                                                                                       (IVar empty)) ])) ])
                                  , PatClause (IApp. IVar <<DerivedGen.XE>>
                                                   $ Implicit True
                                                   $ Implicit True
@@ -124,21 +126,23 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar m
                                                   $ IBindVar to_be_deceqed^^m1)
                                              (ICase (IApp. IVar Decidable.Equality.decEq
-                                                         $ IVar m
-                                                         $ IVar to_be_deceqed^^m1)
+                                                         $ IVar to_be_deceqed^^m1
+                                                         $ IVar m)
                                                     (Implicit False)
                                                     [ PatClause (IApp. IVar Prelude.No
                                                                      $ Implicit True)
                                                                 (IVar Prelude.empty)
                                                     , PatClause (IApp. IVar Prelude.Yes
-                                                                     $ IVar Builtin.Refl)
-                                                                (ICase (IApp. IVar Decidable.Equality.decEq
-                                                                            $ IVar n
-                                                                            $ IVar to_be_deceqed^^n0)
-                                                                       (Implicit False)
-                                                                       [ PatClause (IApp. IVar Prelude.No
-                                                                                        $ Implicit True)
-                                                                                   (IVar Prelude.empty)
-                                                                       , PatClause (IApp. IVar Prelude.Yes
-                                                                                        $ IVar Builtin.Refl)
-                                                                                   (IVar empty) ]) ]) ] ]
+                                                                     $ IVar elim^to_be_deceqed^^m1^prf)
+                                                                (IRewrite (IVar elim^to_be_deceqed^^m1^prf)
+                                                                          (ICase (IApp. IVar Decidable.Equality.decEq
+                                                                                      $ IVar to_be_deceqed^^n0
+                                                                                      $ IVar n)
+                                                                                 (Implicit False)
+                                                                                 [ PatClause (IApp. IVar Prelude.No
+                                                                                                  $ Implicit True)
+                                                                                             (IVar Prelude.empty)
+                                                                                 , PatClause (IApp. IVar Prelude.Yes
+                                                                                                  $ IVar elim^to_be_deceqed^^n0^prf)
+                                                                                             (IRewrite (IVar elim^to_be_deceqed^^n0^prf)
+                                                                                                       (IVar empty)) ])) ]) ] ]
