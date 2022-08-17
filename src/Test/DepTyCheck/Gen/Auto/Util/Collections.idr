@@ -140,6 +140,10 @@ joinEithersPos as bs lefts =
       put (as, bs)
       pure $ Just $ Right x
 
+export
+presenceVect : {n : _} -> SortedSet (Fin n) -> Vect n Bool
+presenceVect = tabulate . flip contains
+
 -----------------------------
 --- `SortedMap` utilities ---
 -----------------------------

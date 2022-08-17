@@ -3,11 +3,52 @@ module Test.DepTyCheck.Gen.Auto.Core.Util
 import public Data.Fin.Extra
 import public Data.List.Equalities
 
+import public Decidable.Equality
+
 import public Test.DepTyCheck.Gen.Auto.Derive
 
 %default total
 
 --- Utilities ---
+
+public export
+data ConsDetermInfo = DeterminedByType | NotDeterminedByType
+
+export
+Cast Bool ConsDetermInfo where
+  cast True  = DeterminedByType
+  cast False = NotDeterminedByType
+
+export
+Cast ConsDetermInfo Bool where
+  cast DeterminedByType    = True
+  cast NotDeterminedByType = False
+
+export
+Semigroup ConsDetermInfo where
+  DeterminedByType <+> DeterminedByType = DeterminedByType
+  NotDeterminedByType <+> x = x
+  x <+> NotDeterminedByType = x
+
+export
+Monoid ConsDetermInfo where
+  neutral = NotDeterminedByType
+
+public export
+BindExprFun : Nat -> Type
+BindExprFun n = (bindExpr : Fin n -> TTImp) -> {-bind expression-} TTImp
+
+public export
+DeepConsAnalysisRes : (collectConsDetermInfo : Bool) -> Type
+DeepConsAnalysisRes c = (appliedFreeNames : List (FreeName c) ** BindExprFun appliedFreeNames.length)
+  where
+    FreeName : Bool -> Type
+    FreeName False = Name
+    FreeName True  = (Name, ConsDetermInfo)
+
+MaybeConsDetermInfo : Bool -> Type
+MaybeConsDetermInfo True  = ConsDetermInfo
+MaybeConsDetermInfo False = Unit
 
 ||| Analyses whether the given expression can be an expression of free variables applies (maybe deeply) to a number of data constructors.
 |||
@@ -20,12 +61,13 @@ import public Test.DepTyCheck.Gen.Auto.Derive
 ||| It returns correct bind expression only when all given bind names are different.
 export
 analyseDeepConsApp : Elaboration m =>
+                     (collectConsDetermInfo : Bool) ->
                      (freeNames : SortedSet Name) ->
                      (analysedExpr : TTImp) ->
-                     m $ Maybe (appliedFreeNames : List Name ** (bindExpr : Fin appliedFreeNames.length -> TTImp) -> {-bind expression-} TTImp)
-analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
+                     m $ Maybe $ DeepConsAnalysisRes collectConsDetermInfo
+analyseDeepConsApp ccdi freeNames = catch . isD where
 
-  isD : TTImp -> Elab (appliedFreeNames : List Name ** (Fin appliedFreeNames.length -> TTImp) -> TTImp)
+  isD : TTImp -> Elab $ DeepConsAnalysisRes ccdi
   isD e = do
 
     -- Treat given expression as a function application to some name
@@ -35,24 +77,64 @@ analyseDeepConsApp freeNames e = try (Just <$> isD e) (pure Nothing) where
     -- Check if this is a free name
     let False = contains lhsName freeNames
       | True => if null args
-                  then pure (singleton lhsName ** \f => f FZ)
+                  then do
+                    let n = if ccdi then (lhsName, neutral) else lhsName
+                    pure (singleton n ** \f => f FZ)
                   else fail "Applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
-    _ <- getCon lhsName -- or fail if `lhsName` is not a constructor
+    con <- getCon lhsName -- or fail if `lhsName` is not a constructor
+
+    -- Aquire type-determination info, if needed
+    typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
+    let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := typeDetermInfo
+
+    let Just typeDetermInfo = reorder typeDetermInfo
+      | Nothing => fail "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
 
     -- Analyze deeply all the arguments
-    deepArgs <- for args $ \anyApp => map (anyApp,) $ isD $ assert_smaller e $ getExpr anyApp
+    deepArgs <- for (Vect.fromList args `zip` typeDetermInfo) $
+      \(anyApp, typeDetermined) => do
+        subResult <- isD $ assert_smaller e $ getExpr anyApp
+        let subResult = if ccdi then mapSnd (<+> typeDetermined) `mapLstDPair` subResult else subResult
+        pure (anyApp, subResult)
 
     -- Collect all the applied names and form proper application expression with binding variables
     pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
 
     where
-      mergeApp : (namesL : List Name ** (Fin namesL.length -> a) -> TTImp) ->
-                 (AnyApp, (namesR : List Name ** (Fin namesR.length -> a) -> TTImp)) ->
-                 (names : List Name ** (Fin names.length -> a) -> TTImp)
+      mergeApp : DeepConsAnalysisRes ccdi -> (AnyApp, DeepConsAnalysisRes ccdi) -> DeepConsAnalysisRes ccdi
       mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
-        let bindNames : Fin (namesL.length + namesR.length) -> a := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
+        let bindNames : Fin (namesL.length + namesR.length) -> _ := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
         let lhs = bindL $ bindNames . indexSum . Left
         let rhs = bindR $ bindNames . indexSum . Right
         reAppAny1 lhs $ const rhs `mapExpr` anyApp
+
+      mapLstDPair : (a -> b) -> (x : List a ** BindExprFun x.length) -> (x : List b ** BindExprFun x.length)
+      mapLstDPair f (lst ** d) = (map f lst ** rewrite lengthMap {f} lst in d)
+
+      ||| Determines which constructor's arguments would be definitely determined by fully known result type.
+      typeDeterminedArgs : forall m. Elaboration m => (con : Con) -> m $ Vect con.args.length ConsDetermInfo
+      typeDeterminedArgs con = do
+        let conArgNames = fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
+        determined <- fromMaybe [] <$> map fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
+        let determined = mapMaybe (flip lookup conArgNames) determined
+        pure $ map cast $ presenceVect $ fromList determined
+
+      reorder : {formalArgs : List NamedArg} -> {apps : List AnyApp} -> Vect formalArgs.length a -> Maybe $ Vect apps.length a
+      reorder xs = reorder' (fromList formalArgs `zip` xs) apps where
+        reorder' : Vect n (NamedArg, a) -> (apps : List AnyApp) -> Maybe $ Vect apps.length a
+        reorder' xs        []      = if isJust $ find ((== ExplicitArg) . piInfo . fst) xs
+                                       then Nothing {- not all explicit parameters are used -} else Just []
+        reorder' []        (_::_)  = Nothing
+        reorder' xs@(_::_) (a::as) = do
+          let searchFun : NamedArg -> Bool
+              searchFun = case a of
+                            PosApp _      => (== ExplicitArg) . piInfo
+                            NamedApp nm _ => \na => isImplicit na.piInfo && argName na == nm
+                            AutoApp _     => (== AutoImplicit) . piInfo
+                            WithApp _     => const False
+          let Just i = findIndex (searchFun . fst) xs
+            | Nothing => Nothing
+          let restxs = deleteAt i xs
+          (snd (index i xs) ::) <$> reorder' restxs as

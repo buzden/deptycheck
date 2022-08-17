@@ -21,7 +21,7 @@ main = runner $
   ] ++
   !(sequence [
     "Auto derivation: core: cons: least effort (\{p}, \{w})" `atDir` "gen-derivation/derivation/least-effort/\{p}/\{w}"
-    | p <- ["print", "run"], w <- ["adt", "gadt"]
+    | p <- ["print", "run"], w <- ["adt", "gadt", "regression"]
   ]) ++
   [ !("Auto derivation: core: derivation itself" `atDir` "gen-derivation/derivation/core")
   ]

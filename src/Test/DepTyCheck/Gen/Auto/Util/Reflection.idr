@@ -53,6 +53,13 @@ normaliseCon $ MkCon n args ty = do
 --- Parsing and rebuilding `TTImp` stuff ---
 --------------------------------------------
 
+public export
+isImplicit : PiInfo c -> Bool
+isImplicit ImplicitArg     = True
+isImplicit (DefImplicit x) = True
+isImplicit AutoImplicit    = True
+isImplicit ExplicitArg     = False
+
 --- `DPair` type parsing and rebuilding stuff ---
 
 public export
