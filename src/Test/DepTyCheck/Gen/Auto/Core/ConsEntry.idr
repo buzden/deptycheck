@@ -92,7 +92,7 @@ canonicConsBody sig name con = do
             Prelude.Yes Builtin.Refl => ~(subexpr)
         )
       deceqise : TTImp -> TTImp
-      deceqise = foldr (\ss, f => enrich1WithDecEq ss . f) id decEqedNames
+      deceqise = foldl (\f, ss => enrich1WithDecEq ss . f) id decEqedNames
 
   -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
