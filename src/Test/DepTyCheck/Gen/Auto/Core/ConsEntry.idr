@@ -52,10 +52,9 @@ canonicConsBody sig name con = do
   --   - something else (cannot manage yet)
   deepConsApps <- for sig.givenParams.asVect $ \idx => do
     let argExpr = conRetTypeArg idx
-    Just (appliedArgs ** bindExprF) <- analyseDeepConsApp True conArgNames argExpr
+    Just analysed <- analyseDeepConsApp True conArgNames argExpr
       | Nothing => failAt conFC "Argument #\{show idx} is not supported yet (argument expression: \{show argExpr})"
-    pure $ the (appArgs : List _ ** (Fin appArgs.length -> TTImp) -> TTImp) $
-      (appliedArgs ** bindExprF)
+    pure analysed
 
   -- Acquire LHS bind expressions for the given parameters
   -- Determine pairs of names which should be `decEq`'ed
@@ -64,7 +63,7 @@ canonicConsBody sig name con = do
   ((givenConArgs, decEqedNames, _), bindExprs) <-
     runStateT (empty, empty, 0) {stateType=(SortedSet String, SortedSet (String, String), Nat)} {m} $
       for deepConsApps $ \(appliedNames ** bindExprF) => do
-        renamedAppliedNames <- for (Vect.fromList appliedNames) $ \(name, typeDetermined) => case name of
+        renamedAppliedNames <- for appliedNames.asVect $ \(name, typeDetermined) => case name of
           UN (Basic name) => if not (cast typeDetermined) && contains name !get
             then do
               -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend

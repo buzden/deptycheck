@@ -60,12 +60,12 @@ namespace NonObligatoryExts
               lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{lhs}"
             let Yes lengthCorrect = decEq ty.args.length args.length
               | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
-            pure $ MkTypeApp ty $ rewrite lengthCorrect in Vect.fromList args <&> \arg => case getExpr arg of
+            pure $ MkTypeApp ty $ rewrite lengthCorrect in args.asVect <&> \arg => case getExpr arg of
               expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
               expr            => Right expr
 
       -- Compute left-to-right need of generation when there are non-trivial types at the left
-      argsTypeApps <- for .| Vect.fromList con.args .| analyseTypeApp . type
+      argsTypeApps <- for con.args.asVect $ analyseTypeApp . type
 
       -- Decide how constructor arguments would be named during generation
       let bindNames : Vect (con.args.length) String
