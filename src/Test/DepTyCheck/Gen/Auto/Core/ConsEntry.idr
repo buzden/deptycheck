@@ -69,10 +69,12 @@ canonicConsBody sig name con = do
               -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
               let substName = "to_be_deceqed^^" ++ name ++ show !getAndInc
               modify $ insert (name, substName)
-              pure substName
-            else modify (insert name) $> name
+              pure (name, substName)
+            else modify (insert name) $> (name, name)
           badName => failAt conFC "Unsupported name `\{show badName}` of a parameter used in the constructor"
-        pure $ bindExprF $ bindVar . flip index renamedAppliedNames
+        let bvs = mapHom bindVar . flip index renamedAppliedNames
+        pure $ mapHom bindExprF (fst . bvs, snd . bvs)
+  let (originalBindExprs, renamedBindExprs) = unzip bindExprs
 
   -- Build a map from constructor's argument name to its index
   let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
@@ -97,7 +99,7 @@ canonicConsBody sig name con = do
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
   pure $
     -- Happy case, given arguments conform out constructor's GADT indices
-    [ callCanonic sig name (bindVar fuelArg) bindExprs .= deceqise !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
-    ++ if all isSimpleBindVar bindExprs then [] {- do not produce dead code if the happy case handles everything already -} else
+    [ callCanonic sig name (bindVar fuelArg) renamedBindExprs .= deceqise !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
+    ++ if all isSimpleBindVar renamedBindExprs then [] {- do not produce dead code if the happy case handles everything already -} else
       -- The rest case, if given arguments do not conform to the current constructor then return empty generator
       [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(empty) ]
