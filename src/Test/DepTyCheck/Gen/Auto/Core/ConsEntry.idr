@@ -89,7 +89,7 @@ canonicConsBody sig name con = do
   -- NOTE: Here I do all `decEq`s in a row and then match them all against `Yes`.
   --       I could do this step by step and this could be more effective in large series.
   let deceqise : (lhs : Vect sig.givenParams.asList.length TTImp -> TTImp) -> (rhs : TTImp) -> List Clause
-      deceqise lhs rhs = step 0 lhs decEqedNames.asList {- !!! order may be incorrect !!! -} where
+      deceqise lhs rhs = step 0 lhs $ orderLikeInCon decEqedNames where
 
         step : (uniq : Nat) -> (withlhs : Vect sig.givenParams.asList.length TTImp -> TTImp) -> (left : List (String, String)) -> List Clause
 
@@ -111,6 +111,19 @@ canonicConsBody sig name con = do
 
             patClauseWith : (rhs : TTImp) -> (mainLHS : TTImp) -> (decEqMatches : Vect decEqsCnt TTImp) -> Clause
             patClauseWith rhs mainLHS decEqMatches = PatClause EmptyFC (foldl (.$) mainLHS decEqMatches) rhs
+
+        -- Order pairs by the first element like they are present in the constructor's signature
+        orderLikeInCon : Foldable f => f (String, String) -> List (String, String)
+        orderLikeInCon m = do
+          let m = insertFrom m empty
+          let conArgStrNames = mapMaybe argStrName con.args
+          let present = mapMaybe (\n => SortedMap.lookup n m <&> (n,)) conArgStrNames
+          let notPresent = foldl (flip SortedMap.delete) m conArgStrNames
+          present ++ SortedMap.toList notPresent
+          where
+            argStrName : NamedArg -> Maybe String
+            argStrName $ MkArg {name=UN (Basic n), _} = Just n
+            argStrName _                              = Nothing
 
   -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
