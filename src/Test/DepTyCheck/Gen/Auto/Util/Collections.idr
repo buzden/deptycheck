@@ -128,7 +128,7 @@ partitionEithersPos = map @{Compose} fromList . p where
 export
 joinEithersPos : (as : List a) -> (bs : List b) -> SortedSet (Fin $ as.length + bs.length) -> Maybe $ Vect (as.length + bs.length) $ Either a b
 joinEithersPos as bs lefts =
-  evalState (as, bs) $ for @{Compose} allFins' $ \idx => if contains idx lefts
+  evalState (as, bs) $ for @{Compose} range $ \idx => if contains idx lefts
     then do
       (x::as, bs) <- get
         | ([], _) => pure $ Nothing
