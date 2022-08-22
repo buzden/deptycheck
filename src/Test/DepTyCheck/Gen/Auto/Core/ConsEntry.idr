@@ -104,13 +104,10 @@ canonicConsBody sig name con = do
         -- match results of `decEq`s
         step decEqsCnt _ [] = do
           let happyCase = patClauseWith rhs .| lhs originalBindExprs .| replicate _ `(Prelude.Yes Builtin.Refl)
-          let negativeCases = patClauseWith `(empty) (lhs renamedBindExprs) . noAtIdx <$> Fin.range {len=decEqsCnt}
-          happyCase :: toList negativeCases
+          let emptyCase = patClauseWith `(empty) .| lhs renamedBindExprs .| replicate _ `(_)
+          [ happyCase, emptyCase ]
 
           where
-
-            noAtIdx : Fin decEqsCnt -> Vect decEqsCnt TTImp
-            noAtIdx pointedIdx = Fin.tabulate $ \idx => if idx == pointedIdx then `(Prelude.No _) else `(_)
 
             patClauseWith : (rhs : TTImp) -> (mainLHS : TTImp) -> (decEqMatches : Vect decEqsCnt TTImp) -> Clause
             patClauseWith rhs mainLHS decEqMatches = PatClause EmptyFC (foldl (.$) mainLHS decEqMatches) rhs
