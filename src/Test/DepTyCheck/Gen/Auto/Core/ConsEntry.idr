@@ -86,20 +86,40 @@ canonicConsBody sig name con = do
     pure idx
 
   -- Equalise index values which must be propositionally equal to some parameters
-  let enrich1WithDecEq : (String, String) -> TTImp -> TTImp
-      enrich1WithDecEq (l, r) subexpr = `(
-          case Decidable.Equality.decEq ~(varStr l) ~(varStr r) of
-            Prelude.No  _            => Prelude.empty
-            Prelude.Yes Builtin.Refl => ~(subexpr)
-        )
-      deceqise : TTImp -> TTImp
-      deceqise = foldl (\f, ss => enrich1WithDecEq ss . f) id decEqedNames
+  -- NOTE: Here I do all `decEq`s in a row and then match them all against `Yes`.
+  --       I could do this step by step and this could be more effective in large series.
+  let deceqise : (lhs : Vect sig.givenParams.asList.length TTImp -> TTImp) -> (rhs : TTImp) -> List Clause
+      deceqise lhs rhs = step 0 lhs decEqedNames.asList {- !!! order may be incorrect !!! -} where
+
+        step : (uniq : Nat) -> (withlhs : Vect sig.givenParams.asList.length TTImp -> TTImp) -> (left : List (String, String)) -> List Clause
+
+        -- continue deceqing
+        step uniq withlhs ((orig, renam)::rest) =
+          [ WithClause EmptyFC (withlhs renamedBindExprs) MW
+              `(Decidable.Equality.decEq ~(varStr renam) ~(varStr orig))
+              Nothing [] $
+              step (S uniq) ((.$ varStr "witharg^\{show uniq}") . withlhs) rest
+          ]
+
+        -- match results of `decEq`s
+        step decEqsCnt _ [] = do
+          let happyCase = patClauseWith rhs .| lhs originalBindExprs .| replicate _ `(Prelude.Yes Builtin.Refl)
+          let negativeCases = patClauseWith `(empty) (lhs renamedBindExprs) . noAtIdx <$> Fin.range {len=decEqsCnt}
+          happyCase :: toList negativeCases
+
+          where
+
+            noAtIdx : Fin decEqsCnt -> Vect decEqsCnt TTImp
+            noAtIdx pointedIdx = Fin.tabulate $ \idx => if idx == pointedIdx then `(Prelude.No _) else `(_)
+
+            patClauseWith : (rhs : TTImp) -> (mainLHS : TTImp) -> (decEqMatches : Vect decEqsCnt TTImp) -> Clause
+            patClauseWith rhs mainLHS decEqMatches = PatClause EmptyFC (foldl (.$) mainLHS decEqMatches) rhs
 
   -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
   pure $
     -- Happy case, given arguments conform out constructor's GADT indices
-    [ callCanonic sig name (bindVar fuelArg) renamedBindExprs .= deceqise !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
+    deceqise (callCanonic sig name $ bindVar fuelArg) !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg)
     ++ if all isSimpleBindVar renamedBindExprs then [] {- do not produce dead code if the happy case handles everything already -} else
       -- The rest case, if given arguments do not conform to the current constructor then return empty generator
       [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(empty) ]
