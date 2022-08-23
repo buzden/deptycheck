@@ -52,10 +52,9 @@ canonicConsBody sig name con = do
   --   - something else (cannot manage yet)
   deepConsApps <- for sig.givenParams.asVect $ \idx => do
     let argExpr = conRetTypeArg idx
-    Just (appliedArgs ** bindExprF) <- analyseDeepConsApp True conArgNames argExpr
+    Just analysed <- analyseDeepConsApp True conArgNames argExpr
       | Nothing => failAt conFC "Argument #\{show idx} is not supported yet (argument expression: \{show argExpr})"
-    pure $ the (appArgs : List _ ** (Fin appArgs.length -> TTImp) -> TTImp) $
-      (appliedArgs ** bindExprF)
+    pure analysed
 
   -- Acquire LHS bind expressions for the given parameters
   -- Determine pairs of names which should be `decEq`'ed
@@ -64,16 +63,18 @@ canonicConsBody sig name con = do
   ((givenConArgs, decEqedNames, _), bindExprs) <-
     runStateT (empty, empty, 0) {stateType=(SortedSet String, SortedSet (String, String), Nat)} {m} $
       for deepConsApps $ \(appliedNames ** bindExprF) => do
-        renamedAppliedNames <- for (Vect.fromList appliedNames) $ \(name, typeDetermined) => case name of
+        renamedAppliedNames <- for appliedNames.asVect $ \(name, typeDetermined) => case name of
           UN (Basic name) => if not (cast typeDetermined) && contains name !get
             then do
               -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
               let substName = "to_be_deceqed^^" ++ name ++ show !getAndInc
               modify $ insert (name, substName)
-              pure substName
-            else modify (insert name) $> name
+              pure $ \alreadyMatchedRenames => if contains substName alreadyMatchedRenames then name else substName
+            else modify (insert name) $> const name
           badName => failAt conFC "Unsupported name `\{show badName}` of a parameter used in the constructor"
-        pure $ bindExprF $ bindVar . flip index renamedAppliedNames
+        let _ : Vect appliedNames.length $ SortedSet String -> String = renamedAppliedNames
+        pure $ \alreadyMatchedRenames => bindExprF $ \idx => bindVar $ (index idx renamedAppliedNames) alreadyMatchedRenames
+  let bindExprs = \alreadyMatchedRenames => bindExprs <&> \f => f alreadyMatchedRenames
 
   -- Build a map from constructor's argument name to its index
   let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
@@ -85,20 +86,44 @@ canonicConsBody sig name con = do
     pure idx
 
   -- Equalise index values which must be propositionally equal to some parameters
-  let enrich1WithDecEq : (String, String) -> TTImp -> TTImp
-      enrich1WithDecEq (l, r) subexpr = `(
-          case Decidable.Equality.decEq ~(varStr l) ~(varStr r) of
-            Prelude.No  _            => Prelude.empty
-            Prelude.Yes Builtin.Refl => ~(subexpr)
-        )
-      deceqise : TTImp -> TTImp
-      deceqise = foldr (\ss, f => enrich1WithDecEq ss . f) id decEqedNames
+  -- NOTE: Here I do all `decEq`s in a row and then match them all against `Yes`.
+  --       I could do this step by step and this could be more effective in large series.
+  let deceqise : (lhs : Vect sig.givenParams.asList.length TTImp -> TTImp) -> (rhs : TTImp) -> Clause
+      deceqise lhs rhs = step lhs empty $ orderLikeInCon decEqedNames where
+
+        step : (withlhs : Vect sig.givenParams.asList.length TTImp -> TTImp) ->
+               (alreadyMatchedRenames : SortedSet String) ->
+               (left : List (String, String)) ->
+               Clause
+        step withlhs matched [] = PatClause EmptyFC .| withlhs (bindExprs matched) .| rhs
+        step withlhs matched ((orig, renam)::rest) =
+          WithClause EmptyFC (withlhs $ bindExprs matched) MW
+            `(Decidable.Equality.decEq ~(varStr renam) ~(varStr orig))
+            Nothing []
+            [ -- happy case
+              step ((.$ `(Prelude.Yes Builtin.Refl)) . withlhs) (insert renam matched) rest
+            , -- empty case
+              PatClause EmptyFC .| withlhs (bindExprs matched) .$ `(Prelude.No _) .| `(empty)
+            ]
+
+        -- Order pairs by the first element like they are present in the constructor's signature
+        orderLikeInCon : Foldable f => f (String, String) -> List (String, String)
+        orderLikeInCon m = do
+          let m = insertFrom m empty
+          let conArgStrNames = mapMaybe argStrName con.args
+          let present = mapMaybe (\n => SortedMap.lookup n m <&> (n,)) conArgStrNames
+          let notPresent = foldl (flip SortedMap.delete) m conArgStrNames
+          present ++ SortedMap.toList notPresent
+          where
+            argStrName : NamedArg -> Maybe String
+            argStrName $ MkArg {name=UN (Basic n), _} = Just n
+            argStrName _                              = Nothing
 
   -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
   pure $
     -- Happy case, given arguments conform out constructor's GADT indices
-    [ callCanonic sig name (bindVar fuelArg) bindExprs .= deceqise !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
-    ++ if all isSimpleBindVar bindExprs then [] {- do not produce dead code if the happy case handles everything already -} else
+    [ deceqise (callCanonic sig name $ bindVar fuelArg) !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
+    ++ if all isSimpleBindVar $ bindExprs empty then [] {- do not produce dead code if the happy case handles everything already -} else
       -- The rest case, if given arguments do not conform to the current constructor then return empty generator
       [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(empty) ]

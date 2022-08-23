@@ -24,11 +24,6 @@ minus_last_gives_0 (S k) = minus_last_gives_0 k
 --- Collections of `Fin`s ---
 
 public export
-allFins' : {n : Nat} -> Vect n (Fin n)
-allFins' {n=Z  } = []
-allFins' {n=S k} = FZ :: map FS allFins'
-
-public export
 rangeFrom0To : Fin n -> List (Fin n)
 rangeFrom0To FZ     = [FZ]
 rangeFrom0To (FS x) = FZ :: (FS <$> rangeFrom0To x)
