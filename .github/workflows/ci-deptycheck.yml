@@ -184,26 +184,36 @@ jobs:
   # Test deptycheck's derivation #
   ################################
 
+  get-derivation-test-sets:
+    name: Aquire test sets for derivation
+    runs-on: ubuntu-latest
+    outputs:
+      derivation-test-sets: ${{ steps.get-derivation-test-sets.outputs.derivation-test-sets }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Get derivation test sets
+        id: get-derivation-test-sets
+        run: |
+          echo -n "::set-output name=derivation-test-sets::["
+          find tests/gen-derivation/ -type f,l -name run | \
+            grep -v '/_' | sed 's|^tests/gen-derivation/|"|' | sed 's|/[^/]*/run$|"|' | \
+            sort | uniq | awk 'ORS=", "' | head -c -2
+          echo "]"
+
   deptycheck-test-derivation:
     name: Test DepTyCheck's derivation
     needs:
       - read-ver
       - deptycheck-build-lib
       - deptycheck-test-lib
+      - get-derivation-test-sets
     runs-on: ubuntu-latest
     container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
     strategy:
+      fail-fast: false # all test cases are more or less independent
       matrix:
-        test_set:
-          - inputvalidation/
-          - up-to-renaming-ttimp-eq/
-          - canonicsig/
-          - cons-analysis/
-          - derivation/infra/
-          - arg-deps/
-          - derivation/least-effort/print
-          - derivation/least-effort/run
-          - derivation/core/
+        test_set: ${{ fromJSON(needs.get-derivation-test-sets.outputs.derivation-test-sets) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
