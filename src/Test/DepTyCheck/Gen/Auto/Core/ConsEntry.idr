@@ -108,12 +108,12 @@ canonicConsBody sig name con = do
 
         -- Order pairs by the first element like they are present in the constructor's signature
         orderLikeInCon : Foldable f => f (String, String) -> List (String, String)
-        orderLikeInCon m = do
-          let m = insertFrom m empty
+        orderLikeInCon = do
           let conArgStrNames = mapMaybe argStrName con.args
-          let present = mapMaybe (\n => SortedMap.lookup n m <&> (n,)) conArgStrNames
-          let notPresent = foldl (flip SortedMap.delete) m conArgStrNames
-          present ++ SortedMap.toList notPresent
+          let conNameToIdx : SortedMap _ $ Fin conArgStrNames.length := fromList $ mapI' conArgStrNames $ flip (,)
+          let [AsInCon] Ord (String, String) where
+                compare (origL, renL) (origR, renR) = comparing (flip lookup conNameToIdx) origL origR <+> compare renL renR
+          SortedSet.toList . foldl (flip insert) (empty @{AsInCon})
           where
             argStrName : NamedArg -> Maybe String
             argStrName $ MkArg {name=UN (Basic n), _} = Just n

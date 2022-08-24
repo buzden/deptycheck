@@ -17,5 +17,5 @@ checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()
 main = runGs
-  [ G $ \fl => checkedGen fl Z Z Z
+  [ G $ \fl => checkedGen fl Z Z Z Z
   ]

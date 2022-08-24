@@ -92,20 +92,49 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                    $ IBindVar to_be_deceqed^^n1)
                                               MW
                                               (IApp. IVar Decidable.Equality.decEq
-                                                   $ IVar to_be_deceqed^^n1
+                                                   $ IVar to_be_deceqed^^n0
                                                    $ IVar n)
 
                                               []
-                                              [ PatClause (IApp. IVar <<DerivedGen.XE>>
-                                                               $ IBindVar ^cons_fuel^
-                                                               $ IBindVar n
-                                                               $ (IApp. IVar Prelude.Types.S
-                                                                      $ IBindVar to_be_deceqed^^n0)
-                                                               $ IBindVar m
-                                                               $ IBindVar n
-                                                               $ (IApp. IVar Prelude.Yes
-                                                                      $ IVar Builtin.Refl))
-                                                          (IVar empty)
+                                              [ WithClause (IApp. IVar <<DerivedGen.XE>>
+                                                                $ IBindVar ^cons_fuel^
+                                                                $ IBindVar n
+                                                                $ (IApp. IVar Prelude.Types.S
+                                                                       $ IBindVar n)
+                                                                $ IBindVar m
+                                                                $ IBindVar to_be_deceqed^^n1
+                                                                $ (IApp. IVar Prelude.Yes
+                                                                       $ IVar Builtin.Refl))
+                                                           MW
+                                                           (IApp. IVar Decidable.Equality.decEq
+                                                                $ IVar to_be_deceqed^^n1
+                                                                $ IVar n)
+
+                                                           []
+                                                           [ PatClause (IApp. IVar <<DerivedGen.XE>>
+                                                                            $ IBindVar ^cons_fuel^
+                                                                            $ IBindVar n
+                                                                            $ (IApp. IVar Prelude.Types.S
+                                                                                   $ IBindVar n)
+                                                                            $ IBindVar m
+                                                                            $ IBindVar n
+                                                                            $ (IApp. IVar Prelude.Yes
+                                                                                   $ IVar Builtin.Refl)
+                                                                            $ (IApp. IVar Prelude.Yes
+                                                                                   $ IVar Builtin.Refl))
+                                                                       (IVar empty)
+                                                           , PatClause (IApp. IVar <<DerivedGen.XE>>
+                                                                            $ IBindVar ^cons_fuel^
+                                                                            $ IBindVar n
+                                                                            $ (IApp. IVar Prelude.Types.S
+                                                                                   $ IBindVar n)
+                                                                            $ IBindVar m
+                                                                            $ IBindVar to_be_deceqed^^n1
+                                                                            $ (IApp. IVar Prelude.Yes
+                                                                                   $ IVar Builtin.Refl)
+                                                                            $ (IApp. IVar Prelude.No
+                                                                                   $ Implicit True))
+                                                                       (IVar empty) ]
                                               , PatClause (IApp. IVar <<DerivedGen.XE>>
                                                                $ IBindVar ^cons_fuel^
                                                                $ IBindVar n
