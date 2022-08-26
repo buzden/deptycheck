@@ -30,25 +30,29 @@ Seed = StdGen
 -------------------------------
 
 export
-data Gen : Type -> Type where
-  Uniform : LzList a -> Gen a
-  AlternG : LzList (Gen a) -> Gen a
-  Raw     : State Seed (LazyList a) -> Gen a
+data Gen' : Type -> Type where
+  Uniform : LzList a -> Gen' a
+  AlternG : LzList (Gen' a) -> Gen' a
+  Raw     : State Seed (LazyList a) -> Gen' a
+
+public export
+Gen : Type -> Type
+Gen = Gen'
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
 export
-bound : Gen a -> Maybe Nat
+bound : Gen' a -> Maybe Nat
 bound (Uniform xs) = Just $ length xs
 bound (AlternG gs) = sum <$> traverse (assert_total bound) gs
 bound (Raw _)      = Nothing
 
 export
-chooseAny : Random a => Gen a
+chooseAny : Random a => Gen' a
 chooseAny = Raw $ pure <$> random'
 
 export
-choose : Random a => (a, a) -> Gen a
+choose : Random a => (a, a) -> Gen' a
 choose bounds = Raw $ pure <$> randomR' bounds
 
 shiftRandomly : RandomGen g => LzList a -> State g (LazyList a)
@@ -63,22 +67,22 @@ traverseSt (x::xs) = ST $ \s =>
   Id (s1, xx :: evalState s2 (traverseSt xs))
 
 export
-unGen : Gen a -> State Seed (LazyList a)
+unGen : Gen' a -> State Seed (LazyList a)
 unGen (Raw sf)     = sf
 unGen (Uniform xs) = shiftRandomly xs
 unGen (AlternG gs) = shiftRandomly gs >>= map join . traverseSt . map (assert_total unGen)
 
 export
-Functor Gen where
+Functor Gen' where
   map f (Uniform xs) = Uniform $ map f xs
   map f (AlternG gs) = AlternG $ assert_total $ map f <$> gs
   map f (Raw gena)   = Raw $ map f <$> gena
 
-apAsRaw : Gen (a -> b) -> Gen a -> Gen b
+apAsRaw : Gen' (a -> b) -> Gen' a -> Gen' b
 apAsRaw generalF generalA = Raw [| unGen generalF <*> unGen generalA |]
 
 export
-Applicative Gen where
+Applicative Gen' where
   pure x = Uniform [x]
 
   Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
@@ -91,7 +95,7 @@ Applicative Gen where
   generalF <*> rawA@(Raw {}) = apAsRaw generalF rawA
 
 export
-Alternative Gen where
+Alternative Gen' where
   empty = Uniform []
   AlternG ls <|> Delay (AlternG rs) = AlternG $ ls ++ rs
   AlternG ls <|> Delay (generalR  ) = AlternG $ ls ++ [generalR]
@@ -101,7 +105,7 @@ Alternative Gen where
 ||| Makes the given `Gen` to act as an independent generator according to the `Alternative` combination.
 ||| That is, in `independent (independent a <|> independent b)` given `a` and `b` are distributed evenly.
 export
-independent : Gen a -> Gen a
+independent : Gen' a -> Gen' a
 independent alt@(AlternG _) = AlternG [alt]
 independent other = other
 
@@ -115,14 +119,14 @@ independent other = other
 |||
 ||| The resulting generator is not independent, i.e. `oneOf [a, b, c] <|> oneOf [d, e]` is equivalent to `oneOf [a, b, c, d, e]`.
 public export
-oneOf : List (Gen a) -> Gen a
+oneOf : List (Gen a) -> Gen' a
 oneOf []      = empty
 oneOf [x]     = independent x
 oneOf (x::xs) = independent x <|> oneOf xs
 
 ||| Choose one of the given generators uniformly. This function is a deprecated historical alias for `oneOf`.
 public export %inline %deprecate
-oneOf' : List (Gen a) -> Gen a
+oneOf' : List (Gen a) -> Gen' a
 oneOf' = oneOf
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
@@ -136,7 +140,7 @@ oneOf' = oneOf
 ||| equivalent to `frequency [(n1, g1), (n2, g2), (n3, g3), (n4, g4)]`.
 ||| Also, `frequency [(n, g), (m, h)] <|> oneOf [u, w]` is equivalent to `frequency [(n, g), (m, h), (1, u), (1, w)]`.
 export
-frequency : List (Nat, Gen a) -> Gen a
+frequency : List (Nat, Gen' a) -> Gen' a
 frequency = AlternG . concatMap (uncurry replicate . map independent)
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators dependently.
@@ -145,30 +149,30 @@ frequency = AlternG . concatMap (uncurry replicate . map independent)
 ||| That is, unlike the `frequency` function, `frequency' [(n, oneOf [a, b, c]), (m, x)]` is equivalent to
 ||| `frequency [(n, a), (n, b), (n, c), (m, x)]`
 export
-frequency_dep : List (Nat, Gen a) -> Gen a
+frequency_dep : List (Nat, Gen' a) -> Gen' a
 frequency_dep = AlternG . concatMap (uncurry replicate)
 
 ||| Choose one of the given values uniformly.
 |||
 ||| The resulting generator is not independent, i.e. `elements xs <|> elements ys` is equivalent to `elements (xs ++ ys)`.
 export
-elements : List a -> Gen a
+elements : List a -> Gen' a
 elements = Uniform . fromList
 
 export
-Monad Gen where
+Monad Gen' where
   Uniform gs >>= c = if null gs then Uniform [] else AlternG $ c <$> gs
   AlternG gs >>= c = AlternG $ assert_total (>>= c) <$> gs
   Raw sf     >>= c = Raw $ sf >>= map join . traverseSt . map (unGen . c)
 
 export
-mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
+mapMaybe : (a -> Maybe b) -> Gen' a -> Gen' b
 mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
 mapMaybe p (AlternG l) = AlternG $ assert_total $ mapMaybe p <$> l
 mapMaybe p (Raw sf)    = Raw $ mapMaybe p <$> sf
 
 export
-suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `Subset` So . p
+suchThat_withPrf : Gen' a -> (p : a -> Bool) -> Gen' $ a `Subset` So . p
 suchThat_withPrf g p = mapMaybe lp g where
   lp : a -> Maybe $ a `Subset` So . p
   lp x with (p x) proof prf
@@ -178,11 +182,11 @@ suchThat_withPrf g p = mapMaybe lp g where
 infixl 4 `suchThat`
 
 public export
-suchThat : Gen a -> (a -> Bool) -> Gen a
+suchThat : Gen' a -> (a -> Bool) -> Gen' a
 suchThat g p = fst <$> suchThat_withPrf g p
 
 export
-suchThat_dec : Gen a -> ((x : a) -> Dec (prop x)) -> Gen $ Subset a prop
+suchThat_dec : Gen' a -> ((x : a) -> Dec (prop x)) -> Gen' $ Subset a prop
 suchThat_dec g f = mapMaybe d g where
   d : a -> Maybe $ Subset a prop
   d x = case f x of
@@ -191,23 +195,23 @@ suchThat_dec g f = mapMaybe d g where
 
 ||| Filters the given generator so, that resulting values `x` are solutions of equation `y = f x` for given `f` and `y`.
 export
-suchThat_invertedEq : DecEq b => Gen a -> (y : b) -> (f : a -> b) -> Gen $ Subset a $ \x => y = f x
+suchThat_invertedEq : DecEq b => Gen' a -> (y : b) -> (f : a -> b) -> Gen' $ Subset a $ \x => y = f x
 suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
 
 -- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
 export
-variant : Nat -> Gen a -> Gen a
+variant : Nat -> Gen' a -> Gen' a
 variant Z       gen = gen
 variant x@(S _) gen = Raw $ modify (index x . iterate (fst . next)) *> unGen gen
 
 export
-uniform : LzList a -> Gen a
+uniform : LzList a -> Gen' a
 uniform = Uniform
 
 export
-listOf : {default (choose (0, 10)) length : Gen Nat} -> Gen a -> Gen (List a)
+listOf : {default (choose (0, 10)) length : Gen' Nat} -> Gen' a -> Gen' (List a)
 listOf g = sequence $ List.replicate !length g
 
 export
-vectOf : {n : Nat} -> Gen a -> Gen (Vect n a)
+vectOf : {n : Nat} -> Gen' a -> Gen' (Vect n a)
 vectOf g = sequence $ replicate n g
