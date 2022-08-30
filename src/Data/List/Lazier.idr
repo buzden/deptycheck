@@ -241,9 +241,10 @@ randomFin : RandomGen g => {n : _} -> StateT g Maybe $ Fin n
 randomFin {n = Z}   = lift empty
 randomFin {n = S k} = mapStateT (pure . runIdentity) random'
 
-lrProportionally : (l, r : Nat) -> StateT g Maybe Bool
+lrProportionally : RandomGen g => (l, r : Nat) -> StateT g Maybe Bool
 lrProportionally Z Z = lift empty
-lrProportionally l r = ?lrProportionally_rhs
+lrProportionally l r = mapStateT (pure . runIdentity) $ (< cast l) <$> randomR' {a=Int} (0, cast l + cast r - 1)
+-- We do this through `Int`!
 
 export
 pickUniformly : RandomGen g => LzList a -> StateT g Maybe a
