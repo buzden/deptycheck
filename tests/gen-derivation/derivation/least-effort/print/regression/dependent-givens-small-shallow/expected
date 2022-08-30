@@ -49,7 +49,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar n)
                                                   $ (IApp. (INamedApp. IVar Data.Fin.FS
-                                                                     $ IBindVar n)
+                                                                     $ Implicit True)
                                                          $ IBindVar f))
                                              (IApp. (INamedApp. IVar Prelude.pure
                                                               $ IVar Test.DepTyCheck.Gen.Gen)

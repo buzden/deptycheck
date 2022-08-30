@@ -64,7 +64,9 @@ canonicConsBody sig name con = do
     runStateT (empty, empty, 0) {stateType=(SortedSet String, SortedSet (String, String), Nat)} {m} $
       for deepConsApps $ \(appliedNames ** bindExprF) => do
         renamedAppliedNames <- for appliedNames.asVect $ \(name, typeDetermined) => case name of
-          UN (Basic name) => if not (cast typeDetermined) && contains name !get
+          UN (Basic name) => if cast typeDetermined
+            then pure $ const `(_) -- no need to match type-determined parameter by hand
+            else if contains name !get
             then do
               -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
               let substName = "to_be_deceqed^^" ++ name ++ show !getAndInc
