@@ -38,6 +38,10 @@ fromList : List a -> LzList a
 fromList xs = MkLzList _ $ Eager xs
 
 export
+fromFoldable : Foldable f => f a -> LzList a
+fromFoldable = fromList . toList -- TODO maybe, to do this somehow better?
+
+export
 Nil : LzList a
 Nil = fromList []
 
