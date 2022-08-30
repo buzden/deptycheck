@@ -59,7 +59,7 @@ unGen (Uniform xs) = pickUniformly xs
 unGen (AlternG gs) = pickUniformly gs >>= assert_total unGen
 unGen (Raw sf)     = mapStateT (pure . runIdentity) sf >>= pickUniformly
 -- We can implement it like this:
---unGen = (>>= pickUniformly) . unGen'
+--unGen = (>>= pickUniformly) . mapStateT (pure . runIdentity) . unGen'
 -- But it seems to be less effective (need to check)
 
 export
