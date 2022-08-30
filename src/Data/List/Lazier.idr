@@ -237,5 +237,13 @@ Show a => Show (LzList a) where
 
 --- Random-related functions ---
 
+randomFin : {n : _} -> StateT g Maybe $ Fin n
+
 export
-pickUniformly : RandomGen g => LzList a -> State g a
+pickUniformly : RandomGen g => LzList a -> StateT g Maybe a
+pickUniformly ll@(MkLzList {contents=Delay lv, length}) = case lv of
+  Eager xs     => ?foo_1 -- index' xs <$> randomFin {a=length}
+  Replic _ x   => pure x
+  Map f xs     => f <$> pickUniformly xs
+  Concat ls rs => ?foo_3
+  Cart os is   => [| (pickUniformly os, pickUniformly is) |]

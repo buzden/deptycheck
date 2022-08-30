@@ -47,14 +47,17 @@ choose = Raw . map pure . randomR'
 
 unGen' : Gen a -> State Seed (LzList a)
 unGen' (Uniform xs) = pure xs
-unGen' (AlternG gs) = pickUniformly gs >>= assert_total unGen'
+unGen' (AlternG gs) = ST $ \seed => do
+                        let Just (seed, subgen) = runStateT seed $ pickUniformly {g=StdGen} gs
+                          | Nothing => Id (seed, empty)
+                        runStateT seed $ assert_total $ unGen' subgen
 unGen' (Raw sf)     = sf
 
 export
-unGen : Gen a -> State Seed a
+unGen : Gen a -> StateT Seed Maybe a
 unGen (Uniform xs) = pickUniformly xs
 unGen (AlternG gs) = pickUniformly gs >>= assert_total unGen
-unGen (Raw sf)     = sf >>= pickUniformly
+unGen (Raw sf)     = mapStateT (pure . runIdentity) sf >>= pickUniformly
 -- We can implement it like this:
 --unGen = (>>= pickUniformly) . unGen'
 -- But it seems to be less effective (need to check)
