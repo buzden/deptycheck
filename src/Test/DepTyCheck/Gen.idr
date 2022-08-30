@@ -78,7 +78,7 @@ namespace Distr
   mapMaybe : (a -> Maybe b) -> Distr a -> Distr b
 
   export
-  getOverDistr : Distr a -> State Seed a
+  pickRandomly : Distr a -> State Seed a
 
 -------------------------------
 --- Definition of the `Gen` ---
@@ -102,14 +102,14 @@ choose = Raw . map pure . randomR'
 
 unGen' : Gen a -> State Seed (Distr a)
 unGen' (Uniform xs) = pure xs
-unGen' (AlternG gs) = getOverDistr gs >>= assert_total unGen'
+unGen' (AlternG gs) = pickRandomly gs >>= assert_total unGen'
 unGen' (Raw sf)     = sf
 
 export
 unGen : Gen a -> State Seed a
-unGen (Uniform xs) = getOverDistr xs
-unGen (AlternG gs) = getOverDistr gs >>= assert_total unGen
-unGen (Raw sf)     = sf >>= getOverDistr
+unGen (Uniform xs) = pickRandomly xs
+unGen (AlternG gs) = pickRandomly gs >>= assert_total unGen
+unGen (Raw sf)     = sf >>= pickRandomly
 
 export
 Functor Gen where
