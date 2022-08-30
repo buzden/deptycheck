@@ -237,9 +237,13 @@ Show a => Show (LzList a) where
 
 --- Random-related functions ---
 
-randomFin : {n : _} -> StateT g Maybe $ Fin n
+randomFin : RandomGen g => {n : _} -> StateT g Maybe $ Fin n
+randomFin {n = Z}   = lift empty
+randomFin {n = S k} = mapStateT (pure . runIdentity) random'
 
-lrProportionally : (l, r : Nat) -> StateT g m Bool
+lrProportionally : (l, r : Nat) -> StateT g Maybe Bool
+lrProportionally Z Z = lift empty
+lrProportionally l r = ?lrProportionally_rhs
 
 export
 pickUniformly : RandomGen g => LzList a -> StateT g Maybe a
