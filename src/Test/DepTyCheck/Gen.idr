@@ -25,70 +25,15 @@ public export %inline
 Seed : Type
 Seed = StdGen
 
---- Distr (to be moved out and implemented) ---
-
-namespace Distr
-
-  export
-  data Distr : Type -> Type where
-
-  export
-  Functor Distr where
-    map = ?distr_map
-
-  export
-  Applicative Distr where
-    pure = ?distr_pure
-    (<*>) = ?distr_ap
-
-  export
-  Semigroup (Distr a) where
-    (<+>) = ?distr_semi
-
-  export
-  Monoid (Distr a) where
-    neutral = ?distr_neutral
-
-  export
-  Alternative Distr where
-    empty = ?distr_empty
-    (<|>) = ?distr_alt
-
-  export
-  Monad Distr where
-    (>>=) = ?distr_bind
-
-  export
-  Foldable Distr where
-    foldl = ?distr_foldl
-    foldr = ?distr_foldr
-    null = ?distr_null
-
-  export
-  Traversable Distr where
-    traverse = ?distr_traverse
-
-  export
-  replicate : Nat -> a -> Distr a
-
-  export
-  fromFoldable : Foldable f => f a -> Distr a
-
-  export
-  mapMaybe : (a -> Maybe b) -> Distr a -> Distr b
-
-  export
-  pickRandomly : Distr a -> State Seed a
-
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
 
 export
 data Gen : Type -> Type where
-  Uniform : Distr a -> Gen a
-  AlternG : Distr (Gen a) -> Gen a
-  Raw     : State Seed (Distr a) -> Gen a
+  Uniform : LzList a -> Gen a
+  AlternG : LzList (Gen a) -> Gen a
+  Raw     : State Seed (LzList a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
@@ -100,16 +45,16 @@ export
 choose : Random a => (a, a) -> Gen a
 choose = Raw . map pure . randomR'
 
-unGen' : Gen a -> State Seed (Distr a)
+unGen' : Gen a -> State Seed (LzList a)
 unGen' (Uniform xs) = pure xs
-unGen' (AlternG gs) = pickRandomly gs >>= assert_total unGen'
+unGen' (AlternG gs) = pickUniformly gs >>= assert_total unGen'
 unGen' (Raw sf)     = sf
 
 export
 unGen : Gen a -> State Seed a
-unGen (Uniform xs) = pickRandomly xs
-unGen (AlternG gs) = pickRandomly gs >>= assert_total unGen
-unGen (Raw sf)     = sf >>= pickRandomly
+unGen (Uniform xs) = pickUniformly xs
+unGen (AlternG gs) = pickUniformly gs >>= assert_total unGen
+unGen (Raw sf)     = sf >>= pickUniformly
 
 export
 Functor Gen where

@@ -1,5 +1,7 @@
 module Data.List.Lazier
 
+import Control.Monad.State
+
 import Data.Fin
 import Data.Fin.Extra
 import Data.List
@@ -7,6 +9,8 @@ import Data.List.Lazy
 import Data.Nat
 
 import Decidable.Equality
+
+import System.Random.Simple
 
 %default total
 
@@ -230,3 +234,8 @@ mapMaybe f ll@(MkLzList {contents=Delay lv, _}) = case lv of
 export
 Show a => Show (LzList a) where
   show = show . toList
+
+--- Random-related functions ---
+
+export
+pickUniformly : RandomGen g => LzList a -> State g a
