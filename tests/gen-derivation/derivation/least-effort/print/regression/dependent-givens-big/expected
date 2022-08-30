@@ -108,7 +108,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar n)
                                                   $ (IApp. (INamedApp. IVar DerivedGen.VectMaybeAnyType.(::)
-                                                                     $ IBindVar n)
+                                                                     $ Implicit True)
                                                          $ IBindVar x
                                                          $ IBindVar xs))
                                              (IApp. (INamedApp. IVar Prelude.pure
@@ -132,7 +132,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar n)
                                                   $ (IApp. (INamedApp. IVar DerivedGen.VectMaybeAnyType.(::)
-                                                                     $ IBindVar n)
+                                                                     $ Implicit True)
                                                          $ IBindVar z
                                                          $ IBindVar zs))
                                              (IApp. IVar >>=
