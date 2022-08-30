@@ -25,47 +25,86 @@ public export %inline
 Seed : Type
 Seed = StdGen
 
+--- Distr (to be moved out and implemented) ---
+
+namespace Distr
+
+  export
+  data Distr : Type -> Type where
+
+  export
+  Functor Distr where
+    map = ?distr_map
+
+  export
+  Applicative Distr where
+    pure = ?distr_pure
+    (<*>) = ?distr_ap
+
+  export
+  Alternative Distr where
+    empty = ?distr_empty
+    (<|>) = ?distr_alt
+
+  export
+  Monad Distr where
+    (>>=) = ?distr_bind
+
+  export
+  replicate : Nat -> a -> Distr a
+
+  -- or, maybe, just `Foldable Distr`?
+  export
+  null : Distr a -> Bool
+
+  export
+  fromFoldable : Foldable f => f a -> Distr a
+
+  export
+  mapMaybe : (a -> Maybe b) -> Distr a -> Distr b
+
+  export
+  getOverDistr : Distr a -> State Seed a
+
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
 
 export
-data Gen' : (carrier : Type -> Type) -> Type -> Type where
-  Uniform : cr a -> Gen' cr a
-  AlternG : cr (Gen' cr a) -> Gen' cr a
-  Raw     : StateT Seed cr a -> Gen' cr a
-
-public export
-Gen : Type -> Type
-Gen = Gen' ?whatever_carrier
+data Gen : Type -> Type where
+  Uniform : Distr a -> Gen a
+  AlternG : Distr (Gen a) -> Gen a
+  Raw     : StateT Seed Distr a -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
 export
-chooseAny : Random a => Applicative cr => Gen' cr a
+chooseAny : Random a => Gen a
 chooseAny = Raw $ mapStateT (pure . runIdentity) random'
 
 export
-choose : Random a => Applicative cr => (a, a) -> Gen' cr a
+choose : Random a => (a, a) -> Gen a
 choose = Raw . mapStateT (pure . runIdentity) . randomR'
 
-export
-unGen' : Monad cr => Gen' cr a -> StateT Seed cr a
-unGen' (Raw sf)     = sf
-unGen' (Uniform xs) = ?runCR xs
-unGen' (AlternG gs) = lift gs >>= unGen'
+unGen' : Gen a -> StateT Seed Distr a
 
 export
-Functor cr => Functor (Gen' cr) where
+unGen : Gen a -> State Seed a
+unGen (Raw sf)     = ?ungen_raw
+unGen (Uniform xs) = ?ungen_uniform xs
+unGen (AlternG gs) = ?ungen_alterng -- lift gs >>= unGen
+
+export
+Functor Gen where
   map f (Uniform xs) = Uniform $ map f xs
   map f (AlternG gs) = AlternG $ assert_total $ map f <$> gs
   map f (Raw gena)   = Raw $ map f gena
 
-apAsRaw : Monad cr => Gen' cr (a -> b) -> Gen' cr a -> Gen' cr b
+apAsRaw : Gen (a -> b) -> Gen a -> Gen b
 apAsRaw generalF generalA = Raw $ unGen' generalF <*> unGen' generalA
 
 export
-Monad cr => Applicative (Gen' cr) where
+Applicative Gen where
   pure x = Uniform $ pure x
 
   Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
@@ -78,7 +117,7 @@ Monad cr => Applicative (Gen' cr) where
   generalF <*> rawA@(Raw {}) = apAsRaw generalF rawA
 
 export
-Alternative cr => Monad cr => Alternative (Gen' cr) where
+Alternative Gen where
   empty = Uniform empty
   AlternG ls <|> Delay (AlternG rs) = AlternG $ ls <|> rs
   AlternG ls <|> Delay (generalR  ) = AlternG $ ls <|> pure generalR
@@ -88,7 +127,7 @@ Alternative cr => Monad cr => Alternative (Gen' cr) where
 ||| Makes the given `Gen` to act as an independent generator according to the `Alternative` combination.
 ||| That is, in `independent (independent a <|> independent b)` given `a` and `b` are distributed evenly.
 export
-independent : Applicative cr => Gen' cr a -> Gen' cr a
+independent : Gen a -> Gen a
 independent alt@(AlternG _) = AlternG $ pure alt
 independent other = other
 
@@ -102,15 +141,10 @@ independent other = other
 |||
 ||| The resulting generator is not independent, i.e. `oneOf [a, b, c] <|> oneOf [d, e]` is equivalent to `oneOf [a, b, c, d, e]`.
 public export
-oneOf : Alternative cr => Monad cr => List (Gen' cr a) -> Gen' cr a
+oneOf : List (Gen a) -> Gen a
 oneOf []      = empty
 oneOf [x]     = independent x
 oneOf (x::xs) = independent x <|> oneOf xs
-
-replicate : Alternative f => Nat -> a -> f a
-replicate 0     _ = empty
-replicate 1     x = pure x
-replicate (S n) x = pure x <|> replicate n x
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -123,7 +157,7 @@ replicate (S n) x = pure x <|> replicate n x
 ||| equivalent to `frequency [(n1, g1), (n2, g2), (n3, g3), (n4, g4)]`.
 ||| Also, `frequency [(n, g), (m, h)] <|> oneOf [u, w]` is equivalent to `frequency [(n, g), (m, h), (1, u), (1, w)]`.
 export
-frequency : Alternative cr => Monad cr => List (Nat, Gen' cr a) -> Gen' cr a
+frequency : List (Nat, Gen a) -> Gen a
 frequency = AlternG . concatMap @{MonoidAlternative} (uncurry replicate . map independent)
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators dependently.
@@ -132,37 +166,34 @@ frequency = AlternG . concatMap @{MonoidAlternative} (uncurry replicate . map in
 ||| That is, unlike the `frequency` function, `frequency' [(n, oneOf [a, b, c]), (m, x)]` is equivalent to
 ||| `frequency [(n, a), (n, b), (n, c), (m, x)]`
 export
-frequency_dep : Alternative cr => Monad cr => List (Nat, Gen' cr a) -> Gen' cr a
+frequency_dep : List (Nat, Gen a) -> Gen a
 frequency_dep = AlternG . concatMap @{MonoidAlternative} (uncurry replicate)
-
-fromFoldable : Alternative t => Foldable f => f a -> t a
-fromFoldable = concatMap @{MonoidAlternative} pure
 
 ||| Choose one of the given values uniformly.
 |||
 ||| The resulting generator is not independent, i.e. `elements xs <|> elements ys` is equivalent to `elements (xs ++ ys)`.
 export
-elements : Alternative cr => Monad cr => List a -> Gen' cr a
+elements : List a -> Gen a
 elements = Uniform . fromFoldable
 
 export
-elements' : Foldable f => Alternative cr => Monad cr => f a -> Gen' cr a
+elements' : Foldable f => f a -> Gen a
 elements' = Uniform . fromFoldable
 
 export
-Foldable cr => Alternative cr => Monad cr => Monad (Gen' cr) where
+Monad Gen where
   Uniform gs >>= c = if null gs then Uniform empty else AlternG $ c <$> gs
   AlternG gs >>= c = AlternG $ assert_total (>>= c) <$> gs
   Raw sf     >>= c = Raw $ sf >>= unGen' . c
 
 export
-mapMaybe : (a -> Maybe b) -> Gen' cr a -> Gen' cr b
---mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
---mapMaybe p (AlternG l) = AlternG $ assert_total $ mapMaybe p <$> l
---mapMaybe p (Raw sf)    = Raw $ mapMaybe p <$> sf
+mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
+mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
+mapMaybe p (AlternG l) = AlternG $ assert_total $ mapMaybe p <$> l
+mapMaybe p (Raw sf)    = Raw $ mapStateT (mapMaybe $ \(sd, x) => (sd,) <$> p x) sf
 
 export
-suchThat_withPrf : Gen' cr a -> (p : a -> Bool) -> Gen' cr $ a `Subset` So . p
+suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `Subset` So . p
 suchThat_withPrf g p = mapMaybe lp g where
   lp : a -> Maybe $ a `Subset` So . p
   lp x with (p x) proof prf
@@ -172,11 +203,11 @@ suchThat_withPrf g p = mapMaybe lp g where
 infixl 4 `suchThat`
 
 public export
-suchThat : Functor cr => Gen' cr a -> (a -> Bool) -> Gen' cr a
+suchThat : Gen a -> (a -> Bool) -> Gen a
 suchThat g p = fst <$> suchThat_withPrf g p
 
 export
-suchThat_dec : Gen' cr a -> ((x : a) -> Dec (prop x)) -> Gen' cr $ Subset a prop
+suchThat_dec : Gen a -> ((x : a) -> Dec (prop x)) -> Gen $ Subset a prop
 suchThat_dec g f = mapMaybe d g where
   d : a -> Maybe $ Subset a prop
   d x = case f x of
@@ -185,19 +216,19 @@ suchThat_dec g f = mapMaybe d g where
 
 ||| Filters the given generator so, that resulting values `x` are solutions of equation `y = f x` for given `f` and `y`.
 export
-suchThat_invertedEq : DecEq b => Gen' cr a -> (y : b) -> (f : a -> b) -> Gen' cr $ Subset a $ \x => y = f x
+suchThat_invertedEq : DecEq b => Gen a -> (y : b) -> (f : a -> b) -> Gen $ Subset a $ \x => y = f x
 suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
 
 -- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
 export
-variant : Monad cr => Nat -> Gen' cr a -> Gen' cr a
+variant : Nat -> Gen a -> Gen a
 variant Z       gen = gen
 variant x@(S _) gen = Raw $ modify (index x . iterate (fst . next)) *> unGen' gen
 
 export
-listOf : Foldable cr => Alternative cr => Monad cr => {default (choose (0, 10)) length : Gen' cr Nat} -> Gen' cr a -> Gen' cr (List a)
+listOf : {default (choose (0, 10)) length : Gen Nat} -> Gen a -> Gen (List a)
 listOf g = sequence $ List.replicate !length g
 
 export
-vectOf : Monad cr => {n : Nat} -> Gen' cr a -> Gen' cr (Vect n a)
+vectOf : {n : Nat} -> Gen a -> Gen (Vect n a)
 vectOf g = sequence $ replicate n g
