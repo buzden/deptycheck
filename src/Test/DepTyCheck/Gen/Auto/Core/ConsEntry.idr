@@ -69,11 +69,11 @@ canonicConsBody sig name con = do
               -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
               let substName = "to_be_deceqed^^" ++ name ++ show !getAndInc
               modify $ insert (name, substName)
-              pure $ \alreadyMatchedRenames => if contains substName alreadyMatchedRenames then name else substName
-            else modify (insert name) $> const name
+              pure $ \alreadyMatchedRenames => bindVar $ if contains substName alreadyMatchedRenames then name else substName
+            else modify (insert name) $> const (bindVar name)
           badName => failAt conFC "Unsupported name `\{show badName}` of a parameter used in the constructor"
-        let _ : Vect appliedNames.length $ SortedSet String -> String = renamedAppliedNames
-        pure $ \alreadyMatchedRenames => bindExprF $ \idx => bindVar $ (index idx renamedAppliedNames) alreadyMatchedRenames
+        let _ : Vect appliedNames.length $ SortedSet String -> TTImp = renamedAppliedNames
+        pure $ \alreadyMatchedRenames => bindExprF $ \idx => index idx renamedAppliedNames $ alreadyMatchedRenames
   let bindExprs = \alreadyMatchedRenames => bindExprs <&> \f => f alreadyMatchedRenames
 
   -- Build a map from constructor's argument name to its index
