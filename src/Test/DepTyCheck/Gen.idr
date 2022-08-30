@@ -55,6 +55,9 @@ unGen : Gen a -> State Seed a
 unGen (Uniform xs) = pickUniformly xs
 unGen (AlternG gs) = pickUniformly gs >>= assert_total unGen
 unGen (Raw sf)     = sf >>= pickUniformly
+-- We can implement it like this:
+--unGen = (>>= pickUniformly) . unGen'
+-- But it seems to be less effective (need to check)
 
 export
 Functor Gen where
