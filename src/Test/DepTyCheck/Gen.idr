@@ -42,6 +42,14 @@ namespace Distr
     (<*>) = ?distr_ap
 
   export
+  Semigroup (Distr a) where
+    (<+>) = ?distr_semi
+
+  export
+  Monoid (Distr a) where
+    neutral = ?distr_neutral
+
+  export
   Alternative Distr where
     empty = ?distr_empty
     (<|>) = ?distr_alt
@@ -167,7 +175,7 @@ oneOf (x::xs) = independent x <|> oneOf xs
 ||| Also, `frequency [(n, g), (m, h)] <|> oneOf [u, w]` is equivalent to `frequency [(n, g), (m, h), (1, u), (1, w)]`.
 export
 frequency : List (Nat, Gen a) -> Gen a
-frequency = AlternG . concatMap @{MonoidAlternative} (uncurry replicate . map independent)
+frequency = AlternG . concatMap (uncurry replicate . map independent)
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators dependently.
 |||
@@ -176,7 +184,7 @@ frequency = AlternG . concatMap @{MonoidAlternative} (uncurry replicate . map in
 ||| `frequency [(n, a), (n, b), (n, c), (m, x)]`
 export
 frequency_dep : List (Nat, Gen a) -> Gen a
-frequency_dep = AlternG . concatMap @{MonoidAlternative} (uncurry replicate)
+frequency_dep = AlternG . concatMap (uncurry replicate)
 
 ||| Choose one of the given values uniformly.
 |||
