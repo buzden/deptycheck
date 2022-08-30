@@ -51,11 +51,17 @@ namespace Distr
     (>>=) = ?distr_bind
 
   export
-  replicate : Nat -> a -> Distr a
+  Foldable Distr where
+    foldl = ?distr_foldl
+    foldr = ?distr_foldr
+    null = ?distr_null
 
-  -- or, maybe, just `Foldable Distr`?
   export
-  null : Distr a -> Bool
+  Traversable Distr where
+    traverse = ?distr_traverse
+
+  export
+  replicate : Nat -> a -> Distr a
 
   export
   fromFoldable : Foldable f => f a -> Distr a
@@ -74,34 +80,37 @@ export
 data Gen : Type -> Type where
   Uniform : Distr a -> Gen a
   AlternG : Distr (Gen a) -> Gen a
-  Raw     : StateT Seed Distr a -> Gen a
+  Raw     : State Seed (Distr a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
 export
 chooseAny : Random a => Gen a
-chooseAny = Raw $ mapStateT (pure . runIdentity) random'
+chooseAny = Raw $ pure <$> random'
 
 export
 choose : Random a => (a, a) -> Gen a
-choose = Raw . mapStateT (pure . runIdentity) . randomR'
+choose = Raw . map pure . randomR'
 
-unGen' : Gen a -> StateT Seed Distr a
+unGen' : Gen a -> State Seed (Distr a)
+unGen' (Uniform xs) = pure xs
+unGen' (AlternG gs) = getOverDistr gs >>= assert_total unGen'
+unGen' (Raw sf)     = sf
 
 export
 unGen : Gen a -> State Seed a
-unGen (Raw sf)     = ?ungen_raw
-unGen (Uniform xs) = ?ungen_uniform xs
-unGen (AlternG gs) = ?ungen_alterng -- lift gs >>= unGen
+unGen (Uniform xs) = getOverDistr xs
+unGen (AlternG gs) = getOverDistr gs >>= assert_total unGen
+unGen (Raw sf)     = sf >>= getOverDistr
 
 export
 Functor Gen where
   map f (Uniform xs) = Uniform $ map f xs
   map f (AlternG gs) = AlternG $ assert_total $ map f <$> gs
-  map f (Raw gena)   = Raw $ map f gena
+  map f (Raw sf)     = Raw $ map f <$> sf
 
 apAsRaw : Gen (a -> b) -> Gen a -> Gen b
-apAsRaw generalF generalA = Raw $ unGen' generalF <*> unGen' generalA
+apAsRaw generalF generalA = Raw [| unGen' generalF <*> unGen' generalA |]
 
 export
 Applicative Gen where
@@ -184,13 +193,13 @@ export
 Monad Gen where
   Uniform gs >>= c = if null gs then Uniform empty else AlternG $ c <$> gs
   AlternG gs >>= c = AlternG $ assert_total (>>= c) <$> gs
-  Raw sf     >>= c = Raw $ sf >>= unGen' . c
+  Raw sf     >>= c = Raw $ (sf >>= unGen' . c) @{Compose}
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
 mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
 mapMaybe p (AlternG l) = AlternG $ assert_total $ mapMaybe p <$> l
-mapMaybe p (Raw sf)    = Raw $ mapStateT (mapMaybe $ \(sd, x) => (sd,) <$> p x) sf
+mapMaybe p (Raw sf)    = Raw $ mapMaybe p <$> sf
 
 export
 suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `Subset` So . p
