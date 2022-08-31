@@ -56,7 +56,7 @@ someStatementGen = statement_gen (limit 6) [] AllUndefined
 
 export
 someStatement : {rc : Nat} -> Nat -> Maybe (postV ** postR ** Statement [] (AllUndefined {rc}) postV postR)
-someStatement n = head' $ unGenTryN 10 someStdGen $ variant n $ someStatementGen
+someStatement n = head' $ unGenTryN 100 someStdGen $ variant n $ someStatementGen
 
 showStatement : forall preV, preR. (postV ** postR ** Statement preV preR postV postR) -> String
 showStatement (postV ** postR ** stmt) = """

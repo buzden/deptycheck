@@ -1,57 +1,53 @@
 1/1: Building DemoGen (DemoGen.idr)
+[0] = !(!(False)) || False;
+// regs ty after: [Bool, -]
 
+----
+
+[1] = 69;
+// regs ty after: [-, Int]
+
+----
+
+[1] = inc(62);
+// regs ty after: [-, Int]
+
+----
+
+[0] = inc(17);
+// regs ty after: [Int, -]
+
+----
+
+int m;
 // regs ty after: [-, -]
 
 ----
 
-puts("d");
+int ori;
 // regs ty after: [-, -]
 
 ----
 
-
-// regs ty after: [-, -]
-
-----
-
-puts(as_str(inc(inc(38))));
-// regs ty after: [-, -]
+[0] = inc(61);
+// regs ty after: [Int, -]
 
 ----
 
-int sr;
-// regs ty after: [-, -]
-
-----
-
-puts("jcf");
-// regs ty after: [-, -]
-
-----
-
-bool irc;
-// regs ty after: [-, -]
-
-----
-
-{
-  bool qbj;
-}
-// regs ty after: [-, -]
-
-----
-
-puts("kq");
-// regs ty after: [-, -]
-
-----
-
-{
-  [1] = concat(as_str(41 + -77), "xd");
-}
+[1] = "v";
 // regs ty after: [-, String]
 
 ----
 
-char * kn;
-// regs ty after: [-, -]
+[0] = inc(61);
+// regs ty after: [Int, -]
+
+----
+
+[1] = 39;
+// regs ty after: [-, Int]
+
+----
+
+[1] = "qk";
+// regs ty after: [-, String]

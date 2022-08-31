@@ -209,23 +209,23 @@ namespace Statements_given_preV_preR_postV_postR
 
   export
   statement_gen : Statement_no_Gen
-  statement_gen Dry preV preR postV postR = independent $ oneOf
-    [ nop_gen   Dry preV preR postV postR
-    , dot_gen   Dry preV preR postV postR
-    , v_ass_gen Dry preV preR postV postR
-    , r_ass_gen Dry preV preR postV postR
-    , print_gen Dry preV preR postV postR
+  statement_gen Dry preV preR postV postR = independent $ frequency
+    [ (1  , nop_gen   Dry preV preR postV postR)
+    , (5  , dot_gen   Dry preV preR postV postR)
+    , (50 , v_ass_gen Dry preV preR postV postR)
+    , (50 , r_ass_gen Dry preV preR postV postR)
+    , (10 , print_gen Dry preV preR postV postR)
     ]
-  statement_gen (More f) preV preR postV postR = independent $ oneOf
-    [ nop_gen   f preV preR postV postR
-    , dot_gen   f preV preR postV postR
-    , v_ass_gen f preV preR postV postR
-    , r_ass_gen f preV preR postV postR
-    , for_gen   f preV preR postV postR
-    , if_gen    f preV preR postV postR
-    , seq_gen   f preV preR postV postR
-    , block_gen f preV preR postV postR
-    , print_gen f preV preR postV postR
+  statement_gen (More f) preV preR postV postR = independent $ frequency
+    [ (1  , nop_gen   f preV preR postV postR)
+    , (5  , dot_gen   f preV preR postV postR)
+    , (50 , v_ass_gen f preV preR postV postR)
+    , (50 , r_ass_gen f preV preR postV postR)
+    , (10 , for_gen   f preV preR postV postR)
+    , (10 , if_gen    f preV preR postV postR)
+    , (200, seq_gen   f preV preR postV postR)
+    , (5  , block_gen f preV preR postV postR)
+    , (10 , print_gen f preV preR postV postR)
     ]
 
 namespace Statements_given_preV_preR_postR
@@ -247,23 +247,23 @@ namespace Statements_given_preV_preR_postR
 
   export
   statement_gen : Statement_postV_Gen
-  statement_gen Dry preV preR postR = independent $ oneOf
-    [ nop_gen   Dry preV preR postR
-    , dot_gen   Dry preV preR postR
-    , v_ass_gen Dry preV preR postR
-    , r_ass_gen Dry preV preR postR
-    , print_gen Dry preV preR postR
+  statement_gen Dry preV preR postR = independent $ frequency
+    [ (1  , nop_gen   Dry preV preR postR)
+    , (5  , dot_gen   Dry preV preR postR)
+    , (50 , v_ass_gen Dry preV preR postR)
+    , (50 , r_ass_gen Dry preV preR postR)
+    , (10 , print_gen Dry preV preR postR)
     ]
-  statement_gen (More f) preV preR postR = independent $ oneOf
-    [ nop_gen   f preV preR postR
-    , dot_gen   f preV preR postR
-    , v_ass_gen f preV preR postR
-    , r_ass_gen f preV preR postR
-    , for_gen   f preV preR postR
-    , if_gen    f preV preR postR
-    , seq_gen   f preV preR postR
-    , block_gen f preV preR postR
-    , print_gen f preV preR postR
+  statement_gen (More f) preV preR postR = independent $ frequency
+    [ (1  , nop_gen   f preV preR postR)
+    , (5  , dot_gen   f preV preR postR)
+    , (50 , v_ass_gen f preV preR postR)
+    , (50 , r_ass_gen f preV preR postR)
+    , (10 , for_gen   f preV preR postR)
+    , (10 , if_gen    f preV preR postR)
+    , (200, seq_gen   f preV preR postR)
+    , (5  , block_gen f preV preR postR)
+    , (10 , print_gen f preV preR postR)
     ]
 
 namespace Statements_given_preV_preR
@@ -284,23 +284,23 @@ namespace Statements_given_preV_preR
 
   export
   statement_gen : Statement_postV_postR_Gen
-  statement_gen Dry preV preR = independent $ oneOf
-    [ nop_gen   Dry preV preR
-    , dot_gen   Dry preV preR
-    , v_ass_gen Dry preV preR
-    , r_ass_gen Dry preV preR
-    , print_gen Dry preV preR
+  statement_gen Dry preV preR = independent $ frequency
+    [ (1  , nop_gen   Dry preV preR)
+    , (5  , dot_gen   Dry preV preR)
+    , (50 , v_ass_gen Dry preV preR)
+    , (50 , r_ass_gen Dry preV preR)
+    , (10 , print_gen Dry preV preR)
     ]
-  statement_gen (More f) preV preR = independent $ oneOf
-    [ nop_gen   f preV preR
-    , dot_gen   f preV preR
-    , v_ass_gen f preV preR
-    , r_ass_gen f preV preR
-    , for_gen   f preV preR
-    , if_gen    f preV preR
-    , seq_gen   f preV preR
-    , block_gen f preV preR
-    , print_gen f preV preR
+  statement_gen (More f) preV preR = independent $ frequency
+    [ (1  , nop_gen   f preV preR)
+    , (5  , dot_gen   f preV preR)
+    , (50 , v_ass_gen f preV preR)
+    , (50 , r_ass_gen f preV preR)
+    , (10 , for_gen   f preV preR)
+    , (10 , if_gen    f preV preR)
+    , (200, seq_gen   f preV preR)
+    , (5  , block_gen f preV preR)
+    , (10 , print_gen f preV preR)
     ]
 
 namespace Statements_given_preV_preR -- implementations
