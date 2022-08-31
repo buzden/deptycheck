@@ -1,6 +1,6 @@
 module Test.DepTyCheck.Gen
 
-import Control.Monad.State.Interface
+import Control.Monad.State
 import Control.Monad.Error.Interface
 import Control.Monad.Maybe
 
@@ -54,6 +54,15 @@ unGen (Raw sf)     = sf >>= pickUniformly
 -- We can implement it like this:
 --unGen g = unGen' g >>= pickUniformly
 -- But it seems to be less effective (need to check)
+
+export
+unGenTryN : RandomGen g => (n : Nat) -> g -> Gen a -> LazyList a
+unGenTryN n seed gen = mapMaybe id $ go n seed where
+  go : Nat -> g -> LazyList $ Maybe a
+  go Z     _    = []
+  go (S n) seed = do
+    let (seed, mc) = runState seed $ runMaybeT $ unGen {g} {m=MaybeT (State g)} gen
+    mc :: go n seed
 
 export
 Functor Gen where
