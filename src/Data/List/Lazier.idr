@@ -33,6 +33,7 @@ data LzVect : Nat -> Type -> Type where
   Map    : (a -> b) -> (xs : LzList a) -> LzVect xs.length b
   Concat : (ls : LzList a) -> (rs : LzList a) -> LzVect (ls.length + rs.length) a
   Cart   : (os : LzList a) -> (is : LzList b) -> LzVect (os.length * is.length) (a, b)
+  Hide   : (xs : LzList a) -> LzVect 1 a
 
 %name LzVect lvxs, lvys, lvzs
 
@@ -65,6 +66,8 @@ replicate Z _ = []
 replicate n x = MkLzList _ $ Replic n x
 
 export
+hideLength : LzList a -> LzList a
+hideLength ll = if lzNull ll then [] else MkLzList _ $ Hide ll
 
 -------------------------------------------------
 --- Funny implementations of funny interfaces ---
@@ -91,6 +94,7 @@ Foldable LzList where
     Map g xs     => foldr (f . g) n xs
     Concat ls rs => foldr f (foldr f n rs) ls
     Cart os is   => foldr (\a, acc => foldr (f . (a, )) acc is) n os
+    Hide xs      => foldr f n xs
 
 --- Functor ---
 
@@ -109,6 +113,7 @@ concatMap mf lz@(MkLzList {contents=Delay lv, _}) = case lv of
   Map f xs     => Lazier.concatMap (mf . f) xs
   Concat ls rs => Lazier.concatMap mf ls <+> Lazier.concatMap mf rs
   Cart os is   => Lazier.concatMap mf $ assert_smaller lz $ Lazier.concatMap (\e => map (e, ) is) os
+  Hide xs      => Lazier.concatMap mf xs
 
 export
 concat : Monoid a => LzList a -> a
@@ -157,6 +162,7 @@ uncons $ MkLzList {contents = Delay lv, _} = case lv of
   Replic (S n) x => Just (x, replicate n x)
   Map f xs       => bimap f (map f) <$> uncons xs
   Concat ls rs   => map (map (++ rs)) (uncons ls) <|> uncons rs
+  Hide xs        => uncons xs <&> mapSnd hideLength
   Cart os is     => [| recart (uncons os) (uncons is) |] where
     recart : forall a, b. (a, LzList a) -> (b, LzList b) -> ((a, b), LzList (a, b))
     recart (x, xs) (y, ys) = ((x, y), map (, y) xs ++ [| (xs, ys) |])
@@ -177,6 +183,7 @@ Traversable LzList where
     Map g xs     => traverse (f . g) xs
     Concat ls rs => [| traverse f ls ++ traverse f rs |]
     Cart os is   => Lazier.concatMap @{MonoidApplicative} (\x => traverse (f . (x,)) is) os
+    Hide xs      => traverse f xs <&> hideLength
 
 --- Filtering ---
 
@@ -189,6 +196,7 @@ mapMaybe f ll@(MkLzList {contents=Delay lv, _}) = case lv of
   Map g xs     => mapMaybe (f . g) xs
   Concat ls rs => mapMaybe f ls ++ mapMaybe f rs
   Cart os is   => os >>= \x => mapMaybe (f . (x,)) is
+  Hide xs      => hideLength $ mapMaybe f xs
 
 --- Show ---
 
@@ -215,3 +223,4 @@ pickUniformly ll@(MkLzList {contents=Delay lv, length}) = case lv of
   Map f xs     => f <$> pickUniformly xs
   Concat ls rs => lrProportionally ls.length rs.length >>= \lr => pickUniformly $ assert_smaller ll $ if lr then ls else rs
   Cart os is   => [| (pickUniformly os, pickUniformly is) |]
+  Hide xs      => pickUniformly xs
