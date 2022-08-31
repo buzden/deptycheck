@@ -154,7 +154,7 @@ namespace Equal_registers
 
   export
   eq_registers_gen : EqRegisters_Gen
-  eq_registers_gen f regs = oneOf
+  eq_registers_gen f regs = independent $ oneOf
     [ refl         f regs
     , merge_idemp  f regs
     , merge_comm   f regs
@@ -209,14 +209,14 @@ namespace Statements_given_preV_preR_postV_postR
 
   export
   statement_gen : Statement_no_Gen
-  statement_gen Dry preV preR postV postR = oneOf
+  statement_gen Dry preV preR postV postR = independent $ oneOf
     [ nop_gen   Dry preV preR postV postR
     , dot_gen   Dry preV preR postV postR
     , v_ass_gen Dry preV preR postV postR
     , r_ass_gen Dry preV preR postV postR
     , print_gen Dry preV preR postV postR
     ]
-  statement_gen (More f) preV preR postV postR = oneOf
+  statement_gen (More f) preV preR postV postR = independent $ oneOf
     [ nop_gen   f preV preR postV postR
     , dot_gen   f preV preR postV postR
     , v_ass_gen f preV preR postV postR
@@ -247,14 +247,14 @@ namespace Statements_given_preV_preR_postR
 
   export
   statement_gen : Statement_postV_Gen
-  statement_gen Dry preV preR postR = oneOf
+  statement_gen Dry preV preR postR = independent $ oneOf
     [ nop_gen   Dry preV preR postR
     , dot_gen   Dry preV preR postR
     , v_ass_gen Dry preV preR postR
     , r_ass_gen Dry preV preR postR
     , print_gen Dry preV preR postR
     ]
-  statement_gen (More f) preV preR postR = oneOf
+  statement_gen (More f) preV preR postR = independent $ oneOf
     [ nop_gen   f preV preR postR
     , dot_gen   f preV preR postR
     , v_ass_gen f preV preR postR
@@ -284,14 +284,14 @@ namespace Statements_given_preV_preR
 
   export
   statement_gen : Statement_postV_postR_Gen
-  statement_gen Dry preV preR = oneOf
+  statement_gen Dry preV preR = independent $ oneOf
     [ nop_gen   Dry preV preR
     , dot_gen   Dry preV preR
     , v_ass_gen Dry preV preR
     , r_ass_gen Dry preV preR
     , print_gen Dry preV preR
     ]
-  statement_gen (More f) preV preR = oneOf
+  statement_gen (More f) preV preR = independent $ oneOf
     [ nop_gen   f preV preR
     , dot_gen   f preV preR
     , v_ass_gen f preV preR

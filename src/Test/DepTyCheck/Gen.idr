@@ -1,7 +1,8 @@
 module Test.DepTyCheck.Gen
 
 import Control.Monad.State
-import Control.Monad.Error.Interface
+import public Control.Monad.State.Interface
+import public Control.Monad.Error.Interface
 import Control.Monad.Maybe
 
 import Data.DPair
@@ -61,7 +62,7 @@ unGenTryN n seed gen = mapMaybe id $ go n seed where
   go : Nat -> g -> LazyList $ Maybe a
   go Z     _    = []
   go (S n) seed = do
-    let (seed, mc) = runState seed $ runMaybeT $ unGen {g} {m=MaybeT (State g)} gen
+    let (seed, mc) = runState seed $ runMaybeT $ unGen {g} {m=MaybeT $ State g} gen
     mc :: go n seed
 
 export
