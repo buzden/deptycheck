@@ -1,6 +1,7 @@
 module Data.List.Lazier
 
 import Control.Monad.State
+import Control.Monad.Error.Interface
 
 import Data.Fin
 import Data.Fin.Extra
@@ -237,17 +238,17 @@ Show a => Show (LzList a) where
 
 --- Random-related functions ---
 
-randomFin : RandomGen g => {n : _} -> StateT g Maybe $ Fin n
-randomFin {n = Z}   = lift empty
-randomFin {n = S k} = mapStateT (pure . runIdentity) random'
+randomFin : RandomGen g => MonadState g m => MonadError () m => {n : _} -> m $ Fin n
+randomFin {n = Z}   = throwError ()
+randomFin {n = S k} = random'
 
-lrProportionally : RandomGen g => (l, r : Nat) -> StateT g Maybe Bool
-lrProportionally Z Z = lift empty
-lrProportionally l r = mapStateT (pure . runIdentity) $ (< cast l) <$> randomR' {a=Int} (0, cast l + cast r - 1)
+lrProportionally : RandomGen g => MonadState g m => MonadError () m => (l, r : Nat) -> m Bool
+lrProportionally Z Z = throwError ()
+lrProportionally l r = (< cast l) <$> randomR' {a=Int} (0, cast l + cast r - 1)
 -- We do this through `Int`!
 
 export
-pickUniformly : RandomGen g => LzList a -> StateT g Maybe a
+pickUniformly : RandomGen g => MonadState g m => MonadError () m => LzList a -> m a
 pickUniformly ll@(MkLzList {contents=Delay lv, length}) = case lv of
   Eager xs     => index' xs <$> randomFin {n=length}
   Replic _ x   => pure x

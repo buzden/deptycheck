@@ -1,6 +1,8 @@
 module Test.DepTyCheck.Gen
 
-import Control.Monad.State
+import Control.Monad.State.Interface
+import Control.Monad.Error.Interface
+import Control.Monad.Maybe
 
 import Data.DPair
 import Data.List
@@ -33,7 +35,7 @@ export
 data Gen : Type -> Type where
   Uniform : LzList a -> Gen a
   AlternG : LzList (Gen a) -> Gen a
-  Raw     : State Seed (LzList a) -> Gen a
+  Raw     : ({0 m : _} -> MonadState Seed m => m $ LzList a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
@@ -43,23 +45,24 @@ chooseAny = Raw $ pure <$> random'
 
 export
 choose : Random a => (a, a) -> Gen a
-choose = Raw . map pure . randomR'
+choose bounds = Raw $ map pure $ randomR' bounds
 
-unGen' : Gen a -> State Seed (LzList a)
+Monad m => MonadError () (MaybeT m) where
+  throwError () = MkMaybeT $ pure Nothing
+  catchError (MkMaybeT m) f = MkMaybeT $ m >>= maybe (runMaybeT $ f ()) (pure @{Compose})
+
+unGen' : MonadState Seed m => Gen a -> m $ LzList a
 unGen' (Raw sf)     = sf
 unGen' (Uniform xs) = pure xs
-unGen' (AlternG gs) = ST $ \seed => do
-                        let Just (seed, subgen) = runStateT seed $ pickUniformly {g=StdGen} gs
-                          | Nothing => Id (seed, empty)
-                        runStateT seed $ assert_total $ unGen' subgen
+unGen' (AlternG gs) = maybeT (pure empty) (assert_total unGen') $ pickUniformly {g=StdGen} gs
 
 export
-unGen : Gen a -> StateT Seed Maybe a
+unGen : MonadState Seed m => MonadError () m => Gen a -> m a
 unGen (Uniform xs) = pickUniformly xs
 unGen (AlternG gs) = pickUniformly gs >>= assert_total unGen
-unGen (Raw sf)     = mapStateT (pure . runIdentity) sf >>= pickUniformly
+unGen (Raw sf)     = sf >>= pickUniformly
 -- We can implement it like this:
---unGen = (>>= pickUniformly) . mapStateT (pure . runIdentity) . unGen'
+--unGen g = unGen' g >>= pickUniformly
 -- But it seems to be less effective (need to check)
 
 export

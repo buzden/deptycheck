@@ -76,12 +76,12 @@ interface Random a where
   cardinalityR : (a, a) -> Maybe Nat
 
 export
-randomR' : Random a => RandomGen g => (a, a) -> State g a
-randomR' bounds = ST $ pure . randomR bounds
+randomR' : Random a => RandomGen g => MonadState g m => (a, a) -> m a
+randomR' bounds = let (g, x) = randomR bounds !get in put g $> x
 
 export
-random' : Random a => RandomGen g => State g a
-random' = ST $ pure . random
+random' : Random a => RandomGen g => MonadState g m => m a
+random' = let (g, x) = random !get in put g $> x
 
 export
 [RandomThru] Random thru => Cast a thru => Cast thru a => Random a where
