@@ -29,7 +29,7 @@ asp rl lr = do (n ** i) <- rl
 --- Common ---
 
 lookupGen : (vars : Variables) -> Gen (n : Name ** Lookup n vars)
-lookupGen vars = uniform $ fromList $ mapLk vars where
+lookupGen vars = elements $ mapLk vars where
   mapLk : (vars : Variables) -> List (n ** Lookup n vars)
   mapLk []            = []
   mapLk ((n, ty)::xs) = (n ** Here ty) :: map (\(n ** lk) => (n ** There lk)) (mapLk xs)
