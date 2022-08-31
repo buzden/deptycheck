@@ -65,13 +65,6 @@ replicate Z _ = []
 replicate n x = MkLzList _ $ Replic n x
 
 export
-index : (lz : LzList a) -> Fin lz.length -> a
-index $ MkLzList {contents=Delay lv, _} = case lv of
-  Eager xs     => index' xs
-  Replic _ x   => const x
-  Map f xs     => f . index xs
-  Concat ls rs => either (index ls) (index rs) . splitSum
-  Cart os is   => bimap  (index os) (index is) . splitProd
 
 -------------------------------------------------
 --- Funny implementations of funny interfaces ---
@@ -167,39 +160,6 @@ uncons $ MkLzList {contents = Delay lv, _} = case lv of
   Cart os is     => [| recart (uncons os) (uncons is) |] where
     recart : forall a, b. (a, LzList a) -> (b, LzList b) -> ((a, b), LzList (a, b))
     recart (x, xs) (y, ys) = ((x, y), map (, y) xs ++ [| (xs, ys) |])
-
-0 uncons_length_correct : (lz : LzList a) -> case uncons lz of Nothing => Unit; Just (hd, tl) => lz.length = S tl.length
-
-export
-splitAt : (lz : LzList a) -> Fin lz.length -> (LzList a, LzList a)
-splitAt (MkLzList {contents=Delay lv, _}) i = case lv of
-  Eager xs     => let (l, r) = splitAt (finToNat i) xs in (fromList l, fromList r)
-  Replic n x   => (replicate (finToNat i) x, replicate (n `minus` finToNat i) x)
-  Map f xs     => let (l, r) = splitAt xs i in (map f l, map f r)
-  Concat ls rs => case splitSum i of
-                    Left  l => let (ll, rr) = splitAt ls l in (ll, rr ++ rs)
-                    Right r => let (ll, rr) = splitAt rs r in (ls ++ ll, rs)
-  Cart os is   => let (oi, ii) = splitProd i
-                      (ibef, iaft) = splitAt is ii
-                      topSq = MkLzList _ $ Cart os ibef
-                  in case uncons iaft of
-                    Nothing => (topSq, []) -- Actually, impossible case since the second element (i.e. `iaft`) cannot be empty
-                    Just (p, ibot) => let (middleBef, middleAft) = splitAt (assert_smaller lv $ map (, p) os) oi
-                                          botSq = MkLzList _ $ Cart os ibot
-                                      in (topSq ++ middleBef, middleAft ++ botSq)
-
-0 splitAt_length_correct_fst : (lz : LzList a) -> (i : Fin lz.length) -> (fst $ splitAt lz i).length = finToNat i
-
-0 splitAt_length_correct_sum : (lz : LzList a) -> (i : Fin lz.length) -> let (ll, rr) = splitAt lz i in lz.length = ll.length + rr.length
-
--- Somewhat an extensional equality of `index lz` and `index (ll ++ rr)`.
---0 splitAt_correct : (lz : LzList a) -> (i, j : Fin lz.length) -> let (ll, rr) = splitAt lz i in index lz j = index (ll ++ rr) j
-
-export
-splitAt' : (lz : LzList a) -> Fin (S lz.length) -> (LzList a, LzList a)
-splitAt' lz i = case strengthen i of
-  Nothing => (lz, [])
-  Just x  => splitAt lz x
 
 --- Conversions ---
 
