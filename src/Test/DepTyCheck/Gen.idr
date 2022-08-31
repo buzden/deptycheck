@@ -17,16 +17,6 @@ import public System.Random.Simple
 
 %default total
 
----------------------------------------------
---- General decisions and magic constants ---
----------------------------------------------
-
--- All of those can (and even should) be generalized some day.
-
-public export %inline
-Seed : Type
-Seed = StdGen
-
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
@@ -35,7 +25,7 @@ export
 data Gen : Type -> Type where
   Uniform : LzList a -> Gen a
   AlternG : LzList (Gen a) -> Gen a
-  Raw     : ({0 m : _} -> MonadState Seed m => m $ LzList a) -> Gen a
+  Raw     : ({0 g : _} -> RandomGen g => {0 m : _} -> MonadState g m => m $ LzList a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
@@ -51,13 +41,13 @@ Monad m => MonadError () (MaybeT m) where
   throwError () = MkMaybeT $ pure Nothing
   catchError (MkMaybeT m) f = MkMaybeT $ m >>= maybe (runMaybeT $ f ()) (pure @{Compose})
 
-unGen' : MonadState Seed m => Gen a -> m $ LzList a
+unGen' : RandomGen g => MonadState g m => Gen a -> m $ LzList a
 unGen' (Raw sf)     = sf
 unGen' (Uniform xs) = pure xs
-unGen' (AlternG gs) = maybeT (pure empty) (assert_total unGen') $ pickUniformly {g=StdGen} gs
+unGen' (AlternG gs) = maybeT (pure empty) (assert_total unGen') $ pickUniformly {g} gs
 
 export
-unGen : MonadState Seed m => MonadError () m => Gen a -> m a
+unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
 unGen (Uniform xs) = pickUniformly xs
 unGen (AlternG gs) = pickUniformly gs >>= assert_total unGen
 unGen (Raw sf)     = sf >>= pickUniformly
