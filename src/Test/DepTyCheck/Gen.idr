@@ -134,8 +134,8 @@ frequency = AlternG . concatMap (uncurry replicate . map independent)
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators dependently.
 |||
 ||| This function is similar to `frequency` but as of it takes internal alternative combinations inside the given generators level up.
-||| That is, unlike the `frequency` function, `frequency' [(n, oneOf [a, b, c]), (m, x)]` is equivalent to
-||| `frequency [(n, a), (n, b), (n, c), (m, x)]`
+||| That is, unlike the `frequency` function, `frequency_dep' [(n, a <|> b <|> c), (m, x)]` is equivalent to
+||| `frequency_dep [(n, a), (n, b), (n, c), (m, x)]`
 export
 frequency_dep : List (Nat, Gen a) -> Gen a
 frequency_dep = AlternG . concatMap (uncurry replicate)
