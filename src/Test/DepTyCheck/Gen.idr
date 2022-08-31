@@ -45,16 +45,11 @@ Monad m => MonadError () (MaybeT m) where
 unGen' : RandomGen g => MonadState g m => Gen a -> m $ LzList a
 unGen' (Raw sf)     = sf
 unGen' (Uniform xs) = pure xs
-unGen' (AlternG gs) = maybeT (pure empty) (assert_total unGen') $ pickUniformly {g} gs
+unGen' (AlternG gs) = (pure gs >>= map hideLength . assert_total unGen') @{Compose}
 
 export
 unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
-unGen (Uniform xs) = pickUniformly xs
-unGen (AlternG gs) = pickUniformly gs >>= assert_total unGen
-unGen (Raw sf)     = sf >>= pickUniformly
--- We can implement it like this:
---unGen g = unGen' g >>= pickUniformly
--- But it seems to be less effective (need to check)
+unGen g = unGen' g >>= pickUniformly
 
 export
 unGenTryN : RandomGen g => (n : Nat) -> g -> Gen a -> LazyList a
