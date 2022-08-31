@@ -42,7 +42,7 @@ namespace BothPreAndPost
     show (preDefs ** postDefs ** stmt) = "-- pre defs: \{show preDefs}\n\{show stmt}\n-- post defs: \{show postDefs}"
 
 runOnce : (variant : Nat) -> Gen a -> LazyList a
-runOnce v = evalState (fst $ next someStdGen) . unGen . variant v
+runOnce v = unGenTryN 100 someStdGen . variant v
 
 for' : Monad f => LazyList a -> (a -> f Unit) -> f Unit
 for' xs g = foldrLazy ((>>) . g) (pure ()) xs
