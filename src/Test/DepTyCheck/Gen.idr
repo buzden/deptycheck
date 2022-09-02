@@ -38,10 +38,6 @@ export
 choose : Random a => (a, a) -> Gen a
 choose bounds = Raw $ map pure $ randomR' bounds
 
-Monad m => MonadError () (MaybeT m) where
-  throwError () = MkMaybeT $ pure Nothing
-  catchError (MkMaybeT m) f = MkMaybeT $ m >>= maybe (runMaybeT $ f ()) (pure @{Compose})
-
 unGen' : RandomGen g => MonadState g m => Gen a -> m $ LzList a
 unGen' (Raw sf)     = sf
 unGen' (Uniform xs) = pure xs
