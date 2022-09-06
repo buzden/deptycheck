@@ -39,7 +39,7 @@ data LzVect : Nat -> Type -> Type where
 
 --- Common functions ---
 
-export
+public export
 fromList : List a -> LzList a
 fromList xs = MkLzList _ $ Eager xs
 

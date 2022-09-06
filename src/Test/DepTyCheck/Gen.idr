@@ -90,8 +90,19 @@ Alternative Gen where
 ||| That is, in `independent (independent a <|> independent b)` given `a` and `b` are distributed evenly.
 export
 independent : Gen a -> Gen a
-independent alt@(AlternG _) = AlternG $ pure alt
+independent alt@(AlternG gs) = case gs.length of
+                                 0 => empty
+                                 1 => alt -- ensure `independent` is idempotent
+                                 _ => AlternG $ pure alt
 independent other = other
+
+independent_is_idempotent : (g : Gen a) -> independent (independent g) = independent g
+independent_is_idempotent $ Uniform _  = Refl
+independent_is_idempotent $ Raw _      = Refl
+independent_is_idempotent $ AlternG gs with (gs.length) proof prf
+  _ | 0       = Refl
+  _ | 1       = rewrite prf in Refl
+  _ | S (S _) = Refl
 
 ||| Choose one of the given generators uniformly.
 |||
