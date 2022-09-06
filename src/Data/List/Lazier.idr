@@ -129,8 +129,6 @@ export
 cartWith : (f : a -> b -> c) -> LzList a -> LzList b -> LzList c
 cartWith f xs ys = map (uncurry f) $ MkLzList _ $ Cart xs ys
 
-0 cartWith_length_correct : (xs : LzList a) -> (ys : LzList b) -> (f : a -> b -> c) -> (cartWith f xs ys).length = xs.length * ys.length
-
 export
 Applicative LzList where
   pure x = fromList [x]
@@ -152,28 +150,6 @@ export
 x :: ll@(MkLzList {contents=Delay lv, _}) = case lv of
   Eager xs => fromList $ x::xs
   _        => pure x ++ ll
-
---- Splitting ---
-
-export
-uncons : LzList a -> Maybe (a, LzList a)
-uncons $ MkLzList {contents = Delay lv, _} = case lv of
-  Eager []       => Nothing
-  Eager (x::xs)  => Just (x, fromList xs)
-  Replic Z x     => Nothing
-  Replic (S n) x => Just (x, replicate n x)
-  Map f xs       => bimap f (map f) <$> uncons xs
-  Concat ls rs   => map (map (++ rs)) (uncons ls) <|> uncons rs
-  Hide xs        => uncons xs <&> mapSnd hideLength
-  Cart os is     => [| recart (uncons os) (uncons is) |] where
-    recart : forall a, b. (a, LzList a) -> (b, LzList b) -> ((a, b), LzList (a, b))
-    recart (x, xs) (y, ys) = ((x, y), map (, y) xs ++ [| (xs, ys) |])
-
---- Conversions ---
-
-export
-toLazyList : LzList a -> LazyList a
-toLazyList xs = assert_total $ unfoldr uncons xs -- total because uncons produces shorter list
 
 --- Traversable ---
 
