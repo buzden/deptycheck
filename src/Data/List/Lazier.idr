@@ -67,7 +67,9 @@ replicate n x = MkLzList _ $ Replic n x
 
 export
 hideLength : LzList a -> LzList a
-hideLength ll = if lzNull ll then [] else MkLzList _ $ Hide ll
+hideLength ll@(MkLzList {contents=Delay lv, _}) = case lv of
+  Hide _ => ll
+  _      => if lzNull ll then [] else MkLzList _ $ Hide ll
 
 -------------------------------------------------
 --- Funny implementations of funny interfaces ---
