@@ -127,7 +127,10 @@ concat = Lazier.concatMap id
 ||| The resulting length is different with potential `zipWith` function despite the similarly looking signature.
 export
 cartWith : (f : a -> b -> c) -> LzList a -> LzList b -> LzList c
-cartWith f xs ys = map (uncurry f) $ MkLzList _ $ Cart xs ys
+cartWith f xs ys =
+  if lzNull xs then [] else
+  if lzNull ys then [] else
+    map (uncurry f) $ MkLzList _ $ Cart xs ys
 
 export
 Applicative LzList where
