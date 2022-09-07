@@ -141,10 +141,20 @@ alternativesOf : Gen a -> List $ Lazy (Gen a)
 alternativesOf $ OneOf gs = forget gs
 alternativesOf g          = [g]
 
+public export
+onAlternativesOf : (a -> b) -> Gen a -> List $ Lazy (Gen b)
+onAlternativesOf f = map (wrapLazy $ map f) . alternativesOf
+
 export
 forgetStructure : Gen a -> Gen a
 forgetStructure g@(Point _) = g
 forgetStructure g = Point $ unGen g
+
+public export
+onForgottenStructure : (a -> b) -> Gen a -> Gen b
+onForgottenStructure f = map f . forgetStructure
+
+infix 8 `onAlternativesOf`, `onForgottenStructure`
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
