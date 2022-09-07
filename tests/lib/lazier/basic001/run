@@ -1,5 +1,0 @@
-rm -rf build
-
-$1 --build use-lazier.ipkg
-
-rm -rf build
