@@ -31,6 +31,10 @@ randomFin {n = S k} = random'
 pickUniformly : RandomGen g => MonadState g m => MonadError () m => List a -> m a
 pickUniformly xs = index' xs <$> randomFin
 
+public export
+wrapLazy : (a -> b) -> Lazy a -> Lazy b
+wrapLazy f = delay . f . force
+
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
@@ -79,7 +83,7 @@ unGenTryN n seed gen = mapMaybe id $ go n seed where
 export
 Functor Gen where
   map f $ Point sf = Point $ f <$> sf
-  map f $ OneOf gs = OneOf $ delay . assert_total map f . force <$> gs
+  map f $ OneOf gs = OneOf $ wrapLazy (assert_total map f) <$> gs
   map f $ Bind x g = Bind x $ assert_total map f . g
 
 export
@@ -88,8 +92,8 @@ Applicative Gen where
 
   Point sfl <*> Point sfr = Point $ sfl <*> sfr
 
-  OneOf gs <*> g = OneOf $ gs <&> delay . assert_total (<*> g) . force
-  g <*> OneOf gs = OneOf $ gs <&> delay . assert_total (g <*>) . force
+  OneOf gs <*> g = OneOf $ gs <&> wrapLazy (assert_total (<*> g))
+  g <*> OneOf gs = OneOf $ gs <&> wrapLazy (assert_total (g <*>))
 
   Bind x f <*> g = Bind x $ assert_total (<*> g) . f
   g <*> Bind x f = Bind x $ assert_total (g <*>) . f
@@ -144,7 +148,7 @@ Applicative Gen where
 export
 Monad Gen where
   g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
-  OneOf gs    >>= nf = OneOf $ gs <&> delay . assert_total (>>= nf) . force
+  OneOf gs    >>= nf = OneOf $ gs <&> wrapLazy (assert_total (>>= nf))
   Bind x f    >>= nf = Bind x $ assert_total $ f >=> nf
 
 ||| Choose one of the given generators uniformly.
@@ -192,7 +196,7 @@ forgetStructure g = Point $ unGen g
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
 mapMaybe p $ Point sf = Point $ sf >>= maybe (throwError ()) pure . p
-mapMaybe p $ OneOf gs = OneOf $ gs <&> delay . assert_total mapMaybe p . force
+mapMaybe p $ OneOf gs = OneOf $ gs <&> wrapLazy (assert_total mapMaybe p)
 mapMaybe p $ Bind x f = Bind x $ assert_total mapMaybe p . f
 
 export
