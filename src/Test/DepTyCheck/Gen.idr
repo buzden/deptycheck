@@ -98,53 +98,6 @@ Applicative Gen where
   Bind x f <*> g = Bind x $ assert_total (<*> g) . f
   g <*> Bind x f = Bind x $ assert_total (g <*>) . f
 
---namespace ApplicativeLaws
---
---  applicativeIdentity : (v : Gen a) -> pure Prelude.id <*> v = v
---  applicativeIdentity $ Point sf = ?applicativeIdentity_rhs_0 -- goes to identity law of `m` inside `Point`
---  applicativeIdentity $ OneOf gs = ?applicativeIdentity_rhs_1 -- goes recursively
---  applicativeIdentity $ Bind x f = ?applicativeIdentity_rhs_2 -- goes to identity law of `m` inside `Point`
---
---  applicativeComposition : (u : Gen $ b -> c) -> (v : Gen $ a -> b) -> (w : Gen a) -> pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
---  applicativeComposition (Point f)  (Point g)  (Point f1)  = ?applicativeComposition_rhs_12
---  applicativeComposition (Point f)  (Point g)  (OneOf xs)  = ?applicativeComposition_rhs_13
---  applicativeComposition (Point f)  (Point g)  (Bind x f1) = ?applicativeComposition_rhs_14
---  applicativeComposition (Point f)  (OneOf xs) (Point g)   = ?applicativeComposition_rhs_15
---  applicativeComposition (Point f)  (OneOf xs) (OneOf ys)  = ?applicativeComposition_rhs_16
---  applicativeComposition (Point f)  (OneOf xs) (Bind x g)  = ?applicativeComposition_rhs_17
---  applicativeComposition (Point f)  (Bind x g) (Point f1)  = ?applicativeComposition_rhs_18
---  applicativeComposition (Point f)  (Bind x g) (OneOf xs)  = ?applicativeComposition_rhs_19
---  applicativeComposition (Point f)  (Bind x g) (Bind y f1) = ?applicativeComposition_rhs_20
---  applicativeComposition (OneOf xs) (Point f)  (Point g)   = ?applicativeComposition_rhs_21
---  applicativeComposition (OneOf xs) (Point f)  (OneOf ys)  = ?applicativeComposition_rhs_22
---  applicativeComposition (OneOf xs) (Point f)  (Bind x g)  = ?applicativeComposition_rhs_23
---  applicativeComposition (OneOf xs) (OneOf ys) (Point f)   = ?applicativeComposition_rhs_24
---  applicativeComposition (OneOf xs) (OneOf ys) (OneOf zs)  = ?applicativeComposition_rhs_25
---  applicativeComposition (OneOf xs) (OneOf ys) (Bind x f)  = ?applicativeComposition_rhs_26
---  applicativeComposition (OneOf xs) (Bind x f) (Point g)   = ?applicativeComposition_rhs_27
---  applicativeComposition (OneOf xs) (Bind x f) (OneOf ys)  = ?applicativeComposition_rhs_28
---  applicativeComposition (OneOf xs) (Bind x f) (Bind y g)  = ?applicativeComposition_rhs_29
---  applicativeComposition (Bind x f) (Point g)  (Point f1)  = ?applicativeComposition_rhs_30
---  applicativeComposition (Bind x f) (Point g)  (OneOf xs)  = ?applicativeComposition_rhs_31
---  applicativeComposition (Bind x f) (Point g)  (Bind y f1) = ?applicativeComposition_rhs_32
---  applicativeComposition (Bind x f) (OneOf xs) (Point g)   = ?applicativeComposition_rhs_33
---  applicativeComposition (Bind x f) (OneOf xs) (OneOf ys)  = ?applicativeComposition_rhs_34
---  applicativeComposition (Bind x f) (OneOf xs) (Bind y g)  = ?applicativeComposition_rhs_35
---  applicativeComposition (Bind x f) (Bind y g) (Point f1)  = ?applicativeComposition_rhs_36
---  applicativeComposition (Bind x f) (Bind y g) (OneOf xs)  = ?applicativeComposition_rhs_37
---  applicativeComposition (Bind x f) (Bind y g) (Bind z f1) = ?applicativeComposition_rhs_38
---
---  applicativeHomomorphism : (x : a) -> (f : a -> b) -> the (Gen b) (pure f <*> pure x) === pure (f x)
---  applicativeHomomorphism x f = cong Point ?applicativeHomomorphism_rhs -- goes to homomorphism law of `m` inside `Point`
---
---  applicativeInterchange : FunExt => (u : Gen $ a -> b) -> (y : a) -> u <*> pure y = pure ($ y) <*> u
---  applicativeInterchange (Point f)  y = cong Point ?applicativeInterchange_rhs_0 -- goes to interchange law of `m` inside `Point`
---  applicativeInterchange (OneOf xs) y = cong OneOf $ cong (\arg => map arg xs) $ funExt $ \case
---    Point f  => ?applicativeInterchange_rhs_3 -- goes to interchange law of `m` inside `Point`
---    OneOf ys => cong OneOf $ cong (\arg => map arg ys) $ funExt $ \x => applicativeInterchange (assert_smaller (OneOf xs) x) y
---    Bind x f => cong (Bind x) $ funExt $ \x => applicativeInterchange (assert_smaller (OneOf xs) $ f x) y
---  applicativeInterchange (Bind x f) y = cong (Bind x) $ funExt $ \x => applicativeInterchange (f x) y
-
 export
 Monad Gen where
   g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
