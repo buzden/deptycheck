@@ -145,6 +145,10 @@ public export
 onAlternativesOf : (a -> b) -> Gen a -> List $ Lazy (Gen b)
 onAlternativesOf f = map (wrapLazy $ map f) . alternativesOf
 
+public export %inline
+mapAlternativesWith : Gen a -> (a -> b) -> List $ Lazy (Gen b)
+mapAlternativesWith = flip onAlternativesOf
+
 export
 forgetStructure : Gen a -> Gen a
 forgetStructure g@(Point _) = g
@@ -154,7 +158,11 @@ public export
 onForgottenStructure : (a -> b) -> Gen a -> Gen b
 onForgottenStructure f = map f . forgetStructure
 
-infix 8 `onAlternativesOf`, `onForgottenStructure`
+public export %inline
+mapForgettingStructure : Gen a -> (a -> b) -> Gen b
+mapForgettingStructure = flip onForgottenStructure
+
+infix 8 `onAlternativesOf`, `mapAlternativesWith`, `onForgottenStructure`, `mapForgettingStructure`
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
