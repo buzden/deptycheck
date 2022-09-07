@@ -1,5 +1,7 @@
 module Test.DepTyCheck.Gen
 
+import Control.Function.FunExt
+
 import Control.Monad.State
 import public Control.Monad.State.Interface
 import public Control.Monad.Error.Interface
@@ -7,10 +9,10 @@ import Control.Monad.Maybe
 
 import Data.DPair
 import Data.List
-import Data.List.Lazier
+import Data.List1
 import Data.List.Lazy
-import Data.Stream
 import Data.Vect
+import Data.Stream
 
 import Decidable.Equality
 
@@ -18,34 +20,46 @@ import public System.Random.Simple
 
 %default total
 
+-------------------------
+--- Utility functions ---
+-------------------------
+
+randomFin : RandomGen g => MonadState g m => MonadError () m => {n : _} -> m $ Fin n
+randomFin {n = Z}   = throwError ()
+randomFin {n = S k} = random'
+
+pickUniformly : RandomGen g => MonadState g m => MonadError () m => List a -> m a
+pickUniformly xs = index' xs <$> randomFin
+
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
 
 export
 data Gen : Type -> Type where
-  Uniform : LzList a -> Gen a
-  AlternG : LzList (Gen a) -> Gen a
-  Raw     : ({0 g : _} -> RandomGen g => {0 m : _} -> MonadState g m => m $ LzList a) -> Gen a
+  Point : (forall g, m. RandomGen g => MonadState g m => MonadError () m => m a) -> Gen a
+  OneOf : List1 (Gen a) -> Gen a
+  Bind  : Gen c -> (c -> Gen a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
 export
 chooseAny : Random a => Gen a
-chooseAny = Raw $ pure <$> random'
+chooseAny = Point random'
 
 export
 choose : Random a => (a, a) -> Gen a
-choose bounds = Raw $ map pure $ randomR' bounds
+choose bounds = Point $ randomR' bounds
 
-unGen' : RandomGen g => MonadState g m => Gen a -> m $ LzList a
-unGen' (Raw sf)     = sf
-unGen' (Uniform xs) = pure xs
-unGen' (AlternG gs) = (pure gs >>= map hideLength . assert_total unGen') @{Compose}
+export
+empty : Gen a
+empty = Point $ throwError ()
 
 export
 unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
-unGen g = unGen' g >>= pickUniformly
+unGen $ Point sf = sf
+unGen $ OneOf gs = pickUniformly (forget gs) >>= assert_total unGen
+unGen $ Bind x f = unGen x >>= assert_total unGen . f
 
 export
 unGenTryN : RandomGen g => (n : Nat) -> g -> Gen a -> LazyList a
@@ -56,68 +70,92 @@ unGenTryN n seed gen = mapMaybe id $ go n seed where
     let (seed, mc) = runState seed $ runMaybeT $ unGen {g} {m=MaybeT $ State g} gen
     mc :: go n seed
 
+-- TODO To add config and Reader for that.
+--      This config should contain attempts count for each `unGen` (including those in combinators)
+--      Current `unGen` should be renamed to `unGen1` and not be exported.
+--      Current `unGenTryN` should be changed returning `LazyList (a, g)` and
+--      new `unGen` should be implemented trying `retry` times from config using this (`g` must be stored to restore correct state of seed).
+
 export
 Functor Gen where
-  map f (Uniform xs) = Uniform $ map f xs
-  map f (AlternG gs) = AlternG $ assert_total $ map f <$> gs
-  map f (Raw sf)     = Raw $ map f <$> sf
-
-apAsRaw : Gen (a -> b) -> Gen a -> Gen b
-apAsRaw generalF generalA = Raw [| unGen' generalF <*> unGen' generalA |]
+  map f $ Point sf = Point $ f <$> sf
+  map f $ OneOf gs = OneOf $ assert_total map f <$> gs
+  map f $ Bind x g = Bind x $ assert_total map f . g
 
 export
 Applicative Gen where
-  pure x = Uniform $ pure x
+  pure x = Point $ pure x
 
-  Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
+  Point sfl <*> Point sfr = Point $ sfl <*> sfr
 
-  Uniform fs <*> AlternG gs = AlternG [| map fs gs |]
-  AlternG gs <*> Uniform xs = AlternG [| (\gab, a => flip apply a <$> gab) gs xs |]
-  AlternG fs <*> AlternG gs = AlternG $ assert_total [| fs <*> gs |]
+  OneOf gs <*> g = OneOf $ gs <&> assert_total (<*> g)
+  g <*> OneOf gs = OneOf $ gs <&> assert_total (g <*>)
 
-  rawF@(Raw {}) <*> generalA = apAsRaw rawF generalA
-  generalF <*> rawA@(Raw {}) = apAsRaw generalF rawA
+  Bind x f <*> g = Bind x $ assert_total (<*> g) . f
+  g <*> Bind x f = Bind x $ assert_total (g <*>) . f
+
+namespace ApplicativeLaws
+
+  applicativeIdentity : (v : Gen a) -> pure Prelude.id <*> v = v
+  applicativeIdentity $ Point sf = ?applicativeIdentity_rhs_0 -- goes to identity law of `m` inside `Point`
+  applicativeIdentity $ OneOf gs = ?applicativeIdentity_rhs_1 -- goes recursively
+  applicativeIdentity $ Bind x f = ?applicativeIdentity_rhs_2 -- goes to identity law of `m` inside `Point`
+
+  applicativeComposition : (u : Gen $ b -> c) -> (v : Gen $ a -> b) -> (w : Gen a) -> pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
+  applicativeComposition (Point f)  (Point g)  (Point f1)  = ?applicativeComposition_rhs_12
+  applicativeComposition (Point f)  (Point g)  (OneOf xs)  = ?applicativeComposition_rhs_13
+  applicativeComposition (Point f)  (Point g)  (Bind x f1) = ?applicativeComposition_rhs_14
+  applicativeComposition (Point f)  (OneOf xs) (Point g)   = ?applicativeComposition_rhs_15
+  applicativeComposition (Point f)  (OneOf xs) (OneOf ys)  = ?applicativeComposition_rhs_16
+  applicativeComposition (Point f)  (OneOf xs) (Bind x g)  = ?applicativeComposition_rhs_17
+  applicativeComposition (Point f)  (Bind x g) (Point f1)  = ?applicativeComposition_rhs_18
+  applicativeComposition (Point f)  (Bind x g) (OneOf xs)  = ?applicativeComposition_rhs_19
+  applicativeComposition (Point f)  (Bind x g) (Bind y f1) = ?applicativeComposition_rhs_20
+  applicativeComposition (OneOf xs) (Point f)  (Point g)   = ?applicativeComposition_rhs_21
+  applicativeComposition (OneOf xs) (Point f)  (OneOf ys)  = ?applicativeComposition_rhs_22
+  applicativeComposition (OneOf xs) (Point f)  (Bind x g)  = ?applicativeComposition_rhs_23
+  applicativeComposition (OneOf xs) (OneOf ys) (Point f)   = ?applicativeComposition_rhs_24
+  applicativeComposition (OneOf xs) (OneOf ys) (OneOf zs)  = ?applicativeComposition_rhs_25
+  applicativeComposition (OneOf xs) (OneOf ys) (Bind x f)  = ?applicativeComposition_rhs_26
+  applicativeComposition (OneOf xs) (Bind x f) (Point g)   = ?applicativeComposition_rhs_27
+  applicativeComposition (OneOf xs) (Bind x f) (OneOf ys)  = ?applicativeComposition_rhs_28
+  applicativeComposition (OneOf xs) (Bind x f) (Bind y g)  = ?applicativeComposition_rhs_29
+  applicativeComposition (Bind x f) (Point g)  (Point f1)  = ?applicativeComposition_rhs_30
+  applicativeComposition (Bind x f) (Point g)  (OneOf xs)  = ?applicativeComposition_rhs_31
+  applicativeComposition (Bind x f) (Point g)  (Bind y f1) = ?applicativeComposition_rhs_32
+  applicativeComposition (Bind x f) (OneOf xs) (Point g)   = ?applicativeComposition_rhs_33
+  applicativeComposition (Bind x f) (OneOf xs) (OneOf ys)  = ?applicativeComposition_rhs_34
+  applicativeComposition (Bind x f) (OneOf xs) (Bind y g)  = ?applicativeComposition_rhs_35
+  applicativeComposition (Bind x f) (Bind y g) (Point f1)  = ?applicativeComposition_rhs_36
+  applicativeComposition (Bind x f) (Bind y g) (OneOf xs)  = ?applicativeComposition_rhs_37
+  applicativeComposition (Bind x f) (Bind y g) (Bind z f1) = ?applicativeComposition_rhs_38
+
+  applicativeHomomorphism : (x : a) -> (f : a -> b) -> the (Gen b) (pure f <*> pure x) === pure (f x)
+  applicativeHomomorphism x f = cong Point ?applicativeHomomorphism_rhs -- goes to homomorphism law of `m` inside `Point`
+
+  applicativeInterchange : FunExt => (u : Gen $ a -> b) -> (y : a) -> u <*> pure y = pure ($ y) <*> u
+  applicativeInterchange (Point f)  y = cong Point ?applicativeInterchange_rhs_0 -- goes to interchange law of `m` inside `Point`
+  applicativeInterchange (OneOf xs) y = cong OneOf $ cong (\arg => map arg xs) $ funExt $ \case
+    Point f  => ?applicativeInterchange_rhs_3 -- goes to interchange law of `m` inside `Point`
+    OneOf ys => cong OneOf $ cong (\arg => map arg ys) $ funExt $ \x => applicativeInterchange (assert_smaller (OneOf xs) x) y
+    Bind x f => cong (Bind x) $ funExt $ \x => applicativeInterchange (assert_smaller (OneOf xs) $ f x) y
+  applicativeInterchange (Bind x f) y = cong (Bind x) $ funExt $ \x => applicativeInterchange (f x) y
 
 export
-Alternative Gen where
-  empty = Uniform empty
-  AlternG ls <|> Delay (AlternG rs) = AlternG $ ls <|> rs
-  AlternG ls <|> Delay (generalR  ) = AlternG $ ls <|> pure generalR
-  generalL   <|> Delay (AlternG rs) = AlternG $ pure generalL <|> rs
-  generalL   <|> Delay (generalR  ) = AlternG $ pure generalL <|> pure generalR
-
-||| Makes the given `Gen` to act as an independent generator according to the `Alternative` combination.
-||| That is, in `independent (independent a <|> independent b)` given `a` and `b` are distributed evenly.
-export
-independent : Gen a -> Gen a
-independent alt@(AlternG gs) = case gs.length of
-                                 0 => empty
-                                 1 => alt -- ensure `independent` is idempotent
-                                 _ => AlternG $ pure alt
-independent other = other
-
-independent_is_idempotent : (g : Gen a) -> independent (independent g) = independent g
-independent_is_idempotent $ Uniform _  = Refl
-independent_is_idempotent $ Raw _      = Refl
-independent_is_idempotent $ AlternG gs with (gs.length) proof prf
-  _ | 0       = Refl
-  _ | 1       = rewrite prf in Refl
-  _ | S (S _) = Refl
+Monad Gen where
+  g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
+  OneOf gs    >>= nf = OneOf $ gs <&> assert_total (>>= nf)
+  Bind x f    >>= nf = Bind x $ assert_total $ f >=> nf
 
 ||| Choose one of the given generators uniformly.
 |||
-||| All the given generators are treated as independent, i.e. `oneOf [a <|> b, c]` is not the same as `a <|> b <|> c`.
-||| In this example case, generator `a <|> b` and generator `c` will have the same probability in the resulting generator,
-||| i.e., `oneOf [a <|> b, c]` is equivalent to `independent (a <|> b) <|> independent c`.
-|||
-||| If you want generators in the list to be treated non-independent, you can use the `choice` function from prelude.
-|||
-||| The resulting generator is not independent, i.e. `oneOf [a, b, c] <|> oneOf [d, e]` is equivalent to `oneOf [a, b, c, d, e]`.
+||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
+||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 public export
 oneOf : List (Gen a) -> Gen a
 oneOf []      = empty
-oneOf [x]     = independent x
-oneOf (x::xs) = independent x <|> oneOf xs
+oneOf [x]     = x
+oneOf (x::xs) = OneOf $ x:::xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -125,45 +163,37 @@ oneOf (x::xs) = independent x <|> oneOf xs
 ||| from the given list the more frequently, the higher number is has.
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
-|||
-||| The resulting generator is not independent, i.e. `frequency [(n1, g1), (n2, g2)] <|> frequency [(n3, g3), (n4, g4)]` is
-||| equivalent to `frequency [(n1, g1), (n2, g2), (n3, g3), (n4, g4)]`.
-||| Also, `frequency [(n, g), (m, h)] <|> oneOf [u, w]` is equivalent to `frequency [(n, g), (m, h), (1, u), (1, w)]`.
 export
 frequency : List (Nat, Gen a) -> Gen a
-frequency = AlternG . concatMap (uncurry replicate . map independent)
-
-||| Choose one of the given generators with probability proportional to the given value, treating all source generators dependently.
-|||
-||| This function is similar to `frequency` but as of it takes internal alternative combinations inside the given generators level up.
-||| That is, unlike the `frequency` function, `frequency_dep' [(n, a <|> b <|> c), (m, x)]` is equivalent to
-||| `frequency_dep [(n, a), (n, b), (n, c), (m, x)]`
-export
-frequency_dep : List (Nat, Gen a) -> Gen a
-frequency_dep = AlternG . concatMap (uncurry replicate)
+frequency = oneOf . concatMap (uncurry replicate)
+            -- TODO to reimplement this more effectively
 
 ||| Choose one of the given values uniformly.
 |||
-||| The resulting generator is not independent, i.e. `elements xs <|> elements ys` is equivalent to `elements (xs ++ ys)`.
+||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
 elements : List a -> Gen a
-elements = Uniform . fromFoldable
+elements = oneOf . map pure
 
 export
 elements' : Foldable f => f a -> Gen a
-elements' = Uniform . fromFoldable
+elements' = elements . toList
 
 export
-Monad Gen where
-  Uniform gs >>= c = if null gs then Uniform empty else AlternG $ c <$> gs
-  AlternG gs >>= c = AlternG $ assert_total (>>= c) <$> gs
-  Raw sf     >>= c = Raw $ (sf >>= unGen' . c) @{Compose}
+alternativesOf : Gen a -> List $ Gen a
+alternativesOf $ OneOf gs = forget gs
+alternativesOf g          = [g]
+
+export
+forgetStructure : Gen a -> Gen a
+forgetStructure g@(Point _) = g
+forgetStructure g = Point $ unGen g
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
-mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
-mapMaybe p (AlternG l) = AlternG $ assert_total $ mapMaybe p <$> l
-mapMaybe p (Raw sf)    = Raw $ mapMaybe p <$> sf
+mapMaybe p $ Point sf = Point $ sf >>= maybe (throwError ()) pure . p
+mapMaybe p $ OneOf gs = OneOf $ gs <&> assert_total mapMaybe p
+mapMaybe p $ Bind x f = Bind x $ assert_total mapMaybe p . f
 
 export
 suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `Subset` So . p
@@ -196,7 +226,7 @@ suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
 export
 variant : Nat -> Gen a -> Gen a
 variant Z       gen = gen
-variant x@(S _) gen = Raw $ modify (index x . iterate (fst . next)) *> unGen' gen
+variant x@(S _) gen = Point $ modify (index x . iterate (fst . next)) *> unGen gen
 
 export
 listOf : {default (choose (0, 10)) length : Gen Nat} -> Gen a -> Gen (List a)
