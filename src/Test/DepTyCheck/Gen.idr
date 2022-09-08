@@ -182,6 +182,8 @@ public export %inline
 mapForgottenStructureWith : Gen a -> (a -> b) -> Gen b
 mapForgottenStructureWith = flip mapForgottenStructureOf
 
+-- Priority is chosen to be able to use these operators without parenthesis
+-- in expressions of lists, i.e. involving operators `::` and `++`.
 infix 8 `mapAlternativesOf`
       , `mapAlternativesWith`
 
