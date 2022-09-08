@@ -146,28 +146,28 @@ processAlternatives : (Gen a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
 processAlternatives f = map (wrapLazy f) . alternativesOf
 
 public export
-onAlternativesOf : (a -> b) -> Gen a -> List $ Lazy (Gen b)
-onAlternativesOf = processAlternatives . map
+mapAlternativesOf : (a -> b) -> Gen a -> List $ Lazy (Gen b)
+mapAlternativesOf = processAlternatives . map
 
 public export
-onAlternativesOf' : Gen (a -> b) -> Gen a -> List $ Lazy (Gen b)
-onAlternativesOf' = processAlternatives . (<*>)
+apAlternativesOf : Gen (a -> b) -> Gen a -> List $ Lazy (Gen b)
+apAlternativesOf = processAlternatives . (<*>)
 
 public export
-onAlternativesOf'' : (a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
-onAlternativesOf'' = processAlternatives . (=<<)
+bindAlternativesOf : (a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
+bindAlternativesOf = processAlternatives . (=<<)
 
 public export %inline
 mapAlternativesWith : Gen a -> (a -> b) -> List $ Lazy (Gen b)
-mapAlternativesWith = flip onAlternativesOf
+mapAlternativesWith = flip mapAlternativesOf
 
 public export %inline
 apAlternativesWith : Gen a -> Gen (a -> b) -> List $ Lazy (Gen b)
-apAlternativesWith = flip onAlternativesOf'
+apAlternativesWith = flip apAlternativesOf
 
 public export %inline
 bindAlternativesWith : Gen a -> (a -> Gen b) -> List $ Lazy (Gen b)
-bindAlternativesWith = flip onAlternativesOf''
+bindAlternativesWith = flip bindAlternativesOf
 
 export
 forgetStructure : Gen a -> Gen a
@@ -175,23 +175,24 @@ forgetStructure g@(Point _) = g
 forgetStructure g = Point $ unGen g
 
 public export
-onForgottenStructure : (a -> b) -> Gen a -> Gen b
-onForgottenStructure f = map f . forgetStructure
+mapForgottenStructureOf : (a -> b) -> Gen a -> Gen b
+mapForgottenStructureOf f = map f . forgetStructure
 
 public export %inline
-mapForgettingStructure : Gen a -> (a -> b) -> Gen b
-mapForgettingStructure = flip onForgottenStructure
+mapForgottenStructureWith : Gen a -> (a -> b) -> Gen b
+mapForgottenStructureWith = flip mapForgottenStructureOf
 
-infix 8 `onAlternativesOf`
-      , `onAlternativesOf'`
-      , `onAlternativesOf''`
-
+infix 8 `mapAlternativesOf`
       , `mapAlternativesWith`
+
+      , `apAlternativesOf`
       , `apAlternativesWith`
+
+      , `bindAlternativesOf`
       , `bindAlternativesWith`
 
-      , `onForgottenStructure`
-      , `mapForgettingStructure`
+      , `mapForgottenStructureOf`
+      , `mapForgottenStructureWith`
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b

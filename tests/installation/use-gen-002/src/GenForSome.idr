@@ -47,8 +47,8 @@ genAllQ f (x::xs) = [| f x :: genAllQ f xs |]
 genAnyQ : ((x : a) -> Gen (p x)) -> (list : List a) -> Gen $ Any p list
 genAnyQ f []      = empty
 genAnyQ f (x::xs) = oneOf
-  $  Here `onForgottenStructure` f x
-  :: There `onAlternativesOf` genAnyQ f xs
+  $  Here `mapForgottenStructureOf` f x
+  :: There `mapAlternativesOf` genAnyQ f xs
 
 genName : Gen Name
 genName = [| elements (cast <$> ['x', 'y', 'z']) ++ elements (show <$> [1 .. 3]) |]
