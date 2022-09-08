@@ -32,18 +32,21 @@ simpleValue {a=String'} = alphaString
 simpleValue {a=Bool'}   = chooseAny
 
 recExpr : ({x : Type'} -> Gen $ Expression vars regs x) -> {a : Type'} -> Gen $ Expression vars regs a
-recExpr sub {a=Int'}    = oneOf [ U (+1) {opName="inc"} <$> forgetStructure (sub {x=Int'})
-                                , B (+) {opName="+"} <$> forgetStructure (sub {x=Int'}) <*> forgetStructure (sub {x=Int'})
-                                , B (*) {opName="*"} <$> forgetStructure (sub {x=Int'}) <*> forgetStructure (sub {x=Int'})
+recExpr sub {a=Int'}    = oneOfForgottenStructure
+                                [ U (+1) {opName="inc"} <$> sub {x=Int'}
+                                , B (+) {opName="+"} <$> sub {x=Int'} <*> sub {x=Int'}
+                                , B (*) {opName="*"} <$> sub {x=Int'} <*> sub {x=Int'}
                                 ]
-recExpr sub {a=String'} = oneOf [ U show {opName="as_str"} <$> forgetStructure (sub {x=Int'})
-                                , B (++) {opName="concat"} <$> forgetStructure (sub {x=String'}) <*> forgetStructure (sub {x=String'})
+recExpr sub {a=String'} = oneOfForgottenStructure
+                                [ U show {opName="as_str"} <$> sub {x=Int'}
+                                , B (++) {opName="concat"} <$> sub {x=String'} <*> sub {x=String'}
                                 ]
-recExpr sub {a=Bool'}   = oneOf [ U not {opName="!"} <$> sub {x=Bool'}
-                                , B (\x, y => x && y) {opName="&&"} <$> forgetStructure (sub {x=Bool'}) <*> forgetStructure (sub {x=Bool'})
-                                , B (\x, y => x || y) {opName="||"} <$> forgetStructure (sub {x=Bool'}) <*> forgetStructure (sub {x=Bool'})
-                                , B (<) {opName="<"} <$> forgetStructure (sub {x=Int'}) <*> forgetStructure (sub {x=Int'})
-                                , B (<=) {opName="<="} <$> forgetStructure (sub {x=Int'}) <*> forgetStructure (sub {x=Int'})
+recExpr sub {a=Bool'}   = oneOfForgottenStructure
+                                [ U not {opName="!"} <$> sub {x=Bool'}
+                                , B (\x, y => x && y) {opName="&&"} <$> sub {x=Bool'} <*> sub {x=Bool'}
+                                , B (\x, y => x || y) {opName="||"} <$> sub {x=Bool'} <*> sub {x=Bool'}
+                                , B (<) {opName="<"} <$> sub {x=Int'} <*> sub {x=Int'}
+                                , B (<=) {opName="<="} <$> sub {x=Int'} <*> sub {x=Int'}
                                 ]
 
 %hint
