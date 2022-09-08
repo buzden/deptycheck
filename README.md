@@ -135,13 +135,17 @@ genAnyFin @{genNat} = do
 
 > **Note**
 >
-> Search for alternatives through the series of monadic bind goes to the first generator that
+> Search for alternatives through the series of monadic binds goes to the first generator that
 > is produced with no alternatives.
 >
-> Say, generator `do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }` would have nine
-> alternatives when inspected by `alternativesOf`,
-> where generator `do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }` would have only three,
-> and `do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }` would have only one.
+> Consider three generators:
+>
+>   - `do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
+>   - `do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }`
+>   - `do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
+>
+> The first generator would have nine alternatives when inspected by `alternativesOf`,
+> where the second generator would have only three, and the third one would have only one.
 >
 > This, actually, violates monadic laws in some sense.
 > Say, `alternativesOf` can distinct between `pure x >>= f` and `f x` if generator `f x` is, say, of form `elements [a, b, c]`,
