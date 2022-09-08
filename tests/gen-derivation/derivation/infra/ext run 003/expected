@@ -4,14 +4,22 @@
 Generated values:
 -----
 -----
-MkXSN "" 0
------
-MkXSN "a" 0
+MkXSN "" 10
 -----
 MkXSN "bc" 0
 -----
+MkXSN "a" 0
+-----
+MkXSN "a" 0
+-----
+MkXSN "" 0
+-----
 MkXSN "" 10
 -----
-MkXSN "a" 10
+MkXSN "" 10
 -----
 MkXSN "bc" 10
+-----
+MkXSN "a" 0
+-----
+MkXSN "a" 0

@@ -5,18 +5,20 @@ Generated values:
 -----
 MkX "" ""
 -----
-MkX "" "a"
------
-MkX "" "bc"
+MkX "bc" ""
 -----
 MkX "a" "a"
 -----
-MkX "a" "bc"
+MkX "a" "a"
 -----
-MkX "a" ""
+MkX "" ""
+-----
+MkX "" "bc"
+-----
+MkX "" ""
 -----
 MkX "bc" "a"
 -----
-MkX "bc" "bc"
+MkX "a" ""
 -----
-MkX "bc" ""
+MkX "a" "bc"

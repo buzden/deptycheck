@@ -7,18 +7,18 @@ Generated values:
 -----
 (2 ** (2 ** ReflN : EqualN 2 2))
 -----
-(11 ** (11 ** ReflN : EqualN 11 11))
+(1 ** (1 ** ReflN : EqualN 1 1))
 -----
-(14 ** (14 ** ReflN : EqualN 14 14))
+(1 ** (1 ** ReflN : EqualN 1 1))
 -----
-(16 ** (16 ** ReflN : EqualN 16 16))
+(0 ** (0 ** ReflN : EqualN 0 0))
 -----
-(19 ** (19 ** ReflN : EqualN 19 19))
+(0 ** (0 ** ReflN : EqualN 0 0))
 -----
-(20 ** (20 ** ReflN : EqualN 20 20))
+(6 ** (6 ** ReflN : EqualN 6 6))
 -----
-(18 ** (18 ** ReflN : EqualN 18 18))
+(0 ** (0 ** ReflN : EqualN 0 0))
 -----
-(17 ** (17 ** ReflN : EqualN 17 17))
+(0 ** (0 ** ReflN : EqualN 0 0))
 -----
-(15 ** (15 ** ReflN : EqualN 15 15))
+(0 ** (0 ** ReflN : EqualN 0 0))
