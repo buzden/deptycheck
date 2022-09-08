@@ -39,12 +39,63 @@ genSomeStrings : Gen String
 genSomeStrings = elements ["one", "two", "three"]
 ```
 
-Generators can be combined with operations from `Applicative` and `Alternative` interfaces:
+You can combine several generators into one:
 
 ```idris
 genMoreStrings : Gen String
-genMoreStrings = genSomeStrings <|> elements ["more", "even more"]
+genMoreStrings = oneOf [genSomeStrings, elements ["more", "even more"]]
 ```
+
+> **Note**
+> Notice that all generators listed in `oneOf` are meant to be distributed uniformly between each other as a whole thing.
+> That is, in `genMoreStrings` values `"one"`, `"two"` and `"three"` have the same probability to be generated
+> and this probability is `2/3` of probability for `"more"` or `"even more"` to appear.
+
+So, the following generator is **not** equivalent to the `genMoreStrings` from above:
+
+```idris
+genMoreStrings' : Gen String
+genMoreStrings' = elements ["one", "two", "three", "more", "even more"]
+```
+
+In `genMoreStrings'` all values are distributed uniformly.
+
+To achieve the same result with reusing `genSomeStrings` generator, we need to dig into it deeper with `alternativesOf` function:
+
+```idris
+genMoreStrings'' : Gen String
+genMoreStrings'' = oneOf $ alternativesOf genMoreStrings ++ alternativesOf (elements ["more", "even more"])
+```
+
+There are also several functions based on the `alternativesOf`, allowing to process all alternatives in a single expression;
+you will see some of them in use below.
+
+Functions based on `alternativesOf` tries to dig as far as possible and get individual generators from inside the given one.
+Sometimes this is not desirable.
+To prevent going too deep, one can use function `forgetStructure`.
+
+For example, consider a generator of lists with length not greater than given.
+There are a lot of possible implementations, but consider a recursive one:
+
+```idris
+genListsN : Gen a -> (n : Nat) -> Gen $ List a
+genListsN _    Z     = elements [ [] ]
+genListsN genA (S n) = oneOf $ elements [ [] ]
+                            :: (forgetStructure genA <&> (::)) `apAlternativesOf` genListsN genA n
+```
+
+Distribution of lengths of lists produced by this generator is uniform,
+thanks to both `forgetStructure` and `apAlternativesOf` (a flavour of `alternativesOf` function).
+
+> **Note**
+> If we were not using `alternativesOf` at all (say, with expression `[| genA :: genListsN genA n |]`),
+> probability of getting a list of length `n+1` would be 2 times *less* than getting a list of length `n`.
+> If we were not using `forgetStructure`, then depending on particular generator of values of type `a`,
+> we could get higher probability of getting longer lists.
+> For example, for call `genListsN (elements [True, False]) m`,
+> probability to get a list of length `n+1` would be 2 times *more* than a list of length `n`.
+
+Generators can be combined with operations from `Applicative` interface:
 
 ```idris
 data X = MkX String String
@@ -53,23 +104,7 @@ genStrPairs : Gen X
 genStrPairs = [| MkX genSomeStrings genMoreStrings |]
 ```
 
-Notice that distribution of simple elements listing can depend on the environment.
-For example, the following generator is completely equivalent to `genMoreStrings` from above:
-
-```idris
-genMoreStrings' : Gen String
-genMoreStrings' = elements ["one", "two", "three", "more", "even more"]
-```
-
-I.e., all five elements are distributed equally in the resulting generator.
-To make the alternatives to be distributed equally as a whole, we can to make them *independent*:
-
-```idris
-genMoreStrings'' : Gen String
-genMoreStrings'' = independent genMoreStrings <|> independent (elements ["more", "even more"])
-```
-
-Being `Alternative` (unlike, say, in QuickCheck) generators can be empty.
+Unlike, say, in QuickCheck, generators can be empty.
 This is important for dependent types.
 For example, `Fin 0` is not inhabited,
 thus we need to have an empty generator if we want to have a generator for any `Fin n`:
