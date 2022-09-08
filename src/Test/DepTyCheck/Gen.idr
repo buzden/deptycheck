@@ -108,7 +108,7 @@ Monad Gen where
 |||
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
-public export
+export
 oneOf : List (Lazy (Gen a)) -> Gen a
 oneOf []      = empty
 oneOf [x]     = x
@@ -142,12 +142,32 @@ alternativesOf $ OneOf gs = forget gs
 alternativesOf g          = [g]
 
 public export
+processAlternatives : (Gen a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
+processAlternatives f = map (wrapLazy f) . alternativesOf
+
+public export
 onAlternativesOf : (a -> b) -> Gen a -> List $ Lazy (Gen b)
-onAlternativesOf f = map (wrapLazy $ map f) . alternativesOf
+onAlternativesOf = processAlternatives . map
+
+public export
+onAlternativesOf' : Gen (a -> b) -> Gen a -> List $ Lazy (Gen b)
+onAlternativesOf' = processAlternatives . (<*>)
+
+public export
+onAlternativesOf'' : (a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
+onAlternativesOf'' = processAlternatives . (=<<)
 
 public export %inline
 mapAlternativesWith : Gen a -> (a -> b) -> List $ Lazy (Gen b)
 mapAlternativesWith = flip onAlternativesOf
+
+public export %inline
+apAlternativesWith : Gen a -> Gen (a -> b) -> List $ Lazy (Gen b)
+apAlternativesWith = flip onAlternativesOf'
+
+public export %inline
+bindAlternativesWith : Gen a -> (a -> Gen b) -> List $ Lazy (Gen b)
+bindAlternativesWith = flip onAlternativesOf''
 
 export
 forgetStructure : Gen a -> Gen a
@@ -162,7 +182,16 @@ public export %inline
 mapForgettingStructure : Gen a -> (a -> b) -> Gen b
 mapForgettingStructure = flip onForgottenStructure
 
-infix 8 `onAlternativesOf`, `mapAlternativesWith`, `onForgottenStructure`, `mapForgettingStructure`
+infix 8 `onAlternativesOf`
+      , `onAlternativesOf'`
+      , `onAlternativesOf''`
+
+      , `mapAlternativesWith`
+      , `apAlternativesWith`
+      , `bindAlternativesWith`
+
+      , `onForgottenStructure`
+      , `mapForgettingStructure`
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
