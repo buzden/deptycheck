@@ -1,31 +1,34 @@
 1/1: Building DemoGen (DemoGen.idr)
 [0] = False;
+char * jrd;
+[0] = False;
 // regs ty after: [Bool, -]
 
 ----
 
-[1] = "rnd";
-// regs ty after: [-, String]
+[0] = False;
+char * jrd;
+// regs ty after: [Bool, -]
 
 ----
 
-puts("jnu");
-// regs ty after: [-, -]
+[0] = False;
+// regs ty after: [Bool, -]
 
 ----
 
-[0] = -72;
+[0] = -61;
 // regs ty after: [Int, -]
 
 ----
 
-char * jp;
-// regs ty after: [-, -]
+[1] = -73;
+// regs ty after: [-, Int]
 
 ----
 
-[1] = as_str(inc(-82));
-// regs ty after: [-, String]
+
+// regs ty after: [-, -]
 
 ----
 
@@ -39,15 +42,16 @@ char * jp;
 
 ----
 
-puts("pzr");
+puts("q");
 // regs ty after: [-, -]
 
 ----
 
-puts("pb");
-// regs ty after: [-, -]
+[0] = inc(inc(-63)) + 82;
+[0] = as_str(-30);
+// regs ty after: [String, -]
 
 ----
 
-[0] = -99;
-// regs ty after: [Int, -]
+[1] = -64;
+// regs ty after: [-, Int]
