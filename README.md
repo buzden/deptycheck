@@ -47,7 +47,8 @@ genMoreStrings = oneOf [genSomeStrings, elements ["more", "even more"]]
 ```
 
 > **Note**
-> Notice that all generators listed in `oneOf` are meant to be distributed uniformly between each other as a whole thing.
+>
+> All generators listed in `oneOf` are meant to be distributed uniformly between each other as a whole thing.
 > That is, in `genMoreStrings` values `"one"`, `"two"` and `"three"` have the same probability to be generated
 > and this probability is `2/3` of probability for `"more"` or `"even more"` to appear.
 
@@ -88,8 +89,10 @@ Distribution of lengths of lists produced by this generator is uniform,
 thanks to both `forgetStructure` and `apAlternativesOf` (a flavour of `alternativesOf` function).
 
 > **Note**
+>
 > If we were not using `alternativesOf` at all (say, with expression `[| genA :: genListsN genA n |]`),
 > probability of getting a list of length `n+1` would be 2 times *less* than getting a list of length `n`.
+>
 > If we were not using `forgetStructure`, then depending on particular generator of values of type `a`,
 > we could get higher probability of getting longer lists.
 > For example, for call `genListsN (elements [True, False]) m`,
