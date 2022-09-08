@@ -107,6 +107,11 @@ genStrPairs : Gen X
 genStrPairs = [| MkX genSomeStrings genMoreStrings |]
 ```
 
+> **Note**
+>
+> The number of alternatives acquired by `alternativesOf` function of an applicative combination
+> of two generators is a product of numbers of alternatives of those generators.
+
 Unlike, say, in QuickCheck, generators can be empty.
 This is important for dependent types.
 For example, `Fin 0` is not inhabited,
@@ -127,6 +132,21 @@ genAnyFin @{genNat} = do
   f <- genFin n
   pure (n ** f)
 ```
+
+> **Note**
+>
+> Search for alternatives through the series of monadic bind goes to the first generator that
+> is produced with no alternatives.
+>
+> Say, generator `do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }` would have nine
+> alternatives when inspected by `alternativesOf`,
+> where generator `do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }` would have only three,
+> and `do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }` would have only one.
+>
+> This, actually, violates monadic laws in some sense.
+> Say, `alternativesOf` can distinct between `pure x >>= f` and `f x` if generator `f x` is, say, of form `elements [a, b, c]`,
+> because in the first case it would produce a single alternative, where in the second there will be three of them.
+> However, unless `alternativesOf` is used, there shall be no difference.
 
 Also, here you can see that we can use generators as `auto`-parameters,
 thus no need in a separate thing like QuickCheck's `Arbitrary`.
