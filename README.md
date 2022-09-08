@@ -140,17 +140,17 @@ genAnyFin @{genNat} = do
 >
 > Consider three generators:
 >
->   - `do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
->   - `do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }`
->   - `do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
+> - `do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
+> - `do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }`
+> - `do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
 >
 > The first generator would have nine alternatives when inspected by `alternativesOf`,
 > where the second generator would have only three, and the third one would have only one.
 >
 > This, actually, violates monadic laws in some sense.
 > Say, `alternativesOf` can distinct between `pure x >>= f` and `f x` if generator `f x` is, say, of form `elements [a, b, c]`,
-> because in the first case it would produce a single alternative, where in the second there will be three of them.
-> However, unless `alternativesOf` is used, there shall be no difference.
+> because in the first case it would produce a single alternative, when in the second there will be three of them.
+> However, according to the generated result these two generators shall be equivalent.
 
 Also, here you can see that we can use generators as `auto`-parameters,
 thus no need in a separate thing like QuickCheck's `Arbitrary`.
