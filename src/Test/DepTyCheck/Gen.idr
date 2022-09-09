@@ -7,7 +7,9 @@ import public Control.Monad.State.Interface
 import public Control.Monad.Error.Interface
 import Control.Monad.Maybe
 
+import Data.Colist
 import Data.DPair
+import Data.Fuel
 import Data.List
 import Data.List1
 import Data.List.Lazy
@@ -66,13 +68,14 @@ unGen $ OneOf gs = pickUniformly (forget gs) >>= assert_total unGen . force
 unGen $ Bind x f = unGen x >>= assert_total unGen . f
 
 export
+unGenTryAll : RandomGen g => (seed : g) -> Gen a -> Colist $ Maybe a
+unGenTryAll seed gen = do
+  let (seed, mc) = runState seed $ runMaybeT $ unGen {g} {m=MaybeT $ State g} gen
+  mc :: unGenTryAll seed gen
+
+export
 unGenTryN : RandomGen g => (n : Nat) -> g -> Gen a -> LazyList a
-unGenTryN n seed gen = mapMaybe id $ go n seed where
-  go : Nat -> g -> LazyList $ Maybe a
-  go Z     _    = []
-  go (S n) seed = do
-    let (seed, mc) = runState seed $ runMaybeT $ unGen {g} {m=MaybeT $ State g} gen
-    mc :: go n seed
+unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 
 -- TODO To add config and Reader for that.
 --      This config should contain attempts count for each `unGen` (including those in combinators)
