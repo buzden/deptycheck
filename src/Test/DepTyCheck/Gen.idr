@@ -7,7 +7,6 @@ import public Control.Monad.State.Interface
 import public Control.Monad.Error.Interface
 import Control.Monad.Maybe
 
-import Data.Colist
 import Data.DPair
 import Data.Fuel
 import Data.List
@@ -68,7 +67,7 @@ unGen $ OneOf gs = pickUniformly (forget gs) >>= assert_total unGen . force
 unGen $ Bind x f = unGen x >>= assert_total unGen . f
 
 export
-unGenTryAll : RandomGen g => (seed : g) -> Gen a -> Colist $ Maybe a
+unGenTryAll : RandomGen g => (seed : g) -> Gen a -> Stream $ Maybe a
 unGenTryAll seed gen = do
   let (seed, mc) = runState seed $ runMaybeT $ unGen {g} {m=MaybeT $ State g} gen
   mc :: unGenTryAll seed gen
