@@ -41,10 +41,11 @@ ConstructorDerivator => DerivatorCore where
     let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
 
     -- derive bodies for generators per constructors
-    consBodies <- for sig.targetType.cons $ \con => canonicConsBody sig (consGenName con) con <&> def (consGenName con)
+    consBodies <- for sig.targetType.cons $ \con => logBounds "consBody" [sig, con] $
+      canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
     -- calculate which constructors are recursive and which are not
-    consRecs <- for sig.targetType.cons $ \con => do
+    consRecs <- for sig.targetType.cons $ \con => logBounds "consRec" [sig, con] $ do
       let conExprs = map type con.args ++ (getExpr <$> snd (unAppAny con.type))
       r <- any (hasNameInsideDeep sig.targetType.name) conExprs
       pure (con, toRec r)
