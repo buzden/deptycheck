@@ -42,4 +42,8 @@ logBounds subTopic position action = do
 
   let lg : String -> m () := \mark => logMsg topic level "\{position}\{mark}"
 
-  lg startMark *> action <* lg endMark
+  -- vertical monadic style seems to use much less memory than `lg startMark *> action <* lg endMark`
+  lg startMark
+  r <- action
+  lg endMark
+  pure r
