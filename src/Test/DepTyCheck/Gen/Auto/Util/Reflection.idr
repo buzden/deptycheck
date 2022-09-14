@@ -18,6 +18,7 @@ import public Language.Reflection.Pretty
 import public Test.DepTyCheck.Gen.Auto.Util.Alternative
 import public Test.DepTyCheck.Gen.Auto.Util.Collections
 import public Test.DepTyCheck.Gen.Auto.Util.Fin
+import public Test.DepTyCheck.Gen.Auto.Util.Logging
 import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 
 %default total
@@ -29,6 +30,10 @@ import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 export
 Interpolation TTImp where
   interpolate expr = show $ assert_total $ pretty {ann=Unit} expr
+
+export
+SingleLogPosition Con where
+  logPosition con = "\{show con.name}"
 
 ----------------------------------------------
 --- Compiler-based `TTImp` transformations ---

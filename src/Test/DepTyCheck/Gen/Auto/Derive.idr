@@ -27,6 +27,10 @@ namespace GenSignature
   characteristics : GenSignature -> (String, List Nat)
   characteristics $ MkGenSignature ty giv = (show ty.name, toNatList giv)
 
+export
+SingleLogPosition GenSignature where
+  logPosition sig = "\{show sig.targetType.name}\{show sig.givenParams.asList}"
+
 public export
 Eq GenSignature where
   (==) = (==) `on` characteristics

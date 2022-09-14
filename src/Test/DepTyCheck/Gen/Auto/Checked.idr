@@ -129,9 +129,7 @@ namespace ClojuringCanonicImpl
         modify $ insert sig name
 
         -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
-        logMsg "deptycheck.derive.type" 5 "\{show sig.targetType.name}\{show sig.givenParams.asList} ___ start ___"
-        (genFunClaim, genFunBody) <- assert_total $ deriveCanonical sig name
-        logMsg "deptycheck.derive.type" 5 "\{show sig.targetType.name}\{show sig.givenParams.asList} ^^^  end  ^^^"
+        (genFunClaim, genFunBody) <- logBounds "type" [sig] $ assert_total $ deriveCanonical sig name
 
         -- remember the derived stuff
         tell ([genFunClaim], [genFunBody])
