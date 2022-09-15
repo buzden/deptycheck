@@ -427,16 +427,16 @@ allVarNames expr = ttimp expr where
     ity $ MkTy _ _ _ ty = ttimp ty
 
     decl : Decl -> LazyList Name
-    decl $ IClaim _ _ _ _ t                       = ity t
-    decl $ IData _ _ _ z                          = data_ z
-    decl $ IDef _ _ xs                            = foldMap clause xs
-    decl $ IParameters _ xs ys                    = lncpt xs ++ assert_total (foldMap decl ys)
-    decl $ IRecord _ _ _ _ $ MkRecord _ _ ps _ fs = lncpt ps ++ foldMap (\(MkIField _ _ pii _ tt) => piInfo pii ++ ttimp tt) fs
-    decl $ INamespace _ _ xs                      = assert_total $ foldMap decl xs
-    decl $ ITransform _ _ z w                     = ttimp z ++ ttimp w
-    decl $ IRunElabDecl _ y                       = ttimp y
-    decl $ ILog _                                 = []
-    decl $ IBuiltin _ _ _                         = []
+    decl $ IClaim _ _ _ _ t                         = ity t
+    decl $ IData _ _ _ z                            = data_ z
+    decl $ IDef _ _ xs                              = foldMap clause xs
+    decl $ IParameters _ xs ys                      = lncpt xs ++ assert_total (foldMap decl ys)
+    decl $ IRecord _ _ _ _ $ MkRecord _ _ ps _ _ fs = lncpt ps ++ foldMap (\(MkIField _ _ pii _ tt) => piInfo pii ++ ttimp tt) fs
+    decl $ INamespace _ _ xs                        = assert_total $ foldMap decl xs
+    decl $ ITransform _ _ z w                       = ttimp z ++ ttimp w
+    decl $ IRunElabDecl _ y                         = ttimp y
+    decl $ ILog _                                   = []
+    decl $ IBuiltin _ _ _                           = []
 
     data_ : Data -> LazyList Name
     data_ $ MkData x n tycon _ datacons = ttimp tycon ++ foldMap ity datacons
@@ -515,16 +515,16 @@ hasNameInsideDeep nm expr = evalStateT .| the (SortedSet Name) empty .| hasInsid
       ity $ MkTy _ _ _ ty = ttimp ty
 
       decl : Decl -> mm Bool
-      decl $ IClaim _ _ _ _ t                       = ity t
-      decl $ IData _ _ _ z                          = data_ z
-      decl $ IDef _ _ xs                            = any clause xs
-      decl $ IParameters _ xs ys                    = lncpt xs || assert_total (any decl ys)
-      decl $ IRecord _ _ _ _ $ MkRecord _ _ ps _ fs = lncpt ps || any (\(MkIField _ _ pii _ tt) => piInfo pii || ttimp tt) fs
-      decl $ INamespace _ _ xs                      = assert_total $ any decl xs
-      decl $ ITransform _ _ z w                     = ttimp z || ttimp w
-      decl $ IRunElabDecl _ y                       = ttimp y
-      decl $ ILog _                                 = pure False
-      decl $ IBuiltin _ _ _                         = pure False
+      decl $ IClaim _ _ _ _ t                         = ity t
+      decl $ IData _ _ _ z                            = data_ z
+      decl $ IDef _ _ xs                              = any clause xs
+      decl $ IParameters _ xs ys                      = lncpt xs || assert_total (any decl ys)
+      decl $ IRecord _ _ _ _ $ MkRecord _ _ ps _ _ fs = lncpt ps || any (\(MkIField _ _ pii _ tt) => piInfo pii || ttimp tt) fs
+      decl $ INamespace _ _ xs                        = assert_total $ any decl xs
+      decl $ ITransform _ _ z w                       = ttimp z || ttimp w
+      decl $ IRunElabDecl _ y                         = ttimp y
+      decl $ ILog _                                   = pure False
+      decl $ IBuiltin _ _ _                           = pure False
 
       data_ : Data -> mm Bool
       data_ $ MkData x n tycon _ datacons = ttimp tycon || any ity datacons
