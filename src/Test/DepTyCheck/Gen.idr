@@ -67,10 +67,14 @@ unGen $ OneOf gs = pickUniformly (forget gs) >>= assert_total unGen . force
 unGen $ Bind x f = unGen x >>= assert_total unGen . f
 
 export
-unGenTryAll : RandomGen g => (seed : g) -> Gen a -> Stream $ Maybe a
-unGenTryAll seed gen = do
+unGenTryAll' : RandomGen g => (seed : g) -> Gen a -> Stream (Maybe a, g)
+unGenTryAll' seed gen = do
   let (seed, mc) = runState seed $ runMaybeT $ unGen {g} {m=MaybeT $ State g} gen
-  mc :: unGenTryAll seed gen
+  (mc, seed) :: unGenTryAll' seed gen
+
+export
+unGenTryAll : RandomGen g => (seed : g) -> Gen a -> Stream $ Maybe a
+unGenTryAll = map fst .: unGenTryAll'
 
 export
 unGenTryN : RandomGen g => (n : Nat) -> g -> Gen a -> LazyList a
