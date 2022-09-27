@@ -48,6 +48,10 @@ data Gen : Type -> Type where
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
+-----------------------------
+--- Very basic generators ---
+-----------------------------
+
 export
 chooseAny : Random a => Gen a
 chooseAny = Point random'
@@ -59,6 +63,10 @@ choose bounds = Point $ randomR' bounds
 export
 empty : Gen a
 empty = Point $ throwError ()
+
+--------------------------
+--- Running generators ---
+--------------------------
 
 export
 unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
@@ -85,6 +93,10 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 --      Current `unGen` should be renamed to `unGen1` and not be exported.
 --      Current `unGenTryN` should be changed returning `LazyList (a, g)` and
 --      new `unGen` should be implemented trying `retry` times from config using this (`g` must be stored to restore correct state of seed).
+
+---------------------------------
+--- Combinators of generators ---
+---------------------------------
 
 export
 Functor Gen where
@@ -244,6 +256,10 @@ export
 variant : Nat -> Gen a -> Gen a
 variant Z       gen = gen
 variant x@(S _) gen = Point $ modify (index x . iterate (fst . next)) *> unGen gen
+
+-----------------------------
+--- Particular generators ---
+-----------------------------
 
 export
 listOf : {default (choose (0, 10)) length : Gen Nat} -> Gen a -> Gen (List a)
