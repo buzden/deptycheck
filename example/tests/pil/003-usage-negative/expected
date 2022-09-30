@@ -62,7 +62,7 @@ Negative:35:19--35:23
  35 | bad_for = for (do Int'. "x" #= C 0; Int'. "y" #= C 0)
                         ^^^^
 
-Error: While processing right hand side of bad_read_reg_base. Can't find an implementation for IsJust (index (natToFinLt 1) (Base [Nothing, Nothing, Just Int', Nothing])).
+Error: While processing right hand side of bad_read_reg_base. Can't find an implementation for IsJust (index (natToFinLT 1) (Base [Nothing, Nothing, Just Int', Nothing])).
 
 Negative:44:17--44:20
  40 | -- Registers-related --
@@ -72,7 +72,7 @@ Negative:44:17--44:20
  44 |   Int'. "x" !#= R 1
                       ^^^
 
-Error: While processing right hand side of bad_read_reg_undef_with. Can't find an implementation for IsJust (index (natToFinLt 2) (With AllUndefined (FS (FS (FS FZ)), Just Int'))).
+Error: While processing right hand side of bad_read_reg_undef_with. Can't find an implementation for IsJust (index (natToFinLT 2) (With AllUndefined (FS (FS (FS FZ)), Just Int'))).
 
 Negative:49:17--49:20
  45 | 
@@ -82,7 +82,7 @@ Negative:49:17--49:20
  49 |   Int'. "x" !#= R 2
                       ^^^
 
-Error: While processing right hand side of bad_read_reg_with. Can't find an implementation for IsJust (index (natToFinLt 2) (With regs (FS (FS (FS FZ)), Just Int'))).
+Error: While processing right hand side of bad_read_reg_with. Can't find an implementation for IsJust (index (natToFinLT 2) (With regs (FS (FS (FS FZ)), Just Int'))).
 
 Negative:53:17--53:20
  49 |   Int'. "x" !#= R 2
@@ -93,10 +93,10 @@ Negative:53:17--53:20
                       ^^^
 
 Error: While processing right hand side of bad_registers_ass. When unifying:
-    FS (natToFinLt 5)
+    FS (natToFinLT 5)
 and:
     FS (FS (FS FZ))
-Mismatch between: FS (natToFinLt 2) and FZ.
+Mismatch between: FS (natToFinLT 2) and FZ.
 
 Negative:57:3--57:20
  53 |   Int'. "x" !#= R 2 + C 0
@@ -106,7 +106,7 @@ Negative:57:3--57:20
  57 |   Int'. "x" !#= C 0
         ^^^^^^^^^^^^^^^^^
 
-Error: While processing right hand side of bad_registers_infer_nothing. Can't find an implementation for IsJust (index (natToFinLt 0) AllUndefined).
+Error: While processing right hand side of bad_registers_infer_nothing. Can't find an implementation for IsJust (index (natToFinLT 0) AllUndefined).
 
 Negative:62:11--62:14
  58 |   6 %= V "x"
@@ -126,7 +126,7 @@ Negative:69:17--69:22
  69 |   Int'. "y" !#= V "x"
                       ^^^^^
 
-Error: While processing right hand side of bad_if_taints_register. Can't find an implementation for IsJust (index (natToFinLt 3) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Int')) (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Bool')))).
+Error: While processing right hand side of bad_if_taints_register. Can't find an implementation for IsJust (index (natToFinLT 3) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Int')) (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Bool')))).
 
 Negative:77:17--77:20
  73 | bad_if_taints_register : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
@@ -136,7 +136,7 @@ Negative:77:17--77:20
  77 |   Int'. "x" !#= R 3
                       ^^^
 
-Error: While processing right hand side of bad_if_single_branch_taint. Can't find an implementation for IsJust (index (natToFinLt 3) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just String')) (With regs (FS (FS (FS FZ)), Just Int')))).
+Error: While processing right hand side of bad_if_single_branch_taint. Can't find an implementation for IsJust (index (natToFinLT 3) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just String')) (With regs (FS (FS (FS FZ)), Just Int')))).
 
 Negative:83:18--83:21
  79 | bad_if_single_branch_taint : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
