@@ -42,6 +42,8 @@ wrapLazy f = delay . f . force
 
 export
 data Gen : Type -> Type where
+  Empty : Gen a
+  Pure  : a -> Gen a
   Point : (forall g, m. RandomGen g => MonadState g m => MonadError () m => m a) -> Gen a
   OneOf : List1 (Lazy (Gen a)) -> Gen a
   Bind  : Gen c -> (c -> Gen a) -> Gen a
@@ -62,7 +64,7 @@ choose bounds = Point $ randomR' bounds
 
 export
 empty : Gen a
-empty = Point $ throwError ()
+empty = Empty
 
 --------------------------
 --- Running generators ---
@@ -70,6 +72,8 @@ empty = Point $ throwError ()
 
 export
 unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
+unGen $ Empty    = throwError ()
+unGen $ Pure x   = pure x
 unGen $ Point sf = sf
 unGen $ OneOf gs = pickUniformly (forget gs) >>= assert_total unGen . force
 unGen $ Bind x f = unGen x >>= assert_total unGen . f
@@ -100,13 +104,21 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 
 export
 Functor Gen where
+  map _ $ Empty    = Empty
+  map f $ Pure x   = Pure $ f x
   map f $ Point sf = Point $ f <$> sf
   map f $ OneOf gs = OneOf $ wrapLazy (assert_total map f) <$> gs
   map f $ Bind x g = Bind x $ assert_total map f . g
 
 export
 Applicative Gen where
-  pure x = Point $ pure x
+  pure = Pure
+
+  Empty <*> _ = Empty
+  _ <*> Empty = Empty
+
+  Pure f <*> g = f <$> g
+  g <*> Pure x = g <&> \f => f x
 
   Point sfl <*> Point sfr = Point $ sfl <*> sfr
 
@@ -118,6 +130,8 @@ Applicative Gen where
 
 export
 Monad Gen where
+  Empty       >>= _  = Empty
+  Pure x      >>= nf = nf x
   g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
   OneOf gs    >>= nf = OneOf $ gs <&> wrapLazy (assert_total (>>= nf))
   Bind x f    >>= nf = x >>= \x => f x >>= nf
@@ -156,6 +170,7 @@ elements' = elements . toList
 
 export
 alternativesOf : Gen a -> List $ Lazy (Gen a)
+alternativesOf $ Empty    = []
 alternativesOf $ OneOf gs = forget gs
 alternativesOf g          = [g]
 
@@ -220,6 +235,8 @@ infix 8 `mapAlternativesOf`
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
+mapMaybe _ $ Empty    = Empty
+mapMaybe p $ Pure x   = maybe Empty Pure $ p x
 mapMaybe p $ Point sf = Point $ sf >>= maybe (throwError ()) pure . p
 mapMaybe p $ OneOf gs = OneOf $ gs <&> wrapLazy (assert_total mapMaybe p)
 mapMaybe p $ Bind x f = Bind x $ assert_total mapMaybe p . f

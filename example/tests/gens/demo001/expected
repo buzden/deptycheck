@@ -1,57 +1,56 @@
 1/1: Building DemoGen (DemoGen.idr)
-[0] = False;
-char * jrd;
-[0] = False;
-// regs ty after: [Bool, -]
-
-----
-
-[0] = False;
-char * jrd;
-// regs ty after: [Bool, -]
-
-----
-
-[0] = False;
-// regs ty after: [Bool, -]
-
-----
-
-[0] = -61;
+[0] = (inc(-34) + (-95 * 86)) + 76;
 // regs ty after: [Int, -]
 
 ----
 
-[1] = -73;
-// regs ty after: [-, Int]
+[1] = True;
+[0] = ((-87 * 66) + 62) * (-86 * inc(69));
+// regs ty after: [Int, Bool]
 
 ----
 
+[1] = True;
+// regs ty after: [-, Bool]
 
+----
+
+[1] = 50;
+[0] = "e";
+[1] = as_str(84);
+// regs ty after: [String, String]
+
+----
+
+[0] = -42;
+// regs ty after: [Int, -]
+
+----
+
+[1] = inc(89 + 48) < ((82 * -27) + (-52 * 7));
+// regs ty after: [-, Bool]
+
+----
+
+[1] = ((True || False) || (True || True)) || ((-76 * -21) <= (13 * -4));
+// regs ty after: [-, Bool]
+
+----
+
+[0] = ((-87 * 66) + 62) * (-86 * inc(69));
+// regs ty after: [Int, -]
+
+----
+
+puts(concat(as_str(-17), "bf"));
 // regs ty after: [-, -]
 
 ----
 
-[0] = 2;
-// regs ty after: [Int, -]
-
-----
-
-[0] = 2;
-// regs ty after: [Int, -]
-
-----
-
-puts("q");
-// regs ty after: [-, -]
-
-----
-
-[0] = inc(inc(-63)) + 82;
-[0] = as_str(-30);
-// regs ty after: [String, -]
-
-----
-
-[1] = -64;
+[1] = -18;
 // regs ty after: [-, Int]
+
+----
+
+[1] = True;
+// regs ty after: [-, Bool]
