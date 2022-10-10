@@ -120,7 +120,7 @@ export
 Monad Gen where
   g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
   OneOf gs    >>= nf = OneOf $ gs <&> wrapLazy (assert_total (>>= nf))
-  Bind x f    >>= nf = Bind x $ assert_total $ f >=> nf
+  Bind x f    >>= nf = x >>= \x => f x >>= nf
 
 ||| Choose one of the given generators uniformly.
 |||
