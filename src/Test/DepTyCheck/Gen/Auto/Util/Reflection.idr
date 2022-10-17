@@ -147,10 +147,15 @@ public export
 liftList : Foldable f => f TTImp -> TTImp
 liftList = foldr (\l, r => `(~l :: ~r)) `([])
 
+public export
+data GenPresence = ForSure | UnderMaybe
+
+-- no optimisation for `UnderMaybe` case because otherwise types won't match
 export
-callOneOf : List TTImp -> TTImp
-callOneOf [v]      = v
-callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf} .$ liftList variants
+callOneOf : GenPresence -> List TTImp -> TTImp
+callOneOf ForSure [v]         = v
+callOneOf ForSure variants    = var `{Test.DepTyCheck.Gen.oneOf} .$ liftList variants
+callOneOf UnderMaybe variants = var `{Test.DepTyCheck.Gen.oneOf'} .$ liftList variants
 
 export
 isSimpleBindVar : TTImp -> Bool

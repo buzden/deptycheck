@@ -97,7 +97,7 @@ canonicConsBody sig name con = do
                (alreadyMatchedRenames : SortedSet String) ->
                (left : List (String, String)) ->
                Clause
-        step withlhs matched [] = PatClause EmptyFC .| withlhs (bindExprs matched) .| rhs
+        step withlhs matched [] = PatClause EmptyFC .| withlhs (bindExprs matched) .| `(Prelude.Just ~(rhs))
         step withlhs matched ((orig, renam)::rest) =
           WithClause EmptyFC (withlhs $ bindExprs matched) MW
             `(Decidable.Equality.decEq ~(varStr renam) ~(varStr orig))
@@ -105,7 +105,7 @@ canonicConsBody sig name con = do
             [ -- happy case
               step ((.$ `(Prelude.Yes Builtin.Refl)) . withlhs) (insert renam matched) rest
             , -- empty case
-              PatClause EmptyFC .| withlhs (bindExprs matched) .$ `(Prelude.No _) .| `(empty)
+              PatClause EmptyFC .| withlhs (bindExprs matched) .$ `(Prelude.No _) .| `(Prelude.Nothing)
             ]
 
         -- Order pairs by the first element like they are present in the constructor's signature
@@ -128,4 +128,4 @@ canonicConsBody sig name con = do
     [ deceqise (callCanonic sig name $ bindVar fuelArg) !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
     ++ if all isSimpleBindVar $ bindExprs empty then [] {- do not produce dead code if the happy case handles everything already -} else
       -- The rest case, if given arguments do not conform to the current constructor then return empty generator
-      [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(empty) ]
+      [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(Prelude.Nothing) ]

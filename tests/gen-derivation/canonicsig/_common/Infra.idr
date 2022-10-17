@@ -19,7 +19,7 @@ TestCaseDesc = (String, TestCaseData)
 
 export
 chk : (ty : TypeInfo) -> List (Fin ty.args.length) -> Type -> TestCaseData
-chk ty giv expr = (canonicSig (MkGenSignature ty $ fromList giv), Fuel -> expr)
+chk ty giv expr = (canonicSig ForSure (MkGenSignature ty $ fromList giv), Fuel -> expr)
 
 export
 caseVerdict : TestCaseDesc -> Elab String

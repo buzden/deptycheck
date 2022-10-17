@@ -15,8 +15,6 @@ Generated values:
 -----
 (0 ** (Nothing ** !))
 -----
-(2 ** (Just RefTy ** ..!))
------
 (0 ** (Nothing ** !))
 -----
 (0 ** (Nothing ** !))

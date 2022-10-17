@@ -29,13 +29,16 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar <<Data.Vect.Nil>>
-                                                          $ IVar Data.Fuel.Dry
-                                                          $ IVar len
-                                                          $ IVar elem)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar <<Data.Vect.Nil>>
+                                                                        $ IVar Data.Fuel.Dry
+                                                                        $ IVar len
+                                                                        $ IVar elem)
+                                                                 $ IVar Nil))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<Data.Vect.Nil>>
                                                                         $ IVar ^fuel_arg^
@@ -54,10 +57,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg len : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg elem : IType)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ (IApp. IVar Data.Vect.Vect
-                                                            $ IVar len
-                                                            $ IVar elem))))
+                                             -> (IApp. IVar Prelude.Maybe
+                                                     $ IDelayed Lazy
+                                                                (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                     $ (IApp. IVar Data.Vect.Vect
+                                                                            $ IVar len
+                                                                            $ IVar elem)))))
                             IClaim MW
                                    Export
                                    []
@@ -65,30 +70,34 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg len : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg elem : IType)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ (IApp. IVar Data.Vect.Vect
-                                                            $ IVar len
-                                                            $ IVar elem))))
+                                             -> (IApp. IVar Prelude.Maybe
+                                                     $ IDelayed Lazy
+                                                                (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                     $ (IApp. IVar Data.Vect.Vect
+                                                                            $ IVar len
+                                                                            $ IVar elem)))))
                             IDef <<Data.Vect.Nil>>
                                  [ PatClause (IApp. IVar <<Data.Vect.Nil>>
                                                   $ IBindVar ^cons_fuel^
                                                   $ IVar Prelude.Types.Z
                                                   $ IBindVar elem)
-                                             (IVar empty)
+                                             (IApp. IVar Prelude.Just
+                                                  $ IVar empty)
                                  , PatClause (IApp. IVar <<Data.Vect.Nil>>
                                                   $ Implicit True
                                                   $ Implicit True
                                                   $ Implicit True)
-                                             (IVar empty) ]
+                                             (IVar Prelude.Nothing) ]
                             IDef <<Data.Vect.(::)>>
                                  [ PatClause (IApp. IVar <<Data.Vect.(::)>>
                                                   $ IBindVar ^cons_fuel^
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar len)
                                                   $ IBindVar elem)
-                                             (IVar empty)
+                                             (IApp. IVar Prelude.Just
+                                                  $ IVar empty)
                                  , PatClause (IApp. IVar <<Data.Vect.(::)>>
                                                   $ Implicit True
                                                   $ Implicit True
                                                   $ Implicit True)
-                                             (IVar empty) ] ]
+                                             (IVar Prelude.Nothing) ] ]

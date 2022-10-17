@@ -54,15 +54,18 @@ CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
 --- Low-level derivation interface ---
 
 export
-canonicSig : GenSignature -> TTImp
-canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) where
+canonicSig : GenPresence -> GenSignature -> TTImp
+canonicSig pres sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
 
   arg : Fin sig.targetType.args.length -> Arg False
   arg idx = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW ExplicitArg (Just name) type
 
   returnTy : TTImp
-  returnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs where
+  returnTy = case pres of
+               ForSure    => baseReturnTy
+               UnderMaybe => `(Prelude.Maybe $ Lazy (~(baseReturnTy)))
+    where
 
     targetTypeApplied : TTImp
     targetTypeApplied = foldr apply (extractTargetTyExpr sig.targetType) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => case piInfo of
@@ -74,6 +77,9 @@ canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel)
     generatedArgs : List (Name, TTImp)
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
                       ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (name, type)
+
+    baseReturnTy : TTImp
+    baseReturnTy = var `{Test.DepTyCheck.Gen.Gen} .$ buildDPair targetTypeApplied generatedArgs
 
 -- Complementary to `canonicSig`
 export
@@ -108,4 +114,4 @@ canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
 
 export
 deriveCanonical : DerivatorCore => CanonicGen m => GenSignature -> Name -> m (Decl, Decl)
-deriveCanonical sig name = pure (export' name (canonicSig sig), def name !(canonicBody sig name))
+deriveCanonical sig name = pure (export' name (canonicSig ForSure sig), def name !(canonicBody sig name))

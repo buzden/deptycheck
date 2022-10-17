@@ -38,7 +38,7 @@ ConstructorDerivator => DerivatorCore where
     when .| sig.targetType.name == `{Test.DepTyCheck.Gen.Gen} .| fail "Target type of a derived `Gen` cannot be a `Gen`"
 
     -- generate claims for generators per constructors
-    let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
+    let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig UnderMaybe sig)
 
     -- derive bodies for generators per constructors
     consBodies <- for sig.targetType.cons $ \con => logBounds "consBody" [sig, con] $
@@ -72,21 +72,21 @@ ConstructorDerivator => DerivatorCore where
       let True = isJust $ find ((== Recursive) . snd) consRecs
         | False =>
             -- no recursive constructors, thus just call all without spending fuel
-            callOneOf (consRecs <&> callConsGen (varStr fuelAr) . fst)
+            callOneOf UnderMaybe (consRecs <&> callConsGen (varStr fuelAr) . fst)
 
       -- pattern match on the fuel argument
       iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
           let nonRecCons = fst <$> filter ((== NonRecursive) . snd) consRecs in
-          let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf (nonRecCons <&> callConsGen dry)
+          let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf UnderMaybe (nonRecCons <&> callConsGen dry)
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
           let selectFuel : Recursiveness -> String
               selectFuel Recursive    = subFuelArg
               selectFuel NonRecursive = fuelAr
-          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callOneOf (consRecs <&> \(con, rec) => callConsGen (varStr $ selectFuel rec) con)
+          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callOneOf UnderMaybe (consRecs <&> \(con, rec) => callConsGen (varStr $ selectFuel rec) con)
         ]
 
       where

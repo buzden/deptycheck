@@ -14,16 +14,22 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                   $ IVar Builtin.Unit)))
          IDef <Builtin.Unit>[]
               [ PatClause (IApp. IVar <Builtin.Unit>[] $ IBindVar ^fuel_arg^)
-                          (ILocal (IApp. IVar <<Builtin.MkUnit>>
-                                       $ IVar ^fuel_arg^))
+                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                       $ (IApp. IVar ::
+                                              $ (IApp. IVar <<Builtin.MkUnit>>
+                                                     $ IVar ^fuel_arg^)
+                                              $ IVar Nil)))
                             IClaim MW
                                    Export
                                    []
                                    (MkTy <<Builtin.MkUnit>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Builtin.Unit)))
+                                             -> (IApp. IVar Prelude.Maybe
+                                                     $ IDelayed Lazy
+                                                                (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                     $ IVar Builtin.Unit))))
                             IDef <<Builtin.MkUnit>>
                                  [ PatClause (IApp. IVar <<Builtin.MkUnit>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IVar empty) ] ]
+                                             (IApp. IVar Prelude.Just
+                                                  $ IVar empty) ] ]

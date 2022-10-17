@@ -39,7 +39,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                $ IBindVar {arg:833}
                                $ IBindVar {arg:836}
                                $ IBindVar {arg:839})
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<DerivedGen.XE>>
                                                      $ IVar ^fuel_arg^
@@ -64,12 +64,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:833} : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg {arg:836} : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg {arg:839} : IVar Prelude.Types.Nat)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ (IApp. IVar DerivedGen.X
-                                                            $ IVar {arg:830}
-                                                            $ IVar {arg:833}
-                                                            $ IVar {arg:836}
-                                                            $ IVar {arg:839}))))
+                                             -> (IApp. IVar Prelude.Maybe
+                                                     $ IDelayed Lazy
+                                                                (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                     $ (IApp. IVar DerivedGen.X
+                                                                            $ IVar {arg:830}
+                                                                            $ IVar {arg:833}
+                                                                            $ IVar {arg:836}
+                                                                            $ IVar {arg:839})))))
                             IClaim MW
                                    Export
                                    []
@@ -79,12 +81,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:833} : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg {arg:836} : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg {arg:839} : IVar Prelude.Types.Nat)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ (IApp. IVar DerivedGen.X
-                                                            $ IVar {arg:830}
-                                                            $ IVar {arg:833}
-                                                            $ IVar {arg:836}
-                                                            $ IVar {arg:839}))))
+                                             -> (IApp. IVar Prelude.Maybe
+                                                     $ IDelayed Lazy
+                                                                (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                     $ (IApp. IVar DerivedGen.X
+                                                                            $ IVar {arg:830}
+                                                                            $ IVar {arg:833}
+                                                                            $ IVar {arg:836}
+                                                                            $ IVar {arg:839})))))
                             IDef <<DerivedGen.XE>>
                                  [ WithClause (IApp. IVar <<DerivedGen.XE>>
                                                    $ IBindVar ^cons_fuel^
@@ -125,7 +129,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                    $ IVar Builtin.Refl)
                                                                             $ (IApp. IVar Prelude.Yes
                                                                                    $ IVar Builtin.Refl))
-                                                                       (IVar empty)
+                                                                       (IApp. IVar Prelude.Just
+                                                                            $ IVar empty)
                                                            , PatClause (IApp. IVar <<DerivedGen.XE>>
                                                                             $ IBindVar ^cons_fuel^
                                                                             $ IBindVar n
@@ -137,7 +142,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                    $ IVar Builtin.Refl)
                                                                             $ (IApp. IVar Prelude.No
                                                                                    $ Implicit True))
-                                                                       (IVar empty) ]
+                                                                       (IVar Prelude.Nothing) ]
                                               , PatClause (IApp. IVar <<DerivedGen.XE>>
                                                                $ IBindVar ^cons_fuel^
                                                                $ IBindVar n
@@ -147,14 +152,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                $ IBindVar to_be_deceqed^^n1
                                                                $ (IApp. IVar Prelude.No
                                                                       $ Implicit True))
-                                                          (IVar empty) ]
+                                                          (IVar Prelude.Nothing) ]
                                  , PatClause (IApp. IVar <<DerivedGen.XE>>
                                                   $ Implicit True
                                                   $ Implicit True
                                                   $ Implicit True
                                                   $ Implicit True
                                                   $ Implicit True)
-                                             (IVar empty) ]
+                                             (IVar Prelude.Nothing) ]
                             IDef <<DerivedGen.XS>>
                                  [ WithClause (IApp. IVar <<DerivedGen.XS>>
                                                    $ IBindVar ^cons_fuel^
@@ -192,7 +197,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                    $ IVar Builtin.Refl)
                                                                             $ (IApp. IVar Prelude.Yes
                                                                                    $ IVar Builtin.Refl))
-                                                                       (IVar empty)
+                                                                       (IApp. IVar Prelude.Just
+                                                                            $ IVar empty)
                                                            , PatClause (IApp. IVar <<DerivedGen.XS>>
                                                                             $ IBindVar ^cons_fuel^
                                                                             $ IBindVar n
@@ -203,7 +209,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                    $ IVar Builtin.Refl)
                                                                             $ (IApp. IVar Prelude.No
                                                                                    $ Implicit True))
-                                                                       (IVar empty) ]
+                                                                       (IVar Prelude.Nothing) ]
                                               , PatClause (IApp. IVar <<DerivedGen.XS>>
                                                                $ IBindVar ^cons_fuel^
                                                                $ IBindVar n
@@ -212,4 +218,4 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                $ IBindVar to_be_deceqed^^m1
                                                                $ (IApp. IVar Prelude.No
                                                                       $ Implicit True))
-                                                          (IVar empty) ] ] ]
+                                                          (IVar Prelude.Nothing) ] ] ]

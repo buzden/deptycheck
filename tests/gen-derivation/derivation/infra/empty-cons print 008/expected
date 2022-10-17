@@ -25,11 +25,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar <<Data.Vect.Nil>>
-                                                          $ IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar <<Data.Vect.Nil>>
+                                                                        $ IVar Data.Fuel.Dry)
+                                                                 $ IVar Nil))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf'
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<Data.Vect.Nil>>
                                                                         $ IVar ^fuel_arg^)
@@ -42,36 +45,42 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    []
                                    (MkTy <<Data.Vect.Nil>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ (IApp. IVar Builtin.DPair.DPair
-                                                            $ IVar Prelude.Types.Nat
-                                                            $ (ILam.  (MW ExplicitArg len : IVar Prelude.Types.Nat)
-                                                                   => (IApp. IVar Builtin.DPair.DPair
-                                                                           $ IType
-                                                                           $ (ILam.  (MW ExplicitArg elem : IType)
-                                                                                  => (IApp. IVar Data.Vect.Vect
-                                                                                          $ IVar len
-                                                                                          $ IVar elem))))))))
+                                             -> (IApp. IVar Prelude.Maybe
+                                                     $ IDelayed Lazy
+                                                                (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                                            $ IVar Prelude.Types.Nat
+                                                                            $ (ILam.  (MW ExplicitArg len : IVar Prelude.Types.Nat)
+                                                                                   => (IApp. IVar Builtin.DPair.DPair
+                                                                                           $ IType
+                                                                                           $ (ILam.  (MW ExplicitArg elem : IType)
+                                                                                                  => (IApp. IVar Data.Vect.Vect
+                                                                                                          $ IVar len
+                                                                                                          $ IVar elem)))))))))
                             IClaim MW
                                    Export
                                    []
                                    (MkTy <<Data.Vect.(::)>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ (IApp. IVar Builtin.DPair.DPair
-                                                            $ IVar Prelude.Types.Nat
-                                                            $ (ILam.  (MW ExplicitArg len : IVar Prelude.Types.Nat)
-                                                                   => (IApp. IVar Builtin.DPair.DPair
-                                                                           $ IType
-                                                                           $ (ILam.  (MW ExplicitArg elem : IType)
-                                                                                  => (IApp. IVar Data.Vect.Vect
-                                                                                          $ IVar len
-                                                                                          $ IVar elem))))))))
+                                             -> (IApp. IVar Prelude.Maybe
+                                                     $ IDelayed Lazy
+                                                                (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                                            $ IVar Prelude.Types.Nat
+                                                                            $ (ILam.  (MW ExplicitArg len : IVar Prelude.Types.Nat)
+                                                                                   => (IApp. IVar Builtin.DPair.DPair
+                                                                                           $ IType
+                                                                                           $ (ILam.  (MW ExplicitArg elem : IType)
+                                                                                                  => (IApp. IVar Data.Vect.Vect
+                                                                                                          $ IVar len
+                                                                                                          $ IVar elem)))))))))
                             IDef <<Data.Vect.Nil>>
                                  [ PatClause (IApp. IVar <<Data.Vect.Nil>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IVar empty) ]
+                                             (IApp. IVar Prelude.Just
+                                                  $ IVar empty) ]
                             IDef <<Data.Vect.(::)>>
                                  [ PatClause (IApp. IVar <<Data.Vect.(::)>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IVar empty) ] ]
+                                             (IApp. IVar Prelude.Just
+                                                  $ IVar empty) ] ]

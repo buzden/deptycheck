@@ -27,10 +27,13 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                $ IBindVar ^fuel_arg^
                                $ IBindVar n
                                $ IBindVar {arg:832})
-                          (ILocal (IApp. IVar <<DerivedGen.MkX>>
-                                       $ IVar ^fuel_arg^
-                                       $ IVar n
-                                       $ IVar {arg:832}))
+                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf'
+                                       $ (IApp. IVar ::
+                                              $ (IApp. IVar <<DerivedGen.MkX>>
+                                                     $ IVar ^fuel_arg^
+                                                     $ IVar n
+                                                     $ IVar {arg:832})
+                                              $ IVar Nil)))
                             IClaim MW
                                    Export
                                    []
@@ -39,10 +42,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg n : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg {arg:832} : IApp. IVar Data.Fin.Fin
                                                                                 $ IVar n)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ (IApp. IVar DerivedGen.X
-                                                            $ IVar n
-                                                            $ IVar {arg:832}))))
+                                             -> (IApp. IVar Prelude.Maybe
+                                                     $ IDelayed Lazy
+                                                                (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                     $ (IApp. IVar DerivedGen.X
+                                                                            $ IVar n
+                                                                            $ IVar {arg:832})))))
                             IDef <<DerivedGen.MkX>>
                                  [ PatClause (IApp. IVar <<DerivedGen.MkX>>
                                                   $ IBindVar ^cons_fuel^
@@ -51,13 +56,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ (IApp. (INamedApp. IVar Data.Fin.FS
                                                                      $ Implicit True)
                                                          $ IBindVar f))
-                                             (IApp. (INamedApp. IVar Prelude.pure
-                                                              $ IVar Test.DepTyCheck.Gen.Gen)
-                                                  $ (IApp. IVar DerivedGen.MkX
-                                                         $ IVar n
-                                                         $ IVar f))
+                                             (IApp. IVar Prelude.Just
+                                                  $ (IApp. (INamedApp. IVar Prelude.pure
+                                                                     $ IVar Test.DepTyCheck.Gen.Gen)
+                                                         $ (IApp. IVar DerivedGen.MkX
+                                                                $ IVar n
+                                                                $ IVar f)))
                                  , PatClause (IApp. IVar <<DerivedGen.MkX>>
                                                   $ Implicit True
                                                   $ Implicit True
                                                   $ Implicit True)
-                                             (IVar empty) ] ]
+                                             (IVar Prelude.Nothing) ] ]

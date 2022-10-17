@@ -188,6 +188,10 @@ oneOf $ LLG []      = empty
 oneOf $ LLG [x]     = x
 oneOf $ LLG (x::xs) = OneOf $ x:::xs
 
+public export %inline
+oneOf' : List (Maybe (Lazy (Gen a))) -> Gen a
+oneOf' = oneOf . LLG . mapMaybe id
+
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
 ||| This function treats given generators in the same way as `oneOf` do, but the resulting generator uses generator
