@@ -1,4 +1,5 @@
 1/1: Building DerivedGen (DerivedGen.idr)
+Now compiling the executable: run-derived-gen
 Generated values:
 -----
 ()
