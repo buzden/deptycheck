@@ -1,5 +1,6 @@
 1/2: Building GenForSome (src/GenForSome.idr)
 2/2: Building Run (src/Run.idr)
+Now compiling the executable: deptycheck-usage-example
 
 ---------
 
