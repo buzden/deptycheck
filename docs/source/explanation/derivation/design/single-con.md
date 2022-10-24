@@ -257,6 +257,11 @@ we can pattern match on them in generators.
 We would produce a value for the appropriate value of the given index and produce an empty generator for the rest.
 Empty generator is available through function `empty`.
 
+:::{todo}
+To change the doc to reflect changes in the derivation of empty generators,
+an attempt to eliminate them locally as much as possible.
+:::
+
 So, the structure of the derived generator with the given type index would be the following for the `D` example.
 
 <!--
