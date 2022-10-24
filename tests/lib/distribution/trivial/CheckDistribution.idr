@@ -11,10 +11,12 @@ import Statistics.Confidence
 bools : Gen Bool
 bools = elements [True, False]
 
--- we expect verdict to contain only `Just True`
-verdict = head' $ filter (all isJust) $
-            checkCoverageConditions [coverWith 50.percent (== True), coverWith 50.percent (== False)] $
-              unGenTryN 10000000 someStdGen bools
+verdict : Vect n (CoverageTest a) -> Gen a -> Bool
+verdict conds = not . null . filter (all isJust) .
+                  checkCoverageConditions conds . unGenTryN 10000000 someStdGen
+
+printVerdict : HasIO m => Gen a -> Vect n (CoverageTest a) -> m ()
+printVerdict = putStrLn .: show .: flip verdict
 
 main : IO ()
-main = putStrLn $ show verdict
+main = printVerdict bools [coverWith 50.percent (== True), coverWith 50.percent (== False)]
