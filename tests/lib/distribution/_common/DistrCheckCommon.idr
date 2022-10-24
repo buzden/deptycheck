@@ -8,8 +8,8 @@ import public Statistics.Confidence
 
 %default total
 
-verdict : Vect n (CoverageTest a) -> Gen a -> Bool
-verdict conds = not . null . filter (all isJust) .
+verdict : Vect n (CoverageTest a) -> Gen a -> Maybe $ Vect n Bool
+verdict conds = head' . mapMaybe sequence .
                   checkCoverageConditions conds . unGenTryN 10000000 someStdGen
 
 export
