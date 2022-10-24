@@ -1,6 +1,5 @@
 rm -rf build
 
-$1 --exec main --no-color --console-width 0 --no-banner --find-ipkg CheckDistribution.idr | \
-  sed 's/[0-9]\.[0-9]*/<num>/g'
+$1 --exec main --no-color --console-width 0 --no-banner --find-ipkg CheckDistribution.idr
 
 rm -rf build
