@@ -17,9 +17,9 @@ eb = oneOf
 
 main : IO ()
 main = printVerdict eb
-         [ coverWith 33.percent isNothing
-         , coverWith 66.percent isJust
+         [ coverWith 50.percent isNothing
+         , coverWith 50.percent isJust
 
-         , coverWith 33.percent $ (== Just True)
-         , coverWith 33.percent $ (== Just False)
+         , coverWith 25.percent $ (== Just True)
+         , coverWith 25.percent $ (== Just False)
          ]
