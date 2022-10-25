@@ -71,10 +71,6 @@ genMoreStrings'' = oneOf $ alternativesOf genMoreStrings ++ alternativesOf (elem
 There are also several functions based on the `alternativesOf`, allowing to process all alternatives in a single expression;
 you will see some of them in use below.
 
-Functions based on `alternativesOf` tries to dig as far as possible and get individual generators from inside the given one.
-Sometimes this is not desirable.
-To prevent going too deep, one can use function `forgetStructure`.
-
 For example, consider a generator of lists with length not greater than given.
 There are a lot of possible implementations, but consider a recursive one:
 
@@ -82,21 +78,16 @@ There are a lot of possible implementations, but consider a recursive one:
 genListsN : Gen a -> (n : Nat) -> Gen $ List a
 genListsN _    Z     = elements [ [] ]
 genListsN genA (S n) = oneOf $ elements [ [] ]
-                            :: (forgetStructure genA <&> (::)) `apAlternativesOf` genListsN genA n
+                            :: [| (::) genA |] `apAlternativesOf` genListsN genA n
 ```
 
 Distribution of lengths of lists produced by this generator is uniform,
-thanks to both `forgetStructure` and `apAlternativesOf` (a flavour of `alternativesOf` function).
+thanks to `apAlternativesOf` (a flavour of `alternativesOf` function).
 
 > **Note**
 >
 > If we were not using `alternativesOf` at all (say, with expression `[| genA :: genListsN genA n |]`),
 > probability of getting a list of length `n+1` would be 2 times *less* than getting a list of length `n`.
->
-> If we were not using `forgetStructure`, then depending on particular generator of values of type `a`,
-> we could get higher probability of getting longer lists.
-> For example, for call `genListsN (elements [True, False]) m`,
-> probability to get a list of length `n+1` would be 2 times *more* than a list of length `n`.
 
 Generators can be combined with operations from `Applicative` interface:
 
@@ -115,7 +106,8 @@ genStrPairs = [| MkX genSomeStrings genMoreStrings |]
 Unlike, say, in QuickCheck, generators can be empty.
 This is important for dependent types.
 For example, `Fin 0` is not inhabited,
-thus we need to have an empty generator if we want to have a generator for any `Fin n`:
+thus we need to have an empty generator
+if we want to have a generator for any `Fin n` (and sometimes we really want):
 
 ```idris
 genFin : (n : Nat) -> Gen $ Fin n
@@ -132,6 +124,28 @@ genAnyFin @{genNat} = do
   f <- genFin n
   pure (n ** f)
 ```
+
+Bind operation looks deeply into alternatives of generators if it can.
+Thus, in the example above if given generator of `Nat`s has several alternatives
+(e.g., it is built using `elements`, or `oneOf`, or in its case as a bind of such)
+then the resulting generator would have all alternatives of `genFin` be distributed
+equally upon all possible `n` given by `genNat`.
+
+You can discard this behaviour by using `forgetStructure` function.
+
+```idris
+genAnyFin' : Gen Nat => Gen (n ** Fin n)
+genAnyFin' @{genNat} = do
+  n <- forgetStructure genNat
+  f <- genFin n
+  pure (n ** f)
+```
+
+In this case, all results of `genFin 1` and all results of `genFin 2` would be distributed equally
+in the case when `genNat` is `elements [1, 2]`.
+I.e., particular generator's application `genAnyFin' @{elements [1, 2]}` would be equivalent to `oneOf [pure (1**0), elements [(2**0), (2**1)]]`
+where `genAnyFin @{elements [1, 2]}` would be equivalent to `elements [(1**0), (2**0), (2**1)]`.
+Thus, they have the same domain, but different distributions.
 
 > **Note**
 >
