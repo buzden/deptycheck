@@ -179,16 +179,16 @@ genAnyFin'' @{genNat} = do
 In this case, `alternativesOf` being applied to `genAnyFin'' @{elements [1, 2]}` would return a single alternative.
 
 <!-- idris
-main_alternatives_count_corr : IO ()
-main_alternatives_count_corr = putStrLn $ show $ length (alternativesOf $ genAnyFin @{elements [1, 2]}) == 2
+main_genAnyFin_alternatives_count_corr : IO ()
+main_genAnyFin_alternatives_count_corr = putStrLn $ show $ length (alternativesOf $ genAnyFin @{elements [1, 2]}) == 2
 
-main_alternatives_count_corr'' : IO ()
-main_alternatives_count_corr'' = putStrLn $ show $ length (alternativesOf $ genAnyFin'' @{elements [1, 2]}) == 1
+main_genAnyFin''_alternatives_count_corr : IO ()
+main_genAnyFin''_alternatives_count_corr = putStrLn $ show $ length (alternativesOf $ genAnyFin'' @{elements [1, 2]}) == 1
 -->
 
 > **Note**
 >
-> Search for alternatives through the series of monadic binds goes to the first generator that
+> Search for alternatives through the series of monadic binds can go to the first generator that
 > is produced with no alternatives.
 >
 > Consider three generators:
@@ -197,13 +197,57 @@ main_alternatives_count_corr'' = putStrLn $ show $ length (alternativesOf $ genA
 > - `do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }`
 > - `do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
 >
-> The first generator would have nine alternatives when inspected by `alternativesOf`,
-> where the second generator would have only three, and the third one would have only one.
+> The first two generators would have three alternatives each when inspected by `alternativesOf`,
+> where the third one would have only one.
+>
+> But if you do `alternativesOf` for each of generators returned by the first `alternativesOf` and concatenate the results,
+> the first example would give you nine alternatives, where the second one still would give you three.
 >
 > This, actually, violates monadic laws in some sense.
 > Say, `alternativesOf` can distinct between `pure x >>= f` and `f x` if generator `f x` is, say, of form `elements [a, b, c]`,
 > because in the first case it would produce a single alternative, when in the second there will be three of them.
 > However, according to the generated result these two generators shall be equivalent.
+
+<!-- idris
+namespace ForgetStructureNote
+
+  a, b, c, d, e, f : Nat
+  a = 0
+  b = 1
+  c = 2
+  d = 3
+  e = 4
+  f = 5
+
+  g1, g2, g3 : Gen (Nat, Nat)
+  g1 = do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
+  g2 = do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }
+  g3 = do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
+
+  export
+  main_forgetSturcture_note_ex1_alternatives_count_corr : IO ()
+  main_forgetSturcture_note_ex1_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g1)
+
+  export
+  main_forgetSturcture_note_ex2_alternatives_count_corr : IO ()
+  main_forgetSturcture_note_ex2_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g2)
+
+  export
+  main_forgetSturcture_note_ex3_alternatives_count_corr : IO ()
+  main_forgetSturcture_note_ex3_alternatives_count_corr = putStrLn $ show $ 1 == length (alternativesOf g3)
+
+  export
+  main_forgetSturcture_note_ex1_alternatives_sq_count_corr : IO ()
+  main_forgetSturcture_note_ex1_alternatives_sq_count_corr = putStrLn $ show $ 9 == length (with Prelude.(>>=) alternativesOf g1 >>= alternativesOf . force)
+
+  export
+  main_forgetSturcture_note_ex2_alternatives_sq_count_corr : IO ()
+  main_forgetSturcture_note_ex2_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (with Prelude.(>>=) alternativesOf g2 >>= alternativesOf . force)
+
+  export
+  main_forgetSturcture_note_ex3_alternatives_sq_count_corr : IO ()
+  main_forgetSturcture_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (with Prelude.(>>=) alternativesOf g3 >>= alternativesOf . force)
+-->
 
 Also, here you can see that we can use generators as `auto`-parameters,
 thus no need in a separate thing like QuickCheck's `Arbitrary`.
