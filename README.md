@@ -125,27 +125,66 @@ genAnyFin @{genNat} = do
   pure (n ** f)
 ```
 
-Bind operation looks deeply into alternatives of generators if it can.
-Thus, in the example above if given generator of `Nat`s has several alternatives
-(e.g., it is built using `elements`, or `oneOf`, or in its case as a bind of such)
-then the resulting generator would have all alternatives of `genFin` be distributed
-equally upon all possible `n` given by `genNat`.
+Distribution of a generator built by monadic bind is such that
+the whole continuation (i.e. RHS of `>>=`) applied to some `x` has the same probability to produce the result
+as the probability for `x` to appear.
 
-You can discard this behaviour by using `forgetStructure` function.
+This, in the example above probability of particular natural `n` to come in the result
+is the same as probability of this `n` to come on the given `genNat`.
+After that, all fins for each particular `n` are distributed evenly, because it is a property of `genFin`.
+
+You need to use `alternativesOf` if you wanted all possible resulted values to be distributed evenly, e.g.:
 
 ```idris
 genAnyFin' : Gen Nat => Gen (n ** Fin n)
-genAnyFin' @{genNat} = do
+genAnyFin' @{genNat} = oneOf $ do
+  n <- alternativesOf genNat
+  f <- alternativesOf $ genFin n
+  pure (n ** f)
+```
+
+Here we are using special monadic syntax support for lists of generators produced by `alternativesOf` function.
+
+In the last example, all results of `genFin 1` and all results of `genFin 2` would **not** be distributed equally
+in the case when `genNat` is `elements [1, 2]`, when they are distributed equally in the example of `genAnyFin`.
+I.e., particular generator's application `genAnyFin @{elements [1, 2]}` would be equivalent to `oneOf [pure (1**0), elements [(2**0), (2**1)]]`
+where `genAnyFin' @{elements [1, 2]}` would be equivalent to `elements [(1**0), (2**0), (2**1)]`.
+Thus, they have the same domain, but different distributions.
+
+<!-- idris
+app_non_even, app_non_even_inlined, app_even, app_even_inlined : Gen (n ** Fin n)
+app_non_even = genAnyFin @{elements [1, 2]}
+app_non_even_inlined = oneOf [pure (1**0), elements [(2**0), (2**1)]]
+app_even = genAnyFin' @{elements [1, 2]}
+app_even_inlined = elements [(1**0), (2**0), (2**1)]
+-->
+
+Despite monadic bind of generators interprets left-hand side generators as a whole,
+it looks inside it when the resulting generator is being asked for alternatives by `alternativesOf` function or its variants.
+
+For example, `alternativesOf` being applied to `genAnyFin @{elements [1, 2]}` would produce two alternatives.
+Sometimes this can be undesirable, thus, a `forgetStructure` function exists.
+It allows to forget actual structure of a generator in terms of its alternatives.
+
+Consider one more alternative of `genAnyFin`, now the given `genNat` is wrapped with `forgetStructure`:
+
+```idris
+genAnyFin'' : Gen Nat => Gen (n ** Fin n)
+genAnyFin'' @{genNat} = do
   n <- forgetStructure genNat
   f <- genFin n
   pure (n ** f)
 ```
 
-In this case, all results of `genFin 1` and all results of `genFin 2` would be distributed equally
-in the case when `genNat` is `elements [1, 2]`.
-I.e., particular generator's application `genAnyFin' @{elements [1, 2]}` would be equivalent to `oneOf [pure (1**0), elements [(2**0), (2**1)]]`
-where `genAnyFin @{elements [1, 2]}` would be equivalent to `elements [(1**0), (2**0), (2**1)]`.
-Thus, they have the same domain, but different distributions.
+In this case, `alternativesOf` being applied to `genAnyFin'' @{elements [1, 2]}` would return a single alternative.
+
+<!-- idris
+main_alternatives_count_corr : IO ()
+main_alternatives_count_corr = putStrLn $ show $ length (alternativesOf $ genAnyFin @{elements [1, 2]}) == 2
+
+main_alternatives_count_corr'' : IO ()
+main_alternatives_count_corr'' = putStrLn $ show $ length (alternativesOf $ genAnyFin'' @{elements [1, 2]}) == 1
+-->
 
 > **Note**
 >

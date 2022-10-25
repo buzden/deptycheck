@@ -1,1 +1,11 @@
 1/1: Building README (README.md)
+
+---------------------------------
+Running check main_alternatives_count_corr...
+---------------------------------
+True
+
+---------------------------------
+Running check main_alternatives_count_corr''...
+---------------------------------
+True
