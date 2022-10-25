@@ -168,70 +168,72 @@ export
 elements' : Foldable f => f a -> Gen a
 elements' = elements . toList
 
-export
-alternativesOf : Gen a -> List $ Lazy (Gen a)
-alternativesOf $ Empty    = []
-alternativesOf $ OneOf gs = forget gs
-alternativesOf g          = [g]
+namespace AlternativesOf
 
-public export
-processAlternatives : (Gen a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
-processAlternatives f = map (wrapLazy f) . alternativesOf
+  export
+  alternativesOf : Gen a -> List $ Lazy (Gen a)
+  alternativesOf $ Empty    = []
+  alternativesOf $ OneOf gs = forget gs
+  alternativesOf g          = [g]
 
-public export
-mapAlternativesOf : (a -> b) -> Gen a -> List $ Lazy (Gen b)
-mapAlternativesOf = processAlternatives . map
+  public export
+  processAlternatives : (Gen a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
+  processAlternatives f = map (wrapLazy f) . alternativesOf
 
-public export
-apAlternativesOf : Gen (a -> b) -> Gen a -> List $ Lazy (Gen b)
-apAlternativesOf = processAlternatives . (<*>)
+  public export
+  mapAlternativesOf : (a -> b) -> Gen a -> List $ Lazy (Gen b)
+  mapAlternativesOf = processAlternatives . map
 
-public export
-bindAlternativesOf : (a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
-bindAlternativesOf = processAlternatives . (=<<)
+  public export
+  apAlternativesOf : Gen (a -> b) -> Gen a -> List $ Lazy (Gen b)
+  apAlternativesOf = processAlternatives . (<*>)
 
-public export %inline
-mapAlternativesWith : Gen a -> (a -> b) -> List $ Lazy (Gen b)
-mapAlternativesWith = flip mapAlternativesOf
+  public export
+  bindAlternativesOf : (a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
+  bindAlternativesOf = processAlternatives . (=<<)
 
-public export %inline
-apAlternativesWith : Gen a -> Gen (a -> b) -> List $ Lazy (Gen b)
-apAlternativesWith = flip apAlternativesOf
+  public export %inline
+  mapAlternativesWith : Gen a -> (a -> b) -> List $ Lazy (Gen b)
+  mapAlternativesWith = flip mapAlternativesOf
 
-public export %inline
-bindAlternativesWith : Gen a -> (a -> Gen b) -> List $ Lazy (Gen b)
-bindAlternativesWith = flip bindAlternativesOf
+  public export %inline
+  apAlternativesWith : Gen a -> Gen (a -> b) -> List $ Lazy (Gen b)
+  apAlternativesWith = flip apAlternativesOf
 
-export
-forgetStructure : Gen a -> Gen a
-forgetStructure g@(Point _) = g
-forgetStructure g = Point $ unGen g
+  public export %inline
+  bindAlternativesWith : Gen a -> (a -> Gen b) -> List $ Lazy (Gen b)
+  bindAlternativesWith = flip bindAlternativesOf
 
-public export
-mapForgottenStructureOf : (a -> b) -> Gen a -> Gen b
-mapForgottenStructureOf f = map f . forgetStructure
+  export
+  forgetStructure : Gen a -> Gen a
+  forgetStructure g@(Point _) = g
+  forgetStructure g = Point $ unGen g
 
-public export %inline
-mapForgottenStructureWith : Gen a -> (a -> b) -> Gen b
-mapForgottenStructureWith = flip mapForgottenStructureOf
+  public export
+  mapForgottenStructureOf : (a -> b) -> Gen a -> Gen b
+  mapForgottenStructureOf f = map f . forgetStructure
 
-public export
-oneOfForgottenStructure : List (Lazy (Gen a)) -> Gen a
-oneOfForgottenStructure = oneOf . map (wrapLazy forgetStructure)
+  public export %inline
+  mapForgottenStructureWith : Gen a -> (a -> b) -> Gen b
+  mapForgottenStructureWith = flip mapForgottenStructureOf
 
--- Priority is chosen to be able to use these operators without parenthesis
--- in expressions of lists, i.e. involving operators `::` and `++`.
-infix 8 `mapAlternativesOf`
-      , `mapAlternativesWith`
+  public export
+  oneOfForgottenStructure : List (Lazy (Gen a)) -> Gen a
+  oneOfForgottenStructure = oneOf . map (wrapLazy forgetStructure)
 
-      , `apAlternativesOf`
-      , `apAlternativesWith`
+  -- Priority is chosen to be able to use these operators without parenthesis
+  -- in expressions of lists, i.e. involving operators `::` and `++`.
+  infix 8 `mapAlternativesOf`
+        , `mapAlternativesWith`
 
-      , `bindAlternativesOf`
-      , `bindAlternativesWith`
+        , `apAlternativesOf`
+        , `apAlternativesWith`
 
-      , `mapForgottenStructureOf`
-      , `mapForgottenStructureWith`
+        , `bindAlternativesOf`
+        , `bindAlternativesWith`
+
+        , `mapForgottenStructureOf`
+        , `mapForgottenStructureWith`
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
