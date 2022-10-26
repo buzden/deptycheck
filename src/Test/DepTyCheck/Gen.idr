@@ -208,9 +208,12 @@ namespace AlternativesOf
   bindAlternativesWith : Gen a -> (a -> Gen b) -> List $ Lazy (Gen b)
   bindAlternativesWith = flip bindAlternativesOf
 
+  ||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
+  ||| except for empty generator, which would still be returned as empty generator.
   export
   forgetStructure : Gen a -> Gen a
   forgetStructure g@(Point _) = g
+  forgetStructure Empty = Empty
   forgetStructure g = Point $ unGen g
 
   -- Priority is chosen to be able to use these operators without parenthesis
