@@ -5,6 +5,7 @@ version = 0.0.220712
 
 modules = Control.Monad.State.Tuple
         , Data.Vect.Dependent
+        , Syntax.DepTyCheck.Gen.AlternativesOf
         , System.Random.Simple
         , Test.DepTyCheck.Gen.Auto
         , Test.DepTyCheck.Gen.Auto.Derive

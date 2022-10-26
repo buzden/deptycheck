@@ -7,6 +7,8 @@ import Data.List1
 import Test.DepTyCheck.Gen
 import Test.DepTyCheck.Gen.Auto
 
+import Syntax.DepTyCheck.Gen.AlternativesOf
+
 %default total
 
 %language ElabReflection
