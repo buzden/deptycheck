@@ -86,6 +86,16 @@ genListsN genA (S n) = oneOf $ elements [ [] ]
 Distribution of lengths of lists produced by this generator is uniform,
 thanks to `apAlternativesOf` (a flavour of `alternativesOf` function).
 
+Alternatively, one can use an applicative syntax of producing alternatives
+from module `Syntax.DepTyCheck.Gen.AlternativesOf`:
+
+```idris
+genListsN' : Gen a -> (n : Nat) -> Gen $ List a
+genListsN' _    Z     = elements [ [] ]
+genListsN' genA (S n) = oneOf $ elements [ [] ]
+                             :: [| [genA] :: alternativesOf (genListsN' genA n) |]
+```
+
 > **Note**
 >
 > If we were not using `alternativesOf` at all (say, with expression `[| genA :: genListsN genA n |]`),
