@@ -15,8 +15,14 @@
 
 ----
 
-puts("pzr");
-// regs ty after: [-, -]
+int dvl;
+[0] = -79;
+[0] = (False || !(False)) || ((53 <= 10) || (dvl <= -12));
+puts(concat(concat(as_str(-30), "u"), as_str(inc(dvl))));
+puts(as_str(inc(dvl)));
+[1] = dvl;
+dvl = -62;
+// regs ty after: [Bool, Int]
 
 ----
 
@@ -25,8 +31,9 @@ puts("pzr");
 
 ----
 
-[0] = "he";
-// regs ty after: [String, -]
+[0] = 56 + ((-22 + -56) + inc(-9));
+[0] = ((-78 * 87) < inc(19)) && (inc(63) <= inc(55));
+// regs ty after: [Bool, -]
 
 ----
 
@@ -40,13 +47,13 @@ puts("pzr");
 
 ----
 
-[1] = concat(concat("v", as_str(-6)), "ck");
-// regs ty after: [-, String]
+[0] = !((True || False) || (False || True));
+// regs ty after: [Bool, -]
 
 ----
 
-[1] = -18;
-// regs ty after: [-, Int]
+[0] = -17;
+// regs ty after: [Int, -]
 
 ----
 
