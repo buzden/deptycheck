@@ -225,28 +225,28 @@ namespace ForgetStructureNote
   g3 = do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
 
   export
-  main_forgetSturcture_note_ex1_alternatives_count_corr : IO ()
-  main_forgetSturcture_note_ex1_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g1)
+  main_forgetStructure_note_ex1_alternatives_count_corr : IO ()
+  main_forgetStructure_note_ex1_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g1)
 
   export
-  main_forgetSturcture_note_ex2_alternatives_count_corr : IO ()
-  main_forgetSturcture_note_ex2_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g2)
+  main_forgetStructure_note_ex2_alternatives_count_corr : IO ()
+  main_forgetStructure_note_ex2_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g2)
 
   export
-  main_forgetSturcture_note_ex3_alternatives_count_corr : IO ()
-  main_forgetSturcture_note_ex3_alternatives_count_corr = putStrLn $ show $ 1 == length (alternativesOf g3)
+  main_forgetStructure_note_ex3_alternatives_count_corr : IO ()
+  main_forgetStructure_note_ex3_alternatives_count_corr = putStrLn $ show $ 1 == length (alternativesOf g3)
 
   export
-  main_forgetSturcture_note_ex1_alternatives_sq_count_corr : IO ()
-  main_forgetSturcture_note_ex1_alternatives_sq_count_corr = putStrLn $ show $ 9 == length (with Prelude.(>>=) alternativesOf g1 >>= alternativesOf . force)
+  main_forgetStructure_note_ex1_alternatives_sq_count_corr : IO ()
+  main_forgetStructure_note_ex1_alternatives_sq_count_corr = putStrLn $ show $ 9 == length (with Prelude.(>>=) alternativesOf g1 >>= alternativesOf . force)
 
   export
-  main_forgetSturcture_note_ex2_alternatives_sq_count_corr : IO ()
-  main_forgetSturcture_note_ex2_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (with Prelude.(>>=) alternativesOf g2 >>= alternativesOf . force)
+  main_forgetStructure_note_ex2_alternatives_sq_count_corr : IO ()
+  main_forgetStructure_note_ex2_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (with Prelude.(>>=) alternativesOf g2 >>= alternativesOf . force)
 
   export
-  main_forgetSturcture_note_ex3_alternatives_sq_count_corr : IO ()
-  main_forgetSturcture_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (with Prelude.(>>=) alternativesOf g3 >>= alternativesOf . force)
+  main_forgetStructure_note_ex3_alternatives_sq_count_corr : IO ()
+  main_forgetStructure_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (with Prelude.(>>=) alternativesOf g3 >>= alternativesOf . force)
 -->
 
 Also, here you can see that we can use generators as `auto`-parameters,
