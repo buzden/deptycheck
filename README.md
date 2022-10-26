@@ -145,7 +145,8 @@ genAnyFin' @{genNat} = oneOf $ do
   pure (n ** f)
 ```
 
-Here we are using special monadic syntax support for lists of generators produced by `alternativesOf` function.
+Here we are using special monadic syntax support for lists of generators produced by `alternativesOf` function
+available in the module `Syntax.DepTyCheck.Gen.AlternativesOf`.
 
 In the last example, all results of `genFin 1` and all results of `genFin 2` would **not** be distributed equally
 in the case when `genNat` is `elements [1, 2]`, when they are distributed equally in the example of `genAnyFin`.
