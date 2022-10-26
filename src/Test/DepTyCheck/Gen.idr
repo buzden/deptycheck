@@ -172,60 +172,59 @@ export
 elements' : Foldable f => f a -> Gen a
 elements' = elements . toList
 
+------------------------------
+--- Analysis of generators ---
+------------------------------
+
+export
+alternativesOf : Gen a -> List $ Lazy (Gen a)
+alternativesOf $ Empty    = []
+alternativesOf $ OneOf gs = forget gs
+alternativesOf g          = [g]
+
+||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
+||| except for empty generator, which would still be returned as empty generator.
+export
+forgetStructure : Gen a -> Gen a
+forgetStructure g@(Point _) = g
+forgetStructure Empty = Empty
+forgetStructure g = Point $ unGen g
+
+--- Support for functor, idiom brackets and monadic syntax ---
+
 namespace AlternativesOf
 
   export
-  alternativesOf : Gen a -> List $ Lazy (Gen a)
-  alternativesOf $ Empty    = []
-  alternativesOf $ OneOf gs = forget gs
-  alternativesOf g          = [g]
+  map : (a -> b) -> List (Lazy (Gen a)) -> List (Lazy (Gen b))
+  map = Prelude.map . wrapLazy . map
 
-  public export
-  processAlternatives : (Gen a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
-  processAlternatives f = map (wrapLazy f) . alternativesOf
+  export %inline
+  (<$>) : (a -> b) -> List (Lazy (Gen a)) -> List (Lazy (Gen b))
+  (<$>) = map
 
-  public export
-  mapAlternativesOf : (a -> b) -> Gen a -> List $ Lazy (Gen b)
-  mapAlternativesOf = processAlternatives . map
+  export %inline
+  (<&>) : List (Lazy (Gen a)) -> (a -> b) -> List (Lazy (Gen b))
+  (<&>) = flip (<$>)
 
-  public export
-  apAlternativesOf : Gen (a -> b) -> Gen a -> List $ Lazy (Gen b)
-  apAlternativesOf = processAlternatives . (<*>)
-
-  public export
-  bindAlternativesOf : (a -> Gen b) -> Gen a -> List $ Lazy (Gen b)
-  bindAlternativesOf = processAlternatives . (=<<)
-
-  public export %inline
-  mapAlternativesWith : Gen a -> (a -> b) -> List $ Lazy (Gen b)
-  mapAlternativesWith = flip mapAlternativesOf
-
-  public export %inline
-  apAlternativesWith : Gen a -> Gen (a -> b) -> List $ Lazy (Gen b)
-  apAlternativesWith = flip apAlternativesOf
-
-  public export %inline
-  bindAlternativesWith : Gen a -> (a -> Gen b) -> List $ Lazy (Gen b)
-  bindAlternativesWith = flip bindAlternativesOf
-
-  ||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
-  ||| except for empty generator, which would still be returned as empty generator.
   export
-  forgetStructure : Gen a -> Gen a
-  forgetStructure g@(Point _) = g
-  forgetStructure Empty = Empty
-  forgetStructure g = Point $ unGen g
+  pure : a -> List (Lazy (Gen a))
+  pure x = [ pure x ]
 
-  -- Priority is chosen to be able to use these operators without parenthesis
-  -- in expressions of lists, i.e. involving operators `::` and `++`.
-  infix 8 `mapAlternativesOf`
-        , `mapAlternativesWith`
+  export
+  (<*>) : List (Lazy (Gen $ a -> b)) -> List (Lazy (Gen a)) -> List (Lazy (Gen b))
+  (<*>) xs ys = with Prelude.(<*>) [| ap xs ys |] where
+    ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
+    ap x y = x <*> y
 
-        , `apAlternativesOf`
-        , `apAlternativesWith`
+  export
+  (>>=) : List (Lazy (Gen a)) -> (a -> List (Lazy (Gen b))) -> List (Lazy (Gen b))
+  xs >>= f = with Prelude.(>>=) xs >>= alternativesOf . (>>= oneOf . f) . force
 
-        , `bindAlternativesOf`
-        , `bindAlternativesWith`
+  namespace HeterogenousL
+
+    export %inline
+    (>>=) : Gen a -> (a -> List (Lazy (Gen b))) -> List (Lazy (Gen b))
+    gen >>= f = [ gen ] >>= f
 
 -----------------
 --- Filtering ---

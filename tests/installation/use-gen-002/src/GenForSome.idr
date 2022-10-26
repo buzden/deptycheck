@@ -47,8 +47,8 @@ genAllQ f (x::xs) = [| f x :: genAllQ f xs |]
 genAnyQ : ((x : a) -> Gen (p x)) -> (list : List a) -> Gen $ Any p list
 genAnyQ f []      = empty
 genAnyQ f (x::xs) = oneOf
-  $ [ Here <$> f x ]
-  ++ There `mapAlternativesOf` genAnyQ f xs
+  $  (Here  <$> f x)
+  :: (There <$> genAnyQ f xs)
 
 genName : Gen Name
 genName = [| elements (cast <$> ['x', 'y', 'z']) ++ elements (show <$> [1 .. 3]) |]
@@ -65,8 +65,8 @@ genUniqueName existing = do
 genExisting : Eq a => (existing : List a) -> Gen (res : a ** Any (\ex => So $ ex == res) existing)
 genExisting [] = empty
 genExisting existing@(x::xs) = oneOf
-  $  genAnyQ (\ex => genSo $ ex == x) existing `mapAlternativesWith` (\an => (x ** an))
-  ++ genExisting xs `mapAlternativesWith` \(res ** subex) => (res ** There subex)
+  $  (genAnyQ (\ex => genSo $ ex == x) existing <&> \an => (x ** an))
+  ++ (genExisting xs <&> \(res ** subex) => (res ** There subex))
 
 mutual
 

@@ -11,8 +11,8 @@ bools = elements [True, False]
 
 eb : Gen $ Either Bool Bool
 eb = oneOf
-       $  Left  `mapAlternativesOf` bools
-       ++ Right `mapAlternativesOf` bools
+       $  ( Left  <$> alternativesOf bools )
+       ++ ( Right <$> alternativesOf bools )
 
 main : IO ()
 main = printVerdict eb

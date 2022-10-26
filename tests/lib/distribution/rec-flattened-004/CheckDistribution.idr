@@ -12,8 +12,8 @@ nats = elements [0 .. 100]
 lists : (maxLen : Nat) -> Gen a -> Gen $ List a
 lists Z     _  = pure []
 lists (S n) as = oneOf
-  $ [ pure [] ]
-  ++ ((::) <$> forgetStructure as) `apAlternativesOf` lists n as
+  $  [| [] |]
+  :: [| [forgetStructure as] :: alternativesOf (lists n as) |]
 
 mainFor : (maxLen : Nat) -> IO ()
 mainFor maxLen = printVerdict (lists maxLen nats) $ take (S maxLen) [0, 1 ..] <&> \l => coverWith (ratio 1 (S maxLen)) ((== l) . length)

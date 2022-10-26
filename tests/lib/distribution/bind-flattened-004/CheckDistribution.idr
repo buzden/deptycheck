@@ -7,8 +7,6 @@ import Decidable.Equality
 
 import DistrCheckCommon
 
-import Syntax.DepTyCheck.Gen.AlternativesOf
-
 %default total
 
 nats : (n : Nat) -> Gen Nat

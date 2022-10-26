@@ -11,8 +11,8 @@ bools = elements [True, False]
 
 eb : Gen $ Maybe Bool
 eb = oneOf
-       $ [ pure Nothing ]
-       ++ Just `mapAlternativesOf` bools
+       $  ( pure Nothing )
+       :: ( Just <$> alternativesOf bools )
 
 main : IO ()
 main = printVerdict eb

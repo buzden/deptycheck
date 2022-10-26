@@ -7,8 +7,6 @@ import Data.List1
 import Test.DepTyCheck.Gen
 import Test.DepTyCheck.Gen.Auto
 
-import Syntax.DepTyCheck.Gen.AlternativesOf
-
 %default total
 
 %language ElabReflection
@@ -78,23 +76,13 @@ There are a lot of possible implementations, but consider a recursive one:
 
 ```idris
 genListsN : Gen a -> (n : Nat) -> Gen $ List a
-genListsN _    Z     = elements [ [] ]
-genListsN genA (S n) = oneOf $ elements [ [] ]
-                            :: [| (::) genA |] `apAlternativesOf` genListsN genA n
+genListsN _    Z     = [| [] |]
+genListsN genA (S n) = oneOf $ [| [] |]
+                            :: [| [genA] :: alternativesOf (genListsN genA n) |]
 ```
 
 Distribution of lengths of lists produced by this generator is uniform,
-thanks to `apAlternativesOf` (a flavour of `alternativesOf` function).
-
-Alternatively, one can use an applicative syntax of producing alternatives
-from module `Syntax.DepTyCheck.Gen.AlternativesOf`:
-
-```idris
-genListsN' : Gen a -> (n : Nat) -> Gen $ List a
-genListsN' _    Z     = elements [ [] ]
-genListsN' genA (S n) = oneOf $ elements [ [] ]
-                             :: [| [genA] :: alternativesOf (genListsN' genA n) |]
-```
+thanks to `alternativesOf` function.
 
 > **Note**
 >
@@ -155,8 +143,7 @@ genAnyFin' @{genNat} = oneOf $ do
   pure (n ** f)
 ```
 
-Here we are using special monadic syntax support for lists of generators produced by `alternativesOf` function
-available in the module `Syntax.DepTyCheck.Gen.AlternativesOf`.
+Here we are using special monadic syntax support for lists of generators produced by `alternativesOf` function.
 
 In the last example, all results of `genFin 1` and all results of `genFin 2` would **not** be distributed equally
 in the case when `genNat` is `elements [1, 2]`, when they are distributed equally in the example of `genAnyFin`.
