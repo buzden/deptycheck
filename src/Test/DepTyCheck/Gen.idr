@@ -216,22 +216,24 @@ forgetStructure g@(Point _) = g
 forgetStructure Empty = Empty
 forgetStructure g = Point $ unGen g
 
-namespace AlternativesOf
+-----------------------------------------------------
+--- Detour: implementations for list of lazy gens ---
+-----------------------------------------------------
 
-  export
-  Functor ListLazyGen where
-    map = wrapLLG . map . wrapLazy . map
+export
+Functor ListLazyGen where
+  map = wrapLLG . map . wrapLazy . map
 
-  export
-  Applicative ListLazyGen where
-    pure x = LLG [ pure x ]
-    LLG xs <*> LLG ys = LLG [| ap xs ys |] where
-      ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
-      ap x y = x <*> y
+export
+Applicative ListLazyGen where
+  pure x = LLG [ pure x ]
+  LLG xs <*> LLG ys = LLG [| ap xs ys |] where
+    ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
+    ap x y = x <*> y
 
-  export
-  Monad ListLazyGen where
-    LLG xs >>= f = LLG $ xs >>= unLLG . alternativesOf . (>>= oneOf . f) . force
+export
+Monad ListLazyGen where
+  LLG xs >>= f = LLG $ xs >>= unLLG . alternativesOf . (>>= oneOf . f) . force
 
 -----------------
 --- Filtering ---
