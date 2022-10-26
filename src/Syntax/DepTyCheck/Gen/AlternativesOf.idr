@@ -4,7 +4,7 @@ import Test.DepTyCheck.Gen
 
 %default total
 
--- Support for monadic syntax --
+-- Support for idiom brackets and monadic syntax --
 
 export
 pure : a -> List (Lazy (Gen a))
