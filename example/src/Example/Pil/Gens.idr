@@ -42,7 +42,7 @@ varExprGen = do Element (n ** _) prf <- lookupGen vars `suchThat_invertedEq` a $
 
 ||| Generator of non-recursive expressions (thus those that can be used with zero recursion bound).
 nonRec_exprGen : {a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen (idrTypeOf a) -> Gen $ Expression vars regs a
-nonRec_exprGen g = oneOf $ C' `mapForgottenStructureOf` g :: alternativesOf varExprGen
+nonRec_exprGen g = oneOf $ (C' <$> g) :: alternativesOf varExprGen
                    -- TODO to add the register access expression
 
 export

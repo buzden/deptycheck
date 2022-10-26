@@ -1,11 +1,11 @@
 1/1: Building DemoGen (DemoGen.idr)
-[0] = (inc(-34) + (-95 * 86)) + 76;
-// regs ty after: [Int, -]
+[1] = True;
+// regs ty after: [-, Bool]
 
 ----
 
 [1] = True;
-[0] = ((-87 * 66) + 62) * (-86 * inc(69));
+[0] = ((-87 * 66) + (62 * -76)) * 87;
 // regs ty after: [Int, Bool]
 
 ----
@@ -15,10 +15,8 @@
 
 ----
 
-[1] = 50;
-[0] = "e";
-[1] = as_str(84);
-// regs ty after: [String, String]
+puts("pzr");
+// regs ty after: [-, -]
 
 ----
 
@@ -27,23 +25,23 @@
 
 ----
 
-[1] = inc(89 + 48) < ((82 * -27) + (-52 * 7));
-// regs ty after: [-, Bool]
+[0] = "he";
+// regs ty after: [String, -]
 
 ----
 
-[1] = ((True || False) || (True || True)) || ((-76 * -21) <= (13 * -4));
-// regs ty after: [-, Bool]
-
-----
-
-[0] = ((-87 * 66) + 62) * (-86 * inc(69));
+[0] = 56 + ((-22 + -56) + inc(-9));
 // regs ty after: [Int, -]
 
 ----
 
-puts(concat(as_str(-17), "bf"));
-// regs ty after: [-, -]
+[0] = ((-87 * 66) + (62 * -76)) * 87;
+// regs ty after: [Int, -]
+
+----
+
+[1] = concat(concat("v", as_str(-6)), "ck");
+// regs ty after: [-, String]
 
 ----
 

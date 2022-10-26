@@ -213,18 +213,6 @@ namespace AlternativesOf
   forgetStructure g@(Point _) = g
   forgetStructure g = Point $ unGen g
 
-  public export
-  mapForgottenStructureOf : (a -> b) -> Gen a -> Gen b
-  mapForgottenStructureOf f = map f . forgetStructure
-
-  public export %inline
-  mapForgottenStructureWith : Gen a -> (a -> b) -> Gen b
-  mapForgottenStructureWith = flip mapForgottenStructureOf
-
-  public export
-  oneOfForgottenStructure : List (Lazy (Gen a)) -> Gen a
-  oneOfForgottenStructure = oneOf . map (wrapLazy forgetStructure)
-
   -- Priority is chosen to be able to use these operators without parenthesis
   -- in expressions of lists, i.e. involving operators `::` and `++`.
   infix 8 `mapAlternativesOf`
@@ -235,9 +223,6 @@ namespace AlternativesOf
 
         , `bindAlternativesOf`
         , `bindAlternativesWith`
-
-        , `mapForgottenStructureOf`
-        , `mapForgottenStructureWith`
 
   -- Support for monadic syntax --
 
