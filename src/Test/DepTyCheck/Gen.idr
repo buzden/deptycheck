@@ -240,6 +240,12 @@ namespace AlternativesOf
   (>>=) : List (Lazy (Gen a)) -> (a -> List (Lazy (Gen b))) -> List (Lazy (Gen b))
   (>>=) xs f = with Prelude.(>>=) xs >>= alternativesOf . (>>= oneOf . f) . force
 
+  namespace BindWithJustGen
+
+    export
+    (>>=) : Gen a -> (a -> List (Lazy (Gen b))) -> List (Lazy (Gen b))
+    (>>=) xs f = [ xs ] >>= f
+
 -----------------
 --- Filtering ---
 -----------------

@@ -18,8 +18,8 @@ genFin (S n) = elements $ forget $ allFins n
 
 genAnyFin : Gen Nat => Gen (n ** Fin n)
 genAnyFin @{genNat} = oneOf $ do
-  n <- [ genNat ]
-  f <- [ genFin n ]
+  n <- genNat
+  f <- genFin n
   pure (n ** f)
 
 Eq (n ** Fin n) where

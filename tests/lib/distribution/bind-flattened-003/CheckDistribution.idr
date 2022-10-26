@@ -18,7 +18,7 @@ genFin (S n) = elements $ forget $ allFins n
 
 genAnyFin : Gen Nat => Gen (n ** Fin n)
 genAnyFin @{genNat} = oneOf $ do
-  n <- [ genNat ]
+  n <- genNat
   f <- alternativesOf $ genFin n
   pure (n ** f)
 

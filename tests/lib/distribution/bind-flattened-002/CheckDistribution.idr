@@ -19,7 +19,7 @@ genFin (S n) = elements $ forget $ allFins n
 genAnyFin : Gen Nat => Gen (n ** Fin n)
 genAnyFin @{genNat} = oneOf $ do
   n <- alternativesOf genNat
-  f <- [ genFin n ]
+  f <- genFin n
   pure (n ** f)
 
 Eq (n ** Fin n) where
