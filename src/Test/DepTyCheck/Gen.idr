@@ -98,9 +98,9 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 --      Current `unGenTryN` should be changed returning `LazyList (a, g)` and
 --      new `unGen` should be implemented trying `retry` times from config using this (`g` must be stored to restore correct state of seed).
 
----------------------------------
---- Combinators of generators ---
----------------------------------
+---------------------------------------
+--- Standard combination interfaces ---
+---------------------------------------
 
 export
 Functor Gen where
@@ -135,6 +135,10 @@ Monad Gen where
   g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
   OneOf gs    >>= nf = OneOf $ gs <&> wrapLazy (assert_total (>>= nf))
   Bind x f    >>= nf = x >>= \x => f x >>= nf
+
+----------------------------------
+--- Creation of new generators ---
+----------------------------------
 
 ||| Choose one of the given generators uniformly.
 |||
@@ -251,6 +255,10 @@ namespace AlternativesOf
   (>>=) : List (Lazy (Gen a)) -> (a -> List (Lazy (Gen b))) -> List (Lazy (Gen b))
   (>>=) xs f = with Prelude.(>>=) xs >>= alternativesOf . (>>= oneOf . f) . force
 
+-----------------
+--- Filtering ---
+-----------------
+
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
 mapMaybe _ $ Empty    = Empty
@@ -285,6 +293,10 @@ suchThat_dec g f = mapMaybe d g where
 export
 suchThat_invertedEq : DecEq b => Gen a -> (y : b) -> (f : a -> b) -> Gen $ Subset a $ \x => y = f x
 suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
+
+-------------------------------
+--- Variation in generation ---
+-------------------------------
 
 -- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
 export
