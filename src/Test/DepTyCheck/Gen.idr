@@ -32,7 +32,7 @@ randomFin {n = S k} = random'
 pickUniformly : RandomGen g => MonadState g m => MonadError () m => List a -> m a
 pickUniformly xs = index' xs <$> randomFin
 
-public export
+public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
 wrapLazy f = delay . f . force
 
@@ -136,6 +136,32 @@ Monad Gen where
   OneOf gs    >>= nf = OneOf $ gs <&> wrapLazy (assert_total (>>= nf))
   Bind x f    >>= nf = x >>= \x => f x >>= nf
 
+-----------------------------------------
+--- Detour: special list of lazy gens ---
+-----------------------------------------
+
+namespace ListLazyGen
+
+  public export
+  record ListLazyGen a where
+    constructor LLG
+    unLLG : List (Lazy (Gen a))
+
+  wrapLLG : (List (Lazy (Gen a)) -> List (Lazy (Gen b))) -> ListLazyGen a -> ListLazyGen b
+  wrapLLG f = LLG . f . unLLG
+
+  public export %inline
+  Nil : ListLazyGen a
+  Nil = LLG Nil
+
+  public export %inline
+  (::) : Lazy (Gen a) -> ListLazyGen a -> ListLazyGen a
+  (::) x = wrapLLG (x ::)
+
+  public export %inline
+  (++) : ListLazyGen a -> ListLazyGen a -> ListLazyGen a
+  LLG xs ++ LLG ys = LLG $ xs ++ ys
+
 ----------------------------------
 --- Creation of new generators ---
 ----------------------------------
@@ -145,10 +171,10 @@ Monad Gen where
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
-oneOf : List (Lazy (Gen a)) -> Gen a
-oneOf []      = empty
-oneOf [x]     = x
-oneOf (x::xs) = OneOf $ x:::xs
+oneOf : ListLazyGen a -> Gen a
+oneOf $ LLG []      = empty
+oneOf $ LLG [x]     = x
+oneOf $ LLG (x::xs) = OneOf $ x:::xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -158,7 +184,7 @@ oneOf (x::xs) = OneOf $ x:::xs
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
 frequency : List (Nat, Lazy (Gen a)) -> Gen a
-frequency = oneOf . concatMap (uncurry replicate)
+frequency = oneOf . LLG . concatMap (uncurry replicate)
             -- TODO to reimplement this more effectively
 
 ||| Choose one of the given values uniformly.
@@ -166,7 +192,7 @@ frequency = oneOf . concatMap (uncurry replicate)
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
 elements : List a -> Gen a
-elements = oneOf . map (delay . pure)
+elements = oneOf . LLG . map (delay . pure)
 
 export
 elements' : Foldable f => f a -> Gen a
@@ -177,10 +203,10 @@ elements' = elements . toList
 ------------------------------
 
 export
-alternativesOf : Gen a -> List $ Lazy (Gen a)
-alternativesOf $ Empty    = []
-alternativesOf $ OneOf gs = forget gs
-alternativesOf g          = [g]
+alternativesOf : Gen a -> ListLazyGen a
+alternativesOf $ Empty    = LLG []
+alternativesOf $ OneOf gs = LLG $ forget gs
+alternativesOf g          = LLG [g]
 
 ||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
 ||| except for empty generator, which would still be returned as empty generator.
@@ -190,41 +216,22 @@ forgetStructure g@(Point _) = g
 forgetStructure Empty = Empty
 forgetStructure g = Point $ unGen g
 
---- Support for functor, idiom brackets and monadic syntax ---
-
 namespace AlternativesOf
 
   export
-  map : (a -> b) -> List (Lazy (Gen a)) -> List (Lazy (Gen b))
-  map = Prelude.map . wrapLazy . map
-
-  export %inline
-  (<$>) : (a -> b) -> List (Lazy (Gen a)) -> List (Lazy (Gen b))
-  (<$>) = map
-
-  export %inline
-  (<&>) : List (Lazy (Gen a)) -> (a -> b) -> List (Lazy (Gen b))
-  (<&>) = flip (<$>)
+  Functor ListLazyGen where
+    map = wrapLLG . map . wrapLazy . map
 
   export
-  pure : a -> List (Lazy (Gen a))
-  pure x = [ pure x ]
+  Applicative ListLazyGen where
+    pure x = LLG [ pure x ]
+    LLG xs <*> LLG ys = LLG [| ap xs ys |] where
+      ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
+      ap x y = x <*> y
 
   export
-  (<*>) : List (Lazy (Gen $ a -> b)) -> List (Lazy (Gen a)) -> List (Lazy (Gen b))
-  (<*>) xs ys = with Prelude.(<*>) [| ap xs ys |] where
-    ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
-    ap x y = x <*> y
-
-  export
-  (>>=) : List (Lazy (Gen a)) -> (a -> List (Lazy (Gen b))) -> List (Lazy (Gen b))
-  xs >>= f = with Prelude.(>>=) xs >>= alternativesOf . (>>= oneOf . f) . force
-
-  namespace HeterogenousL
-
-    export %inline
-    (>>=) : Gen a -> (a -> List (Lazy (Gen b))) -> List (Lazy (Gen b))
-    gen >>= f = [ gen ] >>= f
+  Monad ListLazyGen where
+    LLG xs >>= f = LLG $ xs >>= unLLG . alternativesOf . (>>= oneOf . f) . force
 
 -----------------
 --- Filtering ---
