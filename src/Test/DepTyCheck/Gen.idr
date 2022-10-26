@@ -245,9 +245,9 @@ namespace AlternativesOf
 
   namespace BindWithJustGen
 
-    export
+    export %inline
     (>>=) : Gen a -> (a -> List (Lazy (Gen b))) -> List (Lazy (Gen b))
-    (>>=) xs f = [ xs ] >>= f
+    (>>=) gen f = [ gen ] >>= f
 
 -----------------
 --- Filtering ---
