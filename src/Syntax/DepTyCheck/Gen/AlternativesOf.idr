@@ -22,16 +22,16 @@ xs >>= f = with Prelude.(>>=) xs >>= alternativesOf . (>>= oneOf . f) . force
 
 namespace HeterogenousL
 
-  export %inline
-  (<*>) : Gen (a -> b) -> List (Lazy (Gen a)) -> List (Lazy (Gen b))
-  f <*> b = [ f ] <*> b
+--  export %inline
+--  (<*>) : Gen (a -> b) -> List (Lazy (Gen a)) -> List (Lazy (Gen b))
+--  f <*> b = [ f ] <*> b
 
   export %inline
   (>>=) : Gen a -> (a -> List (Lazy (Gen b))) -> List (Lazy (Gen b))
   gen >>= f = [ gen ] >>= f
 
-namespace HeterogenousR
-
-  export %inline
-  (<*>) : List (Lazy (Gen $ a -> b)) -> Gen a -> List (Lazy (Gen b))
-  f <*> b = f <*> [ b ]
+--namespace HeterogenousR
+--
+--  export %inline
+--  (<*>) : List (Lazy (Gen $ a -> b)) -> Gen a -> List (Lazy (Gen b))
+--  f <*> b = f <*> [ b ]
