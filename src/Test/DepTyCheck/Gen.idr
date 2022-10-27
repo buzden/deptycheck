@@ -287,7 +287,7 @@ Alternative GenAlternatives where
 
 export
 Monad GenAlternatives where
-  LLG xs >>= f = LLG $ xs >>= unLLG . alternativesOf . (>>= oneOf . f) . force
+  xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
 
 -----------------
 --- Filtering ---
