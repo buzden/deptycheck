@@ -68,8 +68,12 @@ genMoreStrings'' : Gen String
 genMoreStrings'' = oneOf $ alternativesOf genMoreStrings ++ alternativesOf (elements ["more", "even more"])
 ```
 
-There are also several functions based on the `alternativesOf`, allowing to process all alternatives in a single expression;
-you will see some of them in use below.
+> **Note**
+>
+> There are also functions based on the `alternativesOf`, allowing to map values from all alternatives in a single expression
+> named `mapAlternativesOf` and `mapAlternativesWith`.
+
+You can also operate with alternatives as with applicative functors or monads.
 
 For example, consider a generator of lists with length not greater than given.
 There are a lot of possible implementations, but consider a recursive one:
@@ -129,11 +133,11 @@ Distribution of a generator built by monadic bind is such that
 the whole continuation (i.e. RHS of `>>=`) applied to some `x` has the same probability to produce the result
 as the probability for `x` to appear.
 
-This, in the example above probability of particular natural `n` to come in the result
+Thus, in the example above probability of particular natural `n` to come in the result
 is the same as probability of this `n` to come on the given `genNat`.
 After that, all fins for each particular `n` are distributed evenly, because it is a property of `genFin`.
 
-You need to use `alternativesOf` if you wanted all possible resulted values to be distributed evenly, e.g.:
+You need to use `alternativesOf` if you want all possible resulted values to be distributed evenly, e.g.:
 
 ```idris
 genAnyFin' : Gen Nat => Gen (n ** Fin n)

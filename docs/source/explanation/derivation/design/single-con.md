@@ -255,7 +255,7 @@ It means that depending on its value, some constructors cannot be generated.
 Since, expressions that are used to the type index value in the data definitions are just type constructor,
 we can pattern match on them in generators.
 We would produce a value for the appropriate value of the given index and produce an empty generator for the rest.
-Empty generator is available though function `empty`.
+Empty generator is available through function `empty`.
 
 So, the structure of the derived generator with the given type index would be the following for the `D` example.
 
