@@ -216,9 +216,9 @@ elements' = elements . toList
 
 export
 alternativesOf : Gen a -> GenAlternatives a
-alternativesOf $ Empty    = LLG []
+alternativesOf $ Empty    = []
 alternativesOf $ OneOf gs = LLG $ forget gs
-alternativesOf g          = LLG [g]
+alternativesOf g          = [g]
 
 ||| Any order alternatives fetching.
 |||
@@ -226,9 +226,10 @@ alternativesOf g          = LLG [g]
 ||| `alternativesOf'` of order `n+1` returns alternatives of all alternatives of order `n` flattened.
 export
 alternativesOf' : (order : Nat) -> Gen a -> GenAlternatives a
-alternativesOf' 0     gen = [ gen ]
-alternativesOf' 1     gen = alternativesOf gen
-alternativesOf' (S k) gen = processAlternatives' alternativesOf $ alternativesOf' k gen
+alternativesOf' 0     Empty = []
+alternativesOf' 0     gen   = [ gen ]
+alternativesOf' 1     gen   = alternativesOf gen
+alternativesOf' (S k) gen   = processAlternatives' alternativesOf $ alternativesOf' k gen
 
 ||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
 ||| except for empty generator, which would still be returned as empty generator.
