@@ -140,33 +140,34 @@ Monad Gen where
 --- Detour: special list of lazy gens ---
 -----------------------------------------
 
-namespace ListLazyGen
+namespace GenAlternatives
 
-  public export
-  record ListLazyGen a where
+  export
+  record GenAlternatives a where
     constructor LLG
     unLLG : List (Lazy (Gen a))
 
-  wrapLLG : (List (Lazy (Gen a)) -> List (Lazy (Gen b))) -> ListLazyGen a -> ListLazyGen b
+  wrapLLG : (List (Lazy (Gen a)) -> List (Lazy (Gen b))) -> GenAlternatives a -> GenAlternatives b
   wrapLLG f = LLG . f . unLLG
 
-  wrapLLG' : (Gen a -> Gen b) -> ListLazyGen a -> ListLazyGen b
-  wrapLLG' = wrapLLG . map . wrapLazy
+  export
+  processAlternatives : (Gen a -> Gen b) -> GenAlternatives a -> GenAlternatives b
+  processAlternatives = wrapLLG . map . wrapLazy
 
   public export %inline
-  Nil : ListLazyGen a
+  Nil : GenAlternatives a
   Nil = LLG Nil
 
   public export %inline
-  (::) : Lazy (Gen a) -> ListLazyGen a -> ListLazyGen a
+  (::) : Lazy (Gen a) -> GenAlternatives a -> GenAlternatives a
   (::) x = wrapLLG (x ::)
 
   public export %inline
-  (++) : ListLazyGen a -> ListLazyGen a -> ListLazyGen a
+  (++) : GenAlternatives a -> GenAlternatives a -> GenAlternatives a
   LLG xs ++ LLG ys = LLG $ xs ++ ys
 
   public export %inline
-  length : ListLazyGen a -> Nat
+  length : GenAlternatives a -> Nat
   length = length . unLLG
 
 ----------------------------------
@@ -178,7 +179,7 @@ namespace ListLazyGen
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
-oneOf : ListLazyGen a -> Gen a
+oneOf : GenAlternatives a -> Gen a
 oneOf $ LLG []      = empty
 oneOf $ LLG [x]     = x
 oneOf $ LLG (x::xs) = OneOf $ x:::xs
@@ -210,7 +211,7 @@ elements' = elements . toList
 ------------------------------
 
 export
-alternativesOf : Gen a -> ListLazyGen a
+alternativesOf : Gen a -> GenAlternatives a
 alternativesOf $ Empty    = LLG []
 alternativesOf $ OneOf gs = LLG $ forget gs
 alternativesOf g          = LLG [g]
@@ -224,15 +225,15 @@ forgetStructure Empty = Empty
 forgetStructure g = Point $ unGen g
 
 public export
-processAlternatives : (Gen a -> Gen b) -> Gen a -> ListLazyGen b
-processAlternatives f = wrapLLG' f . alternativesOf
+processAlternatives : (Gen a -> Gen b) -> Gen a -> GenAlternatives b
+processAlternatives f = processAlternatives f . alternativesOf
 
 public export
-mapAlternativesOf : (a -> b) -> Gen a -> ListLazyGen b
+mapAlternativesOf : (a -> b) -> Gen a -> GenAlternatives b
 mapAlternativesOf = processAlternatives . map
 
 public export %inline
-mapAlternativesWith : Gen a -> (a -> b) -> ListLazyGen b
+mapAlternativesWith : Gen a -> (a -> b) -> GenAlternatives b
 mapAlternativesWith = flip mapAlternativesOf
 
 -- Priority is chosen to be able to use these operators without parenthesis
@@ -245,31 +246,31 @@ infix 8 `mapAlternativesOf`
 -----------------------------------------------------
 
 export
-Semigroup (ListLazyGen a) where
+Semigroup (GenAlternatives a) where
   LLG xs <+> LLG ys = LLG $ xs <+> ys
 
 export
-Monoid (ListLazyGen a) where
+Monoid (GenAlternatives a) where
   neutral = LLG neutral
 
 export
-Functor ListLazyGen where
-  map = wrapLLG' . map
+Functor GenAlternatives where
+  map = processAlternatives . map
 
 export
-Applicative ListLazyGen where
+Applicative GenAlternatives where
   pure x = LLG [ pure x ]
   LLG xs <*> LLG ys = LLG [| ap xs ys |] where
     ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
     ap x y = x <*> y
 
 export
-Alternative ListLazyGen where
+Alternative GenAlternatives where
   empty = LLG empty
   LLG xs <|> ys = LLG $ xs <|> ys.unLLG
 
 export
-Monad ListLazyGen where
+Monad GenAlternatives where
   LLG xs >>= f = LLG $ xs >>= unLLG . alternativesOf . (>>= oneOf . f) . force
 
 -----------------
