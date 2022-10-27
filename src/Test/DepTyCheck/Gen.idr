@@ -221,6 +221,14 @@ forgetStructure g = Point $ unGen g
 -----------------------------------------------------
 
 export
+Semigroup (ListLazyGen a) where
+  LLG xs <+> LLG ys = LLG $ xs <+> ys
+
+export
+Monoid (ListLazyGen a) where
+  neutral = LLG neutral
+
+export
 Functor ListLazyGen where
   map = wrapLLG . map . wrapLazy . map
 
@@ -230,6 +238,11 @@ Applicative ListLazyGen where
   LLG xs <*> LLG ys = LLG [| ap xs ys |] where
     ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
     ap x y = x <*> y
+
+export
+Alternative ListLazyGen where
+  empty = LLG empty
+  LLG xs <|> ys = LLG $ xs <|> ys.unLLG
 
 export
 Monad ListLazyGen where
