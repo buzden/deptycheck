@@ -238,15 +238,18 @@ namespace ForgetStructureNote
 
   export
   main_forgetStructure_note_ex1_alternatives_sq_count_corr : IO ()
-  main_forgetStructure_note_ex1_alternatives_sq_count_corr = putStrLn $ show $ 9 == length (with Prelude.(>>=) alternativesOf g1 >>= alternativesOf . force)
+  main_forgetStructure_note_ex1_alternatives_sq_count_corr = putStrLn $ show $ 9 ==
+    length (with Prelude.(>>=) unLLG (alternativesOf g1) >>= unLLG . alternativesOf . force)
 
   export
   main_forgetStructure_note_ex2_alternatives_sq_count_corr : IO ()
-  main_forgetStructure_note_ex2_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (with Prelude.(>>=) alternativesOf g2 >>= alternativesOf . force)
+  main_forgetStructure_note_ex2_alternatives_sq_count_corr = putStrLn $ show $ 3 ==
+    length (with Prelude.(>>=) unLLG (alternativesOf g2) >>= unLLG . alternativesOf . force)
 
   export
   main_forgetStructure_note_ex3_alternatives_sq_count_corr : IO ()
-  main_forgetStructure_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (with Prelude.(>>=) alternativesOf g3 >>= alternativesOf . force)
+  main_forgetStructure_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 ==
+    length (with Prelude.(>>=) unLLG (alternativesOf g3) >>= unLLG . alternativesOf . force)
 -->
 
 Also, here you can see that we can use generators as `auto`-parameters,
