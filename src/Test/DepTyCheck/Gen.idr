@@ -154,6 +154,10 @@ namespace GenAlternatives
   processAlternatives : (Gen a -> Gen b) -> GenAlternatives a -> GenAlternatives b
   processAlternatives = wrapLLG . map . wrapLazy
 
+  export
+  processAlternatives' : (Gen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
+  processAlternatives' f = wrapLLG (>>= unLLG . f . force)
+
   public export %inline
   Nil : GenAlternatives a
   Nil = LLG Nil
@@ -215,6 +219,16 @@ alternativesOf : Gen a -> GenAlternatives a
 alternativesOf $ Empty    = LLG []
 alternativesOf $ OneOf gs = LLG $ forget gs
 alternativesOf g          = LLG [g]
+
+||| Any order alternatives fetching.
+|||
+||| `alternativesOf'` of order `1` is equivalent to the original `alternativesOf`,
+||| `alternativesOf'` of order `n+1` returns alternatives of all alternatives of order `n` flattened.
+export
+alternativesOf' : (order : Nat) -> Gen a -> GenAlternatives a
+alternativesOf' 0     gen = [ gen ]
+alternativesOf' 1     gen = alternativesOf gen
+alternativesOf' (S k) gen = processAlternatives' alternativesOf $ alternativesOf' k gen
 
 ||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
 ||| except for empty generator, which would still be returned as empty generator.
