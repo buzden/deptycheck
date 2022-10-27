@@ -162,6 +162,10 @@ namespace ListLazyGen
   (++) : ListLazyGen a -> ListLazyGen a -> ListLazyGen a
   LLG xs ++ LLG ys = LLG $ xs ++ ys
 
+  public export %inline
+  length : ListLazyGen a -> Nat
+  length = length . unLLG
+
 ----------------------------------
 --- Creation of new generators ---
 ----------------------------------
