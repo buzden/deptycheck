@@ -150,6 +150,9 @@ namespace ListLazyGen
   wrapLLG : (List (Lazy (Gen a)) -> List (Lazy (Gen b))) -> ListLazyGen a -> ListLazyGen b
   wrapLLG f = LLG . f . unLLG
 
+  wrapLLG' : (Gen a -> Gen b) -> ListLazyGen a -> ListLazyGen b
+  wrapLLG' = wrapLLG . map . wrapLazy
+
   public export %inline
   Nil : ListLazyGen a
   Nil = LLG Nil
@@ -220,6 +223,23 @@ forgetStructure g@(Point _) = g
 forgetStructure Empty = Empty
 forgetStructure g = Point $ unGen g
 
+public export
+processAlternatives : (Gen a -> Gen b) -> Gen a -> ListLazyGen b
+processAlternatives f = wrapLLG' f . alternativesOf
+
+public export
+mapAlternativesOf : (a -> b) -> Gen a -> ListLazyGen b
+mapAlternativesOf = processAlternatives . map
+
+public export %inline
+mapAlternativesWith : Gen a -> (a -> b) -> ListLazyGen b
+mapAlternativesWith = flip mapAlternativesOf
+
+-- Priority is chosen to be able to use these operators without parenthesis
+-- in expressions of lists, i.e. involving operators `::` and `++`.
+infix 8 `mapAlternativesOf`
+      , `mapAlternativesWith`
+
 -----------------------------------------------------
 --- Detour: implementations for list of lazy gens ---
 -----------------------------------------------------
@@ -234,7 +254,7 @@ Monoid (ListLazyGen a) where
 
 export
 Functor ListLazyGen where
-  map = wrapLLG . map . wrapLazy . map
+  map = wrapLLG' . map
 
 export
 Applicative ListLazyGen where
