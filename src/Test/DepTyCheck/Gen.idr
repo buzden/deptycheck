@@ -180,18 +180,18 @@ namespace GenAlternatives
   public export
   data GenAlternatives : Type -> Type where
     Nil  : GenAlternatives a
-    (::) : {default 1 weight : Nat} -> Lazy (Gen a) -> GenAlternatives a -> GenAlternatives a
+    Cons : Lazy (Gen a) -> (weight : Nat) -> GenAlternatives a -> GenAlternatives a
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export
   (++) : GenAlternatives a -> GenAlternatives a -> GenAlternatives a
-  (++) []                   ys = ys
-  (++) ((::) x {weight} xs) ys = (x :: (xs ++ ys)) {weight}
+  (++) []                 ys = ys
+  (++) (Cons x weight xs) ys = Cons x weight (xs ++ ys)
 
   public export
   length : GenAlternatives a -> Nat
-  length []      = Z
-  length (_::xs) = S $ length xs
+  length []           = Z
+  length (Cons _ _xs) = S $ length xs
 
   export
   Semigroup (GenAlternatives a) where
@@ -203,34 +203,89 @@ namespace GenAlternatives
 
   export
   processAlternatives : (Gen a -> Gen b) -> GenAlternatives a -> GenAlternatives b
-  processAlternatives _   []                 = []
-  processAlternatives f $ (::) x {weight} xs = (wrapLazy f x :: processAlternatives f xs) {weight}
+  processAlternatives _   []               = []
+  processAlternatives f $ Cons x weight xs = Cons (wrapLazy f x) weight (processAlternatives f xs)
 
   export
   processAlternatives' : (Gen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
   processAlternatives' f = concat . mapGens where
 
     mapWeight : forall a. (Nat -> Nat) -> GenAlternatives a -> GenAlternatives a
-    mapWeight _ []                   = []
-    mapWeight f $ (::) x {weight} xs = (::) x {weight=f weight} $ mapWeight f xs
+    mapWeight _ []                 = []
+    mapWeight f $ Cons x weight xs = Cons x (f weight) (mapWeight f xs)
 
     mapGens : GenAlternatives a -> List $ GenAlternatives b
-    mapGens []                   = []
-    mapGens $ (::) x {weight} xs = mapWeight (weight *) (f x) :: mapGens xs
+    mapGens []                 = []
+    mapGens $ Cons x weight xs = mapWeight (weight *) (f x) :: mapGens xs
+
+  --- Lists syntax for alternatives list ---
+
+  export
+  interface GenAlternative g where
+    altGen : g a -> Lazy (Gen a)
+    weight : g a -> Nat
+
+  public export %inline
+  (::) : GenAlternative g => g a -> GenAlternatives a -> GenAlternatives a
+  (::) @{ga} x xs = Cons (altGen x) (weight @{ga} x) xs
+
+  namespace Gen
+
+    export
+    GenAlternative (\a => Lazy (Gen a)) where
+      altGen = id
+      weight = const 1
+
+    export
+    GenAlternative Gen where
+      altGen = delay
+      weight = const 1
+
+  namespace Weighted
+
+    public export
+    data GenWithWeight : Type -> Type where
+      Weighted : Nat -> Lazy (Gen a) -> GenWithWeight a
+
+    public export %inline
+    weighted : Nat -> Lazy (Gen a) -> GenWithWeight a
+    weighted = Weighted
+
+    infixr 0 `weighted` -- right-associativity for compatibility with `$`
+
+    public export %inline
+    withWeight : Lazy (Gen a) -> Nat -> GenWithWeight a
+    withWeight = flip Weighted
+
+    infix 0 `withWeight`
+
+    export
+    GenAlternative GenWithWeight where
+      altGen (Weighted _ g) = g
+      weight (Weighted w _) = w
+
+  namespace Maybe
+
+    export
+    GenAlternative (\a => Maybe (Lazy (Gen a))) where
+      altGen Nothing  = empty
+      altGen (Just x) = x
+      weight Nothing  = 0
+      weight (Just _) = 1
 
 toLNLG : GenAlternatives a -> List (Subset Nat IsSucc, Lazy (Gen a))
-toLNLG []                       = []
-toLNLG $ (::) _ {weight=Z}   xs = toLNLG xs
-toLNLG $ (::) x {weight=S w} xs = (Element (S w) ItIsSucc, x) :: toLNLG xs
+toLNLG []                = []
+toLNLG $ Cons _ Z     xs = toLNLG xs
+toLNLG $ Cons x (S w) xs = (Element (S w) ItIsSucc, x) :: toLNLG xs
 
 fromLNLG : List (Subset Nat IsSucc, Lazy (Gen a)) -> GenAlternatives a
 fromLNLG []                = []
-fromLNLG ((weight, g)::xs) = (::) g {weight = fst weight} $ fromLNLG xs
+fromLNLG ((weight, g)::xs) = Cons g weight.fst $ fromLNLG xs
 
 export
 Cast (List a) (GenAlternatives a) where
   cast []      = []
-  cast (x::xs) = pure x :: cast xs
+  cast (x::xs) = Cons (pure x) 1 (cast xs)
 
 ----------------------------------
 --- Creation of new generators ---
@@ -260,8 +315,8 @@ export %deprecate
 frequency : List (Nat, Lazy (Gen a)) -> Gen a
 frequency = oneOf . fromList where
   fromList : List (Nat, Lazy (Gen a)) -> GenAlternatives a
-  fromList []                = []
-  fromList ((weight, g)::xs) = (g :: fromList xs) {weight}
+  fromList []           = []
+  fromList ((w, g)::xs) = Cons g w $ fromList xs
 
 ||| Choose one of the given values uniformly.
 |||
@@ -331,7 +386,7 @@ Functor GenAlternatives where
 
 export
 Applicative GenAlternatives where
-  pure x = [ pure x ]
+  pure x = [ pure {f=Gen} x ]
   xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
 
 export
@@ -342,41 +397,6 @@ Alternative GenAlternatives where
 export
 Monad GenAlternatives where
   xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
-
------------------------------------------------
---- Additional syntax for alternatives list ---
------------------------------------------------
-
-namespace GenAlternatives
-
-  namespace Weighted
-
-    public export
-    data GenWithWeight : Type -> Type where
-      Weighted : Nat -> Lazy (Gen a) -> GenWithWeight a
-
-    public export %inline
-    weighted : Nat -> Lazy (Gen a) -> GenWithWeight a
-    weighted = Weighted
-
-    infixr 0 `weighted` -- right-associativity for compatibility with `$`
-
-    public export %inline
-    withWeight : Lazy (Gen a) -> Nat -> GenWithWeight a
-    withWeight = flip Weighted
-
-    infix 0 `withWeight`
-
-    public export %inline
-    (::) : GenWithWeight a -> GenAlternatives a -> GenAlternatives a
-    (::) (Weighted weight gen) = (::) gen {weight}
-
-  namespace Maybe
-
-    public export
-    (::) : Maybe (Lazy (Gen a)) -> GenAlternatives a -> GenAlternatives a
-    (::) (Just g) = (::) g
-    (::) Nothing  = id
 
 -----------------
 --- Filtering ---
