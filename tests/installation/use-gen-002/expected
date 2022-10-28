@@ -3,6 +3,7 @@
 Now compiling the executable: deptycheck-usage-example
 
 ---------
+
 define `x3`
 -- post defs: ["x3"]
 
