@@ -182,6 +182,10 @@ namespace GenAlternatives
     Nil  : GenAlternatives a
     Cons : (weight : Nat) -> Lazy (Gen a) -> GenAlternatives a -> GenAlternatives a
 
+  public export %inline
+  (::) : Lazy (Gen a) -> GenAlternatives a -> GenAlternatives a
+  (::) = Cons 1
+
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export
   (++) : GenAlternatives a -> GenAlternatives a -> GenAlternatives a
@@ -217,61 +221,6 @@ namespace GenAlternatives
     mapGens : GenAlternatives a -> List $ GenAlternatives b
     mapGens []                 = []
     mapGens $ Cons weight x xs = mapWeight (weight *) (f x) :: mapGens xs
-
-  --- Lists syntax for alternatives list ---
-
-  export
-  interface GenAlternative g where
-    altGen : g a -> Lazy (Gen a)
-    weight : g a -> Nat
-
-  public export %inline
-  (::) : GenAlternative g => g a -> GenAlternatives a -> GenAlternatives a
-  (::) @{ga} x xs = Cons (weight @{ga} x) (altGen x) xs
-
-  namespace Gen
-
-    export
-    GenAlternative (\a => Lazy (Gen a)) where
-      altGen = id
-      weight = const 1
-
-    export
-    GenAlternative Gen where
-      altGen = delay
-      weight = const 1
-
-  namespace Weighted
-
-    public export
-    data GenWithWeight : Type -> Type where
-      Weighted : Nat -> Lazy (Gen a) -> GenWithWeight a
-
-    public export %inline
-    weighted : Nat -> Lazy (Gen a) -> GenWithWeight a
-    weighted = Weighted
-
-    infixr 0 `weighted` -- right-associativity for compatibility with `$`
-
-    public export %inline
-    withWeight : Lazy (Gen a) -> Nat -> GenWithWeight a
-    withWeight = flip Weighted
-
-    infix 0 `withWeight`
-
-    export
-    GenAlternative GenWithWeight where
-      altGen (Weighted _ g) = g
-      weight (Weighted w _) = w
-
-  namespace Maybe
-
-    export
-    GenAlternative (\a => Maybe (Lazy (Gen a))) where
-      altGen Nothing  = empty
-      altGen (Just x) = x
-      weight Nothing  = 0
-      weight (Just _) = 1
 
 toLNLG : GenAlternatives a -> List (Subset Nat IsSucc, Lazy (Gen a))
 toLNLG []                = []
