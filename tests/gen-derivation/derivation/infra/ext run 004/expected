@@ -6,13 +6,41 @@ Generated values:
 -----
 MkX'S "" : X'S 0
 -----
-MkX'S "a" : X'S 0
+MkX'S "" : X'S 0
 -----
 MkX'S "bc" : X'S 0
 -----
+MkX'S "" : X'S 0
+-----
+MkX'S "a" : X'S 0
+-----
+MkX'S "a" : X'S 0
+-----
+MkX'S "a" : X'S 0
+-----
+MkX'S "a" : X'S 0
+-----
+MkX'S "" : X'S 0
+-----
+MkX'S "" : X'S 0
+-----
+-----
+MkX'S "" : X'S 18
+-----
+MkX'S "" : X'S 18
+-----
+MkX'S "bc" : X'S 18
 -----
 MkX'S "" : X'S 18
 -----
 MkX'S "a" : X'S 18
 -----
-MkX'S "bc" : X'S 18
+MkX'S "a" : X'S 18
+-----
+MkX'S "a" : X'S 18
+-----
+MkX'S "a" : X'S 18
+-----
+MkX'S "" : X'S 18
+-----
+MkX'S "" : X'S 18

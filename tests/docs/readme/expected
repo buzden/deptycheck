@@ -1,1 +1,41 @@
 1/1: Building README (README.md)
+
+---------------------------------
+Running check main_genAnyFin_alternatives_count_corr...
+---------------------------------
+True
+
+---------------------------------
+Running check main_genAnyFin''_alternatives_count_corr...
+---------------------------------
+True
+
+---------------------------------
+Running check main_forgetStructure_note_ex1_alternatives_count_corr...
+---------------------------------
+True
+
+---------------------------------
+Running check main_forgetStructure_note_ex2_alternatives_count_corr...
+---------------------------------
+True
+
+---------------------------------
+Running check main_forgetStructure_note_ex3_alternatives_count_corr...
+---------------------------------
+True
+
+---------------------------------
+Running check main_forgetStructure_note_ex1_alternatives_sq_count_corr...
+---------------------------------
+True
+
+---------------------------------
+Running check main_forgetStructure_note_ex2_alternatives_sq_count_corr...
+---------------------------------
+True
+
+---------------------------------
+Running check main_forgetStructure_note_ex3_alternatives_sq_count_corr...
+---------------------------------
+True

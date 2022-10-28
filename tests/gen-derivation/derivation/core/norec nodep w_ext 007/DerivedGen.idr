@@ -12,8 +12,8 @@ Show X where
   show _ = #"an "X""#
 
 gensGen : Fuel -> (a : Type) -> Gen $ Gen a
-gensGen _ Bool = choiceMap (pure . pure) [True, False]
-gensGen _ Nat  = choiceMap (pure . pure) [0 .. 99]
+gensGen _ Bool = elements $ pure <$> [True, False]
+gensGen _ Nat  = elements $ pure <$> [0 .. 99]
 gensGen _ _    = empty
 
 -- Check that demanding the gen of gens is allowed and is used

@@ -40,7 +40,7 @@ test: test-all
 
 test-all: test-deptycheck print-v-delimiter test-pil
 
-test-deptycheck: deptycheck thirdparty-sop
+test-deptycheck: deptycheck thirdparty-sop thirdparty-summary-stat
 	${MAKE} -C tests -f tests.mk only="${only}"
 
 .PHONY: retest-deptycheck
@@ -55,7 +55,7 @@ test-installation:
 
 .PHONY: thirdparties thirdparty-elab-util thirdparty-sop
 
-thirdparties: thirdparty-elab-util thirdparty-sop
+thirdparties: thirdparty-elab-util thirdparty-sop thirdparty-summary-stat
 
 thirdparty-elab-util:
 	${IDRIS2} --build thirdparty/elab-util/elab-util.ipkg
@@ -67,6 +67,9 @@ thirdparty-sop: thirdparty-elab-util
 	${IDRIS2} --build thirdparty/sop/sop.ipkg
 	${RM} -r thirdparty/sop/depends/
 	# TODO to make the `depends` dir be removed even on the compiler crash
+
+thirdparty-summary-stat:
+	${IDRIS2} --build thirdparty/summary-stat/summary-stat.ipkg
 
 .PHONY: pil test-pil
 

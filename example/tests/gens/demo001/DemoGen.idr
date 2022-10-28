@@ -52,14 +52,11 @@ interestingExpr = exprGen (limit 3) simpleValue recExpr
 
 export
 someStatementGen : {rc : Nat} -> Gen (postV ** postR ** Statement [] (AllUndefined {rc}) postV postR)
-someStatementGen = statement_gen (limit 6) [] AllUndefined
+someStatementGen = statement_gen (limit 12) [] AllUndefined
 
 export
 someStatement : {rc : Nat} -> Nat -> Maybe (postV ** postR ** Statement [] (AllUndefined {rc}) postV postR)
-someStatement n = evalState someStdGen $ unGen (variant n $ someStatementGen) >>= takeSomeRandomly
-  where
-    takeSomeRandomly : RandomGen g => LazyList a -> State g $ Maybe a
-    takeSomeRandomly xs = pure $ head' $ drop (finToNat {n=1000} !random') xs
+someStatement n = head' $ unGenTryN 100 someStdGen $ variant n $ someStatementGen
 
 showStatement : forall preV, preR. (postV ** postR ** Statement preV preR postV postR) -> String
 showStatement (postV ** postR ** stmt) = """

@@ -35,7 +35,7 @@ export
 runGs : List GenForRun -> IO Unit
 runGs checkedGens = do
   putStrLn "Generated values:"
-  let genedValues = checkedGens <&> \(G gen) => map show $ take 10 $ evalState someStdGen $ unGen $ gen $ limit 20
+  let genedValues = checkedGens <&> \(G gen) => map show $ unGenTryN 10 someStdGen $ gen $ limit 20
   let delim = (putStrLn "-----" >>)
   for_ genedValues $ delim . Lazy.traverse_ (delim . putStrLn)
 

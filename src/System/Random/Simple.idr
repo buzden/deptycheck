@@ -76,17 +76,22 @@ interface Random a where
   cardinalityR : (a, a) -> Maybe Nat
 
 export
-randomR' : Random a => RandomGen g => (a, a) -> State g a
-randomR' bounds = ST $ pure . randomR bounds
+randomR' : Random a => RandomGen g => MonadState g m => (a, a) -> m a
+randomR' bounds = let (g, x) = randomR bounds !get in put g $> x
 
 export
-random' : Random a => RandomGen g => State g a
-random' = ST $ pure . random
+random' : Random a => RandomGen g => MonadState g m => m a
+random' = let (g, x) = random !get in put g $> x
+
+export
+[RandomThru] Random thru => Cast a thru => Cast thru a => Random a where
+  randomR (lo, hi) = map cast . randomR {a=thru} (cast lo, cast hi)
+  random = map cast . random {a=thru}
+
+  cardinality = cardinality {a=thru}
+  cardinalityR (lo, hi) = cardinalityR {a=thru} (cast lo, cast hi)
 
 --- Random Int ---
-
-intToNat : Int -> Nat
-intToNat = fromInteger . cast
 
 export
 Random Int where
@@ -117,17 +122,13 @@ Random Int where
         f (assert_smaller n' $ n' - 1) (x + acc * b) g'
 
   cardinality = Nothing
-  cardinalityR (a, b) = Just $ intToNat $ if a > b then a - b else b - a
+  cardinalityR (a, b) = Just $ cast $ if a > b then a - b else b - a
 
 --- Random Nat ---
 
-export
-Random Nat where
-  randomR (lo, hi) = map intToNat . randomR (cast lo, cast hi)
-  random = map intToNat . random
-
-  cardinality = Nothing
-  cardinalityR (a, b) = Just $ if a > b then a `minus` b else b `minus` a
+export %hint
+RandomNat : Random Nat
+RandomNat = RandomThru {thru=Int}
 
 --- Random Unit ---
 
@@ -157,13 +158,9 @@ export
 
 --- Random Char ---
 
-export
-Random Char where
-  randomR (lo, hi) = map chr . randomR (ord lo, ord hi)
-  random = map chr . random
-
-  cardinality = cardinality {a=Int} -- Well, I don't know how many chars there are a pair of functions to and back for `Int`s
-  cardinalityR (a, b) = cardinalityR (ord a, ord b)
+export %hint
+RandomChar : Random Char
+RandomChar = RandomThru {thru=Int}
 
 --- Random Bool ---
 

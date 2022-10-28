@@ -5,20 +5,20 @@ Generated values:
 -----
 MkY {n=0} (MkX {n=0})
 -----
-MkY {n=3} (MkX {n=6})
+MkY {n=2} (MkX {n=4})
 -----
-MkY {n=4} (MkX {n=8})
+MkY {n=1} (MkX {n=2})
+-----
+MkY {n=1} (MkX {n=2})
+-----
+MkY {n=0} (MkX {n=0})
+-----
+MkY {n=0} (MkX {n=0})
 -----
 MkY {n=6} (MkX {n=12})
 -----
-MkY {n=7} (MkX {n=14})
+MkY {n=0} (MkX {n=0})
 -----
-MkY {n=10} (MkX {n=20})
+MkY {n=0} (MkX {n=0})
 -----
-MkY {n=16} (MkX {n=32})
------
-MkY {n=17} (MkX {n=34})
------
-MkY {n=20} (MkX {n=40})
------
-MkY {n=19} (MkX {n=38})
+MkY {n=0} (MkX {n=0})

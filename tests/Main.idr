@@ -9,8 +9,8 @@ atDir poolName dir = testsInDir dir (not . isPrefixOf "_") poolName [] Nothing
 
 main : IO ()
 main = runner $
-  [ !("Lazier list" `atDir` "lib/lazier")
-  , !("The `Gen` monad" `atDir` "lib/gen-monad")
+  [ !("The `Gen` monad" `atDir` "lib/gen-monad")
+  , !("Distribution of generators" `atDir` "lib/distribution")
   , !("The library documentation" `atDir` "docs")
   , !("Auto derivation: infrastructure: input validation" `atDir` "gen-derivation/inputvalidation")
   , !("Auto derivation: infrastructure: TTImp equality up to renaming" `atDir` "gen-derivation/up-to-renaming-ttimp-eq")

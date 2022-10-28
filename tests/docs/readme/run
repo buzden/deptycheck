@@ -1,5 +1,12 @@
 rm -rf build
 
-$1 --no-color --console-width 0 --no-banner --find-ipkg --check README.md
+$1 --no-color --console-width 0 --no-banner --find-ipkg --check README.md && \
+for mn in `grep 'main.* : IO ()' README.md | sed 's/ : IO ()$//' | sed 's/^ *//'`; do
+  echo
+  echo "---------------------------------"
+  echo "Running check $mn..."
+  echo "---------------------------------"
+  $1 --find-ipkg --exec "$mn" README.md
+done
 
 rm -rf build

@@ -7,18 +7,18 @@ MkY (MkX {n=0} {m=()})
 -----
 MkY (MkX {n=2} {m=()})
 -----
-MkY (MkX {n=3} {m=()})
+MkY (MkX {n=1} {m=()})
 -----
-MkY (MkX {n=7} {m=()})
+MkY (MkX {n=1} {m=()})
 -----
-MkY (MkX {n=8} {m=()})
+MkY (MkX {n=0} {m=()})
 -----
-MkY (MkX {n=9} {m=()})
+MkY (MkX {n=0} {m=()})
 -----
-MkY (MkX {n=10} {m=()})
+MkY (MkX {n=6} {m=()})
 -----
-MkY (MkX {n=14} {m=()})
+MkY (MkX {n=0} {m=()})
 -----
-MkY (MkX {n=15} {m=()})
+MkY (MkX {n=0} {m=()})
 -----
-MkY (MkX {n=17} {m=()})
+MkY (MkX {n=0} {m=()})

@@ -5,20 +5,20 @@ Generated values:
 -----
 X0
 -----
-X1 True
+X0
+-----
+X2 False 1
 -----
 X1 False
 -----
-X2 False 0
+X0
 -----
-X2 False 4
+X0
 -----
-X2 False 6
+X0
 -----
-X2 False 7
+X2 True 3
 -----
-X2 False 8
+X0
 -----
-X2 False 14
------
-X2 False 15
+X1 False

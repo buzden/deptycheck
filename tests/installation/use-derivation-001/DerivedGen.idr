@@ -18,5 +18,5 @@ checkedGen = deriveGen
 main : IO Unit
 main = do
   putStrLn "Generated values:"
-  let genedValues = map show $ take 10 $ evalState someStdGen $ unGen $ checkedGen $ limit 20
+  let genedValues = map show $ unGenTryN 10 someStdGen $ checkedGen $ limit 20
   Lazy.for_ genedValues $ (putStrLn "-----" >>) . putStrLn

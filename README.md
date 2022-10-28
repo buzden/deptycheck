@@ -39,12 +39,61 @@ genSomeStrings : Gen String
 genSomeStrings = elements ["one", "two", "three"]
 ```
 
-Generators can be combined with operations from `Applicative` and `Alternative` interfaces:
+You can combine several generators into one:
 
 ```idris
 genMoreStrings : Gen String
-genMoreStrings = genSomeStrings <|> elements ["more", "even more"]
+genMoreStrings = oneOf [genSomeStrings, elements ["more", "even more"]]
 ```
+
+> **Note**
+>
+> All generators listed in `oneOf` are meant to be distributed uniformly between each other as a whole thing.
+> That is, in `genMoreStrings` values `"one"`, `"two"` and `"three"` have the same probability to be generated
+> and this probability is `2/3` of probability for `"more"` or `"even more"` to appear.
+
+So, the following generator is **not** equivalent to the `genMoreStrings` from above:
+
+```idris
+genMoreStrings' : Gen String
+genMoreStrings' = elements ["one", "two", "three", "more", "even more"]
+```
+
+In `genMoreStrings'` all values are distributed uniformly.
+
+To achieve the same result with reusing `genSomeStrings` generator, we need to dig into it deeper with `alternativesOf` function:
+
+```idris
+genMoreStrings'' : Gen String
+genMoreStrings'' = oneOf $ alternativesOf genMoreStrings ++ alternativesOf (elements ["more", "even more"])
+```
+
+> **Note**
+>
+> There are also functions based on the `alternativesOf`, allowing to map values from all alternatives in a single expression
+> named `mapAlternativesOf` and `mapAlternativesWith`.
+
+You can also operate with alternatives as with applicative functors or monads.
+
+For example, consider a generator of lists with length not greater than given.
+There are a lot of possible implementations, but consider a recursive one:
+
+```idris
+genListsN : Gen a -> (n : Nat) -> Gen $ List a
+genListsN _    Z     = [| [] |]
+genListsN genA (S n) = oneOf $ [| [] |]
+                            :: [| [genA] :: alternativesOf (genListsN genA n) |]
+```
+
+Distribution of lengths of lists produced by this generator is uniform,
+thanks to `alternativesOf` function.
+
+> **Note**
+>
+> If we were not using `alternativesOf` at all (say, with expression `[| genA :: genListsN genA n |]`),
+> probability of getting a list of length `n+1` would be 2 times *less* than getting a list of length `n`.
+
+Generators can be combined with operations from `Applicative` interface:
 
 ```idris
 data X = MkX String String
@@ -53,26 +102,16 @@ genStrPairs : Gen X
 genStrPairs = [| MkX genSomeStrings genMoreStrings |]
 ```
 
-Notice that distribution of simple elements listing can depend on the environment.
-For example, the following generator is completely equivalent to `genMoreStrings` from above:
+> **Note**
+>
+> The number of alternatives acquired by `alternativesOf` function of an applicative combination
+> of two generators is a product of numbers of alternatives of those generators.
 
-```idris
-genMoreStrings' : Gen String
-genMoreStrings' = elements ["one", "two", "three", "more", "even more"]
-```
-
-I.e., all five elements are distributed equally in the resulting generator.
-To make the alternatives to be distributed equally as a whole, we can to make them *independent*:
-
-```idris
-genMoreStrings'' : Gen String
-genMoreStrings'' = independent genMoreStrings <|> independent (elements ["more", "even more"])
-```
-
-Being `Alternative` (unlike, say, in QuickCheck) generators can be empty.
+Unlike, say, in QuickCheck, generators can be empty.
 This is important for dependent types.
 For example, `Fin 0` is not inhabited,
-thus we need to have an empty generator if we want to have a generator for any `Fin n`:
+thus we need to have an empty generator
+if we want to have a generator for any `Fin n` (and sometimes we really want):
 
 ```idris
 genFin : (n : Nat) -> Gen $ Fin n
@@ -89,6 +128,131 @@ genAnyFin @{genNat} = do
   f <- genFin n
   pure (n ** f)
 ```
+
+Distribution of a generator built by monadic bind is such that
+the whole continuation (i.e. RHS of `>>=`) applied to some `x` has the same probability to produce the result
+as the probability for `x` to appear.
+
+Thus, in the example above probability of particular natural `n` to come in the result
+is the same as probability of this `n` to come on the given `genNat`.
+After that, all fins for each particular `n` are distributed evenly, because it is a property of `genFin`.
+
+You need to use `alternativesOf` if you want all possible resulted values to be distributed evenly, e.g.:
+
+```idris
+genAnyFin' : Gen Nat => Gen (n ** Fin n)
+genAnyFin' @{genNat} = oneOf $ do
+  n <- alternativesOf genNat
+  f <- alternativesOf $ genFin n
+  pure (n ** f)
+```
+
+Here we are using special monadic syntax support for lists of generators produced by `alternativesOf` function.
+
+In the last example, all results of `genFin 1` and all results of `genFin 2` would **not** be distributed equally
+in the case when `genNat` is `elements [1, 2]`, when they are distributed equally in the example of `genAnyFin`.
+I.e., particular generator's application `genAnyFin @{elements [1, 2]}` would be equivalent to `oneOf [pure (1**0), elements [(2**0), (2**1)]]`
+where `genAnyFin' @{elements [1, 2]}` would be equivalent to `elements [(1**0), (2**0), (2**1)]`.
+Thus, they have the same domain, but different distributions.
+
+<!-- idris
+app_non_even, app_non_even_inlined, app_even, app_even_inlined : Gen (n ** Fin n)
+app_non_even = genAnyFin @{elements [1, 2]}
+app_non_even_inlined = oneOf [pure (1**0), elements [(2**0), (2**1)]]
+app_even = genAnyFin' @{elements [1, 2]}
+app_even_inlined = elements [(1**0), (2**0), (2**1)]
+-->
+
+Despite monadic bind of generators interprets left-hand side generators as a whole,
+it looks inside it when the resulting generator is being asked for alternatives by `alternativesOf` function or its variants.
+
+For example, `alternativesOf` being applied to `genAnyFin @{elements [1, 2]}` would produce two alternatives.
+Sometimes this can be undesirable, thus, a `forgetStructure` function exists.
+It allows to forget actual structure of a generator in terms of its alternatives.
+
+Consider one more alternative of `genAnyFin`, now the given `genNat` is wrapped with `forgetStructure`:
+
+```idris
+genAnyFin'' : Gen Nat => Gen (n ** Fin n)
+genAnyFin'' @{genNat} = do
+  n <- forgetStructure genNat
+  f <- genFin n
+  pure (n ** f)
+```
+
+In this case, `alternativesOf` being applied to `genAnyFin'' @{elements [1, 2]}` would return a single alternative.
+
+<!-- idris
+main_genAnyFin_alternatives_count_corr : IO ()
+main_genAnyFin_alternatives_count_corr = putStrLn $ show $ length (alternativesOf $ genAnyFin @{elements [1, 2]}) == 2
+
+main_genAnyFin''_alternatives_count_corr : IO ()
+main_genAnyFin''_alternatives_count_corr = putStrLn $ show $ length (alternativesOf $ genAnyFin'' @{elements [1, 2]}) == 1
+-->
+
+> **Note**
+>
+> Search for alternatives through the series of monadic binds can go to the first generator that
+> is produced with no alternatives.
+>
+> Consider three generators:
+>
+> - `do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
+> - `do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }`
+> - `do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
+>
+> The first two generators would have three alternatives each when inspected by `alternativesOf`,
+> where the third one would have only one.
+>
+> But if you do `alternativesOf` for each of generators returned by the first `alternativesOf` and concatenate the results,
+> the first example would give you nine alternatives, where the second one still would give you three.
+> You can use `deepAlternativesOf` function with depth argument of `2` for this.
+>
+> This, actually, violates monadic laws in some sense.
+> Say, `alternativesOf` can distinct between `pure x >>= f` and `f x` if generator `f x` is, say, of form `elements [a, b, c]`,
+> because in the first case it would produce a single alternative, when in the second there will be three of them.
+> However, according to the generated result these two generators shall be equivalent.
+
+<!-- idris
+namespace ForgetStructureNote
+
+  a, b, c, d, e, f : Nat
+  a = 0
+  b = 1
+  c = 2
+  d = 3
+  e = 4
+  f = 5
+
+  g1, g2, g3 : Gen (Nat, Nat)
+  g1 = do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
+  g2 = do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }
+  g3 = do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
+
+  export
+  main_forgetStructure_note_ex1_alternatives_count_corr : IO ()
+  main_forgetStructure_note_ex1_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g1)
+
+  export
+  main_forgetStructure_note_ex2_alternatives_count_corr : IO ()
+  main_forgetStructure_note_ex2_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g2)
+
+  export
+  main_forgetStructure_note_ex3_alternatives_count_corr : IO ()
+  main_forgetStructure_note_ex3_alternatives_count_corr = putStrLn $ show $ 1 == length (alternativesOf g3)
+
+  export
+  main_forgetStructure_note_ex1_alternatives_sq_count_corr : IO ()
+  main_forgetStructure_note_ex1_alternatives_sq_count_corr = putStrLn $ show $ 9 == length (deepAlternativesOf 2 g1)
+
+  export
+  main_forgetStructure_note_ex2_alternatives_sq_count_corr : IO ()
+  main_forgetStructure_note_ex2_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (deepAlternativesOf 2 g2)
+
+  export
+  main_forgetStructure_note_ex3_alternatives_sq_count_corr : IO ()
+  main_forgetStructure_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (deepAlternativesOf 2 g3)
+-->
 
 Also, here you can see that we can use generators as `auto`-parameters,
 thus no need in a separate thing like QuickCheck's `Arbitrary`.

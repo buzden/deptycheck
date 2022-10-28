@@ -1,13 +1,19 @@
 module Test.DepTyCheck.Gen
 
+import Control.Function.FunExt
+
 import Control.Monad.State
+import public Control.Monad.State.Interface
+import public Control.Monad.Error.Interface
+import Control.Monad.Maybe
 
 import Data.DPair
+import Data.Fuel
 import Data.List
-import Data.List.Lazier
+import Data.List1
 import Data.List.Lazy
-import Data.Stream
 import Data.Vect
+import Data.Stream
 
 import Decidable.Equality
 
@@ -15,15 +21,20 @@ import public System.Random.Simple
 
 %default total
 
----------------------------------------------
---- General decisions and magic constants ---
----------------------------------------------
+-------------------------
+--- Utility functions ---
+-------------------------
 
--- All of those can (and even should) be generalized some day.
+randomFin : RandomGen g => MonadState g m => MonadError () m => {n : _} -> m $ Fin n
+randomFin {n = Z}   = throwError ()
+randomFin {n = S k} = random'
+
+pickUniformly : RandomGen g => MonadState g m => MonadError () m => List a -> m a
+pickUniformly xs = index' xs <$> randomFin
 
 public export %inline
-Seed : Type
-Seed = StdGen
+wrapLazy : (a -> b) -> Lazy a -> Lazy b
+wrapLazy f = delay . f . force
 
 -------------------------------
 --- Definition of the `Gen` ---
@@ -31,99 +42,151 @@ Seed = StdGen
 
 export
 data Gen : Type -> Type where
-  Uniform : LzList a -> Gen a
-  AlternG : LzList (Gen a) -> Gen a
-  Raw     : State Seed (LazyList a) -> Gen a
+  Empty : Gen a
+  Pure  : a -> Gen a
+  Point : (forall g, m. RandomGen g => MonadState g m => MonadError () m => m a) -> Gen a
+  OneOf : List1 (Lazy (Gen a)) -> Gen a
+  Bind  : Gen c -> (c -> Gen a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
-export
-bound : Gen a -> Maybe Nat
-bound (Uniform xs) = Just $ length xs
-bound (AlternG gs) = sum <$> traverse (assert_total bound) gs
-bound (Raw _)      = Nothing
+-----------------------------
+--- Very basic generators ---
+-----------------------------
 
 export
 chooseAny : Random a => Gen a
-chooseAny = Raw $ pure <$> random'
+chooseAny = Point random'
 
 export
 choose : Random a => (a, a) -> Gen a
-choose bounds = Raw $ pure <$> randomR' bounds
-
-shiftRandomly : RandomGen g => LzList a -> State g (LazyList a)
-shiftRandomly xs with (xs.length) proof prf
-  shiftRandomly xs | Z   = pure []
-  shiftRandomly xs | S _ = (uncurry $ toLazyList .: flip (++)) <$> splitAt xs <$> rewrite prf in random'
-
-traverseSt : RandomGen g => LazyList (State g a) -> State g (LazyList a)
-traverseSt []      = pure []
-traverseSt (x::xs) = ST $ \s =>
-  let ((s1, s2), xx) = mapFst split $ runState s x in
-  Id (s1, xx :: evalState s2 (traverseSt xs))
+choose bounds = Point $ randomR' bounds
 
 export
-unGen : Gen a -> State Seed (LazyList a)
-unGen (Raw sf)     = sf
-unGen (Uniform xs) = shiftRandomly xs
-unGen (AlternG gs) = shiftRandomly gs >>= map join . traverseSt . map (assert_total unGen)
+empty : Gen a
+empty = Empty
+
+--------------------------
+--- Running generators ---
+--------------------------
+
+export
+unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
+unGen $ Empty    = throwError ()
+unGen $ Pure x   = pure x
+unGen $ Point sf = sf
+unGen $ OneOf gs = pickUniformly (forget gs) >>= assert_total unGen . force
+unGen $ Bind x f = unGen x >>= assert_total unGen . f
+
+export
+unGenTryAll' : RandomGen g => (seed : g) -> Gen a -> Stream (Maybe a, g)
+unGenTryAll' seed gen = do
+  let (seed, mc) = runState seed $ runMaybeT $ unGen {g} {m=MaybeT $ State g} gen
+  (mc, seed) :: unGenTryAll' seed gen
+
+export
+unGenTryAll : RandomGen g => (seed : g) -> Gen a -> Stream $ Maybe a
+unGenTryAll = map fst .: unGenTryAll'
+
+export
+unGenTryN : RandomGen g => (n : Nat) -> g -> Gen a -> LazyList a
+unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
+
+-- TODO To add config and Reader for that.
+--      This config should contain attempts count for each `unGen` (including those in combinators)
+--      Current `unGen` should be renamed to `unGen1` and not be exported.
+--      Current `unGenTryN` should be changed returning `LazyList (a, g)` and
+--      new `unGen` should be implemented trying `retry` times from config using this (`g` must be stored to restore correct state of seed).
+
+---------------------------------------
+--- Standard combination interfaces ---
+---------------------------------------
 
 export
 Functor Gen where
-  map f (Uniform xs) = Uniform $ map f xs
-  map f (AlternG gs) = AlternG $ assert_total $ map f <$> gs
-  map f (Raw gena)   = Raw $ map f <$> gena
-
-apAsRaw : Gen (a -> b) -> Gen a -> Gen b
-apAsRaw generalF generalA = Raw [| unGen generalF <*> unGen generalA |]
+  map _ $ Empty    = Empty
+  map f $ Pure x   = Pure $ f x
+  map f $ Point sf = Point $ f <$> sf
+  map f $ OneOf gs = OneOf $ wrapLazy (assert_total map f) <$> gs
+  map f $ Bind x g = Bind x $ assert_total map f . g
 
 export
 Applicative Gen where
-  pure x = Uniform [x]
+  pure = Pure
 
-  Uniform fs <*> Uniform xs = Uniform $ fs <*> xs
+  Empty <*> _ = Empty
+  _ <*> Empty = Empty
 
-  Uniform fs <*> AlternG gs = AlternG [| map fs gs |]
-  AlternG gs <*> Uniform xs = AlternG [| (\gab, a => flip apply a <$> gab) gs xs |]
-  AlternG fs <*> AlternG gs = AlternG $ assert_total [| fs <*> gs |]
+  Pure f <*> g = f <$> g
+  g <*> Pure x = g <&> \f => f x
 
-  rawF@(Raw {}) <*> generalA = apAsRaw rawF generalA
-  generalF <*> rawA@(Raw {}) = apAsRaw generalF rawA
+  Point sfl <*> Point sfr = Point $ sfl <*> sfr
+
+  OneOf gs <*> g = OneOf $ gs <&> wrapLazy (assert_total (<*> g))
+  g <*> OneOf gs = OneOf $ gs <&> wrapLazy (assert_total (g <*>))
+
+  Bind x f <*> g = Bind x $ assert_total (<*> g) . f
+  g <*> Bind x f = Bind x $ assert_total (g <*>) . f
 
 export
-Alternative Gen where
-  empty = Uniform []
-  AlternG ls <|> Delay (AlternG rs) = AlternG $ ls ++ rs
-  AlternG ls <|> Delay (generalR  ) = AlternG $ ls ++ [generalR]
-  generalL   <|> Delay (AlternG rs) = AlternG $ [generalL] ++ rs
-  generalL   <|> Delay (generalR  ) = AlternG [generalL, generalR]
+Monad Gen where
+  Empty       >>= _  = Empty
+  Pure x      >>= nf = nf x
+  g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
+  OneOf gs    >>= nf = OneOf $ gs <&> wrapLazy (assert_total (>>= nf))
+  Bind x f    >>= nf = x >>= \x => f x >>= nf
 
-||| Makes the given `Gen` to act as an independent generator according to the `Alternative` combination.
-||| That is, in `independent (independent a <|> independent b)` given `a` and `b` are distributed evenly.
-export
-independent : Gen a -> Gen a
-independent alt@(AlternG _) = AlternG [alt]
-independent other = other
+-----------------------------------------
+--- Detour: special list of lazy gens ---
+-----------------------------------------
+
+namespace GenAlternatives
+
+  export
+  record GenAlternatives a where
+    constructor LLG
+    unLLG : List (Lazy (Gen a))
+
+  wrapLLG : (List (Lazy (Gen a)) -> List (Lazy (Gen b))) -> GenAlternatives a -> GenAlternatives b
+  wrapLLG f = LLG . f . unLLG
+
+  export
+  processAlternatives : (Gen a -> Gen b) -> GenAlternatives a -> GenAlternatives b
+  processAlternatives = wrapLLG . map . wrapLazy
+
+  export
+  processAlternatives' : (Gen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
+  processAlternatives' f = wrapLLG (>>= unLLG . f . force)
+
+  public export %inline
+  Nil : GenAlternatives a
+  Nil = LLG Nil
+
+  public export %inline
+  (::) : Lazy (Gen a) -> GenAlternatives a -> GenAlternatives a
+  (::) x = wrapLLG (x ::)
+
+  public export %inline
+  (++) : GenAlternatives a -> GenAlternatives a -> GenAlternatives a
+  LLG xs ++ LLG ys = LLG $ xs ++ ys
+
+  public export %inline
+  length : GenAlternatives a -> Nat
+  length = length . unLLG
+
+----------------------------------
+--- Creation of new generators ---
+----------------------------------
 
 ||| Choose one of the given generators uniformly.
 |||
-||| All the given generators are treated as independent, i.e. `oneOf [a <|> b, c]` is not the same as `a <|> b <|> c`.
-||| In this example case, generator `a <|> b` and generator `c` will have the same probability in the resulting generator,
-||| i.e., `oneOf [a <|> b, c]` is equivalent to `independent (a <|> b) <|> independent c`.
-|||
-||| If you want generators in the list to be treated non-independent, you can use the `choice` function from prelude.
-|||
-||| The resulting generator is not independent, i.e. `oneOf [a, b, c] <|> oneOf [d, e]` is equivalent to `oneOf [a, b, c, d, e]`.
-public export
-oneOf : List (Gen a) -> Gen a
-oneOf []      = empty
-oneOf [x]     = independent x
-oneOf (x::xs) = independent x <|> oneOf xs
-
-||| Choose one of the given generators uniformly. This function is a deprecated historical alias for `oneOf`.
-public export %inline %deprecate
-oneOf' : List (Gen a) -> Gen a
-oneOf' = oneOf
+||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
+||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
+export
+oneOf : GenAlternatives a -> Gen a
+oneOf $ LLG []      = empty
+oneOf $ LLG [x]     = x
+oneOf $ LLG (x::xs) = OneOf $ x:::xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -131,41 +194,112 @@ oneOf' = oneOf
 ||| from the given list the more frequently, the higher number is has.
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
-|||
-||| The resulting generator is not independent, i.e. `frequency [(n1, g1), (n2, g2)] <|> frequency [(n3, g3), (n4, g4)]` is
-||| equivalent to `frequency [(n1, g1), (n2, g2), (n3, g3), (n4, g4)]`.
-||| Also, `frequency [(n, g), (m, h)] <|> oneOf [u, w]` is equivalent to `frequency [(n, g), (m, h), (1, u), (1, w)]`.
 export
-frequency : List (Nat, Gen a) -> Gen a
-frequency = AlternG . concatMap (uncurry replicate . map independent)
-
-||| Choose one of the given generators with probability proportional to the given value, treating all source generators dependently.
-|||
-||| This function is similar to `frequency` but as of it takes internal alternative combinations inside the given generators level up.
-||| That is, unlike the `frequency` function, `frequency' [(n, oneOf [a, b, c]), (m, x)]` is equivalent to
-||| `frequency [(n, a), (n, b), (n, c), (m, x)]`
-export
-frequency_dep : List (Nat, Gen a) -> Gen a
-frequency_dep = AlternG . concatMap (uncurry replicate)
+frequency : List (Nat, Lazy (Gen a)) -> Gen a
+frequency = oneOf . LLG . concatMap (uncurry replicate)
+            -- TODO to reimplement this more effectively
 
 ||| Choose one of the given values uniformly.
 |||
-||| The resulting generator is not independent, i.e. `elements xs <|> elements ys` is equivalent to `elements (xs ++ ys)`.
+||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
 elements : List a -> Gen a
-elements = Uniform . fromList
+elements = oneOf . LLG . map (delay . pure)
 
 export
-Monad Gen where
-  Uniform gs >>= c = if null gs then Uniform [] else AlternG $ c <$> gs
-  AlternG gs >>= c = AlternG $ assert_total (>>= c) <$> gs
-  Raw sf     >>= c = Raw $ sf >>= map join . traverseSt . map (unGen . c)
+elements' : Foldable f => f a -> Gen a
+elements' = elements . toList
+
+------------------------------
+--- Analysis of generators ---
+------------------------------
+
+export
+alternativesOf : Gen a -> GenAlternatives a
+alternativesOf $ Empty    = []
+alternativesOf $ OneOf gs = LLG $ forget gs
+alternativesOf g          = [g]
+
+||| Any depth alternatives fetching.
+|||
+||| Alternatives of depth `0` are meant to be a single-item alternatives list with the original generator,
+||| alternatives of depth `1` are those returned by the `alternativesOf` function,
+||| alternatives of depth `n+1` are alternatives of all alternatives of depth `n` being flattened into a single alternatives list.
+export
+deepAlternativesOf : (depth : Nat) -> Gen a -> GenAlternatives a
+deepAlternativesOf _     Empty = []
+deepAlternativesOf 0     gen   = [ gen ]
+deepAlternativesOf 1     gen   = alternativesOf gen
+deepAlternativesOf (S k) gen   = processAlternatives' alternativesOf $ deepAlternativesOf k gen
+
+||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
+||| except for empty generator, which would still be returned as empty generator.
+export
+forgetStructure : Gen a -> Gen a
+forgetStructure g@(Point _) = g
+forgetStructure Empty = Empty
+forgetStructure g = Point $ unGen g
+
+public export
+processAlternatives : (Gen a -> Gen b) -> Gen a -> GenAlternatives b
+processAlternatives f = processAlternatives f . alternativesOf
+
+public export
+mapAlternativesOf : (a -> b) -> Gen a -> GenAlternatives b
+mapAlternativesOf = processAlternatives . map
+
+public export %inline
+mapAlternativesWith : Gen a -> (a -> b) -> GenAlternatives b
+mapAlternativesWith = flip mapAlternativesOf
+
+-- Priority is chosen to be able to use these operators without parenthesis
+-- in expressions of lists, i.e. involving operators `::` and `++`.
+infix 8 `mapAlternativesOf`
+      , `mapAlternativesWith`
+
+-----------------------------------------------------
+--- Detour: implementations for list of lazy gens ---
+-----------------------------------------------------
+
+export
+Semigroup (GenAlternatives a) where
+  LLG xs <+> LLG ys = LLG $ xs <+> ys
+
+export
+Monoid (GenAlternatives a) where
+  neutral = LLG neutral
+
+export
+Functor GenAlternatives where
+  map = processAlternatives . map
+
+export
+Applicative GenAlternatives where
+  pure x = LLG [ pure x ]
+  LLG xs <*> LLG ys = LLG [| ap xs ys |] where
+    ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
+    ap x y = x <*> y
+
+export
+Alternative GenAlternatives where
+  empty = LLG empty
+  LLG xs <|> ys = LLG $ xs <|> ys.unLLG
+
+export
+Monad GenAlternatives where
+  LLG xs >>= f = LLG $ xs >>= unLLG . alternativesOf . (>>= oneOf . f) . force
+
+-----------------
+--- Filtering ---
+-----------------
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
-mapMaybe p (Uniform l) = Uniform $ mapMaybe p l
-mapMaybe p (AlternG l) = AlternG $ assert_total $ mapMaybe p <$> l
-mapMaybe p (Raw sf)    = Raw $ mapMaybe p <$> sf
+mapMaybe _ $ Empty    = Empty
+mapMaybe p $ Pure x   = maybe Empty Pure $ p x
+mapMaybe p $ Point sf = Point $ sf >>= maybe (throwError ()) pure . p
+mapMaybe p $ OneOf gs = OneOf $ gs <&> wrapLazy (assert_total mapMaybe p)
+mapMaybe p $ Bind x f = Bind x $ assert_total mapMaybe p . f
 
 export
 suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `Subset` So . p
@@ -194,15 +328,19 @@ export
 suchThat_invertedEq : DecEq b => Gen a -> (y : b) -> (f : a -> b) -> Gen $ Subset a $ \x => y = f x
 suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
 
+-------------------------------
+--- Variation in generation ---
+-------------------------------
+
 -- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
 export
 variant : Nat -> Gen a -> Gen a
 variant Z       gen = gen
-variant x@(S _) gen = Raw $ modify (index x . iterate (fst . next)) *> unGen gen
+variant x@(S _) gen = Point $ modify (index x . iterate (fst . next)) *> unGen gen
 
-export
-uniform : LzList a -> Gen a
-uniform = Uniform
+-----------------------------
+--- Particular generators ---
+-----------------------------
 
 export
 listOf : {default (choose (0, 10)) length : Gen Nat} -> Gen a -> Gen (List a)
