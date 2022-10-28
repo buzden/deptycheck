@@ -257,10 +257,7 @@ oneOf alts = case toLNLG alts of
 ||| from the given list the more frequently, the higher number is has.
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
-|||
-||| Deprecated. Use `oneOf` with `weighted` instead, e.g.,
-||| instead of `frequency [(1, g1), (2, g2)]` use `oneOf [g1, weighted 2 g2]`.
-export %deprecate
+export
 frequency : List (Nat, Lazy (Gen a)) -> Gen a
 frequency = oneOf . fromList where
   fromList : List (Nat, Lazy (Gen a)) -> GenAlternatives a
