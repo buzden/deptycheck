@@ -36,20 +36,6 @@ public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
 wrapLazy f = delay . f . force
 
-mapLNLG : (a -> b) -> List1 (tag, Lazy a) -> List1 (tag, Lazy b)
-mapLNLG = map . mapSnd . wrapLazy
-
-mapLNLG_preserves_tag : FunExt =>
-                        {cf : _} ->
-                        {ff : _} ->
-                        {mf : _} ->
-                        (xs : List1 (tag, Lazy a)) ->
-                        foldl1 cf (xs <&> \x => ff $ fst x) = foldl1 cf (mapLNLG mf xs <&> \x => ff $ fst x)
-mapLNLG_preserves_tag ((t, x):::xs) = do
-  rewrite mapFusion (ff . Builtin.fst) (mapSnd $ wrapLazy mf) xs
-  cong (foldl {t=List} cf (ff t)) $ cong (\f => map f xs) $ do
-    funExt $ \(xx, _) => Refl
-
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
@@ -63,6 +49,37 @@ data Gen : Type -> Type where
   Bind  : Gen c -> (c -> Gen a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
+
+------------------------------------------------
+--- Technical stuff for mapping alternatives ---
+------------------------------------------------
+
+mapLNLG : (a -> b) -> List1 (tag, Lazy a) -> List1 (tag, Lazy b)
+mapLNLG = map . mapSnd . wrapLazy
+
+0 mapExt : {xs : List _} -> ((x : _) -> f x = g x) -> map f xs = map g xs
+mapExt {xs = []}    _  = Refl
+mapExt {xs = x::xs} fg = rewrite fg x in cong (g x ::) $ mapExt fg
+
+0 mapLNLG_preserves_tag : {cf : _} ->
+                          {ff : _} ->
+                          {mf : _} ->
+                          (xs : List1 (tag, Lazy a)) ->
+                          foldl1 cf (xs <&> \x => ff $ fst x) = foldl1 cf (mapLNLG mf xs <&> \x => ff $ fst x)
+mapLNLG_preserves_tag ((t, x):::xs) = do
+  rewrite mapFusion (ff . Builtin.fst) (mapSnd $ wrapLazy mf) xs
+  cong (foldl {t=List} cf (ff t)) $ mapExt {xs} $ \(tt, xx) => Refl
+
+mapLNLG_preserves_w : {xs : List1 (Subset Nat IsSucc, Lazy (Gen a))} ->
+                      val = foldl1 (+) (xs <&> \x => fst $ fst x) =>
+                      val = foldl1 (+) (mapLNLG mf xs <&> \x => fst $ fst x)
+mapLNLG_preserves_w @{prf} = rewrite sym $ mapLNLG_preserves_tag {cf=(+)} {ff=fst} {mf} xs in prf
+
+data IsOneOf : Gen a -> Type where
+  ItIsOneOf : IsOneOf $ OneOf tw gs @{twCorr}
+
+mapOneOf : (g : Gen a) -> (Gen a -> Gen b) -> (0 _ : IsOneOf g) => Gen b
+mapOneOf (OneOf tw gs) f = OneOf tw @{mapLNLG_preserves_w {mf=f}} $ mapLNLG f gs
 
 -----------------------------
 --- Very basic generators ---
@@ -121,7 +138,7 @@ Functor Gen where
   map _ $ Empty       = Empty
   map f $ Pure x      = Pure $ f x
   map f $ Point sf    = Point $ f <$> sf
-  map f $ OneOf tw gs = OneOf tw ?map_OneOf @{?tw_corr_in_map} -- gs <&> wrapLazy (assert_total map f)
+  map f g@(OneOf _ _) = mapOneOf g $ assert_total $ map f
   map f $ Bind x g    = Bind x $ assert_total map f . g
 
 export
@@ -136,19 +153,19 @@ Applicative Gen where
 
   Point sfl <*> Point sfr = Point $ sfl <*> sfr
 
-  OneOf tw gs <*> g = ?ap_OneOf_1 -- OneOf tw $ gs <&> wrapLazy (assert_total (<*> g))
-  g <*> OneOf tw gs = ?ap_OneOf_2 -- OneOf tw $ gs <&> wrapLazy (assert_total (g <*>))
+  o@(OneOf _ _) <*> g = mapOneOf o $ assert_total (<*> g)
+  g <*> o@(OneOf _ _) = mapOneOf o $ assert_total (g <*>)
 
   Bind x f <*> g = Bind x $ assert_total (<*> g) . f
   g <*> Bind x f = Bind x $ assert_total (g <*>) . f
 
 export
 Monad Gen where
-  Empty       >>= _  = Empty
-  Pure x      >>= nf = nf x
-  g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
-  OneOf tw gs >>= nf = ?bind_OneOf -- OneOf tw $ gs <&> wrapLazy (assert_total (>>= nf))
-  Bind x f    >>= nf = x >>= \x => f x >>= nf
+  Empty         >>= _  = Empty
+  Pure x        >>= nf = nf x
+  g@(Point _)   >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
+  o@(OneOf _ _) >>= nf = mapOneOf o $ assert_total (>>= nf)
+  Bind x f      >>= nf = x >>= \x => f x >>= nf
 
 -----------------------------------------
 --- Detour: special list of lazy gens ---
@@ -164,8 +181,8 @@ namespace GenAlternatives
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export
   (++) : GenAlternatives a -> GenAlternatives a -> GenAlternatives a
-  (++) []      ys = ys
-  (++) (x::xs) ys = x :: (xs ++ ys)
+  (++) []                   ys = ys
+  (++) ((::) x {weight} xs) ys = (x :: (xs ++ ys)) {weight}
 
   public export
   length : GenAlternatives a -> Nat
@@ -182,8 +199,8 @@ namespace GenAlternatives
 
   export
   processAlternatives : (Gen a -> Gen b) -> GenAlternatives a -> GenAlternatives b
-  processAlternatives _ []      = []
-  processAlternatives f (x::xs) = wrapLazy f x :: processAlternatives f xs
+  processAlternatives _   []                 = []
+  processAlternatives f $ (::) x {weight} xs = (wrapLazy f x :: processAlternatives f xs) {weight}
 
   export
   processAlternatives' : (Gen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
@@ -360,7 +377,7 @@ mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
 mapMaybe _ $ Empty       = Empty
 mapMaybe p $ Pure x      = maybe Empty Pure $ p x
 mapMaybe p $ Point sf    = Point $ sf >>= maybe (throwError ()) pure . p
-mapMaybe p $ OneOf tw gs = ?mapMaybe_OneOf -- OneOf tw $ gs <&> wrapLazy (assert_total mapMaybe p)
+mapMaybe p o@(OneOf _ _) = mapOneOf o $ assert_total mapMaybe p
 mapMaybe p $ Bind x f    = Bind x $ assert_total mapMaybe p . f
 
 export
