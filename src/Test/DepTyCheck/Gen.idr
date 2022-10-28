@@ -29,8 +29,9 @@ randomFin : RandomGen g => MonadState g m => MonadError () m => {n : _} -> m $ F
 randomFin {n = Z}   = throwError ()
 randomFin {n = S k} = random'
 
-pickUniformly : RandomGen g => MonadState g m => MonadError () m => List a -> m a
-pickUniformly xs = index' xs <$> randomFin
+pickUniformly : List1 (Subset Nat IsSucc, a) -> Nat -> a
+pickUniformly ((_, x):::[])                  _ = x
+pickUniformly w@((Element n _, x):::(y::ys)) k = if k <= n then x else pickUniformly (assert_smaller w $ y:::ys) (k `minus` n)
 
 public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
@@ -109,7 +110,7 @@ unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
 unGen $ Empty       = throwError ()
 unGen $ Pure x      = pure x
 unGen $ Point sf    = sf
-unGen $ OneOf tw gs = ?unGen_OneOf -- pickUniformly (forget gs) >>= assert_total unGen . force
+unGen $ OneOf tw gs = randomFin {n=tw} >>= assert_total unGen . force . pickUniformly gs . finToNat
 unGen $ Bind x f    = unGen x >>= assert_total unGen . f
 
 export
