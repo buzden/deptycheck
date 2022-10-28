@@ -45,7 +45,10 @@ data Gen : Type -> Type where
   Empty : Gen a
   Pure  : a -> Gen a
   Point : (forall g, m. RandomGen g => MonadState g m => MonadError () m => m a) -> Gen a
-  OneOf : (totalWeight : Nat) -> (gens : List1 (Subset Nat IsSucc, Lazy (Gen a))) -> (0 _ : totalWeight = foldl1 (+) (gens <&> \x => fst $ fst x)) => Gen a
+  OneOf : (totalWeight : Nat) ->
+          (gens : List1 (Subset Nat IsSucc, Lazy (Gen a))) ->
+          (0 _ : totalWeight = foldl1 (+) (gens <&> \x => fst $ fst x)) =>
+          Gen a
   Bind  : Gen c -> (c -> Gen a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
@@ -70,9 +73,9 @@ mapLNLG_preserves_tag ((t, x):::xs) = do
   rewrite mapFusion (ff . Builtin.fst) (mapSnd $ wrapLazy mf) xs
   cong (foldl {t=List} cf (ff t)) $ mapExt {xs} $ \(tt, xx) => Refl
 
-mapLNLG_preserves_w : {xs : List1 (Subset Nat IsSucc, Lazy (Gen a))} ->
-                      val = foldl1 (+) (xs <&> \x => fst $ fst x) =>
-                      val = foldl1 (+) (mapLNLG mf xs <&> \x => fst $ fst x)
+0 mapLNLG_preserves_w : {xs : List1 (Subset Nat IsSucc, Lazy (Gen a))} ->
+                        val = foldl1 (+) (xs <&> \x => fst $ fst x) =>
+                        val = foldl1 (+) (mapLNLG mf xs <&> \x => fst $ fst x)
 mapLNLG_preserves_w @{prf} = rewrite sym $ mapLNLG_preserves_tag {cf=(+)} {ff=fst} {mf} xs in prf
 
 data IsOneOf : Gen a -> Type where
