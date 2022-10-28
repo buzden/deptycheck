@@ -231,6 +231,21 @@ fromLNLG : List (Subset Nat IsSucc, Lazy (Gen a)) -> GenAlternatives a
 fromLNLG []                = []
 fromLNLG ((weight, g)::xs) = Cons weight.fst g $ fromLNLG xs
 
+gcd : (a, b : Nat) -> {auto 0 ok : Either (IsSucc a) (IsSucc b)} -> Subset Nat IsSucc
+gcd Z Z       = void $ absurd ok
+gcd a@(S _) Z = Element a ItIsSucc
+gcd Z b@(S _) = Element b ItIsSucc
+gcd a (S b)   = assert_total $ gcd (S b) (modNatNZ a (S b) SIsNonZero)
+
+normLNLG : List (Subset Nat IsSucc, a) -> List (Subset Nat IsSucc, a)
+normLNLG [] = []
+normLNLG wh@(x::xs) = do
+  let Element (S d) _ = foldl1 gcd' $ map fst $ x:::xs
+  flip map wh $ mapFst $ \(Element n _) => Element (divNatNZ n (S d) SIsNonZero) (believe_me $ ItIsSucc {n=1} {- since divisor is GCD -})
+  where
+    gcd' : (a, b : Subset Nat IsSucc) -> Subset Nat IsSucc
+    gcd' (Element n _) (Element m _) = gcd n m
+
 export
 Cast (List a) (GenAlternatives a) where
   cast []      = []
@@ -246,7 +261,7 @@ Cast (List a) (GenAlternatives a) where
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : GenAlternatives a -> Gen a
-oneOf alts = case toLNLG alts of
+oneOf alts = case normLNLG $ toLNLG alts of
                []       => empty
                [(_, x)] => x
                x::xs    => OneOf _ $ x:::xs
