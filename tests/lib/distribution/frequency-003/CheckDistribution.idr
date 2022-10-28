@@ -4,19 +4,16 @@ import DistrCheckCommon
 
 %default total
 
--- Some big prime numbers
-a, b : Nat
-a = 100000007
-b = 100000217
-
 bools : Gen Bool
 bools = frequency
-          [ (a, pure True)
-          , (b, pure False)
+          [ (100000007, pure True)
+          , (100000217, pure False)
           ]
+        -- weights are prime numbers
+        -- percentage below should be in default tolerance of 95%
 
 main : IO ()
 main = printVerdict bools
-         [ coverWith (ratio a (a + b)) (== True)
-         , coverWith (ratio b (a + b)) (== False)
+         [ coverWith 50.percent (== True)
+         , coverWith 50.percent (== False)
          ]
