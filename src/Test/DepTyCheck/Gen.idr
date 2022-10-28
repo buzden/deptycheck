@@ -220,16 +220,17 @@ alternativesOf $ Empty    = []
 alternativesOf $ OneOf gs = LLG $ forget gs
 alternativesOf g          = [g]
 
-||| Any order alternatives fetching.
+||| Any depth alternatives fetching.
 |||
-||| `alternativesOf'` of order `1` is equivalent to the original `alternativesOf`,
-||| `alternativesOf'` of order `n+1` returns alternatives of all alternatives of order `n` flattened.
+||| Alternatives of depth `0` are meant to be a single-item alternatives list with the original generator,
+||| alternatives of depth `1` are those returned by the `alternativesOf` function,
+||| alternatives of depth `n+1` are alternatives of all alternatives of depth `n` being flattened into a single alternatives list.
 export
-alternativesOf' : (order : Nat) -> Gen a -> GenAlternatives a
-alternativesOf' 0     Empty = []
-alternativesOf' 0     gen   = [ gen ]
-alternativesOf' 1     gen   = alternativesOf gen
-alternativesOf' (S k) gen   = processAlternatives' alternativesOf $ alternativesOf' k gen
+deepAlternativesOf : (depth : Nat) -> Gen a -> GenAlternatives a
+deepAlternativesOf _     Empty = []
+deepAlternativesOf 0     gen   = [ gen ]
+deepAlternativesOf 1     gen   = alternativesOf gen
+deepAlternativesOf (S k) gen   = processAlternatives' alternativesOf $ deepAlternativesOf k gen
 
 ||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
 ||| except for empty generator, which would still be returned as empty generator.

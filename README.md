@@ -206,7 +206,7 @@ main_genAnyFin''_alternatives_count_corr = putStrLn $ show $ length (alternative
 >
 > But if you do `alternativesOf` for each of generators returned by the first `alternativesOf` and concatenate the results,
 > the first example would give you nine alternatives, where the second one still would give you three.
-> You can use `alternativesOf'` function with order argument set to `2` for this.
+> You can use `deepAlternativesOf` function with depth argument of `2` for this.
 >
 > This, actually, violates monadic laws in some sense.
 > Say, `alternativesOf` can distinct between `pure x >>= f` and `f x` if generator `f x` is, say, of form `elements [a, b, c]`,
@@ -243,15 +243,15 @@ namespace ForgetStructureNote
 
   export
   main_forgetStructure_note_ex1_alternatives_sq_count_corr : IO ()
-  main_forgetStructure_note_ex1_alternatives_sq_count_corr = putStrLn $ show $ 9 == length (alternativesOf' 2 g1)
+  main_forgetStructure_note_ex1_alternatives_sq_count_corr = putStrLn $ show $ 9 == length (deepAlternativesOf 2 g1)
 
   export
   main_forgetStructure_note_ex2_alternatives_sq_count_corr : IO ()
-  main_forgetStructure_note_ex2_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (alternativesOf' 2 g2)
+  main_forgetStructure_note_ex2_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (deepAlternativesOf 2 g2)
 
   export
   main_forgetStructure_note_ex3_alternatives_sq_count_corr : IO ()
-  main_forgetStructure_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (alternativesOf' 2 g3)
+  main_forgetStructure_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (deepAlternativesOf 2 g3)
 -->
 
 Also, here you can see that we can use generators as `auto`-parameters,
