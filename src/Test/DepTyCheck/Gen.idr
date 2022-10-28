@@ -36,6 +36,20 @@ public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
 wrapLazy f = delay . f . force
 
+mapLNLG : (a -> b) -> List1 (tag, Lazy a) -> List1 (tag, Lazy b)
+mapLNLG = map . mapSnd . wrapLazy
+
+mapLNLG_preserves_tag : FunExt =>
+                        {cf : _} ->
+                        {ff : _} ->
+                        {mf : _} ->
+                        (xs : List1 (tag, Lazy a)) ->
+                        foldl1 cf (xs <&> \x => ff $ fst x) = foldl1 cf (mapLNLG mf xs <&> \x => ff $ fst x)
+mapLNLG_preserves_tag ((t, x):::xs) = do
+  rewrite mapFusion (ff . Builtin.fst) (mapSnd $ wrapLazy mf) xs
+  cong (foldl {t=List} cf (ff t)) $ cong (\f => map f xs) $ do
+    funExt $ \(xx, _) => Refl
+
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
@@ -107,7 +121,7 @@ Functor Gen where
   map _ $ Empty       = Empty
   map f $ Pure x      = Pure $ f x
   map f $ Point sf    = Point $ f <$> sf
-  map f $ OneOf tw gs = OneOf tw ?map_OneOf @{?tw_corr_in_map} -- wrapLazy (assert_total map f) <$> gs
+  map f $ OneOf tw gs = OneOf tw ?map_OneOf @{?tw_corr_in_map} -- gs <&> wrapLazy (assert_total map f)
   map f $ Bind x g    = Bind x $ assert_total map f . g
 
 export
@@ -122,8 +136,8 @@ Applicative Gen where
 
   Point sfl <*> Point sfr = Point $ sfl <*> sfr
 
-  OneOf tw gs <*> g = ?ap_OneOf_1 -- OneOf $ gs <&> wrapLazy (assert_total (<*> g))
-  g <*> OneOf tw gs = ?ap_OneOf_2 -- OneOf $ gs <&> wrapLazy (assert_total (g <*>))
+  OneOf tw gs <*> g = ?ap_OneOf_1 -- OneOf tw $ gs <&> wrapLazy (assert_total (<*> g))
+  g <*> OneOf tw gs = ?ap_OneOf_2 -- OneOf tw $ gs <&> wrapLazy (assert_total (g <*>))
 
   Bind x f <*> g = Bind x $ assert_total (<*> g) . f
   g <*> Bind x f = Bind x $ assert_total (g <*>) . f
@@ -133,7 +147,7 @@ Monad Gen where
   Empty       >>= _  = Empty
   Pure x      >>= nf = nf x
   g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
-  OneOf tw gs >>= nf = ?bind_OneOf -- OneOf $ gs <&> wrapLazy (assert_total (>>= nf))
+  OneOf tw gs >>= nf = ?bind_OneOf -- OneOf tw $ gs <&> wrapLazy (assert_total (>>= nf))
   Bind x f    >>= nf = x >>= \x => f x >>= nf
 
 -----------------------------------------
@@ -147,19 +161,55 @@ namespace GenAlternatives
     Nil  : GenAlternatives a
     (::) : {default 1 weight : Nat} -> Lazy (Gen a) -> GenAlternatives a -> GenAlternatives a
 
+  -- This concatenation breaks relative proportions in frequences of given alternative lists
+  public export
+  (++) : GenAlternatives a -> GenAlternatives a -> GenAlternatives a
+  (++) []      ys = ys
+  (++) (x::xs) ys = x :: (xs ++ ys)
+
+  public export
+  length : GenAlternatives a -> Nat
+  length []      = Z
+  length (_::xs) = S $ length xs
+
+  export
+  Semigroup (GenAlternatives a) where
+    xs <+> ys = xs ++ ys
+
+  export
+  Monoid (GenAlternatives a) where
+    neutral = []
+
   export
   processAlternatives : (Gen a -> Gen b) -> GenAlternatives a -> GenAlternatives b
---  processAlternatives = wrapLLG . map . wrapLazy
+  processAlternatives _ []      = []
+  processAlternatives f (x::xs) = wrapLazy f x :: processAlternatives f xs
 
   export
   processAlternatives' : (Gen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
---  processAlternatives' f = wrapLLG (>>= unLLG . f . force)
+  processAlternatives' f = concat . mapGens where
 
-  public export %inline
-  (++) : GenAlternatives a -> GenAlternatives a -> GenAlternatives a
+    mapWeight : forall a. (Nat -> Nat) -> GenAlternatives a -> GenAlternatives a
+    mapWeight _ []                   = []
+    mapWeight f $ (::) x {weight} xs = (::) x {weight=f weight} $ mapWeight f xs
 
-  public export %inline
-  length : GenAlternatives a -> Nat
+    mapGens : GenAlternatives a -> List $ GenAlternatives b
+    mapGens []                   = []
+    mapGens $ (::) x {weight} xs = mapWeight (weight *) (f x) :: mapGens xs
+
+toLNLG : GenAlternatives a -> List (Subset Nat IsSucc, Lazy (Gen a))
+toLNLG []                       = []
+toLNLG $ (::) _ {weight=Z}   xs = toLNLG xs
+toLNLG $ (::) x {weight=S w} xs = (Element (S w) ItIsSucc, x) :: toLNLG xs
+
+fromLNLG : List (Subset Nat IsSucc, Lazy (Gen a)) -> GenAlternatives a
+fromLNLG []                = []
+fromLNLG ((weight, g)::xs) = (::) g {weight = fst weight} $ fromLNLG xs
+
+export
+Cast (List a) (GenAlternatives a) where
+  cast []      = []
+  cast (x::xs) = pure x :: cast xs
 
 ----------------------------------
 --- Creation of new generators ---
@@ -171,9 +221,10 @@ namespace GenAlternatives
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : GenAlternatives a -> Gen a
-oneOf []      = empty
-oneOf [x]     = x
-oneOf (x::xs) = ?oneOf_impl -- OneOf $ x:::xs
+oneOf alts = case toLNLG alts of
+               []       => empty
+               [(_, x)] => x
+               x::xs    => OneOf _ $ x:::xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -190,7 +241,7 @@ frequency : List (Nat, Lazy (Gen a)) -> Gen a
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
 elements : List a -> Gen a
---elements = oneOf . LLG . map (delay . pure)
+elements = oneOf . cast
 
 export
 elements' : Foldable f => f a -> Gen a
@@ -202,9 +253,9 @@ elements' = elements . toList
 
 export
 alternativesOf : Gen a -> GenAlternatives a
-alternativesOf $ Empty       = []
-alternativesOf $ OneOf tw gs = ?alternativesOf_OneOf -- LLG $ forget gs
-alternativesOf g             = [g]
+alternativesOf $ Empty      = []
+alternativesOf $ OneOf _ gs = fromLNLG $ forget gs
+alternativesOf g            = [g]
 
 ||| Any depth alternatives fetching.
 |||
@@ -248,24 +299,13 @@ infix 8 `mapAlternativesOf`
 -----------------------------------------------------
 
 export
-Semigroup (GenAlternatives a) where
-  xs <+> ys = xs ++ ys
-
-export
-Monoid (GenAlternatives a) where
-  neutral = []
-
-export
 Functor GenAlternatives where
   map = processAlternatives . map
 
 export
 Applicative GenAlternatives where
   pure x = [ pure x ]
-  (<*>) = ?ap_gen_alternatives
---  LLG xs <*> LLG ys = LLG [| ap xs ys |] where
---    ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
---    ap x y = x <*> y
+  xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
 
 export
 Alternative GenAlternatives where
@@ -320,7 +360,7 @@ mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
 mapMaybe _ $ Empty       = Empty
 mapMaybe p $ Pure x      = maybe Empty Pure $ p x
 mapMaybe p $ Point sf    = Point $ sf >>= maybe (throwError ()) pure . p
-mapMaybe p $ OneOf tw gs = ?mapMaybe_OneOf -- OneOf $ gs <&> wrapLazy (assert_total mapMaybe p)
+mapMaybe p $ OneOf tw gs = ?mapMaybe_OneOf -- OneOf tw $ gs <&> wrapLazy (assert_total mapMaybe p)
 mapMaybe p $ Bind x f    = Bind x $ assert_total mapMaybe p . f
 
 export
