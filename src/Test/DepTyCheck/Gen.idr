@@ -45,7 +45,7 @@ data Gen : Type -> Type where
   Empty : Gen a
   Pure  : a -> Gen a
   Point : (forall g, m. RandomGen g => MonadState g m => MonadError () m => m a) -> Gen a
-  OneOf : List1 (Lazy (Gen a)) -> Gen a
+  OneOf : (totalWeight : Nat) -> (gens : List1 (Subset Nat IsSucc, Lazy (Gen a))) -> (0 _ : totalWeight = foldl1 (+) (gens <&> \x => fst $ fst x)) => Gen a
   Bind  : Gen c -> (c -> Gen a) -> Gen a
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
@@ -72,11 +72,11 @@ empty = Empty
 
 export
 unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
-unGen $ Empty    = throwError ()
-unGen $ Pure x   = pure x
-unGen $ Point sf = sf
-unGen $ OneOf gs = pickUniformly (forget gs) >>= assert_total unGen . force
-unGen $ Bind x f = unGen x >>= assert_total unGen . f
+unGen $ Empty       = throwError ()
+unGen $ Pure x      = pure x
+unGen $ Point sf    = sf
+unGen $ OneOf tw gs = ?unGen_OneOf -- pickUniformly (forget gs) >>= assert_total unGen . force
+unGen $ Bind x f    = unGen x >>= assert_total unGen . f
 
 export
 unGenTryAll' : RandomGen g => (seed : g) -> Gen a -> Stream (Maybe a, g)
@@ -104,11 +104,11 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 
 export
 Functor Gen where
-  map _ $ Empty    = Empty
-  map f $ Pure x   = Pure $ f x
-  map f $ Point sf = Point $ f <$> sf
-  map f $ OneOf gs = OneOf $ wrapLazy (assert_total map f) <$> gs
-  map f $ Bind x g = Bind x $ assert_total map f . g
+  map _ $ Empty       = Empty
+  map f $ Pure x      = Pure $ f x
+  map f $ Point sf    = Point $ f <$> sf
+  map f $ OneOf tw gs = OneOf tw ?map_OneOf @{?tw_corr_in_map} -- wrapLazy (assert_total map f) <$> gs
+  map f $ Bind x g    = Bind x $ assert_total map f . g
 
 export
 Applicative Gen where
@@ -122,8 +122,8 @@ Applicative Gen where
 
   Point sfl <*> Point sfr = Point $ sfl <*> sfr
 
-  OneOf gs <*> g = OneOf $ gs <&> wrapLazy (assert_total (<*> g))
-  g <*> OneOf gs = OneOf $ gs <&> wrapLazy (assert_total (g <*>))
+  OneOf tw gs <*> g = ?ap_OneOf_1 -- OneOf $ gs <&> wrapLazy (assert_total (<*> g))
+  g <*> OneOf tw gs = ?ap_OneOf_2 -- OneOf $ gs <&> wrapLazy (assert_total (g <*>))
 
   Bind x f <*> g = Bind x $ assert_total (<*> g) . f
   g <*> Bind x f = Bind x $ assert_total (g <*>) . f
@@ -133,7 +133,7 @@ Monad Gen where
   Empty       >>= _  = Empty
   Pure x      >>= nf = nf x
   g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
-  OneOf gs    >>= nf = OneOf $ gs <&> wrapLazy (assert_total (>>= nf))
+  OneOf tw gs >>= nf = ?bind_OneOf -- OneOf $ gs <&> wrapLazy (assert_total (>>= nf))
   Bind x f    >>= nf = x >>= \x => f x >>= nf
 
 -----------------------------------------
@@ -142,37 +142,24 @@ Monad Gen where
 
 namespace GenAlternatives
 
-  export
-  record GenAlternatives a where
-    constructor LLG
-    unLLG : List (Lazy (Gen a))
-
-  wrapLLG : (List (Lazy (Gen a)) -> List (Lazy (Gen b))) -> GenAlternatives a -> GenAlternatives b
-  wrapLLG f = LLG . f . unLLG
+  public export
+  data GenAlternatives : Type -> Type where
+    Nil  : GenAlternatives a
+    (::) : {default 1 weight : Nat} -> Lazy (Gen a) -> GenAlternatives a -> GenAlternatives a
 
   export
   processAlternatives : (Gen a -> Gen b) -> GenAlternatives a -> GenAlternatives b
-  processAlternatives = wrapLLG . map . wrapLazy
+--  processAlternatives = wrapLLG . map . wrapLazy
 
   export
   processAlternatives' : (Gen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
-  processAlternatives' f = wrapLLG (>>= unLLG . f . force)
-
-  public export %inline
-  Nil : GenAlternatives a
-  Nil = LLG Nil
-
-  public export %inline
-  (::) : Lazy (Gen a) -> GenAlternatives a -> GenAlternatives a
-  (::) x = wrapLLG (x ::)
+--  processAlternatives' f = wrapLLG (>>= unLLG . f . force)
 
   public export %inline
   (++) : GenAlternatives a -> GenAlternatives a -> GenAlternatives a
-  LLG xs ++ LLG ys = LLG $ xs ++ ys
 
   public export %inline
   length : GenAlternatives a -> Nat
-  length = length . unLLG
 
 ----------------------------------
 --- Creation of new generators ---
@@ -184,9 +171,9 @@ namespace GenAlternatives
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : GenAlternatives a -> Gen a
-oneOf $ LLG []      = empty
-oneOf $ LLG [x]     = x
-oneOf $ LLG (x::xs) = OneOf $ x:::xs
+oneOf []      = empty
+oneOf [x]     = x
+oneOf (x::xs) = ?oneOf_impl -- OneOf $ x:::xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -196,15 +183,14 @@ oneOf $ LLG (x::xs) = OneOf $ x:::xs
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
 frequency : List (Nat, Lazy (Gen a)) -> Gen a
-frequency = oneOf . LLG . concatMap (uncurry replicate)
-            -- TODO to reimplement this more effectively
+--frequency = oneOf . LLG . concatMap (uncurry replicate)
 
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
 elements : List a -> Gen a
-elements = oneOf . LLG . map (delay . pure)
+--elements = oneOf . LLG . map (delay . pure)
 
 export
 elements' : Foldable f => f a -> Gen a
@@ -216,9 +202,9 @@ elements' = elements . toList
 
 export
 alternativesOf : Gen a -> GenAlternatives a
-alternativesOf $ Empty    = []
-alternativesOf $ OneOf gs = LLG $ forget gs
-alternativesOf g          = [g]
+alternativesOf $ Empty       = []
+alternativesOf $ OneOf tw gs = ?alternativesOf_OneOf -- LLG $ forget gs
+alternativesOf g             = [g]
 
 ||| Any depth alternatives fetching.
 |||
@@ -263,11 +249,11 @@ infix 8 `mapAlternativesOf`
 
 export
 Semigroup (GenAlternatives a) where
-  LLG xs <+> LLG ys = LLG $ xs <+> ys
+  xs <+> ys = xs ++ ys
 
 export
 Monoid (GenAlternatives a) where
-  neutral = LLG neutral
+  neutral = []
 
 export
 Functor GenAlternatives where
@@ -275,19 +261,55 @@ Functor GenAlternatives where
 
 export
 Applicative GenAlternatives where
-  pure x = LLG [ pure x ]
-  LLG xs <*> LLG ys = LLG [| ap xs ys |] where
-    ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
-    ap x y = x <*> y
+  pure x = [ pure x ]
+  (<*>) = ?ap_gen_alternatives
+--  LLG xs <*> LLG ys = LLG [| ap xs ys |] where
+--    ap : Lazy (Gen (a -> b)) -> Lazy (Gen a) -> Lazy (Gen b)
+--    ap x y = x <*> y
 
 export
 Alternative GenAlternatives where
-  empty = LLG empty
-  LLG xs <|> ys = LLG $ xs <|> ys.unLLG
+  empty = []
+  xs <|> ys = xs ++ ys
 
 export
 Monad GenAlternatives where
   xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
+
+-----------------------------------------------
+--- Additional syntax for alternatives list ---
+-----------------------------------------------
+
+namespace GenAlternatives
+
+  namespace Weighted
+
+    public export
+    data GenWithWeight : Type -> Type where
+      Weighted : Nat -> Lazy (Gen a) -> GenWithWeight a
+
+    public export %inline
+    weighted : Nat -> Lazy (Gen a) -> GenWithWeight a
+    weighted = Weighted
+
+    infixr 0 `weighted` -- right-associativity for compatibility with `$`
+
+    public export %inline
+    withWeight : Lazy (Gen a) -> Nat -> GenWithWeight a
+    withWeight = flip Weighted
+
+    infix 0 `withWeight`
+
+    public export %inline
+    (::) : GenWithWeight a -> GenAlternatives a -> GenAlternatives a
+    (::) (Weighted weight gen) = (::) gen {weight}
+
+  namespace Maybe
+
+    public export
+    (::) : Maybe (Lazy (Gen a)) -> GenAlternatives a -> GenAlternatives a
+    (::) (Just g) = (::) g
+    (::) Nothing  = id
 
 -----------------
 --- Filtering ---
@@ -295,11 +317,11 @@ Monad GenAlternatives where
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
-mapMaybe _ $ Empty    = Empty
-mapMaybe p $ Pure x   = maybe Empty Pure $ p x
-mapMaybe p $ Point sf = Point $ sf >>= maybe (throwError ()) pure . p
-mapMaybe p $ OneOf gs = OneOf $ gs <&> wrapLazy (assert_total mapMaybe p)
-mapMaybe p $ Bind x f = Bind x $ assert_total mapMaybe p . f
+mapMaybe _ $ Empty       = Empty
+mapMaybe p $ Pure x      = maybe Empty Pure $ p x
+mapMaybe p $ Point sf    = Point $ sf >>= maybe (throwError ()) pure . p
+mapMaybe p $ OneOf tw gs = ?mapMaybe_OneOf -- OneOf $ gs <&> wrapLazy (assert_total mapMaybe p)
+mapMaybe p $ Bind x f    = Bind x $ assert_total mapMaybe p . f
 
 export
 suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `Subset` So . p
