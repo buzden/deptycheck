@@ -277,6 +277,7 @@ frequency : List (Nat, Lazy (Gen a)) -> Gen a
 frequency = oneOf . fromList where
   fromList : List (Nat, Lazy (Gen a)) -> GenAlternatives a
   fromList []           = []
+  fromList ((Z, _)::xs) = fromList xs
   fromList ((w, g)::xs) = Cons w g $ fromList xs
 
 ||| Choose one of the given values uniformly.
