@@ -31,7 +31,7 @@ randomFin {n = S k} = random'
 
 pickUniformly : List1 (Subset Nat IsSucc, a) -> Nat -> a
 pickUniformly ((_, x):::[])                  _ = x
-pickUniformly w@((Element n _, x):::(y::ys)) k = if k <= n then x else pickUniformly (assert_smaller w $ y:::ys) (k `minus` n)
+pickUniformly w@((Element n _, x):::(y::ys)) k = if k < n then x else pickUniformly (assert_smaller w $ y:::ys) (k `minus` n)
 
 public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
