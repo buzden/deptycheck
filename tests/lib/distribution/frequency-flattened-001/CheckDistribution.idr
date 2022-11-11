@@ -22,5 +22,5 @@ main = printVerdict eb
          , coverWith 10.percent $ (== Left True)
          , coverWith 40.percent $ (== Left False)
          , coverWith 10.percent $ (== Right True)
-         , coverWith 40.percent   $ (== Right False)
+         , coverWith 40.percent $ (== Right False)
          ]
