@@ -178,24 +178,26 @@ Monad Gen where
 namespace GenAlternatives
 
   public export
-  data GenAlternatives : Type -> Type where
-    Nil  : GenAlternatives a
-    Cons : (weight : Nat) -> Lazy (Gen a) -> GenAlternatives a -> GenAlternatives a
+  record GenAlternatives a where
+    constructor MkGenAlternatives
+    unGenAlternatives : List (Subset Nat IsSucc, Lazy (Gen a))
 
-  public export %inline
+  export %inline
+  Nil : GenAlternatives a
+  Nil = MkGenAlternatives []
+
+  export %inline
   (::) : Lazy (Gen a) -> GenAlternatives a -> GenAlternatives a
-  (::) = Cons 1
+  x :: MkGenAlternatives xs = MkGenAlternatives $ (Element 1 ItIsSucc, x) :: xs
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export
   (++) : GenAlternatives a -> GenAlternatives a -> GenAlternatives a
-  (++) []                 ys = ys
-  (++) (Cons weight x xs) ys = Cons weight x (xs ++ ys)
+  MkGenAlternatives xs ++ MkGenAlternatives ys = MkGenAlternatives $ xs ++ ys
 
   public export
   length : GenAlternatives a -> Nat
-  length []            = Z
-  length (Cons _ _ xs) = S $ length xs
+  length = length . unGenAlternatives
 
   export
   Semigroup (GenAlternatives a) where
@@ -207,29 +209,24 @@ namespace GenAlternatives
 
   export
   processAlternatives : (Gen a -> Gen b) -> GenAlternatives a -> GenAlternatives b
-  processAlternatives _   []               = []
-  processAlternatives f $ Cons weight x xs = Cons weight (wrapLazy f x) (processAlternatives f xs)
+  processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
+
+  (*) : Subset Nat IsSucc -> Subset Nat IsSucc -> Subset Nat IsSucc
+  Element (S n) _ * Element (S m) _ = Element (S n * S m) ItIsSucc
+
+  checkSucc : Nat -> Maybe $ Subset Nat IsSucc
+  checkSucc Z       = Nothing
+  checkSucc k@(S _) = Just $ Element k ItIsSucc
 
   export
   processAlternatives' : (Gen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
   processAlternatives' f = concat . mapGens where
 
-    mapWeight : forall a. (Nat -> Nat) -> GenAlternatives a -> GenAlternatives a
-    mapWeight _ []                 = []
-    mapWeight f $ Cons weight x xs = Cons (f weight) x (mapWeight f xs)
+    mapWeight : forall a. (Subset Nat IsSucc -> Subset Nat IsSucc) -> GenAlternatives a -> GenAlternatives a
+    mapWeight f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapFst f
 
     mapGens : GenAlternatives a -> List $ GenAlternatives b
-    mapGens []                 = []
-    mapGens $ Cons weight x xs = mapWeight (weight *) (f x) :: mapGens xs
-
-toLNLG : GenAlternatives a -> List (Subset Nat IsSucc, Lazy (Gen a))
-toLNLG []                = []
-toLNLG $ Cons Z     _ xs = toLNLG xs
-toLNLG $ Cons (S w) x xs = (Element (S w) ItIsSucc, x) :: toLNLG xs
-
-fromLNLG : List (Subset Nat IsSucc, Lazy (Gen a)) -> GenAlternatives a
-fromLNLG []                = []
-fromLNLG ((weight, g)::xs) = Cons weight.fst g $ fromLNLG xs
+    mapGens $ MkGenAlternatives xs = xs <&> \(w, x) => mapWeight (w *) $ f x
 
 gcd : (a, b : Nat) -> {auto 0 ok : Either (IsSucc a) (IsSucc b)} -> Subset Nat IsSucc
 gcd Z Z       = void $ absurd ok
@@ -249,7 +246,7 @@ normLNLG wh@(x::xs) = do
 export
 Cast (List a) (GenAlternatives a) where
   cast []      = []
-  cast (x::xs) = Cons 1 (pure x) (cast xs)
+  cast (x::xs) = pure x :: cast xs
 
 ----------------------------------
 --- Creation of new generators ---
@@ -261,7 +258,7 @@ Cast (List a) (GenAlternatives a) where
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : GenAlternatives a -> Gen a
-oneOf alts = case normLNLG $ toLNLG alts of
+oneOf alts = case normLNLG $ unGenAlternatives alts of
                []       => empty
                [(_, x)] => x
                x::xs    => OneOf _ $ x:::xs
@@ -276,9 +273,7 @@ export
 frequency : List (Nat, Lazy (Gen a)) -> Gen a
 frequency = oneOf . fromList where
   fromList : List (Nat, Lazy (Gen a)) -> GenAlternatives a
-  fromList []           = []
-  fromList ((Z, _)::xs) = fromList xs
-  fromList ((w, g)::xs) = Cons w g $ fromList xs
+  fromList = MkGenAlternatives . mapMaybe (\(w, x) => (, x) <$> checkSucc w)
 
 ||| Choose one of the given values uniformly.
 |||
@@ -298,7 +293,7 @@ elements' = elements . toList
 export
 alternativesOf : Gen a -> GenAlternatives a
 alternativesOf $ Empty      = []
-alternativesOf $ OneOf _ gs = fromLNLG $ forget gs
+alternativesOf $ OneOf _ gs = MkGenAlternatives $ forget gs
 alternativesOf g            = [g]
 
 ||| Any depth alternatives fetching.
