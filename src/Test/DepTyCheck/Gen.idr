@@ -177,7 +177,7 @@ Monad Gen where
 
 namespace GenAlternatives
 
-  public export
+  export
   record GenAlternatives a where
     constructor MkGenAlternatives
     unGenAlternatives : List (Subset Nat IsSucc, Lazy (Gen a))
