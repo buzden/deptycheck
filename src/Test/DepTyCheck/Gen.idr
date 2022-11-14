@@ -8,6 +8,7 @@ import public Control.Monad.Error.Interface
 import Control.Monad.Maybe
 
 import Data.DPair
+import Data.Nat.Pos
 import Data.Fuel
 import Data.List
 import Data.List1
@@ -29,7 +30,7 @@ randomFin : RandomGen g => MonadState g m => MonadError () m => {n : _} -> m $ F
 randomFin {n = Z}   = throwError ()
 randomFin {n = S k} = random'
 
-pickUniformly : List1 (Subset Nat IsSucc, a) -> Nat -> a
+pickUniformly : List1 (PosNat, a) -> Nat -> a
 pickUniformly ((_, x):::[])                  _ = x
 pickUniformly w@((Element n _, x):::(y::ys)) k = if k < n then x else pickUniformly (assert_smaller w $ y:::ys) (k `minus` n)
 
@@ -47,7 +48,7 @@ data Gen : Type -> Type where
   Pure  : a -> Gen a
   Point : (forall g, m. RandomGen g => MonadState g m => MonadError () m => m a) -> Gen a
   OneOf : (totalWeight : Nat) ->
-          (gens : List1 (Subset Nat IsSucc, Lazy (Gen a))) ->
+          (gens : List1 (PosNat, Lazy (Gen a))) ->
           (0 _ : totalWeight = foldl1 (+) (gens <&> \x => fst $ fst x)) =>
           Gen a
   Bind  : Gen c -> (c -> Gen a) -> Gen a
@@ -74,7 +75,7 @@ mapTaggedLazy_preserves_tag ((t, x):::xs) = do
   rewrite mapFusion (ff . Builtin.fst) (mapSnd $ wrapLazy mf) xs
   cong (foldl {t=List} cf (ff t)) $ mapExt {xs} $ \(tt, xx) => Refl
 
-0 mapTaggedLazy_preserves_w : {xs : List1 (Subset Nat IsSucc, Lazy (Gen a))} ->
+0 mapTaggedLazy_preserves_w : {xs : List1 (PosNat, Lazy (Gen a))} ->
                               val = foldl1 (+) (xs <&> \x => fst $ fst x) =>
                               val = foldl1 (+) (mapTaggedLazy mf xs <&> \x => fst $ fst x)
 mapTaggedLazy_preserves_w @{prf} = rewrite sym $ mapTaggedLazy_preserves_tag {cf=(+)} {ff=fst} {mf} xs in prf
@@ -180,7 +181,7 @@ namespace GenAlternatives
   export
   record GenAlternatives a where
     constructor MkGenAlternatives
-    unGenAlternatives : List (Subset Nat IsSucc, Lazy (Gen a))
+    unGenAlternatives : List (PosNat, Lazy (Gen a))
 
   export %inline
   Nil : GenAlternatives a
@@ -211,37 +212,15 @@ namespace GenAlternatives
   processAlternatives : (Gen a -> Gen b) -> GenAlternatives a -> GenAlternatives b
   processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
 
-  (*) : Subset Nat IsSucc -> Subset Nat IsSucc -> Subset Nat IsSucc
-  Element (S n) _ * Element (S m) _ = Element (S n * S m) ItIsSucc
-
-  checkSucc : Nat -> Maybe $ Subset Nat IsSucc
-  checkSucc Z       = Nothing
-  checkSucc k@(S _) = Just $ Element k ItIsSucc
-
   export
   processAlternatives' : (Gen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
   processAlternatives' f = concat . mapGens where
 
-    mapWeight : forall a. (Subset Nat IsSucc -> Subset Nat IsSucc) -> GenAlternatives a -> GenAlternatives a
+    mapWeight : forall a. (PosNat -> PosNat) -> GenAlternatives a -> GenAlternatives a
     mapWeight f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapFst f
 
     mapGens : GenAlternatives a -> List $ GenAlternatives b
     mapGens $ MkGenAlternatives xs = xs <&> \(w, x) => mapWeight (w *) $ f x
-
-gcd : (a, b : Nat) -> {auto 0 ok : Either (IsSucc a) (IsSucc b)} -> Subset Nat IsSucc
-gcd Z Z       = void $ absurd ok
-gcd a@(S _) Z = Element a ItIsSucc
-gcd Z b@(S _) = Element b ItIsSucc
-gcd a (S b)   = assert_total $ gcd (S b) (modNatNZ a (S b) SIsNonZero)
-
-normaliseTags : List (Subset Nat IsSucc, a) -> List (Subset Nat IsSucc, a)
-normaliseTags [] = []
-normaliseTags wh@(x::xs) = do
-  let Element (S d) _ = foldl1 gcd' $ map fst $ x:::xs
-  flip map wh $ mapFst $ \(Element n _) => Element (divNatNZ n (S d) SIsNonZero) (believe_me $ ItIsSucc {n=1} {- since divisor is GCD -})
-  where
-    gcd' : (a, b : Subset Nat IsSucc) -> Subset Nat IsSucc
-    gcd' (Element n _) (Element m _) = gcd n m
 
 export
 Cast (List a) (GenAlternatives a) where
