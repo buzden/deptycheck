@@ -63,9 +63,9 @@ record OneOfAlternatives (0 a : Type) where
 mapTaggedLazy : (a -> b) -> List1 (tag, Lazy a) -> List1 (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
-0 mapExt : {xs : List _} -> ((x : _) -> f x = g x) -> map f xs = map g xs
-mapExt {xs = []}    _  = Refl
-mapExt {xs = x::xs} fg = rewrite fg x in cong (g x ::) $ mapExt fg
+0 mapExt : (xs : List _) -> ((x : _) -> f x = g x) -> map f xs = map g xs
+mapExt []      _  = Refl
+mapExt (x::xs) fg = rewrite fg x in cong (g x ::) $ mapExt _ fg
 
 0 mapTaggedLazy_preserves_tag : {cf : _} ->
                                 {ff : _} ->
@@ -74,7 +74,7 @@ mapExt {xs = x::xs} fg = rewrite fg x in cong (g x ::) $ mapExt fg
                                 foldl1 cf (xs <&> \x => ff $ fst x) = foldl1 cf (mapTaggedLazy mf xs <&> \x => ff $ fst x)
 mapTaggedLazy_preserves_tag ((t, x):::xs) = do
   rewrite mapFusion (ff . Builtin.fst) (mapSnd $ wrapLazy mf) xs
-  cong (foldl {t=List} cf (ff t)) $ mapExt {xs} $ \(tt, xx) => Refl
+  cong (foldl {t=List} cf (ff t)) $ mapExt xs $ \(tt, xx) => Refl
 
 0 mapTaggedLazy_preserves_w : {xs : List1 (PosNat, Lazy (Gen a))} ->
                               val = foldl1 (+) (xs <&> \x => fst $ fst x) =>
