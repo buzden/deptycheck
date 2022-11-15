@@ -4,6 +4,7 @@ authors = "Denis Buzdalov"
 version = 0.0.220712
 
 modules = Control.Monad.State.Tuple
+        , Data.Nat.Pos
         , Data.Vect.Dependent
         , System.Random.Simple
         , Test.DepTyCheck.Gen.Auto
