@@ -30,10 +30,6 @@ randomFin : RandomGen g => MonadState g m => MonadError () m => {n : _} -> m $ F
 randomFin {n = Z}   = throwError ()
 randomFin {n = S k} = random'
 
-pickUniformly : List1 (PosNat, a) -> Nat -> a
-pickUniformly ((_, x):::[])                  _ = x
-pickUniformly w@((Element n _, x):::(y::ys)) k = if k < n then x else pickUniformly (assert_smaller w $ y:::ys) (k `minus` n)
-
 public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
 wrapLazy f = delay . f . force
@@ -113,7 +109,7 @@ unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
 unGen $ Empty    = throwError ()
 unGen $ Pure x   = pure x
 unGen $ Point sf = sf
-unGen $ OneOf oo = assert_total unGen . force . pickUniformly oo.gens . finToNat =<< randomFin {n=oo.totalWeight}
+unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin {n=oo.totalWeight}
 unGen $ Bind x f = unGen x >>= assert_total unGen . f
 
 export
@@ -239,7 +235,7 @@ Cast (List a) (GenAlternatives a) where
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : GenAlternatives a -> Gen a
-oneOf alts = case normaliseTags $ unGenAlternatives alts of
+oneOf alts = case normaliseWeights $ unGenAlternatives alts of
                []       => empty
                [(_, x)] => x
                x::xs    => OneOf $ MkOneOf _ $ x:::xs

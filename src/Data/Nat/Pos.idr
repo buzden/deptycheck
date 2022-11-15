@@ -26,10 +26,17 @@ gcd a@(S _) Z = Element a ItIsSucc
 gcd Z b@(S _) = Element b ItIsSucc
 gcd a (S b)   = assert_total $ gcd (S b) (modNatNZ a (S b) SIsNonZero)
 
+--- Working with weighted lists ---
+
 export
-normaliseTags : List (PosNat, a) -> List (PosNat, a)
-normaliseTags [] = []
-normaliseTags wh@(x::xs) = do
+pickWeighted : List1 (PosNat, a) -> Nat -> a
+pickWeighted ((_, x):::[])                  _ = x
+pickWeighted w@((Element n _, x):::(y::ys)) k = if k < n then x else pickWeighted (assert_smaller w $ y:::ys) (k `minus` n)
+
+export
+normaliseWeights : List (PosNat, a) -> List (PosNat, a)
+normaliseWeights [] = []
+normaliseWeights wh@(x::xs) = do
   let Element (S d) _ = foldl1 gcd' $ map fst $ x:::xs
   flip map wh $ mapFst $ \(Element n _) => Element (divNatNZ n (S d) SIsNonZero) (believe_me $ ItIsSucc {n=1} {- since divisor is GCD -})
   where
