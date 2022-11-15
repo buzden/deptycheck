@@ -254,7 +254,7 @@ export
 frequency : List (Nat, Lazy (Gen a)) -> Gen a
 frequency = oneOf . fromList where
   fromList : List (Nat, Lazy (Gen a)) -> GenAlternatives a
-  fromList = MkGenAlternatives . mapMaybe (\(w, x) => (, x) <$> checkSucc w)
+  fromList = MkGenAlternatives . mapMaybe (\(w, x) => (, x) <$> toPosNat w)
 
 ||| Choose one of the given values uniformly.
 |||

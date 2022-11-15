@@ -15,9 +15,9 @@ public export %inline
 Element (S n) _ * Element (S m) _ = Element (S n * S m) ItIsSucc
 
 public export
-checkSucc : Nat -> Maybe $ PosNat
-checkSucc Z       = Nothing
-checkSucc k@(S _) = Just $ Element k ItIsSucc
+toPosNat : Nat -> Maybe PosNat
+toPosNat Z       = Nothing
+toPosNat k@(S _) = Just $ Element k ItIsSucc
 
 export
 gcd : (a, b : Nat) -> {auto 0 ok : Either (IsSucc a) (IsSucc b)} -> PosNat
