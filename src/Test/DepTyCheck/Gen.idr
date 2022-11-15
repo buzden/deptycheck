@@ -42,16 +42,21 @@ wrapLazy f = delay . f . force
 --- Definition of the `Gen` ---
 -------------------------------
 
+record OneOfAlternatives (0 a : Type)
+
 export
 data Gen : Type -> Type where
   Empty : Gen a
   Pure  : a -> Gen a
   Point : (forall g, m. RandomGen g => MonadState g m => MonadError () m => m a) -> Gen a
-  OneOf : (totalWeight : Nat) ->
-          (gens : List1 (PosNat, Lazy (Gen a))) ->
-          (0 _ : totalWeight = foldl1 (+) (gens <&> \x => fst $ fst x)) =>
-          Gen a
+  OneOf : OneOfAlternatives a -> Gen a
   Bind  : Gen c -> (c -> Gen a) -> Gen a
+
+record OneOfAlternatives (0 a : Type) where
+  constructor MkOneOf
+  totalWeight : Nat
+  gens : List1 (PosNat, Lazy (Gen a))
+  {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst $ fst x)}
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
@@ -80,11 +85,8 @@ mapTaggedLazy_preserves_tag ((t, x):::xs) = do
                               val = foldl1 (+) (mapTaggedLazy mf xs <&> \x => fst $ fst x)
 mapTaggedLazy_preserves_w @{prf} = rewrite sym $ mapTaggedLazy_preserves_tag {cf=(+)} {ff=fst} {mf} xs in prf
 
-data IsOneOf : Gen a -> Type where
-  ItIsOneOf : IsOneOf $ OneOf tw gs @{twCorr}
-
-mapOneOf : (g : Gen a) -> (Gen a -> Gen b) -> (0 _ : IsOneOf g) => Gen b
-mapOneOf (OneOf tw gs) f = OneOf tw @{mapTaggedLazy_preserves_w {mf=f}} $ mapTaggedLazy f gs
+mapOneOf : OneOfAlternatives a -> (Gen a -> Gen b) -> Gen b
+mapOneOf (MkOneOf tw gs) f = OneOf $ MkOneOf tw @{mapTaggedLazy_preserves_w {mf=f}} $ mapTaggedLazy f gs
 
 -----------------------------
 --- Very basic generators ---
@@ -108,11 +110,11 @@ empty = Empty
 
 export
 unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
-unGen $ Empty       = throwError ()
-unGen $ Pure x      = pure x
-unGen $ Point sf    = sf
-unGen $ OneOf tw gs = randomFin {n=tw} >>= assert_total unGen . force . pickUniformly gs . finToNat
-unGen $ Bind x f    = unGen x >>= assert_total unGen . f
+unGen $ Empty    = throwError ()
+unGen $ Pure x   = pure x
+unGen $ Point sf = sf
+unGen $ OneOf oo = randomFin {n=oo.totalWeight} >>= assert_total unGen . force . pickUniformly oo.gens . finToNat
+unGen $ Bind x f = unGen x >>= assert_total unGen . f
 
 export
 unGenTryAll' : RandomGen g => (seed : g) -> Gen a -> Stream (Maybe a, g)
@@ -140,11 +142,11 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 
 export
 Functor Gen where
-  map _ $ Empty       = Empty
-  map f $ Pure x      = Pure $ f x
-  map f $ Point sf    = Point $ f <$> sf
-  map f g@(OneOf _ _) = mapOneOf g $ assert_total $ map f
-  map f $ Bind x g    = Bind x $ assert_total map f . g
+  map _ $ Empty    = Empty
+  map f $ Pure x   = Pure $ f x
+  map f $ Point sf = Point $ f <$> sf
+  map f $ OneOf oo = mapOneOf oo $ assert_total $ map f
+  map f $ Bind x g = Bind x $ assert_total map f . g
 
 export
 Applicative Gen where
@@ -158,19 +160,19 @@ Applicative Gen where
 
   Point sfl <*> Point sfr = Point $ sfl <*> sfr
 
-  o@(OneOf _ _) <*> g = mapOneOf o $ assert_total (<*> g)
-  g <*> o@(OneOf _ _) = mapOneOf o $ assert_total (g <*>)
+  OneOf oo <*> g = mapOneOf oo $ assert_total (<*> g)
+  g <*> OneOf oo = mapOneOf oo $ assert_total (g <*>)
 
   Bind x f <*> g = Bind x $ assert_total (<*> g) . f
   g <*> Bind x f = Bind x $ assert_total (g <*>) . f
 
 export
 Monad Gen where
-  Empty         >>= _  = Empty
-  Pure x        >>= nf = nf x
-  g@(Point _)   >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
-  o@(OneOf _ _) >>= nf = mapOneOf o $ assert_total (>>= nf)
-  Bind x f      >>= nf = x >>= \x => f x >>= nf
+  Empty       >>= _  = Empty
+  Pure x      >>= nf = nf x
+  g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
+  OneOf oo    >>= nf = mapOneOf oo $ assert_total (>>= nf)
+  Bind x f    >>= nf = x >>= \x => f x >>= nf
 
 -----------------------------------------
 --- Detour: special list of lazy gens ---
@@ -240,7 +242,7 @@ oneOf : GenAlternatives a -> Gen a
 oneOf alts = case normaliseTags $ unGenAlternatives alts of
                []       => empty
                [(_, x)] => x
-               x::xs    => OneOf _ $ x:::xs
+               x::xs    => OneOf $ MkOneOf _ $ x:::xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -271,9 +273,9 @@ elements' = elements . toList
 
 export
 alternativesOf : Gen a -> GenAlternatives a
-alternativesOf $ Empty      = []
-alternativesOf $ OneOf _ gs = MkGenAlternatives $ forget gs
-alternativesOf g            = [g]
+alternativesOf $ Empty    = []
+alternativesOf $ OneOf oo = MkGenAlternatives $ forget oo.gens
+alternativesOf g          = [g]
 
 ||| Any depth alternatives fetching.
 |||
@@ -340,11 +342,11 @@ Monad GenAlternatives where
 
 export
 mapMaybe : (a -> Maybe b) -> Gen a -> Gen b
-mapMaybe _ $ Empty       = Empty
-mapMaybe p $ Pure x      = maybe Empty Pure $ p x
-mapMaybe p $ Point sf    = Point $ sf >>= maybe (throwError ()) pure . p
-mapMaybe p o@(OneOf _ _) = mapOneOf o $ assert_total mapMaybe p
-mapMaybe p $ Bind x f    = Bind x $ assert_total mapMaybe p . f
+mapMaybe _ $ Empty    = Empty
+mapMaybe p $ Pure x   = maybe Empty Pure $ p x
+mapMaybe p $ Point sf = Point $ sf >>= maybe (throwError ()) pure . p
+mapMaybe p $ OneOf oo = mapOneOf oo $ assert_total mapMaybe p
+mapMaybe p $ Bind x f = Bind x $ assert_total mapMaybe p . f
 
 export
 suchThat_withPrf : Gen a -> (p : a -> Bool) -> Gen $ a `Subset` So . p
