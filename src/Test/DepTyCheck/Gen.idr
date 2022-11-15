@@ -113,7 +113,7 @@ unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
 unGen $ Empty    = throwError ()
 unGen $ Pure x   = pure x
 unGen $ Point sf = sf
-unGen $ OneOf oo = randomFin {n=oo.totalWeight} >>= assert_total unGen . force . pickUniformly oo.gens . finToNat
+unGen $ OneOf oo = assert_total unGen . force . pickUniformly oo.gens . finToNat =<< randomFin {n=oo.totalWeight}
 unGen $ Bind x f = unGen x >>= assert_total unGen . f
 
 export
@@ -324,7 +324,7 @@ Functor GenAlternatives where
 
 export
 Applicative GenAlternatives where
-  pure x = [ pure {f=Gen} x ]
+  pure x = [ pure x ]
   xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
 
 export
