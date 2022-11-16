@@ -78,7 +78,7 @@ mapTaggedLazy_preserves_tag ((t, x):::xs) = do
 0 mapTaggedLazy_preserves_w : {xs : List1 (PosNat, Lazy (NonEmptyGen a))} ->
                               val = foldl1 (+) (xs <&> \x => fst x) =>
                               val = foldl1 (+) (mapTaggedLazy mf xs <&> \x => fst x)
---mapTaggedLazy_preserves_w @{prf} = rewrite sym $ mapTaggedLazy_preserves_tag {cf=(+)} {ff=fst} {mf} xs in prf
+mapTaggedLazy_preserves_w @{prf} = rewrite sym $ mapTaggedLazy_preserves_tag {cf=Pos.(+)} {ff=id} {mf} xs in prf
 
 mapOneOf : OneOfAlternatives a -> (NonEmptyGen a -> NonEmptyGen b) -> NonEmptyGen b
 mapOneOf (MkOneOf tw gs) f = OneOf $ MkOneOf tw @{mapTaggedLazy_preserves_w {mf=f}} $ mapTaggedLazy f gs
