@@ -1,20 +1,13 @@
 module Test.DepTyCheck.Gen.NonEmpty
 
-import Control.Function.FunExt
-
 import Control.Monad.State
 import public Control.Monad.State.Interface
-import Control.Monad.Maybe
 
-import Data.DPair
 import Data.Nat.Pos
 import Data.List
 import Data.List.CheckedEmpty
-import Data.List.Lazy
 import Data.Vect
 import Data.Stream
-
-import Decidable.Equality
 
 import public System.Random.Simple
 
