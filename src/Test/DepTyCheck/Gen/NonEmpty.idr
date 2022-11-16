@@ -59,26 +59,12 @@ record OneOfAlternatives (0 a : Type) where
 mapTaggedLazy : (a -> b) -> NEList (tag, Lazy a) -> NEList (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
-0 mapExt : (xs : List _) -> ((x : _) -> f x = g x) -> map f xs = map g xs
-mapExt []      _  = Refl
-mapExt (x::xs) fg = rewrite fg x in cong (g x ::) $ mapExt _ fg
-
-0 mapTaggedLazy_preserves_tag : {cf : _} ->
-                                {ff : _} ->
-                                {mf : _} ->
-                                (xs : NEList (tag, Lazy a)) ->
-                                foldl1 cf (xs <&> \x => ff $ fst x) = foldl1 cf (mapTaggedLazy mf xs <&> \x => ff $ fst x)
---mapTaggedLazy_preserves_tag ((t, x):::xs) = do
---  rewrite mapFusion (ff . Builtin.fst) (mapSnd $ wrapLazy mf) xs
---  cong (foldl {t=List} cf (ff t)) $ mapExt xs $ \(tt, xx) => Refl
-
-0 mapTaggedLazy_preserves_w : {xs : NEList (PosNat, Lazy (NonEmptyGen a))} ->
-                              val = foldl1 (+) (xs <&> \x => fst x) =>
-                              val = foldl1 (+) (mapTaggedLazy mf xs <&> \x => fst x)
---mapTaggedLazy_preserves_w @{prf} = rewrite sym $ mapTaggedLazy_preserves_tag {cf=Pos.(+)} {ff=id} {mf} xs in prf
-
 mapOneOf : OneOfAlternatives a -> (NonEmptyGen a -> NonEmptyGen b) -> NonEmptyGen b
-mapOneOf (MkOneOf tw gs) f = OneOf $ MkOneOf tw @{mapTaggedLazy_preserves_w {mf=f}} $ mapTaggedLazy f gs
+mapOneOf (MkOneOf tw gs @{prf}) f = OneOf $ MkOneOf tw (mapTaggedLazy f gs) @{do
+    rewrite mapFusion (Builtin.fst) (mapSnd $ wrapLazy f) gs
+    rewrite prf
+    cong (CheckedEmpty.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
+  }
 
 -----------------------------
 --- Very basic generators ---

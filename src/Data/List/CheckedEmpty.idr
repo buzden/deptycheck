@@ -114,3 +114,15 @@ fromVect (x::xs) = x :: fromVect xs
 export
 Show a => Show (CEList ne a) where
   show = show . toList
+
+--- Properties ---
+
+export
+mapFusion : (g : b -> c) -> (f : a -> b) -> (xs : CEList ne a) -> map g (map f xs) = map (g . f) xs
+mapFusion g f []      = Refl
+mapFusion g f (x::xs) = rewrite mapFusion g f xs in Refl
+
+export
+mapExt : (xs : CEList ne _) -> ((x : _) -> f x = g x) -> map f xs = map g xs
+mapExt []      _  = Refl
+mapExt (x::xs) fg = rewrite fg x in cong (g x ::) $ mapExt _ fg
