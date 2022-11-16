@@ -11,6 +11,10 @@ PosNat : Type
 PosNat = Subset Nat IsSucc
 
 public export %inline
+(+) : PosNat -> PosNat -> PosNat
+Element (S n) _ + Element (S m) _ = Element (S n + S m) ItIsSucc
+
+public export %inline
 (*) : PosNat -> PosNat -> PosNat
 Element (S n) _ * Element (S m) _ = Element (S n * S m) ItIsSucc
 
@@ -33,12 +37,17 @@ pickWeighted : List1 (PosNat, a) -> Nat -> a
 pickWeighted ((_, x):::[])                  _ = x
 pickWeighted w@((Element n _, x):::(y::ys)) k = if k < n then x else pickWeighted (assert_smaller w $ y:::ys) (k `minus` n)
 
+foldmne : Foldable f => (a -> a -> a) -> f a -> Maybe a
+foldmne g = foldl gg Nothing where
+  gg : Maybe a -> a -> Maybe a
+  gg ml r = ml <&> \l => g l r
+
 export
-normaliseWeights : List (PosNat, a) -> List (PosNat, a)
-normaliseWeights [] = []
-normaliseWeights wh@(x::xs) = do
-  let Element (S d) _ = foldl1 gcd' $ map fst $ x:::xs
-  flip map wh $ mapFst $ \(Element n _) => Element (divNatNZ n (S d) SIsNonZero) (believe_me $ ItIsSucc {n=1} {- since divisor is GCD -})
+normaliseWeights : Foldable f => Functor f => f (PosNat, a) -> f (PosNat, a)
+normaliseWeights xs = do
+  let Just $ Element (S d) _ = foldmne gcd' $ Builtin.fst <$> xs
+    | Nothing => xs
+  flip map xs $ mapFst $ \(Element n _) => Element (divNatNZ n (S d) SIsNonZero) (believe_me $ ItIsSucc {n=1} {- since divisor is GCD -})
   where
     gcd' : (a, b : PosNat) -> PosNat
     gcd' (Element n _) (Element m _) = gcd n m
