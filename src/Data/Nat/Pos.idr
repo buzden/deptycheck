@@ -3,12 +3,23 @@ module Data.Nat.Pos
 import public Data.Nat
 import public Data.DPair
 import Data.List1
+import public Data.So
 
 %default total
+
+--- Type definition ---
 
 public export %inline
 PosNat : Type
 PosNat = Subset Nat IsSucc
+
+--- Literals syntax support ---
+
+public export %inline
+fromInteger : (x : Integer) -> (0 _ : So $ x >= 1) => PosNat
+fromInteger x = Element (cast x) (believe_me $ ItIsSucc {n=1})
+
+--- Simple arithmetics ---
 
 public export %inline
 (+) : PosNat -> PosNat -> PosNat
@@ -18,10 +29,14 @@ public export %inline
 (*) : PosNat -> PosNat -> PosNat
 Element (S n) _ * Element (S m) _ = Element (S n * S m) ItIsSucc
 
+--- Covertions ---
+
 public export
 toPosNat : Nat -> Maybe PosNat
 toPosNat Z       = Nothing
 toPosNat k@(S _) = Just $ Element k ItIsSucc
+
+--- Greatest common divisor ---
 
 export
 gcd : (a, b : Nat) -> {auto 0 ok : Either (IsSucc a) (IsSucc b)} -> PosNat

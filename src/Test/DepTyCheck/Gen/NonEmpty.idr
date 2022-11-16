@@ -25,10 +25,14 @@ import public System.Random.Simple
 -------------------------
 
 randomFin : RandomGen g => MonadState g m => (n : PosNat) -> m $ Fin $ fst n
+randomFin $ Element (S _) _ = random'
 
 public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
 wrapLazy f = delay . f . force
+
+list1ToVect : (xs : List1 a) -> Vect (S $ length xs `minus` 1) a
+list1ToVect (x:::xs) = x :: rewrite minusZeroRight (length xs) in fromList xs
 
 -------------------------------
 --- Definition of the `NonEmptyGen` ---
@@ -150,11 +154,11 @@ namespace GenAlternatives
   export
   record GenAlternatives a where
     constructor MkGenAlternatives
-    unGenAlternatives : List (PosNat, Lazy (NonEmptyGen a))
+    unGenAlternatives : Vect (S altsCnt) (PosNat, Lazy (NonEmptyGen a))
 
   export %inline
   Nil : GenAlternatives a
-  Nil = MkGenAlternatives []
+  --Nil = MkGenAlternatives []
 
   export %inline
   (::) : Lazy (NonEmptyGen a) -> GenAlternatives a -> GenAlternatives a
@@ -167,7 +171,7 @@ namespace GenAlternatives
 
   public export
   length : GenAlternatives a -> Nat
-  length = length . unGenAlternatives
+  length $ MkGenAlternatives alts = length alts
 
   export
   Semigroup (GenAlternatives a) where
@@ -189,12 +193,12 @@ namespace GenAlternatives
     mapWeight f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapFst f
 
     mapGens : GenAlternatives a -> List $ GenAlternatives b
-    mapGens $ MkGenAlternatives xs = xs <&> \(w, x) => mapWeight (w *) $ f x
+    mapGens $ MkGenAlternatives xs = toList xs <&> \(w, x) => mapWeight (w *) $ f x
 
 export
-Cast (List a) (GenAlternatives a) where
-  cast []      = []
-  cast (x::xs) = pure x :: cast xs
+Cast (Vect (S n) a) (GenAlternatives a) where
+  cast [x]            = MkGenAlternatives [(1, pure x)]
+  cast (x::xs@(_::_)) = pure x :: cast xs
 
 ----------------------------------
 --- Creation of new generators ---
@@ -206,10 +210,8 @@ Cast (List a) (GenAlternatives a) where
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : GenAlternatives a -> NonEmptyGen a
-oneOf alts = case normaliseWeights $ unGenAlternatives alts of
-               []       => ?empty_case
-               [(_, x)] => x
-               x::xs    => OneOf $ MkOneOf _ $ x:::xs
+oneOf $ MkGenAlternatives [(_, x)] = x
+oneOf $ MkGenAlternatives (x::xs)  = OneOf $ MkOneOf _ $ normaliseWeights $ x ::: toList xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -218,21 +220,19 @@ oneOf alts = case normaliseWeights $ unGenAlternatives alts of
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : List (Nat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
-frequency = oneOf . fromList where
-  fromList : List (Nat, Lazy (NonEmptyGen a)) -> GenAlternatives a
-  fromList = MkGenAlternatives . mapMaybe (\(w, x) => (, x) <$> toPosNat w)
+frequency : Vect (S n) (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
+frequency alts = oneOf $ MkGenAlternatives alts
 
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
-elements : List a -> NonEmptyGen a
+elements : Vect (S n) a -> NonEmptyGen a
 elements = oneOf . cast
 
 export
-elements' : Foldable f => f a -> NonEmptyGen a
-elements' = elements . toList
+elements' : List1 a -> NonEmptyGen a
+elements' (x:::xs) = elements $ x :: fromList xs
 
 ------------------------------
 --- Analysis of generators ---
@@ -240,7 +240,7 @@ elements' = elements . toList
 
 export
 alternativesOf : NonEmptyGen a -> GenAlternatives a
-alternativesOf $ OneOf oo = MkGenAlternatives $ forget oo.gens
+alternativesOf $ OneOf oo = MkGenAlternatives $ list1ToVect oo.gens
 alternativesOf g          = [g]
 
 ||| Any depth alternatives fetching.
