@@ -9,6 +9,7 @@ license = "MPL-2.0"
 version = 0.0.220712
 
 modules = Data.Nat.Pos
+        , Data.List.CheckedEmpty
         , Data.Vect.Dependent
         , Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
