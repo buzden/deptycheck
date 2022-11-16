@@ -47,7 +47,7 @@ data NonEmptyGen : Type -> Type where
 record OneOfAlternatives (0 a : Type) where
   constructor MkOneOf
   totalWeight : PosNat
-  gens : NEList True (PosNat, Lazy (NonEmptyGen a))
+  gens : NEList (PosNat, Lazy (NonEmptyGen a))
   {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst x)}
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
@@ -56,7 +56,7 @@ record OneOfAlternatives (0 a : Type) where
 --- Technical stuff for mapping alternatives ---
 ------------------------------------------------
 
-mapTaggedLazy : (a -> b) -> NEList True (tag, Lazy a) -> NEList True (tag, Lazy b)
+mapTaggedLazy : (a -> b) -> NEList (tag, Lazy a) -> NEList (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
 0 mapExt : (xs : List _) -> ((x : _) -> f x = g x) -> map f xs = map g xs
@@ -66,13 +66,13 @@ mapExt (x::xs) fg = rewrite fg x in cong (g x ::) $ mapExt _ fg
 0 mapTaggedLazy_preserves_tag : {cf : _} ->
                                 {ff : _} ->
                                 {mf : _} ->
-                                (xs : NEList True (tag, Lazy a)) ->
+                                (xs : NEList (tag, Lazy a)) ->
                                 foldl1 cf (xs <&> \x => ff $ fst x) = foldl1 cf (mapTaggedLazy mf xs <&> \x => ff $ fst x)
 --mapTaggedLazy_preserves_tag ((t, x):::xs) = do
 --  rewrite mapFusion (ff . Builtin.fst) (mapSnd $ wrapLazy mf) xs
 --  cong (foldl {t=List} cf (ff t)) $ mapExt xs $ \(tt, xx) => Refl
 
-0 mapTaggedLazy_preserves_w : {xs : NEList True (PosNat, Lazy (NonEmptyGen a))} ->
+0 mapTaggedLazy_preserves_w : {xs : NEList (PosNat, Lazy (NonEmptyGen a))} ->
                               val = foldl1 (+) (xs <&> \x => fst x) =>
                               val = foldl1 (+) (mapTaggedLazy mf xs <&> \x => fst x)
 --mapTaggedLazy_preserves_w @{prf} = rewrite sym $ mapTaggedLazy_preserves_tag {cf=Pos.(+)} {ff=id} {mf} xs in prf
@@ -151,7 +151,7 @@ namespace GenAlternatives
   export
   record GenAlternatives' (0 ne : Bool) a where
     constructor MkGenAlternatives
-    unGenAlternatives : NEList ne (PosNat, Lazy (NonEmptyGen a))
+    unGenAlternatives : CEList ne (PosNat, Lazy (NonEmptyGen a))
 
   public export %inline
   GenAlternatives : Type -> Type
@@ -185,11 +185,11 @@ namespace GenAlternatives
     mapWeight : forall a. (PosNat -> PosNat) -> GenAlternatives' nea a -> GenAlternatives' nea a
     mapWeight f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapFst f
 
-    mapGens : GenAlternatives a -> NEList True $ GenAlternatives b
+    mapGens : GenAlternatives a -> NEList $ GenAlternatives b
     mapGens $ MkGenAlternatives xs = xs <&> \(w, x) => mapWeight (w *) $ f x
 
 export
-Cast (NEList ne a) (GenAlternatives' ne a) where
+Cast (CEList ne a) (GenAlternatives' ne a) where
   cast = MkGenAlternatives . map (\x => (1, pure x))
 
 ----------------------------------
@@ -212,14 +212,14 @@ oneOf $ MkGenAlternatives xs@(_::_) = OneOf $ MkOneOf _ $ normaliseWeights xs
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : NEList True (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
+frequency : NEList (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
 frequency = oneOf . MkGenAlternatives
 
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
-elements : NEList True a -> NonEmptyGen a
+elements : NEList a -> NonEmptyGen a
 elements = oneOf . cast
 
 ------------------------------

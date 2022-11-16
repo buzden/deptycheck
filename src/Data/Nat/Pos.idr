@@ -48,7 +48,7 @@ gcd a (S b)   = assert_total $ gcd (S b) (modNatNZ a (S b) SIsNonZero)
 --- Working with weighted lists ---
 
 export
-pickWeighted : NEList True (PosNat, a) -> Nat -> a
+pickWeighted : NEList (PosNat, a) -> Nat -> a
 pickWeighted [(_, x)]                      _ = x
 pickWeighted ((Element n _, x)::xs@(_::_)) k = if k < n then x else pickWeighted xs (k `minus` n)
 

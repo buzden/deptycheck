@@ -7,37 +7,41 @@ import Data.Vect
 %default total
 
 public export
-data NEList : (nonEmpty : Bool) -> Type -> Type where
-  Nil  : NEList False a
-  (::) : a -> NEList e a -> NEList True a
+data CEList : (nonEmpty : Bool) -> Type -> Type where
+  Nil  : CEList False a
+  (::) : a -> CEList e a -> CEList True a
 
-%name NEList xs, ys, zs
+%name CEList xs, ys, zs
+
+public export %inline
+NEList : Type -> Type
+NEList = CEList True
 
 --- Basic functions ---
 
 public export
-length : NEList ne a -> Nat
+length : CEList ne a -> Nat
 length []      = Z
 length (_::xs) = S $ length xs
 
 public export
-(++) : (l : NEList nel a) -> (r : NEList ner a) -> NEList (nel || ner) a
+(++) : (l : CEList nel a) -> (r : CEList ner a) -> CEList (nel || ner) a
 []      ++ ys = ys
 (x::xs) ++ ys = x :: xs ++ ys
 
 --- Functor ---
 
 export
-Functor (NEList ne) where
+Functor (CEList ne) where
   map f []      = []
   map f (x::xs) = f x :: map f xs
 
 export
-pure : a -> NEList True a
+pure : a -> NEList a
 pure x = [x]
 
 export
-(>>=) : NEList nel a -> (a -> NEList ner b) -> NEList (nel && ner) b
+(>>=) : CEList nel a -> (a -> CEList ner b) -> CEList (nel && ner) b
 (>>=) [] _ = []
 (>>=) ((::) x xs {e=nem}) f = do
   rewrite sym $ orSameAndRightNeutral ner nem
@@ -45,13 +49,13 @@ export
   f x ++ (xs >>= f)
 
 export
-(<*>) : NEList nel (a -> b) -> NEList ner a -> NEList (nel && ner) b
+(<*>) : CEList nel (a -> b) -> CEList ner a -> CEList (nel && ner) b
 xs <*> ys = xs >>= (<$> ys)
 
 --- Folds ---
 
 export
-Foldable (NEList ne) where
+Foldable (CEList ne) where
   foldr c n []      = n
   foldr c n (x::xs) = c x (foldr c n xs)
 
@@ -67,15 +71,15 @@ Foldable (NEList ne) where
   foldMap f = foldl (\acc, elem => acc <+> f elem) neutral
 
 export
-foldl1 : (a -> a -> a) -> NEList True a -> a
+foldl1 : (a -> a -> a) -> NEList a -> a
 foldl1 f (x::xs) = foldl f x xs
 
 export
-foldr1 : (a -> a -> a) -> NEList True a -> a
+foldr1 : (a -> a -> a) -> NEList a -> a
 foldr1 f (x::xs) = foldr f x xs
 
 export
-Traversable (NEList ne) where
+Traversable (CEList ne) where
   traverse f []      = pure []
   traverse f (x::xs) = [| f x :: traverse f xs |]
 
@@ -84,29 +88,29 @@ Traversable (NEList ne) where
 -- List --
 
 public export
-fromList : (xs : List a) -> NEList (not $ null xs) a
+fromList : (xs : List a) -> CEList (not $ null xs) a
 fromList []      = []
 fromList (x::xs) = x :: fromList xs
 
 -- List1 --
 
 public export
-fromList1 : List1 a -> NEList True a
+fromList1 : List1 a -> NEList a
 fromList1 $ x:::xs = x :: fromList xs
 
 public export
-toList1 : NEList True a -> List1 a
+toList1 : NEList a -> List1 a
 toList1 $ x::xs = x ::: toList xs
 
 -- Vect --
 
 public export
-fromVect : Vect n a -> NEList (n /= Z) a
+fromVect : Vect n a -> CEList (n /= Z) a
 fromVect []      = []
 fromVect (x::xs) = x :: fromVect xs
 
 --- Showing ---
 
 export
-Show a => Show (NEList ne a) where
+Show a => Show (CEList ne a) where
   show = show . toList
