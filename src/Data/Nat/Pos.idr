@@ -2,7 +2,7 @@ module Data.Nat.Pos
 
 import public Data.Nat
 import public Data.DPair
-import Data.List1
+import Data.List.CheckedEmpty
 import public Data.So
 
 %default total
@@ -48,9 +48,9 @@ gcd a (S b)   = assert_total $ gcd (S b) (modNatNZ a (S b) SIsNonZero)
 --- Working with weighted lists ---
 
 export
-pickWeighted : List1 (PosNat, a) -> Nat -> a
-pickWeighted ((_, x):::[])                  _ = x
-pickWeighted w@((Element n _, x):::(y::ys)) k = if k < n then x else pickWeighted (assert_smaller w $ y:::ys) (k `minus` n)
+pickWeighted : NEList True (PosNat, a) -> Nat -> a
+pickWeighted [(_, x)]                      _ = x
+pickWeighted ((Element n _, x)::xs@(_::_)) k = if k < n then x else pickWeighted xs (k `minus` n)
 
 foldmne : Foldable f => (a -> a -> a) -> f a -> Maybe a
 foldmne g = foldl gg Nothing where

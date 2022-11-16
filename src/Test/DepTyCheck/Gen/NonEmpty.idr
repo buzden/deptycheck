@@ -9,7 +9,7 @@ import Control.Monad.Maybe
 import Data.DPair
 import Data.Nat.Pos
 import Data.List
-import Data.List1
+import Data.List.CheckedEmpty
 import Data.List.Lazy
 import Data.Vect
 import Data.Stream
@@ -31,12 +31,9 @@ public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
 wrapLazy f = delay . f . force
 
-list1ToVect : (xs : List1 a) -> Vect (S $ length xs `minus` 1) a
-list1ToVect (x:::xs) = x :: rewrite minusZeroRight (length xs) in fromList xs
-
--------------------------------
+---------------------------------------
 --- Definition of the `NonEmptyGen` ---
--------------------------------
+---------------------------------------
 
 record OneOfAlternatives (0 a : Type)
 
@@ -50,7 +47,7 @@ data NonEmptyGen : Type -> Type where
 record OneOfAlternatives (0 a : Type) where
   constructor MkOneOf
   totalWeight : PosNat
-  gens : List1 (PosNat, Lazy (NonEmptyGen a))
+  gens : NEList True (PosNat, Lazy (NonEmptyGen a))
   {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst x)}
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
@@ -59,7 +56,7 @@ record OneOfAlternatives (0 a : Type) where
 --- Technical stuff for mapping alternatives ---
 ------------------------------------------------
 
-mapTaggedLazy : (a -> b) -> List1 (tag, Lazy a) -> List1 (tag, Lazy b)
+mapTaggedLazy : (a -> b) -> NEList True (tag, Lazy a) -> NEList True (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
 0 mapExt : (xs : List _) -> ((x : _) -> f x = g x) -> map f xs = map g xs
@@ -69,16 +66,16 @@ mapExt (x::xs) fg = rewrite fg x in cong (g x ::) $ mapExt _ fg
 0 mapTaggedLazy_preserves_tag : {cf : _} ->
                                 {ff : _} ->
                                 {mf : _} ->
-                                (xs : List1 (tag, Lazy a)) ->
+                                (xs : NEList True (tag, Lazy a)) ->
                                 foldl1 cf (xs <&> \x => ff $ fst x) = foldl1 cf (mapTaggedLazy mf xs <&> \x => ff $ fst x)
-mapTaggedLazy_preserves_tag ((t, x):::xs) = do
-  rewrite mapFusion (ff . Builtin.fst) (mapSnd $ wrapLazy mf) xs
-  cong (foldl {t=List} cf (ff t)) $ mapExt xs $ \(tt, xx) => Refl
+--mapTaggedLazy_preserves_tag ((t, x):::xs) = do
+--  rewrite mapFusion (ff . Builtin.fst) (mapSnd $ wrapLazy mf) xs
+--  cong (foldl {t=List} cf (ff t)) $ mapExt xs $ \(tt, xx) => Refl
 
-0 mapTaggedLazy_preserves_w : {xs : List1 (PosNat, Lazy (NonEmptyGen a))} ->
+0 mapTaggedLazy_preserves_w : {xs : NEList True (PosNat, Lazy (NonEmptyGen a))} ->
                               val = foldl1 (+) (xs <&> \x => fst x) =>
                               val = foldl1 (+) (mapTaggedLazy mf xs <&> \x => fst x)
-mapTaggedLazy_preserves_w @{prf} = rewrite sym $ mapTaggedLazy_preserves_tag {cf=Pos.(+)} {ff=id} {mf} xs in prf
+--mapTaggedLazy_preserves_w @{prf} = rewrite sym $ mapTaggedLazy_preserves_tag {cf=Pos.(+)} {ff=id} {mf} xs in prf
 
 mapOneOf : OneOfAlternatives a -> (NonEmptyGen a -> NonEmptyGen b) -> NonEmptyGen b
 mapOneOf (MkOneOf tw gs) f = OneOf $ MkOneOf tw @{mapTaggedLazy_preserves_w {mf=f}} $ mapTaggedLazy f gs
@@ -152,53 +149,48 @@ Monad NonEmptyGen where
 namespace GenAlternatives
 
   export
-  record GenAlternatives a where
+  record GenAlternatives' (0 ne : Bool) a where
     constructor MkGenAlternatives
-    unGenAlternatives : Vect (S altsCnt) (PosNat, Lazy (NonEmptyGen a))
+    unGenAlternatives : NEList ne (PosNat, Lazy (NonEmptyGen a))
+
+  public export %inline
+  GenAlternatives : Type -> Type
+  GenAlternatives = GenAlternatives' True
 
   export %inline
-  Nil : GenAlternatives a
-  --Nil = MkGenAlternatives []
+  Nil : GenAlternatives' False a
+  Nil = MkGenAlternatives []
 
   export %inline
-  (::) : Lazy (NonEmptyGen a) -> GenAlternatives a -> GenAlternatives a
+  (::) : Lazy (NonEmptyGen a) -> GenAlternatives' ne a -> GenAlternatives a
   x :: MkGenAlternatives xs = MkGenAlternatives $ (Element 1 ItIsSucc, x) :: xs
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export
-  (++) : GenAlternatives a -> GenAlternatives a -> GenAlternatives a
+  (++) : GenAlternatives' nel a -> GenAlternatives' ner a -> GenAlternatives' (nel || ner) a
   MkGenAlternatives xs ++ MkGenAlternatives ys = MkGenAlternatives $ xs ++ ys
 
   public export
-  length : GenAlternatives a -> Nat
+  length : GenAlternatives' ne a -> Nat
   length $ MkGenAlternatives alts = length alts
 
   export
-  Semigroup (GenAlternatives a) where
-    xs <+> ys = xs ++ ys
-
-  export
-  Monoid (GenAlternatives a) where
-    neutral = []
-
-  export
-  processAlternatives : (NonEmptyGen a -> NonEmptyGen b) -> GenAlternatives a -> GenAlternatives b
+  processAlternatives : (NonEmptyGen a -> NonEmptyGen b) -> GenAlternatives' ne a -> GenAlternatives' ne b
   processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
 
   export
   processAlternatives' : (NonEmptyGen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
-  processAlternatives' f = concat . mapGens where
+  processAlternatives' f = foldl1 (++) . mapGens where
 
-    mapWeight : forall a. (PosNat -> PosNat) -> GenAlternatives a -> GenAlternatives a
+    mapWeight : forall a. (PosNat -> PosNat) -> GenAlternatives' nea a -> GenAlternatives' nea a
     mapWeight f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapFst f
 
-    mapGens : GenAlternatives a -> List $ GenAlternatives b
-    mapGens $ MkGenAlternatives xs = toList xs <&> \(w, x) => mapWeight (w *) $ f x
+    mapGens : GenAlternatives a -> NEList True $ GenAlternatives b
+    mapGens $ MkGenAlternatives xs = xs <&> \(w, x) => mapWeight (w *) $ f x
 
 export
-Cast (Vect (S n) a) (GenAlternatives a) where
-  cast [x]            = MkGenAlternatives [(1, pure x)]
-  cast (x::xs@(_::_)) = pure x :: cast xs
+Cast (NEList ne a) (GenAlternatives' ne a) where
+  cast = MkGenAlternatives . map (\x => (1, pure x))
 
 ----------------------------------
 --- Creation of new generators ---
@@ -210,8 +202,8 @@ Cast (Vect (S n) a) (GenAlternatives a) where
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : GenAlternatives a -> NonEmptyGen a
-oneOf $ MkGenAlternatives [(_, x)] = x
-oneOf $ MkGenAlternatives (x::xs)  = OneOf $ MkOneOf _ $ normaliseWeights $ x ::: toList xs
+oneOf $ MkGenAlternatives [(_, x)]  = x
+oneOf $ MkGenAlternatives xs@(_::_) = OneOf $ MkOneOf _ $ normaliseWeights xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -220,19 +212,15 @@ oneOf $ MkGenAlternatives (x::xs)  = OneOf $ MkOneOf _ $ normaliseWeights $ x ::
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : Vect (S n) (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
-frequency alts = oneOf $ MkGenAlternatives alts
+frequency : NEList True (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
+frequency = oneOf . MkGenAlternatives
 
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
-elements : Vect (S n) a -> NonEmptyGen a
+elements : NEList True a -> NonEmptyGen a
 elements = oneOf . cast
-
-export
-elements' : List1 a -> NonEmptyGen a
-elements' (x:::xs) = elements $ x :: fromList xs
 
 ------------------------------
 --- Analysis of generators ---
@@ -240,7 +228,7 @@ elements' (x:::xs) = elements $ x :: fromList xs
 
 export
 alternativesOf : NonEmptyGen a -> GenAlternatives a
-alternativesOf $ OneOf oo = MkGenAlternatives $ list1ToVect oo.gens
+alternativesOf $ OneOf oo = MkGenAlternatives oo.gens
 alternativesOf g          = [g]
 
 ||| Any depth alternatives fetching.
@@ -290,11 +278,6 @@ export
 Applicative GenAlternatives where
   pure x = [ pure x ]
   xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
-
-export
-Alternative GenAlternatives where
-  empty = []
-  xs <|> ys = xs ++ ys
 
 export
 Monad GenAlternatives where
