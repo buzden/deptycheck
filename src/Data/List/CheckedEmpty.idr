@@ -85,6 +85,13 @@ Traversable (CEList ne) where
 
 --- Conversions ---
 
+-- NEList --
+
+public export
+toNEList : CEList ne a -> Maybe $ NEList a
+toNEList []        = Nothing
+toNEList xs@(_::_) = Just xs
+
 -- List --
 
 public export
