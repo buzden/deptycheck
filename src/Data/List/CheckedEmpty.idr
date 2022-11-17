@@ -113,6 +113,10 @@ export
   relaxAnd $ f x ++ (assert_smaller wh nxs >>= f)
 
 export
+(>>) : CEList nel a -> CEList ner b -> CEList (nel && ner) b
+(>>) xs ys = xs >>= \_ => ys
+
+export
 (<*>) : CEList nel (a -> b) -> CEList ner a -> CEList (nel && ner) b
 xs <*> ys = xs >>= (<$> ys)
 
