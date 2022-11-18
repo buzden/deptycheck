@@ -1,7 +1,5 @@
 module Test.DepTyCheck.Gen
 
-import Control.Function.FunExt
-
 import Control.Monad.Random
 import public Control.Monad.Random.Interface
 import Control.Monad.State
@@ -15,7 +13,6 @@ import Data.Fuel
 import Data.List
 import Data.List.CheckedEmpty
 import Data.List.Lazy
-import Data.List1
 import Data.Vect
 import Data.Stream
 
