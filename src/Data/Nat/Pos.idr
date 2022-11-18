@@ -49,8 +49,8 @@ gcd a (S b)   = assert_total $ gcd (S b) (modNatNZ a (S b) SIsNonZero)
 
 export
 pickWeighted : NEList (PosNat, a) -> Nat -> a
-pickWeighted [(_, x)]                      _ = x
-pickWeighted ((Element n _, x)::xs@(_::_)) k = if k < n then x else pickWeighted xs (k `minus` n)
+pickWeighted [(_, x)]                     _ = x
+pickWeighted wh@((Element n _, x)::y::ys) k = if k < n then x else pickWeighted (assert_smaller wh $ y::ys) (k `minus` n)
 
 foldmne : Foldable f => (a -> a -> a) -> f a -> Maybe a
 foldmne g = foldl gg Nothing where
