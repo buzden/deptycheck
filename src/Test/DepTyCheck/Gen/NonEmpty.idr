@@ -1,5 +1,7 @@
 module Test.DepTyCheck.Gen.NonEmpty
 
+import Control.Monad.Random
+import public Control.Monad.Random.Interface
 import Control.Monad.State
 import public Control.Monad.State.Interface
 
@@ -9,7 +11,7 @@ import Data.List.CheckedEmpty
 import Data.Vect
 import Data.Stream
 
-import public System.Random.Simple
+import public System.Random.Pure
 
 %default total
 
@@ -17,8 +19,8 @@ import public System.Random.Simple
 --- Utility functions ---
 -------------------------
 
-randomFin : RandomGen g => MonadState g m => (n : PosNat) -> m $ Fin $ fst n
-randomFin $ Element (S _) _ = random'
+randomFin : MonadRandom m => (n : PosNat) -> m $ Fin $ fst n
+randomFin $ Element (S _) _ = getRandom
 
 public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
@@ -33,7 +35,7 @@ record OneOfAlternatives (0 a : Type)
 export
 data NonEmptyGen : Type -> Type where
   Pure  : a -> NonEmptyGen a
-  Point : (forall g, m. RandomGen g => MonadState g m => m a) -> NonEmptyGen a
+  Point : (forall m. MonadRandom m => m a) -> NonEmptyGen a
   OneOf : OneOfAlternatives a -> NonEmptyGen a
   Bind  : NonEmptyGen c -> (c -> NonEmptyGen a) -> NonEmptyGen a
 
@@ -65,18 +67,18 @@ mapOneOf (MkOneOf tw gs @{prf}) f = OneOf $ MkOneOf tw (mapTaggedLazy f gs) @{do
 
 export
 chooseAny : Random a => NonEmptyGen a
-chooseAny = Point random'
+chooseAny = Point getRandom
 
 export
 choose : Random a => (a, a) -> NonEmptyGen a
-choose bounds = Point $ randomR' bounds
+choose bounds = Point $ getRandomR bounds
 
 --------------------------
 --- Running generators ---
 --------------------------
 
 export
-unGen : RandomGen g => MonadState g m => NonEmptyGen a -> m a
+unGen : MonadRandom m => NonEmptyGen a -> m a
 unGen $ Pure x   = pure x
 unGen $ Point sf = sf
 unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
@@ -154,8 +156,18 @@ namespace GenAlternatives
   length $ MkGenAlternatives alts = length alts
 
   export
+  toGenAlternatives : GenAlternatives' ne a -> Maybe $ GenAlternatives a
+  toGenAlternatives $ MkGenAlternatives xs = MkGenAlternatives <$> toNEList xs
+
+  export
   processAlternatives : (NonEmptyGen a -> NonEmptyGen b) -> GenAlternatives' ne a -> GenAlternatives' ne b
   processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
+
+  export
+  processAlternativesMaybe : (NonEmptyGen a -> Maybe $ NonEmptyGen b) -> GenAlternatives' ne a -> GenAlternatives' False b
+  processAlternativesMaybe f $ MkGenAlternatives xs = MkGenAlternatives $ mapMaybe filt xs where
+    %inline filt : (tag, Lazy (NonEmptyGen a)) -> Maybe (tag, Lazy (NonEmptyGen b))
+    filt (t, x) = (t,) . delay <$> f x
 
   export
   processAlternatives' : (NonEmptyGen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
@@ -167,9 +179,17 @@ namespace GenAlternatives
     mapGens : GenAlternatives a -> NEList $ GenAlternatives b
     mapGens $ MkGenAlternatives xs = xs <&> \(w, x) => mapWeight (w *) $ f x
 
+  export
+  relax : GenAlternatives a -> GenAlternatives' False a
+  relax $ MkGenAlternatives alts = MkGenAlternatives $ relaxF alts
+
 export
 Cast (CEList ne a) (GenAlternatives' ne a) where
   cast = MkGenAlternatives . map (\x => (1, pure x))
+
+public export %inline
+altsFromList : CEList ne a -> GenAlternatives' ne a
+altsFromList = cast
 
 ----------------------------------
 --- Creation of new generators ---
@@ -270,7 +290,10 @@ Monad GenAlternatives where
 export
 variant : Nat -> NonEmptyGen a -> NonEmptyGen a
 variant Z       gen = gen
-variant x@(S _) gen = Point $ modify (index x . iterate (fst . next)) *> unGen gen
+variant x@(S _) gen = Point $ iterate x independent $ unGen gen where
+  iterate : forall a. Nat -> (a -> a) -> a -> a
+  iterate Z     _ x = x
+  iterate (S n) f x = iterate n f $ f x
 
 -----------------------------
 --- Particular generators ---
