@@ -162,6 +162,20 @@ Traversable (CEList ne) where
   traverse f []      = pure []
   traverse f (x::xs) = [| f x :: traverse f xs |]
 
+--- Filtering ---
+
+export
+filter : (a -> Bool) -> CEList ne a -> CEList False a
+filter _ []      = []
+filter f (x::xs) = if f x then x :: filter f xs else filter f xs
+
+export
+mapMaybe : (a -> Maybe b) -> CEList ne a -> CEList False b
+mapMaybe _ [] = []
+mapMaybe f (x::xs) = case f x of
+                       Just y  => y :: mapMaybe f xs
+                       Nothing => mapMaybe f xs
+
 --- External conversions ---
 
 -- List --
