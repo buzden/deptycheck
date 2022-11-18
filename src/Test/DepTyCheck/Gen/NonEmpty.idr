@@ -128,9 +128,9 @@ Monad NonEmptyGen where
 namespace GenAlternatives
 
   export
-  record GenAlternatives' (0 ne : Bool) a where
+  record GenAlternatives' (0 mustBeNotEmpty : Bool) a where
     constructor MkGenAlternatives
-    unGenAlternatives : CEList ne (PosNat, Lazy (NonEmptyGen a))
+    unGenAlternatives : CEList mustBeNotEmpty (PosNat, Lazy (NonEmptyGen a))
 
   public export %inline
   GenAlternatives : Type -> Type
