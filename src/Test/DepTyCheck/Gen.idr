@@ -141,6 +141,14 @@ namespace GenAlternatives
   (++) : GenAlternatives' a -> GenAlternatives' a -> GenAlternatives' a
   MkGenAlts xs ++ MkGenAlts ys = MkGenAlts $ xs ++ ys
 
+  public export
+  length : GenAlternatives' a -> Nat
+  length $ MkGenAlts alts = length alts
+
+  export
+  Functor GenAlternatives' where
+    map f $ MkGenAlts xs = MkGenAlts $ map f xs @{Compose}
+
 ----------------------------------
 --- Creation of new generators ---
 ----------------------------------

@@ -270,7 +270,7 @@ infix 8 `mapAlternativesOf`
 -----------------------------------------------------
 
 export
-Functor GenAlternatives where
+Functor (GenAlternatives' ne) where
   map = processAlternatives . map
 
 export
