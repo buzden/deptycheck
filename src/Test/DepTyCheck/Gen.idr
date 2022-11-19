@@ -124,7 +124,7 @@ Monad Gen where
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : GenAlternatives' ne a -> Gen a
-oneOf = maybe empty (NonEmpty . delay . oneOf) . toGenAlternatives
+oneOf = maybe empty (NonEmpty . delay . oneOf) . strengthen
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -135,7 +135,7 @@ oneOf = maybe empty (NonEmpty . delay . oneOf) . toGenAlternatives
 export
 frequency : List (Nat, Lazy (Gen a)) -> Gen a
 frequency xs = fromMaybe empty $ map (NonEmpty . delay . NonEmpty.frequency) $
-                 toNEList $ fromList $ mapMaybe (\(w, g) => [| (,) (toPosNat w) (toNonEmpty g) |]) xs
+                 strengthen $ fromList $ mapMaybe (\(w, g) => [| (,) (toPosNat w) (toNonEmpty g) |]) xs
 
 ||| Choose one of the given values uniformly.
 |||

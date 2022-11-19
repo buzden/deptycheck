@@ -98,9 +98,9 @@ relaxAnd (x::xs) = x::xs
 -- Strengthening --
 
 public export
-toNEList : CEList ne a -> Maybe $ NEList a
-toNEList []      = Nothing
-toNEList (x::xs) = Just $ x::xs
+strengthen : CEList ne a -> Maybe $ NEList a
+strengthen []      = Nothing
+strengthen (x::xs) = Just $ x::xs
 
 --- Functor ---
 
@@ -118,7 +118,7 @@ export
 (>>=) [] _ = []
 (>>=) wh@(x::xs) f = do
   rewrite andCommutative nel ner
-  let Just nxs = toNEList xs
+  let Just nxs = strengthen xs
     | Nothing => relaxAnd $ f x
   rewrite sym $ orSameNeutral ner
   relaxAnd $ f x ++ (assert_smaller wh nxs >>= f)

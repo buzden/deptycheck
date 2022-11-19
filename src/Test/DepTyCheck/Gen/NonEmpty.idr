@@ -156,10 +156,6 @@ namespace GenAlternatives
   length $ MkGenAlternatives alts = length alts
 
   export
-  toGenAlternatives : GenAlternatives' ne a -> Maybe $ GenAlternatives a
-  toGenAlternatives $ MkGenAlternatives xs = MkGenAlternatives <$> toNEList xs
-
-  export
   processAlternatives : (NonEmptyGen a -> NonEmptyGen b) -> GenAlternatives' ne a -> GenAlternatives' ne b
   processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
 
@@ -182,6 +178,10 @@ namespace GenAlternatives
   export
   relax : GenAlternatives a -> GenAlternatives' False a
   relax $ MkGenAlternatives alts = MkGenAlternatives $ relaxF alts
+
+  export
+  strengthen : GenAlternatives' ne a -> Maybe $ GenAlternatives a
+  strengthen $ MkGenAlternatives xs = MkGenAlternatives <$> strengthen xs
 
 export
 Cast (CEList ne a) (GenAlternatives' ne a) where
