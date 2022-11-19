@@ -112,7 +112,9 @@ Applicative Gen where
 export
 Monad Gen where
   Empty      >>= _  = Empty
-  NonEmpty g >>= nf = ?foo_binf
+  NonEmpty g >>= nf = NonEmpty $ (>>=) @{Compose} g $ \x => case nf x of
+    Empty       => pure Nothing
+    NonEmpty nn => nn
 
 ---------------------------------------------
 --- Data type for alternatives in `oneOf` ---
