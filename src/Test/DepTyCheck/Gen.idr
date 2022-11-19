@@ -39,7 +39,7 @@ wrapLazy f = delay . f . force
 export
 data Gen : Type -> Type where
   Empty    : Gen a
-  NonEmpty : Lazy (NonEmptyGen a) -> Gen a
+  NonEmpty : Lazy (NonEmptyGen $ Maybe a) -> Gen a
 
 -----------------------------
 --- Very basic generators ---
@@ -47,18 +47,18 @@ data Gen : Type -> Type where
 
 export
 chooseAny : Random a => Gen a
-chooseAny = NonEmpty chooseAny
+chooseAny = NonEmpty $ Just <$> chooseAny
 
 export
 choose : Random a => (a, a) -> Gen a
-choose bounds = NonEmpty $ choose bounds
+choose bounds = NonEmpty $ Just <$> choose bounds
 
 export
 empty : Gen a
 empty = Empty
 
 export
-toNonEmpty : Gen a -> Maybe $ NonEmptyGen a
+toNonEmpty : Gen a -> Maybe $ NonEmptyGen $ Maybe a
 toNonEmpty Empty        = Nothing
 toNonEmpty $ NonEmpty g = Just g
 
@@ -69,7 +69,7 @@ toNonEmpty $ NonEmpty g = Just g
 export
 unGen : MonadRandom m => MonadError () m => Gen a -> m a
 unGen $ Empty      = throwError ()
-unGen $ NonEmpty g = unGen g
+unGen $ NonEmpty g = unGen g >>= maybe (throwError ()) pure
 
 export
 unGenTryAll' : RandomGen g => (seed : g) -> Gen a -> Stream (Maybe a, g)
@@ -98,21 +98,46 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 export
 Functor Gen where
   map _ $ Empty      = Empty
-  map f $ NonEmpty g = NonEmpty $ map f g
+  map f $ NonEmpty g = NonEmpty $ map @{Compose} f g
 
 export
 Applicative Gen where
-  pure x = NonEmpty $ pure x
+  pure x = NonEmpty $ pure @{Compose} x
 
   Empty <*> _ = Empty
   _ <*> Empty = Empty
 
-  NonEmpty gf <*> NonEmpty ga = NonEmpty $ gf <*> ga
+  NonEmpty gf <*> NonEmpty ga = NonEmpty $ (gf <*> ga) @{Compose}
 
 export
 Monad Gen where
   Empty      >>= _  = Empty
   NonEmpty g >>= nf = ?foo_binf
+
+---------------------------------------------
+--- Data type for alternatives in `oneOf` ---
+---------------------------------------------
+
+namespace GenAlternatives
+
+  export
+  record GenAlternatives' a where
+    constructor MkGenAlts
+    unGenAlts : GenAlternatives' False $ Maybe a
+
+  export %inline
+  Nil : GenAlternatives' a
+  Nil = MkGenAlts []
+
+  export %inline
+  (::) : Gen a -> GenAlternatives' a -> GenAlternatives' a
+  Empty      :: xs           = xs
+  NonEmpty x :: MkGenAlts xs = MkGenAlts $ relax $ x :: xs
+
+  -- This concatenation breaks relative proportions in frequences of given alternative lists
+  public export
+  (++) : GenAlternatives' a -> GenAlternatives' a -> GenAlternatives' a
+  MkGenAlts xs ++ MkGenAlts ys = MkGenAlts $ xs ++ ys
 
 ----------------------------------
 --- Creation of new generators ---
@@ -123,8 +148,8 @@ Monad Gen where
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
-oneOf : GenAlternatives' ne a -> Gen a
-oneOf = maybe empty (NonEmpty . delay . oneOf) . strengthen
+oneOf : GenAlternatives' a -> Gen a
+oneOf = maybe empty (NonEmpty . delay . oneOf) . strengthen . unGenAlts
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -142,7 +167,7 @@ frequency xs = fromMaybe empty $ map (NonEmpty . delay . NonEmpty.frequency) $
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
 elements : List a -> Gen a
-elements xs = oneOf $ altsFromList $ CheckedEmpty.fromList xs
+elements xs = oneOf $ MkGenAlts $ altsFromList $ relaxF $ CheckedEmpty.fromList $ map Just xs
 
 export
 elements' : Foldable f => f a -> Gen a
@@ -153,9 +178,9 @@ elements' = elements . toList
 ------------------------------
 
 export
-alternativesOf : Gen a -> GenAlternatives' False a
+alternativesOf : Gen a -> GenAlternatives' a
 alternativesOf $ Empty      = []
-alternativesOf $ NonEmpty g = relax $ alternativesOf g
+alternativesOf $ NonEmpty g = MkGenAlts $ relax $ alternativesOf g
 
 ||| Any depth alternatives fetching.
 |||
@@ -163,9 +188,9 @@ alternativesOf $ NonEmpty g = relax $ alternativesOf g
 ||| alternatives of depth `1` are those returned by the `alternativesOf` function,
 ||| alternatives of depth `n+1` are alternatives of all alternatives of depth `n` being flattened into a single alternatives list.
 export
-deepAlternativesOf : (depth : Nat) -> Gen a -> GenAlternatives' False a
+deepAlternativesOf : (depth : Nat) -> Gen a -> GenAlternatives' a
 deepAlternativesOf _ $ Empty      = []
-deepAlternativesOf n $ NonEmpty g = relax $ deepAlternativesOf n g
+deepAlternativesOf n $ NonEmpty g = MkGenAlts $ relax $ deepAlternativesOf n g
 
 ||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
 ||| except for empty generator, which would still be returned as empty generator.
@@ -175,19 +200,19 @@ forgetStructure $ Empty      = Empty
 forgetStructure $ NonEmpty g = NonEmpty $ forgetStructure g
 
 public export
-processAlternatives : (Gen a -> Gen b) -> Gen a -> GenAlternatives' False b
-processAlternatives f = processAlternativesMaybe fm . alternativesOf where
-  fm : NonEmptyGen a -> Maybe (NonEmptyGen b)
+processAlternatives : (Gen a -> Gen b) -> Gen a -> GenAlternatives' b
+processAlternatives f = MkGenAlts . processAlternativesMaybe fm . unGenAlts . alternativesOf where
+  fm : NonEmptyGen (Maybe a) -> Maybe $ NonEmptyGen $ Maybe b
   fm neg = case f $ NonEmpty neg of
              Empty      => Nothing
              NonEmpty g => Just g
 
 public export
-mapAlternativesOf : (a -> b) -> Gen a -> GenAlternatives' False b
+mapAlternativesOf : (a -> b) -> Gen a -> GenAlternatives' b
 mapAlternativesOf = processAlternatives . map
 
 public export %inline
-mapAlternativesWith : Gen a -> (a -> b) -> GenAlternatives' False b
+mapAlternativesWith : Gen a -> (a -> b) -> GenAlternatives' b
 mapAlternativesWith = flip mapAlternativesOf
 
 -- Priority is chosen to be able to use these operators without parenthesis
