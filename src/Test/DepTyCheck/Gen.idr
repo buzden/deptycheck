@@ -160,7 +160,7 @@ oneOf = maybe empty (NonEmpty . delay . oneOf) . strengthen . unGenAlts
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : List (Nat, Lazy (Gen a)) -> Gen a
+frequency : List (Nat, Gen a) -> Gen a
 frequency xs = fromMaybe empty $ map (NonEmpty . delay . NonEmpty.frequency) $
                  strengthen $ fromList $ mapMaybe (\(w, g) => [| (,) (toPosNat w) (toNonEmpty g) |]) xs
 
