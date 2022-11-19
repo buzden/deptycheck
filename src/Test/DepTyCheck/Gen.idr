@@ -154,7 +154,7 @@ elements' = elements . toList
 
 export
 alternativesOf : Gen a -> GenAlternatives' False a
-alternativesOf $ Empty    = []
+alternativesOf $ Empty      = []
 alternativesOf $ NonEmpty g = relax $ alternativesOf g
 
 ||| Any depth alternatives fetching.
