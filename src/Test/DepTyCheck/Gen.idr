@@ -149,6 +149,20 @@ namespace GenAlternatives
   Functor GenAlternatives' where
     map f $ MkGenAlts xs = MkGenAlts $ map f xs @{Compose}
 
+  export
+  Applicative GenAlternatives' where
+    pure = MkGenAlts . pure @{Compose}
+    MkGenAlts xs <*> MkGenAlts ys = MkGenAlts $ (xs <*> ys) @{Compose}
+
+  export
+  Alternative GenAlternatives' where
+    empty = MkGenAlts empty
+    MkGenAlts xs <|> ys = MkGenAlts $ xs <|> ys.unGenAlts
+
+  export
+  Monad GenAlternatives' where
+    MkGenAlts xs >>= f = MkGenAlts $ xs >>= maybe [] (unGenAlts . f)
+
 ----------------------------------
 --- Creation of new generators ---
 ----------------------------------

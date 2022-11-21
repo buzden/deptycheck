@@ -284,6 +284,11 @@ Applicative (GenAlternatives' ne) where
   xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
 
 export
+Alternative (GenAlternatives' False) where
+  empty = []
+  MkGenAlternatives xs <|> MkGenAlternatives ys = MkGenAlternatives $ xs <|> ys
+
+export
 Monad (GenAlternatives' ne) where
   xs >>= f = flip processAlternatives' xs $ assert_total (>>= f) . relax . alternativesOf
 
