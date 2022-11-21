@@ -181,8 +181,8 @@ namespace GenAlternatives
   processAlternatives' f xs = rewrite sym $ andSameNeutral ne in processAlternatives'' f xs
 
   export
-  relax : GenAlternatives a -> GenAlternatives' False a
-  relax $ MkGenAlternatives alts = MkGenAlternatives $ relaxF alts
+  relax : GenAlternatives a -> GenAlternatives' ne a
+  relax $ MkGenAlternatives alts = MkGenAlternatives $ relaxT alts
 
   export
   strengthen : GenAlternatives' ne a -> Maybe $ GenAlternatives a
@@ -284,8 +284,8 @@ Applicative (GenAlternatives' ne) where
   xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
 
 export
-Monad GenAlternatives where
-  xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
+Monad (GenAlternatives' ne) where
+  xs >>= f = flip processAlternatives' xs $ assert_total (>>= f) . relax . alternativesOf
 
 -------------------------------
 --- Variation in generation ---
