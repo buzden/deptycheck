@@ -9,22 +9,22 @@ import Data.Vect
 --- Some magic for providing a default choice ---
 
 export
-interface DefaultChoiceMagic (0 a : Bool) where
-  constructor MkDefaultChoiceMagic
+interface DefaultTrue (0 a : Bool) where
+  constructor MkDefaultTrue
 
 export %defaulthint
-0 DDefaultChoiceMagic : DefaultChoiceMagic True
-DDefaultChoiceMagic = MkDefaultChoiceMagic
+0 TheDefaultTrue : DefaultTrue True
+TheDefaultTrue = MkDefaultTrue
 
 export
-DefaultChoiceMagic b where
+DefaultTrue b where
 
 --- Types definitions ---
 
 public export
 data CEList : (definitelyNotEmpty : Bool) -> Type -> Type where
   Nil  : CEList False a
-  (::) : (0 _ : DefaultChoiceMagic e) => a -> CEList e a -> CEList ne a
+  (::) : (0 _ : DefaultTrue e) => a -> CEList e a -> CEList ne a
 
 %name CEList xs, ys, zs
 
