@@ -104,32 +104,39 @@ strengthen (x::xs) = Just $ x::xs
 
 --- Functor ---
 
-export
+public export
 Functor (CEList ne) where
   map f []      = []
   map f (x::xs) = f x :: map f xs
 
-export
-pure : a -> CEList ne a
-pure x = [x]
+namespace NEHeteroOps
 
-export
-(>>=) : CEList nel a -> (a -> CEList ner b) -> CEList (nel && ner) b
-(>>=) [] _ = []
-(>>=) wh@(x::xs) f = do
-  rewrite andCommutative nel ner
-  let Just nxs = strengthen xs
-    | Nothing => relaxAnd $ f x
-  rewrite sym $ orSameNeutral ner
-  relaxAnd $ f x ++ (assert_smaller wh nxs >>= f)
+  export
+  bind : CEList nel a -> (a -> CEList ner b) -> CEList (nel && ner) b
+  bind [] _ = []
+  bind wh@(x::xs) f = do
+    rewrite andCommutative nel ner
+    let Just nxs = strengthen xs
+      | Nothing => relaxAnd $ f x
+    rewrite sym $ orSameNeutral ner
+    relaxAnd $ f x ++ (assert_smaller wh nxs `bind` f)
 
-export
-(>>) : CEList nel a -> CEList ner b -> CEList (nel && ner) b
-(>>) xs ys = xs >>= \_ => ys
+  export
+  bind' : CEList nel a -> CEList ner b -> CEList (nel && ner) b
+  bind' xs ys = xs `bind` \_ => ys
 
-export
-(<*>) : CEList nel (a -> b) -> CEList ner a -> CEList (nel && ner) b
-xs <*> ys = xs >>= (<$> ys)
+  export
+  ap : CEList nel (a -> b) -> CEList ner a -> CEList (nel && ner) b
+  ap xs ys = xs `bind` (<$> ys)
+
+public export
+Applicative (CEList ne) where
+  pure x = [x]
+  xs <*> ys = rewrite sym $ andSameNeutral ne in xs `ap` ys
+
+public export
+Monad (CEList ne) where
+  xs >>= f = rewrite sym $ andSameNeutral ne in xs `bind` f
 
 --- Folds ---
 
