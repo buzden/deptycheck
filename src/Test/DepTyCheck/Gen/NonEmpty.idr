@@ -5,6 +5,7 @@ import public Control.Monad.Random.Interface
 import Control.Monad.State
 import public Control.Monad.State.Interface
 
+import Data.Bool
 import Data.Nat.Pos
 import Data.List
 import Data.List.CheckedEmpty
@@ -143,7 +144,7 @@ namespace GenAlternatives
   Nil = MkGenAlternatives []
 
   export %inline
-  (::) : Lazy (NonEmptyGen a) -> GenAlternatives' ne a -> GenAlternatives a
+  (::) : (0 _ : DefaultTrue e) => Lazy (NonEmptyGen a) -> GenAlternatives' e a -> GenAlternatives' ne a
   x :: MkGenAlternatives xs = MkGenAlternatives $ (Element 1 ItIsSucc, x) :: xs
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
@@ -166,14 +167,18 @@ namespace GenAlternatives
     filt (t, x) = (t,) . delay <$> f x
 
   export
-  processAlternatives' : (NonEmptyGen a -> GenAlternatives' neb b) -> GenAlternatives' nea a -> GenAlternatives' (nea && neb) b
-  processAlternatives' f = MkGenAlternatives . NEHeteroOps.join' . mapGens where
+  processAlternatives'' : (NonEmptyGen a -> GenAlternatives' neb b) -> GenAlternatives' nea a -> GenAlternatives' (nea && neb) b
+  processAlternatives'' f = MkGenAlternatives . NEHeteroOps.join' . mapGens where
 
     mapWeight : forall a, nea. (PosNat -> PosNat) -> GenAlternatives' nea a -> GenAlternatives' nea a
     mapWeight f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapFst f
 
     mapGens : GenAlternatives' nea a -> CEList nea $ CEList neb (PosNat, Lazy (NonEmptyGen b))
     mapGens $ MkGenAlternatives xs = xs <&> \(w, x) => unGenAlternatives $ mapWeight (w *) $ f x
+
+  export
+  processAlternatives' : (NonEmptyGen a -> GenAlternatives' ne b) -> GenAlternatives' ne a -> GenAlternatives' ne b
+  processAlternatives' f xs = rewrite sym $ andSameNeutral ne in processAlternatives'' f xs
 
   export
   relax : GenAlternatives a -> GenAlternatives' False a
@@ -274,7 +279,7 @@ Functor (GenAlternatives' ne) where
   map = processAlternatives . map
 
 export
-Applicative GenAlternatives where
+Applicative (GenAlternatives' ne) where
   pure x = [ pure x ]
   xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
 
