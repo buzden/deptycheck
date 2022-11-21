@@ -72,6 +72,14 @@ public export
 []      ++ ys = ys
 (x::xs) ++ ys = x :: xs ++ ys
 
+public export
+Semigroup (CEList ne a) where
+  xs <+> ys = rewrite sym $ orSameNeutral ne in xs ++ ys
+
+public export
+Monoid (CEList False a) where
+  neutral = []
+
 --- Internal conversions ---
 
 -- Relaxation --
@@ -133,6 +141,11 @@ public export
 Applicative (CEList ne) where
   pure x = [x]
   xs <*> ys = rewrite sym $ andSameNeutral ne in xs `ap` ys
+
+public export
+Alternative (CEList False) where
+  empty = []
+  xs <|> ys = xs <+> ys
 
 public export
 Monad (CEList ne) where
