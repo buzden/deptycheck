@@ -166,14 +166,14 @@ namespace GenAlternatives
     filt (t, x) = (t,) . delay <$> f x
 
   export
-  processAlternatives' : (NonEmptyGen a -> GenAlternatives b) -> GenAlternatives a -> GenAlternatives b
-  processAlternatives' f = foldl1 (++) . mapGens where
+  processAlternatives' : (NonEmptyGen a -> GenAlternatives' neb b) -> GenAlternatives' nea a -> GenAlternatives' (nea && neb) b
+  processAlternatives' f = MkGenAlternatives . NEHeteroOps.join' . mapGens where
 
-    mapWeight : forall a. (PosNat -> PosNat) -> GenAlternatives' nea a -> GenAlternatives' nea a
+    mapWeight : forall a, nea. (PosNat -> PosNat) -> GenAlternatives' nea a -> GenAlternatives' nea a
     mapWeight f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapFst f
 
-    mapGens : GenAlternatives a -> NEList $ GenAlternatives b
-    mapGens $ MkGenAlternatives xs = xs <&> \(w, x) => mapWeight (w *) $ f x
+    mapGens : GenAlternatives' nea a -> CEList nea $ CEList neb (PosNat, Lazy (NonEmptyGen b))
+    mapGens $ MkGenAlternatives xs = xs <&> \(w, x) => unGenAlternatives $ mapWeight (w *) $ f x
 
   export
   relax : GenAlternatives a -> GenAlternatives' False a

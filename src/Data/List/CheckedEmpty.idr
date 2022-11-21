@@ -134,6 +134,10 @@ namespace NEHeteroOps
   bind' xs ys = xs `bind` \_ => ys
 
   export
+  join' : CEList nel (CEList ner a) -> CEList (nel && ner) a
+  join' xs = xs `bind` id
+
+  export
   ap : CEList nel (a -> b) -> CEList ner a -> CEList (nel && ner) b
   ap xs ys = xs `bind` (<$> ys)
 
