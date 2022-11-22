@@ -183,7 +183,7 @@ oneOf = maybe empty (NonEmpty . delay . oneOf) . strengthen . unGenAlts
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
 frequency : List (Nat, Gen a) -> Gen a
-frequency xs = fromMaybe empty $ map (NonEmpty . delay . NonEmpty.frequency) $
+frequency xs = maybe empty (NonEmpty . delay . NonEmpty.frequency) $
                  strengthen $ fromList $ mapMaybe (\(w, g) => [| (,) (toPosNat w) (toNonEmpty g) |]) xs
 
 ||| Choose one of the given values uniformly.
@@ -191,7 +191,7 @@ frequency xs = fromMaybe empty $ map (NonEmpty . delay . NonEmpty.frequency) $
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
 elements : List a -> Gen a
-elements xs = oneOf $ MkGenAlts $ altsFromList $ relaxF $ CheckedEmpty.fromList $ map Just xs
+elements xs = oneOf $ MkGenAlts $ altsFromList $ relaxF $ fromList $ map Just xs
 
 export
 elements' : Foldable f => f a -> Gen a
