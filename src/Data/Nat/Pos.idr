@@ -55,7 +55,7 @@ pickWeighted wh@((Element n _, x)::y::ys) k = if k < n then x else pickWeighted 
 foldmne : Foldable f => (a -> a -> a) -> f a -> Maybe a
 foldmne g = foldl gg Nothing where
   gg : Maybe a -> a -> Maybe a
-  gg ml r = ml <&> \l => g l r
+  gg ml r = (ml <&> \l => g l r) <|> Just r
 
 export
 normaliseWeights : Foldable f => Functor f => f (PosNat, a) -> f (PosNat, a)
