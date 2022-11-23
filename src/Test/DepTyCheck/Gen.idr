@@ -137,29 +137,29 @@ namespace GenAlternatives
   NonEmpty x :: MkGenAlts xs = MkGenAlts $ relax $ x :: xs
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
-  public export
+  public export %inline
   (++) : GenAlternatives' a -> GenAlternatives' a -> GenAlternatives' a
   MkGenAlts xs ++ MkGenAlts ys = MkGenAlts $ xs ++ ys
 
-  public export
+  public export %inline
   length : GenAlternatives' a -> Nat
   length $ MkGenAlts alts = length alts
 
-  export
+  export %inline
   Functor GenAlternatives' where
     map f $ MkGenAlts xs = MkGenAlts $ map f xs @{Compose}
 
-  export
+  export %inline
   Applicative GenAlternatives' where
     pure = MkGenAlts . pure @{Compose}
     MkGenAlts xs <*> MkGenAlts ys = MkGenAlts $ (xs <*> ys) @{Compose}
 
-  export
+  export %inline
   Alternative GenAlternatives' where
     empty = MkGenAlts empty
     MkGenAlts xs <|> ys = MkGenAlts $ xs <|> ys.unGenAlts
 
-  export
+  export %inline
   Monad GenAlternatives' where
     MkGenAlts xs >>= f = MkGenAlts $ flip processAlternatives' xs $ relax . alternativesOf . (>>= oneOf' . traverse f) where
       %inline oneOf' : forall a. GenAlternatives' (Maybe a) -> NonEmptyGen (Maybe a)
@@ -175,7 +175,7 @@ namespace GenAlternatives
 |||
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
-export
+export %inline
 oneOf : GenAlternatives' a -> Gen a
 oneOf = maybe empty (NonEmpty . delay . oneOf) . strengthen . unGenAlts
 
@@ -197,7 +197,7 @@ export
 elements : List a -> Gen a
 elements xs = oneOf $ MkGenAlts $ altsFromList $ relaxF $ fromList $ map Just xs
 
-export
+export %inline
 elements' : Foldable f => f a -> Gen a
 elements' = elements . toList
 

@@ -150,25 +150,25 @@ namespace GenAlternatives
   x :: MkGenAlternatives xs = MkGenAlternatives $ (Element 1 ItIsSucc, x) :: xs
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
-  public export
+  public export %inline
   (++) : GenAlternatives' nel a -> GenAlternatives' ner a -> GenAlternatives' (nel || ner) a
   MkGenAlternatives xs ++ MkGenAlternatives ys = MkGenAlternatives $ xs ++ ys
 
-  public export
+  public export %inline
   length : GenAlternatives' ne a -> Nat
   length $ MkGenAlternatives alts = length alts
 
-  export
+  export %inline
   processAlternatives : (NonEmptyGen a -> NonEmptyGen b) -> GenAlternatives' ne a -> GenAlternatives' ne b
   processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
 
-  export
+  export %inline
   processAlternativesMaybe : (NonEmptyGen a -> Maybe $ NonEmptyGen b) -> GenAlternatives' ne a -> GenAlternatives' False b
   processAlternativesMaybe f $ MkGenAlternatives xs = MkGenAlternatives $ mapMaybe filt xs where
     %inline filt : (tag, Lazy (NonEmptyGen a)) -> Maybe (tag, Lazy (NonEmptyGen b))
     filt (t, x) = (t,) . delay <$> f x
 
-  export
+  export %inline
   processAlternatives'' : (NonEmptyGen a -> GenAlternatives' neb b) -> GenAlternatives' nea a -> GenAlternatives' (nea && neb) b
   processAlternatives'' f = MkGenAlternatives . NEHeteroOps.join' . mapGens where
 
@@ -178,15 +178,15 @@ namespace GenAlternatives
     mapGens : GenAlternatives' nea a -> CEList nea $ CEList neb (PosNat, Lazy (NonEmptyGen b))
     mapGens $ MkGenAlternatives xs = xs <&> \(w, x) => unGenAlternatives $ mapWeight (w *) $ f x
 
-  export
+  export %inline
   processAlternatives' : (NonEmptyGen a -> GenAlternatives' ne b) -> GenAlternatives' ne a -> GenAlternatives' ne b
   processAlternatives' f xs = rewrite sym $ andSameNeutral ne in processAlternatives'' f xs
 
-  export
+  export %inline
   relax : GenAlternatives a -> GenAlternatives' ne a
   relax $ MkGenAlternatives alts = MkGenAlternatives $ relaxT alts
 
-  export
+  export %inline
   strengthen : GenAlternatives' ne a -> Maybe $ GenAlternatives a
   strengthen $ MkGenAlternatives xs = MkGenAlternatives <$> strengthen xs
 
