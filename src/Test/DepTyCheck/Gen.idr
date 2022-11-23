@@ -161,7 +161,11 @@ namespace GenAlternatives
 
   export
   Monad GenAlternatives' where
-    MkGenAlts xs >>= f = MkGenAlts $ xs >>= maybe [] (unGenAlts . f)
+    MkGenAlts xs >>= f = MkGenAlts $ flip processAlternatives' xs $ relax . alternativesOf . (>>= oneOf' . traverse f) where
+      %inline oneOf' : forall a. GenAlternatives' (Maybe a) -> NonEmptyGen (Maybe a)
+      oneOf' $ MkGenAlts xs = case strengthen xs of
+        Nothing => pure Nothing
+        Just xs => oneOf $ join <$> xs
 
 ----------------------------------
 --- Creation of new generators ---

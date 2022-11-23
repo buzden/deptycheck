@@ -289,8 +289,8 @@ Alternative (GenAlternatives' False) where
   MkGenAlternatives xs <|> MkGenAlternatives ys = MkGenAlternatives $ xs <|> ys
 
 export
-Monad (GenAlternatives' ne) where
-  xs >>= f = flip processAlternatives' xs $ assert_total (>>= f) . relax . alternativesOf
+Monad (GenAlternatives' True) where
+ xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
 
 -------------------------------
 --- Variation in generation ---
