@@ -12,6 +12,8 @@ import Data.List.CheckedEmpty
 import Data.Vect
 import Data.Stream
 
+import public Language.Implicits.Default
+
 import public System.Random.Pure
 
 %default total
@@ -144,7 +146,7 @@ namespace GenAlternatives
   Nil = MkGenAlternatives []
 
   export %inline
-  (::) : (0 _ : DefaultTrue e) => Lazy (NonEmptyGen a) -> GenAlternatives' e a -> GenAlternatives' ne a
+  (::) : (0 _ : Default True e) => Lazy (NonEmptyGen a) -> GenAlternatives' e a -> GenAlternatives' ne a
   x :: MkGenAlternatives xs = MkGenAlternatives $ (Element 1 ItIsSucc, x) :: xs
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists

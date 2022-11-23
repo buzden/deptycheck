@@ -33,6 +33,7 @@ modules = Data.Nat.Pos
 
 depends = contrib
         , elab-util
+        , if-unsolved-implicit
         , mtl-tuple-impls
         , random-pure
 

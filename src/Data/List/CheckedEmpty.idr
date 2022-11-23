@@ -4,20 +4,9 @@ import Data.Bool
 import Data.List1
 import Data.Vect
 
+import public Language.Implicits.Default
+
 %default total
-
---- Some magic for providing a default choice ---
-
-export
-interface Default (0 def, a : ty) where
-  constructor MkDefault
-
-export %defaulthint
-0 TheDefault : Default x x
-TheDefault = MkDefault
-
-export
-Default def x where
 
 --- Types definitions ---
 
