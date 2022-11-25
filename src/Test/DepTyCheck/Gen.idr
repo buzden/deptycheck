@@ -24,14 +24,6 @@ import Test.DepTyCheck.Gen.NonEmpty
 
 %default total
 
--------------------------
---- Utility functions ---
--------------------------
-
-public export %inline
-wrapLazy : (a -> b) -> Lazy a -> Lazy b
-wrapLazy f = delay . f . force
-
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
