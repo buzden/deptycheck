@@ -50,7 +50,7 @@ empty : Gen a
 empty = Empty
 
 export
-toNonEmpty : Gen a -> Maybe $ NonEmptyGen $ Maybe a
+toNonEmpty : Gen a -> Maybe $ Lazy (NonEmptyGen $ Maybe a)
 toNonEmpty Empty        = Nothing
 toNonEmpty $ NonEmpty g = Just g
 
@@ -104,7 +104,7 @@ Applicative Gen where
 export
 Monad Gen where
   Empty      >>= _  = Empty
-  NonEmpty g >>= nf = NonEmpty $ (>>=) @{Compose} g $ fromMaybe (pure Nothing) . toNonEmpty . nf
+  NonEmpty g >>= nf = NonEmpty $ (>>=) @{Compose} g $ fromMaybe (pure Nothing) . map force . toNonEmpty . nf
 
 ---------------------------------------------
 --- Data type for alternatives in `oneOf` ---
@@ -177,8 +177,8 @@ oneOf = maybe empty (NonEmpty . delay . oneOf) . strengthen . unGenAlts
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
 frequency : List (Nat, Gen a) -> Gen a
-frequency xs = maybe empty (NonEmpty . delay . NonEmpty.frequency) $
-                 strengthen $ fromList $ mapMaybe (\(w, g) => [| (,) (toPosNat w) (toNonEmpty g) |]) xs
+frequency xs = maybe empty (NonEmpty . delay . frequency) $
+                 strengthen $ fromList $ mapMaybe {b=(_, Lazy _)} (\(w, g) => [| (toPosNat w, toNonEmpty g) |]) xs
 
 ||| Choose one of the given values uniformly.
 |||

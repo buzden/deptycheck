@@ -163,10 +163,10 @@ namespace GenAlternatives
   processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
 
   export %inline
-  processAlternativesMaybe : (NonEmptyGen a -> Maybe $ NonEmptyGen b) -> GenAlternatives' ne a -> GenAlternatives' False b
+  processAlternativesMaybe : (NonEmptyGen a -> Maybe $ Lazy (NonEmptyGen b)) -> GenAlternatives' ne a -> GenAlternatives' False b
   processAlternativesMaybe f $ MkGenAlternatives xs = MkGenAlternatives $ mapMaybe filt xs where
     %inline filt : (tag, Lazy (NonEmptyGen a)) -> Maybe (tag, Lazy (NonEmptyGen b))
-    filt (t, x) = (t,) . delay <$> f x
+    filt (t, x) = (t,) <$> f x
 
   export %inline
   processAlternatives'' : (NonEmptyGen a -> GenAlternatives' neb b) -> GenAlternatives' nea a -> GenAlternatives' (nea && neb) b
