@@ -209,7 +209,9 @@ altsFromList = cast
 export
 oneOf : GenAlternatives a -> NonEmptyGen a
 oneOf $ MkGenAlternatives [(_, x)]  = x
-oneOf $ MkGenAlternatives xs@(_::_) = OneOf $ MkOneOf _ $ normaliseWeights xs
+oneOf $ MkGenAlternatives xs@(_::_) = do
+  let nw = normaliseWeights xs -- this `let` is needed to cache results for calculation of total weight
+  OneOf $ MkOneOf _ nw
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
