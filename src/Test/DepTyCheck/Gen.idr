@@ -104,9 +104,7 @@ Applicative Gen where
 export
 Monad Gen where
   Empty      >>= _  = Empty
-  NonEmpty g >>= nf = NonEmpty $ (>>=) @{Compose} g $ \x => case nf x of
-    Empty       => pure Nothing
-    NonEmpty nn => nn
+  NonEmpty g >>= nf = NonEmpty $ (>>=) @{Compose} g $ fromMaybe (pure Nothing) . toNonEmpty . nf
 
 ---------------------------------------------
 --- Data type for alternatives in `oneOf` ---
@@ -221,11 +219,7 @@ forgetStructure $ NonEmpty g = NonEmpty $ forgetStructure g
 
 public export
 processAlternatives : (Gen a -> Gen b) -> Gen a -> GenAlternatives' b
-processAlternatives f = MkGenAlts . processAlternativesMaybe fm . unGenAlts . alternativesOf where
-  fm : NonEmptyGen (Maybe a) -> Maybe $ NonEmptyGen $ Maybe b
-  fm neg = case f $ NonEmpty neg of
-             Empty      => Nothing
-             NonEmpty g => Just g
+processAlternatives f = MkGenAlts . processAlternativesMaybe (toNonEmpty . f . NonEmpty . delay) . unGenAlts . alternativesOf
 
 public export
 mapAlternativesOf : (a -> b) -> Gen a -> GenAlternatives' b
