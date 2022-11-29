@@ -237,7 +237,6 @@ export
 oneOf : GenAlternatives a -> Gen a
 oneOf alts = case unGenAlternatives alts of
                []       => empty
-               [(_, x)] => x
                x::xs    => OneOf $ MkOneOf _ $ x:::xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.

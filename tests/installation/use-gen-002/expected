@@ -9,9 +9,8 @@ define `x3`
 
 ---------
 
-define `y3`
-define `y1`
--- post defs: ["y1", "y3"]
+define `x1`
+-- post defs: ["x1"]
 
 ---------
 
