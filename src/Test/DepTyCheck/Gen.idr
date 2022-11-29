@@ -235,10 +235,8 @@ Cast (List a) (GenAlternatives a) where
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : GenAlternatives a -> Gen a
-oneOf alts = case normaliseWeights $ unGenAlternatives alts of
-               []       => empty
-               [(_, x)] => x
-               x::xs    => OneOf $ MkOneOf _ $ x:::xs
+oneOf $ MkGenAlternatives $ []    = empty
+oneOf $ MkGenAlternatives $ x::xs = OneOf $ MkOneOf _ $ x:::xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
