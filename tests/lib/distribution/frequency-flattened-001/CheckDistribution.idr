@@ -13,14 +13,14 @@ eb = oneOf
 
 main : IO ()
 main = printVerdict eb
-         [ coverWith 50.percent isLeft
-         , coverWith 50.percent isRight
+         [ coverWith 100.percent isLeft
+         , coverWith 0.percent isRight
 
          , coverWith 20.percent $ (== True)  . fromEither
          , coverWith 80.percent $ (== False) . fromEither
 
-         , coverWith 10.percent $ (== Left True)
-         , coverWith 40.percent $ (== Left False)
-         , coverWith 10.percent $ (== Right True)
-         , coverWith 40.percent $ (== Right False)
+         , coverWith 20.percent $ (== Left True)
+         , coverWith 80.percent $ (== Left False)
+         , coverWith 0.percent $ (== Right True)
+         , coverWith 0.percent $ (== Right False)
          ]
