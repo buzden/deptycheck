@@ -208,10 +208,7 @@ altsFromList = cast
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : GenAlternatives a -> NonEmptyGen a
-oneOf $ MkGenAlternatives [(_, x)]  = x
-oneOf $ MkGenAlternatives xs@(_::_) = do
-  let nw = normaliseWeights xs -- this `let` is needed to cache results for calculation of total weight
-  OneOf $ MkOneOf _ nw
+oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf _ xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||

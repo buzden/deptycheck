@@ -5,7 +5,8 @@ Now compiling the executable: deptycheck-usage-example
 ---------
 
 define `x1`
--- post defs: ["x1"]
+define `y2`
+-- post defs: ["y2", "x1"]
 
 ---------
 
