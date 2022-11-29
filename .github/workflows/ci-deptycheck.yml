@@ -43,12 +43,14 @@ jobs:
       - name: Read the version
         id: read-ver
         run: |
-          echo -n "::set-output name=idris-ver::"
+          (
+          echo -n "idris-ver="
           if [[ '${{ github.event_name }}' == 'schedule' ]]; then
             echo "latest"
           else
             cat "${IDRIS_VERSION_FILE}"
           fi
+          ) >> "$GITHUB_OUTPUT"
 
   thirdparties-build:
     name: Build thirdparties
@@ -195,11 +197,13 @@ jobs:
       - name: Get derivation test sets
         id: get-derivation-test-sets
         run: |
-          echo -n "::set-output name=derivation-test-sets::["
+          (
+          echo -n "derivation-test-sets=["
           find tests/gen-derivation/ -type f,l -name run | \
             grep -v '/_' | sed 's|^tests/gen-derivation/|"|' | sed 's|/[^/]*/run$|"|' | \
             sort | uniq | awk 'ORS=", "' | head -c -2
           echo "]"
+          ) >> "$GITHUB_OUTPUT"
 
   deptycheck-test-derivation:
     name: Test DepTyCheck's derivation
