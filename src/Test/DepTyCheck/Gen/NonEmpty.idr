@@ -38,7 +38,7 @@ record OneOfAlternatives (0 a : Type)
 export
 data NonEmptyGen : Type -> Type where
   Pure  : a -> NonEmptyGen a
-  Point : (forall m. MonadRandom m => m a) -> NonEmptyGen a
+  Raw   : (forall m. MonadRandom m => m a) -> NonEmptyGen a
   OneOf : OneOfAlternatives a -> NonEmptyGen a
   Bind  : NonEmptyGen c -> (c -> NonEmptyGen a) -> NonEmptyGen a
 
@@ -70,11 +70,11 @@ mapOneOf (MkOneOf tw gs @{prf}) f = OneOf $ MkOneOf tw (mapTaggedLazy f gs) @{do
 
 export
 chooseAny : Random a => NonEmptyGen a
-chooseAny = Point getRandom
+chooseAny = Raw getRandom
 
 export
 choose : Random a => (a, a) -> NonEmptyGen a
-choose bounds = Point $ getRandomR bounds
+choose bounds = Raw $ getRandomR bounds
 
 --------------------------
 --- Running generators ---
@@ -83,7 +83,7 @@ choose bounds = Point $ getRandomR bounds
 export
 unGen : MonadRandom m => NonEmptyGen a -> m a
 unGen $ Pure x   = pure x
-unGen $ Point sf = sf
+unGen $ Raw sf   = sf
 unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
 unGen $ Bind x f = unGen x >>= assert_total unGen . f
 
@@ -100,7 +100,7 @@ unGen $ Bind x f = unGen x >>= assert_total unGen . f
 export
 Functor NonEmptyGen where
   map f $ Pure x   = Pure $ f x
-  map f $ Point sf = Point $ f <$> sf
+  map f $ Raw sf   = Raw $ f <$> sf
   map f $ OneOf oo = mapOneOf oo $ assert_total $ map f
   map f $ Bind x g = Bind x $ assert_total map f . g
 
@@ -111,7 +111,7 @@ Applicative NonEmptyGen where
   Pure f <*> g = f <$> g
   g <*> Pure x = g <&> \f => f x
 
-  Point sfl <*> Point sfr = Point $ sfl <*> sfr
+  Raw sfl <*> Raw sfr = Raw $ sfl <*> sfr
 
   OneOf oo <*> g = mapOneOf oo $ assert_total (<*> g)
   g <*> OneOf oo = mapOneOf oo $ assert_total (g <*>)
@@ -122,7 +122,7 @@ Applicative NonEmptyGen where
 export
 Monad NonEmptyGen where
   Pure x      >>= nf = nf x
-  g@(Point _) >>= nf = Bind g nf -- Point $ sf >>= unGen . nf
+  g@(Raw _)   >>= nf = Bind g nf -- Raw $ sf >>= unGen . nf
   OneOf oo    >>= nf = mapOneOf oo $ assert_total (>>= nf)
   Bind x f    >>= nf = x >>= \x => f x >>= nf
 
@@ -251,8 +251,8 @@ deepAlternativesOf (S k) gen   = processAlternatives' alternativesOf $ deepAlter
 ||| except for empty generator, which would still be returned as empty generator.
 export
 forgetStructure : NonEmptyGen a -> NonEmptyGen a
-forgetStructure g@(Point _) = g
-forgetStructure g = Point $ unGen g
+forgetStructure g@(Raw _) = g
+forgetStructure g = Raw $ unGen g
 
 public export
 processAlternatives : (NonEmptyGen a -> NonEmptyGen b) -> NonEmptyGen a -> GenAlternatives b
@@ -301,7 +301,7 @@ Monad (GenAlternatives' True) where
 export
 variant : Nat -> NonEmptyGen a -> NonEmptyGen a
 variant Z       gen = gen
-variant x@(S _) gen = Point $ iterate x independent $ unGen gen where
+variant x@(S _) gen = Raw $ iterate x independent $ unGen gen where
   iterate : forall a. Nat -> (a -> a) -> a -> a
   iterate Z     _ x = x
   iterate (S n) f x = iterate n f $ f x
