@@ -91,6 +91,10 @@ export
   cardinality = cardinality {a=thru}
   cardinalityR (lo, hi) = cardinalityR {a=thru} (cast lo, cast hi)
 
+export %inline
+randomThru : (0 thru : _) -> Random thru => Cast a thru => Cast thru a => Random a
+randomThru thru = RandomThru {thru}
+
 --- Random Int ---
 
 export
@@ -128,7 +132,7 @@ Random Int where
 
 export %hint
 RandomNat : Random Nat
-RandomNat = RandomThru {thru=Int}
+RandomNat = randomThru Int
 
 --- Random Unit ---
 
@@ -160,7 +164,7 @@ export
 
 export %hint
 RandomChar : Random Char
-RandomChar = RandomThru {thru=Int}
+RandomChar = randomThru Int
 
 --- Random Bool ---
 
