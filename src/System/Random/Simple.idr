@@ -14,7 +14,7 @@ import Data.Fin
 
 public export %inline
 BaseGenTy : Type
-BaseGenTy = Int
+BaseGenTy = Int64
 
 public export
 interface RandomGen g where
@@ -135,6 +135,12 @@ Random BaseGenTy where
 public export %inline
 randomThruNative : Cast a BaseGenTy => Cast BaseGenTy a => Random a
 randomThruNative = randomThru BaseGenTy
+
+--- Random Int ---
+
+export %hint
+RandomInt : Random Int
+RandomInt = randomThruNative
 
 --- Random Nat ---
 
