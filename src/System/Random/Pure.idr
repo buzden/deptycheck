@@ -1,9 +1,8 @@
--- This is based on the David Christianen's port of QuickCheck to Idris 1
-
 module System.Random.Pure
 
 import Control.Monad.State
 
+import Data.Bits
 import Data.Fin
 
 %default total
@@ -12,14 +11,9 @@ import Data.Fin
 --- Interface for seed types ---
 --------------------------------
 
-public export %inline
-BaseGenTy : Type
-BaseGenTy = Int64
-
 public export
 interface RandomGen g where
-  next : g -> (g, BaseGenTy)
-  genRange : g -> (BaseGenTy, BaseGenTy)
+  next  : g -> (g, Bits64)
   split : g -> (g, g)
 
 --------------------------------------------------------
@@ -29,7 +23,7 @@ interface RandomGen g where
 public export
 interface Random a where
   randomR : RandomGen g => (a, a) -> g -> (g, a)
-  random : RandomGen g => g -> (g, a)
+  random  : RandomGen g => g -> (g, a)
 
 export
 randomR' : Random a => RandomGen g => MonadState g m => (a, a) -> m a
@@ -40,90 +34,122 @@ random' : Random a => RandomGen g => MonadState g m => m a
 random' = let (g, x) = random !get in put g $> x
 
 export
-[RandomThru] Random thru => Cast a thru => Cast thru a => Random a where
-  randomR (lo, hi) = map cast . randomR {a=thru} (cast lo, cast hi)
-  random = map cast . random {a=thru}
+randomThru : (0 thru : _) -> Random thru => (to : a -> thru) -> (from : thru -> a) -> Random a
+randomThru thru to from = RandomThru where
+  [RandomThru] Random a where
+    randomR = map from .: randomR {a=thru} . mapHom to
+    random  = map from . random {a=thru}
 
-export %inline
-randomThru : (0 thru : _) -> Random thru => Cast a thru => Cast thru a => Random a
-randomThru thru = RandomThru {thru}
+--- Patricular implementations ---
 
---- Nativest implementation ---
+maxMask : Bits64 -> Bits64
+maxMask max = case countLeadingZeros max of
+                Nothing  => zeroBits
+                Just off => oneBits `shiftR` off
+  where
+    countLeadingZeros : Bits64 -> Maybe $ Fin 64
+    countLeadingZeros x = go 63 where
+      go : Fin 64 -> Maybe $ Fin 64
+      go i = if testBit x i then Just $ complement i else case i of
+               FZ    => Nothing
+               FS i' => go $ assert_smaller i $ weaken i'
 
 export
-Random BaseGenTy where
-  random gen = next gen
-  randomR (lo, hi) gen = if lo > hi
-                           then assert_total $ randomR (hi, lo) gen
-                           else flip mapSnd (f n 1 gen) $ \v => lo + v `mod` k
-    where
-      k : BaseGenTy
-      k = hi - lo + 1
+Random Bits64 where
+  random = next
+  randomR (lo, hi) = do
+    let (lo, hi) = (lo `min` hi, lo `max` hi)
+    map (lo +) . nextMax (hi - lo) where
 
-      -- ERROR: b here (2^31-87) represents a baked-in assumption about genRange:
-      b : BaseGenTy
-      b = 2147483561
+      nextMax : (max : Bits64) -> g -> (g, Bits64)
+      nextMax max = assert_total go where
 
-      iLogBase : BaseGenTy -> Nat
-      iLogBase i = if i < b then 1 else S $ iLogBase $ assert_smaller i $ i `div` b where
+        mask : Bits64
+        mask = maxMask max
 
-      n : Nat
-      n = iLogBase k
+        covering
+        go : g -> (g, Bits64)
+        go g = do
+          let (g', x) = next g
+              x' = x .&. mask
+          if x' > max then go g' else (g', x')
 
-      -- Here we loop until we've generated enough randomness to cover the range:
-      f : Nat -> BaseGenTy -> g -> (g, BaseGenTy)
-      f Z      acc g = (g, acc)
-      f (S n') acc g =
-        let (g', x) = next g in
-        -- We shift over the random bits generated thusfar (* b) and add in the new ones.
-        f n' (x + acc * b) g'
-
-public export %inline
-randomThruNative : Cast a BaseGenTy => Cast BaseGenTy a => Random a
-randomThruNative = randomThru BaseGenTy
-
---- Random Int ---
+export %hint
+RandomInt64 : Random Int64
+RandomInt64 = randomThru Bits64 (fromInteger . (+ diff) . cast) (fromInteger . (\x => x - diff) . cast) where
+  diff : Integer
+  diff = 1 `shiftL` 63
 
 export %hint
 RandomInt : Random Int
-RandomInt = randomThruNative
+RandomInt = randomThru Int64 cast cast
 
---- Random Nat ---
+two64 : Integer
+two64 = 1 `shiftL` 64
+
+export
+Random Integer where
+  random = randomR (-two64, two64) -- This is more or less arbitrary anyway
+  randomR (lo, hi) = do
+    let (lo, hi) = (lo `min` hi, lo `max` hi)
+    map (lo +) . nextMax (hi - lo) where
+
+      nextMax : Integer -> g -> (g, Integer)
+      nextMax max = do
+        let goMask : Nat -> Integer -> (Nat, Bits64)
+            goMask n x = if x < two64
+              then (n, maxMask $ cast x)
+              else goMask (S n) (assert_smaller x $ x `shiftR` 64)
+
+        let (restDigits, leadMask) = goMask 0 max
+        let generate : g -> (g, Integer)
+            generate g0 = do
+              let (g', x) = next g0
+                  x' = x .&. leadMask
+              go (cast x') restDigits g'
+              where
+                go : Integer -> Nat -> g -> (g, Integer)
+                go acc Z     g = (g, acc)
+                go acc (S n) g =
+                    let (g', x) = next g
+                    in go (acc * two64 + cast x) n g'
+
+        let covering loop : g -> (g, Integer)
+            loop g = do
+              let (g', x) = generate g
+              if x > max then loop g' else (g', x)
+
+        assert_total loop
 
 export %hint
 RandomNat : Random Nat
-RandomNat = randomThruNative
+RandomNat = randomThru Integer cast (cast . abs)
 
---- Random Unit ---
+export
+Random Double where
+  random = map (\w64 => cast (w64 `shiftR` 11) * doubleULP) . next where
+    doubleULP : Double
+    doubleULP =  1.0 / cast {from=Bits64} (1 `shiftL` 53)
+  randomR (lo, hi) =
+    if lo == hi then map (const lo) . next
+    else if lo == 1/0 || lo == -1/0 || hi == 1/0 || hi == -1/0 then map (const $ lo + hi) . next
+    else map (\x => x * lo + (1 - x) * hi) . random
 
 export
 Random Unit where
   randomR ((), ()) gen = map (const ()) $ next gen
   random gen = map (const ()) $ next gen
 
---- Random Fin ---
-
-export %hint
-RandomFin : {n : Nat} -> Random (Fin (S n))
-RandomFin = randomThruNative where
-  Cast (Fin $ S n) BaseGenTy where
-    cast = fromInteger . cast
-  Cast BaseGenTy (Fin $ S n) where
-    cast = restrict {n} . cast
-
---- Random Char ---
-
-export %hint
-RandomChar : Random Char
-RandomChar = randomThruNative
-
---- Random Bool ---
+export
+{n : Nat} -> Random (Fin $ S n) where
+  random  = map (\x => natToFinLt x @{believe_me Oh}) . randomR (0, n)
+  randomR = map (\x => natToFinLt x @{believe_me Oh}) .: randomR . mapHom finToNat
 
 export %hint
 RandomBool : Random Bool
-RandomBool = randomThruNative where
-  Cast Bool BaseGenTy where
-    cast True  = 1
-    cast False = 0
-  Cast BaseGenTy Bool where
-    cast x = x `mod` 2 == 0
+RandomBool = randomThru Bits64 (\b => if b then 1 else 0) (\x => testBit x 0)
+
+export
+Random Char where
+  random  = map cast . randomR {a=Bits64} (0, 0xfffff+0xffff+1)
+  randomR = map cast .: randomR {a=Bits64} . mapHom cast
