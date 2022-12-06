@@ -1,6 +1,9 @@
 module System.Random.Pure.StdGen
 
+import System
 import public System.Random.Pure
+
+import Data.Bits
 
 %default total
 
@@ -15,7 +18,7 @@ export
 Show StdGen where
   show (MkStdGen i j) = "MkStdGen " ++ show i ++ " " ++ show j
 
--- Blatantly stolen from Haskell
+-- Based on a port of QuickCheck to Idris 1, which in its turn based on some translation of Haskell code
 export
 RandomGen StdGen where
   next (MkStdGen s1 s2) =
@@ -43,3 +46,38 @@ RandomGen StdGen where
     let left : StdGen = MkStdGen (new_s1 - 1) t2 in
     let right : StdGen = MkStdGen t1 (new_s2 + 1) in
     (left, right)
+
+-- The following function contains translation from the Haskell code taken from
+-- https://hackage.haskell.org/package/splitmix-0.1.0.4/docs/src/System.Random.SplitMix.html
+export
+mkStdGen : BaseGenTy -> StdGen
+mkStdGen s = MkStdGen (mix64 s) (mixGamma (s + goldenGamma)) where
+
+  goldenGamma : BaseGenTy
+  goldenGamma = 0x9e3779b97f4a7c15
+
+  shiftXor : Index {a=BaseGenTy} -> BaseGenTy -> BaseGenTy
+  shiftXor n w = w `xor` (w `shiftR` n)
+
+  shiftXorMultiply : Index {a=BaseGenTy} -> BaseGenTy -> BaseGenTy -> BaseGenTy
+  shiftXorMultiply n k w = shiftXor n w * k
+
+  mix64, mix64v13 : BaseGenTy -> BaseGenTy
+  mix64    = shiftXor 33 . shiftXorMultiply 33 0xc4ceb9fe1a85ec53 . shiftXorMultiply 33 0xff51afd7ed558ccd
+  mix64v13 = shiftXor 31 . shiftXorMultiply 27 0x94d049bb133111eb . shiftXorMultiply 30 0xbf58476d1ce4e5b9
+
+  mixGamma : BaseGenTy -> BaseGenTy
+  mixGamma z0 = do
+    let z1 = mix64v13 z0 .|. 1             -- force to be odd
+        n  = popCount $ z1 `xor` (z1 `shiftR` 1)
+    -- see: http://www.pcg-random.org/posts/bugs-in-splitmix.html
+    -- let's trust the text of the paper, not the code.
+    if n >= 24
+      then z1
+      else z1 `xor` 0xaaaaaaaaaaaaaaaa
+
+export
+initStdGen : HasIO io => io StdGen
+initStdGen = mkStdGen <$> aSeed where
+  aSeed : io BaseGenTy
+  aSeed = pure $ cast !time `xor` cast !getPID
