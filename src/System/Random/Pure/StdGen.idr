@@ -21,30 +21,25 @@ Show StdGen where
 -- Based on a port of QuickCheck to Idris 1, which in its turn based on some translation of Haskell code
 export
 RandomGen StdGen where
-  next (MkStdGen s1 s2) =
-    let k : BaseGenTy = s1 `div` 53668 in
-    let s1' : BaseGenTy  = 40014 * (s1 - k * 53668) - k * 12211 in
-    let s1'' : BaseGenTy = if s1' < 0 then s1' + 2147483563 else s1' in
-    let k' : BaseGenTy = s2 `div` 52774 in
-    let s2' : BaseGenTy = 40692 * (s2 - k' * 52774) - k' * 3791 in
-    let s2'' : BaseGenTy = if s2' <= 0 then s2' + 2147483399 else s2' in
-    let z : BaseGenTy = s1'' - s2'' in
-    let z' : BaseGenTy = if z < 1 then z + 2147483562 else z in
+  next (MkStdGen s1 s2) = do
+    let k    = s1 `div` 53668
+        s1'  = 40014 * (s1 - k * 53668) - k * 12211
+        s1'' = if s1' < 0 then s1' + 2147483563 else s1'
+        k'   = s2 `div` 52774
+        s2'  = 40692 * (s2 - k' * 52774) - k' * 3791
+        s2'' = if s2' <= 0 then s2' + 2147483399 else s2'
+        z    = s1'' - s2''
+        z'   = if z < 1 then z + 2147483562 else z
     (MkStdGen s1'' s2'', z')
 
   genRange _ = (0, 2147483562)
-  split (MkStdGen s1 s2) =
-    let gen' : StdGen = fst (next (MkStdGen s1 s2)) in
-    let t1 : BaseGenTy = case gen' of { MkStdGen a b => a } in
-    let t2 : BaseGenTy = case gen' of { MkStdGen a b => b } in
-    let new_s1 : BaseGenTy = if s1 >= 2147483562 || s1 < 1
-                         then 1
-                         else s1 + 1 in
-    let new_s2 : BaseGenTy = if s2 <= 1 || s2 >= 2147483398
-                         then 2147483398
-                         else s2 - 1 in
-    let left : StdGen = MkStdGen (new_s1 - 1) t2 in
-    let right : StdGen = MkStdGen t1 (new_s2 + 1) in
+
+  split g@(MkStdGen s1 s2) = do
+    let MkStdGen t1 t2 = fst $ next g
+        new_s1 = if s1 >= 2147483562 || s1 < 1 then 1 else s1 + 1
+        new_s2 = if s2 <= 1 || s2 >= 2147483398 then 2147483398 else s2 - 1
+        left  = MkStdGen (new_s1 - 1) t2
+        right = MkStdGen t1 (new_s2 + 1)
     (left, right)
 
 -- The following function contains translation from the Haskell code taken from
@@ -72,9 +67,7 @@ mkStdGen s = MkStdGen (mix64 s) (mixGamma (s + goldenGamma)) where
         n  = popCount $ z1 `xor` (z1 `shiftR` 1)
     -- see: http://www.pcg-random.org/posts/bugs-in-splitmix.html
     -- let's trust the text of the paper, not the code.
-    if n >= 24
-      then z1
-      else z1 `xor` 0xaaaaaaaaaaaaaaaa
+    if n >= 24 then z1 else z1 `xor` 0xaaaaaaaaaaaaaaaa
 
 export
 initStdGen : HasIO io => io StdGen

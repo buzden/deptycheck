@@ -55,28 +55,28 @@ Random BaseGenTy where
   random gen = next gen
   randomR (lo, hi) gen = if lo > hi
                            then assert_total $ randomR (hi, lo) gen
-                           else case (f n 1 gen) of
-                             (gen', v) => (gen', (lo + v `mod` k))
+                           else flip mapSnd (f n 1 gen) $ \v => lo + v `mod` k
     where
       k : BaseGenTy
       k = hi - lo + 1
+
       -- ERROR: b here (2^31-87) represents a baked-in assumption about genRange:
       b : BaseGenTy
       b = 2147483561
 
-      iLogBase : BaseGenTy -> BaseGenTy
-      iLogBase i = if i < b then 1 else 1 + iLogBase (assert_smaller i (i `div` b))
+      iLogBase : BaseGenTy -> Nat
+      iLogBase i = if i < b then 1 else S $ iLogBase $ assert_smaller i $ i `div` b where
 
-      n : BaseGenTy
+      n : Nat
       n = iLogBase k
 
       -- Here we loop until we've generated enough randomness to cover the range:
-      f : BaseGenTy -> BaseGenTy -> g -> (g, BaseGenTy)
-      f 0 acc g = (g, acc)
-      f n' acc g =
-        let (g',x) = next g in
+      f : Nat -> BaseGenTy -> g -> (g, BaseGenTy)
+      f Z      acc g = (g, acc)
+      f (S n') acc g =
+        let (g', x) = next g in
         -- We shift over the random bits generated thusfar (* b) and add in the new ones.
-        f (assert_smaller n' $ n' - 1) (x + acc * b) g'
+        f n' (x + acc * b) g'
 
 public export %inline
 randomThruNative : Cast a BaseGenTy => Cast BaseGenTy a => Random a
