@@ -10,6 +10,8 @@ import Data.String
 import Example.Pil.Gens
 import Example.Pil.Lang.ShowC
 
+import System.Random.Pure.StdGen
+
 %default total
 
 %hint

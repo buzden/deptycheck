@@ -4,6 +4,8 @@ import Data.Fuel
 
 import Test.DepTyCheck.Gen.Auto
 
+import System.Random.Pure.StdGen
+
 %default total
 
 %language ElabReflection

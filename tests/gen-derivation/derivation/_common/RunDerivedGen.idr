@@ -4,6 +4,8 @@ import public Generics.Derive
 
 import public Test.DepTyCheck.Gen.Auto
 
+import System.Random.Pure.StdGen
+
 %default total
 
 export %hint
