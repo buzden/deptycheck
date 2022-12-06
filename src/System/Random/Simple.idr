@@ -75,10 +75,6 @@ interface Random a where
   randomR : RandomGen g => (a, a) -> g -> (g, a)
   random : RandomGen g => g -> (g, a)
 
-  -- `Nothing` for infinite or unknown
-  cardinality : Maybe Nat
-  cardinalityR : (a, a) -> Maybe Nat
-
 export
 randomR' : Random a => RandomGen g => MonadState g m => (a, a) -> m a
 randomR' bounds = let (g, x) = randomR bounds !get in put g $> x
@@ -91,9 +87,6 @@ export
 [RandomThru] Random thru => Cast a thru => Cast thru a => Random a where
   randomR (lo, hi) = map cast . randomR {a=thru} (cast lo, cast hi)
   random = map cast . random {a=thru}
-
-  cardinality = cardinality {a=thru}
-  cardinalityR (lo, hi) = cardinalityR {a=thru} (cast lo, cast hi)
 
 export %inline
 randomThru : (0 thru : _) -> Random thru => Cast a thru => Cast thru a => Random a
@@ -129,9 +122,6 @@ Random BaseGenTy where
         -- We shift over the random bits generated thusfar (* b) and add in the new ones.
         f (assert_smaller n' $ n' - 1) (x + acc * b) g'
 
-  cardinality = Nothing
-  cardinalityR (a, b) = Just $ cast $ if a > b then a - b else b - a
-
 public export %inline
 randomThruNative : Cast a BaseGenTy => Cast BaseGenTy a => Random a
 randomThruNative = randomThru BaseGenTy
@@ -155,24 +145,15 @@ Random Unit where
   randomR ((), ()) gen = map (const ()) $ next gen
   random gen = map (const ()) $ next gen
 
-  cardinality = Just 1
-  cardinalityR _ = Just 1
-
 --- Random Fin ---
 
-finToBase : Fin n -> BaseGenTy
-finToBase = fromInteger . cast
-
-baseToFin : (n : Nat) -> BaseGenTy -> Fin (S n)
-baseToFin n = restrict n . cast
-
-export
-{n : Nat} -> Random (Fin (S n)) where
-  randomR (lo, hi) = map (baseToFin n) . randomR (finToBase lo, finToBase hi)
-  random = map (baseToFin n) . random
-
-  cardinality = Just n
-  cardinalityR (a, b) = cardinalityR (finToBase a, finToBase b)
+export %hint
+RandomFin : {n : Nat} -> Random (Fin (S n))
+RandomFin = randomThruNative where
+  Cast (Fin $ S n) BaseGenTy where
+    cast = fromInteger . cast
+  Cast BaseGenTy (Fin $ S n) where
+    cast = restrict {n} . cast
 
 --- Random Char ---
 
@@ -182,17 +163,11 @@ RandomChar = randomThruNative
 
 --- Random Bool ---
 
-boolToBase : Bool -> BaseGenTy
-boolToBase True = 1
-boolToBase False = 0
-
-baseToBoolUni : BaseGenTy -> Bool
-baseToBoolUni x = x `mod` 2 == 0
-
-export
-Random Bool where
-  randomR (lo, hi) = map baseToBoolUni . randomR (boolToBase lo, boolToBase hi)
-  random = map baseToBoolUni . random
-
-  cardinality = Just 2
-  cardinalityR (a, b) = if a == b then Just 1 else Just 2
+export %hint
+RandomBool : Random Bool
+RandomBool = randomThruNative where
+  Cast Bool BaseGenTy where
+    cast True  = 1
+    cast False = 0
+  Cast BaseGenTy Bool where
+    cast x = x `mod` 2 == 0
