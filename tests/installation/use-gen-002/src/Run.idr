@@ -14,33 +14,33 @@ import System.File.Virtual
 
 import System.Random.Pure.StdGen
 
-Show (Stmt preDefs postDefs) where
-  show $ Define new = "define `\{new}`"
-  show $ Use usd    = "use `\{usd}`"
-  show $ Chain x y  = show x ++ "\n" ++ show y
+Show (Stmts preDefs postDefs) where
+  show $ Def new = "define `\{new}`"
+  show $ Use usd = "use `\{usd}`"
+  show $ x >> y  = show x ++ "\n" ++ show y
 
 namespace NoParams
 
   export
-  ShowStmt : Show $ Stmt preDefs postDefs
-  ShowStmt = %search
+  ShowStmts : Show $ Stmts preDefs postDefs
+  ShowStmts = %search
 
 namespace PreOnly
 
   export
-  [ShowStmt] Show (preDefs ** Stmt preDefs postDefs) where
+  [ShowStmt] Show (preDefs ** Stmts preDefs postDefs) where
     show (preDefs ** stmt) = "-- pre defs: \{show preDefs}\n\{show stmt}"
 
 namespace PostOnly
 
   export
-  [ShowStmt] Show (postDefs ** Stmt preDefs postDefs) where
+  [ShowStmt] Show (postDefs ** Stmts preDefs postDefs) where
     show (postDefs ** stmt) = "\{show stmt}\n-- post defs: \{show postDefs}"
 
 namespace BothPreAndPost
 
   export
-  [ShowStmt] Show (preDefs ** postDefs ** Stmt preDefs postDefs) where
+  [ShowStmt] Show (preDefs ** postDefs ** Stmts preDefs postDefs) where
     show (preDefs ** postDefs ** stmt) = "-- pre defs: \{show preDefs}\n\{show stmt}\n-- post defs: \{show postDefs}"
 
 runOnce : (variant : Nat) -> Gen a -> LazyList a
