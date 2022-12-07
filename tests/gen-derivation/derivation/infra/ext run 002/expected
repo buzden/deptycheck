@@ -4,22 +4,22 @@
 Generated values:
 -----
 -----
-MkXSS "" ""
------
-MkXSS "bc" ""
------
-MkXSS "a" "a"
------
-MkXSS "a" "a"
+MkXSS "a" ""
 -----
 MkXSS "" ""
 -----
-MkXSS "" "bc"
+MkXSS "" "a"
+-----
+MkXSS "a" "a"
+-----
+MkXSS "" "a"
+-----
+MkXSS "a" "bc"
 -----
 MkXSS "" ""
 -----
 MkXSS "bc" "a"
 -----
-MkXSS "a" ""
+MkXSS "a" "a"
 -----
-MkXSS "a" "bc"
+MkXSS "a" ""

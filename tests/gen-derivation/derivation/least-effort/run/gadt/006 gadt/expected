@@ -3,29 +3,31 @@
 Generated values:
 -----
 -----
+JJ 0 0
+-----
 JJ 10 10
 -----
-JJ 10 0
+TR "" (TR "" (JJ 10 0))
 -----
-TR "bc" (JJ 0 10)
+TL "a"
 -----
-TR "bc" (FN 0 (JJ 0 0))
+TR "" (FN 10 (FN 10 (JJ 0 10)))
 -----
 JJ 0 10
 -----
-TR "" (TR "a" (TL "a"))
------
-TR "a" (TL "bc")
------
-JJ 10 10
+TL "a"
 -----
 -----
-JJ 10 10
+FN 10 (JJ 0 0)
 -----
-JJ 10 0
+FN 10 (FN 0 (TR "" (TR "" (JJ 10 0))))
 -----
-JJ 0 0
+FN 0 (TR "" (FN 10 (FN 10 (JJ 0 10))))
 -----
-FN 10 (FN 10 (FN 0 (FN 0 (TR "bc" (FN 0 (JJ 0 0))))))
+FN 10 (TL "a")
 -----
-JJ 10 10
+FN 10 (JJ 0 10)
+-----
+FN 10 (FN 10 (TR "bc" (TL "")))
+-----
+JJ 0 10

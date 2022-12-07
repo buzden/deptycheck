@@ -3,22 +3,22 @@
 Generated values:
 -----
 -----
-X0
------
-X0
------
-X2 False True
------
-X1 True
------
 X1 False
 -----
 X0
 -----
 X0
 -----
-X2 True True
+X0
 -----
-X2 True False
+X1 True
+-----
+X1 True
+-----
+X0
+-----
+X1 True
+-----
+X2 False True
 -----
 X0

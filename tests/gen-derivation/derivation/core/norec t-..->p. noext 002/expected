@@ -3,22 +3,22 @@
 Generated values:
 -----
 -----
-(True ** (True ** X0 True True))
------
-(True ** (False ** X0 True False))
------
 (False ** (False ** X1))
 -----
-(True ** (True ** X0 True True))
+(False ** (True ** X0 False True))
 -----
 (True ** (True ** X1))
 -----
-(False ** (False ** X1))
+(True ** (False ** X1))
 -----
-(False ** (False ** X0 False False))
+(False ** (False ** X1))
 -----
 (False ** (False ** X1))
 -----
 (True ** (True ** X1))
 -----
-(True ** (False ** X0 True False))
+(False ** (True ** X1))
+-----
+(False ** (True ** X0 False True))
+-----
+(False ** (True ** X1))
