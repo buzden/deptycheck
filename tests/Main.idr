@@ -9,7 +9,7 @@ atDir poolName dir = testsInDir dir (not . isPrefixOf "_") poolName [] Nothing
 
 main : IO ()
 main = runner $
-  [ !("Facilities for random generation" `atDir` "random")
+  [ !("Facilities for random generation" `atDir` "lib/random")
   , !("The `Gen` monad" `atDir` "lib/gen-monad")
   , !("Distribution of generators" `atDir` "lib/distribution")
   , !("The library documentation" `atDir` "docs")
