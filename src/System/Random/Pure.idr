@@ -34,8 +34,8 @@ random' : Random a => RandomGen g => MonadState g m => m a
 random' = let (g, x) = random !get in put g $> x
 
 export
-randomThru : (0 thru : _) -> Random thru => (to : a -> thru) -> (from : thru -> a) -> Random a
-randomThru thru to from = RandomThru where
+randomThru : (0 thru : _) -> Random thru => (from : thru -> a) -> (to : a -> thru) -> Random a
+randomThru thru from to = RandomThru where
   [RandomThru] Random a where
     randomR = map from .: randomR {a=thru} . mapHom to
     random  = map from . random {a=thru}
@@ -76,7 +76,7 @@ Random Bits64 where
 
 export %hint
 RandomInt64 : Random Int64
-RandomInt64 = randomThru Bits64 (fromInteger . (+ diff) . cast) (fromInteger . (\x => x - diff) . cast) where
+RandomInt64 = randomThru Bits64 (fromInteger . (\x => x - diff) . cast) (fromInteger . (+ diff) . cast) where
   diff : Integer
   diff = 1 `shiftL` 63
 
@@ -123,7 +123,7 @@ Random Integer where
 
 export %hint
 RandomNat : Random Nat
-RandomNat = randomThru Integer cast (cast . abs)
+RandomNat = randomThru Integer (cast . abs) cast
 
 export
 Random Double where
@@ -147,7 +147,7 @@ export
 
 export %hint
 RandomBool : Random Bool
-RandomBool = randomThru Bits64 (\b => if b then 1 else 0) (\x => testBit x 0)
+RandomBool = randomThru Bits64 (\x => testBit x 0) (\b => if b then 1 else 0)
 
 export
 Random Char where
