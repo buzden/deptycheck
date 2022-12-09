@@ -21,5 +21,5 @@ verdict conds = find . mapMaybe sequence .
 Show SignificantBounds where show = interpolate
 
 export
-printVerdict : HasIO m => (g -> (g, a)) -> g -> List (CoverageTest a) -> m ()
-printVerdict it st cts = putStrLn $ show $ verdict (fromList cts) (unfoldr (swap . it) st)
+printVerdict : HasIO m => g -> (g -> (g, a)) -> List (CoverageTest a) -> m ()
+printVerdict st it cts = putStrLn $ show $ verdict (fromList cts) (unfoldr (swap . it) st)

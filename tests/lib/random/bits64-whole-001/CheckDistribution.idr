@@ -10,7 +10,7 @@ import System.Random.Pure.StdGen
 %default total
 
 main : IO ()
-main = printVerdict (random {a=Bits64}) !initStdGen $
+main = printVerdict !initStdGen (random {a=Bits64}) $
          forget (allFins {n=63}) >>= \b =>
            [ coverWith 50.percent $ (== True)  . (`testBit` b)
            , coverWith 50.percent $ (== False) . (`testBit` b)

@@ -10,7 +10,7 @@ import System.Random.Pure.StdGen
 %default total
 
 main : IO ()
-main = printVerdict (random {a=Bool}) !initStdGen $
+main = printVerdict !initStdGen (random {a=Bool}) $
          [ coverWith 50.percent $ (== True)
          , coverWith 50.percent $ (== False)
          ]
