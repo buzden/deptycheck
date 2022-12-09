@@ -18,7 +18,7 @@ import Data.Stream
 
 import Decidable.Equality
 
-import public System.Random.Simple
+import public System.Random.Pure
 
 %default total
 

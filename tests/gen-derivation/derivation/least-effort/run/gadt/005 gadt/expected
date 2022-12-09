@@ -3,22 +3,22 @@
 Generated values:
 -----
 -----
-(True ** JJ 10 0)
+(False ** FN 10 (JJ 0 0))
 -----
-(False ** FN 0 (TL "a"))
+(False ** FN 10 (FN 0 (TR "" (TR "" (JJ 10 0)))))
 -----
-(True ** TL "")
------
-(False ** FN 10 (FN 10 (FN 0 (FN 0 (TR "bc" (FN 0 (JJ 0 0)))))))
------
-(True ** TR "a" (TL "a"))
------
-(False ** FN 0 (TR "a" (TL "bc")))
------
-(False ** FN 0 (TR "a" (TL "bc")))
+(False ** FN 0 (TR "" (FN 10 (FN 10 (JJ 0 10)))))
 -----
 (True ** TL "a")
 -----
-(True ** JJ 0 10)
+(True ** TL "a")
 -----
-(False ** JJ 10 10)
+(True ** TR "a" (TR "a" (FN 10 (JJ 0 10))))
+-----
+(True ** TR "bc" (TL ""))
+-----
+(False ** FN 0 (FN 0 (TR "bc" (JJ 10 0))))
+-----
+(True ** TL "bc")
+-----
+(True ** TL "a")

@@ -6,7 +6,8 @@ version = 0.0.220712
 modules = Control.Monad.State.Tuple
         , Data.Nat.Pos
         , Data.Vect.Dependent
-        , System.Random.Simple
+        , System.Random.Pure
+        , System.Random.Pure.StdGen
         , Test.DepTyCheck.Gen.Auto
         , Test.DepTyCheck.Gen.Auto.Derive
         , Test.DepTyCheck.Gen.Auto.Entry

@@ -12,6 +12,8 @@ import Test.DepTyCheck.Gen
 import System.File.Process
 import System.File.Virtual
 
+import System.Random.Pure.StdGen
+
 Show (Stmt preDefs postDefs) where
   show $ Define new = "define `\{new}`"
   show $ Use usd    = "use `\{usd}`"

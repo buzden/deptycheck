@@ -6,6 +6,8 @@ import public Test.DepTyCheck.Gen
 
 import public Statistics.Confidence
 
+import System.Random.Pure.StdGen
+
 %default total
 
 find : LazyList (Vect n SignificantBounds) -> Maybe $ Vect n SignificantBounds
