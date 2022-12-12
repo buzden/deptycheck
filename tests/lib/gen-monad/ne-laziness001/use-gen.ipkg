@@ -1,0 +1,7 @@
+package dummy
+
+authors = "Denis Buzdalov"
+
+modules = UseGen
+
+depends = deptycheck, contrib

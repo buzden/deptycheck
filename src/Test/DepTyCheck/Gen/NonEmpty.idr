@@ -87,6 +87,16 @@ unGen $ Raw sf   = sf
 unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
 unGen $ Bind x f = unGen x >>= assert_total unGen . f
 
+export
+unGenTryAll' : RandomGen g => (seed : g) -> NonEmptyGen a -> Stream (a, g)
+unGenTryAll' seed gen = do
+  let (seed, mc) = runState seed $ unGen {g} {m=State g} gen
+  (mc, seed) :: unGenTryAll' seed gen
+
+export
+unGenTryAll : RandomGen g => (seed : g) -> NonEmptyGen a -> Stream a
+unGenTryAll = map fst .: unGenTryAll'
+
 -- TODO To add config and Reader for that.
 --      This config should contain attempts count for each `unGen` (including those in combinators)
 --      Current `unGen` should be renamed to `unGen1` and not be exported.
