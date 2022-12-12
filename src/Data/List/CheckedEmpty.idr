@@ -13,7 +13,7 @@ import public Language.Implicits.Default
 public export
 data CEList : (definitelyNotEmpty : Bool) -> Type -> Type where
   Nil  : CEList False a
-  (::) : (0 _ : Default True e) => a -> CEList e a -> CEList ne a
+  (::) : (0 _ : Default True e) => a -> Lazy (CEList e a) -> CEList ne a
 
 %name CEList xs, ys, zs
 
@@ -57,7 +57,7 @@ length []      = Z
 length (_::xs) = S $ length xs
 
 public export
-(++) : (l : CEList nel a) -> (r : CEList ner a) -> CEList (nel || ner) a
+(++) : CEList nel a -> Lazy (CEList ner a) -> CEList (nel || ner) a
 []      ++ ys = ys
 (x::xs) ++ ys = x :: xs ++ ys
 
@@ -138,13 +138,18 @@ Applicative (CEList ne) where
 public export
 Alternative (CEList False) where
   empty = []
-  xs <|> ys = xs <+> ys
+  (<|>) = (++)
 
 public export
 Monad (CEList ne) where
   xs >>= f = rewrite sym $ andSameNeutral ne in xs `bind` f
 
 --- Folds ---
+
+public export
+foldrLazy : (op : a -> Lazy b -> b) -> (init : Lazy b) -> CEList ne a -> b
+foldrLazy _  init []      = init
+foldrLazy op init (x::xs) = x `op` foldrLazy op init xs
 
 export
 Foldable (CEList ne) where
@@ -166,14 +171,10 @@ export
 foldl1 : (a -> a -> a) -> NEList a -> a
 foldl1 f (x::xs) = foldl f x xs
 
-export
-foldr1 : (a -> a -> a) -> NEList a -> a
-foldr1 f (x::xs) = foldr f x xs
-
-export
-Traversable (CEList ne) where
-  traverse f []      = pure []
-  traverse f (x::xs) = [| f x :: traverse f xs |]
+--export
+--Traversable (CEList ne) where
+--  traverse f []      = pure []
+--  traverse f (x::xs) = [| f x :: traverse f xs |]
 
 --- Filtering ---
 
