@@ -50,6 +50,10 @@ empty : Gen a
 empty = Empty
 
 export
+fromNonEmpty : Lazy (NonEmptyGen a) -> Gen a
+fromNonEmpty = NonEmpty . wrapLazy (map Just)
+
+export
 toNonEmpty : Gen a -> Maybe $ Lazy (NonEmptyGen $ Maybe a)
 toNonEmpty Empty        = Nothing
 toNonEmpty $ NonEmpty g = Just g
