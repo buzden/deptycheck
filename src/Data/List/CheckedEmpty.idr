@@ -1,6 +1,7 @@
 module Data.List.CheckedEmpty
 
 import Data.Bool
+import Data.List.Lazy
 import Data.List1
 import Data.Vect
 
@@ -208,6 +209,13 @@ fromList1 $ x:::xs = x :: fromList xs
 public export
 toList1 : NEList a -> List1 a
 toList1 $ x::xs = x ::: toList xs
+
+-- Lazy list --
+
+public export
+fromLazyList : (xs : LazyList a) -> CEList (not $ null xs) a
+fromLazyList []      = []
+fromLazyList (x::xs) = x :: fromLazyList xs
 
 -- Vect --
 

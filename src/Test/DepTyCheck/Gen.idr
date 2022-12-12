@@ -12,7 +12,7 @@ import Data.Nat.Pos
 import Data.Fuel
 import Data.List
 import Data.List.CheckedEmpty
-import Data.List.Lazy
+import public Data.List.Lazy
 import Data.Vect
 import Data.Stream
 
@@ -180,9 +180,9 @@ oneOf = maybe empty (NonEmpty . delay . oneOf) . strengthen . unGenAlts
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : List (Nat, Gen a) -> Gen a
+frequency : LazyList (Nat, Gen a) -> Gen a
 frequency xs = maybe empty (NonEmpty . delay . frequency) $
-                 strengthen $ fromList $ mapMaybe {b=(_, Lazy _)} (\(w, g) => [| (toPosNat w, toNonEmpty g) |]) xs
+                 strengthen $ fromLazyList $ mapMaybe {b=(_, Lazy _)} (\(w, g) => [| (toPosNat w, toNonEmpty g) |]) xs
 
 ||| Choose one of the given values uniformly.
 |||
