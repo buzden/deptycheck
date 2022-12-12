@@ -1,54 +1,61 @@
 1/1: Building DemoGen (DemoGen.idr)
-[1] = as_str(32);
-// regs ty after: [-, String]
-
-----
-
-puts(concat(concat(as_str(-62), concat("lou", "emr")), "y"));
-// regs ty after: [-, -]
-
-----
-
-[0] = as_str(-3);
-[0] = (-20 < inc(77)) || False;
+[0] = True;
 // regs ty after: [Bool, -]
 
 ----
 
-[0] = inc(77 + -99) + ((19 * -74) * inc(67));
-// regs ty after: [Int, -]
+[0] = "s";
+[1] = ((-28 <= 17) || (-85 < 79)) || ((False || False) || (True || True));
+// regs ty after: [String, Bool]
 
 ----
 
-[0] = as_str(inc(-45 * -57));
-// regs ty after: [String, -]
-
-----
-
-[0] = concat("rri", as_str(56 + 99));
-// regs ty after: [String, -]
-
-----
-
-[0] = 1;
-// regs ty after: [Int, -]
-
-----
-
-[1] = 37;
-// regs ty after: [-, Int]
-
-----
-
-[1] = inc(inc(26));
-// regs ty after: [-, Int]
-
-----
-
-puts(concat(concat(as_str(77), concat("zc", "m")), "xz"));
+puts(as_str(-47 + (89 * -60)));
 // regs ty after: [-, -]
 
 ----
 
-[0] = inc(-8);
+[1] = 84 + (42 * 86);
+// regs ty after: [-, Int]
+
+----
+
+[0] = (4 + (93 + 21)) * ((30 + 17) + inc(2));
+// regs ty after: [Int, -]
+
+----
+
+[0] = "ky";
+// regs ty after: [String, -]
+
+----
+
+{
+  int en;
+}
+[0] = "hw";
+// regs ty after: [String, -]
+
+----
+
+[1] = (inc(-91) * (-66 + -65)) < inc(-54 * -57);
+// regs ty after: [-, Bool]
+
+----
+
+[0] = "ucz";
+// regs ty after: [String, -]
+
+----
+
+{
+  [1] = inc(inc(-88) + inc(-11));
+  [1] = (inc(33) + (68 + 70)) + (75 + -60);
+}
+[0] = concat(as_str(12 + 76), concat("fr", as_str(-62)));
+// regs ty after: [String, Int]
+
+----
+
+[0] = -14;
 // regs ty after: [Int, -]

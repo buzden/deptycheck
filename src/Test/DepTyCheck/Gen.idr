@@ -18,6 +18,8 @@ import Data.Stream
 
 import Decidable.Equality
 
+import public Language.Implicits.IfUnsolved
+
 import public System.Random.Pure
 
 import Test.DepTyCheck.Gen.NonEmpty

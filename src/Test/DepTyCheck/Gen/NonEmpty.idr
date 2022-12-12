@@ -12,7 +12,7 @@ import Data.List.CheckedEmpty
 import Data.Vect
 import Data.Stream
 
-import public Language.Implicits.Default
+import public Language.Implicits.IfUnsolved
 
 import public System.Random.Pure
 
@@ -90,7 +90,7 @@ unGen $ Bind x f = unGen x >>= assert_total unGen . f
 export
 unGenTryAll' : RandomGen g => (seed : g) -> NonEmptyGen a -> Stream (a, g)
 unGenTryAll' seed gen = do
-  let (seed, mc) = runState seed $ unGen {g} {m=State g} gen
+  let (seed, mc) = runRandom seed $ unGen gen
   (mc, seed) :: unGenTryAll' seed gen
 
 export
@@ -156,7 +156,7 @@ namespace GenAlternatives
   Nil = MkGenAlternatives []
 
   export %inline
-  (::) : (0 _ : Default True e) => Lazy (NonEmptyGen a) -> Lazy (GenAlternatives' e a) -> GenAlternatives' ne a
+  (::) : (0 _ : IfUnsolved True e) => Lazy (NonEmptyGen a) -> Lazy (GenAlternatives' e a) -> GenAlternatives' ne a
   x :: xs = MkGenAlternatives $ (Element 1 ItIsSucc, x) :: xs.unGenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
