@@ -156,13 +156,13 @@ namespace GenAlternatives
   Nil = MkGenAlternatives []
 
   export %inline
-  (::) : (0 _ : Default True e) => Lazy (NonEmptyGen a) -> GenAlternatives' e a -> GenAlternatives' ne a
-  x :: MkGenAlternatives xs = MkGenAlternatives $ (Element 1 ItIsSucc, x) :: xs
+  (::) : (0 _ : Default True e) => Lazy (NonEmptyGen a) -> Lazy (GenAlternatives' e a) -> GenAlternatives' ne a
+  x :: xs = MkGenAlternatives $ (Element 1 ItIsSucc, x) :: xs.unGenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export %inline
-  (++) : GenAlternatives' nel a -> GenAlternatives' ner a -> GenAlternatives' (nel || ner) a
-  MkGenAlternatives xs ++ MkGenAlternatives ys = MkGenAlternatives $ xs ++ ys
+  (++) : GenAlternatives' nel a -> Lazy (GenAlternatives' ner a) -> GenAlternatives' (nel || ner) a
+  xs ++ ys = MkGenAlternatives $ xs.unGenAlternatives ++ ys.unGenAlternatives
 
   public export %inline
   length : GenAlternatives' ne a -> Nat
