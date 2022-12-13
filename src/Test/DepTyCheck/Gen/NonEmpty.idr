@@ -157,7 +157,7 @@ namespace GenAlternatives
 
   export %inline
   (::) : (0 _ : IfUnsolved True e) => Lazy (NonEmptyGen a) -> Lazy (GenAlternatives' e a) -> GenAlternatives' ne a
-  x :: xs = MkGenAlternatives $ (Element 1 ItIsSucc, x) :: xs.unGenAlternatives
+  x :: xs = MkGenAlternatives $ (1, x) :: xs.unGenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export %inline
