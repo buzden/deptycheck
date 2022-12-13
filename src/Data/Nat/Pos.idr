@@ -29,6 +29,24 @@ public export %inline
 (*) : PosNat -> PosNat -> PosNat
 Element (S n) _ * Element (S m) _ = Element (S n * S m) ItIsSucc
 
+--- Semigroups and etc ---
+
+namespace Semigroup
+
+  public export
+  [ Additive ] Semigroup PosNat where
+    (<+>) = (+)
+
+  public export
+  [ Multiplicative ] Semigroup PosNat where
+    (<+>) = (*)
+
+namespace Monoid
+
+  public export
+  Monoid PosNat using Pos.Semigroup.Multiplicative where
+    neutral = 1
+
 --- Covertions ---
 
 public export
