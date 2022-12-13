@@ -15,14 +15,14 @@ modules = Control.Monad.State.Tuple
         , Deriving.DepTyCheck.Gen.Core.ConsEntry
         , Deriving.DepTyCheck.Gen.Core.Util
         , Deriving.DepTyCheck.Gen.Checked
-        , Deriving.DepTyCheck.Gen.Util
-        , Deriving.DepTyCheck.Gen.Util.Alternative
-        , Deriving.DepTyCheck.Gen.Util.Collections
-        , Deriving.DepTyCheck.Gen.Util.DepPerm
-        , Deriving.DepTyCheck.Gen.Util.Fin
-        , Deriving.DepTyCheck.Gen.Util.Logging
-        , Deriving.DepTyCheck.Gen.Util.Reflection
-        , Deriving.DepTyCheck.Gen.Util.Syntax
+        , Deriving.DepTyCheck.Util
+        , Deriving.DepTyCheck.Util.Alternative
+        , Deriving.DepTyCheck.Util.Collections
+        , Deriving.DepTyCheck.Util.DepPerm
+        , Deriving.DepTyCheck.Util.Fin
+        , Deriving.DepTyCheck.Util.Logging
+        , Deriving.DepTyCheck.Util.Reflection
+        , Deriving.DepTyCheck.Util.Syntax
         , System.Random.Pure
         , System.Random.Pure.StdGen
         , Test.DepTyCheck.Gen

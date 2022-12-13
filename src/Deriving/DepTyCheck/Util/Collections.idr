@@ -1,4 +1,4 @@
-module Deriving.DepTyCheck.Gen.Util.Collections
+module Deriving.DepTyCheck.Util.Collections
 
 import public Control.Monad.State
 
@@ -11,8 +11,8 @@ import public Data.SortedSet
 import public Data.Vect
 import public Data.Vect.Dependent
 
-import public Deriving.DepTyCheck.Gen.Util.Fin
-import public Deriving.DepTyCheck.Gen.Util.Syntax
+import public Deriving.DepTyCheck.Util.Fin
+import public Deriving.DepTyCheck.Util.Syntax
 
 %default total
 

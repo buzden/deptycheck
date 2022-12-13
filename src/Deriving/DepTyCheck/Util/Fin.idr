@@ -1,4 +1,4 @@
-module Deriving.DepTyCheck.Gen.Util.Fin
+module Deriving.DepTyCheck.Util.Fin
 
 import public Data.Vect
 

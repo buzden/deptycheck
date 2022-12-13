@@ -1,4 +1,4 @@
-module Deriving.DepTyCheck.Gen.Util.Logging
+module Deriving.DepTyCheck.Util.Logging
 
 import public Data.So
 

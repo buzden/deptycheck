@@ -7,7 +7,7 @@ import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
-import public Deriving.DepTyCheck.Gen.Util
+import public Deriving.DepTyCheck.Util
 
 %default total
 

@@ -1,4 +1,4 @@
-module Deriving.DepTyCheck.Gen.Util.Alternative
+module Deriving.DepTyCheck.Util.Alternative
 
 %default total
 

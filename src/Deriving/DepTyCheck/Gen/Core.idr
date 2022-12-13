@@ -2,7 +2,7 @@
 module Deriving.DepTyCheck.Gen.Core
 
 import public Deriving.DepTyCheck.Gen.Core.ConsEntry
-import public Deriving.DepTyCheck.Gen.Util.Reflection
+import public Deriving.DepTyCheck.Util.Reflection
 
 import public Language.Reflection.Syntax
 import public Language.Reflection.Types

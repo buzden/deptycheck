@@ -9,7 +9,7 @@ import public Decidable.Equality
 
 import public Deriving.DepTyCheck.Gen.Derive
 
-import public Deriving.DepTyCheck.Gen.Util.DepPerm
+import public Deriving.DepTyCheck.Util.DepPerm
 
 %default total
 
