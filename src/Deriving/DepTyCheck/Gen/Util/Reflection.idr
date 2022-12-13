@@ -1,5 +1,5 @@
 ||| `Language.Reflection`-related utilities
-module Test.DepTyCheck.Gen.Auto.Util.Reflection
+module Deriving.DepTyCheck.Gen.Util.Reflection
 
 import public Data.Fin
 import public Data.List.Lazy
@@ -11,15 +11,15 @@ import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
+import public Deriving.DepTyCheck.Gen.Util.Alternative
+import public Deriving.DepTyCheck.Gen.Util.Collections
+import public Deriving.DepTyCheck.Gen.Util.Fin
+import public Deriving.DepTyCheck.Gen.Util.Logging
+import public Deriving.DepTyCheck.Gen.Util.Syntax
+
 import public Language.Reflection.TTImp
 import public Language.Reflection.Types
 import public Language.Reflection.Pretty
-
-import public Test.DepTyCheck.Gen.Auto.Util.Alternative
-import public Test.DepTyCheck.Gen.Auto.Util.Collections
-import public Test.DepTyCheck.Gen.Auto.Util.Fin
-import public Test.DepTyCheck.Gen.Auto.Util.Logging
-import public Test.DepTyCheck.Gen.Auto.Util.Syntax
 
 %default total
 

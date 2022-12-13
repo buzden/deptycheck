@@ -1,12 +1,12 @@
 ||| Derivation of the outer layer of a constructor-generating function, performing GADT indices check of given arguments.
-module Test.DepTyCheck.Gen.Auto.Core.ConsEntry
+module Deriving.DepTyCheck.Gen.Core.ConsEntry
 
 import public Control.Monad.State.Tuple
 
 import public Decidable.Equality
 
-import public Test.DepTyCheck.Gen.Auto.Core.ConsDerive
-import public Test.DepTyCheck.Gen.Auto.Core.Util
+import public Deriving.DepTyCheck.Gen.Core.ConsDerive
+import public Deriving.DepTyCheck.Gen.Core.Util
 
 %default total
 

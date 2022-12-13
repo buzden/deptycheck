@@ -1,6 +1,6 @@
 module Infra
 
-import public Test.DepTyCheck.Gen.Auto.Util.Reflection
+import public Deriving.DepTyCheck.Gen.Util.Reflection
 
 import public Language.Reflection.Syntax
 

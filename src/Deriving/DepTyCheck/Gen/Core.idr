@@ -1,11 +1,11 @@
 ||| Main implementation of the derivator core interface
-module Test.DepTyCheck.Gen.Auto.Core
+module Deriving.DepTyCheck.Gen.Core
+
+import public Deriving.DepTyCheck.Gen.Core.ConsEntry
+import public Deriving.DepTyCheck.Gen.Util.Reflection
 
 import public Language.Reflection.Syntax
 import public Language.Reflection.Types
-
-import public Test.DepTyCheck.Gen.Auto.Core.ConsEntry
-import public Test.DepTyCheck.Gen.Auto.Util.Reflection
 
 %default total
 

@@ -2,10 +2,10 @@ module Infra
 
 import DepsCheck
 
+import Deriving.DepTyCheck.Gen.Util
+
 import Language.Reflection
 import Language.Reflection.Syntax
-
-import Test.DepTyCheck.Gen.Auto.Util
 
 %language ElabReflection
 

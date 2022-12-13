@@ -1,4 +1,6 @@
-module Test.DepTyCheck.Gen.Auto.Util.Collections
+module Deriving.DepTyCheck.Gen.Util.Collections
+
+import public Control.Monad.State
 
 import public Data.List
 import public Data.List.Lazy
@@ -9,10 +11,8 @@ import public Data.SortedSet
 import public Data.Vect
 import public Data.Vect.Dependent
 
-import public Control.Monad.State
-
-import public Test.DepTyCheck.Gen.Auto.Util.Fin
-import public Test.DepTyCheck.Gen.Auto.Util.Syntax
+import public Deriving.DepTyCheck.Gen.Util.Fin
+import public Deriving.DepTyCheck.Gen.Util.Syntax
 
 %default total
 

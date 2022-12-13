@@ -1,7 +1,7 @@
 <!-- idris
 module Explanation.Derivation.Design
 
-import public Test.DepTyCheck.Gen.Auto
+import public Deriving.DepTyCheck.Gen
 
 %language ElabReflection
 

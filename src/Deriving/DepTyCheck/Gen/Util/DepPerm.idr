@@ -1,14 +1,14 @@
 -- This module exists only to put out couple of heavily copiling functions, to speed up compilation time
-module Test.DepTyCheck.Gen.Auto.Util.DepPerm
+module Deriving.DepTyCheck.Gen.Util.DepPerm
 
 import public Data.Vect.Dependent
 import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
-import public Test.DepTyCheck.Gen.Auto.Util.Collections
-import public Test.DepTyCheck.Gen.Auto.Util.Fin
-import public Test.DepTyCheck.Gen.Auto.Util.Syntax
+import public Deriving.DepTyCheck.Gen.Util.Collections
+import public Deriving.DepTyCheck.Gen.Util.Fin
+import public Deriving.DepTyCheck.Gen.Util.Syntax
 
 export
 disjointDepSets : (rawDeps : DVect n $ SortedSet . Fin . Fin.finToNat) -> (givs : SortedSet $ Fin n) -> List $ SortedSet $ Fin n

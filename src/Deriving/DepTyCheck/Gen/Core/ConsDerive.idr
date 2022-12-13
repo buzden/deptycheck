@@ -1,5 +1,5 @@
 ||| Several tactics for derivation of particular generators for a constructor regarding to how they use externals
-module Test.DepTyCheck.Gen.Auto.Core.ConsDerive
+module Deriving.DepTyCheck.Gen.Core.ConsDerive
 
 import public Control.Monad.State
 
@@ -7,9 +7,9 @@ import public Data.Either
 
 import public Decidable.Equality
 
-import public Test.DepTyCheck.Gen.Auto.Derive
+import public Deriving.DepTyCheck.Gen.Derive
 
-import public Test.DepTyCheck.Gen.Auto.Util.DepPerm
+import public Deriving.DepTyCheck.Gen.Util.DepPerm
 
 %default total
 

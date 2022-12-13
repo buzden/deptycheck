@@ -2,8 +2,9 @@ module Infra
 
 import public Data.Fuel
 
+import public Deriving.DepTyCheck.Gen.Core
+
 import public Test.DepTyCheck.Gen
-import public Test.DepTyCheck.Gen.Auto.Core
 
 import public Language.Reflection.Types
 

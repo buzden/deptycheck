@@ -4,8 +4,9 @@ module README
 import Data.Fin
 import Data.List1
 
+import Deriving.DepTyCheck.Gen
+
 import Test.DepTyCheck.Gen
-import Test.DepTyCheck.Gen.Auto
 
 %default total
 

@@ -6,6 +6,8 @@ import public Infra
 
 %language ElabReflection
 
+infixr 3 .=> -- why do I need to repeat it here? Looks like some compiler's bug
+
 %runElab checkEq "fst, rename, diff names" True (\x : Nat => \y : Nat => x) (\v : Nat => \w : Nat => v)
 %runElab checkEq "fst, rename, same names" True (\x : Nat => \y : Nat => x) (\y : Nat => \x : Nat => y)
 %runElab checkEq "snd, rename, diff names" True (\x : Nat => \y : Nat => y) (\v : Nat => \w : Nat => w)

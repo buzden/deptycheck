@@ -2,7 +2,7 @@ module DerivedGen
 
 import Data.Fuel
 
-import Test.DepTyCheck.Gen.Auto
+import Deriving.DepTyCheck.Gen
 
 import System.Random.Pure.StdGen
 
