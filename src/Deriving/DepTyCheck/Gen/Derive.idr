@@ -1,5 +1,5 @@
 ||| Interfaces for using a derivator
-module Test.DepTyCheck.Gen.Auto.Derive
+module Deriving.DepTyCheck.Gen.Derive
 
 import public Control.Monad.Error.Interface
 
@@ -7,7 +7,7 @@ import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
-import public Test.DepTyCheck.Gen.Auto.Util
+import public Deriving.DepTyCheck.Util
 
 %default total
 

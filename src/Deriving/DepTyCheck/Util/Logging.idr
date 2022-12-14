@@ -1,4 +1,4 @@
-module Test.DepTyCheck.Gen.Auto.Util.Logging
+module Deriving.DepTyCheck.Util.Logging
 
 import public Data.So
 

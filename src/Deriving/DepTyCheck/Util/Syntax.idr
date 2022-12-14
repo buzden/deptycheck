@@ -1,4 +1,4 @@
-module Test.DepTyCheck.Gen.Auto.Util.Syntax
+module Deriving.DepTyCheck.Util.Syntax
 
 import public Data.SortedMap
 import public Data.SortedMap.Dependent

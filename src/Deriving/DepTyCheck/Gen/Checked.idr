@@ -1,5 +1,5 @@
 ||| A bridge between a single act of derivation and a user derivation task
-module Test.DepTyCheck.Gen.Auto.Checked
+module Deriving.DepTyCheck.Gen.Checked
 
 import public Control.Monad.Either
 import public Control.Monad.Reader
@@ -7,20 +7,19 @@ import public Control.Monad.State
 import public Control.Monad.Writer
 import public Control.Monad.RWS
 
-import public Decidable.Equality
-
 import public Data.DPair
-
 import public Data.Vect.Extra
 import public Data.SortedMap
 import public Data.SortedSet
 
+import public Decidable.Equality
+
+import public Deriving.DepTyCheck.Gen.Derive
+import public Deriving.DepTyCheck.Util
+
 import public Language.Reflection.Types
 
 import public Syntax.WithProof
-
-import public Test.DepTyCheck.Gen.Auto.Derive
-import public Test.DepTyCheck.Gen.Auto.Util
 
 %default total
 

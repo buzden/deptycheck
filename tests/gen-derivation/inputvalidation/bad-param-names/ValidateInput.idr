@@ -1,6 +1,6 @@
 module ValidateInput
 
-import Test.DepTyCheck.Gen.Auto
+import Deriving.DepTyCheck.Gen
 
 %language ElabReflection
 

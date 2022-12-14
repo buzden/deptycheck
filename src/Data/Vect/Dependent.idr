@@ -5,8 +5,8 @@ import Data.Fin
 import Data.Fin.Extra
 import Data.Vect
 
--- TODO to refactor utils to not to have dependency to `Test.*` packages from here
-import Test.DepTyCheck.Gen.Auto.Util.Fin
+-- TODO to refactor utils to not to have dependency to `Deriving.*` packages from here
+import Deriving.DepTyCheck.Util.Fin
 
 %default total
 

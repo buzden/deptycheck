@@ -4,7 +4,7 @@ import public ConsApps
 
 import Data.Vect.Extra
 
-import Test.DepTyCheck.Gen.Auto.Core.Util
+import Deriving.DepTyCheck.Gen.Core.Util
 
 %language ElabReflection
 

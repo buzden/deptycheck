@@ -6,24 +6,25 @@ version = 0.0.220712
 modules = Control.Monad.State.Tuple
         , Data.Nat.Pos
         , Data.Vect.Dependent
+        , Deriving.DepTyCheck
+        , Deriving.DepTyCheck.Gen
+        , Deriving.DepTyCheck.Gen.Derive
+        , Deriving.DepTyCheck.Gen.Entry
+        , Deriving.DepTyCheck.Gen.Core
+        , Deriving.DepTyCheck.Gen.Core.ConsDerive
+        , Deriving.DepTyCheck.Gen.Core.ConsEntry
+        , Deriving.DepTyCheck.Gen.Core.Util
+        , Deriving.DepTyCheck.Gen.Checked
+        , Deriving.DepTyCheck.Util
+        , Deriving.DepTyCheck.Util.Alternative
+        , Deriving.DepTyCheck.Util.Collections
+        , Deriving.DepTyCheck.Util.DepPerm
+        , Deriving.DepTyCheck.Util.Fin
+        , Deriving.DepTyCheck.Util.Logging
+        , Deriving.DepTyCheck.Util.Reflection
+        , Deriving.DepTyCheck.Util.Syntax
         , System.Random.Pure
         , System.Random.Pure.StdGen
-        , Test.DepTyCheck.Gen.Auto
-        , Test.DepTyCheck.Gen.Auto.Derive
-        , Test.DepTyCheck.Gen.Auto.Entry
-        , Test.DepTyCheck.Gen.Auto.Core
-        , Test.DepTyCheck.Gen.Auto.Core.ConsDerive
-        , Test.DepTyCheck.Gen.Auto.Core.ConsEntry
-        , Test.DepTyCheck.Gen.Auto.Core.Util
-        , Test.DepTyCheck.Gen.Auto.Checked
-        , Test.DepTyCheck.Gen.Auto.Util
-        , Test.DepTyCheck.Gen.Auto.Util.Alternative
-        , Test.DepTyCheck.Gen.Auto.Util.Collections
-        , Test.DepTyCheck.Gen.Auto.Util.DepPerm
-        , Test.DepTyCheck.Gen.Auto.Util.Fin
-        , Test.DepTyCheck.Gen.Auto.Util.Logging
-        , Test.DepTyCheck.Gen.Auto.Util.Reflection
-        , Test.DepTyCheck.Gen.Auto.Util.Syntax
         , Test.DepTyCheck.Gen
 
 depends = contrib

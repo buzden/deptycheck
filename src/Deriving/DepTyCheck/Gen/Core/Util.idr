@@ -1,11 +1,11 @@
-module Test.DepTyCheck.Gen.Auto.Core.Util
+module Deriving.DepTyCheck.Gen.Core.Util
 
 import public Data.Fin.Extra
 import public Data.List.Equalities
 
 import public Decidable.Equality
 
-import public Test.DepTyCheck.Gen.Auto.Derive
+import public Deriving.DepTyCheck.Gen.Derive
 
 %default total
 

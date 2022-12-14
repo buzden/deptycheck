@@ -1,13 +1,14 @@
 ||| Derivation interface for an end-point user
-module Test.DepTyCheck.Gen.Auto.Entry
+module Deriving.DepTyCheck.Gen.Entry
 
 import public Data.Fuel
 
 import public Decidable.Equality
 
+import public Deriving.DepTyCheck.Gen.Checked
+import public Deriving.DepTyCheck.Gen.Core
+
 import public Test.DepTyCheck.Gen -- for `Gen` data type
-import public Test.DepTyCheck.Gen.Auto.Checked
-import public Test.DepTyCheck.Gen.Auto.Core
 
 %default total
 

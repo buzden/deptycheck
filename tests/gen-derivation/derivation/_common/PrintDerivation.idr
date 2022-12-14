@@ -1,6 +1,6 @@
 module PrintDerivation
 
-import public Test.DepTyCheck.Gen.Auto.Entry
+import public Deriving.DepTyCheck.Gen.Entry
 
 %language ElabReflection
 

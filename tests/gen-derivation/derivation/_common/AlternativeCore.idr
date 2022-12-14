@@ -1,6 +1,6 @@
 module AlternativeCore
 
-import public Test.DepTyCheck.Gen.Auto.Core
+import public Deriving.DepTyCheck.Gen.Core
 
 %default total
 

@@ -1,4 +1,4 @@
-module Test.DepTyCheck.Gen.Auto.Util.Fin
+module Deriving.DepTyCheck.Util.Fin
 
 import public Data.Vect
 

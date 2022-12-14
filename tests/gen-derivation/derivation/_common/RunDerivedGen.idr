@@ -1,8 +1,8 @@
 module RunDerivedGen
 
-import public Generics.Derive
+import public Deriving.DepTyCheck.Gen
 
-import public Test.DepTyCheck.Gen.Auto
+import public Generics.Derive
 
 import System.Random.Pure.StdGen
 
