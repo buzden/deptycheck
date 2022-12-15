@@ -156,7 +156,7 @@ namespace GenAlternatives
   Nil = MkGenAlternatives []
 
   export %inline
-  (::) : (0 _ : IfUnsolved True e) => Lazy (NonEmptyGen a) -> Lazy (GenAlternatives' e a) -> GenAlternatives' ne a
+  (::) : (0 _ : True `IfUnsolved` e) => Lazy (NonEmptyGen a) -> Lazy (GenAlternatives' e a) -> GenAlternatives' ne a
   x :: xs = MkGenAlternatives $ (1, x) :: xs.unGenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists

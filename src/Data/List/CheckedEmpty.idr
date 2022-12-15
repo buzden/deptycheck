@@ -14,7 +14,7 @@ import public Language.Implicits.IfUnsolved
 public export
 data CEList : (definitelyNotEmpty : Bool) -> Type -> Type where
   Nil  : CEList False a
-  (::) : (0 _ : IfUnsolved True e) => a -> Lazy (CEList e a) -> CEList ne a
+  (::) : (0 _ : True `IfUnsolved` e) => a -> Lazy (CEList e a) -> CEList ne a
 
 %name CEList xs, ys, zs
 
