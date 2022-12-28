@@ -44,28 +44,36 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<DerivedGen.MkW>>
                                  [ WithClause (IApp. IVar <<DerivedGen.MkW>>
                                                    $ IBindVar ^cons_fuel^
-                                                   $ (INamedApp. (IApp. IVar DerivedGen.MkZ
-                                                                      $ (IApp. IVar DerivedGen.MkX
-                                                                             $ IBindVar n
-                                                                             $ IVar Prelude.Basics.False)
-                                                                      $ (IApp. IVar DerivedGen.MkX
-                                                                             $ IBindVar m
-                                                                             $ IVar Prelude.Basics.False))
-                                                               $ (INamedApp. IVar DerivedGen.MkY
-                                                                           $ Implicit True
-                                                                           $ IVar Prelude.Basics.False
-                                                                           $ Implicit True))
-                                                   $ (INamedApp. (IApp. IVar DerivedGen.MkZ
-                                                                      $ (IApp. IVar DerivedGen.MkX
-                                                                             $ IBindVar to_be_deceqed^^n0
-                                                                             $ IVar Prelude.Basics.True)
-                                                                      $ (IApp. IVar DerivedGen.MkX
-                                                                             $ IBindVar to_be_deceqed^^m1
-                                                                             $ IVar Prelude.Basics.True))
-                                                               $ (INamedApp. IVar DerivedGen.MkY
-                                                                           $ Implicit True
-                                                                           $ IVar Prelude.Basics.True
-                                                                           $ Implicit True)))
+                                                   $ INamedApp (IApp. IVar DerivedGen.MkZ
+                                                                    $ (IApp. IVar DerivedGen.MkX
+                                                                           $ IBindVar n
+                                                                           $ IVar Prelude.Basics.False)
+                                                                    $ (IApp. IVar DerivedGen.MkX
+                                                                           $ IBindVar m
+                                                                           $ IVar Prelude.Basics.False))
+                                                               {conArg:858}
+                                                               (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
+                                                                                                m
+                                                                                                (Implicit True))
+                                                                                     b
+                                                                                     (IVar Prelude.Basics.False))
+                                                                          n
+                                                                          (Implicit True))
+                                                   $ INamedApp (IApp. IVar DerivedGen.MkZ
+                                                                    $ (IApp. IVar DerivedGen.MkX
+                                                                           $ IBindVar to_be_deceqed^^n0
+                                                                           $ IVar Prelude.Basics.True)
+                                                                    $ (IApp. IVar DerivedGen.MkX
+                                                                           $ IBindVar to_be_deceqed^^m1
+                                                                           $ IVar Prelude.Basics.True))
+                                                               {conArg:858}
+                                                               (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
+                                                                                                m
+                                                                                                (Implicit True))
+                                                                                     b
+                                                                                     (IVar Prelude.Basics.True))
+                                                                          n
+                                                                          (Implicit True)))
                                               MW
                                               (IApp. IVar Decidable.Equality.decEq
                                                    $ IVar to_be_deceqed^^m1
@@ -74,28 +82,36 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                               []
                                               [ WithClause (IApp. IVar <<DerivedGen.MkW>>
                                                                 $ IBindVar ^cons_fuel^
-                                                                $ (INamedApp. (IApp. IVar DerivedGen.MkZ
-                                                                                   $ (IApp. IVar DerivedGen.MkX
-                                                                                          $ IBindVar n
-                                                                                          $ IVar Prelude.Basics.False)
-                                                                                   $ (IApp. IVar DerivedGen.MkX
-                                                                                          $ IBindVar m
-                                                                                          $ IVar Prelude.Basics.False))
-                                                                            $ (INamedApp. IVar DerivedGen.MkY
-                                                                                        $ Implicit True
-                                                                                        $ IVar Prelude.Basics.False
-                                                                                        $ Implicit True))
-                                                                $ (INamedApp. (IApp. IVar DerivedGen.MkZ
-                                                                                   $ (IApp. IVar DerivedGen.MkX
-                                                                                          $ IBindVar to_be_deceqed^^n0
-                                                                                          $ IVar Prelude.Basics.True)
-                                                                                   $ (IApp. IVar DerivedGen.MkX
-                                                                                          $ IBindVar m
-                                                                                          $ IVar Prelude.Basics.True))
-                                                                            $ (INamedApp. IVar DerivedGen.MkY
-                                                                                        $ Implicit True
-                                                                                        $ IVar Prelude.Basics.True
-                                                                                        $ Implicit True))
+                                                                $ INamedApp (IApp. IVar DerivedGen.MkZ
+                                                                                 $ (IApp. IVar DerivedGen.MkX
+                                                                                        $ IBindVar n
+                                                                                        $ IVar Prelude.Basics.False)
+                                                                                 $ (IApp. IVar DerivedGen.MkX
+                                                                                        $ IBindVar m
+                                                                                        $ IVar Prelude.Basics.False))
+                                                                            {conArg:858}
+                                                                            (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
+                                                                                                             m
+                                                                                                             (Implicit True))
+                                                                                                  b
+                                                                                                  (IVar Prelude.Basics.False))
+                                                                                       n
+                                                                                       (Implicit True))
+                                                                $ INamedApp (IApp. IVar DerivedGen.MkZ
+                                                                                 $ (IApp. IVar DerivedGen.MkX
+                                                                                        $ IBindVar to_be_deceqed^^n0
+                                                                                        $ IVar Prelude.Basics.True)
+                                                                                 $ (IApp. IVar DerivedGen.MkX
+                                                                                        $ IBindVar m
+                                                                                        $ IVar Prelude.Basics.True))
+                                                                            {conArg:858}
+                                                                            (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
+                                                                                                             m
+                                                                                                             (Implicit True))
+                                                                                                  b
+                                                                                                  (IVar Prelude.Basics.True))
+                                                                                       n
+                                                                                       (Implicit True))
                                                                 $ (IApp. IVar Prelude.Yes
                                                                        $ IVar Builtin.Refl))
                                                            MW
@@ -106,61 +122,80 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                            []
                                                            [ PatClause (IApp. IVar <<DerivedGen.MkW>>
                                                                             $ IBindVar ^cons_fuel^
-                                                                            $ (INamedApp. (IApp. IVar DerivedGen.MkZ
-                                                                                               $ (IApp. IVar DerivedGen.MkX
-                                                                                                      $ IBindVar n
-                                                                                                      $ IVar Prelude.Basics.False)
-                                                                                               $ (IApp. IVar DerivedGen.MkX
-                                                                                                      $ IBindVar m
-                                                                                                      $ IVar Prelude.Basics.False))
-                                                                                        $ (INamedApp. IVar DerivedGen.MkY
-                                                                                                    $ Implicit True
-                                                                                                    $ IVar Prelude.Basics.False
-                                                                                                    $ Implicit True))
-                                                                            $ (INamedApp. (IApp. IVar DerivedGen.MkZ
-                                                                                               $ (IApp. IVar DerivedGen.MkX
-                                                                                                      $ IBindVar n
-                                                                                                      $ IVar Prelude.Basics.True)
-                                                                                               $ (IApp. IVar DerivedGen.MkX
-                                                                                                      $ IBindVar m
-                                                                                                      $ IVar Prelude.Basics.True))
-                                                                                        $ (INamedApp. IVar DerivedGen.MkY
-                                                                                                    $ Implicit True
-                                                                                                    $ IVar Prelude.Basics.True
-                                                                                                    $ Implicit True))
+                                                                            $ INamedApp (IApp. IVar DerivedGen.MkZ
+                                                                                             $ (IApp. IVar DerivedGen.MkX
+                                                                                                    $ IBindVar n
+                                                                                                    $ IVar Prelude.Basics.False)
+                                                                                             $ (IApp. IVar DerivedGen.MkX
+                                                                                                    $ IBindVar m
+                                                                                                    $ IVar Prelude.Basics.False))
+                                                                                        {conArg:858}
+                                                                                        (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
+                                                                                                                         m
+                                                                                                                         (Implicit True))
+                                                                                                              b
+                                                                                                              (IVar Prelude.Basics.False))
+                                                                                                   n
+                                                                                                   (Implicit True))
+                                                                            $ INamedApp (IApp. IVar DerivedGen.MkZ
+                                                                                             $ (IApp. IVar DerivedGen.MkX
+                                                                                                    $ IBindVar n
+                                                                                                    $ IVar Prelude.Basics.True)
+                                                                                             $ (IApp. IVar DerivedGen.MkX
+                                                                                                    $ IBindVar m
+                                                                                                    $ IVar Prelude.Basics.True))
+                                                                                        {conArg:858}
+                                                                                        (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
+                                                                                                                         m
+                                                                                                                         (Implicit True))
+                                                                                                              b
+                                                                                                              (IVar Prelude.Basics.True))
+                                                                                                   n
+                                                                                                   (Implicit True))
                                                                             $ (IApp. IVar Prelude.Yes
                                                                                    $ IVar Builtin.Refl)
                                                                             $ (IApp. IVar Prelude.Yes
                                                                                    $ IVar Builtin.Refl))
-                                                                       (IApp. (INamedApp. IVar Prelude.pure
-                                                                                        $ IVar Test.DepTyCheck.Gen.Gen)
-                                                                            $ (INamedApp. IVar DerivedGen.MkW
-                                                                                        $ IVar m
-                                                                                        $ IVar n))
+                                                                       (IApp. INamedApp (IVar Prelude.pure)
+                                                                                        f
+                                                                                        (IVar Test.DepTyCheck.Gen.Gen)
+                                                                            $ INamedApp (INamedApp (IVar DerivedGen.MkW)
+                                                                                                   m
+                                                                                                   (IVar m))
+                                                                                        n
+                                                                                        (IVar n))
                                                            , PatClause (IApp. IVar <<DerivedGen.MkW>>
                                                                             $ IBindVar ^cons_fuel^
-                                                                            $ (INamedApp. (IApp. IVar DerivedGen.MkZ
-                                                                                               $ (IApp. IVar DerivedGen.MkX
-                                                                                                      $ IBindVar n
-                                                                                                      $ IVar Prelude.Basics.False)
-                                                                                               $ (IApp. IVar DerivedGen.MkX
-                                                                                                      $ IBindVar m
-                                                                                                      $ IVar Prelude.Basics.False))
-                                                                                        $ (INamedApp. IVar DerivedGen.MkY
-                                                                                                    $ Implicit True
-                                                                                                    $ IVar Prelude.Basics.False
-                                                                                                    $ Implicit True))
-                                                                            $ (INamedApp. (IApp. IVar DerivedGen.MkZ
-                                                                                               $ (IApp. IVar DerivedGen.MkX
-                                                                                                      $ IBindVar to_be_deceqed^^n0
-                                                                                                      $ IVar Prelude.Basics.True)
-                                                                                               $ (IApp. IVar DerivedGen.MkX
-                                                                                                      $ IBindVar m
-                                                                                                      $ IVar Prelude.Basics.True))
-                                                                                        $ (INamedApp. IVar DerivedGen.MkY
-                                                                                                    $ Implicit True
-                                                                                                    $ IVar Prelude.Basics.True
-                                                                                                    $ Implicit True))
+                                                                            $ INamedApp (IApp. IVar DerivedGen.MkZ
+                                                                                             $ (IApp. IVar DerivedGen.MkX
+                                                                                                    $ IBindVar n
+                                                                                                    $ IVar Prelude.Basics.False)
+                                                                                             $ (IApp. IVar DerivedGen.MkX
+                                                                                                    $ IBindVar m
+                                                                                                    $ IVar Prelude.Basics.False))
+                                                                                        {conArg:858}
+                                                                                        (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
+                                                                                                                         m
+                                                                                                                         (Implicit True))
+                                                                                                              b
+                                                                                                              (IVar Prelude.Basics.False))
+                                                                                                   n
+                                                                                                   (Implicit True))
+                                                                            $ INamedApp (IApp. IVar DerivedGen.MkZ
+                                                                                             $ (IApp. IVar DerivedGen.MkX
+                                                                                                    $ IBindVar to_be_deceqed^^n0
+                                                                                                    $ IVar Prelude.Basics.True)
+                                                                                             $ (IApp. IVar DerivedGen.MkX
+                                                                                                    $ IBindVar m
+                                                                                                    $ IVar Prelude.Basics.True))
+                                                                                        {conArg:858}
+                                                                                        (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
+                                                                                                                         m
+                                                                                                                         (Implicit True))
+                                                                                                              b
+                                                                                                              (IVar Prelude.Basics.True))
+                                                                                                   n
+                                                                                                   (Implicit True))
                                                                             $ (IApp. IVar Prelude.Yes
                                                                                    $ IVar Builtin.Refl)
                                                                             $ (IApp. IVar Prelude.No
@@ -168,28 +203,36 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                        (IVar empty) ]
                                               , PatClause (IApp. IVar <<DerivedGen.MkW>>
                                                                $ IBindVar ^cons_fuel^
-                                                               $ (INamedApp. (IApp. IVar DerivedGen.MkZ
-                                                                                  $ (IApp. IVar DerivedGen.MkX
-                                                                                         $ IBindVar n
-                                                                                         $ IVar Prelude.Basics.False)
-                                                                                  $ (IApp. IVar DerivedGen.MkX
-                                                                                         $ IBindVar m
-                                                                                         $ IVar Prelude.Basics.False))
-                                                                           $ (INamedApp. IVar DerivedGen.MkY
-                                                                                       $ Implicit True
-                                                                                       $ IVar Prelude.Basics.False
-                                                                                       $ Implicit True))
-                                                               $ (INamedApp. (IApp. IVar DerivedGen.MkZ
-                                                                                  $ (IApp. IVar DerivedGen.MkX
-                                                                                         $ IBindVar to_be_deceqed^^n0
-                                                                                         $ IVar Prelude.Basics.True)
-                                                                                  $ (IApp. IVar DerivedGen.MkX
-                                                                                         $ IBindVar to_be_deceqed^^m1
-                                                                                         $ IVar Prelude.Basics.True))
-                                                                           $ (INamedApp. IVar DerivedGen.MkY
-                                                                                       $ Implicit True
-                                                                                       $ IVar Prelude.Basics.True
-                                                                                       $ Implicit True))
+                                                               $ INamedApp (IApp. IVar DerivedGen.MkZ
+                                                                                $ (IApp. IVar DerivedGen.MkX
+                                                                                       $ IBindVar n
+                                                                                       $ IVar Prelude.Basics.False)
+                                                                                $ (IApp. IVar DerivedGen.MkX
+                                                                                       $ IBindVar m
+                                                                                       $ IVar Prelude.Basics.False))
+                                                                           {conArg:858}
+                                                                           (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
+                                                                                                            m
+                                                                                                            (Implicit True))
+                                                                                                 b
+                                                                                                 (IVar Prelude.Basics.False))
+                                                                                      n
+                                                                                      (Implicit True))
+                                                               $ INamedApp (IApp. IVar DerivedGen.MkZ
+                                                                                $ (IApp. IVar DerivedGen.MkX
+                                                                                       $ IBindVar to_be_deceqed^^n0
+                                                                                       $ IVar Prelude.Basics.True)
+                                                                                $ (IApp. IVar DerivedGen.MkX
+                                                                                       $ IBindVar to_be_deceqed^^m1
+                                                                                       $ IVar Prelude.Basics.True))
+                                                                           {conArg:858}
+                                                                           (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
+                                                                                                            m
+                                                                                                            (Implicit True))
+                                                                                                 b
+                                                                                                 (IVar Prelude.Basics.True))
+                                                                                      n
+                                                                                      (Implicit True))
                                                                $ (IApp. IVar Prelude.No
                                                                       $ Implicit True))
                                                           (IVar empty) ]

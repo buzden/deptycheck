@@ -49,14 +49,17 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ (IApp. IVar Prelude.Types.S
                                                                 $ IBindVar n))
-                                                  $ (IApp. (INamedApp. IVar Data.Fin.FS
-                                                                     $ (IApp. IVar Prelude.Types.S
-                                                                            $ Implicit True))
-                                                         $ (IApp. (INamedApp. IVar Data.Fin.FS
-                                                                            $ Implicit True)
+                                                  $ (IApp. INamedApp (IVar Data.Fin.FS)
+                                                                     k
+                                                                     (IApp. IVar Prelude.Types.S
+                                                                          $ Implicit True)
+                                                         $ (IApp. INamedApp (IVar Data.Fin.FS)
+                                                                            k
+                                                                            (Implicit True)
                                                                 $ IBindVar f)))
-                                             (IApp. (INamedApp. IVar Prelude.pure
-                                                              $ IVar Test.DepTyCheck.Gen.Gen)
+                                             (IApp. INamedApp (IVar Prelude.pure)
+                                                              f
+                                                              (IVar Test.DepTyCheck.Gen.Gen)
                                                   $ (IApp. IVar DerivedGen.MkX
                                                          $ IVar n
                                                          $ IVar f))

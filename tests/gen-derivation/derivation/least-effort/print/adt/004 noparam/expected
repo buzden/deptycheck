@@ -54,8 +54,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<Prelude.Types.Z>>
                                  [ PatClause (IApp. IVar <<Prelude.Types.Z>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. (INamedApp. IVar Prelude.pure
-                                                              $ IVar Test.DepTyCheck.Gen.Gen)
+                                             (IApp. INamedApp (IVar Prelude.pure)
+                                                              f
+                                                              (IVar Test.DepTyCheck.Gen.Gen)
                                                   $ IVar Prelude.Types.Z) ]
                             IDef <<Prelude.Types.S>>
                                  [ PatClause (IApp. IVar <<Prelude.Types.S>>
@@ -64,8 +65,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ (IApp. IVar <Prelude.Types.Nat>[]
                                                          $ IVar ^cons_fuel^)
                                                   $ (ILam.  (MW ExplicitArg ^bnd^{arg:641} : Implicit False)
-                                                         => (IApp. (INamedApp. IVar Prelude.pure
-                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
+                                                         => (IApp. INamedApp (IVar Prelude.pure)
+                                                                             f
+                                                                             (IVar Test.DepTyCheck.Gen.Gen)
                                                                  $ (IApp. IVar Prelude.Types.S
                                                                         $ IVar ^bnd^{arg:641})))) ] ]
          IDef <DerivedGen.X>[]
@@ -102,8 +104,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<DerivedGen.E>>
                                  [ PatClause (IApp. IVar <<DerivedGen.E>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. (INamedApp. IVar Prelude.pure
-                                                              $ IVar Test.DepTyCheck.Gen.Gen)
+                                             (IApp. INamedApp (IVar Prelude.pure)
+                                                              f
+                                                              (IVar Test.DepTyCheck.Gen.Gen)
                                                   $ IVar DerivedGen.E) ]
                             IDef <<DerivedGen.R>>
                                  [ PatClause (IApp. IVar <<DerivedGen.R>>
@@ -116,8 +119,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                  $ (IApp. IVar <Prelude.Types.Nat>[]
                                                                         $ IVar ^cons_fuel^)
                                                                  $ (ILam.  (MW ExplicitArg ^bnd^{arg:836} : Implicit False)
-                                                                        => (IApp. (INamedApp. IVar Prelude.pure
-                                                                                            $ IVar Test.DepTyCheck.Gen.Gen)
+                                                                        => (IApp. INamedApp (IVar Prelude.pure)
+                                                                                            f
+                                                                                            (IVar Test.DepTyCheck.Gen.Gen)
                                                                                 $ (IApp. IVar DerivedGen.R
                                                                                        $ IVar ^bnd^{arg:833}
                                                                                        $ IVar ^bnd^{arg:836})))))) ] ]

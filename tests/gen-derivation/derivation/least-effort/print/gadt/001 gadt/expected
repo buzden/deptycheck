@@ -59,10 +59,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar ^cons_fuel^
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar k))
-                                             (IApp. (INamedApp. IVar Prelude.pure
-                                                              $ IVar Test.DepTyCheck.Gen.Gen)
-                                                  $ (INamedApp. IVar Data.Fin.FZ
-                                                              $ IVar k))
+                                             (IApp. INamedApp (IVar Prelude.pure)
+                                                              f
+                                                              (IVar Test.DepTyCheck.Gen.Gen)
+                                                  $ INamedApp (IVar Data.Fin.FZ)
+                                                              k
+                                                              (IVar k))
                                  , PatClause (IApp. IVar <<Data.Fin.FZ>>
                                                   $ Implicit True
                                                   $ Implicit True)
@@ -77,10 +79,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                          $ IVar ^cons_fuel^
                                                          $ IVar k)
                                                   $ (ILam.  (MW ExplicitArg ^bnd^{arg:3101} : Implicit False)
-                                                         => (IApp. (INamedApp. IVar Prelude.pure
-                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
-                                                                 $ (IApp. (INamedApp. IVar Data.Fin.FS
-                                                                                    $ IVar k)
+                                                         => (IApp. INamedApp (IVar Prelude.pure)
+                                                                             f
+                                                                             (IVar Test.DepTyCheck.Gen.Gen)
+                                                                 $ (IApp. INamedApp (IVar Data.Fin.FS)
+                                                                                    k
+                                                                                    (IVar k)
                                                                         $ IVar ^bnd^{arg:3101}))))
                                  , PatClause (IApp. IVar <<Data.Fin.FS>>
                                                   $ Implicit True

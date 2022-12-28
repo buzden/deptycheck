@@ -107,20 +107,25 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar ^cons_fuel^
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar n)
-                                                  $ (IApp. (INamedApp. IVar DerivedGen.VectMaybeAnyType.(::)
-                                                                     $ Implicit True)
+                                                  $ (IApp. INamedApp (IVar DerivedGen.VectMaybeAnyType.(::))
+                                                                     n
+                                                                     (Implicit True)
                                                          $ IBindVar x
                                                          $ IBindVar xs))
-                                             (IApp. (INamedApp. IVar Prelude.pure
-                                                              $ IVar Test.DepTyCheck.Gen.Gen)
+                                             (IApp. INamedApp (IVar Prelude.pure)
+                                                              f
+                                                              (IVar Test.DepTyCheck.Gen.Gen)
                                                   $ (IApp. IVar Builtin.DPair.MkDPair
                                                          $ Implicit True
                                                          $ (IApp. IVar Builtin.DPair.MkDPair
                                                                 $ Implicit True
-                                                                $ (INamedApp. IVar DerivedGen.VectMaybeAnyType.Here
-                                                                            $ IVar n
-                                                                            $ IVar xs
-                                                                            $ IVar x))))
+                                                                $ INamedApp (INamedApp (INamedApp (IVar DerivedGen.VectMaybeAnyType.Here)
+                                                                                                  n
+                                                                                                  (IVar n))
+                                                                                       xs
+                                                                                       (IVar xs))
+                                                                            x
+                                                                            (IVar x))))
                                  , PatClause (IApp. IVar <<DerivedGen.VectMaybeAnyType.Here>>
                                                   $ Implicit True
                                                   $ Implicit True
@@ -131,8 +136,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar ^cons_fuel^
                                                   $ (IApp. IVar Prelude.Types.S
                                                          $ IBindVar n)
-                                                  $ (IApp. (INamedApp. IVar DerivedGen.VectMaybeAnyType.(::)
-                                                                     $ Implicit True)
+                                                  $ (IApp. INamedApp (IVar DerivedGen.VectMaybeAnyType.(::))
+                                                                     n
+                                                                     (Implicit True)
                                                          $ IBindVar z
                                                          $ IBindVar zs))
                                              (IApp. IVar >>=
@@ -148,18 +154,24 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                    $ (IApp. IVar Builtin.DPair.MkDPair
                                                                                           $ IBindVar x
                                                                                           $ IBindVar ^bnd^{arg:1225}))
-                                                                              (IApp. (INamedApp. IVar Prelude.pure
-                                                                                               $ IVar Test.DepTyCheck.Gen.Gen)
+                                                                              (IApp. INamedApp (IVar Prelude.pure)
+                                                                                               f
+                                                                                               (IVar Test.DepTyCheck.Gen.Gen)
                                                                                    $ (IApp. IVar Builtin.DPair.MkDPair
                                                                                           $ Implicit True
                                                                                           $ (IApp. IVar Builtin.DPair.MkDPair
                                                                                                  $ Implicit True
-                                                                                                 $ (IApp. (INamedApp. IVar DerivedGen.VectMaybeAnyType.There
-                                                                                                                    $ IVar z
-                                                                                                                    $ IVar n
-                                                                                                                    $ IVar zs
-                                                                                                                    $ IVar x
-                                                                                                                    $ IVar i)
+                                                                                                 $ (IApp. INamedApp (INamedApp (INamedApp (INamedApp (INamedApp (IVar DerivedGen.VectMaybeAnyType.There)
+                                                                                                                                                                z
+                                                                                                                                                                (IVar z))
+                                                                                                                                                     n
+                                                                                                                                                     (IVar n))
+                                                                                                                                          zs
+                                                                                                                                          (IVar zs))
+                                                                                                                               x
+                                                                                                                               (IVar x))
+                                                                                                                    i
+                                                                                                                    (IVar i)
                                                                                                         $ IVar ^bnd^{arg:1225})))) ]))
                                  , PatClause (IApp. IVar <<DerivedGen.VectMaybeAnyType.There>>
                                                   $ Implicit True

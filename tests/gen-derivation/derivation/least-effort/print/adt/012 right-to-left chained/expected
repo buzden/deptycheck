@@ -76,8 +76,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<Prelude.Types.Z>>
                                  [ PatClause (IApp. IVar <<Prelude.Types.Z>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. (INamedApp. IVar Prelude.pure
-                                                              $ IVar Test.DepTyCheck.Gen.Gen)
+                                             (IApp. INamedApp (IVar Prelude.pure)
+                                                              f
+                                                              (IVar Test.DepTyCheck.Gen.Gen)
                                                   $ IVar Prelude.Types.Z) ]
                             IDef <<Prelude.Types.S>>
                                  [ PatClause (IApp. IVar <<Prelude.Types.S>>
@@ -86,8 +87,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ (IApp. IVar <Prelude.Types.Nat>[]
                                                          $ IVar ^cons_fuel^)
                                                   $ (ILam.  (MW ExplicitArg ^bnd^{arg:641} : Implicit False)
-                                                         => (IApp. (INamedApp. IVar Prelude.pure
-                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
+                                                         => (IApp. INamedApp (IVar Prelude.pure)
+                                                                             f
+                                                                             (IVar Test.DepTyCheck.Gen.Gen)
                                                                  $ (IApp. IVar Prelude.Types.S
                                                                         $ IVar ^bnd^{arg:641})))) ] ]
          IDef <DerivedGen.X1>[]
@@ -112,8 +114,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ (IApp. IVar <Prelude.Types.Nat>[]
                                                          $ IVar ^cons_fuel^)
                                                   $ (ILam.  (MW ExplicitArg n : Implicit False)
-                                                         => (IApp. (INamedApp. IVar Prelude.pure
-                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
+                                                         => (IApp. INamedApp (IVar Prelude.pure)
+                                                                             f
+                                                                             (IVar Test.DepTyCheck.Gen.Gen)
                                                                  $ (IApp. IVar Builtin.DPair.MkDPair
                                                                         $ Implicit True
                                                                         $ (IApp. IVar DerivedGen.MkX1
@@ -145,8 +148,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                   [ PatClause (IApp. IVar Builtin.DPair.MkDPair
                                                                                    $ IBindVar n
                                                                                    $ IBindVar ^bnd^{arg:850})
-                                                                              (IApp. (INamedApp. IVar Prelude.pure
-                                                                                               $ IVar Test.DepTyCheck.Gen.Gen)
+                                                                              (IApp. INamedApp (IVar Prelude.pure)
+                                                                                               f
+                                                                                               (IVar Test.DepTyCheck.Gen.Gen)
                                                                                    $ (IApp. IVar Builtin.DPair.MkDPair
                                                                                           $ Implicit True
                                                                                           $ (IApp. IVar DerivedGen.MkX2
@@ -175,8 +179,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                   [ PatClause (IApp. IVar Builtin.DPair.MkDPair
                                                                                    $ IBindVar n
                                                                                    $ IBindVar ^bnd^{arg:858})
-                                                                              (IApp. (INamedApp. IVar Prelude.pure
-                                                                                               $ IVar Test.DepTyCheck.Gen.Gen)
-                                                                                   $ (IApp. (INamedApp. IVar DerivedGen.MkY
-                                                                                                      $ IVar n)
+                                                                              (IApp. INamedApp (IVar Prelude.pure)
+                                                                                               f
+                                                                                               (IVar Test.DepTyCheck.Gen.Gen)
+                                                                                   $ (IApp. INamedApp (IVar DerivedGen.MkY)
+                                                                                                      n
+                                                                                                      (IVar n)
                                                                                           $ IVar ^bnd^{arg:858})) ])) ] ]
