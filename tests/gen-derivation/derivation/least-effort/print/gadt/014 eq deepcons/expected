@@ -90,10 +90,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                              $ IBindVar x))
                                                                $ (IApp. IVar Prelude.Yes
                                                                       $ IVar Builtin.Refl))
-                                                          (IApp. (INamedApp. IVar Prelude.pure
-                                                                           $ IVar Test.DepTyCheck.Gen.Gen)
-                                                               $ (INamedApp. IVar DerivedGen.Base
-                                                                           $ IVar x))
+                                                          (IApp. INamedApp (IVar Prelude.pure)
+                                                                           f
+                                                                           (IVar Test.DepTyCheck.Gen.Gen)
+                                                               $ INamedApp (IVar DerivedGen.Base)
+                                                                           x
+                                                                           (IVar x))
                                               , PatClause (IApp. IVar <<DerivedGen.Base>>
                                                                $ IBindVar ^cons_fuel^
                                                                $ IBindVar x
@@ -120,11 +122,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                          $ IVar x
                                                          $ IVar y)
                                                   $ (ILam.  (MW ExplicitArg ^bnd^{arg:841} : Implicit False)
-                                                         => (IApp. (INamedApp. IVar Prelude.pure
-                                                                             $ IVar Test.DepTyCheck.Gen.Gen)
-                                                                 $ (IApp. (INamedApp. IVar DerivedGen.Step
-                                                                                    $ IVar y
-                                                                                    $ IVar x)
+                                                         => (IApp. INamedApp (IVar Prelude.pure)
+                                                                             f
+                                                                             (IVar Test.DepTyCheck.Gen.Gen)
+                                                                 $ (IApp. INamedApp (INamedApp (IVar DerivedGen.Step)
+                                                                                               y
+                                                                                               (IVar y))
+                                                                                    x
+                                                                                    (IVar x)
                                                                         $ IVar ^bnd^{arg:841}))))
                                  , PatClause (IApp. IVar <<DerivedGen.Step>>
                                                   $ Implicit True

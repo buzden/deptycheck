@@ -40,12 +40,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<Prelude.Basics.False>>
                                  [ PatClause (IApp. IVar <<Prelude.Basics.False>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. (INamedApp. IVar Prelude.pure
-                                                              $ IVar Test.DepTyCheck.Gen.Gen)
+                                             (IApp. INamedApp (IVar Prelude.pure)
+                                                              f
+                                                              (IVar Test.DepTyCheck.Gen.Gen)
                                                   $ IVar Prelude.Basics.False) ]
                             IDef <<Prelude.Basics.True>>
                                  [ PatClause (IApp. IVar <<Prelude.Basics.True>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. (INamedApp. IVar Prelude.pure
-                                                              $ IVar Test.DepTyCheck.Gen.Gen)
+                                             (IApp. INamedApp (IVar Prelude.pure)
+                                                              f
+                                                              (IVar Test.DepTyCheck.Gen.Gen)
                                                   $ IVar Prelude.Basics.True) ] ]

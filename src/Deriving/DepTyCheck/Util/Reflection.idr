@@ -439,7 +439,7 @@ allVarNames expr = ttimp expr where
     decl $ IBuiltin _ _ _                           = []
 
     data_ : Data -> LazyList Name
-    data_ $ MkData x n tycon _ datacons = ttimp tycon ++ foldMap ity datacons
+    data_ $ MkData x n tycon _ datacons = maybe [] ttimp tycon ++ foldMap ity datacons
     data_ $ MkLater x n tycon           = ttimp tycon
 
     fieldUpdate : IFieldUpdate -> LazyList Name
@@ -527,7 +527,7 @@ hasNameInsideDeep nm expr = evalStateT .| the (SortedSet Name) empty .| hasInsid
       decl $ IBuiltin _ _ _                           = pure False
 
       data_ : Data -> mm Bool
-      data_ $ MkData x n tycon _ datacons = ttimp tycon || any ity datacons
+      data_ $ MkData x n tycon _ datacons = maybe (pure False) ttimp tycon || any ity datacons
       data_ $ MkLater x n tycon           = ttimp tycon
 
       fieldUpdate : IFieldUpdate -> mm Bool
