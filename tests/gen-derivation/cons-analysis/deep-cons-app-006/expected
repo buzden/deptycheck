@@ -7,7 +7,7 @@ LOG gen.auto.deep-cons-app:0: ------------------------
 LOG gen.auto.deep-cons-app:0: applied names:   []
 LOG gen.auto.deep-cons-app:0: bind expression: Nat
 LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [{arg:641}]
+LOG gen.auto.deep-cons-app:0: given free names:    [{arg:647}]
 LOG gen.auto.deep-cons-app:0: original expression: Nat
 LOG gen.auto.deep-cons-app:0: ------------------------
 LOG gen.auto.deep-cons-app:0: applied names:   []

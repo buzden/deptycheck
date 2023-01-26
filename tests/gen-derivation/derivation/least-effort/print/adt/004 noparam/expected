@@ -64,12 +64,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              (IApp. IVar >>=
                                                   $ (IApp. IVar <Prelude.Types.Nat>[]
                                                          $ IVar ^cons_fuel^)
-                                                  $ (ILam.  (MW ExplicitArg ^bnd^{arg:641} : Implicit False)
+                                                  $ (ILam.  (MW ExplicitArg ^bnd^{arg:647} : Implicit False)
                                                          => (IApp. INamedApp (IVar Prelude.pure)
                                                                              f
                                                                              (IVar Test.DepTyCheck.Gen.Gen)
                                                                  $ (IApp. IVar Prelude.Types.S
-                                                                        $ IVar ^bnd^{arg:641})))) ] ]
+                                                                        $ IVar ^bnd^{arg:647})))) ] ]
          IDef <DerivedGen.X>[]
               [ PatClause (IApp. IVar <DerivedGen.X>[] $ IBindVar ^fuel_arg^)
                           (ILocal (ICase (IVar ^fuel_arg^)
