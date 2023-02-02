@@ -1,6 +1,11 @@
 package deptycheck
 
 authors = "Denis Buzdalov"
+
+brief = "Property-based testing with dependent types"
+
+license = "MPL-2.0"
+
 version = 0.0.220712
 
 modules = Control.Monad.State.Tuple
