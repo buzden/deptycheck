@@ -33,14 +33,18 @@ wrapLazy f = delay . f . force
 --- Definition of the `NonEmptyGen` ---
 ---------------------------------------
 
+record RawGen a where
+  constructor MkRawGen
+  unRawGen : forall m. MonadRandom m => m a
+
 record OneOfAlternatives (0 a : Type)
 
 export
 data NonEmptyGen : Type -> Type where
   Pure  : a -> NonEmptyGen a
-  Raw   : (forall m. MonadRandom m => m a) -> NonEmptyGen a
+  Raw   : RawGen a -> NonEmptyGen a
   OneOf : OneOfAlternatives a -> NonEmptyGen a
-  Bind  : NonEmptyGen c -> (c -> NonEmptyGen a) -> NonEmptyGen a
+  Bind  : RawGen c -> (c -> NonEmptyGen a) -> NonEmptyGen a
 
 record OneOfAlternatives (0 a : Type) where
   constructor MkOneOf
@@ -71,11 +75,11 @@ mapOneOf (MkOneOf desc tw gs @{prf}) f = OneOf $ MkOneOf desc tw (mapTaggedLazy 
 
 export
 chooseAny : Random a => NonEmptyGen a
-chooseAny = Raw getRandom
+chooseAny = Raw $ MkRawGen getRandom
 
 export
 choose : Random a => (a, a) -> NonEmptyGen a
-choose bounds = Raw $ getRandomR bounds
+choose bounds = Raw $ MkRawGen $ getRandomR bounds
 
 --------------------------
 --- Running generators ---
@@ -84,9 +88,9 @@ choose bounds = Raw $ getRandomR bounds
 export
 unGen : MonadRandom m => NonEmptyGen a -> m a
 unGen $ Pure x   = pure x
-unGen $ Raw sf   = sf
+unGen $ Raw sf   = sf.unRawGen
 unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
-unGen $ Bind x f = unGen x >>= assert_total unGen . f
+unGen $ Bind x f = x.unRawGen >>= unGen . f
 
 export
 unGenTryAll' : RandomGen g => (seed : g) -> NonEmptyGen a -> Stream (a, g)
@@ -107,6 +111,13 @@ unGenTryAll = map fst .: unGenTryAll'
 ---------------------------------------
 --- Standard combination interfaces ---
 ---------------------------------------
+
+Functor RawGen where
+  map f $ MkRawGen sf = MkRawGen $ f <$> sf
+
+Applicative RawGen where
+  pure x = MkRawGen $ pure x
+  MkRawGen x <*> MkRawGen y = MkRawGen $ x <*> y
 
 export
 Functor NonEmptyGen where
@@ -132,10 +143,10 @@ Applicative NonEmptyGen where
 
 export
 Monad NonEmptyGen where
-  Pure x      >>= nf = nf x
-  g@(Raw _)   >>= nf = Bind g nf -- Raw $ sf >>= unGen . nf
-  OneOf oo    >>= nf = mapOneOf oo $ assert_total (>>= nf)
-  Bind x f    >>= nf = x >>= \x => f x >>= nf
+  Pure x   >>= nf = nf x
+  Raw g    >>= nf = Bind g nf -- Raw $ MkRawGen $ sf >>= unGen . nf
+  OneOf oo >>= nf = mapOneOf oo $ assert_total (>>= nf)
+  Bind x f >>= nf = Bind x $ \x => f x >>= nf
 
 -----------------------------------------
 --- Detour: special list of lazy gens ---
@@ -263,7 +274,7 @@ deepAlternativesOf (S k) gen   = processAlternatives' alternativesOf $ deepAlter
 export
 forgetStructure : NonEmptyGen a -> NonEmptyGen a
 forgetStructure g@(Raw _) = g
-forgetStructure g = Raw $ unGen g
+forgetStructure g = Raw $ MkRawGen $ unGen g
 
 public export
 processAlternatives : (NonEmptyGen a -> NonEmptyGen b) -> NonEmptyGen a -> GenAlternatives b
@@ -312,7 +323,7 @@ Monad (GenAlternatives' True) where
 export
 variant : Nat -> NonEmptyGen a -> NonEmptyGen a
 variant Z       gen = gen
-variant x@(S _) gen = Raw $ iterate x independent $ unGen gen where
+variant x@(S _) gen = Raw $ MkRawGen $ iterate x independent $ unGen gen where
   iterate : forall a. Nat -> (a -> a) -> a -> a
   iterate Z     _ x = x
   iterate (S n) f x = iterate n f $ f x
