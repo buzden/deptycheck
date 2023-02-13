@@ -110,7 +110,7 @@ Applicative Gen where
 export
 Monad Gen where
   Empty      >>= _  = Empty
-  NonEmpty g >>= nf = NonEmpty $ (>>=) @{Compose} g $ fromMaybe (pure Nothing) . map force . toNonEmpty . nf
+  NonEmpty g >>= nf = NonEmpty $ (>>=) @{Compose} g $ maybe (pure Nothing) force . toNonEmpty . nf
 
 ---------------------------------------------
 --- Data type for alternatives in `oneOf` ---
