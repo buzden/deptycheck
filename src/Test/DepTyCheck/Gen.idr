@@ -172,8 +172,8 @@ namespace GenAlternatives
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export %inline
-oneOf : GenAlternatives' a -> Gen a
-oneOf = maybe empty (NonEmpty . delay . oneOf) . strengthen . unGenAlts
+oneOf : {default Nothing description : Maybe String} -> GenAlternatives' a -> Gen a
+oneOf = maybe empty (NonEmpty . delay . oneOf {description}) . strengthen . unGenAlts
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -182,20 +182,20 @@ oneOf = maybe empty (NonEmpty . delay . oneOf) . strengthen . unGenAlts
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : LazyList (Nat, Gen a) -> Gen a
-frequency xs = maybe empty (NonEmpty . delay . frequency) $
+frequency : {default Nothing description : Maybe String} -> LazyList (Nat, Gen a) -> Gen a
+frequency xs = maybe empty (NonEmpty . delay . frequency {description}) $
                  strengthen $ fromLazyList $ mapMaybe {b=(_, Lazy _)} (\(w, g) => [| (toPosNat w, toNonEmpty g) |]) xs
 
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
-elements : List a -> Gen a
-elements xs = oneOf $ MkGenAlts $ altsFromList $ relaxF $ fromList $ map Just xs
+elements : {default Nothing description : Maybe String} -> List a -> Gen a
+elements xs = oneOf {description} $ MkGenAlts $ altsFromList $ relaxF $ fromList $ map Just xs
 
 export %inline
-elements' : Foldable f => f a -> Gen a
-elements' = elements . toList
+elements' : Foldable f => {default Nothing description : Maybe String} -> f a -> Gen a
+elements' = elements {description} . toList
 
 ------------------------------
 --- Analysis of generators ---

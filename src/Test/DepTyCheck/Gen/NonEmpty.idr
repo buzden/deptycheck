@@ -44,6 +44,7 @@ data NonEmptyGen : Type -> Type where
 
 record OneOfAlternatives (0 a : Type) where
   constructor MkOneOf
+  desc : Maybe String
   totalWeight : PosNat
   gens : NEList (PosNat, Lazy (NonEmptyGen a))
   {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst x)}
@@ -58,7 +59,7 @@ mapTaggedLazy : (a -> b) -> NEList (tag, Lazy a) -> NEList (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
 mapOneOf : OneOfAlternatives a -> (NonEmptyGen a -> NonEmptyGen b) -> NonEmptyGen b
-mapOneOf (MkOneOf tw gs @{prf}) f = OneOf $ MkOneOf tw (mapTaggedLazy f gs) @{do
+mapOneOf (MkOneOf desc tw gs @{prf}) f = OneOf $ MkOneOf desc tw (mapTaggedLazy f gs) @{do
     rewrite mapFusion (Builtin.fst) (mapSnd $ wrapLazy f) gs
     rewrite prf
     cong (CheckedEmpty.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
@@ -217,8 +218,8 @@ altsFromList = cast
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
-oneOf : GenAlternatives a -> NonEmptyGen a
-oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf _ xs
+oneOf : {default Nothing description : Maybe String} -> GenAlternatives a -> NonEmptyGen a
+oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -227,15 +228,15 @@ oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf _ xs
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : NEList (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
-frequency = oneOf . MkGenAlternatives
+frequency : {default Nothing description : Maybe String} -> NEList (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
+frequency = oneOf {description} . MkGenAlternatives
 
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
-elements : NEList a -> NonEmptyGen a
-elements = oneOf . cast
+elements : {default Nothing description : Maybe String} -> NEList a -> NonEmptyGen a
+elements = oneOf {description} . cast
 
 ------------------------------
 --- Analysis of generators ---
