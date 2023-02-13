@@ -26,7 +26,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                           $ IVar n)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                      description
+                                                                      (IApp. IVar Just
+                                                                           $ IPrimVal Data.Fin.Fin[0] (spend fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<Data.Fin.FZ>>
                                                                         $ IVar ^fuel_arg^

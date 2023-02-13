@@ -148,9 +148,9 @@ liftList : Foldable f => f TTImp -> TTImp
 liftList = foldr (\l, r => `(~l :: ~r)) `([])
 
 export
-callOneOf : List TTImp -> TTImp
-callOneOf [v]      = v
-callOneOf variants = var `{Test.DepTyCheck.Gen.oneOf} .$ liftList variants
+callOneOf : (desc : String) -> List TTImp -> TTImp
+callOneOf _    [v]      = v
+callOneOf desc variants = namedApp (var `{Test.DepTyCheck.Gen.oneOf}) `{description} `(Just ~(primVal $ Str desc)) .$ liftList variants
 
 export
 isSimpleBindVar : TTImp -> Bool

@@ -26,7 +26,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                $ IBindVar ^fuel_arg^
                                $ IBindVar {arg:830}
                                $ IBindVar {arg:833})
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                          (ILocal (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                   description
+                                                   (IApp. IVar Just
+                                                        $ IPrimVal DerivedGen.X[0, 1] (non-recursive))
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<DerivedGen.XE>>
                                                      $ IVar ^fuel_arg^

@@ -85,7 +85,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                           $ IVar Data.Fuel.Dry)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                      description
+                                                                      (IApp. IVar Just
+                                                                           $ IPrimVal Prelude.Types.Nat[] (spend fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<Prelude.Types.Z>>
                                                                         $ IVar ^fuel_arg^)
@@ -171,7 +174,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
               [ PatClause (IApp. IVar <DerivedGen.X_GADT>[0]
                                $ IBindVar ^fuel_arg^
                                $ IBindVar {arg:830})
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                          (ILocal (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                   description
+                                                   (IApp. IVar Just
+                                                        $ IPrimVal DerivedGen.X_GADT[0] (non-recursive))
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<DerivedGen.MkXG_4>>
                                                      $ IVar ^fuel_arg^
@@ -253,7 +259,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.X_GADT>[]
               [ PatClause (IApp. IVar <DerivedGen.X_GADT>[]
                                $ IBindVar ^fuel_arg^)
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                          (ILocal (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                   description
+                                                   (IApp. IVar Just
+                                                        $ IPrimVal DerivedGen.X_GADT[] (non-recursive))
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<DerivedGen.MkXG_4>>
                                                      $ IVar ^fuel_arg^)
@@ -357,7 +366,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                $ IVar m))))) ] ]
          IDef <DerivedGen.Y>[]
               [ PatClause (IApp. IVar <DerivedGen.Y>[] $ IBindVar ^fuel_arg^)
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                          (ILocal (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                   description
+                                                   (IApp. IVar Just
+                                                        $ IPrimVal DerivedGen.Y[] (non-recursive))
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<DerivedGen.MkY_LR>>
                                                      $ IVar ^fuel_arg^)

@@ -31,7 +31,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                           $ IVar {arg:833})
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                      description
+                                                                      (IApp. IVar Just
+                                                                           $ IPrimVal DerivedGen.LT2[1] (spend fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<DerivedGen.Base>>
                                                                         $ IVar ^fuel_arg^
