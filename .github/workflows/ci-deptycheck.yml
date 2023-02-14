@@ -26,7 +26,6 @@ defaults:
 
 env:
   PACK_DIR: /root/.pack
-  pack_dir_file: pack-dir.tar
 
 # TODO to reduce duplication, e.g. by using https://docs.github.com/en/actions/using-workflows/reusing-workflows
 
@@ -45,13 +44,13 @@ jobs:
       - run: pack update-db
       - name: Switch to appropriate `pack` collection
         run: pack switch "$( if [[ '${{ github.event_name }}' == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
-      - name: Tar the `pack` dir
-        run: tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
       - name: Save state of `pack`
         uses: actions/upload-artifact@v3
         with:
           name: pack-dir
-          path: ${{ env.pack_dir_file }}
+          path: |
+            ${{ env.PACK_DIR }}
+            !${{ env.PACK_DIR }}/.cache
 
   thirdparties-build:
     name: Build thirdparties
@@ -70,8 +69,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: pack-dir
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
+          path: ${{ env.PACK_DIR }}
       - run: make thirdparties
       - name: Save built thirdparties
         uses: actions/upload-artifact@v3
@@ -96,8 +94,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: pack-dir
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
+          path: ${{ env.PACK_DIR }}
       - name: Restore built thirdparties
         uses: actions/download-artifact@v3
         with:
@@ -125,8 +122,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: pack-dir
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
+          path: ${{ env.PACK_DIR }}
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v3
         with:
@@ -150,8 +146,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: pack-dir
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
+          path: ${{ env.PACK_DIR }}
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v3
         with:
@@ -178,8 +173,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: pack-dir
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
+          path: ${{ env.PACK_DIR }}
       - run: make install
       - run: make test-installation
 
@@ -210,8 +204,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: pack-dir
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
+          path: ${{ env.PACK_DIR }}
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v3
         with:
@@ -264,8 +257,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: pack-dir
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
+          path: ${{ env.PACK_DIR }}
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v3
         with:
@@ -290,8 +282,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: pack-dir
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
+          path: ${{ env.PACK_DIR }}
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v3
         with:
@@ -317,8 +308,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: pack-dir
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
+          path: ${{ env.PACK_DIR }}
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v3
         with:
