@@ -46,7 +46,7 @@ jobs:
       - name: Switch to appropriate `pack` collection
         run: pack switch "$( if [[ '${{ github.event_name }}' == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
       - name: Tar the `pack` dir
-        run: tar -cvf "${{ env.pack_dir_file }}" "${{ env.PACK_DIR }}"
+        run: tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
       - name: Save state of `pack`
         uses: actions/upload-artifact@v3
         with:
