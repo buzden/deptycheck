@@ -1,18 +1,24 @@
+default:
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/ghcr.io/stefan-hoeck/idris2-pack:latest
+
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  IDRIS_VERSION_FILE: .idris-version # should contain the result of `git describe --tags`
+  PACK_DIR: $CI_PROJECT_DIR/.pack
+  PATH: $PACK_DIR/bin:$PATH
 
-read-idris-ver:
+prepare-pack:
   stage: .pre
   script:
-    - IDRIS2_TAG="$( if [[ "$CI_PIPELINE_SOURCE" != "schedule" ]]; then cat "${IDRIS_VERSION_FILE}"; else echo "latest"; fi )"
-    - echo "IDRIS2_TAG=$IDRIS2_TAG" > idris.env
+    - pack update-db
+    - pack switch "$( if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
+    - pack install contrib test
   artifacts:
-    reports:
-      dotenv: idris.env
+    paths:
+      - $PATH_DIR
+    exclude:
+      - $PATH_DIR/.cache/**/*
 
 .depends-on-idris:
-  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/snazzybucket/idris2:${IDRIS2_TAG}
 
 .idris-build-job:
   artifacts:
@@ -32,15 +38,13 @@ stages:
   - pil:build
   - pil:test
 
-# TODO to find a way to not to repeat `read-idris-ver` in `needs` for every job that extends `.depends-on-idris`.
-
 thirdparties:build:
   extends:
     - .depends-on-idris
     - .idris-build-job
   stage: thirdparties:build
   needs:
-    - read-idris-ver
+    - prepare-pack
   script:
     - make thirdparties
 
@@ -50,7 +54,7 @@ deptycheck:build:
     - .idris-build-job
   stage: deptycheck:build
   needs:
-    - read-idris-ver
+    - prepare-pack
     - thirdparties:build
   script:
     - make deptycheck
@@ -67,7 +71,7 @@ deptycheck:install:after_build:
   extends: .depends-on-idris
   stage: deptycheck:install
   needs:
-    - read-idris-ver
+    - prepare-pack
     - deptycheck:build
   script:
     - make install
@@ -77,7 +81,7 @@ deptycheck:install:clean:
   extends: .depends-on-idris
   stage: deptycheck:install
   needs:
-    - read-idris-ver
+    - prepare-pack
   script:
     - make install
     - make test-installation
@@ -86,7 +90,7 @@ deptycheck:test:lib:
   extends: .depends-on-idris
   stage: deptycheck:test:lib
   needs:
-    - read-idris-ver
+    - prepare-pack
     - deptycheck:build
   script:
     - make test-deptycheck only=lib/ INTERACTIVE="--color"
@@ -95,7 +99,7 @@ deptycheck:test:docs:
   extends: .depends-on-idris
   stage: deptycheck:test:docs
   needs:
-    - read-idris-ver
+    - prepare-pack
     - deptycheck:build
   script:
     - make test-deptycheck only=docs/ INTERACTIVE="--color"
@@ -104,7 +108,7 @@ deptycheck:test:derive:
   extends: .depends-on-idris
   stage: deptycheck:test:derive
   needs:
-    - read-idris-ver
+    - prepare-pack
     - deptycheck:build
     - deptycheck:test:lib
   only:
@@ -136,7 +140,7 @@ pil:build:
     - .idris-build-job
   stage: pil:build
   needs:
-    - read-idris-ver
+    - prepare-pack
     - deptycheck:build
   script:
     - make pil
@@ -145,7 +149,7 @@ pil:test:
   extends: .depends-on-idris
   stage: pil:test
   needs:
-    - read-idris-ver
+    - prepare-pack
     - pil:build
     - deptycheck:test:lib
   script:
