@@ -1,4 +1,5 @@
 export IDRIS2 ?= idris2
+export PACK ?= pack
 
 MKDIR := mkdir -p
 LN := ln
@@ -8,6 +9,7 @@ LN := ln
 all: deptycheck
 
 deptycheck: thirdparty-elab-util
+	${PACK} install-deps deptycheck.ipkg
 	${IDRIS2} --build deptycheck.ipkg
 
 clean:
