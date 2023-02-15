@@ -10,8 +10,8 @@ variables:
 prepare-pack:
   stage: .pre
   script:
-    - echo "$PACK_DIR"
-    - echo "$PATH"
+    - apt-get update
+    - apt-get -y install rsync
     - rsync -av --exclude=".cache" /root/.pack "$PACK_DIR"
     - ln -s /root/.pack/.cache "$PACK_DIR"
     - pack update-db
