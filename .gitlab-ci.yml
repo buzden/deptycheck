@@ -14,6 +14,7 @@ prepare-pack:
     - apt-get -y install rsync
     - rsync -av --exclude=".cache" /root/.pack "$PACK_DIR"
     - ln -s /root/.pack/.cache "$PACK_DIR"
+    - ls -lh "$PACK_DIR"
     - pack update-db
     - pack switch "$( if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
     - pack install contrib test
