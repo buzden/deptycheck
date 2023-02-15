@@ -1,5 +1,5 @@
 default:
-  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/ghcr.io/stefan-hoeck/idris2-pack:latest
+  image: ghcr.io/stefan-hoeck/idris2-pack:latest
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
