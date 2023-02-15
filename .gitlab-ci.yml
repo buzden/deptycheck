@@ -6,9 +6,13 @@ variables:
 default:
   image: ghcr.io/stefan-hoeck/idris2-pack:latest
   before_script:
-    - if [[ -r "$PACK_SAVED_TAR" ]]; then tar -xvf "$PACK_SAVED_TAR" --one-top-level=/; fi
+    - if [[ -r "$PACK_SAVED_TAR" ]]; then tar -xf "$PACK_SAVED_TAR" --one-top-level=/; fi
   after_script:
-    - tar -uvf "$PACK_SAVED_TAR" --exclude=".cache" "$PACK_DIR"
+    - |
+      if [[ "$CI_JOB_NAME" =~ "build" || "$CI_JOB_NAME" =~ "pack" ]]
+        then tar -uf "$PACK_SAVED_TAR" --exclude=".cache" "$PACK_DIR"
+        else rm -f "$PACK_SAVED_TAR"
+      fi
   artifacts:
     paths:
       - "**/build/**/*.tt[cm]"
