@@ -7,6 +7,7 @@ default:
   image: ghcr.io/stefan-hoeck/idris2-pack:latest
   before_script:
     - if [[ -r "$PACK_SAVED_TAR" ]]; then tar -xf "$PACK_SAVED_TAR" --one-top-level=/; fi
+    - find . -name '*.tt?' -exec touch '{}' \;
   after_script:
     - |
       if [[ "$CI_JOB_NAME" =~ "build" || "$CI_JOB_NAME" =~ "pack" ]]
