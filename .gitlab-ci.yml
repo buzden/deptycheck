@@ -1,7 +1,7 @@
 default:
   image: ghcr.io/stefan-hoeck/idris2-pack:latest
   before_script:
-    - export PATH="$PACK_DIR/bin:$PATH"
+    - export PATH="$PACK_DIR/bin:${PATH#/root/.pack/bin:}"
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -12,6 +12,8 @@ prepare-pack:
   script:
     - echo "$PACK_DIR"
     - echo "$PATH"
+    - rsync -av --exclude=".cache" /root/.pack "$PACK_DIR"
+    - ln -s /root/.pack/.cache "$PACK_DIR"
     - pack update-db
     - pack switch "$( if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
     - pack install contrib test
