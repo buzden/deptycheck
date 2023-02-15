@@ -10,6 +10,8 @@ variables:
 prepare-pack:
   stage: .pre
   script:
+    - echo "$PACK_DIR"
+    - echo "$PATH"
     - pack update-db
     - pack switch "$( if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
     - pack install contrib test
