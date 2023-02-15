@@ -18,8 +18,6 @@ prepare-pack:
     exclude:
       - $PATH_DIR/.cache/**/*
 
-.depends-on-idris:
-
 .idris-build-job:
   artifacts:
     paths:
@@ -39,9 +37,7 @@ stages:
   - pil:test
 
 thirdparties:build:
-  extends:
-    - .depends-on-idris
-    - .idris-build-job
+  extends: .idris-build-job
   stage: thirdparties:build
   needs:
     - prepare-pack
@@ -49,9 +45,7 @@ thirdparties:build:
     - make thirdparties
 
 deptycheck:build:
-  extends:
-    - .depends-on-idris
-    - .idris-build-job
+  extends: .idris-build-job
   stage: deptycheck:build
   needs:
     - prepare-pack
@@ -68,7 +62,6 @@ deptycheck:docs:
     - make docs
 
 deptycheck:install:after_build:
-  extends: .depends-on-idris
   stage: deptycheck:install
   needs:
     - prepare-pack
@@ -78,7 +71,6 @@ deptycheck:install:after_build:
     - make test-installation
 
 deptycheck:install:clean:
-  extends: .depends-on-idris
   stage: deptycheck:install
   needs:
     - prepare-pack
@@ -87,7 +79,6 @@ deptycheck:install:clean:
     - make test-installation
 
 deptycheck:test:lib:
-  extends: .depends-on-idris
   stage: deptycheck:test:lib
   needs:
     - prepare-pack
@@ -96,7 +87,6 @@ deptycheck:test:lib:
     - make test-deptycheck only=lib/ INTERACTIVE="--color"
 
 deptycheck:test:docs:
-  extends: .depends-on-idris
   stage: deptycheck:test:docs
   needs:
     - prepare-pack
@@ -105,7 +95,6 @@ deptycheck:test:docs:
     - make test-deptycheck only=docs/ INTERACTIVE="--color"
 
 deptycheck:test:derive:
-  extends: .depends-on-idris
   stage: deptycheck:test:derive
   needs:
     - prepare-pack
@@ -135,9 +124,7 @@ deptycheck:test:derive:
     - make test-deptycheck only=gen-derivation/"$test_set" INTERACTIVE="--color" threads=2
 
 pil:build:
-  extends:
-    - .depends-on-idris
-    - .idris-build-job
+  extends: .idris-build-job
   stage: pil:build
   needs:
     - prepare-pack
@@ -146,7 +133,6 @@ pil:build:
     - make pil
 
 pil:test:
-  extends: .depends-on-idris
   stage: pil:test
   needs:
     - prepare-pack
