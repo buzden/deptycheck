@@ -1,34 +1,28 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  PACK_DIR: /root/.pack
+  PACK_SAVE_DIR: $CI_PROJECT_DIR/.pack
+
 default:
   image: ghcr.io/stefan-hoeck/idris2-pack:latest
   before_script:
-    - export PATH="$PACK_DIR/bin:${PATH#/root/.pack/bin:}"
-
-variables:
-  GIT_SUBMODULE_STRATEGY: recursive
-  PACK_DIR: $CI_PROJECT_DIR/.pack
+    - if [[ -d "$PACK_SAVE_DIR" ]]; then cp -rv "$PACK_SAVE_DIR/*" "$PACK_DIR"; fi
+  after_script:
+    - find "$PACK_DIR" -mindepth 1 -maxdepth 1 -not -name '.cache' -exec cp -ruv '{}' "$PACK_SAVE_DIR" \;
+  artifacts:
+    paths:
+      - "**/build/**/*.tt[cm]"
+      - $PACK_SAVE_DIR
+    exclude:
+      - $PACK_SAVE_DIR/.cache/**/*
+    expire_in: 3 hrs
 
 prepare-pack:
   stage: .pre
   script:
-    - apt-get update
-    - apt-get -y install rsync
-    - rsync -av --exclude=".cache" /root/.pack "$PACK_DIR"
-    - ln -s /root/.pack/.cache "$PACK_DIR"
-    - ls -lh "$PACK_DIR"
     - pack update-db
     - pack switch "$( if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
     - pack install contrib test
-  artifacts:
-    paths:
-      - $PATH_DIR
-    exclude:
-      - $PATH_DIR/.cache/**/*
-
-.idris-build-job:
-  artifacts:
-    paths:
-      - "**/build/**/*.tt[cm]"
-    expire_in: 3 hrs
 
 stages:
   - thirdparties:build
@@ -43,7 +37,6 @@ stages:
   - pil:test
 
 thirdparties:build:
-  extends: .idris-build-job
   stage: thirdparties:build
   needs:
     - prepare-pack
@@ -51,7 +44,6 @@ thirdparties:build:
     - make thirdparties
 
 deptycheck:build:
-  extends: .idris-build-job
   stage: deptycheck:build
   needs:
     - prepare-pack
@@ -130,7 +122,6 @@ deptycheck:test:derive:
     - make test-deptycheck only=gen-derivation/"$test_set" INTERACTIVE="--color" threads=2
 
 pil:build:
-  extends: .idris-build-job
   stage: pil:build
   needs:
     - prepare-pack
