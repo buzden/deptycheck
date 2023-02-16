@@ -8,7 +8,7 @@ default:
     - find . -name '.pack.*.tar' -exec tar -xf '{}' --one-top-level=/ \;
     - find . -name '*.tt?' -exec touch '{}' \;
   after_script:
-    - rm -f ".pack.*.tar"
+    - rm -f .pack.*.tar
     - |
       if [[ "$CI_JOB_NAME" =~ ":build" || "$CI_JOB_NAME" =~ "pack:" ]]
         then tar -cf "$CI_PROJECT_DIR/.pack.${CI_JOB_NAME/:/-}.tar" --exclude=".cache" "$PACK_DIR"
