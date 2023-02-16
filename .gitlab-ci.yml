@@ -7,12 +7,18 @@ default:
   interruptible: true
   before_script:
     - find . -name '.pack.*.tar' -exec tar -xf '{}' --one-top-level=/ \;
-    - find . -name '*.tt?' -exec touch '{}' \;
+    - find . -name '*.tt[cm]' -exec touch '{}' \;
+    - find . -name '.pack.*.tar' -exec tar -tf '{}' \; | (grep -v '/$' || true) > .downloaded_before_pack
+    - find . -name '*.tt[cm]' > .downloaded_before_ttc
   after_script:
     - rm -f .pack.*.tar
     - |
       if [[ "$CI_JOB_NAME" =~ ":build" || "$CI_JOB_NAME" =~ "pack:" ]]
-        then tar -cf "$CI_PROJECT_DIR/.pack.${CI_JOB_NAME/:/-}.tar" --exclude=".cache" "$PACK_DIR"
+        then
+          tar -cf "$CI_PROJECT_DIR/.pack.${CI_JOB_NAME/:/-}.tar" --exclude=".cache" --exclude-from=".downloaded_before_pack" "$PACK_DIR"
+          cat .downloaded_before_ttc | while read r; do rm "$r"; done
+        else
+          find . -name '*.tt[cm]' -delete
       fi
   artifacts:
     paths:
@@ -66,6 +72,7 @@ deptycheck:install:after_build:
   stage: deptycheck:install
   needs:
     - pack:prepare
+    - thirdparties:build
     - deptycheck:build
   script:
     - make install
@@ -83,6 +90,7 @@ deptycheck:test:lib:
   stage: deptycheck:test:lib
   needs:
     - pack:prepare
+    - thirdparties:build
     - deptycheck:build
   script:
     - make test-deptycheck only=lib/ INTERACTIVE="--color"
@@ -91,6 +99,7 @@ deptycheck:test:docs:
   stage: deptycheck:test:docs
   needs:
     - pack:prepare
+    - thirdparties:build
     - deptycheck:build
   script:
     - make test-deptycheck only=docs/ INTERACTIVE="--color"
@@ -99,6 +108,7 @@ deptycheck:test:derive:
   stage: deptycheck:test:derive
   needs:
     - pack:prepare
+    - thirdparties:build
     - deptycheck:build
     - deptycheck:test:lib
   only:
@@ -128,6 +138,7 @@ pil:build:
   stage: pil:build
   needs:
     - pack:prepare
+    - thirdparties:build
     - deptycheck:build
   script:
     - make pil
@@ -136,6 +147,8 @@ pil:test:
   stage: pil:test
   needs:
     - pack:prepare
+    - thirdparties:build
+    - deptycheck:build
     - pil:build
     - deptycheck:test:lib
   script:
