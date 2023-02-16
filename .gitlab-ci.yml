@@ -1,23 +1,22 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   PACK_DIR: /root/.pack
-  PACK_SAVED_TAR: $CI_PROJECT_DIR/.pack.tar
+  PACK_TAR_TO_SAVE: $CI_PROJECT_DIR/.pack.$CI_JOB_NAME_SLUG.tar
 
 default:
   image: ghcr.io/stefan-hoeck/idris2-pack:latest
   before_script:
-    - if [[ -r "$PACK_SAVED_TAR" ]]; then tar -xf "$PACK_SAVED_TAR" --one-top-level=/; fi
+    - find . -name '.pack.*.tar' -exec tar -xf '{}' --one-top-level=/ \;
     - find . -name '*.tt?' -exec touch '{}' \;
   after_script:
     - |
       if [[ "$CI_JOB_NAME" =~ "build" || "$CI_JOB_NAME" =~ "pack" ]]
-        then tar -uf "$PACK_SAVED_TAR" --exclude=".cache" "$PACK_DIR"
-        else rm -f "$PACK_SAVED_TAR"
+        then tar -cf "$PACK_TAR_TO_SAVE" --exclude=".cache" "$PACK_DIR"
       fi
   artifacts:
     paths:
       - "**/build/**/*.tt[cm]"
-      - $PACK_SAVED_TAR
+      - $PACK_TAR_TO_SAVE
     expire_in: 3 hrs
 
 prepare-pack:
