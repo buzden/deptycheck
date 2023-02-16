@@ -11,7 +11,7 @@ default:
     - rm -f ".pack.*.tar"
     - |
       if [[ "$CI_JOB_NAME" =~ ":build" || "$CI_JOB_NAME" =~ "pack:" ]]
-        then tar -cf "$CI_PROJECT_DIR/.pack.$CI_JOB_NAME_SLUG.tar" --exclude=".cache" "$PACK_DIR"
+        then tar -cf "$CI_PROJECT_DIR/.pack.${CI_JOB_NAME/:/-}.tar" --exclude=".cache" "$PACK_DIR"
       fi
   artifacts:
     paths:
