@@ -78,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: built-thirdparties
-          path: thirdparty/
+          path: "**/*.tt[cm]"
 
   ############################################
   # Build and test deptycheck library itself #
@@ -103,15 +103,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: built-thirdparties
-          path: thirdparty/
       - run: make deptycheck
       - name: Save built DepTyCheck
         uses: actions/upload-artifact@v3
         with:
           name: built-deptycheck
-          path: |
-            build/
-            thirdparty/
+          path: "**/*.tt[cm]"
 
   deptycheck-test-lib:
     name: Test DepTyCheck lib
@@ -302,7 +299,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: built-pil
-          path: example/build/
+          path: "**/*.tt[cm]"
 
   pil-test:
     name: Test PIL example
@@ -320,10 +317,6 @@ jobs:
           name: pack-dir
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
-      - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v3
-        with:
-          name: built-deptycheck
       - name: Restore built PIL
         uses: actions/download-artifact@v3
         with:
