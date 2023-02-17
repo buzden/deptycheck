@@ -78,7 +78,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: built-thirdparties
-          path: "**/*.tt[cm]"
+          path: |
+            "**/*.tt[cm]"
+            !**/depends/**/*
 
   ############################################
   # Build and test deptycheck library itself #
@@ -108,7 +110,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: built-deptycheck
-          path: "**/*.tt[cm]"
+          path: |
+            "**/*.tt[cm]"
+            !**/depends/**/*
 
   deptycheck-test-lib:
     name: Test DepTyCheck lib
@@ -299,7 +303,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: built-pil
-          path: "**/*.tt[cm]"
+          path: |
+            "**/*.tt[cm]"
+            !**/depends/**/*
 
   pil-test:
     name: Test PIL example
