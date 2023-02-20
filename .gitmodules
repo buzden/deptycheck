@@ -4,7 +4,8 @@
 	branch = pre-con-overhaul
 [submodule "thirdparty/sop"]
 	path = thirdparty/sop
-	url = https://github.com/stefan-hoeck/idris2-sop
+	url = https://github.com/buzden/idris2-sop
+	branch = pre-con-overhaul
 [submodule "thirdparty/summary-stat"]
 	path = thirdparty/summary-stat
 	url = https://github.com/buzden/idris2-summary-stat
