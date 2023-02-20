@@ -80,8 +80,8 @@ jobs:
 
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
-      - name: Tar built TTC files
-        run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
+      - name: Tar thirdparties
+        run: find "$(pwd)/thirdparty" -type f | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built thirdparties
         uses: actions/upload-artifact@v3
         with:
@@ -314,7 +314,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: built-pil
-          path: example/build/
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
 
