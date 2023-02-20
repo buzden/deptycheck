@@ -63,7 +63,7 @@ thirdparty-elab-util:
 thirdparty-sop: thirdparty-elab-util
 	${RM} -r thirdparty/sop/depends/
 	${MKDIR} thirdparty/sop/depends/
-	${LN} -sf ../../elab-util/build/ttc/ thirdparty/sop/depends/elab-util-0.5.0
+	${LN} -sf ../../elab-util/build/ttc/ thirdparty/sop/depends/elab-util-0.6.0
 	${IDRIS2} --build thirdparty/sop/sop.ipkg
 	${RM} -r thirdparty/sop/depends/
 	# TODO to make the `depends` dir be removed even on the compiler crash
