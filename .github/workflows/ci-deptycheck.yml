@@ -81,7 +81,7 @@ jobs:
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
       - name: Tar built TTC files
-        run: find "${{ github.workspace }}" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
+        run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built thirdparties
         uses: actions/upload-artifact@v3
         with:
@@ -113,7 +113,7 @@ jobs:
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
       - name: Tar built TTC files
-        run: find "${{ github.workspace }}" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
+        run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built DepTyCheck
         uses: actions/upload-artifact@v3
         with:
@@ -293,7 +293,7 @@ jobs:
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
       - name: Tar built TTC files
-        run: find "${{ github.workspace }}" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
+        run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built PIL
         uses: actions/upload-artifact@v3
         with:
