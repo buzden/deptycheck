@@ -1,4 +1,5 @@
 export IDRIS2 ?= idris2
+export PACK ?= pack
 
 MKDIR := mkdir -p
 LN := ln
@@ -8,6 +9,8 @@ LN := ln
 all: deptycheck
 
 deptycheck: thirdparty-elab-util
+	#${PACK} install-deps deptycheck.ipkg
+	${PACK} install contrib
 	${IDRIS2} --build deptycheck.ipkg
 
 clean:
@@ -41,6 +44,7 @@ test: test-all
 test-all: test-deptycheck print-v-delimiter test-pil
 
 test-deptycheck: deptycheck thirdparty-sop thirdparty-summary-stat
+	${PACK} install test
 	${MAKE} -C tests -f tests.mk only="${only}"
 
 .PHONY: retest-deptycheck
@@ -51,6 +55,7 @@ retest-deptycheck: deptycheck thirdparty-sop
 .PHONY: test-installation
 
 test-installation:
+	${PACK} install contrib test
 	${MAKE} -C tests/installation -f non-hermetic-tests.mk only="${only}"
 
 .PHONY: thirdparties thirdparty-elab-util thirdparty-sop
@@ -77,6 +82,7 @@ pil: deptycheck
 	${MAKE} -C example -f pil.mk
 
 test-pil: pil
+	${PACK} install contrib test
 	${MAKE} -C example -f pil.mk test only="${only}"
 
 .PHONY: docs

@@ -313,8 +313,14 @@ More on design of derivator can be found in [documentation](https://deptycheck.r
 
 ## Usage and installation
 
+For building it is crucial to use [`pack`](https://github.com/stefan-hoeck/idris2-pack/) package manager.
+Unfortunately, we are not using in a full flavour,
+we still depend on a legacy `Makefile`-based build system,
+but anyway it is used for the particular compiler and environment selection.
+
 We try to use as fresh version of the Idris 2 compiler as possible.
-The version we test against is in the file called [`.idris-version`](/.idris-version) in the root of this repository.
+The `pack`'s collection we test against is in the file called [`.pack-collection`](/.pack-collection) in the root of this repository.
+We may set specific compiler version in the local `pack.toml` file, if we need to.
 
 Derivation facility of this library has en external dependency to the [`idris2-elab-util`](https://github.com/stefan-hoeck/idris2-elab-util/) package.
 In order to run tests, you will also need [`idris2-sop`](https://github.com/stefan-hoeck/idris2-sop) package.
@@ -323,3 +329,4 @@ For building, installing and testing we have a makefile, thus we use simple old 
 Installation is done with a built-in facility of the Idris 2 compiler,
 so consult to [its documentation](https://idris2.readthedocs.io/en/latest/reference/packages.html?highlight=--install#using-package-files)
 to see where the library is installed.
+It the future, we are planning to migrate all stuff related to building, testing and installation to `pack`.

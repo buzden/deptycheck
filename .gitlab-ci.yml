@@ -1,24 +1,30 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  IDRIS_VERSION_FILE: .idris-version # should contain the result of `git describe --tags`
+  PACK_DIR: /root/.pack
 
-read-idris-ver:
-  stage: .pre
-  script:
-    - IDRIS2_TAG="$( if [[ "$CI_PIPELINE_SOURCE" != "schedule" ]]; then cat "${IDRIS_VERSION_FILE}"; else echo "latest"; fi )"
-    - echo "IDRIS2_TAG=$IDRIS2_TAG" > idris.env
-  artifacts:
-    reports:
-      dotenv: idris.env
-
-.depends-on-idris:
-  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/snazzybucket/idris2:${IDRIS2_TAG}
-
-.idris-build-job:
+default:
+  image: ghcr.io/stefan-hoeck/idris2-pack:latest
+  interruptible: true
+  before_script:
+    - find . -name '.pack.*.tar' -exec tar -xf '{}' --one-top-level=/ --touch \;
+  after_script:
+    - rm -f .pack.*.tar
+    - |
+      if [[ "$CI_JOB_NAME" =~ ":build" || "$CI_JOB_NAME" =~ "pack:" ]]
+        then tar -cf "$CI_PROJECT_DIR/.pack.${CI_JOB_NAME/:/-}.tar" --exclude=".cache" "$PACK_DIR"
+      fi
   artifacts:
     paths:
       - "**/build/**/*.tt[cm]"
+      - ".pack.*.tar"
     expire_in: 3 hrs
+
+pack:prepare:
+  stage: .pre
+  script:
+    - pack update-db
+    - pack switch "$( if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
+    - pack install contrib test
 
 stages:
   - thirdparties:build
@@ -32,25 +38,16 @@ stages:
   - pil:build
   - pil:test
 
-# TODO to find a way to not to repeat `read-idris-ver` in `needs` for every job that extends `.depends-on-idris`.
-
 thirdparties:build:
-  extends:
-    - .depends-on-idris
-    - .idris-build-job
   stage: thirdparties:build
   needs:
-    - read-idris-ver
+    - pack:prepare
   script:
     - make thirdparties
 
 deptycheck:build:
-  extends:
-    - .depends-on-idris
-    - .idris-build-job
   stage: deptycheck:build
   needs:
-    - read-idris-ver
     - thirdparties:build
   script:
     - make deptycheck
@@ -64,47 +61,38 @@ deptycheck:docs:
     - make docs
 
 deptycheck:install:after_build:
-  extends: .depends-on-idris
   stage: deptycheck:install
   needs:
-    - read-idris-ver
     - deptycheck:build
   script:
     - make install
     - make test-installation
 
 deptycheck:install:clean:
-  extends: .depends-on-idris
   stage: deptycheck:install
   needs:
-    - read-idris-ver
+    - pack:prepare
   script:
     - make install
     - make test-installation
 
 deptycheck:test:lib:
-  extends: .depends-on-idris
   stage: deptycheck:test:lib
   needs:
-    - read-idris-ver
     - deptycheck:build
   script:
     - make test-deptycheck only=lib/ INTERACTIVE="--color"
 
 deptycheck:test:docs:
-  extends: .depends-on-idris
   stage: deptycheck:test:docs
   needs:
-    - read-idris-ver
     - deptycheck:build
   script:
     - make test-deptycheck only=docs/ INTERACTIVE="--color"
 
 deptycheck:test:derive:
-  extends: .depends-on-idris
   stage: deptycheck:test:derive
   needs:
-    - read-idris-ver
     - deptycheck:build
     - deptycheck:test:lib
   only:
@@ -131,21 +119,15 @@ deptycheck:test:derive:
     - make test-deptycheck only=gen-derivation/"$test_set" INTERACTIVE="--color" threads=2
 
 pil:build:
-  extends:
-    - .depends-on-idris
-    - .idris-build-job
   stage: pil:build
   needs:
-    - read-idris-ver
     - deptycheck:build
   script:
     - make pil
 
 pil:test:
-  extends: .depends-on-idris
   stage: pil:test
   needs:
-    - read-idris-ver
     - pil:build
     - deptycheck:test:lib
   script:

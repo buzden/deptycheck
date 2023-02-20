@@ -1,3 +1,4 @@
+---
 name: Build and test
 
 on:
@@ -12,17 +13,22 @@ on:
       - main
       - master
   schedule:
-    # We want to run right after the `latest` image is published.
-    # So, let's do it an hour right after. Look the schedule of publishing here:
-    # https://github.com/alexhumphreys/idris2-dockerfile/blob/main/.github/workflows/docker-image.yml
+    # We want to run in the beginning of the day, right after the `pack` collection is built at the end of the previous day.
     - cron: '0 1 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}@${{ github.ref }}
+  cancel-in-progress: true
 
 defaults:
   run:
     shell: bash
 
+env:
+  PACK_DIR: /root/.pack
+  pack_dir_file: pack-dir.tar
+
 # TODO to reduce duplication, e.g. by using https://docs.github.com/en/actions/using-workflows/reusing-workflows
-#      and remove `.github` from excluded if jscpd linter
 
 jobs:
 
@@ -30,33 +36,31 @@ jobs:
   # Preparations #
   ################
 
-  read-ver:
-    name: Aquire compiler version
+  prepare-pack:
+    name: Prepare `pack`
     runs-on: ubuntu-latest
-    env:
-      IDRIS_VERSION_FILE: .idris-version
-    outputs:
-      idris-ver: ${{ steps.read-ver.outputs.idris-ver }}
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Read the version
-        id: read-ver
-        run: |
-          (
-          echo -n "idris-ver="
-          if [[ '${{ github.event_name }}' == 'schedule' ]]; then
-            echo "latest"
-          else
-            cat "${IDRIS_VERSION_FILE}"
-          fi
-          ) >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v3
+
+      - run: pack update-db
+      - name: Switch to appropriate `pack` collection
+        run: pack switch "$( if [[ '${{ github.event_name }}' == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
+      - run: pack install contrib test
+
+      - name: Tar the `pack` dir
+        run: tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
+      - name: Save state of `pack`
+        uses: actions/upload-artifact@v3
+        with:
+          name: pack-dir
+          path: ${{ env.pack_dir_file }}
 
   thirdparties-build:
     name: Build thirdparties
-    needs: read-ver
+    needs: prepare-pack
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - name: Install Git in order to enable checkout with submodules
         run: |
@@ -65,12 +69,24 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
+      - name: Restore state of `pack`
+        uses: actions/download-artifact@v3
+        with:
+          name: pack-dir
+      - name: Untar the `pack` dir
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+
       - run: make thirdparties
+
+      - name: Tar the `pack` dir
+        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
+      - name: Tar thirdparties
+        run: find "$(pwd)/thirdparty" -type f | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built thirdparties
         uses: actions/upload-artifact@v3
         with:
           name: built-thirdparties
-          path: thirdparty/
+          path: ${{ env.pack_dir_file }}
 
   ############################################
   # Build and test deptycheck library itself #
@@ -79,39 +95,47 @@ jobs:
   deptycheck-build-lib:
     name: Build DepTyCheck lib
     needs:
-      - read-ver
+      - prepare-pack
       - thirdparties-build
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - uses: actions/checkout@v3
       - name: Restore built thirdparties
         uses: actions/download-artifact@v3
         with:
           name: built-thirdparties
-          path: thirdparty/
+      - name: Untar the `pack` dir
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+
       - run: make deptycheck
+
+      - name: Tar the `pack` dir
+        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
+      - name: Tar built TTC files
+        run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built DepTyCheck
         uses: actions/upload-artifact@v3
         with:
           name: built-deptycheck
-          path: |
-            build/
-            thirdparty/
+          path: ${{ env.pack_dir_file }}
 
   deptycheck-test-lib:
     name: Test DepTyCheck lib
     needs:
-      - read-ver
+      - prepare-pack
       - deptycheck-build-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v3
         with:
           name: built-deptycheck
+      - name: Untar the `pack` dir
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+
       - run: make test-deptycheck INTERACTIVE="--color" only=lib/
 
   ##################################
@@ -121,26 +145,29 @@ jobs:
   deptycheck-install-built:
     name: Install DepTyCheck after build
     needs:
-      - read-ver
+      - prepare-pack
       - deptycheck-build-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v3
         with:
           name: built-deptycheck
+      - name: Untar the `pack` dir
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+
       - run: make install
       - run: make test-installation
 
   deptycheck-install-clean:
     name: Install DepTyCheck clean
     needs:
-      - read-ver
+      - prepare-pack
       - deptycheck-build-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - name: Install Git in order to enable checkout with submodules
         run: |
@@ -149,6 +176,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
+      - name: Restore state of `pack`
+        uses: actions/download-artifact@v3
+        with:
+          name: pack-dir
+      - name: Untar the `pack` dir
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+
       - run: make install
       - run: make test-installation
 
@@ -169,18 +203,20 @@ jobs:
   deptycheck-test-docs:
     name: Test DepTyCheck docs
     needs:
-      - read-ver
+      - prepare-pack
       - deptycheck-build-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v3
         with:
           name: built-deptycheck
-      - name: Test
-        run: make test-deptycheck INTERACTIVE="--color" only=docs/
+      - name: Untar the `pack` dir
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+
+      - run: make test-deptycheck INTERACTIVE="--color" only=docs/
 
   ################################
   # Test deptycheck's derivation #
@@ -188,6 +224,8 @@ jobs:
 
   get-derivation-test-sets:
     name: Aquire test sets for derivation
+    needs:
+      - deptycheck-build-lib
     runs-on: ubuntu-latest
     outputs:
       derivation-test-sets: ${{ steps.get-derivation-test-sets.outputs.derivation-test-sets }}
@@ -208,12 +246,12 @@ jobs:
   deptycheck-test-derivation:
     name: Test DepTyCheck's derivation
     needs:
-      - read-ver
+      - prepare-pack
       - deptycheck-build-lib
       - deptycheck-test-lib
       - get-derivation-test-sets
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
     strategy:
       fail-fast: false # all test cases are more or less independent
       matrix:
@@ -225,8 +263,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: built-deptycheck
-      - name: Test
-        run: make test-deptycheck INTERACTIVE="--color" only="gen-derivation/${{matrix.test_set}}"
+      - name: Untar the `pack` dir
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+
+      - run: make test-deptycheck INTERACTIVE="--color" only="gen-derivation/${{matrix.test_set}}"
 
   #################
   # Test examples #
@@ -235,40 +275,46 @@ jobs:
   pil-build:
     name: Build PIL example
     needs:
-      - read-ver
+      - prepare-pack
       - deptycheck-build-lib
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v3
         with:
           name: built-deptycheck
+      - name: Untar the `pack` dir
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+
       - run: make pil
+
+      - name: Tar the `pack` dir
+        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
+      - name: Tar built TTC files
+        run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built PIL
         uses: actions/upload-artifact@v3
         with:
           name: built-pil
-          path: example/build/
+          path: ${{ env.pack_dir_file }}
 
   pil-test:
     name: Test PIL example
     needs:
-      - read-ver
+      - prepare-pack
       - deptycheck-build-lib
       - pil-build
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2:${{ needs.read-ver.outputs.idris-ver }}
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - uses: actions/checkout@v3
-      - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v3
-        with:
-          name: built-deptycheck
       - name: Restore built PIL
         uses: actions/download-artifact@v3
         with:
           name: built-pil
-          path: example/build/
+      - name: Untar the `pack` dir
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+
       - run: make test-pil INTERACTIVE="--color"
