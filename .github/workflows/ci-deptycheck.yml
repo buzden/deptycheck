@@ -74,9 +74,7 @@ jobs:
         with:
           name: pack-dir
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
-      - name: Touch TTC files
-        run: find . -name '*.tt[cm]' -exec touch '{}' \;
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: make thirdparties
 
@@ -108,9 +106,7 @@ jobs:
         with:
           name: built-thirdparties
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
-      - name: Touch TTC files
-        run: find . -name '*.tt[cm]' -exec touch '{}' \;
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: make deptycheck
 
@@ -138,9 +134,7 @@ jobs:
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
-      - name: Touch TTC files
-        run: find . -name '*.tt[cm]' -exec touch '{}' \;
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: make test-deptycheck INTERACTIVE="--color" only=lib/
 
@@ -162,9 +156,7 @@ jobs:
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
-      - name: Touch TTC files
-        run: find . -name '*.tt[cm]' -exec touch '{}' \;
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: make install
       - run: make test-installation
@@ -189,9 +181,7 @@ jobs:
         with:
           name: pack-dir
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
-      - name: Touch TTC files
-        run: find . -name '*.tt[cm]' -exec touch '{}' \;
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: make install
       - run: make test-installation
@@ -224,9 +214,7 @@ jobs:
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
-      - name: Touch TTC files
-        run: find . -name '*.tt[cm]' -exec touch '{}' \;
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: make test-deptycheck INTERACTIVE="--color" only=docs/
 
@@ -276,9 +264,7 @@ jobs:
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
-      - name: Touch TTC files
-        run: find . -name '*.tt[cm]' -exec touch '{}' \;
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: make test-deptycheck INTERACTIVE="--color" only="gen-derivation/${{matrix.test_set}}"
 
@@ -300,9 +286,7 @@ jobs:
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
-      - name: Touch TTC files
-        run: find . -name '*.tt[cm]' -exec touch '{}' \;
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: make pil
 
@@ -331,8 +315,6 @@ jobs:
         with:
           name: built-pil
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/
-      - name: Touch TTC files
-        run: find . -name '*.tt[cm]' -exec touch '{}' \;
+        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: make test-pil INTERACTIVE="--color"

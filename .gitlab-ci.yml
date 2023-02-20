@@ -6,8 +6,7 @@ default:
   image: ghcr.io/stefan-hoeck/idris2-pack:latest
   interruptible: true
   before_script:
-    - find . -name '.pack.*.tar' -exec tar -xf '{}' --one-top-level=/ \;
-    - find . -name '*.tt[cm]' -exec touch '{}' \;
+    - find . -name '.pack.*.tar' -exec tar -xf '{}' --one-top-level=/ --touch \;
   after_script:
     - rm -f .pack.*.tar
     - |
