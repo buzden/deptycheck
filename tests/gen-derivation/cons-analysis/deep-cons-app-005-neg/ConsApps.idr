@@ -5,10 +5,10 @@ import Language.Reflection.Syntax
 
 %default total
 
-infix 1 @@
+infix 1 @@@
 
-(@@) : b -> a -> (a, b)
-y @@ x = (x, y)
+(@@@) : b -> a -> (a, b)
+y @@@ x = (x, y)
 
 public export
 data X : Type -> Type -> Type where
@@ -24,12 +24,12 @@ infixr 5 `MC`
 public export
 consApps : Elab $ List (List Name, TTImp)
 consApps = pure
-  [ `(XX $ Rigt Unit) @@ []
-  , `(XX $ Rigt a) @@ ["a"]
-  , `(XX $ Rigt MkUnit) @@ []
-  , `(XX $ Rigt Prelude.Nil) @@ []
-  , `(XX $ Left $ S Z `MC` S (S Z) `MC` (S $ S $ S m) `MC` MM) @@ ["n", "a", "b"]
-  , `(XX $ Left $ S Z `MC` S (S Z) `MC` (S $ S $ S Z) `MC` MX) @@ []
-  , `(XX $ Left $ a `MC` b `MC` c `MC` MM) @@ ["n", "a", "b"]
-  , `(XX $ Left $ a `MC` Z `MC` c `MC` MM) @@ ["n", "a", "b"]
+  [ `(XX $ Rigt Unit) @@@ []
+  , `(XX $ Rigt a) @@@ ["a"]
+  , `(XX $ Rigt MkUnit) @@@ []
+  , `(XX $ Rigt Prelude.Nil) @@@ []
+  , `(XX $ Left $ S Z `MC` S (S Z) `MC` (S $ S $ S m) `MC` MM) @@@ ["n", "a", "b"]
+  , `(XX $ Left $ S Z `MC` S (S Z) `MC` (S $ S $ S Z) `MC` MX) @@@ []
+  , `(XX $ Left $ a `MC` b `MC` c `MC` MM) @@@ ["n", "a", "b"]
+  , `(XX $ Left $ a `MC` Z `MC` c `MC` MM) @@@ ["n", "a", "b"]
   ]

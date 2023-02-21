@@ -333,7 +333,7 @@ namespace Statements_given_preV_preR -- implementations
   seq_gen f preV preR = do
     (midV ** midR ** l) <- statement_gen f preV preR
     (_    ** _    ** r) <- statement_gen f midV midR
-    pure (_ ** _ ** l *> r)
+    pure (_ ** _ ** l >> r)
 
   block_gen f preV preR = do
     (_ ** _ ** s) <- statement_gen f preV preR
@@ -391,7 +391,7 @@ namespace Statements_given_preV_preR_postV_postR -- implementations
   seq_gen f preV preR postV postR = do
     (midV ** midR ** left) <- statement_gen f preV preR
     right                  <- statement_gen f midV midR postV postR
-    pure $ left *> right
+    pure $ left >> right
 
   block_gen f preV preR postV postR = case decEq postV preV of
     No _ => empty
@@ -445,7 +445,7 @@ namespace Statements_given_preV_preR_postR -- implementations
   seq_gen f preV preR postR = do
     (midV ** midR ** left) <- statement_gen f preV preR
     (_           ** right) <- statement_gen f midV midR postR
-    pure $ (_ ** left *> right)
+    pure $ (_ ** left >> right)
 
   block_gen f preV preR postR = do
     (_ ** stmt) <- statement_gen f preV preR postR
