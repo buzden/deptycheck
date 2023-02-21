@@ -76,12 +76,10 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: make thirdparties
+      - run: pack install elab-util sop summary-stat
 
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
-      - name: Tar thirdparties
-        run: find "$(pwd)/thirdparty" -type f | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built thirdparties
         uses: actions/upload-artifact@v3
         with:
