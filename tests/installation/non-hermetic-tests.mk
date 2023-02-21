@@ -16,10 +16,10 @@ runner:
 	${PACK} build non-hermetic-tests.ipkg
 
 test: runner
-	${PACK} "`pwd`/.pack_lock" $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only "$(only)"
+	${PACK} run non-hermetic-tests.ipkg "`pwd`/.pack_lock" $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only "$(only)"
 
 retest: runner
-	${PACK} "`pwd`/.pack_lock" $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only-file failures --only "$(only)"
+	${PACK} run non-hermetic-tests.ipkg "`pwd`/.pack_lock" $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only-file failures --only "$(only)"
 
 clean:
 	${PACK} clean non-hermetic-tests.ipkg
