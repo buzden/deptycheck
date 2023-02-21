@@ -28,7 +28,7 @@ done
 "
 package docs
 modules = ${all_modules#, }
-depends = deptycheck, contrib, elab-util
+depends = deptycheck
 sourcedir = \"src\"
 " > docs.ipkg
 

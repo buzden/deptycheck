@@ -64,7 +64,6 @@ deptycheck:install:after_build:
   needs:
     - deptycheck:build
   script:
-    - make install
     - make test-installation
 
 deptycheck:install:clean:
@@ -72,7 +71,6 @@ deptycheck:install:clean:
   needs:
     - pack:prepare
   script:
-    - make install
     - make test-installation
 
 deptycheck:test:lib:

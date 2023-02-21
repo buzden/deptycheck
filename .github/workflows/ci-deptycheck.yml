@@ -156,7 +156,6 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: make install
       - run: make test-installation
 
   deptycheck-install-clean:
@@ -181,7 +180,6 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: make install
       - run: make test-installation
 
   ##########################
