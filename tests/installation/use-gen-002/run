@@ -1,5 +1,6 @@
 rm -rf build
 
-$1 --build deptycheck-usage.ipkg && ./build/exec/deptycheck-usage-example
+flock "$1" pack -q install-deps deptycheck-usage.ipkg && \
+idris2 --build deptycheck-usage.ipkg && ./build/exec/deptycheck-usage-example
 
 rm -rf build

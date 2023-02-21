@@ -1,5 +1,6 @@
 rm -rf build
 
-$1 --build use-gen.ipkg
+flock "$1" pack -q install-deps use-gen.ipkg && \
+idris2 --build use-gen.ipkg
 
 rm -rf build

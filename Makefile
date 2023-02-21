@@ -1,4 +1,3 @@
-export IDRIS2 ?= idris2
 export PACK ?= pack
 
 MKDIR := mkdir -p
@@ -12,7 +11,7 @@ deptycheck:
 	${PACK} build deptycheck.ipkg
 
 clean:
-	${IDRIS2} --clean deptycheck.ipkg
+	${PACK} clean deptycheck.ipkg
 	${RM} -r build
 	@
 	${MAKE} -C docs clean
@@ -27,7 +26,6 @@ test: test-all
 test-all: test-deptycheck print-v-delimiter test-pil
 
 test-deptycheck: deptycheck
-	${PACK} install test
 	${MAKE} -C tests -f tests.mk only="${only}"
 
 .PHONY: retest-deptycheck
@@ -38,7 +36,7 @@ retest-deptycheck: deptycheck
 .PHONY: test-installation
 
 test-installation:
-	${PACK} install contrib test
+	${PACK} install deptycheck
 	${MAKE} -C tests/installation -f non-hermetic-tests.mk only="${only}"
 
 .PHONY: pil test-pil
@@ -47,7 +45,6 @@ pil: deptycheck
 	${MAKE} -C example -f pil.mk
 
 test-pil: pil
-	${PACK} install contrib test
 	${MAKE} -C example -f pil.mk test only="${only}"
 
 .PHONY: docs

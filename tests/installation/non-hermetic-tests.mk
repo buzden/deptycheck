@@ -1,8 +1,4 @@
-# Mostly copied from the Idris2's makefile in the `test` dir
-
-IDRIS2 ?= idris2
-
-RUNTESTS := build/exec/runtests
+PACK ?= pack
 
 INTERACTIVE ?= --interactive
 ifeq ($(shell uname), FreeBSD)
@@ -17,16 +13,16 @@ threads ?= `$(NPROC)`
 all: test
 
 runner:
-	${IDRIS2} --build non-hermetic-tests.ipkg
+	${PACK} build non-hermetic-tests.ipkg
 
 test: runner
-	$(RUNTESTS) $(IDRIS2) $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only "$(only)"
+	${PACK} "`pwd`/.pack_lock" $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only "$(only)"
 
 retest: runner
-	$(RUNTESTS) $(IDRIS2) $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only-file failures --only "$(only)"
+	${PACK} "`pwd`/.pack_lock" $(INTERACTIVE) --timing --failure-file failures --threads $(threads) --only-file failures --only "$(only)"
 
 clean:
-	${IDRIS2} --clean non-hermetic-tests.ipkg
+	${PACK} clean non-hermetic-tests.ipkg
 	$(RM) failures
 	@find . -depth -type d -name build -exec rm -rf '{}' \;
 	@find . -type f -name 'output' -delete

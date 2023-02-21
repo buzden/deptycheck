@@ -1,0 +1,5 @@
+[custom.all.primitive-imperative-language-example]
+type = "local"
+path = "."
+ipkg = "pil.ipkg"
+test = "tests/tests.ipkg"

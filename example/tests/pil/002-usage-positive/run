@@ -1,5 +1,6 @@
 rm -rf build
 
-$1 --find-ipkg --check Positive.idr
+flock "$1" pack -q install-deps use-pil.ipkg && \
+idris2 --find-ipkg --check Positive.idr
 
 rm -rf build

@@ -1,5 +1,6 @@
 rm -rf build
 
-$1 --check --no-color --console-width 0 --no-banner --find-ipkg CanonicSigCheck.idr
+flock "$1" pack -q install-deps canonic-sig.ipkg && \
+idris2 --check --no-color --console-width 0 --no-banner --find-ipkg CanonicSigCheck.idr
 
 rm -rf build

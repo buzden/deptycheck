@@ -1,7 +1,8 @@
 rm -rf build
 
-$1 --check --no-color --console-width 0 --no-banner --find-ipkg DerivedGen.idr && \
+flock "$1" pack -q install-deps derive.ipkg && \
+idris2 --check --no-color --console-width 0 --no-banner --find-ipkg DerivedGen.idr && \
 grep 'main : IO' DerivedGen.idr >/dev/null && \
-$1 --exec main --no-color --console-width 0 --no-banner --find-ipkg DerivedGen.idr
+pack exec DerivedGen.idr
 
 rm -rf build

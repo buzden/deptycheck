@@ -6,4 +6,4 @@ version = 0.0.1
 main = Main
 executable = runtests
 
-depends = contrib, test
+depends = test

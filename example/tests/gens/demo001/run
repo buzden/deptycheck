@@ -1,6 +1,7 @@
 rm -rf build
 
-$1 --build demogen.ipkg
-$1 --find-ipkg --exec main DemoGen.idr
+flock "$1" pack -q install-deps demogen.ipkg && \
+idris2 --build demogen.ipkg && \
+pack exec DemoGen.idr
 
 rm -rf build
