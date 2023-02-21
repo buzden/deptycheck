@@ -41,7 +41,7 @@ Show Type' where
 
 isNopDeeply : Statement preV preR postV postR -> Bool
 isNopDeeply Nop      = True
-isNopDeeply (x *> y) = isNopDeeply x && isNopDeeply y
+isNopDeeply (x >> y) = isNopDeeply x && isNopDeeply y
 isNopDeeply _        = False
 
 ||| Next identation
@@ -73,7 +73,7 @@ showInd i (If__ cond x y) = indent i "if (" ++ show cond ++ ") {\n" ++
                               else " else {\n" ++
                                 showInd (n i) y ++ "\n" ++
                                 indent i "}"
-showInd i (x *> y) = if isNopDeeply x
+showInd i (x >> y) = if isNopDeeply x
                        then showInd i y
                        else showInd i x ++
                        if isNopDeeply y then "" else "\n" ++

@@ -7,7 +7,6 @@ import public Example.Pil.Lang.Expression
 %default total
 
 infix 2 #=, ?#=, !#=, %=
-infixr 1 *>
 
 public export
 data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
@@ -40,7 +39,7 @@ data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
          Statement vars regs varsElse regsElse ->
          Statement vars regs vars $ Merge regsThen regsElse
 
-  (*>) : Statement preV preR midV midR ->
+  (>>) : Statement preV preR midV midR ->
          Statement midV midR postV postR ->
          Statement preV preR postV postR
 
@@ -78,16 +77,10 @@ print : Show (idrTypeOf ty) => Expression vars regs ty -> Statement vars regs va
 print = Print
 
 public export %inline
-(>>) : Statement preV preR midV midR ->
-       Statement midV midR postV postR ->
-       Statement preV preR postV postR
-(>>) = (*>)
-
-public export %inline
 (>>=) : Statement preV preR midV midR ->
         (Unit -> Statement midV midR postV postR) ->
         Statement preV preR postV postR
-a >>= f = a *> f ()
+a >>= f = a >> f ()
 
 public export %inline
 if_  : (cond : Expression vars regsBefore Bool') ->
@@ -106,7 +99,7 @@ while cond body = for nop cond nop body
 public export %inline
 (?#=) : (n : Name) -> {ty : Type'} -> {0 regs : Registers rc} ->
         Expression ((n, ty)::vars) regs ty -> Statement vars regs ((n, ty)::vars) regs
-n ?#= v = ty. n *> n #= v
+n ?#= v = ty. n >> n #= v
 
 namespace AlternativeDefineAndAssign
 
