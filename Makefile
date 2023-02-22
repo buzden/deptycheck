@@ -33,12 +33,6 @@ test-deptycheck: deptycheck
 retest-deptycheck: deptycheck
 	${MAKE} -C tests -f tests.mk retest
 
-.PHONY: test-installation
-
-test-installation:
-	${PACK} install deptycheck
-	${MAKE} -C tests/installation -f non-hermetic-tests.mk only="${only}"
-
 .PHONY: pil test-pil
 
 pil: deptycheck

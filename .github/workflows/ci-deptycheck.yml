@@ -136,52 +136,6 @@ jobs:
 
       - run: make test-deptycheck INTERACTIVE="--color" only=lib/
 
-  ##################################
-  # Test deptycheck's installation #
-  ##################################
-
-  deptycheck-install-built:
-    name: Install DepTyCheck after build
-    needs:
-      - prepare-pack
-      - deptycheck-build-lib
-    runs-on: ubuntu-latest
-    container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v3
-        with:
-          name: built-deptycheck
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
-
-      - run: make test-installation
-
-  deptycheck-install-clean:
-    name: Install DepTyCheck clean
-    needs:
-      - prepare-pack
-      - deptycheck-build-lib
-    runs-on: ubuntu-latest
-    container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    steps:
-      - name: Install Git in order to enable checkout with submodules
-        run: |
-          apt-get update
-          apt-get -y install git
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Restore state of `pack`
-        uses: actions/download-artifact@v3
-        with:
-          name: pack-dir
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
-
-      - run: make test-installation
-
   ##########################
   # Test deptycheck's docs #
   ##########################

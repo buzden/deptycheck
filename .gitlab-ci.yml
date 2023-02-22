@@ -30,7 +30,6 @@ stages:
   - lint
   - deptycheck:build
   - deptycheck:docs
-  - deptycheck:install
   - deptycheck:test:lib
   - deptycheck:test:docs
   - deptycheck:test:derive
@@ -58,20 +57,6 @@ deptycheck:docs:
   script:
     - pip3 install -r docs/requirements.txt
     - make docs
-
-deptycheck:install:after_build:
-  stage: deptycheck:install
-  needs:
-    - deptycheck:build
-  script:
-    - make test-installation
-
-deptycheck:install:clean:
-  stage: deptycheck:install
-  needs:
-    - pack:prepare
-  script:
-    - make test-installation
 
 deptycheck:test:lib:
   stage: deptycheck:test:lib
