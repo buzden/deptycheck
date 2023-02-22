@@ -106,7 +106,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: make deptycheck
+      - run: pack install deptycheck
 
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"

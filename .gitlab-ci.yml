@@ -48,7 +48,7 @@ deptycheck:build:
   needs:
     - thirdparties:build
   script:
-    - make deptycheck
+    - pack install deptycheck
 
 deptycheck:docs:
   stage: deptycheck:docs
