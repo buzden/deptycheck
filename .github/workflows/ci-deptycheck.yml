@@ -46,7 +46,6 @@ jobs:
       - run: pack update-db
       - name: Switch to appropriate `pack` collection
         run: pack switch "$( if [[ '${{ github.event_name }}' == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
-      - run: pack install contrib test
 
       - name: Tar the `pack` dir
         run: tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
@@ -76,7 +75,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: pack install elab-util sop summary-stat
+      - run: pack install elab-util mtl-tuple-impls random-pure sop summary-stat
 
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"

@@ -8,8 +8,7 @@ license = "MPL-2.0"
 
 version = 0.0.220712
 
-modules = Control.Monad.State.Tuple
-        , Data.Nat.Pos
+modules = Data.Nat.Pos
         , Data.Vect.Dependent
         , Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
@@ -28,11 +27,11 @@ modules = Control.Monad.State.Tuple
         , Deriving.DepTyCheck.Util.Logging
         , Deriving.DepTyCheck.Util.Reflection
         , Deriving.DepTyCheck.Util.Syntax
-        , System.Random.Pure
-        , System.Random.Pure.StdGen
         , Test.DepTyCheck.Gen
 
 depends = contrib
         , elab-util
+        , mtl-tuple-impls
+        , random-pure
 
 sourcedir = "src"
