@@ -106,7 +106,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: pack install deptycheck
+      - run: pack build deptycheck
 
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
@@ -134,7 +134,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: make test-deptycheck INTERACTIVE="--color" only=lib/
+      - run: pack test deptycheck lib/
 
   ##########################
   # Test deptycheck's docs #
@@ -166,7 +166,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: make test-deptycheck INTERACTIVE="--color" only=docs/
+      - run: pack test deptycheck docs/
 
   ################################
   # Test deptycheck's derivation #
@@ -216,7 +216,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: make test-deptycheck INTERACTIVE="--color" only="gen-derivation/${{matrix.test_set}}"
+      - run: pack test deptycheck "gen-derivation/${{matrix.test_set}}"
 
   #################
   # Test examples #
@@ -238,7 +238,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: make pil
+      - run: pack build pil
 
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
@@ -267,4 +267,4 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: make test-pil INTERACTIVE="--color"
+      - run: pack test pil
