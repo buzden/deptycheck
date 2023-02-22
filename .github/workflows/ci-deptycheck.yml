@@ -148,7 +148,9 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install dependencies
         run: pip3 install -r docs/requirements.txt
-      - run: make docs
+      - run: alias sh=bash
+      # - run: pack build docs # `pack` is unaccessible here, thus:
+      - run: eval "$(grep prebuild docs.ipkg | sed 's/.*"\(.*\)"/\1/')"
 
   deptycheck-test-docs:
     name: Test DepTyCheck docs

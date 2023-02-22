@@ -1,5 +1,5 @@
 [install]
-whitelist = [ "deptycheck-tests", "pil-tests" ]
+whitelist = [ "deptycheck-tests", "pil-tests", "deptycheck-docs" ]
 
 [custom.all.deptycheck]
 type = "local"
@@ -12,6 +12,11 @@ type = "local"
 path = "example"
 ipkg = "pil.ipkg"
 test = "tests/tests.ipkg"
+
+[custom.all.docs]
+type = "local"
+path = "."
+ipkg = "docs.ipkg"
 
 # To be removed after pack collection bump over 22.02.2023
 [custom.nightly-230220.golden-runner-helper]

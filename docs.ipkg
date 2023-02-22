@@ -1,0 +1,3 @@
+package deptycheck-docs
+
+prebuild = "make -C docs dirhtml SPHINXOPTS='--color -W --keep-going'"
