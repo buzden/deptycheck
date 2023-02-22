@@ -9,8 +9,7 @@ RunScriptArg where
 
 main : IO ()
 main = goldenRunner $
-  [ "Facilities for random generation" `atDir` "lib/random"
-  , "The `Gen` monad" `atDir` "lib/gen-monad"
+  [ "The `Gen` monad" `atDir` "lib/gen-monad"
   , "Distribution of generators" `atDir` "lib/distribution"
   , "The library documentation" `atDir` "docs"
   , "Auto derivation: infrastructure: input validation" `atDir` "gen-derivation/inputvalidation"

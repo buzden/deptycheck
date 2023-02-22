@@ -1,6 +1,0 @@
-rm -rf build
-
-flock "$1" pack -q install-deps test.ipkg && \
-pack exec CheckDistribution.idr
-
-rm -rf build

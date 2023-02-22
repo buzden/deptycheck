@@ -41,7 +41,7 @@ thirdparties:build:
   needs:
     - pack:prepare
   script:
-    - pack install elab-util sop summary-stat
+    - pack install elab-util mtl-tuple-impls random-pure sop summary-stat
 
 deptycheck:build:
   stage: deptycheck:build
@@ -85,7 +85,6 @@ deptycheck:test:derive:
       - src/**/*
       - tests/*
       - tests/gen-derivation/**/*
-      - depends/**/*
   parallel:
     matrix:
       - test_set:
