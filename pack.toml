@@ -17,7 +17,7 @@ test = "tests/tests.ipkg"
 [custom.nightly-230220.golden-runner-helper]
 type   = "git"
 url    = "https://github.com/buzden/idris2-golden-runner-helper"
-commit = "cc49b012578868abc5768dc5f8fe534fc6adf2ad"
+commit = "e1c056e212a4f0e22b37c65177c2586b9efed67e"
 ipkg   = "golden-runner-helper.ipkg"
 
 [custom.all.elab-util]
