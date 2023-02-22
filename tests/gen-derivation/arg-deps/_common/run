@@ -1,5 +1,6 @@
 rm -rf build
 
-$1 --check --no-color --console-width 0 --no-banner --find-ipkg Infra.idr
+flock "$1" pack -q install-deps arg-deps.ipkg && \
+idris2 --check --no-color --console-width 0 --no-banner --find-ipkg Infra.idr
 
 rm -rf build

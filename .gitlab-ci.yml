@@ -24,14 +24,12 @@ pack:prepare:
   script:
     - pack update-db
     - pack switch "$( if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
-    - pack install contrib test
 
 stages:
   - thirdparties:build
   - lint
   - deptycheck:build
   - deptycheck:docs
-  - deptycheck:install
   - deptycheck:test:lib
   - deptycheck:test:docs
   - deptycheck:test:derive
@@ -43,14 +41,14 @@ thirdparties:build:
   needs:
     - pack:prepare
   script:
-    - make thirdparties
+    - pack install elab-util sop summary-stat
 
 deptycheck:build:
   stage: deptycheck:build
   needs:
     - thirdparties:build
   script:
-    - make deptycheck
+    - pack install deptycheck
 
 deptycheck:docs:
   stage: deptycheck:docs
@@ -59,22 +57,6 @@ deptycheck:docs:
   script:
     - pip3 install -r docs/requirements.txt
     - make docs
-
-deptycheck:install:after_build:
-  stage: deptycheck:install
-  needs:
-    - deptycheck:build
-  script:
-    - make install
-    - make test-installation
-
-deptycheck:install:clean:
-  stage: deptycheck:install
-  needs:
-    - pack:prepare
-  script:
-    - make install
-    - make test-installation
 
 deptycheck:test:lib:
   stage: deptycheck:test:lib
@@ -101,7 +83,6 @@ deptycheck:test:derive:
       - src/**/*
       - tests/*
       - tests/gen-derivation/**/*
-      - thirdparty/**/*
       - depends/**/*
   parallel:
     matrix:
@@ -142,5 +123,4 @@ super_linter:
   image:
     name: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/github/super-linter:slim-v4
   variables:
-    FILTER_REGEX_EXCLUDE: ".*/thirdparty/.*"
     VALIDATE_JSCPD_ALL_CODEBASE: "true"

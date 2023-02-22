@@ -16,6 +16,6 @@ modules = Example.Pil.Lang
 
         , Data.List.Lookup
 
-depends = contrib, deptycheck
+depends = deptycheck
 
 sourcedir = "src"

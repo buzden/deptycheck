@@ -1,0 +1,17 @@
+[custom.all.deptycheck]
+type = "local"
+path = "."
+ipkg = "deptycheck.ipkg"
+test = "tests/tests.ipkg"
+
+[custom.all.elab-util]
+type   = "git"
+url    = "https://github.com/buzden/idris2-elab-util"
+commit = "e2cd24824d2c215a88d7d160d73a25cc67ca9d28"
+ipkg   = "elab-util.ipkg"
+
+[custom.all.sop]
+type   = "git"
+url    = "https://github.com/buzden/idris2-sop"
+commit = "a9efb67d23adf3808bfd887781586ef318c56f35"
+ipkg   = "sop.ipkg"

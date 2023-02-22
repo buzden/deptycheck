@@ -1,6 +1,7 @@
 rm -rf build
 
-$1 --build use-pil.ipkg
-$1 --find-ipkg --no-banner UsePil.idr < input
+flock "$1" pack -q install-deps use-pil.ipkg && \
+idris2 --build use-pil.ipkg && \
+idris2 --find-ipkg --no-banner UsePil.idr < input
 
 rm -rf build
