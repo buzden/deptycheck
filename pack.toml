@@ -1,8 +1,24 @@
+[install]
+whitelist = [ "deptycheck-tests", "pil-tests" ]
+
 [custom.all.deptycheck]
 type = "local"
 path = "."
 ipkg = "deptycheck.ipkg"
 test = "tests/tests.ipkg"
+
+[custom.all.pil]
+type = "local"
+path = "example"
+ipkg = "pil.ipkg"
+test = "tests/tests.ipkg"
+
+# To be removed after pack collection bump over 22.02.2023
+[custom.nightly-20230220.golden-runner-helper]
+type   = "git"
+url    = "https://github.com/buzden/idris2-golden-runner-helper"
+commit = "cc49b012578868abc5768dc5f8fe534fc6adf2ad"
+ipkg   = "golden-runner-helper.ipkg"
 
 [custom.all.elab-util]
 type   = "git"

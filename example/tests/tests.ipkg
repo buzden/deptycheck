@@ -1,9 +1,16 @@
 package pil-tests
 
 authors = "Denis Buzdalov"
-version = 0.0.1
+version = 0.1.0
 
-main = Main
+modules = BaseDir
+
+main = Runner
 executable = runtests
 
-depends = contrib, test
+sourcedir = "runner"
+
+prebuild  = "sh runner/buildhook pre"
+postbuild = "sh runner/buildhook post"
+
+depends = golden-runner-helper
