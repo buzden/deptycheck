@@ -48,7 +48,7 @@ deptycheck:build:
   needs:
     - thirdparties:build
   script:
-    - pack install deptycheck
+    - pack build deptycheck
 
 deptycheck:docs:
   stage: deptycheck:docs
@@ -56,21 +56,23 @@ deptycheck:docs:
   needs: []
   script:
     - pip3 install -r docs/requirements.txt
-    - make docs
+    - alias sh=bash
+    # - pack build docs # `pack` is unaccessible here, thus:
+    - eval "$(grep prebuild docs.ipkg | sed 's/.*"\(.*\)"/\1/')"
 
 deptycheck:test:lib:
   stage: deptycheck:test:lib
   needs:
     - deptycheck:build
   script:
-    - make test-deptycheck only=lib/ INTERACTIVE="--color"
+    - pack test deptycheck lib/
 
 deptycheck:test:docs:
   stage: deptycheck:test:docs
   needs:
     - deptycheck:build
   script:
-    - make test-deptycheck only=docs/ INTERACTIVE="--color"
+    - pack test deptycheck docs/
 
 deptycheck:test:derive:
   stage: deptycheck:test:derive
@@ -93,18 +95,22 @@ deptycheck:test:derive:
         - cons-analysis/
         - derivation/infra/
         - arg-deps/
-        - derivation/least-effort/print
-        - derivation/least-effort/run
+        - derivation/least-effort/print/adt
+        - derivation/least-effort/print/gadt
+        - derivation/least-effort/print/regression
+        - derivation/least-effort/run/adt
+        - derivation/least-effort/run/gadt
+        - derivation/least-effort/run/regression
         - derivation/core/
   script:
-    - make test-deptycheck only=gen-derivation/"$test_set" INTERACTIVE="--color" threads=2
+    - NUM_THREADS=2 pack test deptycheck gen-derivation/"$test_set"
 
 pil:build:
   stage: pil:build
   needs:
     - deptycheck:build
   script:
-    - make pil
+    - pack build pil
 
 pil:test:
   stage: pil:test
@@ -112,7 +118,7 @@ pil:test:
     - pil:build
     - deptycheck:test:lib
   script:
-    - make test-pil INTERACTIVE="--color"
+    - pack test pil
 
 include:
   - remote: 'https://jobs.r2devops.io/latest/super_linter.yml'

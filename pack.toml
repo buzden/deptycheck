@@ -1,8 +1,22 @@
+[install]
+whitelist = [ "deptycheck-tests", "pil-tests", "deptycheck-docs" ]
+
 [custom.all.deptycheck]
 type = "local"
 path = "."
 ipkg = "deptycheck.ipkg"
 test = "tests/tests.ipkg"
+
+[custom.all.pil]
+type = "local"
+path = "example"
+ipkg = "pil.ipkg"
+test = "tests/tests.ipkg"
+
+[custom.all.docs]
+type = "local"
+path = "."
+ipkg = "docs.ipkg"
 
 [custom.all.elab-util]
 type   = "git"
