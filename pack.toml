@@ -18,13 +18,6 @@ type = "local"
 path = "."
 ipkg = "docs.ipkg"
 
-# To be removed after pack collection bump over 22.02.2023
-[custom.nightly-230220.golden-runner-helper]
-type   = "git"
-url    = "https://github.com/buzden/idris2-golden-runner-helper"
-commit = "e1c056e212a4f0e22b37c65177c2586b9efed67e"
-ipkg   = "golden-runner-helper.ipkg"
-
 [custom.all.elab-util]
 type   = "git"
 url    = "https://github.com/buzden/idris2-elab-util"
