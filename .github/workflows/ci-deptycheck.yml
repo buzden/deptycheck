@@ -199,7 +199,6 @@ jobs:
     needs:
       - prepare-pack
       - deptycheck-build-lib
-      - deptycheck-test-lib
       - get-derivation-test-sets
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
