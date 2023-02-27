@@ -78,7 +78,6 @@ deptycheck:test:derive:
   stage: deptycheck:test:derive
   needs:
     - deptycheck:build
-    - deptycheck:test:lib
   only:
     changes:
       - "*"
