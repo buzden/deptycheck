@@ -58,7 +58,7 @@ deptycheck:docs:
     - pip3 install -r docs/requirements.txt
     - alias sh=bash
     # - pack build docs # `pack` is unaccessible here, thus:
-    - eval "$(grep prebuild docs.ipkg | sed 's/.*"\(.*\)"/\1/')"
+    - cd docs && eval "$(grep prebuild docs.ipkg | sed 's/.*"\(.*\)"/\1/')"
 
 deptycheck:test:lib:
   stage: deptycheck:test:lib
