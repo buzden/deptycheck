@@ -8,7 +8,7 @@ import public Control.Monad.State.Interface
 import Data.Bool
 import Data.Nat.Pos
 import Data.List
-import Data.List.CheckedEmpty
+import Data.CheckedEmpty.List.Lazy
 import Data.Vect
 import Data.Stream
 
@@ -50,7 +50,7 @@ record OneOfAlternatives (0 a : Type) where
   constructor MkOneOf
   desc : Maybe String
   totalWeight : PosNat
-  gens : NEList (PosNat, Lazy (NonEmptyGen a))
+  gens : LazyL'st1 (PosNat, Lazy (NonEmptyGen a))
   {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst x)}
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
@@ -59,14 +59,14 @@ record OneOfAlternatives (0 a : Type) where
 --- Technical stuff for mapping alternatives ---
 ------------------------------------------------
 
-mapTaggedLazy : (a -> b) -> NEList (tag, Lazy a) -> NEList (tag, Lazy b)
+mapTaggedLazy : (a -> b) -> LazyL'st1 (tag, Lazy a) -> LazyL'st1 (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
 mapOneOf : OneOfAlternatives a -> (NonEmptyGen a -> NonEmptyGen b) -> NonEmptyGen b
 mapOneOf (MkOneOf desc tw gs @{prf}) f = OneOf $ MkOneOf desc tw (mapTaggedLazy f gs) @{do
     rewrite mapFusion (Builtin.fst) (mapSnd $ wrapLazy f) gs
     rewrite prf
-    cong (CheckedEmpty.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
+    cong (Lazy.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
   }
 
 -----------------------------
@@ -157,7 +157,7 @@ namespace GenAlternatives
   export
   record GenAlternatives' (0 mustBeNotEmpty : Bool) a where
     constructor MkGenAlternatives
-    unGenAlternatives : CEList mustBeNotEmpty (PosNat, Lazy (NonEmptyGen a))
+    unGenAlternatives : LazyL'st mustBeNotEmpty (PosNat, Lazy (NonEmptyGen a))
 
   public export %inline
   GenAlternatives : Type -> Type
@@ -213,11 +213,11 @@ namespace GenAlternatives
   strengthen $ MkGenAlternatives xs = MkGenAlternatives <$> strengthen xs
 
 export
-Cast (CEList ne a) (GenAlternatives' ne a) where
+Cast (LazyL'st ne a) (GenAlternatives' ne a) where
   cast = MkGenAlternatives . map (\x => (1, pure x))
 
 public export %inline
-altsFromList : CEList ne a -> GenAlternatives' ne a
+altsFromList : LazyL'st ne a -> GenAlternatives' ne a
 altsFromList = cast
 
 ----------------------------------
@@ -239,14 +239,14 @@ oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : {default Nothing description : Maybe String} -> NEList (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
+frequency : {default Nothing description : Maybe String} -> LazyL'st1 (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
 frequency = oneOf {description} . MkGenAlternatives
 
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
-elements : {default Nothing description : Maybe String} -> NEList a -> NonEmptyGen a
+elements : {default Nothing description : Maybe String} -> LazyL'st1 a -> NonEmptyGen a
 elements = oneOf {description} . cast
 
 ------------------------------

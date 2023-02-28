@@ -2,7 +2,7 @@ module Data.Nat.Pos
 
 import public Data.Nat
 import public Data.DPair
-import Data.List.CheckedEmpty
+import Data.CheckedEmpty.List.Lazy
 import public Data.So
 
 %default total
@@ -66,7 +66,7 @@ gcd a (S b)   = assert_total $ gcd (S b) (modNatNZ a (S b) SIsNonZero)
 --- Working with weighted lists ---
 
 export
-pickWeighted : NEList (PosNat, a) -> Nat -> a
+pickWeighted : LazyL'st1 (PosNat, a) -> Nat -> a
 pickWeighted [(_, x)]                     _ = x
 pickWeighted wh@((Element n _, x)::y::ys) k = if k < n then x else pickWeighted (assert_smaller wh $ y::ys) (k `minus` n)
 

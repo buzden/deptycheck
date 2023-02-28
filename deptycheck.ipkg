@@ -9,7 +9,6 @@ license = "MPL-2.0"
 version = 0.0.220712
 
 modules = Data.Nat.Pos
-        , Data.List.CheckedEmpty
         , Data.Vect.Dependent
         , Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
@@ -36,5 +35,6 @@ depends = contrib
         , if-unsolved-implicit
         , mtl-tuple-impls
         , random-pure
+        , typelevel-emptiness-collections
 
 sourcedir = "src"

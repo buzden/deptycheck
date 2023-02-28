@@ -11,7 +11,7 @@ import Data.DPair
 import Data.Nat.Pos
 import Data.Fuel
 import Data.List
-import Data.List.CheckedEmpty
+import Data.CheckedEmpty.List.Lazy
 import public Data.List.Lazy
 import Data.Vect
 import Data.Stream
