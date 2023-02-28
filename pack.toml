@@ -1,5 +1,13 @@
+################
+### Settings ###
+################
+
 [install]
 whitelist = [ "deptycheck-tests", "pil-tests", "deptycheck-docs" ]
+
+##############
+### Locals ###
+##############
 
 [custom.all.deptycheck]
 type = "local"
@@ -15,8 +23,12 @@ test = "tests/tests.ipkg"
 
 [custom.all.docs]
 type = "local"
-path = "."
+path = "docs"
 ipkg = "docs.ipkg"
+
+####################
+### Thirdparties ###
+####################
 
 [custom.all.elab-util]
 type   = "git"
