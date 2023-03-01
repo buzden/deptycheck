@@ -79,7 +79,7 @@ CanBeInAlternatives = NoWeaker $ CanBeEmpty Dynamic
 
 public export
 data BindToOuter : (emOfBind, outerEm : Emptiness) -> Type where
-  BndNE : BindToOuter NonEmpty NonEmpty
-  BndEE : (0 _ : IfUnsolved em Dynamic) =>
-          (0 _ : IfUnsolved iem Dynamic) =>
-          BindToOuter (CanBeEmpty iem) (CanBeEmpty em)
+  BndNE : BindToOuter NonEmpty em
+  BndEE : (0 _ : IfUnsolved dp Dynamic) =>
+          (0 _ : IfUnsolved idp Dynamic) =>
+          BindToOuter (CanBeEmpty idp) (CanBeEmpty dp)
