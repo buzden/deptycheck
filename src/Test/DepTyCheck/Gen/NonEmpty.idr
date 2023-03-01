@@ -1,13 +1,17 @@
 module Test.DepTyCheck.Gen.NonEmpty
 
+import Control.Monad.Maybe
+import public Control.Monad.Error.Interface
 import Control.Monad.Random
 import public Control.Monad.Random.Interface
 import Control.Monad.State
 import public Control.Monad.State.Interface
 
 import Data.Bool
+import Data.Fuel
 import Data.Nat.Pos
 import Data.List
+import Data.List.Lazy
 import Data.CheckedEmpty.List.Lazy
 import Data.Singleton
 import Data.Stream
@@ -68,12 +72,12 @@ data Gen : Emptiness -> Type -> Type where
   Raw   : (0 _ : IfUnsolved em NonEmpty) =>
           RawGen a -> Gen em a
 
-  OneOf : (0 _ : IfUnsolved em NonEmpty) =>
-          CanBeInAlternatives em =>
+  OneOf : CanBeInAlternatives em =>
+          (0 _ : IfUnsolved em NonEmpty) =>
           OneOfAlternatives em a -> Gen em a
 
-  Bind  : (0 _ : IfUnsolved em NonEmpty) =>
-          BindToOuter biem em =>
+  Bind  : BindToOuter biem em =>
+          (0 _ : IfUnsolved em NonEmpty) =>
           RawGen c -> (c -> Gen biem a) -> Gen em a
 
 record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
@@ -84,6 +88,10 @@ record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
   {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst x)}
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
+
+public export %inline
+Gen1 : Type -> Type
+Gen1 = Gen NonEmpty
 
 ------------------------------------------------
 --- Technical stuff for mapping alternatives ---
@@ -113,30 +121,56 @@ choose bounds = Raw $ MkRawGen $ getRandomR bounds
 --- Running generators ---
 --------------------------
 
-{-
+--- Non-empty generators ---
 
 export
-unGen : MonadRandom m => Gen a -> m a
+unGen1 : MonadRandom m => Gen1 a -> m a
+unGen1 $ Pure x            = pure x
+unGen1 $ Raw sf            = sf.unRawGen
+unGen1 $ OneOf oo          = assert_total unGen1 . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
+unGen1 $ Bind @{BndNE} x f = x.unRawGen >>= unGen1 . f
+
+export
+unGenAll' : RandomGen g => (seed : g) -> Gen1 a -> Stream (a, g)
+unGenAll' seed gen = do
+  let (seed, mc) = runRandom seed $ unGen1 {m=Rand} gen
+  (mc, seed) :: unGenAll' seed gen
+
+export
+unGenAll : RandomGen g => (seed : g) -> Gen1 a -> Stream a
+unGenAll = map fst .: unGenAll'
+
+--- Possibly empty generators ---
+
+export
+unGen : MonadRandom m => MonadError () m => Gen em a -> m a
+unGen $ Empty    = throwError ()
 unGen $ Pure x   = pure x
 unGen $ Raw sf   = sf.unRawGen
 unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
 unGen $ Bind x f = x.unRawGen >>= unGen . f
 
 export
-unGenTryAll' : RandomGen g => (seed : g) -> Gen a -> Stream (a, g)
+unGenTryAll' : RandomGen g => (seed : g) -> Gen em a -> Stream (Maybe a, g)
 unGenTryAll' seed gen = do
-  let (seed, mc) = runRandom seed $ unGen gen
+  let (seed, mc) = runRandom seed $ runMaybeT $ unGen {m=MaybeT Rand} gen
   (mc, seed) :: unGenTryAll' seed gen
 
 export
-unGenTryAll : RandomGen g => (seed : g) -> Gen a -> Stream a
+unGenTryAll : RandomGen g => (seed : g) -> Gen em a -> Stream $ Maybe a
 unGenTryAll = map fst .: unGenTryAll'
+
+export
+unGenTryN : RandomGen g => (n : Nat) -> g -> Gen em a -> LazyList a
+unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 
 -- TODO To add config and Reader for that.
 --      This config should contain attempts count for each `unGen` (including those in combinators)
 --      Current `unGen` should be renamed to `unGen1` and not be exported.
 --      Current `unGenTryN` should be changed returning `LazyList (a, g)` and
 --      new `unGen` should be implemented trying `retry` times from config using this (`g` must be stored to restore correct state of seed).
+
+{-
 
 ---------------------------------------
 --- Standard combination interfaces ---
