@@ -19,9 +19,9 @@ data Emptiness = NonEmpty | CanBeEmpty Depth
 
 public export
 data NoWeaker : (from, to : Emptiness) -> Type where
-  Refl : em                `NoWeaker` em
-  NE   : NonEmpty          `NoWeaker` CanBeEmpty dp
-  Stat : CanBeEmpty Static `NoWeaker` CanBeEmpty Dynamic
+  Refl : em       `NoWeaker` em
+  NE   : NonEmpty `NoWeaker` em
+  Stat : em       `NoWeaker` CanBeEmpty Static
 
 infix 6 `NoWeaker`
 
@@ -31,14 +31,24 @@ Reflexive _ NoWeaker where
 
 export
 Transitive _ NoWeaker where
-  transitive Refl x    = x
-  transitive NE   Refl = NE
-  transitive NE   Stat = NE
+  transitive Refl Refl = Refl
+  transitive Refl NE   = NE
+  transitive Refl Stat = Stat
+  transitive NE   _ = NE
   transitive Stat Refl = Stat
+  transitive Stat NE   impossible
+  transitive Stat Stat = Stat
 
 export
 Antisymmetric _ NoWeaker where
+--  antisymmetric Refl Refl = Refl
   antisymmetric Refl Refl = Refl
+  antisymmetric Refl NE   = Refl
+  antisymmetric Refl Stat = Refl
+  antisymmetric NE   Refl = Refl
+  antisymmetric NE   NE   = Refl
+  antisymmetric Stat Refl = Refl
+  antisymmetric Stat Stat = Refl
 
 export
 Preorder _ NoWeaker where
@@ -55,8 +65,8 @@ Connex _ NoWeaker where
   connex {x = NonEmpty}     {y = CanBeEmpty _} nxy = Left NE
   connex {x = CanBeEmpty _} {y = NonEmpty}     nxy = Right NE
 
-  connex {x = CanBeEmpty Static}  {y = CanBeEmpty Dynamic} nxy = Left Stat
-  connex {x = CanBeEmpty Dynamic} {y = CanBeEmpty Static}  nxy = Right Stat
+  connex {x = CanBeEmpty Static}  {y = CanBeEmpty Dynamic} nxy = Right Stat
+  connex {x = CanBeEmpty Dynamic} {y = CanBeEmpty Static}  nxy = Left Stat
 
 export
 LinearOrder _ NoWeaker where
@@ -67,9 +77,17 @@ StronglyConnex _ NoWeaker where
   order NonEmpty             (CanBeEmpty _)       = Left NE
   order (CanBeEmpty _)       NonEmpty             = Right NE
   order (CanBeEmpty Static)  (CanBeEmpty Static)  = Left Refl
-  order (CanBeEmpty Static)  (CanBeEmpty Dynamic) = Left Stat
-  order (CanBeEmpty Dynamic) (CanBeEmpty Static)  = Right Stat
+  order (CanBeEmpty Static)  (CanBeEmpty Dynamic) = Right Stat
+  order (CanBeEmpty Dynamic) (CanBeEmpty Static)  = Left Stat
   order (CanBeEmpty Dynamic) (CanBeEmpty Dynamic) = Left Refl
+
+weakest : (lem, rem : Emptiness) -> (em ** (lem `NoWeaker` em, rem `NoWeaker` em, Either (lem = em) (rem = em)))
+weakest NonEmpty             NonEmpty             = (NonEmpty           ** (Refl, Refl, Left  Refl))
+weakest NonEmpty             (CanBeEmpty x)       = (CanBeEmpty x       ** (NE  , Refl, Right Refl))
+weakest (CanBeEmpty x)       NonEmpty             = (CanBeEmpty x       ** (Refl, NE  , Left  Refl))
+weakest (CanBeEmpty Static)  (CanBeEmpty _)       = (CanBeEmpty Static  ** (Refl, Stat, Left  Refl))
+weakest (CanBeEmpty Dynamic) (CanBeEmpty Static)  = (CanBeEmpty Static  ** (Stat, Refl, Right Refl))
+weakest (CanBeEmpty Dynamic) (CanBeEmpty Dynamic) = (CanBeEmpty Dynamic ** (Refl, Refl, Left  Refl))
 
 --- Relations for particular generator cases ---
 
