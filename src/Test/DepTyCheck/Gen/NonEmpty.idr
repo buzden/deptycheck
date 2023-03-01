@@ -19,6 +19,8 @@ import Data.Vect
 
 import public Language.Implicits.IfUnsolved
 
+import public Test.DepTyCheck.Gen.Emptiness
+
 %default total
 
 -------------------------
@@ -35,24 +37,6 @@ wrapLazy f = delay . f . force
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
-
-namespace Emptiness
-
-  public export
-  data Depth = Static | Dynamic
-
-  public export
-  data Emptiness = NonEmpty | CanBeEmpty Depth
-
-  public export
-  data CanBeInAlternatives : Emptiness -> Type where
-    AltNE : CanBeInAlternatives NonEmpty
-    AltDE : CanBeInAlternatives (CanBeEmpty Dynamic)
-
-  public export
-  data BindToOuter : (emOfBind, outerEm : Emptiness) -> Type where
-    BndNE : BindToOuter NonEmpty         NonEmpty
-    BndEE : BindToOuter (CanBeEmpty iem) (CanBeEmpty Dynamic)
 
 record RawGen a where
   constructor MkRawGen
@@ -192,8 +176,6 @@ Functor (Gen em) where
   map f $ OneOf oo = mapOneOf oo $ assert_total $ map f
   map f $ Bind x g = Bind x $ assert_total map f . g
 
-{-
-
 export
 Applicative (Gen ne) where
   pure = Pure
@@ -209,8 +191,10 @@ Applicative (Gen ne) where
   OneOf oo <*> g = mapOneOf oo $ assert_total (<*> g)
   g <*> OneOf oo = mapOneOf oo $ assert_total (g <*>)
 
-  Bind x f <*> g = Bind x $ assert_total (<*> g) . f
-  g <*> Bind x f = Bind x $ assert_total (g <*>) . f
+  Bind @{bo} x f <*> g = ?foo_bnd_l -- Bind @{bo} x $ assert_total (<*> g) . f
+  g <*> Bind x f = ?foo_bnd_r -- Bind x $ ?foo_bnd_r -- assert_total (g <*>) . f
+
+{-
 
 export
 Monad Gen where
