@@ -51,9 +51,8 @@ namespace Emptiness
 
   public export
   data BindToOuter : (emOfBind, outerEm : Emptiness) -> Type where
-    BndNE : BindToOuter NonEmpty             NonEmpty
-    BndSE : BindToOuter (CanBeEmpty Static)  (CanBeEmpty Dynamic)
-    BndDE : BindToOuter (CanBeEmpty Dynamic) (CanBeEmpty Dynamic)
+    BndNE : BindToOuter NonEmpty         NonEmpty
+    BndEE : BindToOuter (CanBeEmpty iem) (CanBeEmpty Dynamic)
 
 record RawGen a where
   constructor MkRawGen
