@@ -131,14 +131,14 @@ unGen1 $ OneOf oo          = assert_total unGen1 . force . pickWeighted oo.gens 
 unGen1 $ Bind @{BndNE} x f = x.unRawGen >>= unGen1 . f
 
 export
-unGenAll' : RandomGen g => (seed : g) -> Gen1 a -> Stream (a, g)
+unGenAll' : RandomGen g => (seed : g) -> Gen1 a -> Stream (g, a)
 unGenAll' seed gen = do
-  let (seed, mc) = runRandom seed $ unGen1 {m=Rand} gen
-  (mc, seed) :: unGenAll' seed gen
+  let sv@(seed, _) = runRandom seed $ unGen1 {m=Rand} gen
+  sv :: unGenAll' seed gen
 
 export
 unGenAll : RandomGen g => (seed : g) -> Gen1 a -> Stream a
-unGenAll = map fst .: unGenAll'
+unGenAll = map snd .: unGenAll'
 
 --- Possibly empty generators ---
 
@@ -151,14 +151,14 @@ unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat 
 unGen $ Bind x f = x.unRawGen >>= unGen . f
 
 export
-unGenTryAll' : RandomGen g => (seed : g) -> Gen em a -> Stream (Maybe a, g)
+unGenTryAll' : RandomGen g => (seed : g) -> Gen em a -> Stream (g, Maybe a)
 unGenTryAll' seed gen = do
-  let (seed, mc) = runRandom seed $ runMaybeT $ unGen {m=MaybeT Rand} gen
-  (mc, seed) :: unGenTryAll' seed gen
+  let sv@(seed, _) = runRandom seed $ runMaybeT $ unGen {m=MaybeT Rand} gen
+  sv :: unGenTryAll' seed gen
 
 export
 unGenTryAll : RandomGen g => (seed : g) -> Gen em a -> Stream $ Maybe a
-unGenTryAll = map fst .: unGenTryAll'
+unGenTryAll = map snd .: unGenTryAll'
 
 export
 unGenTryN : RandomGen g => (n : Nat) -> g -> Gen em a -> LazyList a
