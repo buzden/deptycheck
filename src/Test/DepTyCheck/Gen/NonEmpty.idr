@@ -170,11 +170,11 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 --      Current `unGenTryN` should be changed returning `LazyList (a, g)` and
 --      new `unGen` should be implemented trying `retry` times from config using this (`g` must be stored to restore correct state of seed).
 
-{-
-
 ---------------------------------------
 --- Standard combination interfaces ---
 ---------------------------------------
+
+--- `RawGen` ---
 
 Functor RawGen where
   map f $ MkRawGen sf = MkRawGen $ f <$> sf
@@ -183,21 +183,29 @@ Applicative RawGen where
   pure x = MkRawGen $ pure x
   MkRawGen x <*> MkRawGen y = MkRawGen $ x <*> y
 
+--- `Gen` ---
+
 export
-Functor Gen where
+Functor (Gen em) where
+  map f $ Empty    = Empty
   map f $ Pure x   = Pure $ f x
   map f $ Raw sf   = Raw $ f <$> sf
   map f $ OneOf oo = mapOneOf oo $ assert_total $ map f
   map f $ Bind x g = Bind x $ assert_total map f . g
 
+{-
+
 export
-Applicative Gen where
+Applicative (Gen ne) where
   pure = Pure
+
+  Empty <*> _ = Empty
+  _ <*> Empty = Empty
 
   Pure f <*> g = f <$> g
   g <*> Pure x = g <&> \f => f x
 
-  Raw sfl <*> Raw sfr = Raw $ sfl <*> sfr
+  Raw @{p} sfl <*> Raw sfr = Raw @{p} $ sfl <*> sfr
 
   OneOf oo <*> g = mapOneOf oo $ assert_total (<*> g)
   g <*> OneOf oo = mapOneOf oo $ assert_total (g <*>)
