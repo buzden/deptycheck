@@ -2,6 +2,8 @@ module Test.DepTyCheck.Gen
 
 import Control.Function.FunExt
 
+import Control.Monad.Random
+import public Control.Monad.Random.Interface
 import Control.Monad.State
 import public Control.Monad.State.Interface
 import public Control.Monad.Error.Interface
@@ -26,9 +28,9 @@ import public System.Random.Pure
 --- Utility functions ---
 -------------------------
 
-randomFin : RandomGen g => MonadState g m => MonadError () m => {n : _} -> m $ Fin n
+randomFin : MonadRandom m => MonadError () m => {n : _} -> m $ Fin n
 randomFin {n = Z}   = throwError ()
-randomFin {n = S k} = random'
+randomFin {n = S k} = getRandom
 
 public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
@@ -44,7 +46,7 @@ export
 data Gen : Type -> Type where
   Empty : Gen a
   Pure  : a -> Gen a
-  Point : (forall g, m. RandomGen g => MonadState g m => MonadError () m => m a) -> Gen a
+  Point : (forall m. MonadRandom m => MonadError () m => m a) -> Gen a
   OneOf : OneOfAlternatives a -> Gen a
   Bind  : Gen c -> (c -> Gen a) -> Gen a
 
@@ -90,11 +92,11 @@ mapOneOf (MkOneOf tw gs) f = OneOf $ MkOneOf tw @{mapTaggedLazy_preserves_w {mf=
 
 export
 chooseAny : Random a => Gen a
-chooseAny = Point random'
+chooseAny = Point getRandom
 
 export
 choose : Random a => (a, a) -> Gen a
-choose bounds = Point $ randomR' bounds
+choose bounds = Point $ getRandomR bounds
 
 export
 empty : Gen a
@@ -105,7 +107,7 @@ empty = Empty
 --------------------------
 
 export
-unGen : RandomGen g => MonadState g m => MonadError () m => Gen a -> m a
+unGen : MonadRandom m => MonadError () m => Gen a -> m a
 unGen $ Empty    = throwError ()
 unGen $ Pure x   = pure x
 unGen $ Point sf = sf
@@ -115,7 +117,7 @@ unGen $ Bind x f = unGen x >>= assert_total unGen . f
 export
 unGenTryAll' : RandomGen g => (seed : g) -> Gen a -> Stream (Maybe a, g)
 unGenTryAll' seed gen = do
-  let (seed, mc) = runState seed $ runMaybeT $ unGen {g} {m=MaybeT $ State g} gen
+  let (seed, mc) = runRandom seed $ runMaybeT $ unGen {m=MaybeT Rand} gen
   (mc, seed) :: unGenTryAll' seed gen
 
 export
@@ -377,7 +379,10 @@ suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
 export
 variant : Nat -> Gen a -> Gen a
 variant Z       gen = gen
-variant x@(S _) gen = Point $ modify (index x . iterate (fst . next)) *> unGen gen
+variant x@(S _) gen = Point $ iterate x independent $ unGen gen where
+  iterate : forall a. Nat -> (a -> a) -> a -> a
+  iterate Z     _ x = x
+  iterate (S n) f x = iterate n f $ f x
 
 -----------------------------
 --- Particular generators ---
