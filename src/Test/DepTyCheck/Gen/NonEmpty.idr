@@ -3,6 +3,8 @@ module Test.DepTyCheck.Gen.NonEmpty
 import Control.Monad.Random
 import public Control.Monad.Random.Interface
 import Control.Monad.State
+import Control.Monad.Random
+import public Control.Monad.Random.Interface
 import public Control.Monad.State.Interface
 
 import Data.Bool
@@ -13,8 +15,6 @@ import Data.Vect
 import Data.Stream
 
 import public Language.Implicits.IfUnsolved
-
-import public System.Random.Pure
 
 %default total
 
@@ -319,7 +319,7 @@ Monad (GenAlternatives' True) where
 --- Variation in generation ---
 -------------------------------
 
--- TODO to reimplement `variant` to ensure that variant of `Uniform` is left `Uniform`.
+-- TODO to reimplement `variant` to ensure that preserves the structure as far as it can.
 export
 variant : Nat -> NonEmptyGen a -> NonEmptyGen a
 variant Z       gen = gen
