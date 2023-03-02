@@ -1,53 +1,54 @@
 1/1: Building DemoGen (DemoGen.idr)
-[1] = -22;
-// regs ty after: [-, Int]
-
-----
-
-[1] = inc(1);
-// regs ty after: [-, Int]
-
-----
-
-[1] = inc(1);
-// regs ty after: [-, Int]
-
-----
-
-[1] = inc(-33) * (inc(-90) * inc(97));
-// regs ty after: [-, Int]
-
-----
-
-[1] = as_str(-41 + inc(72));
+[1] = as_str(32);
 // regs ty after: [-, String]
 
 ----
 
-int f;
+puts(concat(concat(as_str(-62), concat("lou", "emr")), "y"));
 // regs ty after: [-, -]
 
 ----
 
-int h;
+[0] = as_str(-3);
+[0] = (-20 < inc(77)) || False;
+// regs ty after: [Bool, -]
+
+----
+
+[0] = inc(77 + -99) + ((19 * -74) * inc(67));
+// regs ty after: [Int, -]
+
+----
+
+[0] = as_str(inc(-45 * -57));
+// regs ty after: [String, -]
+
+----
+
+[0] = concat("rri", as_str(56 + 99));
+// regs ty after: [String, -]
+
+----
+
+[0] = 1;
+// regs ty after: [Int, -]
+
+----
+
+[1] = 37;
+// regs ty after: [-, Int]
+
+----
+
+[1] = inc(inc(26));
+// regs ty after: [-, Int]
+
+----
+
+puts(concat(concat(as_str(77), concat("zc", "m")), "xz"));
 // regs ty after: [-, -]
 
 ----
 
-[1] = ((-62 * 23) < inc(-100)) && ((True || True) || (22 <= 31));
-// regs ty after: [-, Bool]
-
-----
-
-[0] = 83 + inc(3);
+[0] = inc(-8);
 // regs ty after: [Int, -]
-
-----
-
-[0] = inc((67 + -7) * inc(-89));
-// regs ty after: [Int, -]
-
-----
-
-[1] = ((62 < 23) || (False || False)) || ((True && False) && True);
-// regs ty after: [-, Bool]
