@@ -83,10 +83,28 @@ Gen1 = Gen NonEmpty
 mapTaggedLazy : (a -> b) -> LazyLst1 (tag, Lazy a) -> LazyLst1 (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
-mapOneOf : CanBeInAlternatives em => OneOfAlternatives iem a -> (Gen iem a -> Gen em b) -> Gen em b
-mapOneOf (MkOneOf desc tw gs @{prf}) f = OneOf $ MkOneOf desc tw (mapTaggedLazy f gs) @{do
+mapOneOf' : CanBeInAlternatives em => OneOfAlternatives iem a -> (Gen iem a -> Gen em b) -> OneOfAlternatives em b
+mapOneOf' (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @{do
     rewrite mapFusion (Builtin.fst) (mapSnd $ wrapLazy f) gs
     transport tw $ cong (Lazy.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
+
+%inline
+mapOneOf : CanBeInAlternatives em => OneOfAlternatives iem a -> (Gen iem a -> Gen em b) -> Gen em b
+mapOneOf = OneOf .: mapOneOf'
+
+-----------------------------
+--- Emptiness tweakenings ---
+-----------------------------
+
+export
+relax : iem `NoWeaker` oem => Gen iem a -> Gen oem a
+relax @{Stat} Empty          = Empty
+relax       $ Pure x         = Pure x
+relax       $ Raw x          = Raw x
+relax @{wk} $ OneOf @{uk} x  = let _ = transitive' uk wk in OneOf $ mapOneOf' x $ assert_total relax
+relax @{wk} $ Bind @{bo} x f = Bind @{bindToOuterRelax bo wk} x f
+
+%transform "relax identity" relax x = believe_me x
 
 -----------------------------
 --- Very basic generators ---

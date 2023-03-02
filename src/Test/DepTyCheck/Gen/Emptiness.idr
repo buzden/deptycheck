@@ -32,12 +32,16 @@ Reflexive _ NoWeaker where
   reflexive {x = CanBeEmpty Dynamic} = %search
 
 export
+transitive' : x `NoWeaker` y -> y `NoWeaker` z -> x `NoWeaker` z
+transitive' NE   _    = %search
+transitive' Dyn  NE   impossible
+transitive' Dyn  Dyn  = %search
+transitive' Dyn  Stat = %search
+transitive' _    Stat = %search
+
+export
 Transitive _ NoWeaker where
-  transitive NE   _    = %search
-  transitive Dyn  NE   impossible
-  transitive Dyn  Dyn  = %search
-  transitive Dyn  Stat = %search
-  transitive _    Stat = %search
+  transitive = transitive'
 
 export
 Antisymmetric _ NoWeaker where
@@ -98,3 +102,9 @@ data BindToOuter : (emOfBind, outerEm : Emptiness) -> Type where
   BndEE : (0 _ : IfUnsolved dp Dynamic) =>
           (0 _ : IfUnsolved idp Dynamic) =>
           BindToOuter (CanBeEmpty idp) (CanBeEmpty dp)
+
+export
+bindToOuterRelax : x `BindToOuter` y -> y `NoWeaker` z -> x `BindToOuter` z
+bindToOuterRelax BndNE _    = BndNE
+bindToOuterRelax BndEE Dyn  = BndEE
+bindToOuterRelax BndEE Stat = BndEE
