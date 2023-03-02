@@ -10,14 +10,14 @@ define `y2`
 
 ---------
 
+define `x2`
 define `y1`
-define `x1`
--- post defs: ["x1", "y1"]
+-- post defs: ["y1", "x2"]
 
 ---------
 
-define `z2`
--- post defs: ["z2"]
+define `y3`
+-- post defs: ["y3"]
 
 ---------
 
