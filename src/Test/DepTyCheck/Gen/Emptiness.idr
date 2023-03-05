@@ -19,9 +19,10 @@ data Emptiness = NonEmpty | CanBeEmpty Depth
 
 public export
 data NoWeaker : (from, to : Emptiness) -> Type where
-  NE   : NonEmpty           `NoWeaker` em
-  Dyn  : CanBeEmpty Dynamic `NoWeaker` CanBeEmpty Dynamic
-  Stat : em                 `NoWeaker` CanBeEmpty Static
+  Refl : em                 `NoWeaker` em
+  NED  : NonEmpty           `NoWeaker` CanBeEmpty Dynamic
+  NES  : NonEmpty           `NoWeaker` CanBeEmpty Static
+  EDS  : CanBeEmpty Dynamic `NoWeaker` CanBeEmpty Static
 
 infix 6 `NoWeaker`
 
@@ -33,11 +34,9 @@ Reflexive _ NoWeaker where
 
 export
 transitive' : x `NoWeaker` y -> y `NoWeaker` z -> x `NoWeaker` z
-transitive' NE   _    = %search
-transitive' Dyn  NE   impossible
-transitive' Dyn  Dyn  = %search
-transitive' Dyn  Stat = %search
-transitive' _    Stat = %search
+transitive' Refl v = v
+transitive' v Refl = v
+transitive' NED EDS = NES
 
 export
 Transitive _ NoWeaker where
@@ -45,9 +44,7 @@ Transitive _ NoWeaker where
 
 export
 Antisymmetric _ NoWeaker where
-  antisymmetric NE   NE   = %search
-  antisymmetric Dyn  Dyn  = %search
-  antisymmetric Stat Stat = %search
+  antisymmetric Refl _ = Refl
 
 export
 Preorder _ NoWeaker where
@@ -61,8 +58,10 @@ Connex _ NoWeaker where
   connex {x = CanBeEmpty Static}  {y = CanBeEmpty Static}  nxy = void $ nxy Refl
   connex {x = CanBeEmpty Dynamic} {y = CanBeEmpty Dynamic} nxy = void $ nxy Refl
 
-  connex {x = NonEmpty}     {y = CanBeEmpty _} nxy = %search
-  connex {x = CanBeEmpty _} {y = NonEmpty}     nxy = %search
+  connex {x = NonEmpty} {y = CanBeEmpty Static}  nxy = %search
+  connex {x = NonEmpty} {y = CanBeEmpty Dynamic} nxy = %search
+  connex {x = CanBeEmpty Static}  {y = NonEmpty} nxy = %search
+  connex {x = CanBeEmpty Dynamic} {y = NonEmpty} nxy = %search
 
   connex {x = CanBeEmpty Static}  {y = CanBeEmpty Dynamic} nxy = %search
   connex {x = CanBeEmpty Dynamic} {y = CanBeEmpty Static}  nxy = %search
@@ -73,8 +72,10 @@ LinearOrder _ NoWeaker where
 export
 StronglyConnex _ NoWeaker where
   order NonEmpty             NonEmpty             = %search
-  order NonEmpty             (CanBeEmpty _)       = %search
-  order (CanBeEmpty _)       NonEmpty             = %search
+  order NonEmpty             (CanBeEmpty Dynamic) = %search
+  order NonEmpty             (CanBeEmpty Static)  = %search
+  order (CanBeEmpty Dynamic) NonEmpty             = %search
+  order (CanBeEmpty Static)  NonEmpty             = %search
   order (CanBeEmpty Static)  (CanBeEmpty Static)  = %search
   order (CanBeEmpty Static)  (CanBeEmpty Dynamic) = %search
   order (CanBeEmpty Dynamic) (CanBeEmpty Static)  = %search
@@ -83,18 +84,38 @@ StronglyConnex _ NoWeaker where
 weakest : (lem, rem : Emptiness) -> (em ** (lem `NoWeaker` em, rem `NoWeaker` em, Either (lem = em) (rem = em)))
 weakest NonEmpty             NonEmpty             = (NonEmpty           ** %search)
 weakest NonEmpty             (CanBeEmpty Dynamic) = (CanBeEmpty Dynamic ** %search)
-weakest NonEmpty             (CanBeEmpty Static)  = (CanBeEmpty Static  ** %search)
 weakest (CanBeEmpty Dynamic) NonEmpty             = (CanBeEmpty Dynamic ** %search)
-weakest (CanBeEmpty Static)  NonEmpty             = (CanBeEmpty Static  ** %search)
-weakest (CanBeEmpty Static)  (CanBeEmpty _)       = (CanBeEmpty Static  ** %search)
-weakest (CanBeEmpty Dynamic) (CanBeEmpty Static)  = (CanBeEmpty Static  ** %search)
 weakest (CanBeEmpty Dynamic) (CanBeEmpty Dynamic) = (CanBeEmpty Dynamic ** %search)
+weakest NonEmpty             (CanBeEmpty Static)  = (CanBeEmpty Static  ** %search)
+weakest (CanBeEmpty Static)  NonEmpty             = (CanBeEmpty Static  ** %search)
+weakest (CanBeEmpty Static)  (CanBeEmpty Dynamic) = (CanBeEmpty Static  ** %search)
+weakest (CanBeEmpty Static)  (CanBeEmpty Static)  = (CanBeEmpty Static  ** %search)
+weakest (CanBeEmpty Dynamic) (CanBeEmpty Static)  = (CanBeEmpty Static  ** %search)
 
 --- Relations for particular generator cases ---
 
-public export %inline
-CanBeInAlternatives : Emptiness -> Type
-CanBeInAlternatives = NoWeaker $ CanBeEmpty Dynamic
+-- alternatives --
+
+public export
+data AltsToOuter : (emOfAlts, outerEm : Emptiness) -> Type where
+  AltsNE : AltsToOuter NonEmpty em
+  AltsEE : (0 _ : IfUnsolved dp Dynamic) =>
+           AltsToOuter (CanBeEmpty Dynamic) (CanBeEmpty dp)
+
+export
+altsToOuterRefl : em `NoWeaker` CanBeEmpty Dynamic => AltsToOuter em em
+altsToOuterRefl @{Refl} = %search
+altsToOuterRefl @{NED}  = %search
+
+export
+altsToOuterRelax : x `AltsToOuter` y -> y `NoWeaker` z -> x `AltsToOuter` z
+altsToOuterRelax v      Refl = v
+altsToOuterRelax AltsNE NED  = %search
+altsToOuterRelax AltsNE NES  = %search
+altsToOuterRelax AltsNE EDS  = %search
+altsToOuterRelax AltsEE EDS  = %search
+
+-- bind --
 
 public export
 data BindToOuter : (emOfBind, outerEm : Emptiness) -> Type where
@@ -105,6 +126,8 @@ data BindToOuter : (emOfBind, outerEm : Emptiness) -> Type where
 
 export
 bindToOuterRelax : x `BindToOuter` y -> y `NoWeaker` z -> x `BindToOuter` z
-bindToOuterRelax BndNE _    = BndNE
-bindToOuterRelax BndEE Dyn  = BndEE
-bindToOuterRelax BndEE Stat = BndEE
+bindToOuterRelax _     Refl = %search
+bindToOuterRelax BndNE NED  = %search
+bindToOuterRelax BndNE NES  = %search
+bindToOuterRelax BndNE EDS  = %search
+bindToOuterRelax BndEE EDS  = %search
