@@ -106,6 +106,27 @@ relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
 
 %transform "relax identity" relax x = believe_me x
 
+export
+strengthen : oem `NoWeaker` iem => Gen iem a -> Maybe $ Gen oem a
+strengthen @{Refl}  x                 = Just x
+strengthen @{NES}   Empty             = Nothing
+strengthen @{EDS}   Empty             = Nothing
+strengthen        $ Pure x            = Just $ Pure x
+strengthen        $ Raw x             = Just $ Raw x
+strengthen        $ OneOf @{AltsNE} x = Just $ OneOf x
+strengthen @{NED} $ OneOf @{AltsEE} x = Nothing
+strengthen @{NES} $ OneOf @{AltsEE} x = Nothing
+strengthen @{EDS} $ OneOf @{AltsEE} x = Just $ OneOf x
+strengthen @{NES} $ OneOf @{AltsNE} x = Just $ OneOf x -- Already covered above, some compiler bug requires it
+strengthen @{EDS} $ OneOf @{AltsNE} x = Just $ OneOf x -- Already covered above, some compiler bug requires it
+strengthen        $ Bind @{BndNE} x f = Just $ Bind x f
+strengthen @{NED} $ Bind @{BndNE} x f = Just $ Bind x f -- Already covered above, some compiler bug requires it
+strengthen @{NES} $ Bind @{BndNE} x f = Just $ Bind x f -- Already covered above, some compiler bug requires it
+strengthen @{EDS} $ Bind @{BndNE} x f = Just $ Bind x f -- Already covered above, some compiler bug requires it
+strengthen @{NED} $ Bind @{BndEE} x f = Nothing
+strengthen @{NES} $ Bind @{BndEE} x f = Nothing
+strengthen @{EDS} $ Bind @{BndEE} x f = Just $ Bind x f
+
 -----------------------------
 --- Very basic generators ---
 -----------------------------
