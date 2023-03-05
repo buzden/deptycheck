@@ -147,10 +147,10 @@ choose bounds = Raw $ MkRawGen $ getRandomR bounds
 
 export
 unGen1 : MonadRandom m => Gen1 a -> m a
-unGen1 $ Pure x            = pure x
-unGen1 $ Raw sf            = sf.unRawGen
-unGen1 $ OneOf oo          = assert_total unGen1 . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
-unGen1 $ Bind @{BndNE} x f = x.unRawGen >>= unGen1 . f
+unGen1 $ Pure x             = pure x
+unGen1 $ Raw sf             = sf.unRawGen
+unGen1 $ OneOf @{AltsNE} oo = assert_total unGen1 . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
+unGen1 $ Bind @{BndNE} x f  = x.unRawGen >>= unGen1 . f
 
 export
 unGenAll' : RandomGen g => (seed : g) -> Gen1 a -> Stream (g, a)
@@ -212,26 +212,29 @@ Functor (Gen em) where
   map f $ Empty    = Empty
   map f $ Pure x   = Pure $ f x
   map f $ Raw sf   = Raw $ f <$> sf
-  map f $ OneOf oo = mapOneOf oo $ assert_total $ map f
+  map f $ OneOf oo = OneOf $ mapOneOf' oo $ assert_total $ map f
   map f $ Bind x g = Bind x $ assert_total map f . g
 
+ap : lem `NoWeaker` em => rem `NoWeaker` em =>
+     Gen lem (a -> b) -> Gen rem a -> Gen em b
+ap @{Refl} Empty _ = Empty
+ap @{_} @{Refl} _ Empty = Empty
+
+ap (Pure f) g = relax $ f <$> g
+ap g (Pure x) = relax $ g <&> \f => f x
+
+ap (Raw sfl) (Raw sfr) = Raw $ sfl <*> sfr
+
+ap @{lbo} (OneOf @{bo} oo) g = ?foo_ap_oneof -- mapOneOf @{transitive' bo lbo} oo $ assert_total (`ap` g)
+ap @{_} @{rbo} g (OneOf @{bo} oo) = ?foo_ap_oneof_r -- mapOneOf @{transitive' bo rbo} oo $ assert_total (g `ap`)
+
+ap @{lbo} @{rbo} (Bind @{bo} x f) g = ?foo_bnd_l -- Bind @{bindToOuterRelax bo lbo} x $ \y => ap @{?foo_nw} @{?foo_nw2} (f y) $ relax @{?foo_f} g
+ap g (Bind x f) = ?foo_bnd_r -- Bind x $ ?foo_bnd_r -- assert_total (g `ap`) . f
+
 export
-Applicative (Gen ne) where
+Applicative (Gen em) where
   pure = Pure
-
-  Empty <*> _ = Empty
-  _ <*> Empty = Empty
-
-  Pure f <*> g = f <$> g
-  g <*> Pure x = g <&> \f => f x
-
-  Raw @{p} sfl <*> Raw sfr = Raw @{p} $ sfl <*> sfr
-
-  OneOf oo <*> g = mapOneOf oo $ assert_total (<*> g)
-  g <*> OneOf oo = mapOneOf oo $ assert_total (g <*>)
-
-  Bind @{bo} x f <*> g = ?foo_bnd_l -- Bind @{bo} x $ assert_total (<*> g) . f
-  g <*> Bind x f = ?foo_bnd_r -- Bind x $ ?foo_bnd_r -- assert_total (g <*>) . f
+  (<*>) = ap @{?foo_l} @{?foo_r}
 
 {-
 
