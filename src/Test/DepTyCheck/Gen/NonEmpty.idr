@@ -154,8 +154,6 @@ strengthen @{AS {em=NonEmpty}}           $ Bind @{BndEE} x f = Nothing
 strengthen @{AS {em=CanBeEmpty Dynamic}} $ Bind @{BndEE} x f = Just $ Bind x f
 strengthen @{AS {em=CanBeEmpty Static}}  $ Bind @{BndEE} x f = Just $ Bind x f
 
-{-
-
 -----------------------------
 --- Very basic generators ---
 -----------------------------
@@ -178,7 +176,7 @@ export
 unGen1 : MonadRandom m => Gen1 a -> m a
 unGen1 $ Pure x             = pure x
 unGen1 $ Raw sf             = sf.unRawGen
-unGen1 $ OneOf @{AltsNE} oo = assert_total unGen1 . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
+unGen1 $ OneOf @{NN} oo     = assert_total unGen1 . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
 unGen1 $ Bind @{BndNE} x f  = x.unRawGen >>= unGen1 . f
 
 export
@@ -243,6 +241,8 @@ Functor (Gen em) where
   map f $ Raw sf   = Raw $ f <$> sf
   map f $ OneOf oo = OneOf $ mapOneOf' oo $ assert_total $ map f
   map f $ Bind x g = Bind x $ assert_total map f . g
+
+{-
 
 ap : lem `NoWeaker` em => rem `NoWeaker` em =>
      Gen lem (a -> b) -> Gen rem a -> Gen em b
