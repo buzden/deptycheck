@@ -88,9 +88,9 @@ mapOneOf' (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @
     rewrite mapFusion (Builtin.fst) (mapSnd $ wrapLazy f) gs
     transport tw $ cong (Lazy.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
 
-%inline
-mapOneOf : em `NoWeaker` CanBeEmpty Dynamic => OneOfAlternatives iem a -> (Gen iem a -> Gen em b) -> Gen em b
-mapOneOf = OneOf @{altsToOuterRefl} .: mapOneOf'
+--%inline
+--mapOneOf : em `NoWeaker` CanBeEmpty Dynamic => OneOfAlternatives iem a -> (Gen iem a -> Gen em b) -> Gen em b
+--mapOneOf = OneOf @{altsToOuterRefl} .: mapOneOf'
 
 -----------------------------
 --- Emptiness tweakenings ---
@@ -108,24 +108,32 @@ relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
 
 export
 strengthen : oem `NoWeaker` iem => Gen iem a -> Maybe $ Gen oem a
-strengthen @{Refl}  x                 = Just x
-strengthen @{NES}   Empty             = Nothing
-strengthen @{EDS}   Empty             = Nothing
-strengthen        $ Pure x            = Just $ Pure x
-strengthen        $ Raw x             = Just $ Raw x
-strengthen        $ OneOf @{AltsNE} x = Just $ OneOf x
-strengthen @{NED} $ OneOf @{AltsEE} x = Nothing
-strengthen @{NES} $ OneOf @{AltsEE} x = Nothing
-strengthen @{EDS} $ OneOf @{AltsEE} x = Just $ OneOf x
-strengthen @{NES} $ OneOf @{AltsNE} x = Just $ OneOf x -- Already covered above, some compiler bug requires it
-strengthen @{EDS} $ OneOf @{AltsNE} x = Just $ OneOf x -- Already covered above, some compiler bug requires it
-strengthen        $ Bind @{BndNE} x f = Just $ Bind x f
-strengthen @{NED} $ Bind @{BndNE} x f = Just $ Bind x f -- Already covered above, some compiler bug requires it
-strengthen @{NES} $ Bind @{BndNE} x f = Just $ Bind x f -- Already covered above, some compiler bug requires it
-strengthen @{EDS} $ Bind @{BndNE} x f = Just $ Bind x f -- Already covered above, some compiler bug requires it
-strengthen @{NED} $ Bind @{BndEE} x f = Nothing
-strengthen @{NES} $ Bind @{BndEE} x f = Nothing
-strengthen @{EDS} $ Bind @{BndEE} x f = Just $ Bind x f
+strengthen        $ Pure x                                    = Just $ Pure x
+strengthen        $ Raw x                                     = Just $ Raw x
+strengthen @{Refl}  x                                         = Just x
+strengthen @{NED} $ OneOf @{AltsEE {dp=Dynamic}} x            = Nothing
+strengthen @{NED} $ OneOf @{AltsNE {em=CanBeEmpty Dynamic}} x = Just $ OneOf x
+strengthen @{NED} $ OneOf @{AltsEE {dp=Static}} x             impossible
+strengthen @{NED} $ OneOf @{AltsNE {em=NonEmpty}} x           impossible
+strengthen @{NED} $ OneOf @{AltsNE {em=CanBeEmpty Static}} x  impossible
+strengthen @{NED} $ Bind @{BndNE} x f                         = Just $ Bind x f
+strengthen @{NED} $ Bind @{BndEE} x f                         = Nothing
+strengthen @{NES}   Empty                                     = Nothing
+strengthen @{NES} $ OneOf @{AltsEE {dp=Static}} x             = Nothing
+strengthen @{NES} $ OneOf @{AltsNE {em=CanBeEmpty Static}} x  = Just $ OneOf x
+strengthen @{NES} $ OneOf @{AltsEE {dp=Dynamic}} x            impossible
+strengthen @{NES} $ OneOf @{AltsNE {em=NonEmpty}} x           impossible
+strengthen @{NES} $ OneOf @{AltsNE {em=CanBeEmpty Dynamic}} x impossible
+strengthen @{NES} $ Bind @{BndNE} x f                         = Just $ Bind x f
+strengthen @{NES} $ Bind @{BndEE} x f                         = Nothing
+strengthen @{EDS}   Empty                                     = Nothing
+strengthen @{EDS} $ OneOf @{AltsEE {dp=Static}} x             = Just $ OneOf x
+strengthen @{EDS} $ OneOf @{AltsNE {em=CanBeEmpty Static}} x  = Just $ OneOf x
+strengthen @{EDS} $ OneOf @{AltsEE {dp=Dynamic}} x            impossible
+strengthen @{EDS} $ OneOf @{AltsNE {em=NonEmpty}} x           impossible
+strengthen @{EDS} $ OneOf @{AltsNE {em=CanBeEmpty Dynamic}} x impossible
+strengthen @{EDS} $ Bind @{BndNE} x f                         = Just $ Bind x f
+strengthen @{EDS} $ Bind @{BndEE} x f                         = Just $ Bind x f
 
 -----------------------------
 --- Very basic generators ---
@@ -225,7 +233,17 @@ ap g (Pure x) = relax $ g <&> \f => f x
 
 ap (Raw sfl) (Raw sfr) = Raw $ sfl <*> sfr
 
-ap @{lbo} (OneOf @{bo} oo) g = ?foo_ap_oneof -- mapOneOf @{transitive' bo lbo} oo $ assert_total (`ap` g)
+ap @{Refl} @{Refl} (OneOf @{ao} oo) g = OneOf @{?foo} $ mapOneOf' oo $ \x => assert_total $ ap x g @{altsToOuterRelax' ao} @{Refl}
+ap @{Refl} @{NED}  (OneOf @{ao} oo) g = ?foo_5
+ap @{Refl} @{NES}  (OneOf @{ao} oo) g = ?foo_6
+ap @{Refl} @{EDS}  (OneOf @{ao} oo) g = ?foo_7
+ap @{NED}  @{rbo}  (OneOf @{ao} oo) g = ?foo_1
+ap @{NES}  @{rbo}  (OneOf @{ao} oo) g = ?foo_2
+ap @{EDS}  @{rbo}  (OneOf @{ao} oo) g = ?foo_3
+--ap @{Refl} (OneOf @{bo} oo) g = OneOf @{?foooo0} $ mapOneOf' oo $ assert_total $ \x => ap x g @{?safd0} @{?foo0}
+--ap @{NED}  (OneOf @{bo} oo) g = OneOf @{?foooo1} $ mapOneOf' oo $ assert_total $ \x => ap x g @{?safd1} @{?foo1}
+--ap @{NES}  (OneOf @{bo} oo) g = OneOf @{?foooo2} $ mapOneOf' oo $ assert_total $ \x => ap x g @{?safd2} @{?foo2}
+--ap @{EDS}  (OneOf @{bo} oo) g = OneOf @{?foooo3} $ mapOneOf' oo $ assert_total $ \x => ap x g @{?safd3} @{?foo3}
 ap @{_} @{rbo} g (OneOf @{bo} oo) = ?foo_ap_oneof_r -- mapOneOf @{transitive' bo rbo} oo $ assert_total (g `ap`)
 
 ap @{lbo} @{rbo} (Bind @{bo} x f) g = ?foo_bnd_l -- Bind @{bindToOuterRelax bo lbo} x $ \y => ap @{?foo_nw} @{?foo_nw2} (f y) $ relax @{?foo_f} g

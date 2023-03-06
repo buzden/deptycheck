@@ -98,14 +98,20 @@ weakest (CanBeEmpty Dynamic) (CanBeEmpty Static)  = (CanBeEmpty Static  ** %sear
 
 public export
 data AltsToOuter : (emOfAlts, outerEm : Emptiness) -> Type where
-  AltsNE : AltsToOuter NonEmpty em
-  AltsEE : (0 _ : IfUnsolved dp Dynamic) =>
+  AltsNE : {em : _} -> AltsToOuter NonEmpty em
+  AltsEE : {dp : _} ->
+           (0 _ : IfUnsolved dp Dynamic) =>
            AltsToOuter (CanBeEmpty Dynamic) (CanBeEmpty dp)
 
 export
-altsToOuterRefl : em `NoWeaker` CanBeEmpty Dynamic => AltsToOuter em em
-altsToOuterRefl @{Refl} = %search
-altsToOuterRefl @{NED}  = %search
+altsToOuterRefl : AltsToOuter em rem => AltsToOuter em em
+altsToOuterRefl @{AltsNE} = %search
+altsToOuterRefl @{AltsEE} = %search
+
+export
+altsToOuterRefl' : em `NoWeaker` CanBeEmpty Dynamic => AltsToOuter em em
+altsToOuterRefl' @{Refl} = %search
+altsToOuterRefl' @{NED}  = %search
 
 export
 altsToOuterRelax : x `AltsToOuter` y -> y `NoWeaker` z -> x `AltsToOuter` z
@@ -114,6 +120,14 @@ altsToOuterRelax AltsNE NED  = %search
 altsToOuterRelax AltsNE NES  = %search
 altsToOuterRelax AltsNE EDS  = %search
 altsToOuterRelax AltsEE EDS  = %search
+
+export
+altsToOuterRelax' : x `AltsToOuter` y -> x `NoWeaker` y
+altsToOuterRelax' $ AltsNE {em = NonEmpty}           = %search
+altsToOuterRelax' $ AltsNE {em = CanBeEmpty Static}  = %search
+altsToOuterRelax' $ AltsNE {em = CanBeEmpty Dynamic} = %search
+altsToOuterRelax' $ AltsEE {dp = Static}             = %search
+altsToOuterRelax' $ AltsEE {dp = Dynamic}            = %search
 
 -- bind --
 
