@@ -10,7 +10,7 @@ import public Language.Implicits.IfUnsolved
 --- The data ---
 
 public export
-data Depth = Static | Dynamic
+data Depth = Dynamic | Static
 
 public export
 data Emptiness = NonEmpty | CanBeEmpty Depth
@@ -19,10 +19,10 @@ data Emptiness = NonEmpty | CanBeEmpty Depth
 
 public export
 data NoWeaker : (from, to : Emptiness) -> Type where
-  Refl : em                 `NoWeaker` em
-  NED  : NonEmpty           `NoWeaker` CanBeEmpty Dynamic
-  NES  : NonEmpty           `NoWeaker` CanBeEmpty Static
-  EDS  : CanBeEmpty Dynamic `NoWeaker` CanBeEmpty Static
+  NN : NonEmpty           `NoWeaker` NonEmpty
+  ND : NonEmpty           `NoWeaker` CanBeEmpty Dynamic
+  DD : CanBeEmpty Dynamic `NoWeaker` CanBeEmpty Dynamic
+  AS : {em : _} -> em     `NoWeaker` CanBeEmpty Static
 
 infix 6 `NoWeaker`
 
@@ -34,9 +34,14 @@ Reflexive _ NoWeaker where
 
 export
 transitive' : x `NoWeaker` y -> y `NoWeaker` z -> x `NoWeaker` z
-transitive' Refl v = v
-transitive' v Refl = v
-transitive' NED EDS = NES
+transitive' NN NN = %search
+transitive' NN ND = %search
+transitive' NN AS = %search
+transitive' ND DD = %search
+transitive' ND AS = %search
+transitive' DD DD = %search
+transitive' DD AS = %search
+transitive' AS AS = %search
 
 export
 Transitive _ NoWeaker where
@@ -44,7 +49,9 @@ Transitive _ NoWeaker where
 
 export
 Antisymmetric _ NoWeaker where
-  antisymmetric Refl _ = Refl
+  antisymmetric NN NN = Refl
+  antisymmetric DD DD = Refl
+  antisymmetric AS AS = Refl
 
 export
 Preorder _ NoWeaker where
@@ -94,41 +101,6 @@ weakest (CanBeEmpty Dynamic) (CanBeEmpty Static)  = (CanBeEmpty Static  ** %sear
 
 --- Relations for particular generator cases ---
 
--- alternatives --
-
-public export
-data AltsToOuter : (emOfAlts, outerEm : Emptiness) -> Type where
-  AltsNE : {em : _} -> AltsToOuter NonEmpty em
-  AltsEE : {dp : _} ->
-           (0 _ : IfUnsolved dp Dynamic) =>
-           AltsToOuter (CanBeEmpty Dynamic) (CanBeEmpty dp)
-
-export
-altsToOuterRefl : AltsToOuter em rem => AltsToOuter em em
-altsToOuterRefl @{AltsNE} = %search
-altsToOuterRefl @{AltsEE} = %search
-
-export
-altsToOuterRefl' : em `NoWeaker` CanBeEmpty Dynamic => AltsToOuter em em
-altsToOuterRefl' @{Refl} = %search
-altsToOuterRefl' @{NED}  = %search
-
-export
-altsToOuterRelax : x `AltsToOuter` y -> y `NoWeaker` z -> x `AltsToOuter` z
-altsToOuterRelax v      Refl = v
-altsToOuterRelax AltsNE NED  = %search
-altsToOuterRelax AltsNE NES  = %search
-altsToOuterRelax AltsNE EDS  = %search
-altsToOuterRelax AltsEE EDS  = %search
-
-export
-altsToOuterRelax' : x `AltsToOuter` y -> x `NoWeaker` y
-altsToOuterRelax' $ AltsNE {em = NonEmpty}           = %search
-altsToOuterRelax' $ AltsNE {em = CanBeEmpty Static}  = %search
-altsToOuterRelax' $ AltsNE {em = CanBeEmpty Dynamic} = %search
-altsToOuterRelax' $ AltsEE {dp = Static}             = %search
-altsToOuterRelax' $ AltsEE {dp = Dynamic}            = %search
-
 -- bind --
 
 public export
@@ -140,8 +112,9 @@ data BindToOuter : (emOfBind, outerEm : Emptiness) -> Type where
 
 export
 bindToOuterRelax : x `BindToOuter` y -> y `NoWeaker` z -> x `BindToOuter` z
-bindToOuterRelax _     Refl = %search
-bindToOuterRelax BndNE NED  = %search
-bindToOuterRelax BndNE NES  = %search
-bindToOuterRelax BndNE EDS  = %search
-bindToOuterRelax BndEE EDS  = %search
+bindToOuterRelax BndNE NN = %search
+bindToOuterRelax BndNE ND = %search
+bindToOuterRelax BndNE DD = %search
+bindToOuterRelax BndNE AS = %search
+bindToOuterRelax BndEE DD = %search
+bindToOuterRelax BndEE AS = %search

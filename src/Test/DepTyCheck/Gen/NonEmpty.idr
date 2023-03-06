@@ -55,7 +55,8 @@ data Gen : Emptiness -> Type -> Type where
   Raw   : (0 _ : IfUnsolved em NonEmpty) =>
           RawGen a -> Gen em a
 
-  OneOf : AltsToOuter alem em =>
+  OneOf : alem `NoWeaker` em =>
+          alem `NoWeaker` CanBeEmpty Dynamic =>
           (0 _ : IfUnsolved em NonEmpty) =>
           OneOfAlternatives alem a -> Gen em a
 
@@ -98,42 +99,62 @@ mapOneOf' (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @
 
 export
 relax : iem `NoWeaker` oem => Gen iem a -> Gen oem a
-relax @{Refl} x        = x
-relax $ Pure x         = Pure x
-relax $ Raw x          = Raw x
-relax $ OneOf @{ao} x  = OneOf @{altsToOuterRelax ao %search} x
-relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
+relax @{AS} Empty            = Empty
+relax       $ Pure x         = Pure x
+relax       $ Raw x          = Raw x
+relax @{ao} $ OneOf @{wo} x  = OneOf @{transitive' wo ao} x
+relax       $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
 
 %transform "relax identity" relax x = believe_me x
 
+-- strengthen : oem `NoWeaker` iem => (gw : Gen iem a) -> Dec (gs : Gen oem a ** gs `Equiv` gw)
+
 export
 strengthen : oem `NoWeaker` iem => Gen iem a -> Maybe $ Gen oem a
-strengthen        $ Pure x                                    = Just $ Pure x
-strengthen        $ Raw x                                     = Just $ Raw x
-strengthen @{Refl}  x                                         = Just x
-strengthen @{NED} $ OneOf @{AltsEE {dp=Dynamic}} x            = Nothing
-strengthen @{NED} $ OneOf @{AltsNE {em=CanBeEmpty Dynamic}} x = Just $ OneOf x
-strengthen @{NED} $ OneOf @{AltsEE {dp=Static}} x             impossible
-strengthen @{NED} $ OneOf @{AltsNE {em=NonEmpty}} x           impossible
-strengthen @{NED} $ OneOf @{AltsNE {em=CanBeEmpty Static}} x  impossible
-strengthen @{NED} $ Bind @{BndNE} x f                         = Just $ Bind x f
-strengthen @{NED} $ Bind @{BndEE} x f                         = Nothing
-strengthen @{NES}   Empty                                     = Nothing
-strengthen @{NES} $ OneOf @{AltsEE {dp=Static}} x             = Nothing
-strengthen @{NES} $ OneOf @{AltsNE {em=CanBeEmpty Static}} x  = Just $ OneOf x
-strengthen @{NES} $ OneOf @{AltsEE {dp=Dynamic}} x            impossible
-strengthen @{NES} $ OneOf @{AltsNE {em=NonEmpty}} x           impossible
-strengthen @{NES} $ OneOf @{AltsNE {em=CanBeEmpty Dynamic}} x impossible
-strengthen @{NES} $ Bind @{BndNE} x f                         = Just $ Bind x f
-strengthen @{NES} $ Bind @{BndEE} x f                         = Nothing
-strengthen @{EDS}   Empty                                     = Nothing
-strengthen @{EDS} $ OneOf @{AltsEE {dp=Static}} x             = Just $ OneOf x
-strengthen @{EDS} $ OneOf @{AltsNE {em=CanBeEmpty Static}} x  = Just $ OneOf x
-strengthen @{EDS} $ OneOf @{AltsEE {dp=Dynamic}} x            impossible
-strengthen @{EDS} $ OneOf @{AltsNE {em=NonEmpty}} x           impossible
-strengthen @{EDS} $ OneOf @{AltsNE {em=CanBeEmpty Dynamic}} x impossible
-strengthen @{EDS} $ Bind @{BndNE} x f                         = Just $ Bind x f
-strengthen @{EDS} $ Bind @{BndEE} x f                         = Just $ Bind x f
+
+strengthen $ Pure x = Just $ Pure x
+strengthen $ Raw x  = Just $ Raw x
+
+strengthen @{AS {em=NonEmpty}}           Empty = Nothing
+strengthen @{AS {em=CanBeEmpty Dynamic}} Empty = Nothing
+strengthen @{AS {em=CanBeEmpty Static}}  Empty = Just Empty
+
+strengthen @{NN}          $ OneOf @{NN} x = Just $ OneOf x
+strengthen @{ND}          $ OneOf @{ND} x = Just $ OneOf x
+strengthen @{ND}          $ OneOf @{DD} x = Nothing
+strengthen @{DD}          $ OneOf @{ND} x = Just $ OneOf x
+strengthen @{DD}          $ OneOf @{DD} x = Just $ OneOf x
+strengthen @{AS {em=oem}} $ OneOf @{AS {em=alem}} x = case order {rel=NoWeaker} oem alem of
+                                                        Left NN                          => Just $ OneOf x
+                                                        Left ND                          => Nothing
+                                                        Left DD                          => Just $ OneOf x
+                                                        Left (AS {em=CanBeEmpty Static}) => Just $ OneOf x
+                                                        Right _                          => Just $ OneOf x
+strengthen @{NN}          $ OneOf @{ND} x impossible
+strengthen @{NN}          $ OneOf @{DD} x impossible
+strengthen @{NN}          $ OneOf @{AS} x impossible
+strengthen @{ND}          $ OneOf @{NN} x impossible
+strengthen @{ND}          $ OneOf @{AS} x impossible
+strengthen @{DD}          $ OneOf @{NN} x impossible
+strengthen @{DD}          $ OneOf @{AS} x impossible
+strengthen @{AS}          $ OneOf @{NN} x impossible
+strengthen @{AS}          $ OneOf @{ND} x impossible
+strengthen @{AS}          $ OneOf @{DD} x impossible
+
+strengthen @{NN}                         $ Bind @{BndNE} x f = Just $ Bind x f
+strengthen @{NN}                         $ Bind @{BndEE} x f impossible
+strengthen @{ND}                         $ Bind @{BndNE} x f = Just $ Bind x f
+strengthen @{ND}                         $ Bind @{BndEE} x f = Nothing
+strengthen @{DD}                         $ Bind @{BndNE} x f = Just $ Bind x f
+strengthen @{DD}                         $ Bind @{BndEE} x f = Just $ Bind x f
+strengthen @{AS {em=NonEmpty}}           $ Bind @{BndNE} x f = Just $ Bind x f
+strengthen @{AS {em=CanBeEmpty Dynamic}} $ Bind @{BndNE} x f = Just $ Bind x f
+strengthen @{AS {em=CanBeEmpty Static}}  $ Bind @{BndNE} x f = Just $ Bind x f
+strengthen @{AS {em=NonEmpty}}           $ Bind @{BndEE} x f = Nothing
+strengthen @{AS {em=CanBeEmpty Dynamic}} $ Bind @{BndEE} x f = Just $ Bind x f
+strengthen @{AS {em=CanBeEmpty Static}}  $ Bind @{BndEE} x f = Just $ Bind x f
+
+{-
 
 -----------------------------
 --- Very basic generators ---
