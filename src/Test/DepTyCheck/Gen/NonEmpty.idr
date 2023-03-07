@@ -49,19 +49,15 @@ data Gen : Emptiness -> Type -> Type where
 
   Empty : Gen (CanBeEmpty Static) a
 
-  Pure  : (0 _ : IfUnsolved em NonEmpty) =>
-          a -> Gen em a
+  Pure  : a -> Gen em a
 
-  Raw   : (0 _ : IfUnsolved em NonEmpty) =>
-          RawGen a -> Gen em a
+  Raw   : RawGen a -> Gen em a
 
   OneOf : alem `NoWeaker` em =>
           alem `NoWeaker` CanBeEmpty Dynamic =>
-          (0 _ : IfUnsolved em NonEmpty) =>
           OneOfAlternatives alem a -> Gen em a
 
   Bind  : BindToOuter biem em =>
-          (0 _ : IfUnsolved em NonEmpty) =>
           RawGen c -> (c -> Gen biem a) -> Gen em a
 
 record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
@@ -242,40 +238,28 @@ Functor (Gen em) where
   map f $ OneOf oo = OneOf $ mapOneOf' oo $ assert_total $ map f
   map f $ Bind x g = Bind x $ assert_total map f . g
 
-{-
+ap : Gen em (a -> b) -> Gen em a -> Gen em b
 
-ap : lem `NoWeaker` em => rem `NoWeaker` em =>
-     Gen lem (a -> b) -> Gen rem a -> Gen em b
-ap @{Refl} Empty _ = Empty
-ap @{_} @{Refl} _ Empty = Empty
+ap Empty _ = Empty
+ap _ Empty = Empty
 
-ap (Pure f) g = relax $ f <$> g
-ap g (Pure x) = relax $ g <&> \f => f x
+ap (Pure f) g = f <$> g
+ap g (Pure x) = g <&> \f => f x
 
 ap (Raw sfl) (Raw sfr) = Raw $ sfl <*> sfr
 
-ap @{Refl} @{Refl} (OneOf @{ao} oo) g = OneOf @{?foo} $ mapOneOf' oo $ \x => assert_total $ ap x g @{altsToOuterRelax' ao} @{Refl}
-ap @{Refl} @{NED}  (OneOf @{ao} oo) g = ?foo_5
-ap @{Refl} @{NES}  (OneOf @{ao} oo) g = ?foo_6
-ap @{Refl} @{EDS}  (OneOf @{ao} oo) g = ?foo_7
-ap @{NED}  @{rbo}  (OneOf @{ao} oo) g = ?foo_1
-ap @{NES}  @{rbo}  (OneOf @{ao} oo) g = ?foo_2
-ap @{EDS}  @{rbo}  (OneOf @{ao} oo) g = ?foo_3
---ap @{Refl} (OneOf @{bo} oo) g = OneOf @{?foooo0} $ mapOneOf' oo $ assert_total $ \x => ap x g @{?safd0} @{?foo0}
---ap @{NED}  (OneOf @{bo} oo) g = OneOf @{?foooo1} $ mapOneOf' oo $ assert_total $ \x => ap x g @{?safd1} @{?foo1}
---ap @{NES}  (OneOf @{bo} oo) g = OneOf @{?foooo2} $ mapOneOf' oo $ assert_total $ \x => ap x g @{?safd2} @{?foo2}
---ap @{EDS}  (OneOf @{bo} oo) g = OneOf @{?foooo3} $ mapOneOf' oo $ assert_total $ \x => ap x g @{?safd3} @{?foo3}
-ap @{_} @{rbo} g (OneOf @{bo} oo) = ?foo_ap_oneof_r -- mapOneOf @{transitive' bo rbo} oo $ assert_total (g `ap`)
+ap (OneOf @{ao} @{au} oo) g = OneOf @{?foo2} @{?for2} $ mapOneOf' oo $ \x => assert_total $ ap (relax x) g
+ap g (OneOf @{ao} oo) = ?foo_oo_r -- OneOf @{?foo2} @{?for2} $ mapOneOf' oo $ \x => assert_total $ ap x g @{?lt1} @{?lt2}
 
-ap @{lbo} @{rbo} (Bind @{bo} x f) g = ?foo_bnd_l -- Bind @{bindToOuterRelax bo lbo} x $ \y => ap @{?foo_nw} @{?foo_nw2} (f y) $ relax @{?foo_f} g
-ap g (Bind x f) = ?foo_bnd_r -- Bind x $ ?foo_bnd_r -- assert_total (g `ap`) . f
-
-export
-Applicative (Gen em) where
-  pure = Pure
-  (<*>) = ap @{?foo_l} @{?foo_r}
+ap (Bind @{bo} x f) g = ?foo_bnd_l -- Bind @{bindToOuterRelax bo lbo} x $ \y => ap @{?foo_nw} @{?foo_nw2} (f y) $ relax @{?foo_f} g
+ap g (Bind @{bo} x f) = ?foo_bnd_r -- Bind x $ ?foo_bnd_r -- assert_total (g `ap`) . f
 
 {-
+
+export
+{em : _} -> Applicative (Gen em) where
+  pure = Pure
+  (<*>) = ap @{reflexive}
 
 export
 Monad Gen where
