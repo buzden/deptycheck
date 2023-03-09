@@ -50,7 +50,7 @@ record OneOfAlternatives (0 a : Type) where
   constructor MkOneOf
   desc : Maybe String
   totalWeight : PosNat
-  gens : LazyL'st1 (PosNat, Lazy (NonEmptyGen a))
+  gens : LazyLst1 (PosNat, Lazy (NonEmptyGen a))
   {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst x)}
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
@@ -59,7 +59,7 @@ record OneOfAlternatives (0 a : Type) where
 --- Technical stuff for mapping alternatives ---
 ------------------------------------------------
 
-mapTaggedLazy : (a -> b) -> LazyL'st1 (tag, Lazy a) -> LazyL'st1 (tag, Lazy b)
+mapTaggedLazy : (a -> b) -> LazyLst1 (tag, Lazy a) -> LazyLst1 (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
 mapOneOf : OneOfAlternatives a -> (NonEmptyGen a -> NonEmptyGen b) -> NonEmptyGen b
@@ -157,7 +157,7 @@ namespace GenAlternatives
   export
   record GenAlternatives' (0 mustBeNotEmpty : Bool) a where
     constructor MkGenAlternatives
-    unGenAlternatives : LazyL'st mustBeNotEmpty (PosNat, Lazy (NonEmptyGen a))
+    unGenAlternatives : LazyLst mustBeNotEmpty (PosNat, Lazy (NonEmptyGen a))
 
   public export %inline
   GenAlternatives : Type -> Type
@@ -213,11 +213,11 @@ namespace GenAlternatives
   strengthen $ MkGenAlternatives xs = MkGenAlternatives <$> strengthen xs
 
 export
-Cast (LazyL'st ne a) (GenAlternatives' ne a) where
+Cast (LazyLst ne a) (GenAlternatives' ne a) where
   cast = MkGenAlternatives . map (\x => (1, pure x))
 
 public export %inline
-altsFromList : LazyL'st ne a -> GenAlternatives' ne a
+altsFromList : LazyLst ne a -> GenAlternatives' ne a
 altsFromList = cast
 
 ----------------------------------
@@ -239,14 +239,14 @@ oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : {default Nothing description : Maybe String} -> LazyL'st1 (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
+frequency : {default Nothing description : Maybe String} -> LazyLst1 (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
 frequency = oneOf {description} . MkGenAlternatives
 
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
-elements : {default Nothing description : Maybe String} -> LazyL'st1 a -> NonEmptyGen a
+elements : {default Nothing description : Maybe String} -> LazyLst1 a -> NonEmptyGen a
 elements = oneOf {description} . cast
 
 ------------------------------

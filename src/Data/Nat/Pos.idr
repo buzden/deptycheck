@@ -66,7 +66,7 @@ gcd a (S b)   = assert_total $ gcd (S b) (modNatNZ a (S b) SIsNonZero)
 --- Working with weighted lists ---
 
 export
-pickWeighted : LazyL'st1 (PosNat, a) -> Nat -> a
+pickWeighted : LazyLst1 (PosNat, a) -> Nat -> a
 pickWeighted [(_, x)]                     _ = x
 pickWeighted wh@((Element n _, x)::y::ys) k = if k < n then x else pickWeighted (assert_smaller wh $ y::ys) (k `minus` n)
 
