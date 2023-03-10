@@ -85,9 +85,9 @@ export
 data Equiv : Gen lem a -> Gen rem a -> Type where
   EE : Empty `Equiv` Empty
   EP : Pure x `Equiv` Pure x
-  ER : {0 f : forall m. MonadRandom m => m a} -> Raw (MkRawGen f) `Equiv` Raw (MkRawGen f)
+  ER : Raw x `Equiv` Raw x
   EO : lgs `AltsEquiv` rgs => OneOf @{lalemem} @{lalemcd} (MkOneOf _ _ lgs) `Equiv` OneOf @{ralemem} @{ralemcd} (MkOneOf _ _ rgs)
-  EB : {0 f : forall m. MonadRandom m => m a} -> Bind @{lbo} (MkRawGen f) g `Equiv` Bind @{rbo} (MkRawGen f) g
+  EB : Bind @{lbo} x g `Equiv` Bind @{rbo} x g
 
 data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, Lazy (Gen lem a)) -> Type where
   Nil  : [] `AltsEquiv` []
@@ -121,7 +121,7 @@ mapOneOf (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @{
 --relax' : {oem : _} -> iem `NoWeaker` oem => (original : Gen iem a) -> (relaxed : Gen oem a ** relaxed `Equiv` original)
 --relax' @{AS} Empty          = (Empty ** EE)
 --relax' $ Pure x             = (Pure x ** EP)
---relax' $ Raw x@(MkRawGen _) = (Raw x ** ER)
+--relax' $ Raw x              = (Raw x ** ER)
 --relax' $ OneOf @{wo} x@(MkOneOf _ _ _)      = (OneOf @{transitive' wo %search} x ** EO)
 --relax' $ Bind @{bo} x f     = Bind @{bindToOuterRelax bo %search} x f
 
