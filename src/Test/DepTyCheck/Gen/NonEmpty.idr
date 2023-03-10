@@ -69,8 +69,6 @@ record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
   gens : LazyLst1 (PosNat, Lazy (Gen em a))
   {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst x)}
 
--- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
-
 public export %inline
 Gen1 : Type -> Type
 Gen1 = Gen NonEmpty
@@ -113,6 +111,23 @@ mapOneOf (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @{
     rewrite mapFusion (Builtin.fst) (mapSnd $ wrapLazy f) gs
     transport tw $ cong (Lazy.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
 
+traverseMaybe : (a -> Maybe b) -> LazyLst ne a -> Maybe $ LazyLst ne b
+traverseMaybe f []      = Just []
+traverseMaybe f (x::xs) = case f x of
+  Nothing => Nothing
+  Just y  => (y ::) <$> traverseMaybe f xs
+
+trMTaggedLazy : (a -> Maybe b) -> LazyLst1 (tag, Lazy a) -> Maybe $ LazyLst1 (tag, Lazy b)
+trMTaggedLazy = traverseMaybe . m . wrapLazy where
+  m : (Lazy a -> Lazy (Maybe b)) -> (tag, Lazy a) -> Maybe (tag, (Lazy b))
+  m f (tg, lz) = (tg,) . delay <$> f lz
+
+-- TODO to make the proof properly
+trMOneOf : OneOfAlternatives iem a -> (Gen iem a -> Maybe $ Gen em b) -> Maybe $ OneOfAlternatives em b
+trMOneOf (MkOneOf desc tw gs @{prf}) f with (trMTaggedLazy f gs) proof trm
+  _ | Nothing = Nothing
+  _ | Just gs' = Just $ MkOneOf desc tw gs' @{believe_me $ Refl {x=Z}}
+
 -----------------------------
 --- Emptiness tweakenings ---
 -----------------------------
@@ -135,16 +150,24 @@ relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
 
 %transform "relax identity" relax x = believe_me x
 
--- strengthen : (gw : Gen iem a) -> Dec (gs : Gen oem a ** gs `Equiv` gw)
+-- strengthen' : {oem : _} -> (gw : Gen iem a) -> Dec (gs : Gen oem a ** gs `Equiv` gw)
 
 export
 strengthen : {oem : _} -> Gen iem a -> Maybe $ Gen oem a
-strengthen Empty      {oem= CanBeEmpty Static} = Just Empty
-strengthen Empty      {oem=_} = Nothing
-strengthen $ Pure x   = ?strengthen_rhs_1
-strengthen $ Raw x    = ?strengthen_rhs_2
-strengthen $ OneOf x  = ?strengthen_rhs_3
-strengthen $ Bind x f = ?strengthen_rhs_4
+
+strengthen {oem=CanBeEmpty Static} Empty = Just Empty
+strengthen {oem=_}                 Empty = Nothing
+
+strengthen $ Pure x = Just $ Pure x
+strengthen $ Raw x  = Just $ Raw x
+
+strengthen {oem=NonEmpty}     $ OneOf x = map OneOf $ trMOneOf x $ assert_total $ strengthen {oem=NonEmpty}
+strengthen {oem=CanBeEmpty _} $ OneOf @{_} @{au} x = Just $ OneOf @{relaxAnyCanBeEmpty au} @{au} x
+
+strengthen {oem=NonEmpty}     $ Bind {biem=NonEmpty}     x f = Just $ Bind x f
+strengthen {oem=NonEmpty}     $ Bind {biem=CanBeEmpty _} x f = Nothing
+strengthen {oem=CanBeEmpty _} $ Bind {biem=NonEmpty}     x f = Just $ Bind x f
+strengthen {oem=CanBeEmpty _} $ Bind {biem=CanBeEmpty _} x f = Just $ Bind x f
 
 -----------------------------
 --- Very basic generators ---

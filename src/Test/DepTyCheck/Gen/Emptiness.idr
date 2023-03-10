@@ -88,6 +88,13 @@ StronglyConnex _ NoWeaker where
   order (CanBeEmpty Dynamic) (CanBeEmpty Static)  = %search
   order (CanBeEmpty Dynamic) (CanBeEmpty Dynamic) = %search
 
+export
+relaxAnyCanBeEmpty : {dp : _} -> em `NoWeaker` CanBeEmpty Dynamic -> em `NoWeaker` CanBeEmpty dp
+relaxAnyCanBeEmpty {dp = Dynamic} ND = %search
+relaxAnyCanBeEmpty {dp = Dynamic} DD = %search
+relaxAnyCanBeEmpty {dp = Static}  ND = %search
+relaxAnyCanBeEmpty {dp = Static}  DD = %search
+
 --- Relations for particular generator cases ---
 
 -- bind --
