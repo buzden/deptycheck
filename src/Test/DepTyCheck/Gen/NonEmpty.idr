@@ -80,14 +80,10 @@ Gen1 = Gen NonEmpty
 mapTaggedLazy : (a -> b) -> LazyLst1 (tag, Lazy a) -> LazyLst1 (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
-mapOneOf' : OneOfAlternatives iem a -> (Gen iem a -> Gen em b) -> OneOfAlternatives em b
-mapOneOf' (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @{do
+mapOneOf : OneOfAlternatives iem a -> (Gen iem a -> Gen em b) -> OneOfAlternatives em b
+mapOneOf (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @{do
     rewrite mapFusion (Builtin.fst) (mapSnd $ wrapLazy f) gs
     transport tw $ cong (Lazy.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
-
---%inline
---mapOneOf : em `NoWeaker` CanBeEmpty Dynamic => OneOfAlternatives iem a -> (Gen iem a -> Gen em b) -> Gen em b
---mapOneOf = OneOf @{altsToOuterRefl} .: mapOneOf'
 
 -----------------------------
 --- Emptiness tweakenings ---
@@ -235,7 +231,7 @@ Functor (Gen em) where
   map f $ Empty    = Empty
   map f $ Pure x   = Pure $ f x
   map f $ Raw sf   = Raw $ f <$> sf
-  map f $ OneOf oo = OneOf $ mapOneOf' oo $ assert_total $ map f
+  map f $ OneOf oo = OneOf $ mapOneOf oo $ assert_total $ map f
   map f $ Bind x g = Bind x $ assert_total map f . g
 
 ap : Gen em (a -> b) -> Gen em a -> Gen em b
@@ -248,8 +244,8 @@ ap g (Pure x) = g <&> \f => f x
 
 ap (Raw sfl) (Raw sfr) = Raw $ sfl <*> sfr
 
-ap (OneOf @{ao} @{au} oo) g = OneOf @{?foo2} @{?for2} $ mapOneOf' oo $ \x => assert_total $ ap (relax x) g
-ap g (OneOf @{ao} oo) = ?foo_oo_r -- OneOf @{?foo2} @{?for2} $ mapOneOf' oo $ \x => assert_total $ ap x g @{?lt1} @{?lt2}
+ap (OneOf @{ao} @{au} oo) g = OneOf @{?foo2} @{?for2} $ mapOneOf oo $ \x => assert_total $ ap (relax x) g
+ap g (OneOf @{ao} oo) = ?foo_oo_r -- OneOf @{?foo2} @{?for2} $ mapOneOf oo $ \x => assert_total $ ap x g @{?lt1} @{?lt2}
 
 ap (Bind @{bo} x f) g = ?foo_bnd_l -- Bind @{bindToOuterRelax bo lbo} x $ \y => ap @{?foo_nw} @{?foo_nw2} (f y) $ relax @{?foo_f} g
 ap g (Bind @{bo} x f) = ?foo_bnd_r -- Bind x $ ?foo_bnd_r -- assert_total (g `ap`) . f
@@ -265,7 +261,7 @@ export
 Monad Gen where
   Pure x   >>= nf = nf x
   Raw g    >>= nf = Bind g nf -- Raw $ MkRawGen $ sf >>= unGen . nf
-  OneOf oo >>= nf = mapOneOf oo $ assert_total (>>= nf)
+  OneOf oo >>= nf = OneOf $ mapOneOf oo $ assert_total (>>= nf)
   Bind x f >>= nf = Bind x $ \x => f x >>= nf
 
 -----------------------------------------
