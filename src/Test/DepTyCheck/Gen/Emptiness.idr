@@ -107,6 +107,12 @@ data BindToOuter : (emOfBind, outerEm : Emptiness) -> Type where
           BindToOuter (CanBeEmpty idp) (CanBeEmpty dp)
 
 export
+Reflexive _ BindToOuter where
+  reflexive {x=NonEmpty}           = %search
+  reflexive {x=CanBeEmpty Dynamic} = %search
+  reflexive {x=CanBeEmpty Static}  = %search
+
+export
 bindToOuterRelax : x `BindToOuter` y -> y `NoWeaker` z -> x `BindToOuter` z
 bindToOuterRelax BndNE NN = %search
 bindToOuterRelax BndNE ND = %search

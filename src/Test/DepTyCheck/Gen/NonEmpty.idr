@@ -285,19 +285,20 @@ ap {em=CanBeEmpty Static} @{ll} g (OneOf @{_} @{au} oo) = maybe Empty (OneOf @{A
 ap (Bind @{bo} x f) g = ?foo_bnd_l -- Bind @{bindToOuterRelax bo lbo} x $ \y => ap @{?foo_nw} @{?foo_nw2} (f y) $ relax @{?foo_f} g
 ap g (Bind @{bo} x f) = ?foo_bnd_r -- Bind x $ ?foo_bnd_r -- assert_total (g `ap`) . f
 
-{-
-
 export
 {em : _} -> Applicative (Gen em) where
   pure = Pure
-  (<*>) = ap @{reflexive}
+  (<*>) = ap @{reflexive} @{reflexive}
 
 export
-Monad Gen where
+{em : _} -> Monad (Gen em) where
+  Empty    >>= _  = Empty
   Pure x   >>= nf = nf x
-  Raw g    >>= nf = Bind g nf -- Raw $ MkRawGen $ sf >>= unGen . nf
-  OneOf oo >>= nf = OneOf $ mapOneOf oo $ assert_total (>>= nf)
-  Bind x f >>= nf = Bind x $ \x => f x >>= nf
+  Raw g    >>= nf = Bind @{reflexive} g nf
+  OneOf oo >>= nf = ?foo_bind_oneof -- OneOf $ mapOneOf oo $ assert_total (>>= nf)
+  Bind x f >>= nf = ?foo_bind_bind -- Bind x $ \x => f x >>= nf
+
+{-
 
 -----------------------------------------
 --- Detour: special list of lazy gens ---
