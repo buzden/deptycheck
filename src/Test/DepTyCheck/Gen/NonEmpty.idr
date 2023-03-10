@@ -75,6 +75,24 @@ public export %inline
 Gen1 : Type -> Type
 Gen1 = Gen NonEmpty
 
+----------------------------
+--- Equivalence relation ---
+----------------------------
+
+data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, Lazy (Gen lem a)) -> Type
+
+export
+data Equiv : Gen lem a -> Gen rem a -> Type where
+  EE : Empty `Equiv` Empty
+  EP : Pure x `Equiv` Pure x
+  ER : (0 f : forall m. MonadRandom m => m a) -> Raw (MkRawGen f) `Equiv` Raw (MkRawGen f)
+  EO : lgs `AltsEquiv` rgs -> OneOf @{lalemem} @{lalemcd} (MkOneOf _ _ lgs) `Equiv` OneOf @{ralemem} @{ralemcd} (MkOneOf _ _ rgs)
+  EB : (0 f : forall m. MonadRandom m => m a) -> Bind @{lbo} (MkRawGen f) g `Equiv` Bind @{rbo} (MkRawGen f) g
+
+data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, Lazy (Gen lem a)) -> Type where
+  Nil  : [] `AltsEquiv` []
+  (::) : lg `Equiv` rg -> lgs `AltsEquiv` rgs -> (Element n _, lg)::lgs `AltsEquiv` (Element n _, rg)::rgs
+
 ------------------------------------------------
 --- Technical stuff for mapping alternatives ---
 ------------------------------------------------
