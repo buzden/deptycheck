@@ -257,18 +257,30 @@ Functor (Gen em) where
   map f $ OneOf oo = OneOf $ mapOneOf oo $ assert_total $ map f
   map f $ Bind x g = Bind x $ assert_total map f . g
 
-ap : Gen em (a -> b) -> Gen em a -> Gen em b
+ap : {em : _} ->
+     lem `NoWeaker` em =>
+     rem `NoWeaker` em =>
+     Gen lem (a -> b) -> Gen rem a -> Gen em b
 
-ap Empty _ = Empty
-ap _ Empty = Empty
+ap @{AS}      Empty _ = Empty
+ap @{_} @{AS} _ Empty = Empty
 
-ap (Pure f) g = f <$> g
-ap g (Pure x) = g <&> \f => f x
+ap (Pure f) g = relax $ f <$> g
+ap g (Pure x) = relax $ g <&> \f => f x
 
 ap (Raw sfl) (Raw sfr) = Raw $ sfl <*> sfr
 
-ap (OneOf @{ao} @{au} oo) g = OneOf @{?foo2} @{?for2} $ mapOneOf oo $ \x => assert_total $ ap (relax x) g
-ap g (OneOf @{ao} oo) = ?foo_oo_r -- OneOf @{?foo2} @{?for2} $ mapOneOf oo $ \x => assert_total $ ap x g @{?lt1} @{?lt2}
+ap {em=NonEmpty} @{NN} @{NN} (OneOf @{ao} oo) g with (ao)
+  ap {em=NonEmpty} @{NN} @{NN} (OneOf @{NN} oo) g | NN = OneOf @{NN} $ mapOneOf oo $ \x => assert_total ap x g
+ap {em=CanBeEmpty Dynamic} (OneOf oo) g = OneOf @{DD} $ mapOneOf oo $ \x => assert_total ap x g
+ap {em=CanBeEmpty Static}  @{_} @{rr} (OneOf @{_} @{au} oo) g = maybe Empty (OneOf @{AS} @{DD}) $
+  trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} @{AS} (relax @{transitive au AS} x) (relax @{rr} g)
+
+ap {em=NonEmpty} @{NN} @{NN} g (OneOf @{ao} oo) with (ao)
+  ap {em=NonEmpty} @{NN} @{NN} g (OneOf @{NN} oo) | NN = OneOf @{NN} $ mapOneOf oo $ assert_total ap g
+ap {em=CanBeEmpty Dynamic} g (OneOf oo) = OneOf @{DD} $ mapOneOf oo $ assert_total ap g
+ap {em=CanBeEmpty Static} @{ll} g (OneOf @{_} @{au} oo) = maybe Empty (OneOf @{AS} @{DD}) $
+  trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} @{AS} (relax @{ll} g) (relax @{transitive au AS} x)
 
 ap (Bind @{bo} x f) g = ?foo_bnd_l -- Bind @{bindToOuterRelax bo lbo} x $ \y => ap @{?foo_nw} @{?foo_nw2} (f y) $ relax @{?foo_f} g
 ap g (Bind @{bo} x f) = ?foo_bnd_r -- Bind x $ ?foo_bnd_r -- assert_total (g `ap`) . f
