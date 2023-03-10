@@ -85,13 +85,21 @@ export
 data Equiv : Gen lem a -> Gen rem a -> Type where
   EE : Empty `Equiv` Empty
   EP : Pure x `Equiv` Pure x
-  ER : (0 f : forall m. MonadRandom m => m a) -> Raw (MkRawGen f) `Equiv` Raw (MkRawGen f)
-  EO : lgs `AltsEquiv` rgs -> OneOf @{lalemem} @{lalemcd} (MkOneOf _ _ lgs) `Equiv` OneOf @{ralemem} @{ralemcd} (MkOneOf _ _ rgs)
-  EB : (0 f : forall m. MonadRandom m => m a) -> Bind @{lbo} (MkRawGen f) g `Equiv` Bind @{rbo} (MkRawGen f) g
+  ER : {0 f : forall m. MonadRandom m => m a} -> Raw (MkRawGen f) `Equiv` Raw (MkRawGen f)
+  EO : lgs `AltsEquiv` rgs => OneOf @{lalemem} @{lalemcd} (MkOneOf _ _ lgs) `Equiv` OneOf @{ralemem} @{ralemcd} (MkOneOf _ _ rgs)
+  EB : {0 f : forall m. MonadRandom m => m a} -> Bind @{lbo} (MkRawGen f) g `Equiv` Bind @{rbo} (MkRawGen f) g
 
 data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, Lazy (Gen lem a)) -> Type where
   Nil  : [] `AltsEquiv` []
-  (::) : lg `Equiv` rg -> lgs `AltsEquiv` rgs -> (Element n _, lg)::lgs `AltsEquiv` (Element n _, rg)::rgs
+  (::) : lg `Equiv` rg -> lgs `AltsEquiv` rgs -> {0 lne, rne : _} ->
+         {0 lim, rim : _} ->
+         {0 lprf, rprf : _} ->
+         ((Element n lprf, Delay lg)::lgs) {ne=lne} @{lim} `AltsEquiv` ((Element n prpf, Delay rg)::rgs) {ne=rne} @{rim}
+
+--reflAltsEquiv : (xs : LazyLst ne (PosNat, Lazy (Gen em a))) -> AltsEquiv xs xs
+--reflAltsEquiv []      = []
+--reflAltsEquiv $ (::) (Element a b, Delay g) (Delay xs) {ne} =
+--    (?foo :: reflAltsEquiv xs) {lprf=b} {rprf=b} {lg=g} {rg=g} {lne=ne} {rne=ne} {lim = %search} {rim = %search}
 
 ------------------------------------------------
 --- Technical stuff for mapping alternatives ---
@@ -108,6 +116,14 @@ mapOneOf (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @{
 -----------------------------
 --- Emptiness tweakenings ---
 -----------------------------
+
+--export
+--relax' : {oem : _} -> iem `NoWeaker` oem => (original : Gen iem a) -> (relaxed : Gen oem a ** relaxed `Equiv` original)
+--relax' @{AS} Empty          = (Empty ** EE)
+--relax' $ Pure x             = (Pure x ** EP)
+--relax' $ Raw x@(MkRawGen _) = (Raw x ** ER)
+--relax' $ OneOf @{wo} x@(MkOneOf _ _ _)      = (OneOf @{transitive' wo %search} x ** EO)
+--relax' $ Bind @{bo} x f     = Bind @{bindToOuterRelax bo %search} x f
 
 export
 relax : {oem : _} -> iem `NoWeaker` oem => Gen iem a -> Gen oem a
