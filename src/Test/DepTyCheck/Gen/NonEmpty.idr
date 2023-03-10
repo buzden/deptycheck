@@ -111,11 +111,11 @@ mapOneOf (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @{
 
 export
 relax : {oem : _} -> iem `NoWeaker` oem => Gen iem a -> Gen oem a
-relax @{AS} Empty            = Empty
-relax       $ Pure x         = Pure x
-relax       $ Raw x          = Raw x
-relax @{ao} $ OneOf @{wo} x  = OneOf @{transitive' wo ao} x
-relax       $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
+relax @{AS} Empty      = Empty
+relax $ Pure x         = Pure x
+relax $ Raw x          = Raw x
+relax $ OneOf @{wo} x  = OneOf @{transitive' wo %search} x
+relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
 
 %transform "relax identity" relax x = believe_me x
 
