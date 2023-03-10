@@ -53,11 +53,13 @@ data Gen : Emptiness -> Type -> Type where
 
   Raw   : RawGen a -> Gen em a
 
-  OneOf : alem `NoWeaker` em =>
+  OneOf : {em : _} -> {alem : _} ->
+          alem `NoWeaker` em =>
           alem `NoWeaker` CanBeEmpty Dynamic =>
           OneOfAlternatives alem a -> Gen em a
 
-  Bind  : BindToOuter biem em =>
+  Bind  : {em : _} -> {biem : _} ->
+          BindToOuter biem em =>
           RawGen c -> (c -> Gen biem a) -> Gen em a
 
 record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
@@ -90,7 +92,7 @@ mapOneOf (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @{
 -----------------------------
 
 export
-relax : iem `NoWeaker` oem => Gen iem a -> Gen oem a
+relax : {oem : _} -> iem `NoWeaker` oem => Gen iem a -> Gen oem a
 relax @{AS} Empty            = Empty
 relax       $ Pure x         = Pure x
 relax       $ Raw x          = Raw x
@@ -99,52 +101,16 @@ relax       $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
 
 %transform "relax identity" relax x = believe_me x
 
--- strengthen : oem `NoWeaker` iem => (gw : Gen iem a) -> Dec (gs : Gen oem a ** gs `Equiv` gw)
+-- strengthen : (gw : Gen iem a) -> Dec (gs : Gen oem a ** gs `Equiv` gw)
 
 export
-strengthen : oem `NoWeaker` iem => Gen iem a -> Maybe $ Gen oem a
-
-strengthen $ Pure x = Just $ Pure x
-strengthen $ Raw x  = Just $ Raw x
-
-strengthen @{AS {em=NonEmpty}}           Empty = Nothing
-strengthen @{AS {em=CanBeEmpty Dynamic}} Empty = Nothing
-strengthen @{AS {em=CanBeEmpty Static}}  Empty = Just Empty
-
-strengthen @{NN}          $ OneOf @{NN} x = Just $ OneOf x
-strengthen @{ND}          $ OneOf @{ND} x = Just $ OneOf x
-strengthen @{ND}          $ OneOf @{DD} x = Nothing
-strengthen @{DD}          $ OneOf @{ND} x = Just $ OneOf x
-strengthen @{DD}          $ OneOf @{DD} x = Just $ OneOf x
-strengthen @{AS {em=oem}} $ OneOf @{AS {em=alem}} x = case order {rel=NoWeaker} oem alem of
-                                                        Left NN                          => Just $ OneOf x
-                                                        Left ND                          => Nothing
-                                                        Left DD                          => Just $ OneOf x
-                                                        Left (AS {em=CanBeEmpty Static}) => Just $ OneOf x
-                                                        Right _                          => Just $ OneOf x
-strengthen @{NN}          $ OneOf @{ND} x impossible
-strengthen @{NN}          $ OneOf @{DD} x impossible
-strengthen @{NN}          $ OneOf @{AS} x impossible
-strengthen @{ND}          $ OneOf @{NN} x impossible
-strengthen @{ND}          $ OneOf @{AS} x impossible
-strengthen @{DD}          $ OneOf @{NN} x impossible
-strengthen @{DD}          $ OneOf @{AS} x impossible
-strengthen @{AS}          $ OneOf @{NN} x impossible
-strengthen @{AS}          $ OneOf @{ND} x impossible
-strengthen @{AS}          $ OneOf @{DD} x impossible
-
-strengthen @{NN}                         $ Bind @{BndNE} x f = Just $ Bind x f
-strengthen @{NN}                         $ Bind @{BndEE} x f impossible
-strengthen @{ND}                         $ Bind @{BndNE} x f = Just $ Bind x f
-strengthen @{ND}                         $ Bind @{BndEE} x f = Nothing
-strengthen @{DD}                         $ Bind @{BndNE} x f = Just $ Bind x f
-strengthen @{DD}                         $ Bind @{BndEE} x f = Just $ Bind x f
-strengthen @{AS {em=NonEmpty}}           $ Bind @{BndNE} x f = Just $ Bind x f
-strengthen @{AS {em=CanBeEmpty Dynamic}} $ Bind @{BndNE} x f = Just $ Bind x f
-strengthen @{AS {em=CanBeEmpty Static}}  $ Bind @{BndNE} x f = Just $ Bind x f
-strengthen @{AS {em=NonEmpty}}           $ Bind @{BndEE} x f = Nothing
-strengthen @{AS {em=CanBeEmpty Dynamic}} $ Bind @{BndEE} x f = Just $ Bind x f
-strengthen @{AS {em=CanBeEmpty Static}}  $ Bind @{BndEE} x f = Just $ Bind x f
+strengthen : {oem : _} -> Gen iem a -> Maybe $ Gen oem a
+strengthen Empty      {oem= CanBeEmpty Static} = Just Empty
+strengthen Empty      {oem=_} = Nothing
+strengthen $ Pure x   = ?strengthen_rhs_1
+strengthen $ Raw x    = ?strengthen_rhs_2
+strengthen $ OneOf x  = ?strengthen_rhs_3
+strengthen $ Bind x f = ?strengthen_rhs_4
 
 -----------------------------
 --- Very basic generators ---

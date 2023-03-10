@@ -22,7 +22,7 @@ data NoWeaker : (from, to : Emptiness) -> Type where
   NN : NonEmpty           `NoWeaker` NonEmpty
   ND : NonEmpty           `NoWeaker` CanBeEmpty Dynamic
   DD : CanBeEmpty Dynamic `NoWeaker` CanBeEmpty Dynamic
-  AS : {em : _} -> em     `NoWeaker` CanBeEmpty Static
+  AS : em                 `NoWeaker` CanBeEmpty Static
 
 infix 6 `NoWeaker`
 
@@ -87,47 +87,6 @@ StronglyConnex _ NoWeaker where
   order (CanBeEmpty Static)  (CanBeEmpty Dynamic) = %search
   order (CanBeEmpty Dynamic) (CanBeEmpty Static)  = %search
   order (CanBeEmpty Dynamic) (CanBeEmpty Dynamic) = %search
-
-export
-min : Emptiness -> Emptiness -> Emptiness
-min s@(CanBeEmpty Static) _ = s
-min _ s@(CanBeEmpty Static) = s
-min d@(CanBeEmpty Dynamic) _ = d
-min _ d@(CanBeEmpty Dynamic) = d
-min NonEmpty NonEmpty = NonEmpty
-
-minWeakest : (lem, rem : Emptiness) -> (em = lem `min` rem) -> (lem `NoWeaker` em, rem `NoWeaker` em, Either (lem = em) (rem = em))
-minWeakest NonEmpty             NonEmpty             Refl = %search
-minWeakest NonEmpty             (CanBeEmpty Dynamic) Refl = %search
-minWeakest (CanBeEmpty Dynamic) NonEmpty             Refl = %search
-minWeakest (CanBeEmpty Dynamic) (CanBeEmpty Dynamic) Refl = %search
-minWeakest NonEmpty             (CanBeEmpty Static)  Refl = %search
-minWeakest (CanBeEmpty Static)  NonEmpty             Refl = %search
-minWeakest (CanBeEmpty Static)  (CanBeEmpty Dynamic) Refl = %search
-minWeakest (CanBeEmpty Static)  (CanBeEmpty Static)  Refl = %search
-minWeakest (CanBeEmpty Dynamic) (CanBeEmpty Static)  Refl = %search
-
-export
-minWeakestL : (lem, rem : Emptiness) -> lem `NoWeaker` (lem `min` rem)
-minWeakestL lem rem = fst $ minWeakest lem rem Refl
-
-export
-minWeakestR : (lem, rem : Emptiness) -> rem `NoWeaker` (lem `min` rem)
-minWeakestR lem rem = fst $ snd $ minWeakest lem rem Refl
-
-export
-minStrongestAmongWeakests : (lem, rem, em : Emptiness) ->
-                            (lem `NoWeaker` em) -> (rem `NoWeaker` em) ->
-                            (lem `min` rem) `NoWeaker` em
-minStrongestAmongWeakests lem rem em x y = case snd $ snd $ minWeakest lem rem Refl of
-  Left  z => rewrite sym z in x
-  Right z => rewrite sym z in y
-
-data Min : (lem, rem, minem : Emptiness) -> Type where
-  SL  : Min (CanBeEmpty Static) _ (CanBeEmpty Static)
-  SR  : Min _ (CanBeEmpty Static) (CanBeEmpty Static)
-  DLR : Min (CanBeEmpty Dynamic) (CanBeEmpty Dynamic) (CanBeEmpty Dynamic)
-  NEL : Min NonEmpty x x
 
 --- Relations for particular generator cases ---
 
