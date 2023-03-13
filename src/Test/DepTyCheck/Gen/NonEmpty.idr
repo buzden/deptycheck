@@ -306,7 +306,9 @@ export
   Pure x   >>= nf = nf x
   Raw g    >>= nf = Bind @{reflexive} g nf
   OneOf oo >>= nf = ?foo_bind_oneof -- OneOf $ mapOneOf oo $ assert_total (>>= nf)
-  Bind x f >>= nf = ?foo_bind_bind -- Bind x $ \x => f x >>= nf
+  Bind @{bo} x f >>= nf with (bo)
+    _ | BndNE = Bind @{reflexive}          x $ \x => assert_total $ relax (f x) >>= nf
+    _ | BndEE = Bind @{BndEE {idp=Static}} x $ \x => assert_total $ relax (f x) >>= relax . nf
 
 {-
 

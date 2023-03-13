@@ -95,6 +95,12 @@ relaxAnyCanBeEmpty {dp = Dynamic} DD = %search
 relaxAnyCanBeEmpty {dp = Static}  ND = %search
 relaxAnyCanBeEmpty {dp = Static}  DD = %search
 
+export %hint
+nonEmptyIsStrongest : {em : _} -> NonEmpty `NoWeaker` em
+nonEmptyIsStrongest {em = NonEmpty}           = NN
+nonEmptyIsStrongest {em = CanBeEmpty Dynamic} = ND
+nonEmptyIsStrongest {em = CanBeEmpty Static}  = AS
+
 --- Relations for particular generator cases ---
 
 -- bind --
