@@ -214,6 +214,10 @@ unGen $ Raw sf   = sf.unRawGen
 unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
 unGen $ Bind x f = x.unRawGen >>= unGen . f
 
+export %inline
+unGen' : MonadRandom m => Gen em a -> m $ Maybe a
+unGen' = runMaybeT . unGen {m=MaybeT m}
+
 export
 unGenTryAll' : RandomGen g => (seed : g) -> Gen em a -> Stream (g, Maybe a)
 unGenTryAll' seed gen = do
@@ -296,7 +300,7 @@ ap @{ll} @{rr} (Bind @{lbo} x f) (Bind @{rbo} y g) with (lbo)
 export
 {em : _} -> Applicative (Gen em) where
   pure = Pure
-  (<*>) = ap @{reflexive} @{reflexive}
+  (<*>) = ap
 
 export
 {em : _} -> Monad (Gen em) where
@@ -375,6 +379,22 @@ namespace GenAlternatives
   strengthen : GenAlternatives' ne em a -> Maybe $ GenAlternatives em a
   strengthen $ MkGenAlternatives xs = MkGenAlternatives <$> strengthen xs
 
+  export
+  Functor (GenAlternatives' ne em) where
+    map = processAlternatives . map
+
+  export
+  {em : _} -> Applicative (GenAlternatives' ne em) where
+    pure x = [ pure x ]
+    xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
+
+  export
+  {em : _} -> Alternative (GenAlternatives' False em) where
+    empty = []
+    MkGenAlternatives xs <|> MkGenAlternatives ys = MkGenAlternatives $ xs <|> ys
+
+  -- implementation for `Monad` is below --
+
 export
 {em : _} -> Cast (LazyLst ne a) (GenAlternatives' ne em a) where
   cast = MkGenAlternatives . map (\x => (1, pure x))
@@ -425,15 +445,13 @@ elements : {default Nothing description : Maybe String} ->
            LazyLst1 a -> Gen em a
 elements = oneOf {description} . cast
 
-{-
-
 ------------------------------
 --- Analysis of generators ---
 ------------------------------
 
 export
-alternativesOf : Gen a -> GenAlternatives a
-alternativesOf $ OneOf oo = MkGenAlternatives oo.gens
+alternativesOf : Gen em a -> GenAlternatives em a
+alternativesOf $ OneOf oo = MkGenAlternatives $ gens $ mapOneOf oo relax
 alternativesOf g          = [g]
 
 ||| Any depth alternatives fetching.
@@ -442,28 +460,30 @@ alternativesOf g          = [g]
 ||| alternatives of depth `1` are those returned by the `alternativesOf` function,
 ||| alternatives of depth `n+1` are alternatives of all alternatives of depth `n` being flattened into a single alternatives list.
 export
-deepAlternativesOf : (depth : Nat) -> Gen a -> GenAlternatives a
-deepAlternativesOf 0     gen   = [ gen ]
-deepAlternativesOf 1     gen   = alternativesOf gen
-deepAlternativesOf (S k) gen   = processAlternatives' alternativesOf $ deepAlternativesOf k gen
+deepAlternativesOf : (depth : Nat) -> Gen em a -> GenAlternatives em a
+deepAlternativesOf 0     gen = [ gen ]
+deepAlternativesOf 1     gen = alternativesOf gen
+deepAlternativesOf (S k) gen = processAlternatives' alternativesOf $ deepAlternativesOf k gen
 
 ||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
 ||| except for empty generator, which would still be returned as empty generator.
 export
-forgetStructure : Gen a -> Gen a
-forgetStructure g@(Raw _) = g
-forgetStructure g = Raw $ MkRawGen $ unGen g
+forgetStructure : {em : _} -> Gen em a -> Gen em a
+forgetStructure Empty               = Empty
+forgetStructure g@(Raw _)           = g
+forgetStructure {em=NonEmpty}     g = Raw $ MkRawGen $ unGen1 g
+forgetStructure {em=CanBeEmpty _} g = MkRawGen (unGen' g) `Bind` maybe Empty Pure where
 
 public export
-processAlternatives : (Gen a -> Gen b) -> Gen a -> GenAlternatives b
+processAlternatives : (Gen em a -> Gen em b) -> Gen em a -> GenAlternatives em b
 processAlternatives f = processAlternatives f . alternativesOf
 
 public export
-mapAlternativesOf : (a -> b) -> Gen a -> GenAlternatives b
+mapAlternativesOf : (a -> b) -> Gen em a -> GenAlternatives em b
 mapAlternativesOf = processAlternatives . map
 
 public export %inline
-mapAlternativesWith : Gen a -> (a -> b) -> GenAlternatives b
+mapAlternativesWith : Gen em a -> (a -> b) -> GenAlternatives em b
 mapAlternativesWith = flip mapAlternativesOf
 
 -- Priority is chosen to be able to use these operators without parenthesis
@@ -471,49 +491,36 @@ mapAlternativesWith = flip mapAlternativesOf
 infix 8 `mapAlternativesOf`
       , `mapAlternativesWith`
 
------------------------------------------------------
---- Detour: implementations for list of lazy gens ---
------------------------------------------------------
-
-export
-Functor (GenAlternatives' ne) where
-  map = processAlternatives . map
-
-export
-Applicative (GenAlternatives' ne) where
-  pure x = [ pure x ]
-  xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
-
-export
-Alternative (GenAlternatives' False) where
-  empty = []
-  MkGenAlternatives xs <|> MkGenAlternatives ys = MkGenAlternatives $ xs <|> ys
-
-export
-Monad (GenAlternatives' True) where
- xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
+export %hint
+GenAltsMonad : {em : _} -> em `NoWeaker` CanBeEmpty Dynamic => Monad (GenAlternatives' True em)
+GenAltsMonad = M where
+  [M] Monad (GenAlternatives' True em) where
+    xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
 
 -------------------------------
 --- Variation in generation ---
 -------------------------------
 
+iterate : forall a. Nat -> (a -> a) -> a -> a
+iterate Z     _ x = x
+iterate (S n) f x = iterate n f $ f x
+
 -- TODO to reimplement `variant` to ensure that preserves the structure as far as it can.
 export
-variant : Nat -> Gen a -> Gen a
+variant : {em : _} -> Nat -> Gen em a -> Gen em a
+variant _     Empty = Empty
 variant Z       gen = gen
-variant x@(S _) gen = Raw $ MkRawGen $ iterate x independent $ unGen gen where
-  iterate : forall a. Nat -> (a -> a) -> a -> a
-  iterate Z     _ x = x
-  iterate (S n) f x = iterate n f $ f x
+variant {em=NonEmpty}     n gen = Raw $ MkRawGen $ iterate n independent $ unGen1 gen
+variant {em=CanBeEmpty _} n gen = (MkRawGen $ iterate n independent $ unGen' gen) `Bind` maybe Empty Pure
 
 -----------------------------
 --- Particular generators ---
 -----------------------------
 
 export
-listOf : {default (choose (0, 10)) length : Gen Nat} -> Gen a -> Gen (List a)
+listOf : {em : _} -> {default (choose (0, 10)) length : Gen em Nat} -> Gen em a -> Gen em (List a)
 listOf g = sequence $ List.replicate !length g
 
 export
-vectOf : {n : Nat} -> Gen a -> Gen (Vect n a)
+vectOf : {em : _} -> {n : Nat} -> Gen em a -> Gen em (Vect n a)
 vectOf g = sequence $ replicate n g

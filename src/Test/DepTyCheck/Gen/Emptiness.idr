@@ -101,6 +101,10 @@ nonEmptyIsStrongest {em = NonEmpty}           = NN
 nonEmptyIsStrongest {em = CanBeEmpty Dynamic} = ND
 nonEmptyIsStrongest {em = CanBeEmpty Static}  = AS
 
+export %hint
+nonEmptyReflexive : {em : _} -> em `NoWeaker` em
+nonEmptyReflexive = reflexive
+
 --- Relations for particular generator cases ---
 
 -- bind --
