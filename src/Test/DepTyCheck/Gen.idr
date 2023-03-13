@@ -74,6 +74,14 @@ public export %inline
 Gen1 : Type -> Type
 Gen1 = Gen NonEmpty
 
+||| Generator with least guaranteed on emptiness.
+|||
+||| This type should not be used as an input argument unless it is strictly required.
+||| You should prefer to be polymorphic on emptiness instead.
+public export %inline
+Gen0 : Type -> Type
+Gen0 = Gen $ CanBeEmpty Static
+
 ----------------------------
 --- Equivalence relation ---
 ----------------------------
@@ -185,7 +193,7 @@ choose : Random a => (0 _ : IfUnsolved ne NonEmpty) => (a, a) -> Gen ne a
 choose bounds = Raw $ MkRawGen $ getRandomR bounds
 
 export
-empty : Gen (CanBeEmpty Static) a
+empty : Gen0 a
 empty = Empty
 
 --------------------------
@@ -455,7 +463,7 @@ elements : {default Nothing description : Maybe String} ->
 elements = oneOf {description} . cast
 
 export %inline
-elements' : Foldable f => {default Nothing description : Maybe String} -> f a -> Gen (CanBeEmpty Static) a
+elements' : Foldable f => {default Nothing description : Maybe String} -> f a -> Gen0 a
 elements' xs = maybe Empty (elements {description}) $ strengthen $ fromList $ toList xs
 
 ------------------------------
@@ -515,11 +523,11 @@ GenAltsMonad = M where
 -----------------
 
 export
-mapMaybe : (a -> Maybe b) -> Gen em a -> Gen (CanBeEmpty Static) b
+mapMaybe : (a -> Maybe b) -> Gen em a -> Gen0 b
 mapMaybe f g = maybe empty pure . f =<< relax g
 
 export
-suchThat_withPrf : Gen em a -> (p : a -> Bool) -> Gen (CanBeEmpty Static) $ a `Subset` So . p
+suchThat_withPrf : Gen em a -> (p : a -> Bool) -> Gen0 $ a `Subset` So . p
 suchThat_withPrf g p = mapMaybe lp g where
   lp : a -> Maybe $ a `Subset` So . p
   lp x with (p x) proof prf
@@ -529,11 +537,11 @@ suchThat_withPrf g p = mapMaybe lp g where
 infixl 4 `suchThat`
 
 public export
-suchThat : Gen em a -> (a -> Bool) -> Gen (CanBeEmpty Static) a
+suchThat : Gen em a -> (a -> Bool) -> Gen0 a
 suchThat g p = fst <$> suchThat_withPrf g p
 
 export
-suchThat_dec : Gen em a -> ((x : a) -> Dec (prop x)) -> Gen (CanBeEmpty Static) $ Subset a prop
+suchThat_dec : Gen em a -> ((x : a) -> Dec (prop x)) -> Gen0 $ Subset a prop
 suchThat_dec g f = mapMaybe d g where
   d : a -> Maybe $ Subset a prop
   d x = case f x of
@@ -542,7 +550,7 @@ suchThat_dec g f = mapMaybe d g where
 
 ||| Filters the given generator so, that resulting values `x` are solutions of equation `y = f x` for given `f` and `y`.
 export
-suchThat_invertedEq : DecEq b => Gen em a -> (y : b) -> (f : a -> b) -> Gen (CanBeEmpty Static) $ Subset a $ \x => y = f x
+suchThat_invertedEq : DecEq b => Gen em a -> (y : b) -> (f : a -> b) -> Gen0 $ Subset a $ \x => y = f x
 suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
 
 -------------------------------
