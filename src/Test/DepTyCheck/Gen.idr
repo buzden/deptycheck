@@ -337,85 +337,81 @@ export
 namespace GenAlternatives
 
   export
-  record GenAlternatives' (0 mustBeNotEmpty : Bool) (em : Emptiness) a where
+  record GenAlternatives (0 mustBeNotEmpty : Bool) (em : Emptiness) a where
     constructor MkGenAlternatives
     unGenAlternatives : LazyLst mustBeNotEmpty (PosNat, Lazy (Gen em a))
 
-  public export %inline
-  GenAlternatives : Emptiness -> Type -> Type
-  GenAlternatives = GenAlternatives' True
-
   export %inline
-  Nil : GenAlternatives' False em a
+  Nil : GenAlternatives False em a
   Nil = MkGenAlternatives []
 
   export %inline
   (::) : (0 _ : True `IfUnsolved` e) =>
          (0 _ : NonEmpty `IfUnsolved` em) =>
-         Lazy (Gen em a) -> Lazy (GenAlternatives' e em a) -> GenAlternatives' ne em a
+         Lazy (Gen em a) -> Lazy (GenAlternatives e em a) -> GenAlternatives ne em a
   x :: xs = MkGenAlternatives $ (1, x) :: xs.unGenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export %inline
-  (++) : GenAlternatives' nel em a -> Lazy (GenAlternatives' ner em a) -> GenAlternatives' (nel || ner) em a
+  (++) : GenAlternatives nel em a -> Lazy (GenAlternatives ner em a) -> GenAlternatives (nel || ner) em a
   xs ++ ys = MkGenAlternatives $ xs.unGenAlternatives ++ ys.unGenAlternatives
 
   public export %inline
-  length : GenAlternatives' ne em a -> Nat
+  length : GenAlternatives ne em a -> Nat
   length $ MkGenAlternatives alts = length alts
 
   export %inline
-  processAlternatives : (Gen em a -> Gen em b) -> GenAlternatives' ne em a -> GenAlternatives' ne em b
+  processAlternatives : (Gen em a -> Gen em b) -> GenAlternatives ne em a -> GenAlternatives ne em b
   processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
 
   export %inline
-  processAlternativesMaybe : (Gen em a -> Maybe $ Lazy (Gen em b)) -> GenAlternatives' ne em a -> GenAlternatives' False em b
+  processAlternativesMaybe : (Gen em a -> Maybe $ Lazy (Gen em b)) -> GenAlternatives ne em a -> GenAlternatives False em b
   processAlternativesMaybe f $ MkGenAlternatives xs = MkGenAlternatives $ mapMaybe (\(t, x) => (t,) <$> f x) xs
 
   export %inline
-  processAlternatives'' : (Gen em a -> GenAlternatives' neb em b) -> GenAlternatives' nea em a -> GenAlternatives' (nea && neb) em b
+  processAlternatives'' : (Gen em a -> GenAlternatives neb em b) -> GenAlternatives nea em a -> GenAlternatives (nea && neb) em b
   processAlternatives'' f = mapGens where
 
-    mapWeight : forall a, nea. (PosNat -> PosNat) -> GenAlternatives' nea em a -> GenAlternatives' nea em a
+    mapWeight : forall a, nea. (PosNat -> PosNat) -> GenAlternatives nea em a -> GenAlternatives nea em a
     mapWeight f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapFst f
 
-    mapGens : GenAlternatives' nea em a -> GenAlternatives' (nea && neb) em b
+    mapGens : GenAlternatives nea em a -> GenAlternatives (nea && neb) em b
     mapGens $ MkGenAlternatives xs = MkGenAlternatives $ xs `bind` \(w, x) => unGenAlternatives $ mapWeight (w *) $ f x
 
   export %inline
-  processAlternatives' : (Gen em a -> GenAlternatives' ne em b) -> GenAlternatives' ne em a -> GenAlternatives' ne em b
+  processAlternatives' : (Gen em a -> GenAlternatives ne em b) -> GenAlternatives ne em a -> GenAlternatives ne em b
   processAlternatives' f xs = rewrite sym $ andSameNeutral ne in processAlternatives'' f xs
 
   export %inline
-  relax : GenAlternatives em a -> GenAlternatives' ne em a
+  relax : GenAlternatives True em a -> GenAlternatives ne em a
   relax $ MkGenAlternatives alts = MkGenAlternatives $ relaxT alts
 
   export %inline
-  strengthen : GenAlternatives' ne em a -> Maybe $ GenAlternatives em a
+  strengthen : GenAlternatives ne em a -> Maybe $ GenAlternatives True em a
   strengthen $ MkGenAlternatives xs = MkGenAlternatives <$> strengthen xs
 
   export
-  Functor (GenAlternatives' ne em) where
+  Functor (GenAlternatives ne em) where
     map = processAlternatives . map
 
   export
-  {em : _} -> Applicative (GenAlternatives' ne em) where
+  {em : _} -> Applicative (GenAlternatives ne em) where
     pure x = [ pure x ]
     xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
 
   export
-  {em : _} -> Alternative (GenAlternatives' False em) where
+  {em : _} -> Alternative (GenAlternatives False em) where
     empty = []
     MkGenAlternatives xs <|> MkGenAlternatives ys = MkGenAlternatives $ xs <|> ys
 
   -- implementation for `Monad` is below --
 
 export
-{em : _} -> Cast (LazyLst ne a) (GenAlternatives' ne em a) where
+{em : _} -> Cast (LazyLst ne a) (GenAlternatives ne em a) where
   cast = MkGenAlternatives . map (\x => (1, pure x))
 
 public export %inline
-altsFromList : {em : _} -> LazyLst ne a -> GenAlternatives' ne em a
+altsFromList : {em : _} -> LazyLst ne a -> GenAlternatives ne em a
 altsFromList = cast
 
 ----------------------------------
@@ -434,7 +430,7 @@ oneOf : {default Nothing description : Maybe String} ->
         alem `NoWeaker` em =>
         alem `NoWeaker` CanBeEmpty Dynamic =>
         (0 _ : IfUnsolved alem NonEmpty) =>
-        GenAlternatives alem a -> Gen em a
+        GenAlternatives True alem a -> Gen em a
 oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
@@ -471,7 +467,7 @@ elements' xs = maybe Empty (elements {description}) $ strengthen $ fromList $ to
 ------------------------------
 
 export
-alternativesOf : Gen em a -> GenAlternatives em a
+alternativesOf : Gen em a -> GenAlternatives True em a
 alternativesOf $ OneOf oo = MkGenAlternatives $ gens $ mapOneOf oo relax
 alternativesOf g          = [g]
 
@@ -481,7 +477,7 @@ alternativesOf g          = [g]
 ||| alternatives of depth `1` are those returned by the `alternativesOf` function,
 ||| alternatives of depth `n+1` are alternatives of all alternatives of depth `n` being flattened into a single alternatives list.
 export
-deepAlternativesOf : (depth : Nat) -> Gen em a -> GenAlternatives em a
+deepAlternativesOf : (depth : Nat) -> Gen em a -> GenAlternatives True em a
 deepAlternativesOf 0     gen = [ gen ]
 deepAlternativesOf 1     gen = alternativesOf gen
 deepAlternativesOf (S k) gen = processAlternatives' alternativesOf $ deepAlternativesOf k gen
@@ -496,15 +492,15 @@ forgetStructure {em=NonEmpty}     g = Raw $ MkRawGen $ unGen1 g
 forgetStructure {em=CanBeEmpty _} g = MkRawGen (unGen' g) `Bind` maybe Empty Pure where
 
 public export
-processAlternatives : (Gen em a -> Gen em b) -> Gen em a -> GenAlternatives em b
+processAlternatives : (Gen em a -> Gen em b) -> Gen em a -> GenAlternatives True em b
 processAlternatives f = processAlternatives f . alternativesOf
 
 public export
-mapAlternativesOf : (a -> b) -> Gen em a -> GenAlternatives em b
+mapAlternativesOf : (a -> b) -> Gen em a -> GenAlternatives True em b
 mapAlternativesOf = processAlternatives . map
 
 public export %inline
-mapAlternativesWith : Gen em a -> (a -> b) -> GenAlternatives em b
+mapAlternativesWith : Gen em a -> (a -> b) -> GenAlternatives True em b
 mapAlternativesWith = flip mapAlternativesOf
 
 -- Priority is chosen to be able to use these operators without parenthesis
@@ -513,9 +509,9 @@ infix 8 `mapAlternativesOf`
       , `mapAlternativesWith`
 
 export %hint
-GenAltsMonad : {em : _} -> em `NoWeaker` CanBeEmpty Dynamic => Monad (GenAlternatives' True em)
+GenAltsMonad : {em : _} -> em `NoWeaker` CanBeEmpty Dynamic => Monad (GenAlternatives True em)
 GenAltsMonad = M where
-  [M] Monad (GenAlternatives' True em) where
+  [M] Monad (GenAlternatives True em) where
     xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
 
 -----------------
