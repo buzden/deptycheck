@@ -17,6 +17,8 @@ import Data.Singleton
 import Data.Stream
 import Data.Vect
 
+import Decidable.Equality
+
 import public Language.Implicits.IfUnsolved
 
 import public Test.DepTyCheck.Gen.Emptiness
@@ -180,6 +182,10 @@ chooseAny = Raw $ MkRawGen getRandom
 export
 choose : Random a => (0 _ : IfUnsolved ne NonEmpty) => (a, a) -> Gen ne a
 choose bounds = Raw $ MkRawGen $ getRandomR bounds
+
+export
+empty : Gen (CanBeEmpty Static) a
+empty = Empty
 
 --------------------------
 --- Running generators ---
@@ -407,6 +413,8 @@ altsFromList = cast
 --- Creation of new generators ---
 ----------------------------------
 
+-- TODO to think whether emptiness of the given list must depend on the resulting `em`. Now it behaves as if it is non-empty.
+
 ||| Choose one of the given generators uniformly.
 |||
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
@@ -444,6 +452,10 @@ elements : {default Nothing description : Maybe String} ->
            (0 _ : IfUnsolved em NonEmpty) =>
            LazyLst1 a -> Gen em a
 elements = oneOf {description} . cast
+
+export %inline
+elements' : Foldable f => {default Nothing description : Maybe String} -> f a -> Gen (CanBeEmpty Static) a
+elements' xs = maybe Empty (elements {description}) $ strengthen $ fromList $ toList xs
 
 ------------------------------
 --- Analysis of generators ---
@@ -496,6 +508,41 @@ GenAltsMonad : {em : _} -> em `NoWeaker` CanBeEmpty Dynamic => Monad (GenAlterna
 GenAltsMonad = M where
   [M] Monad (GenAlternatives' True em) where
     xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
+
+-----------------
+--- Filtering ---
+-----------------
+
+export
+mapMaybe : (a -> Maybe b) -> Gen em a -> Gen (CanBeEmpty Static) b
+mapMaybe f g = maybe empty pure . f =<< relax g
+
+export
+suchThat_withPrf : Gen em a -> (p : a -> Bool) -> Gen (CanBeEmpty Static) $ a `Subset` So . p
+suchThat_withPrf g p = mapMaybe lp g where
+  lp : a -> Maybe $ a `Subset` So . p
+  lp x with (p x) proof prf
+    lp x | True  = Just $ Element x $ eqToSo prf
+    lp x | False = Nothing
+
+infixl 4 `suchThat`
+
+public export
+suchThat : Gen em a -> (a -> Bool) -> Gen (CanBeEmpty Static) a
+suchThat g p = fst <$> suchThat_withPrf g p
+
+export
+suchThat_dec : Gen em a -> ((x : a) -> Dec (prop x)) -> Gen (CanBeEmpty Static) $ Subset a prop
+suchThat_dec g f = mapMaybe d g where
+  d : a -> Maybe $ Subset a prop
+  d x = case f x of
+    Yes p => Just $ Element x p
+    No  _ => Nothing
+
+||| Filters the given generator so, that resulting values `x` are solutions of equation `y = f x` for given `f` and `y`.
+export
+suchThat_invertedEq : DecEq b => Gen em a -> (y : b) -> (f : a -> b) -> Gen (CanBeEmpty Static) $ Subset a $ \x => y = f x
+suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
 
 -------------------------------
 --- Variation in generation ---
