@@ -271,13 +271,13 @@ ap g (Pure x) = relax $ g <&> \f => f x
 ap (Raw sfl) (Raw sfr) = Raw $ sfl <*> sfr
 
 ap {em=NonEmpty} @{NN} @{NN} (OneOf @{ao} oo) g with (ao)
-  ap {em=NonEmpty} @{NN} @{NN} (OneOf @{NN} oo) g | NN = OneOf @{NN} $ mapOneOf oo $ \x => assert_total ap x g
+  _ | NN = OneOf @{NN} $ mapOneOf oo $ \x => assert_total ap x g
 ap {em=CanBeEmpty Dynamic} (OneOf oo) g = OneOf @{DD} $ mapOneOf oo $ \x => assert_total ap x g
 ap {em=CanBeEmpty Static}  @{_} @{rr} (OneOf @{_} @{au} oo) g = maybe Empty (OneOf @{AS} @{DD}) $
   trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} x g
 
 ap {em=NonEmpty} @{NN} @{NN} g (OneOf @{ao} oo) with (ao)
-  ap {em=NonEmpty} @{NN} @{NN} g (OneOf @{NN} oo) | NN = OneOf @{NN} $ mapOneOf oo $ assert_total ap g
+  _ | NN = OneOf @{NN} $ mapOneOf oo $ assert_total ap g
 ap {em=CanBeEmpty Dynamic} g (OneOf oo) = OneOf @{DD} $ mapOneOf oo $ assert_total ap g
 ap {em=CanBeEmpty Static} @{ll} g (OneOf @{_} @{au} oo) = maybe Empty (OneOf @{AS} @{DD}) $
   trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} g x
