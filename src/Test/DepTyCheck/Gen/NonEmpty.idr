@@ -387,14 +387,17 @@ altsFromList = cast
 --- Creation of new generators ---
 ----------------------------------
 
-{-
-
 ||| Choose one of the given generators uniformly.
 |||
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
-oneOf : {default Nothing description : Maybe String} -> GenAlternatives a -> Gen a
+oneOf : {default Nothing description : Maybe String} ->
+        {alem : _} -> {em : _} ->
+        alem `NoWeaker` em =>
+        alem `NoWeaker` CanBeEmpty Dynamic =>
+        (0 _ : IfUnsolved alem NonEmpty) =>
+        GenAlternatives alem a -> Gen em a
 oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
@@ -404,15 +407,25 @@ oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : {default Nothing description : Maybe String} -> LazyLst1 (PosNat, Lazy (Gen a)) -> Gen a
+frequency : {default Nothing description : Maybe String} ->
+            {alem : _} -> {em : _} ->
+            alem `NoWeaker` em =>
+            alem `NoWeaker` CanBeEmpty Dynamic =>
+            (0 _ : IfUnsolved alem NonEmpty) =>
+            LazyLst1 (PosNat, Lazy (Gen alem a)) -> Gen em a
 frequency = oneOf {description} . MkGenAlternatives
 
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
-elements : {default Nothing description : Maybe String} -> LazyLst1 a -> Gen a
+elements : {default Nothing description : Maybe String} ->
+           {em : _} ->
+           (0 _ : IfUnsolved em NonEmpty) =>
+           LazyLst1 a -> Gen em a
 elements = oneOf {description} . cast
+
+{-
 
 ------------------------------
 --- Analysis of generators ---
