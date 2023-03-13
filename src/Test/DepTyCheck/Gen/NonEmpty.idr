@@ -311,8 +311,6 @@ export
     _ | BndNE = Bind @{reflexive}          x $ \x => assert_total $ relax (f x) >>= nf
     _ | BndEE = Bind @{BndEE {idp=Static}} x $ \x => assert_total $ relax (f x) >>= relax . nf
 
-{-
-
 -----------------------------------------
 --- Detour: special list of lazy gens ---
 -----------------------------------------
@@ -320,74 +318,76 @@ export
 namespace GenAlternatives
 
   export
-  record GenAlternatives' (0 mustBeNotEmpty : Bool) a where
+  record GenAlternatives' (0 mustBeNotEmpty : Bool) (em : Emptiness) a where
     constructor MkGenAlternatives
-    unGenAlternatives : LazyLst mustBeNotEmpty (PosNat, Lazy (Gen a))
+    unGenAlternatives : LazyLst mustBeNotEmpty (PosNat, Lazy (Gen em a))
 
   public export %inline
-  GenAlternatives : Type -> Type
+  GenAlternatives : Emptiness -> Type -> Type
   GenAlternatives = GenAlternatives' True
 
   export %inline
-  Nil : GenAlternatives' False a
+  Nil : GenAlternatives' False em a
   Nil = MkGenAlternatives []
 
   export %inline
-  (::) : (0 _ : True `IfUnsolved` e) => Lazy (Gen a) -> Lazy (GenAlternatives' e a) -> GenAlternatives' ne a
+  (::) : (0 _ : True `IfUnsolved` e) =>
+         (0 _ : NonEmpty `IfUnsolved` em) =>
+         Lazy (Gen em a) -> Lazy (GenAlternatives' e em a) -> GenAlternatives' ne em a
   x :: xs = MkGenAlternatives $ (1, x) :: xs.unGenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export %inline
-  (++) : GenAlternatives' nel a -> Lazy (GenAlternatives' ner a) -> GenAlternatives' (nel || ner) a
+  (++) : GenAlternatives' nel em a -> Lazy (GenAlternatives' ner em a) -> GenAlternatives' (nel || ner) em a
   xs ++ ys = MkGenAlternatives $ xs.unGenAlternatives ++ ys.unGenAlternatives
 
   public export %inline
-  length : GenAlternatives' ne a -> Nat
+  length : GenAlternatives' ne em a -> Nat
   length $ MkGenAlternatives alts = length alts
 
   export %inline
-  processAlternatives : (Gen a -> Gen b) -> GenAlternatives' ne a -> GenAlternatives' ne b
+  processAlternatives : (Gen em a -> Gen em b) -> GenAlternatives' ne em a -> GenAlternatives' ne em b
   processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
 
   export %inline
-  processAlternativesMaybe : (Gen a -> Maybe $ Lazy (Gen b)) -> GenAlternatives' ne a -> GenAlternatives' False b
-  processAlternativesMaybe f $ MkGenAlternatives xs = MkGenAlternatives $ mapMaybe filt xs where
-    %inline filt : (tag, Lazy (Gen a)) -> Maybe (tag, Lazy (Gen b))
-    filt (t, x) = (t,) <$> f x
+  processAlternativesMaybe : (Gen em a -> Maybe $ Lazy (Gen em b)) -> GenAlternatives' ne em a -> GenAlternatives' False em b
+  processAlternativesMaybe f $ MkGenAlternatives xs = MkGenAlternatives $ mapMaybe (\(t, x) => (t,) <$> f x) xs
 
   export %inline
-  processAlternatives'' : (Gen a -> GenAlternatives' neb b) -> GenAlternatives' nea a -> GenAlternatives' (nea && neb) b
+  processAlternatives'' : (Gen em a -> GenAlternatives' neb em b) -> GenAlternatives' nea em a -> GenAlternatives' (nea && neb) em b
   processAlternatives'' f = mapGens where
 
-    mapWeight : forall a, nea. (PosNat -> PosNat) -> GenAlternatives' nea a -> GenAlternatives' nea a
+    mapWeight : forall a, nea. (PosNat -> PosNat) -> GenAlternatives' nea em a -> GenAlternatives' nea em a
     mapWeight f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapFst f
 
-    mapGens : GenAlternatives' nea a -> GenAlternatives' (nea && neb) b
+    mapGens : GenAlternatives' nea em a -> GenAlternatives' (nea && neb) em b
     mapGens $ MkGenAlternatives xs = MkGenAlternatives $ xs `bind` \(w, x) => unGenAlternatives $ mapWeight (w *) $ f x
 
   export %inline
-  processAlternatives' : (Gen a -> GenAlternatives' ne b) -> GenAlternatives' ne a -> GenAlternatives' ne b
+  processAlternatives' : (Gen em a -> GenAlternatives' ne em b) -> GenAlternatives' ne em a -> GenAlternatives' ne em b
   processAlternatives' f xs = rewrite sym $ andSameNeutral ne in processAlternatives'' f xs
 
   export %inline
-  relax : GenAlternatives a -> GenAlternatives' ne a
+  relax : GenAlternatives em a -> GenAlternatives' ne em a
   relax $ MkGenAlternatives alts = MkGenAlternatives $ relaxT alts
 
   export %inline
-  strengthen : GenAlternatives' ne a -> Maybe $ GenAlternatives a
+  strengthen : GenAlternatives' ne em a -> Maybe $ GenAlternatives em a
   strengthen $ MkGenAlternatives xs = MkGenAlternatives <$> strengthen xs
 
 export
-Cast (LazyLst ne a) (GenAlternatives' ne a) where
+{em : _} -> Cast (LazyLst ne a) (GenAlternatives' ne em a) where
   cast = MkGenAlternatives . map (\x => (1, pure x))
 
 public export %inline
-altsFromList : LazyLst ne a -> GenAlternatives' ne a
+altsFromList : {em : _} -> LazyLst ne a -> GenAlternatives' ne em a
 altsFromList = cast
 
 ----------------------------------
 --- Creation of new generators ---
 ----------------------------------
+
+{-
 
 ||| Choose one of the given generators uniformly.
 |||
