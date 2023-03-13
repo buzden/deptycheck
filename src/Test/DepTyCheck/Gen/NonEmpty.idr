@@ -274,16 +274,28 @@ ap {em=NonEmpty} @{NN} @{NN} (OneOf @{ao} oo) g with (ao)
   ap {em=NonEmpty} @{NN} @{NN} (OneOf @{NN} oo) g | NN = OneOf @{NN} $ mapOneOf oo $ \x => assert_total ap x g
 ap {em=CanBeEmpty Dynamic} (OneOf oo) g = OneOf @{DD} $ mapOneOf oo $ \x => assert_total ap x g
 ap {em=CanBeEmpty Static}  @{_} @{rr} (OneOf @{_} @{au} oo) g = maybe Empty (OneOf @{AS} @{DD}) $
-  trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} @{AS} (relax @{transitive au AS} x) (relax @{rr} g)
+  trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} x g
 
 ap {em=NonEmpty} @{NN} @{NN} g (OneOf @{ao} oo) with (ao)
   ap {em=NonEmpty} @{NN} @{NN} g (OneOf @{NN} oo) | NN = OneOf @{NN} $ mapOneOf oo $ assert_total ap g
 ap {em=CanBeEmpty Dynamic} g (OneOf oo) = OneOf @{DD} $ mapOneOf oo $ assert_total ap g
 ap {em=CanBeEmpty Static} @{ll} g (OneOf @{_} @{au} oo) = maybe Empty (OneOf @{AS} @{DD}) $
-  trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} @{AS} (relax @{ll} g) (relax @{transitive au AS} x)
+  trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} g x
 
-ap (Bind @{bo} x f) g = ?foo_bnd_l -- Bind @{bindToOuterRelax bo lbo} x $ \y => ap @{?foo_nw} @{?foo_nw2} (f y) $ relax @{?foo_f} g
-ap g (Bind @{bo} x f) = ?foo_bnd_r -- Bind x $ ?foo_bnd_r -- assert_total (g `ap`) . f
+ap @{ll}      (Bind @{bo} x f) (Raw y) = Bind @{bindToOuterRelax bo ll} x $ \c => assert_total $ ap @{reflexive} @{reflexive} (f c) (Raw y)
+ap @{_} @{rr} (Raw y) (Bind @{bo} x f) = Bind @{bindToOuterRelax bo rr} x $ \c => assert_total $ ap @{reflexive} @{reflexive} (Raw y) (f c)
+
+ap @{ll} @{rr} (Bind @{lbo} x f) (Bind @{rbo} y g) with (lbo) | (rbo)
+  _ | BndNE | BndNE = Bind @{BndNE} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
+  _ | BndNE | BndEE with (rr)
+    _ | DD = Bind @{BndEE {idp=Static}} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
+    _ | AS = Bind @{BndEE {idp=Static}} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
+  _ | BndEE | BndNE with (ll)
+    _ | DD = Bind @{BndEE {idp=Static}} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
+    _ | AS = Bind @{BndEE {idp=Static}} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
+  _ | BndEE | BndEE with (ll)
+    _ | DD = Bind @{BndEE {idp=Static}} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
+    _ | AS = Bind @{BndEE {idp=Static}} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
 
 export
 {em : _} -> Applicative (Gen em) where
