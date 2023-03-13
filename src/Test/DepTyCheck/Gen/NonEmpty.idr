@@ -305,7 +305,10 @@ export
   Empty    >>= _  = Empty
   Pure x   >>= nf = nf x
   Raw g    >>= nf = Bind @{reflexive} g nf
-  OneOf oo >>= nf = ?foo_bind_oneof -- OneOf $ mapOneOf oo $ assert_total (>>= nf)
+  (OneOf @{ao} oo >>= nf) {em=NonEmpty} with (ao) _ | NN = OneOf $ mapOneOf oo $ assert_total (>>= nf)
+  (OneOf @{ao} oo >>= nf) {em=CanBeEmpty Dynamic} = OneOf $ mapOneOf oo $ assert_total (>>= nf) . relax @{ao}
+  (OneOf oo >>= nf) {em=CanBeEmpty Static} = maybe Empty (OneOf @{AS} @{DD}) $
+    trMOneOf oo $ \x => strengthen $ assert_total $ relax x >>= nf
   Bind @{bo} x f >>= nf with (bo)
     _ | BndNE = Bind @{reflexive}          x $ \x => assert_total $ relax (f x) >>= nf
     _ | BndEE = Bind @{BndEE {idp=Static}} x $ \x => assert_total $ relax (f x) >>= relax . nf
