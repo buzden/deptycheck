@@ -112,7 +112,7 @@ data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, 
 --- Technical stuff for mapping alternatives ---
 ------------------------------------------------
 
-mapTaggedLazy : (a -> b) -> LazyLst1 (tag, Lazy a) -> LazyLst1 (tag, Lazy b)
+mapTaggedLazy : (a -> b) -> LazyLst ne (tag, Lazy a) -> LazyLst ne (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
 mapOneOf : OneOfAlternatives iem a -> (Gen iem a -> Gen em b) -> OneOfAlternatives em b
@@ -348,11 +348,13 @@ namespace GenAlternatives
   export %inline
   (::) : {em : _} ->
          lem `NoWeaker` em =>
+         rem `NoWeaker` em =>
          (0 _ : IfUnsolved e True) =>
          (0 _ : IfUnsolved em NonEmpty) =>
          (0 _ : IfUnsolved lem em) =>
-         Lazy (Gen lem a) -> Lazy (GenAlternatives e em a) -> GenAlternatives ne em a
-  x :: xs = MkGenAlternatives $ (1, wrapLazy relax x) :: xs.unGenAlternatives
+         (0 _ : IfUnsolved rem em) =>
+         Lazy (Gen lem a) -> Lazy (GenAlternatives e rem a) -> GenAlternatives ne em a
+  x :: xs = MkGenAlternatives $ (1, wrapLazy relax x) :: mapTaggedLazy relax xs.unGenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export %inline
