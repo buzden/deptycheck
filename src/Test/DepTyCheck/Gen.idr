@@ -358,8 +358,15 @@ namespace GenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export %inline
-  (++) : GenAlternatives nel em a -> Lazy (GenAlternatives ner em a) -> GenAlternatives (nel || ner) em a
-  xs ++ ys = MkGenAlternatives $ xs.unGenAlternatives ++ ys.unGenAlternatives
+  (++) : {em : _} ->
+         lem `NoWeaker` em =>
+         rem `NoWeaker` em =>
+         (0 _ : IfUnsolved lem em) =>
+         (0 _ : IfUnsolved rem em) =>
+         (0 _ : IfUnsolved nel False) =>
+         (0 _ : IfUnsolved ner False) =>
+         GenAlternatives nel lem a -> Lazy (GenAlternatives ner rem a) -> GenAlternatives (nel || ner) em a
+  xs ++ ys = MkGenAlternatives $ mapTaggedLazy relax xs.unGenAlternatives ++ mapTaggedLazy relax ys.unGenAlternatives
 
   public export %inline
   length : GenAlternatives ne em a -> Nat
