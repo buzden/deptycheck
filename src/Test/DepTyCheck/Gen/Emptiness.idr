@@ -15,6 +15,20 @@ data Depth = Dynamic | Static
 public export
 data Emptiness = NonEmpty | CanBeEmpty Depth
 
+public export
+Eq Depth where
+  Dynamic == Dynamic = True
+  Static  == Static  = True
+  Dynamic == Static  = False
+  Static  == Dynamic = False
+
+public export
+Eq Emptiness where
+  NonEmpty == NonEmpty = True
+  CanBeEmpty d == CanBeEmpty d' = d == d'
+  NonEmpty == CanBeEmpty _ = False
+  CanBeEmpty _ == NonEmpty = False
+
 --- Order by strength ---
 
 public export
