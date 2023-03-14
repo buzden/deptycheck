@@ -423,9 +423,9 @@ namespace OneOf
   public export
   data AlternativesArg : (altsNe : Bool) -> (innerEn, outerEm : Emptiness) -> Type where
     [search outerEm]
-    NN :                                       AlternativesArg True  NonEmpty NonEmpty
-    Dx : alem `NoWeaker` CanBeEmpty Dynamic => AlternativesArg True  alem     (CanBeEmpty Dynamic)
-    Sx :                                       AlternativesArg False alem     (CanBeEmpty Static)
+    NN :                                       AlternativesArg True NonEmpty NonEmpty
+    Dx : alem `NoWeaker` CanBeEmpty Dynamic => AlternativesArg True alem     (CanBeEmpty Dynamic)
+    Sx :                                       AlternativesArg ne   alem     (CanBeEmpty Static)
 
 ||| Choose one of the given generators uniformly.
 |||
