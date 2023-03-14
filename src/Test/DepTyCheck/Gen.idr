@@ -421,6 +421,14 @@ altsFromList = cast
 --- Creation of new generators ---
 ----------------------------------
 
+namespace OneOf
+
+  public export
+  data AltsNonEmpty : Bool -> Emptiness -> Type where
+    NT : AltsNonEmpty True   NonEmpty
+    DT : AltsNonEmpty True   (CanBeEmpty Dynamic)
+    Sx : AltsNonEmpty altsNe (CanBeEmpty Static)
+
 ||| Choose one of the given generators uniformly.
 |||
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
@@ -429,11 +437,13 @@ export
 oneOf : {default Nothing description : Maybe String} ->
         {alem : _} -> {em : _} ->
         alem `NoWeaker` em =>
+        AltsNonEmpty altsNe em =>
         (0 _ : IfUnsolved alem em) =>
-        GenAlternatives (em /= CanBeEmpty Static) alem a -> Gen em a
-oneOf {em=NonEmpty} @{NN}     $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
-oneOf {em=CanBeEmpty Dynamic} $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
-oneOf {em=CanBeEmpty Static}  $ MkGenAlternatives xs = do
+        (0 _ : IfUnsolved altsNe $ em /= CanBeEmpty Static) =>
+        GenAlternatives altsNe alem a -> Gen em a
+oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
+oneOf {em=CanBeEmpty Dynamic} @{_} @{DT} x = case x of MkGenAlternatives xs => OneOf $ MkOneOf description _ xs
+oneOf {em=CanBeEmpty Static}             x = case x of MkGenAlternatives xs => do
   let u : Maybe $ LazyLst1 (_, Lazy _) :=
             strengthen $ flip mapMaybe xs $ \wg => (fst wg,) . delay <$> strengthen {oem=CanBeEmpty Dynamic} (snd wg)
   maybe Empty (\gs' => OneOf {alem=CanBeEmpty Dynamic} $ MkOneOf description _ gs') u
@@ -448,8 +458,10 @@ export
 frequency : {default Nothing description : Maybe String} ->
             {alem : _} -> {em : _} ->
             alem `NoWeaker` em =>
+            AltsNonEmpty altsNe em =>
             (0 _ : IfUnsolved alem em) =>
-            LazyLst (em /= CanBeEmpty Static) (PosNat, Lazy (Gen alem a)) -> Gen em a
+            (0 _ : IfUnsolved altsNe $ em /= CanBeEmpty Static) =>
+            LazyLst altsNe (PosNat, Lazy (Gen alem a)) -> Gen em a
 frequency = oneOf {description} . MkGenAlternatives
 
 ||| Choose one of the given values uniformly.
@@ -458,8 +470,10 @@ frequency = oneOf {description} . MkGenAlternatives
 export
 elements : {default Nothing description : Maybe String} ->
            {em : _} ->
+           AltsNonEmpty altsNe em =>
            (0 _ : IfUnsolved em NonEmpty) =>
-           LazyLst (em /= CanBeEmpty Static) a -> Gen em a
+           (0 _ : IfUnsolved altsNe $ em /= CanBeEmpty Static) =>
+           LazyLst altsNe a -> Gen em a
 elements = oneOf {alem=NonEmpty} {description} . altsFromList
 
 export %inline
