@@ -78,7 +78,7 @@ genAnyQ f (x::xs) = oneOf
   :: There `mapAlternativesOf` genAnyQ f xs
 
 genName : Gen0 Name
-genName = [| elements (cast <$> ['x', 'y', 'z']) ++ elements (show <$> [1 .. 3]) |]
+genName = [| elements (cast <$> ['x', 'y', 'z']) ++ elements' (show <$> [1 .. 3]) |]
 
 genNames : Gen0 (List Name)
 genNames = listOf genName
