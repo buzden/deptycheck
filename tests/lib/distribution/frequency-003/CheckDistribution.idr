@@ -4,7 +4,7 @@ import DistrCheckCommon
 
 %default total
 
-bools : Gen Bool
+bools : Gen0 Bool
 bools = frequency
           [ (100000007, pure True)
           , (100000217, pure False)

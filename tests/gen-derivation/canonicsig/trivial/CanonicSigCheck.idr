@@ -9,7 +9,7 @@ import public Infra
 data Y = Y0 | Y1
 
 cases : List TestCaseDesc
-cases = [ ("trivial type; no givens",) $ chk (getInfo "Y") [] $ Gen Y
+cases = [ ("trivial type; no givens",) $ chk (getInfo "Y") [] $ Gen0 Y
         ]
 
 %runElab for_ cases checkAndLog

@@ -3,10 +3,10 @@
 Error: While processing right hand side of checkedGen. Error during reflection: Target type of a derived `Gen` cannot be a `Gen`
 
 DerivedGen:13:14--13:23
- 09 | Show (x ** Gen x) where
+ 09 | Show (x ** Gen0 x) where
  10 |   show _ = "a generator"
  11 | 
- 12 | checkedGen : Fuel -> Gen (a ** Gen a)
+ 12 | checkedGen : Fuel -> Gen0 (a ** Gen0 a)
  13 | checkedGen = deriveGen
                    ^^^^^^^^^
 

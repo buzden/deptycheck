@@ -12,7 +12,7 @@ Show (X n m k) where
 
 %language ElabReflection
 
-checkedGen : Fuel -> (x1 : Nat) -> (x2 : Nat) -> (x3 : Nat) -> Gen $ X x1 x2 x3
+checkedGen : Fuel -> (x1 : Nat) -> (x2 : Nat) -> (x3 : Nat) -> Gen0 $ X x1 x2 x3
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

@@ -11,7 +11,7 @@ data X a b = MkX (Maybe (a, b, a))
 Show a => Show b => Show (X a b) where
   show (MkX m) = "MkX \{show m}"
 
-checkedGen : Fuel -> (Fuel -> Gen a) => (Fuel -> Gen b) => Gen (X a b)
+checkedGen : Fuel -> (Fuel -> Gen0 a) => (Fuel -> Gen0 b) => Gen0 (X a b)
 checkedGen = deriveGen
 
 main : IO ()

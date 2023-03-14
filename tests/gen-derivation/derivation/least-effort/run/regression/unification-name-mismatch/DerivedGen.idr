@@ -33,7 +33,7 @@ Show (Y xs ys) where
 checkedGen : Fuel ->
              (xs : X) ->
              (ys : X) ->
-             Gen $ Y xs ys
+             Gen0 $ Y xs ys
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

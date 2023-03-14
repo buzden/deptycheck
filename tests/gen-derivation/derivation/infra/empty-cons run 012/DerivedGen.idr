@@ -17,7 +17,7 @@ data X : Nat -> Nat -> Nat -> Nat -> Type where
   show XE = "XE \{show n} \{show m} \{show p} \{show k}"
   show XS = "XS \{show n} \{show m} \{show p} \{show k}"
 
-checkedGen : Fuel -> (n, m, p, k : Nat) -> Gen (X n m p k)
+checkedGen : Fuel -> (n, m, p, k : Nat) -> Gen0 (X n m p k)
 checkedGen = deriveGen @{EmptyCons}
 
 main : IO Unit

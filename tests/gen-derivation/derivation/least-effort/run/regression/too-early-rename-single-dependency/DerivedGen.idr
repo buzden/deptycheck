@@ -26,7 +26,7 @@ Show (W z1 z2) where
 checkedGen : Fuel ->
              (a : Z) ->
              (b : Z) ->
-             Gen $ W a b
+             Gen0 $ W a b
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

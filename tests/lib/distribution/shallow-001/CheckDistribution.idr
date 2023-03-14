@@ -6,10 +6,10 @@ import DistrCheckCommon
 
 %default total
 
-bools : Gen Bool
+bools : Gen0 Bool
 bools = elements [True, False]
 
-eb : Gen $ Either Bool Bool
+eb : Gen0 $ Either Bool Bool
 eb = oneOf
        [ Left  <$> bools
        , Right <$> bools

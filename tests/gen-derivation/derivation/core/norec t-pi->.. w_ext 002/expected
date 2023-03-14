@@ -7,6 +7,6 @@ DerivedGen:9:52--9:57
  6 | 
  7 | %language ElabReflection
  8 | 
- 9 | checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen (x = y)
+ 9 | checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen0 (x = y)
                                                         ^^^^^
 

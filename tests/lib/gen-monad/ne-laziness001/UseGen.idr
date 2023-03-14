@@ -2,7 +2,7 @@ module UseGen
 
 import Debug.Trace
 
-import Test.DepTyCheck.Gen.NonEmpty
+import Test.DepTyCheck.Gen
 
 import System.Random.Pure.StdGen
 

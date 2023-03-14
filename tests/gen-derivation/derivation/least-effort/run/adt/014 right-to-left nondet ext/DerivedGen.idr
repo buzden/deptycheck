@@ -18,7 +18,7 @@ data Y : Type where
 Show Y where
   show $ MkY xnm xnk = "MkY (\{show xnm}) (\{show xnk})"
 
-checkedGen : Fuel -> (Fuel -> Gen String) => (Fuel -> Gen Nat) => Gen Y
+checkedGen : Fuel -> (Fuel -> Gen0 String) => (Fuel -> Gen0 Nat) => Gen0 Y
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

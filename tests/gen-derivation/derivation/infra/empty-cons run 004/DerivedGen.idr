@@ -13,7 +13,7 @@ data X : Nat -> Type where
 Show (X n) where
   show MkX = "MkX"
 
-checkedGen : Fuel -> Gen (n ** X n)
+checkedGen : Fuel -> Gen0 (n ** X n)
 checkedGen = deriveGen @{EmptyCons}
 
 main : IO Unit

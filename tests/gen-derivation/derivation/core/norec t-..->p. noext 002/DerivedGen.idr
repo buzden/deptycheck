@@ -15,7 +15,7 @@ Show (X b1 b2) where
   show (X0 b1 b2) = "X0 \{show b1} \{show b2}"
   show X1         = "X1"
 
-checkedGen : Fuel -> Gen (b1 ** b2 ** X b1 b2)
+checkedGen : Fuel -> Gen0 (b1 ** b2 ** X b1 b2)
 checkedGen = deriveGen
 
 main : IO ()

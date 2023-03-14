@@ -11,7 +11,7 @@ data X = X0 | X1 (Maybe Bool) | X2 Bool (Bool, Bool)
 %runElab derive "X" [Generic, Meta, Show]
 
 export
-checkedGen : Fuel -> Gen X
+checkedGen : Fuel -> Gen0 X
 checkedGen = deriveGen
 
 main : IO ()

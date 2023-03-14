@@ -9,4 +9,4 @@ import Data.Fin
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen (n ** Fin n)
+%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen0 (n ** Fin n)

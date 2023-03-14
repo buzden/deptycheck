@@ -4,7 +4,7 @@ import DistrCheckCommon
 
 %default total
 
-bools : Gen Bool
+bools : Gen0 Bool
 bools = elements [True, False]
 
 main : IO ()

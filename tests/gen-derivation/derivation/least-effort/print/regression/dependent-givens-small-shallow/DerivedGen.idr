@@ -12,4 +12,4 @@ data X : (n : Nat) -> Fin n -> Type where
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (n : Nat) -> (f : Fin n) -> Gen $ X n f
+%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (n : Nat) -> (f : Fin n) -> Gen0 $ X n f

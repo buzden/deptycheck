@@ -11,19 +11,19 @@ data Y : Type -> Type -> Type where
 
 --- Unrelated stuff in the resulting dpair ---
 
-genY_with_unrelated : Fuel -> (a : Type) -> Gen (b : Type ** n : Nat ** Y a b)
+genY_with_unrelated : Fuel -> (a : Type) -> Gen0 (b : Type ** n : Nat ** Y a b)
 genY_with_unrelated = deriveGen
 
-genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen (b : Type ** b : Type ** Y a b)
+genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen0 (b : Type ** b : Type ** Y a b)
 genY_with_repeating_name_equityped = deriveGen
 
-genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen (b : Type ** b : Nat ** Y a b)
+genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen0 (b : Type ** b : Nat ** Y a b)
 genY_with_repeating_name_difflytyped = deriveGen
 
-genY_with_repeating_name_difflytyped' : Fuel -> (a : Type) -> Gen (b : Nat ** b : Type ** Y a b)
+genY_with_repeating_name_difflytyped' : Fuel -> (a : Type) -> Gen0 (b : Nat ** b : Type ** Y a b)
 genY_with_repeating_name_difflytyped' = deriveGen
 
 --- Not all arguments are used ---
 
-genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen $ Y a b
+genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen0 $ Y a b
 genY_unused_argument = deriveGen

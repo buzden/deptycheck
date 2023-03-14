@@ -9,7 +9,7 @@ import DistrCheckCommon
 
 %default total
 
-genFin : (n : Nat) -> Gen $ Fin n
+genFin : (n : Nat) -> Gen0 $ Fin n
 genFin Z     = empty
 genFin (S n) = chooseAny
 

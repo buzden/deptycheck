@@ -9,4 +9,4 @@ import Data.Vect
 
 %language ElabReflection
 
-%runElab printDerived @{CallSelf} $ Fuel -> (n : Nat) -> (a : Type) -> Gen (Vect n a)
+%runElab printDerived @{CallSelf} $ Fuel -> (n : Nat) -> (a : Type) -> Gen0 (Vect n a)

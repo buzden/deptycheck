@@ -9,7 +9,7 @@ import Data.Vect
 
 %language ElabReflection
 
-checkedGen : Fuel -> (n : Nat) -> (a : Type) -> Gen (Vect n a)
+checkedGen : Fuel -> (n : Nat) -> (a : Type) -> Gen0 (Vect n a)
 checkedGen = deriveGen @{EmptyCons}
 
 main : IO Unit

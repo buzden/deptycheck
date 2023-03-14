@@ -6,10 +6,10 @@ import DistrCheckCommon
 
 %default total
 
-nats : Gen Nat
+nats : Gen0 Nat
 nats = elements [0 .. 9]
 
-lists : (maxLen : Nat) -> Gen a -> Gen $ List a
+lists : (maxLen : Nat) -> Gen0 a -> Gen0 $ List a
 lists Z     _  = pure []
 lists (S n) as = frequency
   [ (1, [| [] |])

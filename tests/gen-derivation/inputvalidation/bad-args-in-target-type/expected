@@ -6,16 +6,16 @@ ValidateInput:14:44--14:47
  11 | 
  12 | --- Non-variable arguments of the target type ---
  13 | 
- 14 | genY_Int : Fuel -> (a : Type) -> Gen $ Y a Int
+ 14 | genY_Int : Fuel -> (a : Type) -> Gen0 $ Y a Int
                                                  ^^^
 
 Error: While processing right hand side of genY_same_param. Error during reflection: All arguments of the target type must be different
 
 ValidateInput:17:47--17:52
  13 | 
- 14 | genY_Int : Fuel -> (a : Type) -> Gen $ Y a Int
+ 14 | genY_Int : Fuel -> (a : Type) -> Gen0 $ Y a Int
  15 | genY_Int = deriveGen
  16 | 
- 17 | genY_same_param : Fuel -> (a : Type) -> Gen $ Y a a
+ 17 | genY_same_param : Fuel -> (a : Type) -> Gen0 $ Y a a
                                                     ^^^^^
 

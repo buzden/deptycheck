@@ -7,6 +7,6 @@ DerivedGen:10:43--10:48
  07 | %language ElabReflection
  08 | 
  09 | export
- 10 | checkedGen : Fuel -> (a, b : Nat) -> Gen (a = b)
+ 10 | checkedGen : Fuel -> (a, b : Nat) -> Gen0 (a = b)
                                                 ^^^^^
 

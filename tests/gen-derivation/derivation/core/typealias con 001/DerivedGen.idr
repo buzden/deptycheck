@@ -16,7 +16,7 @@ data X : Type where
 
 %runElab derive "X" [Generic, Meta, Show]
 
-checkedGen : Fuel -> Gen X
+checkedGen : Fuel -> Gen0 X
 checkedGen = deriveGen
 
 main : IO ()

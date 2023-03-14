@@ -10,14 +10,14 @@ data X = MkX Bool
 
 %runElab derive "X" [Generic, Meta, Show]
 
-gensGen : Fuel -> Gen (a ** Gen a)
+gensGen : Fuel -> Gen0 (a ** Gen0 a)
 gensGen fuel = elements
   [ (String ** smallStrs fuel)
   , (Nat    ** smallNats fuel)
   ]
 
 -- Check that demanding the gen of gens is allowed
-checkedGen : Fuel -> (Fuel -> Gen (a ** Gen a)) => Gen X
+checkedGen : Fuel -> (Fuel -> Gen0 (a ** Gen0 a)) => Gen0 X
 checkedGen = deriveGen
 
 main : IO ()

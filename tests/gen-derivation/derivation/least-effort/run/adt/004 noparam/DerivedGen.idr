@@ -14,7 +14,7 @@ Show X where
   show E = "E"
   show (R x n) = "R (\{show x}) \{show n}"
 
-checkedGen : Fuel -> Gen X
+checkedGen : Fuel -> Gen0 X
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

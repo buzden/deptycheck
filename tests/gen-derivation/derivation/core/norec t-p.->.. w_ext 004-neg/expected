@@ -7,6 +7,6 @@ DerivedGen:9:68--9:70
  6 | 
  7 | %language ElabReflection
  8 | 
- 9 | checkedGen : Fuel -> (Fuel -> Gen a) => (Fuel -> Gen b) => Gen (a, b, a)
+ 9 | checkedGen : Fuel -> (Fuel -> Gen0 a) => (Fuel -> Gen0 b) => Gen0 (a, b, a)
                                                                         ^^
 

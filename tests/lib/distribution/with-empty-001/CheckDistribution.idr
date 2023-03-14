@@ -6,7 +6,7 @@ import DistrCheckCommon
 
 -- Credits for this test to Aleksei Volkov @AlgebraicWolf
 
-bools : Gen Bool
+bools : Gen0 Bool
 bools = oneOf
           [ oneOf
               [ empty

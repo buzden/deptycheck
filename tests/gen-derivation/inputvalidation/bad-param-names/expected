@@ -6,7 +6,7 @@ ValidateInput:14:50--14:53
  11 | 
  12 | --- Not all arguments are named ---
  13 | 
- 14 | genY_unnamed_argument : Fuel -> (a, b : Type) -> Nat -> Gen $ Y a b
+ 14 | genY_unnamed_argument : Fuel -> (a, b : Type) -> Nat -> Gen0 $ Y a b
                                                        ^^^
 
 Error: While processing right hand side of genY_shadowed_by_auto_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
@@ -16,16 +16,16 @@ ValidateInput:19:58--19:62
  16 | 
  17 | --- Arguments shadowing ---
  18 | 
- 19 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen $ Y a b
+ 19 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen0 $ Y a b
                                                                ^^^^
 
 Error: While processing right hand side of genY_shadowed_by_other_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
 
 ValidateInput:22:76--22:80
  18 | 
- 19 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen $ Y a b
+ 19 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen0 $ Y a b
  20 | genY_shadowed_by_auto_argument = deriveGen
  21 | 
- 22 | genY_shadowed_by_other_argument : Fuel -> (a : Type) -> (b : Type) -> (a : Type) -> Gen $ Y a b
+ 22 | genY_shadowed_by_other_argument : Fuel -> (a : Type) -> (b : Type) -> (a : Type) -> Gen0 $ Y a b
                                                                                  ^^^^
 

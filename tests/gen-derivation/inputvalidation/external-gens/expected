@@ -6,7 +6,7 @@ ValidateInput:18:62--18:63
  15 | 
  16 | --- Repeating external gens ---
  17 | 
- 18 | genY_repX_autoimpl : Fuel -> (Fuel -> Gen X) => (Fuel -> Gen X) => (a, b : Type) -> Gen $ Y a b
+ 18 | genY_repX_autoimpl : Fuel -> (Fuel -> Gen0 X) => (Fuel -> Gen0 X) => (a, b : Type) -> Gen0 $ Y a b
                                                                    ^
 
 Error: While processing right hand side of genY_nongen_autoimpl_list. Error during reflection: The result type of the generator function must be of type "`Gen` of desired result"
@@ -16,27 +16,27 @@ ValidateInput:23:46--23:54
  20 | 
  21 | --- Non-gen externals ---
  22 | 
- 23 | genY_nongen_autoimpl_list : Fuel -> (Fuel -> List Int) => (a, b : Type) -> Gen $ Y a b
+ 23 | genY_nongen_autoimpl_list : Fuel -> (Fuel -> List Int) => (a, b : Type) -> Gen0 $ Y a b
                                                    ^^^^^^^^
 
 Error: While processing right hand side of genY_nongen_autoimpl_pair. Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
 
 ValidateInput:26:38--26:52
  22 | 
- 23 | genY_nongen_autoimpl_list : Fuel -> (Fuel -> List Int) => (a, b : Type) -> Gen $ Y a b
+ 23 | genY_nongen_autoimpl_list : Fuel -> (Fuel -> List Int) => (a, b : Type) -> Gen0 $ Y a b
  24 | genY_nongen_autoimpl_list = deriveGen
  25 | 
- 26 | genY_nongen_autoimpl_pair : Fuel -> (Fuel -> Gen X, Fuel -> Gen X') => (a, b : Type) -> Gen $ Y a b
+ 26 | genY_nongen_autoimpl_pair : Fuel -> (Fuel -> Gen0 X, Fuel -> Gen0 X') => (a, b : Type) -> Gen0 $ Y a b
                                            ^^^^^^^^^^^^^^
 
 Error: While processing right hand side of genY_nongen_autoimpl_dpair. Error during reflection: The result type of the generator function must be of type "`Gen` of desired result"
 
 ValidateInput:29:50--29:52
  25 | 
- 26 | genY_nongen_autoimpl_pair : Fuel -> (Fuel -> Gen X, Fuel -> Gen X') => (a, b : Type) -> Gen $ Y a b
+ 26 | genY_nongen_autoimpl_pair : Fuel -> (Fuel -> Gen0 X, Fuel -> Gen0 X') => (a, b : Type) -> Gen0 $ Y a b
  27 | genY_nongen_autoimpl_pair = deriveGen
  28 | 
- 29 | genY_nongen_autoimpl_dpair : Fuel -> (Fuel -> (a ** b ** Gen $ Y a b)) => (a, b : Type) -> Gen $ Y a b
+ 29 | genY_nongen_autoimpl_dpair : Fuel -> (Fuel -> (a ** b ** Gen0 $ Y a b)) => (a, b : Type) -> Gen0 $ Y a b
                                                        ^^
 
 Error: While processing right hand side of genY_nongen_autoimpl_list_nofuel. Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
@@ -46,27 +46,27 @@ ValidateInput:34:44--34:52
  31 | 
  32 | --- Externals with no fuel ---
  33 | 
- 34 | genY_nongen_autoimpl_list_nofuel : Fuel -> List Int => (a, b : Type) -> Gen $ Y a b
+ 34 | genY_nongen_autoimpl_list_nofuel : Fuel -> List Int => (a, b : Type) -> Gen0 $ Y a b
                                                  ^^^^^^^^
 
 Error: While processing right hand side of genY_nongen_autoimpl_pair_nofuel. Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
 
 ValidateInput:37:45--37:51
  33 | 
- 34 | genY_nongen_autoimpl_list_nofuel : Fuel -> List Int => (a, b : Type) -> Gen $ Y a b
+ 34 | genY_nongen_autoimpl_list_nofuel : Fuel -> List Int => (a, b : Type) -> Gen0 $ Y a b
  35 | genY_nongen_autoimpl_list_nofuel = deriveGen
  36 | 
- 37 | genY_nongen_autoimpl_pair_nofuel : Fuel -> (Gen X, Gen X') => (a, b : Type) -> Gen $ Y a b
+ 37 | genY_nongen_autoimpl_pair_nofuel : Fuel -> (Gen X, Gen0 X') => (a, b : Type) -> Gen0 $ Y a b
                                                   ^^^^^^
 
 Error: While processing right hand side of genY_nongen_autoimpl_dpair_nofuel. Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
 
 ValidateInput:40:48--40:50
  36 | 
- 37 | genY_nongen_autoimpl_pair_nofuel : Fuel -> (Gen X, Gen X') => (a, b : Type) -> Gen $ Y a b
+ 37 | genY_nongen_autoimpl_pair_nofuel : Fuel -> (Gen X, Gen0 X') => (a, b : Type) -> Gen0 $ Y a b
  38 | genY_nongen_autoimpl_pair_nofuel = deriveGen
  39 | 
- 40 | genY_nongen_autoimpl_dpair_nofuel : Fuel -> (a ** b ** Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
+ 40 | genY_nongen_autoimpl_dpair_nofuel : Fuel -> (a ** b ** Gen0 $ Y a b) => (a, b : Type) -> Gen0 $ Y a b
                                                      ^^
 
 Error: While processing right hand side of genY_require_self_autoimpl. Error during reflection: External generators contain the generator asked to be derived
@@ -76,7 +76,7 @@ ValidateInput:45:83--45:86
  42 | 
  43 | --- Result is alteady in externals ---
  44 | 
- 45 | genY_require_self_autoimpl : Fuel -> (Fuel -> Gen X) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a, b : Type) -> Gen $ Y a b
+ 45 | genY_require_self_autoimpl : Fuel -> (Fuel -> Gen0 X) => (Fuel -> (a, b : Type) -> Gen0 $ Y a b) => (a, b : Type) -> Gen0 $ Y a b
                                                                                         ^^^
 
 Error: While processing right hand side of genY_autoimpl_in_autoimpl. Error during reflection: Auto-implicit argument should not contain its own auto-implicit arguments
@@ -86,6 +86,6 @@ ValidateInput:50:102--50:105
  47 | 
  48 | --- Auto-implicits are present inside auto-implicits ---
  49 | 
- 50 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen $ Y a b) => (a : Type) -> Gen (b ** Y a b)) => Gen (a ** b ** Y a b)
+ 50 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen0 $ Y a b) => (a : Type) -> Gen0 (b ** Y a b)) => Gen0 (a ** b ** Y a b)
                                                                                                            ^^^
 

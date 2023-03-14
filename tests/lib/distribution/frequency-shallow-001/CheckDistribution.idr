@@ -6,7 +6,7 @@ import DistrCheckCommon
 
 %default total
 
-eb : Gen $ Either Bool Bool
+eb : Gen0 $ Either Bool Bool
 eb = frequency
        [ (the Nat 1, ) $ Left  <$> elements [True, False]
        , (the Nat 2, ) $ Right <$> frequency [ (4, pure True), (5, pure False) ]

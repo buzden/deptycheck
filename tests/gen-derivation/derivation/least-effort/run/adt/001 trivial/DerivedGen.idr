@@ -6,7 +6,7 @@ import RunDerivedGen
 
 %language ElabReflection
 
-checkedGen : Fuel -> Gen Unit
+checkedGen : Fuel -> Gen0 Unit
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

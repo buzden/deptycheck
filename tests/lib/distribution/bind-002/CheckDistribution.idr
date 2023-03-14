@@ -9,14 +9,14 @@ import DistrCheckCommon
 
 %default total
 
-nats : (n : Nat) -> Gen Nat
+nats : (n : Nat) -> Gen0 Nat
 nats n = elements [1 .. n]
 
-genFin : (n : Nat) -> Gen $ Fin n
+genFin : (n : Nat) -> Gen0 $ Fin n
 genFin Z     = empty
 genFin (S n) = elements $ forget $ allFins n
 
-genAnyFin : Gen Nat => Gen (n ** Fin n)
+genAnyFin : Gen0 Nat => Gen0 (n ** Fin n)
 genAnyFin @{genNat} = do
   n <- forgetStructure genNat
   f <- genFin n

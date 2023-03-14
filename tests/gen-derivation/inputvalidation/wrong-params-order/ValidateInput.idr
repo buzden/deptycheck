@@ -17,23 +17,23 @@ data Y : Type -> Type -> Type where
 
 --- Wrong order of parameters ---
 
-genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen $ Y a b
+genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen0 $ Y a b
 genY_wrong_giv_order = deriveGen
 
-genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => Gen X
+genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen0 $ Y a b) => Gen0 X
 genX_wrong_giv_order_autoimpl = deriveGen
 
-genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen $ Y a b) => (Fuel -> (a, b : Type) -> Gen $ Y a b) => Gen X
+genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen0 $ Y a b) => (Fuel -> (a, b : Type) -> Gen0 $ Y a b) => Gen0 X
 genX_wrong_giv_order_autoimpl_rep = deriveGen
 
-genY_wrong_gened_order : Fuel -> Gen (b : Type ** a : Type ** Y a b)
+genY_wrong_gened_order : Fuel -> Gen0 (b : Type ** a : Type ** Y a b)
 genY_wrong_gened_order = deriveGen
 
-genY_wrong_gened_order' : Fuel -> Gen (b ** a ** Y a b)
+genY_wrong_gened_order' : Fuel -> Gen0 (b ** a ** Y a b)
 genY_wrong_gened_order' = deriveGen
 
-genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen (b : Type ** a : Type ** Y a b)) => Gen X
+genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen0 (b : Type ** a : Type ** Y a b)) => Gen0 X
 genX_wrong_gened_order_autoimpl = deriveGen
 
-genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen (a : Type ** b : Type ** Y a b)) => Gen X
+genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen0 (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen0 (a : Type ** b : Type ** Y a b)) => Gen0 X
 genX_wrong_gened_order_autoimpl_rep = deriveGen

@@ -6,10 +6,10 @@ import DistrCheckCommon
 
 %default total
 
-bools : Gen Bool
+bools : Gen0 Bool
 bools = elements [True, False]
 
-eb : Gen $ Maybe Bool
+eb : Gen0 $ Maybe Bool
 eb = oneOf
        $  ( pure Nothing )
        :: ( Just <$> alternativesOf bools )

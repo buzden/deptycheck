@@ -18,7 +18,7 @@ data Y : Type where
 Show Y where
   show $ MkY x = "MkY (\{show x})"
 
-checkedGen : Fuel -> Gen Y
+checkedGen : Fuel -> Gen0 Y
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

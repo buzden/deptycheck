@@ -9,7 +9,7 @@ import RunDerivedGen
 Show (Gen x) where
   show _ = "a generator"
 
-checkedGen : Fuel -> (a : Type) -> Gen $ Gen a
+checkedGen : Fuel -> (a : Type) -> Gen0 $ Gen0 a
 checkedGen = deriveGen
 
 main : IO ()
