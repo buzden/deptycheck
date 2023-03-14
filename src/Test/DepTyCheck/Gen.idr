@@ -204,10 +204,10 @@ empty = Empty
 
 export
 unGen1 : MonadRandom m => Gen1 a -> m a
-unGen1 $ Pure x             = pure x
-unGen1 $ Raw sf             = sf.unRawGen
-unGen1 $ OneOf @{NN} oo     = assert_total unGen1 . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
-unGen1 $ Bind @{BndNE} x f  = x.unRawGen >>= unGen1 . f
+unGen1 $ Pure x            = pure x
+unGen1 $ Raw sf            = sf.unRawGen
+unGen1 $ OneOf @{NN} oo    = assert_total unGen1 . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
+unGen1 $ Bind @{BndNE} x f = x.unRawGen >>= unGen1 . f
 
 export
 unGenAll' : RandomGen g => (seed : g) -> Gen1 a -> Stream (g, a)
