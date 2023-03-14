@@ -346,10 +346,13 @@ namespace GenAlternatives
   Nil = MkGenAlternatives []
 
   export %inline
-  (::) : (0 _ : True `IfUnsolved` e) =>
+  (::) : {em : _} ->
+         lem `NoWeaker` em =>
+         (0 _ : True `IfUnsolved` e) =>
          (0 _ : NonEmpty `IfUnsolved` em) =>
-         Lazy (Gen em a) -> Lazy (GenAlternatives e em a) -> GenAlternatives ne em a
-  x :: xs = MkGenAlternatives $ (1, x) :: xs.unGenAlternatives
+         (0 _ : em `IfUnsolved` lem) =>
+         Lazy (Gen lem a) -> Lazy (GenAlternatives e em a) -> GenAlternatives ne em a
+  x :: xs = MkGenAlternatives $ (1, wrapLazy relax x) :: xs.unGenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export %inline
@@ -468,7 +471,7 @@ elements' xs = elements {description} $ relaxF $ fromList $ toList xs
 ------------------------------
 
 export
-alternativesOf : Gen em a -> GenAlternatives True em a
+alternativesOf : {em : _} -> Gen em a -> GenAlternatives True em a
 alternativesOf $ OneOf oo = MkGenAlternatives $ gens $ mapOneOf oo relax
 alternativesOf g          = [g]
 
@@ -478,7 +481,7 @@ alternativesOf g          = [g]
 ||| alternatives of depth `1` are those returned by the `alternativesOf` function,
 ||| alternatives of depth `n+1` are alternatives of all alternatives of depth `n` being flattened into a single alternatives list.
 export
-deepAlternativesOf : (depth : Nat) -> Gen em a -> GenAlternatives True em a
+deepAlternativesOf : {em : _} -> (depth : Nat) -> Gen em a -> GenAlternatives True em a
 deepAlternativesOf 0     gen = [ gen ]
 deepAlternativesOf 1     gen = alternativesOf gen
 deepAlternativesOf (S k) gen = processAlternatives' alternativesOf $ deepAlternativesOf k gen
@@ -493,15 +496,15 @@ forgetStructure {em=NonEmpty}     g = Raw $ MkRawGen $ unGen1 g
 forgetStructure {em=CanBeEmpty _} g = MkRawGen (unGen' g) `Bind` maybe Empty Pure where
 
 public export
-processAlternatives : (Gen em a -> Gen em b) -> Gen em a -> GenAlternatives True em b
+processAlternatives : {em : _} -> (Gen em a -> Gen em b) -> Gen em a -> GenAlternatives True em b
 processAlternatives f = processAlternatives f . alternativesOf
 
 public export
-mapAlternativesOf : (a -> b) -> Gen em a -> GenAlternatives True em b
+mapAlternativesOf : {em : _} -> (a -> b) -> Gen em a -> GenAlternatives True em b
 mapAlternativesOf = processAlternatives . map
 
 public export %inline
-mapAlternativesWith : Gen em a -> (a -> b) -> GenAlternatives True em b
+mapAlternativesWith : {em : _} -> Gen em a -> (a -> b) -> GenAlternatives True em b
 mapAlternativesWith = flip mapAlternativesOf
 
 -- Priority is chosen to be able to use these operators without parenthesis
