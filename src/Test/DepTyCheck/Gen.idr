@@ -463,13 +463,14 @@ frequency = oneOf {description} . MkGenAlternatives
 export
 elements : {default Nothing description : Maybe String} ->
            {em : _} ->
+           AlternativesArg altsNe NonEmpty em =>
            (0 _ : IfUnsolved em NonEmpty) =>
-           LazyLst1 a -> Gen em a
---elements = oneOf {description} . cast
+           LazyLst altsNe a -> Gen em a
+elements = oneOf {description} . altsFromList
 
 export %inline
 elements' : Foldable f => {default Nothing description : Maybe String} -> f a -> Gen0 a
-elements' xs = maybe Empty (elements {description}) $ strengthen $ fromList $ toList xs
+elements' xs = elements {description} $ relaxF $ fromList $ toList xs
 
 ------------------------------
 --- Analysis of generators ---
