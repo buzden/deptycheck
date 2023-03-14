@@ -348,9 +348,9 @@ namespace GenAlternatives
   export %inline
   (::) : {em : _} ->
          lem `NoWeaker` em =>
-         (0 _ : True `IfUnsolved` e) =>
-         (0 _ : NonEmpty `IfUnsolved` em) =>
-         (0 _ : em `IfUnsolved` lem) =>
+         (0 _ : IfUnsolved e True) =>
+         (0 _ : IfUnsolved em NonEmpty) =>
+         (0 _ : IfUnsolved lem em) =>
          Lazy (Gen lem a) -> Lazy (GenAlternatives e em a) -> GenAlternatives ne em a
   x :: xs = MkGenAlternatives $ (1, wrapLazy relax x) :: xs.unGenAlternatives
 
