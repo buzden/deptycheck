@@ -421,10 +421,10 @@ altsFromList = cast
 namespace OneOf
 
   public export
-  data AlternativesArg : (altsListTy : Emptiness -> Type -> Type) -> (innerEn, outerEm : Emptiness) -> Type where
-    NN :                                       AlternativesArg (GenAlternatives True)  NonEmpty NonEmpty
-    Dx : alem `NoWeaker` CanBeEmpty Dynamic => AlternativesArg (GenAlternatives True)  alem     (CanBeEmpty Dynamic)
-    Sx :                                       AlternativesArg (GenAlternatives False) alem     (CanBeEmpty Static)
+  data AlternativesArg : (altsNe : Bool) -> (innerEn, outerEm : Emptiness) -> Type where
+    NN :                                       AlternativesArg True  NonEmpty NonEmpty
+    Dx : alem `NoWeaker` CanBeEmpty Dynamic => AlternativesArg True  alem     (CanBeEmpty Dynamic)
+    Sx :                                       AlternativesArg False alem     (CanBeEmpty Static)
 
 ||| Choose one of the given generators uniformly.
 |||
@@ -433,9 +433,9 @@ namespace OneOf
 export
 oneOf : {default Nothing description : Maybe String} ->
         {alem : _} -> {em : _} ->
-        AlternativesArg argsTy alem em =>
+        AlternativesArg altsNe alem em =>
         (0 _ : IfUnsolved alem NonEmpty) =>
-        argsTy alem a -> Gen em a
+        GenAlternatives altsNe alem a -> Gen em a
 oneOf @{NN} $ MkGenAlternatives xs             =  OneOf $ MkOneOf description _ xs
 oneOf @{Dx} x = case x of MkGenAlternatives xs => OneOf $ MkOneOf description _ xs
 oneOf @{Sx} x = case x of MkGenAlternatives xs => do
