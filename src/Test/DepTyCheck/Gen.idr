@@ -443,6 +443,14 @@ oneOf @{Sx} x = case x of MkGenAlternatives xs => do
             strengthen $ flip mapMaybe xs $ \wg => (fst wg,) . delay <$> strengthen {oem=CanBeEmpty Dynamic} (snd wg)
   maybe Empty (\gs' => OneOf {alem=CanBeEmpty Dynamic} $ MkOneOf description _ gs') u
 
+namespace Frequency
+
+  public export
+  data AlternativesArg : (lstNe : Bool) -> (innerEn, outerEm : Emptiness) -> Type where
+    NN :                                       AlternativesArg True  NonEmpty NonEmpty
+    Dx : alem `NoWeaker` CanBeEmpty Dynamic => AlternativesArg True  alem     (CanBeEmpty Dynamic)
+    Sx :                                       AlternativesArg False alem     (CanBeEmpty Static)
+
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
 ||| This function treats given generators in the same way as `oneOf` do, but the resulting generator uses generator
