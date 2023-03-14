@@ -12,7 +12,7 @@ import Data.Fuel
 import Data.Nat.Pos
 import Data.List
 import Data.List.Lazy
-import Data.CheckedEmpty.List.Lazy
+import public Data.CheckedEmpty.List.Lazy
 import Data.Vect
 import Data.Stream
 
