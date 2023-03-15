@@ -10,41 +10,46 @@ import public Language.Implicits.IfUnsolved
 --- The data ---
 
 public export
-data Depth = Dynamic | Static
-
-public export
-data Emptiness = NonEmpty | CanBeEmpty Depth
-
-public export
-Eq Depth where
-  Dynamic == Dynamic = True
-  Static  == Static  = True
-  Dynamic == Static  = False
-  Static  == Dynamic = False
+data Emptiness = NonEmpty | CanBeEmptyDynamic | CanBeEmptyStatic
 
 public export
 Eq Emptiness where
   NonEmpty == NonEmpty = True
-  CanBeEmpty d == CanBeEmpty d' = d == d'
-  NonEmpty == CanBeEmpty _ = False
-  CanBeEmpty _ == NonEmpty = False
+  CanBeEmptyDynamic == CanBeEmptyDynamic = True
+  CanBeEmptyStatic == CanBeEmptyStatic = True
+
+  NonEmpty          == CanBeEmptyDynamic = False
+  NonEmpty          == CanBeEmptyStatic  = False
+  CanBeEmptyDynamic == NonEmpty          = False
+  CanBeEmptyDynamic == CanBeEmptyStatic  = False
+  CanBeEmptyStatic  == NonEmpty          = False
+  CanBeEmptyStatic  == CanBeEmptyDynamic = False
 
 --- Order by strength ---
 
 public export
 data NoWeaker : (from, to : Emptiness) -> Type where
-  NN : NonEmpty           `NoWeaker` NonEmpty
-  ND : NonEmpty           `NoWeaker` CanBeEmpty Dynamic
-  DD : CanBeEmpty Dynamic `NoWeaker` CanBeEmpty Dynamic
-  AS : em                 `NoWeaker` CanBeEmpty Static
+  NN : NonEmpty          `NoWeaker` NonEmpty
+  ND : NonEmpty          `NoWeaker` CanBeEmptyDynamic
+  DD : CanBeEmptyDynamic `NoWeaker` CanBeEmptyDynamic
+  AS : em                `NoWeaker` CanBeEmptyStatic
 
 infix 6 `NoWeaker`
 
+noWeaker : (from, to : Emptiness) -> Dec $ from `NoWeaker` to
+noWeaker NonEmpty          NonEmpty          = Yes %search
+noWeaker CanBeEmptyDynamic NonEmpty          = No $ \case _ impossible
+noWeaker CanBeEmptyStatic  NonEmpty          = No $ \case _ impossible
+noWeaker NonEmpty          CanBeEmptyDynamic = Yes %search
+noWeaker CanBeEmptyDynamic CanBeEmptyDynamic = Yes %search
+noWeaker CanBeEmptyStatic  CanBeEmptyDynamic = No $ \case _ impossible
+noWeaker _                 CanBeEmptyStatic  = Yes %search
+
 export
 Reflexive _ NoWeaker where
-  reflexive {x = NonEmpty}           = %search
-  reflexive {x = CanBeEmpty Static}  = %search
-  reflexive {x = CanBeEmpty Dynamic} = %search
+  reflexive {x = NonEmpty}          = %search
+  reflexive {x = CanBeEmptyStatic}  = %search
+  reflexive {x = CanBeEmptyDynamic} = %search
 
 export
 transitive' : x `NoWeaker` y -> y `NoWeaker` z -> x `NoWeaker` z
@@ -75,45 +80,69 @@ PartialOrder _ NoWeaker where
 
 export
 Connex _ NoWeaker where
-  connex {x = NonEmpty}           {y = NonEmpty}           nxy = void $ nxy Refl
-  connex {x = CanBeEmpty Static}  {y = CanBeEmpty Static}  nxy = void $ nxy Refl
-  connex {x = CanBeEmpty Dynamic} {y = CanBeEmpty Dynamic} nxy = void $ nxy Refl
+  connex {x = NonEmpty}          {y = NonEmpty}          nxy = void $ nxy Refl
+  connex {x = CanBeEmptyStatic}  {y = CanBeEmptyStatic}  nxy = void $ nxy Refl
+  connex {x = CanBeEmptyDynamic} {y = CanBeEmptyDynamic} nxy = void $ nxy Refl
 
-  connex {x = NonEmpty} {y = CanBeEmpty Static}  nxy = %search
-  connex {x = NonEmpty} {y = CanBeEmpty Dynamic} nxy = %search
-  connex {x = CanBeEmpty Static}  {y = NonEmpty} nxy = %search
-  connex {x = CanBeEmpty Dynamic} {y = NonEmpty} nxy = %search
+  connex {x = NonEmpty} {y = CanBeEmptyStatic}  nxy = %search
+  connex {x = NonEmpty} {y = CanBeEmptyDynamic} nxy = %search
+  connex {x = CanBeEmptyStatic}  {y = NonEmpty} nxy = %search
+  connex {x = CanBeEmptyDynamic} {y = NonEmpty} nxy = %search
 
-  connex {x = CanBeEmpty Static}  {y = CanBeEmpty Dynamic} nxy = %search
-  connex {x = CanBeEmpty Dynamic} {y = CanBeEmpty Static}  nxy = %search
+  connex {x = CanBeEmptyStatic}  {y = CanBeEmptyDynamic} nxy = %search
+  connex {x = CanBeEmptyDynamic} {y = CanBeEmptyStatic}  nxy = %search
 
 export
 LinearOrder _ NoWeaker where
 
 export
 StronglyConnex _ NoWeaker where
-  order NonEmpty             NonEmpty             = %search
-  order NonEmpty             (CanBeEmpty Dynamic) = %search
-  order NonEmpty             (CanBeEmpty Static)  = %search
-  order (CanBeEmpty Dynamic) NonEmpty             = %search
-  order (CanBeEmpty Static)  NonEmpty             = %search
-  order (CanBeEmpty Static)  (CanBeEmpty Static)  = %search
-  order (CanBeEmpty Static)  (CanBeEmpty Dynamic) = %search
-  order (CanBeEmpty Dynamic) (CanBeEmpty Static)  = %search
-  order (CanBeEmpty Dynamic) (CanBeEmpty Dynamic) = %search
+  order NonEmpty            NonEmpty            = %search
+  order NonEmpty            (CanBeEmptyDynamic) = %search
+  order NonEmpty            (CanBeEmptyStatic)  = %search
+  order (CanBeEmptyDynamic) NonEmpty            = %search
+  order (CanBeEmptyStatic)  NonEmpty            = %search
+  order (CanBeEmptyStatic)  (CanBeEmptyStatic)  = %search
+  order (CanBeEmptyStatic)  (CanBeEmptyDynamic) = %search
+  order (CanBeEmptyDynamic) (CanBeEmptyStatic)  = %search
+  order (CanBeEmptyDynamic) (CanBeEmptyDynamic) = %search
+
+public export
+CanBeEmpty : Emptiness -> Type
+CanBeEmpty em = CanBeEmptyDynamic `NoWeaker` em
 
 export
-relaxAnyCanBeEmpty : {dp : _} -> em `NoWeaker` CanBeEmpty Dynamic -> em `NoWeaker` CanBeEmpty dp
-relaxAnyCanBeEmpty {dp = Dynamic} ND = %search
-relaxAnyCanBeEmpty {dp = Dynamic} DD = %search
-relaxAnyCanBeEmpty {dp = Static}  ND = %search
-relaxAnyCanBeEmpty {dp = Static}  DD = %search
+canBeEmpty : (em : _) -> Dec $ CanBeEmpty em
+canBeEmpty _ = noWeaker _ _
+
+namespace NonEmpty
+
+  export
+  extractNE : {em : _} -> Not (CanBeEmpty em) -> em = NonEmpty
+  extractNE {em = NonEmpty         } _ = Refl
+  extractNE {em = CanBeEmptyDynamic} f = absurd $ f %search
+  extractNE {em = CanBeEmptyStatic } f = absurd $ f %search
+
+public export
+NotImmediatelyEmpty : Emptiness -> Type
+NotImmediatelyEmpty em = em `NoWeaker` CanBeEmptyDynamic
+
+export
+relaxAnyCanBeEmpty : CanBeEmpty cbe => em `NoWeaker` CanBeEmptyDynamic -> em `NoWeaker` cbe
+relaxAnyCanBeEmpty @{DD} ND = %search
+relaxAnyCanBeEmpty @{DD} DD = %search
+relaxAnyCanBeEmpty @{AS} ND = %search
+relaxAnyCanBeEmpty @{AS} DD = %search
+
+export %hint
+rev : {a, b : _} -> Not (a `NoWeaker` b) -> b `NoWeaker` a
+rev f = either (absurd . f) id $ order a b
 
 export %hint
 nonEmptyIsStrongest : {em : _} -> NonEmpty `NoWeaker` em
-nonEmptyIsStrongest {em = NonEmpty}           = NN
-nonEmptyIsStrongest {em = CanBeEmpty Dynamic} = ND
-nonEmptyIsStrongest {em = CanBeEmpty Static}  = AS
+nonEmptyIsStrongest {em = NonEmpty}          = NN
+nonEmptyIsStrongest {em = CanBeEmptyDynamic} = ND
+nonEmptyIsStrongest {em = CanBeEmptyStatic}  = AS
 
 export %hint
 nonEmptyReflexive : {em : _} -> em `NoWeaker` em
@@ -125,20 +154,33 @@ nonEmptyReflexive = reflexive
 
 public export
 data BindToOuter : (emOfBind, outerEm : Emptiness) -> Type where
-  BndNE : BindToOuter NonEmpty em
-  BndEE : BindToOuter (CanBeEmpty idp) (CanBeEmpty dp)
+  BTO : (CanBeEmpty biem -> CanBeEmpty em) -> BindToOuter biem em
+
+export %hint
+BindNE : BindToOuter NonEmpty em
+BindNE = BTO $ \case _ impossible
+
+namespace BindToOuter
+
+  export
+  extractNE : {em : _} -> BindToOuter em NonEmpty -> em = NonEmpty
+  extractNE {em=NonEmpty         } _       = Refl
+  extractNE {em=CanBeEmptyDynamic} $ BTO f = case f %search of _ impossible
+  extractNE {em=CanBeEmptyStatic } $ BTO f = case f %search of _ impossible
 
 export
 Reflexive _ BindToOuter where
-  reflexive {x=NonEmpty}           = %search
-  reflexive {x=CanBeEmpty Dynamic} = %search
-  reflexive {x=CanBeEmpty Static}  = %search
+  reflexive {x=NonEmpty}          = %search
+  reflexive {x=CanBeEmptyDynamic} = %search
+  reflexive {x=CanBeEmptyStatic}  = %search
+
+export %hint
+btoRefl : {em : _} -> BindToOuter em em
+btoRefl = reflexive
 
 export
 bindToOuterRelax : x `BindToOuter` y -> y `NoWeaker` z -> x `BindToOuter` z
-bindToOuterRelax BndNE NN = %search
-bindToOuterRelax BndNE ND = %search
-bindToOuterRelax BndNE DD = %search
-bindToOuterRelax BndNE AS = %search
-bindToOuterRelax BndEE DD = %search
-bindToOuterRelax BndEE AS = %search
+bindToOuterRelax f NN = %search
+bindToOuterRelax f ND = %search
+bindToOuterRelax f DD = %search
+bindToOuterRelax f AS = %search
