@@ -1,5 +1,6 @@
 rm -rf build
 
-$1 --no-color --console-width 0 --find-ipkg --exec main UseGen.idr
+flock "$1" pack -q install-deps use-gen.ipkg && \
+pack exec UseGen.idr
 
 rm -rf build

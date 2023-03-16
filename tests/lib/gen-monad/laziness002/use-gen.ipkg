@@ -2,6 +2,7 @@ package dummy
 
 authors = "Denis Buzdalov"
 
-modules = UseGen
+main = UseGen
+executable = use-gen
 
 depends = deptycheck, contrib
