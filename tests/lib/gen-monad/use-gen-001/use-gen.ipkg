@@ -2,7 +2,7 @@ package dummy
 
 authors = "Denis Buzdalov"
 
-modules = UseGen
-opts = "--no-color --console-width 0"
+main = UseGen
+executable = a-test
 
 depends = deptycheck
