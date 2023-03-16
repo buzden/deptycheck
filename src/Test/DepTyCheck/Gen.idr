@@ -435,6 +435,12 @@ namespace OneOf
     DT : AltsNonEmpty True   CanBeEmptyDynamic
     Sx : AltsNonEmpty altsNe CanBeEmptyStatic
 
+  export %defaulthint
+  altsNonEmptyTrue : {em : _} -> AltsNonEmpty True em
+  altsNonEmptyTrue {em=NonEmpty         } = NT
+  altsNonEmptyTrue {em=CanBeEmptyDynamic} = DT
+  altsNonEmptyTrue {em=CanBeEmptyStatic } = Sx
+
 ||| Choose one of the given generators uniformly.
 |||
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
@@ -535,9 +541,9 @@ infix 8 `mapAlternativesOf`
 
 export %hint
 GenAltsMonad : {em : _} -> em `NoWeaker` CanBeEmptyDynamic => Monad (GenAlternatives True em)
---GenAltsMonad = M where
---  [M] Monad (GenAlternatives True em) where
---    xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
+GenAltsMonad = M where
+  [M] Monad (GenAlternatives True em) where
+    xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
 
 -----------------
 --- Filtering ---
