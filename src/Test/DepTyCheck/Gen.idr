@@ -172,11 +172,11 @@ strengthen {em=_}                Empty = Nothing
 strengthen $ Pure x = Just $ Pure x
 strengthen $ Raw x  = Just $ Raw x
 
-strengthen $ OneOf @{_} @{au} x with (canBeEmpty em)
+strengthen $ OneOf @{_} @{au} x with (decCanBeEmpty em)
   _ | Yes _ = Just $ OneOf @{relaxAnyCanBeEmpty au} @{au} x
   _ | No  _ = map OneOf $ trMOneOf x $ assert_total $ strengthen {em=NonEmpty}
 
-strengthen $ Bind {biem} x f with (canBeEmpty em)
+strengthen $ Bind {biem} x f with (decCanBeEmpty em)
   _ | Yes _ = Just $ Bind x f
   _ | No  _ = case biem of
     NonEmpty => Just $ Bind x f
@@ -305,10 +305,10 @@ ap @{ll}      (Bind @{bo} x f) (Raw y) = Bind @{bindToOuterRelax bo ll} x $ \c =
 ap @{_} @{rr} (Raw y) (Bind @{bo} x f) = Bind @{bindToOuterRelax bo rr} x $ \c => assert_total $ ap @{reflexive} @{reflexive} (Raw y) (f c)
 
 ap @{ll} @{rr} (Bind @{lbo} x f) (Bind {biem} @{rbo} y g) with (canBeEmpty em)
-  _ | Yes cb = Bind {biem=CanBeEmptyStatic} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
-  _ | No ncb with (extractNE ncb)
-    ap @{NN} @{NN} (Bind @{lbo} x f) (Bind {biem=_} @{rbo} y g) | No _ | Refl with (extractNE lbo) | (extractNE rbo)
-      _ | Refl | Refl = Bind @{lbo} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
+  _ | Right cb = Bind {biem=CanBeEmptyStatic} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
+  ap @{NN} @{NN} (Bind @{lbo} x f) (Bind {biem=_} @{rbo} y g) | Left Refl with (extractNE lbo) | (extractNE rbo)
+    _ | Refl | Refl = Bind @{lbo} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
+
 export
 {em : _} -> Applicative (Gen em) where
   pure = Pure
@@ -513,8 +513,8 @@ forgetStructure : {em : _} -> Gen em a -> Gen em a
 forgetStructure Empty               = Empty
 forgetStructure g@(Raw _)           = g
 forgetStructure g with (canBeEmpty em)
-  _ | Yes _ = MkRawGen (unGen' g) `Bind` maybe Empty Pure
-  _ | No nc = case extractNE nc of Refl => Raw $ MkRawGen $ unGen1 g
+  _ | Right _   = MkRawGen (unGen' g) `Bind` maybe Empty Pure
+  _ | Left Refl = Raw $ MkRawGen $ unGen1 g
 
 public export
 processAlternatives : {em : _} -> (Gen em a -> Gen em b) -> Gen em a -> GenAlternatives True em b
@@ -588,8 +588,8 @@ variant : {em : _} -> Nat -> Gen em a -> Gen em a
 variant _     Empty = Empty
 variant Z       gen = gen
 variant n gen with (canBeEmpty em)
-  _ | Yes _ = MkRawGen (iterate n independent $ unGen' gen) `Bind` maybe Empty Pure
-  _ | No nc = case extractNE nc of Refl => Raw $ MkRawGen $ iterate n independent $ unGen1 gen
+  _ | Right _   = MkRawGen (iterate n independent $ unGen' gen) `Bind` maybe Empty Pure
+  _ | Left Refl = Raw $ MkRawGen $ iterate n independent $ unGen1 gen
 
 -----------------------------
 --- Particular generators ---

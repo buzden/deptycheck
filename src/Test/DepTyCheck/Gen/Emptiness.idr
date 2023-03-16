@@ -112,8 +112,8 @@ CanBeEmpty : Emptiness -> Type
 CanBeEmpty em = CanBeEmptyDynamic `NoWeaker` em
 
 export
-canBeEmpty : (em : _) -> Dec $ CanBeEmpty em
-canBeEmpty _ = noWeaker _ _
+decCanBeEmpty : (em : _) -> Dec $ CanBeEmpty em
+decCanBeEmpty _ = noWeaker _ _
 
 namespace NonEmpty
 
@@ -122,6 +122,12 @@ namespace NonEmpty
   extractNE {em = NonEmpty         } _ = Refl
   extractNE {em = CanBeEmptyDynamic} f = absurd $ f %search
   extractNE {em = CanBeEmptyStatic } f = absurd $ f %search
+
+export
+canBeEmpty : (em : _) -> Either (em = NonEmpty) (CanBeEmpty em)
+canBeEmpty NonEmpty          = %search
+canBeEmpty CanBeEmptyDynamic = %search
+canBeEmpty CanBeEmptyStatic  = %search
 
 public export
 NotImmediatelyEmpty : Emptiness -> Type
