@@ -9,7 +9,7 @@ import public Control.Monad.State.Interface
 
 import Data.Bool
 import Data.Fuel
-import Data.Nat.Pos
+import public Data.Nat.Pos
 import Data.List
 import Data.List.Lazy
 import public Data.CheckedEmpty.List.Lazy
@@ -539,11 +539,9 @@ mapAlternativesWith = flip mapAlternativesOf
 infix 8 `mapAlternativesOf`
       , `mapAlternativesWith`
 
-export %hint
-GenAltsMonad : {em : _} -> em `NoWeaker` CanBeEmptyDynamic => Monad (GenAlternatives True em)
-GenAltsMonad = M where
-  [M] Monad (GenAlternatives True em) where
-    xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
+export
+{em : _} -> Monad (GenAlternatives True em) where
+  xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
 
 -----------------
 --- Filtering ---
