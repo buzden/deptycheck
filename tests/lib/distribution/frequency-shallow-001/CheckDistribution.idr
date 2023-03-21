@@ -8,8 +8,8 @@ import DistrCheckCommon
 
 eb : Gen0 $ Either Bool Bool
 eb = frequency
-       [ (the Nat 1, ) $ Left  <$> elements [True, False]
-       , (the Nat 2, ) $ Right <$> frequency [ (4, pure True), (5, pure False) ]
+       [ ( 1, Left  <$> elements [True, False] )
+       , ( 2, Right <$> frequency [ (4, pure True), (5, pure False) ] )
        ]
 
 main : IO ()

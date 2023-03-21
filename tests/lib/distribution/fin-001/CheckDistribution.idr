@@ -11,7 +11,7 @@ import DistrCheckCommon
 
 genFin : (n : Nat) -> Gen0 $ Fin n
 genFin Z     = empty
-genFin (S n) = elements $ forget $ allFins n
+genFin (S n) = elements' $ forget $ allFins n
 
 mainFor : Nat -> IO ()
 mainFor Z     = pure ()

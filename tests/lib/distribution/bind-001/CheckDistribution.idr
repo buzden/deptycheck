@@ -10,11 +10,11 @@ import DistrCheckCommon
 %default total
 
 nats : (n : Nat) -> Gen0 Nat
-nats n = elements [1 .. n]
+nats n = elements' [1 .. n]
 
 genFin : (n : Nat) -> Gen0 $ Fin n
 genFin Z     = empty
-genFin (S n) = elements $ forget $ allFins n
+genFin (S n) = elements' $ forget $ allFins n
 
 genAnyFin : Gen0 Nat => Gen0 (n ** Fin n)
 genAnyFin @{genNat} = do

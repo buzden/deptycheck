@@ -17,9 +17,9 @@ strs m = [0 .. m] <&> \n => "s\{show n}"
 bools : List Bool
 bools = [False, True]
 
-nats' = elements . nats
-strs' = elements . strs
-bools' = elements bools
+nats' = elements' . nats
+strs' = elements' . strs
+bools' = elements' bools
 
 record NSB where
   constructor MkNSB

@@ -7,7 +7,7 @@ import DistrCheckCommon
 %default total
 
 nats : Gen0 Nat
-nats = elements [0 .. 100]
+nats = elements' [0 .. 100]
 
 lists : (maxLen : Nat) -> Gen0 a -> Gen0 $ List a
 lists Z     _  = pure []
