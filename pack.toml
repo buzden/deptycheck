@@ -2,7 +2,7 @@
 ### Settings ###
 ################
 
-collection = "nightly-230316"
+collection = "nightly-230320"
 
 [idris2]
 url     = "https://github.com/buzden/Idris2"
