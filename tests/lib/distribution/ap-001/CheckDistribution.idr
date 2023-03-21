@@ -1,7 +1,6 @@
 module CheckDistribution
 
 import Data.Fin
-import Data.List1
 
 import Decidable.Equality
 

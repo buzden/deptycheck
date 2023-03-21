@@ -22,11 +22,6 @@ genAnyFin @{genNat} = do
   f <- genFin n
   pure (n ** f)
 
-Eq (n ** Fin n) where
-  (n ** f) == (n' ** f') with (n `decEq` n')
-    (n ** f) == (n ** f') | Yes Refl = f == f'
-    _                     | No _     = False
-
 mainFor : Nat -> IO ()
 mainFor Z = pure ()
 mainFor n@(S k) = do
