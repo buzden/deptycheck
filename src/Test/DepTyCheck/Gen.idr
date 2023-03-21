@@ -127,7 +127,7 @@ namespace GenAlternatives
   Nil : GenAlternatives' a
   Nil = MkGenAlts []
 
-  export %inline
+  export
   (::) : Gen a -> Lazy (GenAlternatives' a) -> GenAlternatives' a
   Empty      :: xs = xs
   NonEmpty x :: xs = MkGenAlts $ relax $ x :: xs.unGenAlts
