@@ -476,6 +476,12 @@ frequency : {default Nothing description : Maybe String} ->
             LazyLst altsNe (PosNat, Lazy (Gen alem a)) -> Gen em a
 frequency = oneOf {description} . MkGenAlternatives
 
+export %inline
+frequency' : {default Nothing description : Maybe String} ->
+             {alem : _} ->
+             LazyLst altsNe (Nat, Lazy (Gen alem a)) -> Gen0 a
+frequency' = frequency {description} . mapMaybe (\(freq, gen) => toPosNat freq <&> (, gen))
+
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
