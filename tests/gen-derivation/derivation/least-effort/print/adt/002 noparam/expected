@@ -15,7 +15,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <Prelude.Basics.Bool>[]
               [ PatClause (IApp. IVar <Prelude.Basics.Bool>[]
                                $ IBindVar ^fuel_arg^)
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                          (ILocal (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                   description
+                                                   (IApp. IVar Just
+                                                        $ IPrimVal Prelude.Basics.Bool[] (non-recursive))
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<Prelude.Basics.False>>
                                                      $ IVar ^fuel_arg^)

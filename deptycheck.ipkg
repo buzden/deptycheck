@@ -28,10 +28,13 @@ modules = Data.Nat.Pos
         , Deriving.DepTyCheck.Util.Reflection
         , Deriving.DepTyCheck.Util.Syntax
         , Test.DepTyCheck.Gen
+        , Test.DepTyCheck.Gen.NonEmpty
 
 depends = contrib
         , elab-util
+        , if-unsolved-implicit
         , mtl-tuple-impls
         , random-pure
+        , typelevel-emptiness-collections
 
 sourcedir = "src"

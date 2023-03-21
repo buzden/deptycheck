@@ -29,7 +29,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                           $ IVar Data.Fuel.Dry)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                      description
+                                                                      (IApp. IVar Just
+                                                                           $ IPrimVal Prelude.Types.Nat[] (spend fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<Prelude.Types.Z>>
                                                                         $ IVar ^fuel_arg^)
@@ -79,7 +82,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                           $ IVar Data.Fuel.Dry)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                      description
+                                                                      (IApp. IVar Just
+                                                                           $ IPrimVal DerivedGen.X[] (spend fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<DerivedGen.E>>
                                                                         $ IVar ^fuel_arg^)

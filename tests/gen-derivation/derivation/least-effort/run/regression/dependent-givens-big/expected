@@ -11,7 +11,9 @@ Generated values:
 -----
 (0 ** (Nothing ** !))
 -----
-(1 ** (Just PrimTy ** .!))
+(2 ** (Just RefTy ** ..!))
+-----
+(2 ** (Just RefTy ** ..!))
 -----
 (2 ** (Just RefTy ** ..!))
 -----

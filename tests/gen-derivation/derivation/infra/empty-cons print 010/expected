@@ -17,7 +17,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                      description
+                                                                      (IApp. IVar Just
+                                                                           $ IPrimVal DerivedGen.X[] (dry fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<DerivedGen.X0>>
                                                                         $ IVar Data.Fuel.Dry)
@@ -27,7 +30,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.oneOf
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                      description
+                                                                      (IApp. IVar Just
+                                                                           $ IPrimVal DerivedGen.X[] (spend fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<DerivedGen.X0>>
                                                                         $ IVar ^fuel_arg^)

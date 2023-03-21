@@ -181,7 +181,7 @@ namespace NonObligatoryExts
         rightmost <- indepPermutations' disjDeps rightmostArgs
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
-      map callOneOf $ traverse genForOrder allOrders
+      callOneOf "\{logPosition con} (orders)" <$> traverse genForOrder allOrders
 
       where
 
