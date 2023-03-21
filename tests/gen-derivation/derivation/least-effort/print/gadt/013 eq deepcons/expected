@@ -11,65 +11,71 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 []
                 (MkTy <DerivedGen.LT2>[1]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:833} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar Builtin.DPair.DPair
                                          $ IVar Prelude.Types.Nat
-                                         $ (ILam.  (MW ExplicitArg {arg:830} : IVar Prelude.Types.Nat)
+                                         $ (ILam.  (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
                                                 => (IApp. IVar DerivedGen.LT2
-                                                        $ IVar {arg:830}
-                                                        $ IVar {arg:833}))))))
+                                                        $ IVar {arg:3630}
+                                                        $ IVar {arg:3633}))))))
          IDef <DerivedGen.LT2>[1]
               [ PatClause (IApp. IVar <DerivedGen.LT2>[1]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:833})
+                               $ IBindVar {arg:3633})
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar <<DerivedGen.Base>>
                                                           $ IVar Data.Fuel.Dry
-                                                          $ IVar {arg:833})
+                                                          $ IVar {arg:3633})
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
                                                                       description
                                                                       (IApp. IVar Just
                                                                            $ IPrimVal DerivedGen.LT2[1] (spend fuel))
                                                           $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<DerivedGen.Base>>
-                                                                        $ IVar ^fuel_arg^
-                                                                        $ IVar {arg:833})
+                                                                 $ (IApp. IVar Builtin.MkPair
+                                                                        $ (IApp. IVar Prelude.integerToNat
+                                                                               $ IPrimVal 1)
+                                                                        $ (IApp. IVar <<DerivedGen.Base>>
+                                                                               $ IVar ^fuel_arg^
+                                                                               $ IVar {arg:3633}))
                                                                  $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<DerivedGen.Step>>
-                                                                               $ IVar ^sub^fuel_arg^
-                                                                               $ IVar {arg:833})
+                                                                        $ (IApp. IVar Builtin.MkPair
+                                                                               $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
+                                                                                      $ IVar ^sub^fuel_arg^)
+                                                                               $ (IApp. IVar <<DerivedGen.Step>>
+                                                                                      $ IVar ^sub^fuel_arg^
+                                                                                      $ IVar {arg:3633}))
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export
                                    []
                                    (MkTy <<DerivedGen.Base>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:833} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                      $ (IApp. IVar Builtin.DPair.DPair
                                                             $ IVar Prelude.Types.Nat
-                                                            $ (ILam.  (MW ExplicitArg {arg:830} : IVar Prelude.Types.Nat)
+                                                            $ (ILam.  (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
                                                                    => (IApp. IVar DerivedGen.LT2
-                                                                           $ IVar {arg:830}
-                                                                           $ IVar {arg:833}))))))
+                                                                           $ IVar {arg:3630}
+                                                                           $ IVar {arg:3633}))))))
                             IClaim MW
                                    Export
                                    []
                                    (MkTy <<DerivedGen.Step>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:833} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                      $ (IApp. IVar Builtin.DPair.DPair
                                                             $ IVar Prelude.Types.Nat
-                                                            $ (ILam.  (MW ExplicitArg {arg:830} : IVar Prelude.Types.Nat)
+                                                            $ (ILam.  (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
                                                                    => (IApp. IVar DerivedGen.LT2
-                                                                           $ IVar {arg:830}
-                                                                           $ IVar {arg:833}))))))
+                                                                           $ IVar {arg:3630}
+                                                                           $ IVar {arg:3633}))))))
                             IDef <<DerivedGen.Base>>
                                  [ PatClause (IApp. IVar <<DerivedGen.Base>>
                                                   $ IBindVar ^cons_fuel^
@@ -102,7 +108,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                   (Implicit False)
                                                                   [ PatClause (IApp. IVar Builtin.DPair.MkDPair
                                                                                    $ IBindVar x
-                                                                                   $ IBindVar ^bnd^{arg:841})
+                                                                                   $ IBindVar ^bnd^{arg:3641})
                                                                               (IApp. INamedApp (IVar Prelude.pure)
                                                                                                f
                                                                                                (IVar Test.DepTyCheck.Gen.Gen)
@@ -113,7 +119,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                                                         (IVar y))
                                                                                                              x
                                                                                                              (IVar x)
-                                                                                                 $ IVar ^bnd^{arg:841}))) ]))
+                                                                                                 $ IVar ^bnd^{arg:3641}))) ]))
                                  , PatClause (IApp. IVar <<DerivedGen.Step>>
                                                   $ Implicit True
                                                   $ Implicit True)

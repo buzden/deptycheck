@@ -26,18 +26,24 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                           $ IVar n)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
                                                                       description
                                                                       (IApp. IVar Just
                                                                            $ IPrimVal Data.Fin.Fin[0] (spend fuel))
                                                           $ (IApp. IVar ::
-                                                                 $ (IApp. IVar <<Data.Fin.FZ>>
-                                                                        $ IVar ^fuel_arg^
-                                                                        $ IVar n)
+                                                                 $ (IApp. IVar Builtin.MkPair
+                                                                        $ (IApp. IVar Prelude.integerToNat
+                                                                               $ IPrimVal 1)
+                                                                        $ (IApp. IVar <<Data.Fin.FZ>>
+                                                                               $ IVar ^fuel_arg^
+                                                                               $ IVar n))
                                                                  $ (IApp. IVar ::
-                                                                        $ (IApp. IVar <<Data.Fin.FS>>
-                                                                               $ IVar ^sub^fuel_arg^
-                                                                               $ IVar n)
+                                                                        $ (IApp. IVar Builtin.MkPair
+                                                                               $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
+                                                                                      $ IVar ^sub^fuel_arg^)
+                                                                               $ (IApp. IVar <<Data.Fin.FS>>
+                                                                                      $ IVar ^sub^fuel_arg^
+                                                                                      $ IVar n))
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export

@@ -100,6 +100,7 @@ deptycheck:test:derive:
         - derivation/least-effort/run/gadt
         - derivation/least-effort/run/regression
         - derivation/core/
+        - derivation/distribution/
   script:
     - NUM_THREADS=2 pack test deptycheck gen-derivation/"$test_set"
 

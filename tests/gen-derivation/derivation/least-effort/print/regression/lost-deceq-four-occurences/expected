@@ -19,44 +19,44 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 []
                 (MkTy <DerivedGen.X>[0, 1, 2, 3]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:830} : IVar Prelude.Types.Nat)
-                          -> (MW ExplicitArg {arg:833} : IVar Prelude.Types.Nat)
-                          -> (MW ExplicitArg {arg:836} : IVar Prelude.Types.Nat)
-                          -> (MW ExplicitArg {arg:839} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:3636} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:3639} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar DerivedGen.X
-                                         $ IVar {arg:830}
-                                         $ IVar {arg:833}
-                                         $ IVar {arg:836}
-                                         $ IVar {arg:839}))))
+                                         $ IVar {arg:3630}
+                                         $ IVar {arg:3633}
+                                         $ IVar {arg:3636}
+                                         $ IVar {arg:3639}))))
          IDef <DerivedGen.X>[0, 1, 2, 3]
               [ PatClause (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:830}
-                               $ IBindVar {arg:833}
-                               $ IBindVar {arg:836}
-                               $ IBindVar {arg:839})
+                               $ IBindVar {arg:3630}
+                               $ IBindVar {arg:3633}
+                               $ IBindVar {arg:3636}
+                               $ IBindVar {arg:3639})
                           (ILocal (IApp. IVar <<DerivedGen.MkX>>
                                        $ IVar ^fuel_arg^
-                                       $ IVar {arg:830}
-                                       $ IVar {arg:833}
-                                       $ IVar {arg:836}
-                                       $ IVar {arg:839}))
+                                       $ IVar {arg:3630}
+                                       $ IVar {arg:3633}
+                                       $ IVar {arg:3636}
+                                       $ IVar {arg:3639}))
                             IClaim MW
                                    Export
                                    []
                                    (MkTy <<DerivedGen.MkX>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:830} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:833} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:836} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:839} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:3636} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:3639} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                      $ (IApp. IVar DerivedGen.X
-                                                            $ IVar {arg:830}
-                                                            $ IVar {arg:833}
-                                                            $ IVar {arg:836}
-                                                            $ IVar {arg:839}))))
+                                                            $ IVar {arg:3630}
+                                                            $ IVar {arg:3633}
+                                                            $ IVar {arg:3636}
+                                                            $ IVar {arg:3639}))))
                             IDef <<DerivedGen.MkX>>
                                  [ WithClause (IApp. IVar <<DerivedGen.MkX>>
                                                    $ IBindVar ^cons_fuel^

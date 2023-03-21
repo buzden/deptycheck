@@ -2,6 +2,7 @@
 module Deriving.DepTyCheck.Util.Reflection
 
 import public Data.Fin
+import public Data.Fuel
 import public Data.List.Lazy
 import public Data.These
 import public Data.Vect.Dependent
@@ -148,9 +149,29 @@ liftList : Foldable f => f TTImp -> TTImp
 liftList = foldr (\l, r => `(~l :: ~r)) `([])
 
 export
+liftNat : Nat -> TTImp
+liftNat k = `(Prelude.integerToNat ~(primVal $ BI $ cast k))
+  -- we are using `integerToNat` instead of explicit application of `S` and `Z` to make this look nicer in prints.
+
+export
 callOneOf : (desc : String) -> List TTImp -> TTImp
 callOneOf _    [v]      = v
 callOneOf desc variants = namedApp (var `{Test.DepTyCheck.Gen.oneOf}) `{description} `(Just ~(primVal $ Str desc)) .$ liftList variants
+
+-- List of weights and subgenerators
+export
+callFrequency : (desc : String) -> List (TTImp, TTImp) -> TTImp
+callFrequency _    [(_, v)] = v
+callFrequency desc variants = namedApp (var `{Test.DepTyCheck.Gen.frequency}) `{description} `(Just ~(primVal $ Str desc)) .$
+                                liftList (variants <&> \(freq, subgen) => var `{Builtin.MkPair} .$ freq .$ subgen)
+
+-- TODO to think of better placement for this function; this anyway is intended to be called from the derived code.
+public export
+leftDepth : Fuel -> Nat
+leftDepth = go 1 where
+  go : Nat -> Fuel -> Nat
+  go n Dry      = n
+  go n (More x) = go (S n) x
 
 export
 isSimpleBindVar : TTImp -> Bool
