@@ -33,7 +33,7 @@ import Test.DepTyCheck.Gen.NonEmpty
 export
 data Gen : Type -> Type where
   Empty    : Gen a
-  NonEmpty : Lazy (NonEmptyGen $ Maybe a) -> Gen a
+  NonEmpty : Lazy (Gen1 $ Maybe a) -> Gen a
 
 -----------------------------
 --- Very basic generators ---
@@ -52,11 +52,11 @@ empty : Gen a
 empty = Empty
 
 export
-fromNonEmpty : Lazy (NonEmptyGen a) -> Gen a
+fromNonEmpty : Lazy (Gen1 a) -> Gen a
 fromNonEmpty = NonEmpty . wrapLazy (map Just)
 
 export
-toNonEmpty : Gen a -> Maybe $ Lazy (NonEmptyGen $ Maybe a)
+toNonEmpty : Gen a -> Maybe $ Lazy (Gen1 $ Maybe a)
 toNonEmpty Empty        = Nothing
 toNonEmpty $ NonEmpty g = Just g
 
@@ -158,7 +158,7 @@ namespace GenAlternatives
   export %inline
   Monad GenAlternatives' where
     MkGenAlts xs >>= f = MkGenAlts $ flip processAlternatives' xs $ relax . alternativesOf . (>>= oneOf' . traverse f) where
-      %inline oneOf' : forall a. GenAlternatives' (Maybe a) -> NonEmptyGen (Maybe a)
+      %inline oneOf' : forall a. GenAlternatives' (Maybe a) -> Gen1 (Maybe a)
       oneOf' $ MkGenAlts xs = case strengthen xs of
         Nothing => pure Nothing
         Just xs => oneOf $ join <$> xs

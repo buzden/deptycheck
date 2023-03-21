@@ -8,7 +8,7 @@ import System.Random.Pure.StdGen
 
 %default total
 
-g : NonEmptyGen Nat
+g : Gen1 Nat
 g = trace "--- outmost gen ---" $ oneOf
   [ oneOf $ trace "list with pure 4 and 5"
       [ pure $ trace "pure 4" 4

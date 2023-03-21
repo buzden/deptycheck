@@ -29,9 +29,9 @@ public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
 wrapLazy f = delay . f . force
 
----------------------------------------
---- Definition of the `NonEmptyGen` ---
----------------------------------------
+--------------------------------
+--- Definition of the `Gen1` ---
+--------------------------------
 
 record RawGen a where
   constructor MkRawGen
@@ -40,17 +40,17 @@ record RawGen a where
 record OneOfAlternatives (0 a : Type)
 
 export
-data NonEmptyGen : Type -> Type where
-  Pure  : a -> NonEmptyGen a
-  Raw   : RawGen a -> NonEmptyGen a
-  OneOf : OneOfAlternatives a -> NonEmptyGen a
-  Bind  : RawGen c -> (c -> NonEmptyGen a) -> NonEmptyGen a
+data Gen1 : Type -> Type where
+  Pure  : a -> Gen1 a
+  Raw   : RawGen a -> Gen1 a
+  OneOf : OneOfAlternatives a -> Gen1 a
+  Bind  : RawGen c -> (c -> Gen1 a) -> Gen1 a
 
 record OneOfAlternatives (0 a : Type) where
   constructor MkOneOf
   desc : Maybe String
   totalWeight : PosNat
-  gens : LazyLst1 (PosNat, Lazy (NonEmptyGen a))
+  gens : LazyLst1 (PosNat, Lazy (Gen1 a))
   {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst x)}
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
@@ -62,7 +62,7 @@ record OneOfAlternatives (0 a : Type) where
 mapTaggedLazy : (a -> b) -> LazyLst1 (tag, Lazy a) -> LazyLst1 (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
-mapOneOf : OneOfAlternatives a -> (NonEmptyGen a -> NonEmptyGen b) -> NonEmptyGen b
+mapOneOf : OneOfAlternatives a -> (Gen1 a -> Gen1 b) -> Gen1 b
 mapOneOf (MkOneOf desc tw gs @{prf}) f = OneOf $ MkOneOf desc tw (mapTaggedLazy f gs) @{do
     rewrite mapFusion (Builtin.fst) (mapSnd $ wrapLazy f) gs
     rewrite prf
@@ -74,11 +74,11 @@ mapOneOf (MkOneOf desc tw gs @{prf}) f = OneOf $ MkOneOf desc tw (mapTaggedLazy 
 -----------------------------
 
 export
-chooseAny : Random a => NonEmptyGen a
+chooseAny : Random a => Gen1 a
 chooseAny = Raw $ MkRawGen getRandom
 
 export
-choose : Random a => (a, a) -> NonEmptyGen a
+choose : Random a => (a, a) -> Gen1 a
 choose bounds = Raw $ MkRawGen $ getRandomR bounds
 
 --------------------------
@@ -86,20 +86,20 @@ choose bounds = Raw $ MkRawGen $ getRandomR bounds
 --------------------------
 
 export
-unGen : MonadRandom m => NonEmptyGen a -> m a
+unGen : MonadRandom m => Gen1 a -> m a
 unGen $ Pure x   = pure x
 unGen $ Raw sf   = sf.unRawGen
 unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
 unGen $ Bind x f = x.unRawGen >>= unGen . f
 
 export
-unGenTryAll' : RandomGen g => (seed : g) -> NonEmptyGen a -> Stream (a, g)
+unGenTryAll' : RandomGen g => (seed : g) -> Gen1 a -> Stream (a, g)
 unGenTryAll' seed gen = do
   let (seed, mc) = runRandom seed $ unGen gen
   (mc, seed) :: unGenTryAll' seed gen
 
 export
-unGenTryAll : RandomGen g => (seed : g) -> NonEmptyGen a -> Stream a
+unGenTryAll : RandomGen g => (seed : g) -> Gen1 a -> Stream a
 unGenTryAll = map fst .: unGenTryAll'
 
 -- TODO To add config and Reader for that.
@@ -120,14 +120,14 @@ Applicative RawGen where
   MkRawGen x <*> MkRawGen y = MkRawGen $ x <*> y
 
 export
-Functor NonEmptyGen where
+Functor Gen1 where
   map f $ Pure x   = Pure $ f x
   map f $ Raw sf   = Raw $ f <$> sf
   map f $ OneOf oo = mapOneOf oo $ assert_total $ map f
   map f $ Bind x g = Bind x $ assert_total map f . g
 
 export
-Applicative NonEmptyGen where
+Applicative Gen1 where
   pure = Pure
 
   Pure f <*> g = f <$> g
@@ -142,7 +142,7 @@ Applicative NonEmptyGen where
   g <*> Bind x f = Bind x $ assert_total (g <*>) . f
 
 export
-Monad NonEmptyGen where
+Monad Gen1 where
   Pure x   >>= nf = nf x
   Raw g    >>= nf = Bind g nf -- Raw $ MkRawGen $ sf >>= unGen . nf
   OneOf oo >>= nf = mapOneOf oo $ assert_total (>>= nf)
@@ -157,7 +157,7 @@ namespace GenAlternatives
   export
   record GenAlternatives' (0 mustBeNotEmpty : Bool) a where
     constructor MkGenAlternatives
-    unGenAlternatives : LazyLst mustBeNotEmpty (PosNat, Lazy (NonEmptyGen a))
+    unGenAlternatives : LazyLst mustBeNotEmpty (PosNat, Lazy (Gen1 a))
 
   public export %inline
   GenAlternatives : Type -> Type
@@ -168,7 +168,7 @@ namespace GenAlternatives
   Nil = MkGenAlternatives []
 
   export %inline
-  (::) : (0 _ : True `IfUnsolved` e) => Lazy (NonEmptyGen a) -> Lazy (GenAlternatives' e a) -> GenAlternatives' ne a
+  (::) : (0 _ : True `IfUnsolved` e) => Lazy (Gen1 a) -> Lazy (GenAlternatives' e a) -> GenAlternatives' ne a
   x :: xs = MkGenAlternatives $ (1, x) :: xs.unGenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
@@ -181,17 +181,17 @@ namespace GenAlternatives
   length $ MkGenAlternatives alts = length alts
 
   export %inline
-  processAlternatives : (NonEmptyGen a -> NonEmptyGen b) -> GenAlternatives' ne a -> GenAlternatives' ne b
+  processAlternatives : (Gen1 a -> Gen1 b) -> GenAlternatives' ne a -> GenAlternatives' ne b
   processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
 
   export %inline
-  processAlternativesMaybe : (NonEmptyGen a -> Maybe $ Lazy (NonEmptyGen b)) -> GenAlternatives' ne a -> GenAlternatives' False b
+  processAlternativesMaybe : (Gen1 a -> Maybe $ Lazy (Gen1 b)) -> GenAlternatives' ne a -> GenAlternatives' False b
   processAlternativesMaybe f $ MkGenAlternatives xs = MkGenAlternatives $ mapMaybe filt xs where
-    %inline filt : (tag, Lazy (NonEmptyGen a)) -> Maybe (tag, Lazy (NonEmptyGen b))
+    %inline filt : (tag, Lazy (Gen1 a)) -> Maybe (tag, Lazy (Gen1 b))
     filt (t, x) = (t,) <$> f x
 
   export %inline
-  processAlternatives'' : (NonEmptyGen a -> GenAlternatives' neb b) -> GenAlternatives' nea a -> GenAlternatives' (nea && neb) b
+  processAlternatives'' : (Gen1 a -> GenAlternatives' neb b) -> GenAlternatives' nea a -> GenAlternatives' (nea && neb) b
   processAlternatives'' f = mapGens where
 
     mapWeight : forall a, nea. (PosNat -> PosNat) -> GenAlternatives' nea a -> GenAlternatives' nea a
@@ -201,7 +201,7 @@ namespace GenAlternatives
     mapGens $ MkGenAlternatives xs = MkGenAlternatives $ xs `bind` \(w, x) => unGenAlternatives $ mapWeight (w *) $ f x
 
   export %inline
-  processAlternatives' : (NonEmptyGen a -> GenAlternatives' ne b) -> GenAlternatives' ne a -> GenAlternatives' ne b
+  processAlternatives' : (Gen1 a -> GenAlternatives' ne b) -> GenAlternatives' ne a -> GenAlternatives' ne b
   processAlternatives' f xs = rewrite sym $ andSameNeutral ne in processAlternatives'' f xs
 
   export %inline
@@ -229,7 +229,7 @@ altsFromList = cast
 ||| All the given generators are treated as independent, i.e. `oneOf [oneOf [a, b], c]` is not the same as `oneOf [a, b, c]`.
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
-oneOf : {default Nothing description : Maybe String} -> GenAlternatives a -> NonEmptyGen a
+oneOf : {default Nothing description : Maybe String} -> GenAlternatives a -> Gen1 a
 oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
@@ -239,14 +239,14 @@ oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
 ||| If generator `g1` has the frequency `n1` and generator `g2` has the frequency `n2`, than `g1` will be used `n1/n2` times
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
-frequency : {default Nothing description : Maybe String} -> LazyLst1 (PosNat, Lazy (NonEmptyGen a)) -> NonEmptyGen a
+frequency : {default Nothing description : Maybe String} -> LazyLst1 (PosNat, Lazy (Gen1 a)) -> Gen1 a
 frequency = oneOf {description} . MkGenAlternatives
 
 ||| Choose one of the given values uniformly.
 |||
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
-elements : {default Nothing description : Maybe String} -> LazyLst1 a -> NonEmptyGen a
+elements : {default Nothing description : Maybe String} -> LazyLst1 a -> Gen1 a
 elements = oneOf {description} . cast
 
 ------------------------------
@@ -254,7 +254,7 @@ elements = oneOf {description} . cast
 ------------------------------
 
 export
-alternativesOf : NonEmptyGen a -> GenAlternatives a
+alternativesOf : Gen1 a -> GenAlternatives a
 alternativesOf $ OneOf oo = MkGenAlternatives oo.gens
 alternativesOf g          = [g]
 
@@ -264,7 +264,7 @@ alternativesOf g          = [g]
 ||| alternatives of depth `1` are those returned by the `alternativesOf` function,
 ||| alternatives of depth `n+1` are alternatives of all alternatives of depth `n` being flattened into a single alternatives list.
 export
-deepAlternativesOf : (depth : Nat) -> NonEmptyGen a -> GenAlternatives a
+deepAlternativesOf : (depth : Nat) -> Gen1 a -> GenAlternatives a
 deepAlternativesOf 0     gen   = [ gen ]
 deepAlternativesOf 1     gen   = alternativesOf gen
 deepAlternativesOf (S k) gen   = processAlternatives' alternativesOf $ deepAlternativesOf k gen
@@ -272,20 +272,20 @@ deepAlternativesOf (S k) gen   = processAlternatives' alternativesOf $ deepAlter
 ||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
 ||| except for empty generator, which would still be returned as empty generator.
 export
-forgetStructure : NonEmptyGen a -> NonEmptyGen a
+forgetStructure : Gen1 a -> Gen1 a
 forgetStructure g@(Raw _) = g
 forgetStructure g = Raw $ MkRawGen $ unGen g
 
 public export
-processAlternatives : (NonEmptyGen a -> NonEmptyGen b) -> NonEmptyGen a -> GenAlternatives b
+processAlternatives : (Gen1 a -> Gen1 b) -> Gen1 a -> GenAlternatives b
 processAlternatives f = processAlternatives f . alternativesOf
 
 public export
-mapAlternativesOf : (a -> b) -> NonEmptyGen a -> GenAlternatives b
+mapAlternativesOf : (a -> b) -> Gen1 a -> GenAlternatives b
 mapAlternativesOf = processAlternatives . map
 
 public export %inline
-mapAlternativesWith : NonEmptyGen a -> (a -> b) -> GenAlternatives b
+mapAlternativesWith : Gen1 a -> (a -> b) -> GenAlternatives b
 mapAlternativesWith = flip mapAlternativesOf
 
 -- Priority is chosen to be able to use these operators without parenthesis
@@ -321,7 +321,7 @@ Monad (GenAlternatives' True) where
 
 -- TODO to reimplement `variant` to ensure that preserves the structure as far as it can.
 export
-variant : Nat -> NonEmptyGen a -> NonEmptyGen a
+variant : Nat -> Gen1 a -> Gen1 a
 variant Z       gen = gen
 variant x@(S _) gen = Raw $ MkRawGen $ iterate x independent $ unGen gen where
   iterate : forall a. Nat -> (a -> a) -> a -> a
@@ -333,9 +333,9 @@ variant x@(S _) gen = Raw $ MkRawGen $ iterate x independent $ unGen gen where
 -----------------------------
 
 export
-listOf : {default (choose (0, 10)) length : NonEmptyGen Nat} -> NonEmptyGen a -> NonEmptyGen (List a)
+listOf : {default (choose (0, 10)) length : Gen1 Nat} -> Gen1 a -> Gen1 (List a)
 listOf g = sequence $ List.replicate !length g
 
 export
-vectOf : {n : Nat} -> NonEmptyGen a -> NonEmptyGen (Vect n a)
+vectOf : {n : Nat} -> Gen1 a -> Gen1 (Vect n a)
 vectOf g = sequence $ replicate n g
