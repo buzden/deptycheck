@@ -286,7 +286,7 @@ deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
   checkResult@(signature ** externals ** _) <- checkTypeIsGen DerivationTask signature
   let externalsSigToName = fromList $ externals.externals <&> \(sig, _) => (sig, nameForGen sig)
-  let fuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
+  let fuelArg = outmostFuelArg
   (callExpr, locals) <- runCanonic externalsSigToName $ callMainDerivedGen signature fuelArg
   wrapFuel fuelArg <$> internalGenCallingLambda checkResult (local locals callExpr)
 

@@ -182,6 +182,10 @@ export
 callCon : (con : Con) -> Vect con.args.length TTImp -> TTImp
 callCon con = reAppAny (var con.name) . toList . mapWithPos (appArg . index' con.args)
 
+export
+outmostFuelArg : Name
+outmostFuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
+
 --- General purpose instances ---
 
 export
