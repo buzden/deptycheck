@@ -112,7 +112,7 @@ namespace ClojuringCanonicImpl
 
       -- look for external gens, and call it if exists
       let Nothing = lookupLengthChecked sig !ask
-        | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name fuel $ rewrite lenEq in values
+        | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values
 
       -- get the name of internal gen, derive if necessary
       internalGenName <- do

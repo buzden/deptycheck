@@ -21,6 +21,6 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                $ (IApp. IVar <$>
                                       $ IVar MkXSS
                                       $ (IApp. IVar external^<^prim^.String>[]
-                                             $ IVar fuel))
+                                             $ IVar ^outmost-fuel^))
                                $ (IApp. IVar external^<^prim^.String>[]
-                                      $ IVar fuel)) ]
+                                      $ IVar ^outmost-fuel^)) ]
