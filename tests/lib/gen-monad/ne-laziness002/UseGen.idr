@@ -18,4 +18,4 @@ g = trace "--- outmost gen ---" $ oneOf
   ]
 
 main : IO Unit
-main = putStrLn $ show $ take 10 $ unGenTryAll someStdGen g
+main = putStrLn $ show $ take 10 $ unGenAll someStdGen g

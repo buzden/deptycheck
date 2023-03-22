@@ -13,7 +13,7 @@ import System.Random.Pure.StdGen
 
 g : Gen0 Nat
 g = trace "--- outmost gen ---" $ oneOf
-  [ fromNonEmpty $ pure $ trace "<ne> pure 6" 6
+  [ pure $ trace "pure 6" 6
   , pure $ trace "pure 5" 5
   ]
 
