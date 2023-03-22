@@ -22,4 +22,5 @@ main = goldenRunner $
     | p <- ["print", "run"], w <- ["adt", "gadt", "regression"]
     ]
   , "Auto derivation: core: derivation itself" `atDir` "gen-derivation/derivation/core"
+  , "Auto derivation: core: distribution" `atDir` "gen-derivation/derivation/distribution"
   ]

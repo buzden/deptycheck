@@ -15,32 +15,32 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 []
                 (MkTy <DerivedGen.W>[0, 1]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:858} : IVar DerivedGen.Z)
-                          -> (MW ExplicitArg {arg:861} : IVar DerivedGen.Z)
+                          -> (MW ExplicitArg {arg:3658} : IVar DerivedGen.Z)
+                          -> (MW ExplicitArg {arg:3661} : IVar DerivedGen.Z)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar DerivedGen.W
-                                         $ IVar {arg:858}
-                                         $ IVar {arg:861}))))
+                                         $ IVar {arg:3658}
+                                         $ IVar {arg:3661}))))
          IDef <DerivedGen.W>[0, 1]
               [ PatClause (IApp. IVar <DerivedGen.W>[0, 1]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:858}
-                               $ IBindVar {arg:861})
+                               $ IBindVar {arg:3658}
+                               $ IBindVar {arg:3661})
                           (ILocal (IApp. IVar <<DerivedGen.MkW>>
                                        $ IVar ^fuel_arg^
-                                       $ IVar {arg:858}
-                                       $ IVar {arg:861}))
+                                       $ IVar {arg:3658}
+                                       $ IVar {arg:3661}))
                             IClaim MW
                                    Export
                                    []
                                    (MkTy <<DerivedGen.MkW>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:858} : IVar DerivedGen.Z)
-                                             -> (MW ExplicitArg {arg:861} : IVar DerivedGen.Z)
+                                             -> (MW ExplicitArg {arg:3658} : IVar DerivedGen.Z)
+                                             -> (MW ExplicitArg {arg:3661} : IVar DerivedGen.Z)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                      $ (IApp. IVar DerivedGen.W
-                                                            $ IVar {arg:858}
-                                                            $ IVar {arg:861}))))
+                                                            $ IVar {arg:3658}
+                                                            $ IVar {arg:3661}))))
                             IDef <<DerivedGen.MkW>>
                                  [ WithClause (IApp. IVar <<DerivedGen.MkW>>
                                                    $ IBindVar ^cons_fuel^
@@ -48,7 +48,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                     $ (IApp. IVar DerivedGen.MkX
                                                                            $ IBindVar n
                                                                            $ IVar Prelude.Basics.False))
-                                                               {conArg:852}
+                                                               {conArg:3652}
                                                                (INamedApp (INamedApp (IVar DerivedGen.MkY)
                                                                                      b
                                                                                      (IVar Prelude.Basics.False))
@@ -58,7 +58,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                     $ (IApp. IVar DerivedGen.MkX
                                                                            $ IBindVar to_be_deceqed^^n0
                                                                            $ IVar Prelude.Basics.True))
-                                                               {conArg:852}
+                                                               {conArg:3652}
                                                                (INamedApp (INamedApp (IVar DerivedGen.MkY)
                                                                                      b
                                                                                      (IVar Prelude.Basics.True))
@@ -76,7 +76,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                 $ (IApp. IVar DerivedGen.MkX
                                                                                        $ IBindVar n
                                                                                        $ IVar Prelude.Basics.False))
-                                                                           {conArg:852}
+                                                                           {conArg:3652}
                                                                            (INamedApp (INamedApp (IVar DerivedGen.MkY)
                                                                                                  b
                                                                                                  (IVar Prelude.Basics.False))
@@ -86,7 +86,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                 $ (IApp. IVar DerivedGen.MkX
                                                                                        $ IBindVar n
                                                                                        $ IVar Prelude.Basics.True))
-                                                                           {conArg:852}
+                                                                           {conArg:3652}
                                                                            (INamedApp (INamedApp (IVar DerivedGen.MkY)
                                                                                                  b
                                                                                                  (IVar Prelude.Basics.True))
@@ -106,7 +106,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                 $ (IApp. IVar DerivedGen.MkX
                                                                                        $ IBindVar n
                                                                                        $ IVar Prelude.Basics.False))
-                                                                           {conArg:852}
+                                                                           {conArg:3652}
                                                                            (INamedApp (INamedApp (IVar DerivedGen.MkY)
                                                                                                  b
                                                                                                  (IVar Prelude.Basics.False))
@@ -116,7 +116,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                 $ (IApp. IVar DerivedGen.MkX
                                                                                        $ IBindVar to_be_deceqed^^n0
                                                                                        $ IVar Prelude.Basics.True))
-                                                                           {conArg:852}
+                                                                           {conArg:3652}
                                                                            (INamedApp (INamedApp (IVar DerivedGen.MkY)
                                                                                                  b
                                                                                                  (IVar Prelude.Basics.True))

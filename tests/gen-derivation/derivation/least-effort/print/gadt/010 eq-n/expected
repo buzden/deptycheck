@@ -15,32 +15,32 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 []
                 (MkTy <DerivedGen.EqualN>[0, 1]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:830} : IVar Prelude.Types.Nat)
-                          -> (MW ExplicitArg {arg:833} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ (IApp. IVar DerivedGen.EqualN
-                                         $ IVar {arg:830}
-                                         $ IVar {arg:833}))))
+                                         $ IVar {arg:3630}
+                                         $ IVar {arg:3633}))))
          IDef <DerivedGen.EqualN>[0, 1]
               [ PatClause (IApp. IVar <DerivedGen.EqualN>[0, 1]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:830}
-                               $ IBindVar {arg:833})
+                               $ IBindVar {arg:3630}
+                               $ IBindVar {arg:3633})
                           (ILocal (IApp. IVar <<DerivedGen.ReflN>>
                                        $ IVar ^fuel_arg^
-                                       $ IVar {arg:830}
-                                       $ IVar {arg:833}))
+                                       $ IVar {arg:3630}
+                                       $ IVar {arg:3633}))
                             IClaim MW
                                    Export
                                    []
                                    (MkTy <<DerivedGen.ReflN>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:830} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:833} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                      $ (IApp. IVar DerivedGen.EqualN
-                                                            $ IVar {arg:830}
-                                                            $ IVar {arg:833}))))
+                                                            $ IVar {arg:3630}
+                                                            $ IVar {arg:3633}))))
                             IDef <<DerivedGen.ReflN>>
                                  [ WithClause (IApp. IVar <<DerivedGen.ReflN>>
                                                    $ IBindVar ^cons_fuel^
