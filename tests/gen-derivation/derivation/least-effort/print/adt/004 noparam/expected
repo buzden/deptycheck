@@ -135,7 +135,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ (ILam.  (MW ExplicitArg ^bnd^{arg:3633} : Implicit False)
                                                          => (IApp. IVar >>=
                                                                  $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                                        $ IVar ^cons_fuel^)
+                                                                        $ IVar ^outmost-fuel^)
                                                                  $ (ILam.  (MW ExplicitArg ^bnd^{arg:3636} : Implicit False)
                                                                         => (IApp. INamedApp (IVar Prelude.pure)
                                                                                             f

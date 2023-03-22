@@ -167,7 +167,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar ^cons_fuel^)
                                              (IApp. IVar >>=
                                                   $ (IApp. IVar <Prelude.Basics.Bool>[]
-                                                         $ IVar ^cons_fuel^)
+                                                         $ IVar ^outmost-fuel^)
                                                   $ (ILam.  (MW ExplicitArg b : Implicit False)
                                                          => (IApp. IVar >>=
                                                                  $ (IApp. IVar external^<Prelude.Types.Nat>[]

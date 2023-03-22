@@ -103,7 +103,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar ^cons_fuel^)
                                              (IApp. IVar >>=
                                                   $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                         $ IVar ^cons_fuel^)
+                                                         $ IVar ^outmost-fuel^)
                                                   $ (ILam.  (MW ExplicitArg n : Implicit False)
                                                          => (IApp. INamedApp (IVar Prelude.pure)
                                                                              f
