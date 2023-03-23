@@ -113,8 +113,14 @@ namespace NonObligatoryExts
               let Yes Refl = decEq subsig.givenParams.size subgivensLength
                 | No _ => fail "INTERNAL ERROR: error in given params set length computation"
 
+              -- Check if called subgenerator can call the current one
+              mutRec <- hasNameInsideDeep sig.targetType.name $ var subsig.targetType.name
+
+              -- Decide whether to use local (decreasing) or outmost fuel, depending on whether we are in mutual recursion with subgen
+              let subfuel = if mutRec then fuel else var outmostFuelArg
+
               -- Form an expression to call the subgen
-              subgenCall <- callGen subsig fuel $ snd <$> subgivens
+              subgenCall <- callGen subsig subfuel $ snd <$> subgivens
 
               -- Form an expression of binding the result of subgen
               let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames

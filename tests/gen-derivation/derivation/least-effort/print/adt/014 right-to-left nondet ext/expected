@@ -70,11 +70,11 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar ^cons_fuel^)
                                              (IApp. IVar >>=
                                                   $ (IApp. IVar external^<^prim^.String>[]
-                                                         $ IVar ^cons_fuel^)
+                                                         $ IVar ^outmost-fuel^)
                                                   $ (ILam.  (MW ExplicitArg n : Implicit False)
                                                          => (IApp. IVar >>=
                                                                  $ (IApp. IVar external^<Prelude.Types.Nat>[]
-                                                                        $ IVar ^cons_fuel^)
+                                                                        $ IVar ^outmost-fuel^)
                                                                  $ (ILam.  (MW ExplicitArg m : Implicit False)
                                                                         => (IApp. INamedApp (IVar Prelude.pure)
                                                                                             f
@@ -112,7 +112,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar n)
                                              (IApp. IVar >>=
                                                   $ (IApp. IVar external^<Prelude.Types.Nat>[]
-                                                         $ IVar ^cons_fuel^)
+                                                         $ IVar ^outmost-fuel^)
                                                   $ (ILam.  (MW ExplicitArg m : Implicit False)
                                                          => (IApp. INamedApp (IVar Prelude.pure)
                                                                              f
@@ -138,7 +138,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar ^cons_fuel^)
                                              (IApp. IVar >>=
                                                   $ (IApp. IVar <DerivedGen.X>[]
-                                                         $ IVar ^cons_fuel^)
+                                                         $ IVar ^outmost-fuel^)
                                                   $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                          => ICase (IVar {lamc:0})
                                                                   (Implicit False)
@@ -149,7 +149,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                           $ IBindVar ^bnd^{arg:3654}))
                                                                               (IApp. IVar >>=
                                                                                    $ (IApp. IVar <DerivedGen.X>[0]
-                                                                                          $ IVar ^cons_fuel^
+                                                                                          $ IVar ^outmost-fuel^
                                                                                           $ IVar n)
                                                                                    $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
                                                                                           => ICase (IVar {lamc:0})
