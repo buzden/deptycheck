@@ -15,10 +15,6 @@ export %hint
 smallStrs : Fuel -> Gen MaybeEmpty String
 smallStrs _ = elements ["", "a", "bc"]
 
-export %hint
-UsedConstructorDerivator : ConstructorDerivator
-UsedConstructorDerivator = LeastEffort
-
 data X = X1 | X2 Nat | X3 String
 
 data Y : Nat -> Type where
