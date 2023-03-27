@@ -11,10 +11,6 @@ import System.Random.Pure.StdGen
 
 %language ElabReflection
 
-export %hint
-UsedConstructorDerivator : ConstructorDerivator
-UsedConstructorDerivator = LeastEffort
-
 data X : Bool -> Type where
   XT : X True
   XF : X False
