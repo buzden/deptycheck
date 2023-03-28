@@ -13,8 +13,9 @@ import public Data.Nat.Pos
 import Data.List
 import Data.List.Lazy
 import public Data.CheckedEmpty.List.Lazy
-import Data.Vect
+import Data.Singleton
 import Data.Stream
+import Data.Vect
 
 import Decidable.Equality
 
@@ -23,6 +24,8 @@ import public Language.Implicits.IfUnsolved
 import public Test.DepTyCheck.Gen.Emptiness
 
 %default total
+
+%hide Singleton.(<*>)
 
 -------------------------
 --- Utility functions ---
@@ -34,6 +37,12 @@ randomFin $ Element (S _) _ = getRandom
 public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
 wrapLazy f = delay . f . force
+
+(.unVal) : Singleton {a} x -> a
+(.unVal) $ Val x = x
+
+transport : Singleton x -> x = y -> Singleton y
+transport z Refl = z
 
 -------------------------------
 --- Definition of the `Gen` ---
@@ -66,9 +75,8 @@ data Gen : Emptiness -> Type -> Type where
 record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
   constructor MkOneOf
   desc : Maybe String
-  totalWeight : PosNat
   gens : LazyLst1 (PosNat, Lazy (Gen em a))
-  {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst x)}
+  totalWeight : Singleton $ foldl1 (+) (gens <&> \x => fst x)
 
 public export %inline
 Gen1 : Type -> Type
@@ -93,7 +101,7 @@ data Equiv : Gen lem a -> Gen rem a -> Type where
   EE : Empty `Equiv` Empty
   EP : Pure x `Equiv` Pure x
   ER : Raw x `Equiv` Raw x
-  EO : lgs `AltsEquiv` rgs => OneOf @{lalemem} @{lalemcd} (MkOneOf _ _ lgs) `Equiv` OneOf @{ralemem} @{ralemcd} (MkOneOf _ _ rgs)
+  EO : lgs `AltsEquiv` rgs => OneOf @{lalemem} @{lalemcd} (MkOneOf _ lgs _) `Equiv` OneOf @{ralemem} @{ralemcd} (MkOneOf _ rgs _)
   EB : Bind @{lbo} x g `Equiv` Bind @{rbo} x g
 
 data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, Lazy (Gen lem a)) -> Type where
@@ -116,11 +124,9 @@ mapTaggedLazy : (a -> b) -> LazyLst ne (tag, Lazy a) -> LazyLst ne (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
 mapOneOf : OneOfAlternatives iem a -> (Gen iem a -> Gen em b) -> OneOfAlternatives em b
-mapOneOf (MkOneOf desc tw gs @{prf}) f = MkOneOf desc tw (mapTaggedLazy f gs) @{do
+mapOneOf (MkOneOf desc gs tw) f = MkOneOf desc (mapTaggedLazy f gs) $ do
     rewrite mapFusion (Builtin.fst) (mapSnd $ wrapLazy f) gs
-    rewrite prf
-    cong (Lazy.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
-  }
+    transport tw $ cong (Lazy.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
 
 traverseMaybe : (a -> Maybe b) -> LazyLst ne a -> Maybe $ LazyLst ne b
 traverseMaybe f []      = Just []
@@ -135,9 +141,9 @@ trMTaggedLazy = traverseMaybe . m . wrapLazy where
 
 -- TODO to make the proof properly
 trMOneOf : OneOfAlternatives iem a -> (Gen iem a -> Maybe $ Gen em b) -> Maybe $ OneOfAlternatives em b
-trMOneOf (MkOneOf desc tw gs @{prf}) f with (trMTaggedLazy f gs) proof trm
+trMOneOf (MkOneOf desc gs tw) f with (trMTaggedLazy f gs) proof trm
   _ | Nothing = Nothing
-  _ | Just gs' = Just $ MkOneOf desc tw gs' @{believe_me $ Refl {x=Z}}
+  _ | Just gs' = Just $ MkOneOf desc gs' $ believe_me tw
 
 -----------------------------
 --- Emptiness tweakenings ---
@@ -208,7 +214,7 @@ export
 unGen1 : MonadRandom m => Gen1 a -> m a
 unGen1 $ Pure x         = pure x
 unGen1 $ Raw sf         = sf.unRawGen
-unGen1 $ OneOf @{NN} oo = assert_total unGen1 . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
+unGen1 $ OneOf @{NN} oo = assert_total unGen1 . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
 unGen1 $ Bind @{bo} x f = case extractNE bo of Refl => x.unRawGen >>= unGen1 . f
 
 export
@@ -228,7 +234,7 @@ unGen : MonadRandom m => MonadError () m => Gen em a -> m a
 unGen $ Empty    = throwError ()
 unGen $ Pure x   = pure x
 unGen $ Raw sf   = sf.unRawGen
-unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
+unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
 unGen $ Bind x f = x.unRawGen >>= unGen . f
 
 export %inline
@@ -453,12 +459,12 @@ oneOf : {default Nothing description : Maybe String} ->
         (0 _ : IfUnsolved alem em) =>
         (0 _ : IfUnsolved altsNe $ em /= CanBeEmptyStatic) =>
         GenAlternatives altsNe alem a -> Gen em a
-oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
-oneOf {em=CanBeEmptyDynamic} @{_} @{DT} x = case x of MkGenAlternatives xs => OneOf $ MkOneOf description _ xs
+oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlternatives xs = OneOf $ MkOneOf description xs $ Val _
+oneOf {em=CanBeEmptyDynamic} @{_} @{DT} x = case x of MkGenAlternatives xs => OneOf $ MkOneOf description xs $ Val _
 oneOf {em=CanBeEmptyStatic}             x = case x of MkGenAlternatives xs => do
   let u : Maybe $ LazyLst1 (_, Lazy _) :=
             strengthen $ flip mapMaybe xs $ \wg => (fst wg,) . delay <$> Gen.strengthen {em=CanBeEmptyDynamic} (snd wg)
-  maybe Empty (\gs' => OneOf {alem=CanBeEmptyDynamic} $ MkOneOf description _ gs') u
+  maybe Empty (\gs' => OneOf {alem=CanBeEmptyDynamic} $ MkOneOf description gs' $ Val _) u
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
