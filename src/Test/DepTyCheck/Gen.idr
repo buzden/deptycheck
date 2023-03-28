@@ -76,7 +76,7 @@ record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
   constructor MkOneOf
   desc : Maybe String
   gens : LazyLst1 (PosNat, Lazy (Gen em a))
-  totalWeight : Singleton $ foldl1 (+) (gens <&> \x => fst x)
+  totalWeight : Lazy (Singleton $ foldl1 (+) (gens <&> \x => fst x))
 
 public export %inline
 Gen1 : Type -> Type
