@@ -5,7 +5,6 @@ import Data.List.Lazy
 import Debug.Trace
 
 import Test.DepTyCheck.Gen
-import Test.DepTyCheck.Gen.NonEmpty
 
 import System.Random.Pure.StdGen
 
