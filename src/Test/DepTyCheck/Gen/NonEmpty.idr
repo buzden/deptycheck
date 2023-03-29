@@ -11,8 +11,9 @@ import Data.Bool
 import Data.Nat.Pos
 import Data.List
 import Data.CheckedEmpty.List.Lazy
-import Data.Vect
+import Data.Singleton
 import Data.Stream
+import Data.Vect
 
 import public Language.Implicits.IfUnsolved
 
@@ -28,6 +29,9 @@ randomFin $ Element (S _) _ = getRandom
 public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
 wrapLazy f = delay . f . force
+
+transport : Singleton x -> x = y -> Singleton y
+transport z Refl = z
 
 --------------------------------
 --- Definition of the `Gen1` ---
@@ -49,9 +53,8 @@ data Gen1 : Type -> Type where
 record OneOfAlternatives (0 a : Type) where
   constructor MkOneOf
   desc : Maybe String
-  totalWeight : PosNat
   gens : LazyLst1 (PosNat, Lazy (Gen1 a))
-  {auto 0 weightCorrect : totalWeight = foldl1 (+) (gens <&> \x => fst x)}
+  totalWeight : Singleton $ foldl1 (+) (gens <&> \x => fst x)
 
 -- TODO To think about arbitrary discrete final probability distribution instead of only uniform.
 
@@ -63,11 +66,9 @@ mapTaggedLazy : (a -> b) -> LazyLst1 (tag, Lazy a) -> LazyLst1 (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
 mapOneOf : OneOfAlternatives a -> (Gen1 a -> Gen1 b) -> Gen1 b
-mapOneOf (MkOneOf desc tw gs @{prf}) f = OneOf $ MkOneOf desc tw (mapTaggedLazy f gs) @{do
+mapOneOf (MkOneOf desc gs tw) f = OneOf $ MkOneOf desc (mapTaggedLazy f gs) $ do
     rewrite mapFusion (Builtin.fst) (mapSnd $ wrapLazy f) gs
-    rewrite prf
-    cong (Lazy.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
-  }
+    transport tw $ cong (Lazy.foldl1 (+)) $ mapExt gs $ \(_, _) => Refl
 
 -----------------------------
 --- Very basic generators ---
@@ -89,7 +90,7 @@ export
 unGen : MonadRandom m => Gen1 a -> m a
 unGen $ Pure x   = pure x
 unGen $ Raw sf   = sf.unRawGen
-unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight
+unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
 unGen $ Bind x f = x.unRawGen >>= unGen . f
 
 export
@@ -230,7 +231,7 @@ altsFromList = cast
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : {default Nothing description : Maybe String} -> GenAlternatives a -> Gen1 a
-oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf description _ xs
+oneOf $ MkGenAlternatives xs = OneOf $ MkOneOf description xs $ Val _
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
