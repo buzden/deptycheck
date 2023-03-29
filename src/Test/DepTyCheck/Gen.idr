@@ -38,9 +38,6 @@ public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
 wrapLazy f = delay . f . force
 
-(.unVal) : Singleton {a} x -> a
-(.unVal) $ Val x = x
-
 transport : Singleton x -> x = y -> Singleton y
 transport z Refl = z
 
