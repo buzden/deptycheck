@@ -9,4 +9,4 @@ import Data.Vect
 
 %language ElabReflection
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen0 (n : Nat ** a : Type ** Vect n a)
+%runElab printDerived @{EmptyCons} $ Fuel -> Gen CanBeEmptyStatic (n : Nat ** a : Type ** Vect n a)

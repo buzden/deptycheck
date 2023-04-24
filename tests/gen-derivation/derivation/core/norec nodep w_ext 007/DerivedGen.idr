@@ -11,13 +11,13 @@ data X = MkX (Gen Bool)
 Show X where
   show _ = #"an "X""#
 
-gensGen : Fuel -> (a : Type) -> Gen0 $ Gen0 a
+gensGen : Fuel -> (a : Type) -> Gen CanBeEmptyStatic $ Gen CanBeEmptyStatic a
 gensGen _ Bool = elements $ pure <$> [True, False]
 gensGen _ Nat  = elements $ pure <$> [0 .. 99]
 gensGen _ _    = empty
 
 -- Check that demanding the gen of gens is allowed and is used
-checkedGen : Fuel -> (Fuel -> (a : Type) -> Gen0 $ Gen0 a) => Gen0 X
+checkedGen : Fuel -> (Fuel -> (a : Type) -> Gen CanBeEmptyStatic $ Gen CanBeEmptyStatic a) => Gen CanBeEmptyStatic X
 checkedGen = deriveGen
 
 main : IO ()

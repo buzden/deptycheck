@@ -11,4 +11,4 @@ data LT2 : Nat -> Nat -> Type where
   Base : x `LT2` S (S x)
   Step : x `LT2` y -> x `LT2` S y
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (b : Nat) -> Gen0 (a ** LT2 a b)
+%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (b : Nat) -> Gen CanBeEmptyStatic (a ** LT2 a b)

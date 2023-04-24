@@ -10,4 +10,4 @@ import PrintDerivation
 data X : Nat -> Type where
   MkX : X n
 
-%runElab printDerived @{EmptyCons} $ Fuel -> (n : Nat) -> Gen0 (X n)
+%runElab printDerived @{EmptyCons} $ Fuel -> (n : Nat) -> Gen CanBeEmptyStatic (X n)

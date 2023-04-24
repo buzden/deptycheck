@@ -10,7 +10,7 @@ data X = MkX String
 
 %runElab derive "X" [Generic, Meta, Show]
 
-checkedGen : Fuel -> (Fuel -> Gen0 String) => Gen0 X
+checkedGen : Fuel -> (Fuel -> Gen CanBeEmptyStatic String) => Gen CanBeEmptyStatic X
 checkedGen = deriveGen
 
 main : IO ()

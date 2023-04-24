@@ -24,7 +24,7 @@ data Y : Type where
 Show Y where
   show $ MkY x2 = "MkY (\{show x2})"
 
-checkedGen : Fuel -> Gen0 Y
+checkedGen : Fuel -> Gen CanBeEmptyStatic Y
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

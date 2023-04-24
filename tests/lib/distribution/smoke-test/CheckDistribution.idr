@@ -4,7 +4,7 @@ import DistrCheckCommon
 
 %default total
 
-bools : Gen0 Bool
+bools : Gen CanBeEmptyStatic Bool
 bools = elements [True, False]
 
 -- intentionally wrong expected values

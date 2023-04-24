@@ -63,33 +63,33 @@ failing "Can't find an implementation"
 
 --- General generators ---
 
-genSo : (b : Bool) -> Gen0 $ So b
+genSo : (b : Bool) -> Gen CanBeEmptyStatic $ So b
 genSo True  = pure Oh
 genSo False = empty
 
-genAllQ : ((x : a) -> Gen0 (p x)) -> (list : List a) -> Gen0 $ All p list
+genAllQ : ((x : a) -> Gen CanBeEmptyStatic (p x)) -> (list : List a) -> Gen CanBeEmptyStatic $ All p list
 genAllQ f []      = [| []                  |]
 genAllQ f (x::xs) = [| f x :: genAllQ f xs |]
 
-genAnyQ : ((x : a) -> Gen0 (p x)) -> (list : List a) -> Gen0 $ Any p list
+genAnyQ : ((x : a) -> Gen CanBeEmptyStatic (p x)) -> (list : List a) -> Gen CanBeEmptyStatic $ Any p list
 genAnyQ f []      = empty
 genAnyQ f (x::xs) = oneOf
   $  (Here <$> f x)
   :: There `mapAlternativesOf` genAnyQ f xs
 
-genName : Gen0 Name
+genName : Gen CanBeEmptyStatic Name
 genName = [| elements (cast <$> ['x', 'y', 'z']) ++ elements' (show <$> [the Nat 1 .. 3]) |]
 
-genNames : Gen0 (List Name)
+genNames : Gen CanBeEmptyStatic (List Name)
 genNames = listOf genName
 
-genUniqueName : (existing : List Name) -> Gen0 (new : Name ** All (\ex => So $ ex /= new) existing)
+genUniqueName : (existing : List Name) -> Gen CanBeEmptyStatic (new : Name ** All (\ex => So $ ex /= new) existing)
 genUniqueName existing = do
   new <- genName
   all <- genAllQ (\ex => genSo (ex /= new)) existing
   pure (new ** all)
 
-genExisting : Eq a => (existing : List a) -> Gen0 (res : a ** Any (\ex => So $ ex == res) existing)
+genExisting : Eq a => (existing : List a) -> Gen CanBeEmptyStatic (res : a ** Any (\ex => So $ ex == res) existing)
 genExisting [] = empty
 genExisting existing@(x::xs) = oneOf
   $  genAnyQ (\ex => genSo $ ex == x) existing `mapAlternativesWith` (\an => (x ** an))
@@ -98,7 +98,7 @@ genExisting existing@(x::xs) = oneOf
 mutual
 
   export
-  genStmt__ : Fuel -> Gen0 (definedPre ** definedPost ** Stmts definedPre definedPost)
+  genStmt__ : Fuel -> Gen CanBeEmptyStatic (definedPre ** definedPost ** Stmts definedPre definedPost)
   genStmt__ fuel = oneOf $
     [ do defined <- genNames
          (new ** prf) <- genUniqueName defined
@@ -119,7 +119,7 @@ mutual
                         ]
 
   export
-  genStmtP_ : Fuel -> (definedPre : _) -> Gen0 (definedPost ** Stmts definedPre definedPost)
+  genStmtP_ : Fuel -> (definedPre : _) -> Gen CanBeEmptyStatic (definedPost ** Stmts definedPre definedPost)
   genStmtP_ fuel definedPre = oneOf $
     [ do (new ** prf) <- genUniqueName definedPre
          pure (_ ** Def new)
@@ -138,7 +138,7 @@ mutual
                         ]
 
   export
-  genStmt_P : Fuel -> (definedPost : _) -> Gen0 (definedPre ** Stmts definedPre definedPost)
+  genStmt_P : Fuel -> (definedPost : _) -> Gen CanBeEmptyStatic (definedPre ** Stmts definedPre definedPost)
   genStmt_P fuel definedPost = oneOf $
     [ case definedPost of
         []           => empty
@@ -160,7 +160,7 @@ mutual
                         ]
 
   export
-  genStmtPP : Fuel -> (definedPre : _) -> (definedPost : _) -> Gen0 $ Stmts definedPre definedPost
+  genStmtPP : Fuel -> (definedPre : _) -> (definedPost : _) -> Gen CanBeEmptyStatic $ Stmts definedPre definedPost
   genStmtPP fuel definedPre definedPost = oneOf $
     [ case definedPost of
         []           => empty

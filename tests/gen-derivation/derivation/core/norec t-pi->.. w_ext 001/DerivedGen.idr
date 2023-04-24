@@ -12,7 +12,7 @@ data EqA : (a : Type) -> a -> a -> Type where
 Show (EqA a x y) where
   show _ = "Refl"
 
-checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen0 (EqA a x y)
+checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen CanBeEmptyStatic (EqA a x y)
 checkedGen = deriveGen
 
 main : IO ()

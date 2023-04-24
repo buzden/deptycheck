@@ -13,4 +13,4 @@ data Y = Y0 | Y1
 
 data X = X0 | X1 | X2 Y
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen0 X
+%runElab printDerived @{EmptyCons} $ Fuel -> Gen CanBeEmptyStatic X

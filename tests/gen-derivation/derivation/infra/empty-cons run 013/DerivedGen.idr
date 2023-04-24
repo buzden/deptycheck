@@ -18,8 +18,8 @@ data X : (a : Type) -> a -> a -> Type where
 -- `DecEq a` must go after the declaration of the `a : Type` parameter.
 -- If `a` parameter must go after the `Fuel` parameter, then `DecEq a` must go after it, too.
 -- Or `a` parameter should be on the left of `Fuel` parameter together with the `DecEq a` one.
-checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen0 (X a x y)
---checkedGen : Fuel -> (a : Type) -> (x, y : a) -> DecEq a => Gen0 (X a x y)
+checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen CanBeEmptyStatic (X a x y)
+--checkedGen : Fuel -> (a : Type) -> (x, y : a) -> DecEq a => Gen CanBeEmptyStatic (X a x y)
 checkedGen = deriveGen @{EmptyCons}
 
 main : IO Unit

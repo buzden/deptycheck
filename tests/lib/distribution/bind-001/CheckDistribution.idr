@@ -9,14 +9,14 @@ import DistrCheckCommon
 
 %default total
 
-nats : (n : Nat) -> Gen0 Nat
+nats : (n : Nat) -> Gen CanBeEmptyStatic Nat
 nats n = elements' [1 .. n]
 
-genFin : (n : Nat) -> Gen0 $ Fin n
+genFin : (n : Nat) -> Gen CanBeEmptyStatic $ Fin n
 genFin Z     = empty
 genFin (S n) = elements' $ forget $ allFins n
 
-genAnyFin : Gen0 Nat => Gen0 (n ** Fin n)
+genAnyFin : Gen CanBeEmptyStatic Nat => Gen CanBeEmptyStatic (n ** Fin n)
 genAnyFin @{genNat} = do
   n <- genNat
   f <- genFin n

@@ -16,4 +16,4 @@ data X2 : Nat -> Type where
 data Y : Type where
   MkY : X2 n -> Y
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen0 Y
+%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen CanBeEmptyStatic Y

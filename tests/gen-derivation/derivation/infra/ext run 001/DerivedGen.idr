@@ -7,7 +7,7 @@ import RunDerivedGen
 
 %language ElabReflection
 
-checkedGen : Fuel -> (Fuel -> Gen0 String) => Gen0 XS
+checkedGen : Fuel -> (Fuel -> Gen CanBeEmptyStatic String) => Gen CanBeEmptyStatic XS
 checkedGen = deriveGen @{Ext_XS}
 
 main : IO Unit

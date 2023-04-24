@@ -18,4 +18,4 @@ mutual
 
   data Y = Y0 | Y1 (X Nat)
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen0 (a ** X a)
+%runElab printDerived @{EmptyCons} $ Fuel -> Gen CanBeEmptyStatic (a ** X a)

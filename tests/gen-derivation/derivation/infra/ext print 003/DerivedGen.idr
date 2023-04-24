@@ -7,4 +7,4 @@ import PrintDerivation
 
 %language ElabReflection
 
-%runElab printDerived @{Ext_XSN} $ Fuel -> (Fuel -> Gen0 String) => (Fuel -> Gen0 Nat) => Gen0 XSN
+%runElab printDerived @{Ext_XSN} $ Fuel -> (Fuel -> Gen CanBeEmptyStatic String) => (Fuel -> Gen CanBeEmptyStatic Nat) => Gen CanBeEmptyStatic XSN

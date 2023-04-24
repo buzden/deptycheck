@@ -13,4 +13,4 @@ data D : Bool -> Type where
   TL : String ->        D True
   TR : String -> D b -> D True
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (Fuel -> Gen0 Nat) => (Fuel -> Gen0 String) => (b : Bool) -> Gen0 $ D b
+%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (Fuel -> Gen CanBeEmptyStatic Nat) => (Fuel -> Gen CanBeEmptyStatic String) => (b : Bool) -> Gen CanBeEmptyStatic $ D b

@@ -28,7 +28,7 @@ record NSB where
   sf : String
   bf : Bool
 
-g : Nat -> Nat -> Gen0 NSB
+g : Nat -> Nat -> Gen CanBeEmptyStatic NSB
 g n m = [| MkNSB (forgetStructure $ nats' n) (forgetStructure $ strs' m) (forgetStructure bools') |]
 
 mainFor : Nat -> Nat -> IO ()

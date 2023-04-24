@@ -11,4 +11,4 @@ data X : Nat -> Bool -> Type where
   X0 : X 0 True
   X1 : X 1 False
 
-%runElab printDerived @{EmptyBody} $ Fuel -> Gen0 (n : Nat ** b : Bool ** X n b)
+%runElab printDerived @{EmptyBody} $ Fuel -> Gen CanBeEmptyStatic (n : Nat ** b : Bool ** X n b)

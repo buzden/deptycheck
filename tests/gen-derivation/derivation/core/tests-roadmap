@@ -83,8 +83,8 @@ norec t-p.->.. ext (+)
   `data X a b = MkX (Maybe (a, b, a))`, given gens for `a` and `b` derive for `X a b`, run `X String Nat` with `%hint` for `String` and `Nat`
 
 norec t-pi->.. noext (+)
-  `(a, b : Bool) -> Gen0 (a = b)`
-  `(a, b : Nat) -> Gen0 (a = b)`
+  `(a, b : Bool) -> Gen CanBeEmptyStatic (a = b)`
+  `(a, b : Nat) -> Gen CanBeEmptyStatic (a = b)`
   ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
         MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `X b1 b2`
@@ -94,7 +94,7 @@ norec t-pi->.. noext (+)
       ``` derive for `X b1 b2`
 
 norec t-pi->.. ext (+)
-  given `DecEq a`, derive for `(x, y : a) -> Gen0 (x = y)`
+  given `DecEq a`, derive for `(x, y : a) -> Gen CanBeEmptyStatic (x = y)`
 
 norec t-..->p. noext (+)
   ``` data X : Bool -> Bool -> Type where -- both type arguments are parameters, not indices
@@ -178,10 +178,10 @@ norec t-p.->.i noext (-)
   ``` data X : Bool -> Bool -> Type where -- isn't one of the arguments an index, not a param?
         MkX : (b1 : Bool) -> (b2 : Bool) -> (b1 = b2) -> X b1 b2
       ``` derive for `(b1 ** X b1 b2)`
-  `(a : Nat) -> Gen0 (b : Nat ** a = b)`
-  `(b : Nat) -> Gen0 (a : Nat ** a = b)`
-  `(x : a) -> Gen0 (y : a ** x = y)`
-  `(y : a) -> Gen0 (x : a ** x = y)`
+  `(a : Nat) -> Gen CanBeEmptyStatic (b : Nat ** a = b)`
+  `(b : Nat) -> Gen CanBeEmptyStatic (a : Nat ** a = b)`
+  `(x : a) -> Gen CanBeEmptyStatic (y : a ** x = y)`
+  `(y : a) -> Gen CanBeEmptyStatic (x : a ** x = y)`
 
 --- Recursive ---
 

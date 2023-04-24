@@ -9,4 +9,4 @@ import Data.Vect
 
 %language ElabReflection
 
-%runElab printDerived @{EmptyBody} $ Fuel -> (n : Nat) -> (a : Type) -> Gen0 (Vect n a)
+%runElab printDerived @{EmptyBody} $ Fuel -> (n : Nat) -> (a : Type) -> Gen CanBeEmptyStatic (Vect n a)

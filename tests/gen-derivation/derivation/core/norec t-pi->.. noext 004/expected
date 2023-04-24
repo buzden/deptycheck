@@ -6,7 +6,7 @@ DerivedGen:19:14--19:23
  15 |   show (X0 b1 b2 _) = "X0 \{show b1} \{show b2} Refl"
  16 |   show X1           = "X1"
  17 | 
- 18 | checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen0 (X b1 b2)
+ 18 | checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen CanBeEmptyStatic (X b1 b2)
  19 | checkedGen = deriveGen
                    ^^^^^^^^^
 

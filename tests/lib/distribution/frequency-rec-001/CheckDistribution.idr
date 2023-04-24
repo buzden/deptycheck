@@ -6,10 +6,10 @@ import DistrCheckCommon
 
 %default total
 
-nats : Gen0 Nat
+nats : Gen CanBeEmptyStatic Nat
 nats = elements' [0 .. 9]
 
-lists : (maxLen : Nat) -> Gen0 a -> Gen0 $ List a
+lists : (maxLen : Nat) -> Gen CanBeEmptyStatic a -> Gen CanBeEmptyStatic $ List a
 lists Z     _  = pure []
 lists (S n) as = frequency
   [ (1, [| [] |])

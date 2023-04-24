@@ -7,6 +7,6 @@ DerivedGen:10:72--10:78
  07 | %language ElabReflection
  08 | 
  09 | export
- 10 | checkedGen : Fuel -> (Fuel -> Gen0 String) => (Fuel -> Gen0 Nat) => Gen0 (String, Nat, String)
+ 10 | checkedGen : Fuel -> (Fuel -> Gen CanBeEmptyStatic String) => (Fuel -> Gen CanBeEmptyStatic Nat) => Gen CanBeEmptyStatic (String, Nat, String)
                                                                              ^^^^^^
 

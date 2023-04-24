@@ -6,7 +6,7 @@ DerivedGen:17:14--17:23
  13 | Show (X b1 b2) where
  14 |   show (MkX b1 b2 _) = "MkX \{show b1} \{show b2} Refl"
  15 | 
- 16 | checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen0 (X b1 b2)
+ 16 | checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen CanBeEmptyStatic (X b1 b2)
  17 | checkedGen = deriveGen
                    ^^^^^^^^^
 

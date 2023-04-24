@@ -15,7 +15,7 @@ data X : (b1 : Bool) -> (b2 : Bool) -> Type where
 Show (X b1 b2) where
   show (MkX b1 b2) = "MkX \{show b1} \{show b2}"
 
-checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen0 (X b1 b2)
+checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen CanBeEmptyStatic (X b1 b2)
 checkedGen = deriveGen
 
 main : IO ()

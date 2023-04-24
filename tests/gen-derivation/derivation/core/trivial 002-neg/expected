@@ -6,7 +6,7 @@ DerivedGen:10:14--10:23
  06 | 
  07 | %language ElabReflection
  08 | 
- 09 | checkedGen : Fuel -> Gen0 Void
+ 09 | checkedGen : Fuel -> Gen CanBeEmptyStatic Void
  10 | checkedGen = deriveGen
                    ^^^^^^^^^
 

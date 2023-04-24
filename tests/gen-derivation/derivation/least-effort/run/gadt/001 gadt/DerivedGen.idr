@@ -8,7 +8,7 @@ import Data.Fin
 
 %language ElabReflection
 
-checkedGen : Fuel -> (n : Nat) -> Gen0 $ Fin n
+checkedGen : Fuel -> (n : Nat) -> Gen CanBeEmptyStatic $ Fin n
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

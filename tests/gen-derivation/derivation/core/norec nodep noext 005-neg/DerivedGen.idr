@@ -10,7 +10,7 @@ data X = X0 | X1 Bool | X2 Void Bool
 
 %runElab derive "X" [Generic, Meta, Show]
 
-checkedGen : Fuel -> Gen0 X
+checkedGen : Fuel -> Gen CanBeEmptyStatic X
 checkedGen = deriveGen
 
 main : IO ()

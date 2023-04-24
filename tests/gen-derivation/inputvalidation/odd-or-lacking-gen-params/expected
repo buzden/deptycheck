@@ -6,17 +6,17 @@ ValidateInput:14:66--14:69
  11 | 
  12 | --- Unrelated stuff in the resulting dpair ---
  13 | 
- 14 | genY_with_unrelated : Fuel -> (a : Type) -> Gen0 (b : Type ** n : Nat ** Y a b)
+ 14 | genY_with_unrelated : Fuel -> (a : Type) -> Gen CanBeEmptyStatic (b : Type ** n : Nat ** Y a b)
                                                                        ^^^
 
 Error: While processing right hand side of genY_with_repeating_name_equityped. Error during reflection: Argument of dependent pair under the resulting `Gen` must be named
 
 ValidateInput:17:60--17:95
  13 | 
- 14 | genY_with_unrelated : Fuel -> (a : Type) -> Gen0 (b : Type ** n : Nat ** Y a b)
+ 14 | genY_with_unrelated : Fuel -> (a : Type) -> Gen CanBeEmptyStatic (b : Type ** n : Nat ** Y a b)
  15 | genY_with_unrelated = deriveGen
  16 | 
- 17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen0 (b : Type ** b : Type ** Y a b)
+ 17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen CanBeEmptyStatic (b : Type ** b : Type ** Y a b)
                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Error: While processing type of genY_with_repeating_name_difflytyped. When unifying:
@@ -27,19 +27,19 @@ Mismatch between: Nat and Type.
 
 ValidateInput:20:94--20:95
  16 | 
- 17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen0 (b : Type ** b : Type ** Y a b)
+ 17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen CanBeEmptyStatic (b : Type ** b : Type ** Y a b)
  18 | genY_with_repeating_name_equityped = deriveGen
  19 | 
- 20 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen0 (b : Type ** b : Nat ** Y a b)
+ 20 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen CanBeEmptyStatic (b : Type ** b : Nat ** Y a b)
                                                                                                    ^
 
 Error: No type declaration for ValidateInput.genY_with_repeating_name_difflytyped.
 
 ValidateInput:21:1--21:49
- 17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen0 (b : Type ** b : Type ** Y a b)
+ 17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen CanBeEmptyStatic (b : Type ** b : Type ** Y a b)
  18 | genY_with_repeating_name_equityped = deriveGen
  19 | 
- 20 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen0 (b : Type ** b : Nat ** Y a b)
+ 20 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen CanBeEmptyStatic (b : Type ** b : Nat ** Y a b)
  21 | genY_with_repeating_name_difflytyped = deriveGen
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Did you mean: genY_with_repeating_name_equityped?
@@ -51,10 +51,10 @@ Mismatch between: Nat and Type.
 
 ValidateInput:23:79--23:87
  19 | 
- 20 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen0 (b : Type ** b : Nat ** Y a b)
+ 20 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen CanBeEmptyStatic (b : Type ** b : Nat ** Y a b)
  21 | genY_with_repeating_name_difflytyped = deriveGen
  22 | 
- 23 | genY_with_repeating_name_difflytyped' : Fuel -> (a : Type) -> Gen0 (b : Nat ** b : Type ** Y a b)
+ 23 | genY_with_repeating_name_difflytyped' : Fuel -> (a : Type) -> Gen CanBeEmptyStatic (b : Nat ** b : Type ** Y a b)
                                                                                     ^^^^^^^^
 
 Error: While processing right hand side of genY_unused_argument. Error during reflection: Given parameter is not used in the target type
@@ -64,6 +64,6 @@ ValidateInput:28:54--28:57
  25 | 
  26 | --- Not all arguments are used ---
  27 | 
- 28 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen0 $ Y a b
+ 28 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen CanBeEmptyStatic $ Y a b
                                                            ^^^
 

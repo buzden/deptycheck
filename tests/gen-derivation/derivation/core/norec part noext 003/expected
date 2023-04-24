@@ -6,7 +6,7 @@ DerivedGen:14:14--14:23
  10 | 
  11 | %runElab derive "X" [Generic, Meta, Show]
  12 | 
- 13 | checkedGen : Fuel -> Gen0 X
+ 13 | checkedGen : Fuel -> Gen CanBeEmptyStatic X
  14 | checkedGen = deriveGen
                    ^^^^^^^^^
 

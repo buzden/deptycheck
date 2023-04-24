@@ -7,6 +7,6 @@ DerivedGen:9:44--9:49
  6 | 
  7 | %language ElabReflection
  8 | 
- 9 | checkedGen : Fuel -> (a, b : Bool) -> Gen0 (a = b)
+ 9 | checkedGen : Fuel -> (a, b : Bool) -> Gen CanBeEmptyStatic (a = b)
                                                 ^^^^^
 

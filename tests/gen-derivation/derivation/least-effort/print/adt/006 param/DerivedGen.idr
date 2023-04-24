@@ -10,4 +10,4 @@ import PrintDerivation
 data X : Nat -> Type where
   MkX : X n
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen0 (n ** X n)
+%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen CanBeEmptyStatic (n ** X n)

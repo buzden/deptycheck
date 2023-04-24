@@ -85,7 +85,7 @@ namespace VectMaybeAnyType
 
 %language ElabReflection
 
-checkedGen : Fuel -> (n : Nat) -> (v : VectMaybeAnyType n) -> Gen0 (i ** t ** AtIndex n i t v)
+checkedGen : Fuel -> (n : Nat) -> (v : VectMaybeAnyType n) -> Gen CanBeEmptyStatic (i ** t ** AtIndex n i t v)
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

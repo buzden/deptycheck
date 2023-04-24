@@ -7,6 +7,6 @@ DerivedGen:14:31--14:34
  11 | Show a => Show b => Show (X a b) where
  12 |   show (MkX m) = "MkX \{show m}"
  13 | 
- 14 | checkedGen : Fuel -> (Fuel -> Gen0 a) => (Fuel -> Gen0 b) => Gen0 (X a b)
+ 14 | checkedGen : Fuel -> (Fuel -> Gen CanBeEmptyStatic a) => (Fuel -> Gen CanBeEmptyStatic b) => Gen CanBeEmptyStatic (X a b)
                                     ^^^
 

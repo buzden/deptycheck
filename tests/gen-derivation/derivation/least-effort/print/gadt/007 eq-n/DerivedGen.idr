@@ -10,4 +10,4 @@ import PrintDerivation
 data EqualN : Nat -> Nat -> Type where
   ReflN : EqualN x x
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen0 (a ** b ** EqualN a b)
+%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen CanBeEmptyStatic (a ** b ** EqualN a b)

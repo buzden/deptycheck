@@ -17,7 +17,7 @@ data X : Nat -> Nat -> Type where
   show XE = "XE \{show n} \{show m}"
   show XS = "XS \{show n} \{show m}"
 
-checkedGen : Fuel -> (n, m : Nat) -> Gen0 (X n m)
+checkedGen : Fuel -> (n, m : Nat) -> Gen CanBeEmptyStatic (X n m)
 checkedGen = deriveGen @{EmptyCons}
 
 main : IO Unit

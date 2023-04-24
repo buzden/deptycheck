@@ -15,7 +15,7 @@ Show (X b1 b2) where
   show (X0 b1 b2) = "X0 \{show b1} \{show b2}"
   show (X1 ())    = "X1 ()"
 
-checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen0 (X b1 b2)
+checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen CanBeEmptyStatic (X b1 b2)
 checkedGen = deriveGen
 
 main : IO ()

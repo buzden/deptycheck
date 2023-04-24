@@ -10,7 +10,7 @@ import System.Random.Pure.StdGen
 
 %default total
 
-g : Gen0 Nat
+g : Gen CanBeEmptyStatic Nat
 g = trace "--- outmost gen ---" $ oneOf
   [ oneOf $ trace "-- list with pure 4, 5 --"
       [ pure $ trace "pure 4" 4

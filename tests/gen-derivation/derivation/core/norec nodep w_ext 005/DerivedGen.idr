@@ -10,10 +10,10 @@ data X = MkX Void
 
 %runElab derive "X" [Generic, Meta, Show]
 
-voidsGen : Fuel -> Gen0 Void
+voidsGen : Fuel -> Gen CanBeEmptyStatic Void
 voidsGen _ = empty
 
-checkedGen : Fuel -> (Fuel -> Gen0 Void) => Gen0 X
+checkedGen : Fuel -> (Fuel -> Gen CanBeEmptyStatic Void) => Gen CanBeEmptyStatic X
 checkedGen = deriveGen
 
 main : IO ()

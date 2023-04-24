@@ -6,7 +6,7 @@ DerivedGen:13:14--13:23
  09 | Show (Gen x) where
  10 |   show _ = "a generator"
  11 | 
- 12 | checkedGen : Fuel -> (a : Type) -> Gen0 $ Gen0 a
+ 12 | checkedGen : Fuel -> (a : Type) -> Gen CanBeEmptyStatic $ Gen CanBeEmptyStatic a
  13 | checkedGen = deriveGen
                    ^^^^^^^^^
 
