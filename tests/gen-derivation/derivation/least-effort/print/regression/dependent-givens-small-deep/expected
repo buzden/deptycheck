@@ -19,6 +19,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:3632} : IApp. IVar Data.Fin.Fin
                                                               $ IVar n)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                   $ (IApp. IVar DerivedGen.X
                                          $ IVar n
                                          $ IVar {arg:3632}))))
@@ -40,6 +41,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:3632} : IApp. IVar Data.Fin.Fin
                                                                                  $ IVar n)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                                      $ (IApp. IVar DerivedGen.X
                                                             $ IVar n
                                                             $ IVar {arg:3632}))))
@@ -59,7 +61,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                 $ IBindVar f)))
                                              (IApp. INamedApp (IVar Prelude.pure)
                                                               f
-                                                              (IVar Test.DepTyCheck.Gen.Gen)
+                                                              (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                   $ Implicit True)
                                                   $ (IApp. IVar DerivedGen.MkX
                                                          $ IVar n
                                                          $ IVar f))

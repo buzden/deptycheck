@@ -11,6 +11,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 (MkTy <DerivedGen.X>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                   $ (IApp. IVar Builtin.DPair.DPair
                                          $ IVar Prelude.Types.Nat
                                          $ (ILam.  (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
@@ -26,6 +27,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    (MkTy <<DerivedGen.MkX>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                                      $ (IApp. IVar Builtin.DPair.DPair
                                                             $ IVar Prelude.Types.Nat
                                                             $ (ILam.  (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)

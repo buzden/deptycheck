@@ -15,6 +15,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                   $ (IApp. IVar DerivedGen.X
                                          $ IVar {arg:3630}))))
          IDef <DerivedGen.X>[0]
@@ -31,6 +32,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                                      $ (IApp. IVar DerivedGen.X
                                                             $ IVar {arg:3630}))))
                             IDef <<DerivedGen.MkX>>
@@ -39,7 +41,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ IBindVar n)
                                              (IApp. INamedApp (IVar Prelude.pure)
                                                               f
-                                                              (IVar Test.DepTyCheck.Gen.Gen)
+                                                              (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                   $ Implicit True)
                                                   $ INamedApp (IVar DerivedGen.MkX)
                                                               n
                                                               (IVar n)) ] ]

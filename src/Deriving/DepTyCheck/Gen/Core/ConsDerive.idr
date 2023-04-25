@@ -141,7 +141,7 @@ namespace NonObligatoryExts
                   wrapImpls Z     = constructorCall
                   wrapImpls (S n) = var `{Builtin.DPair.MkDPair} .$ implicitTrue .$ wrapImpls n
               let consExpr = wrapImpls $ sig.targetType.args.length `minus` sig.givenParams.size
-              `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen} ~consExpr)
+              `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen _} ~consExpr)
 
       -- Get dependencies of constructor's arguments
       rawDeps <- argDeps con.args

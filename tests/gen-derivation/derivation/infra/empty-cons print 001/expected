@@ -11,6 +11,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 (MkTy <Builtin.Unit>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                   $ IVar Builtin.Unit)))
          IDef <Builtin.Unit>[]
               [ PatClause (IApp. IVar <Builtin.Unit>[] $ IBindVar ^fuel_arg^)
@@ -22,6 +23,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    (MkTy <<Builtin.MkUnit>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                                      $ IVar Builtin.Unit)))
                             IDef <<Builtin.MkUnit>>
                                  [ PatClause (IApp. IVar <<Builtin.MkUnit>>

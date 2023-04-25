@@ -6,6 +6,7 @@ LOG gen.auto.derive.infra:0:
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:3634} : IVar Data.Fuel.Fuel)
                                                         -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                                                 $ IPrimVal String))
     => ILocal (IApp. IVar <AlternativeCore.XS>[] $ IVar ^outmost-fuel^)
          IClaim MW
@@ -14,6 +15,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 (MkTy <AlternativeCore.XS>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                   $ IVar AlternativeCore.XS)))
          IDef <AlternativeCore.XS>[]
               [ PatClause (IApp. IVar <AlternativeCore.XS>[] $ IBindVar fuel)

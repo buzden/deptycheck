@@ -10,7 +10,7 @@ import DistrCheckCommon
 
 %hint DA : ConstructorDerivator; DA = LeastEffort
 
-nats : Fuel -> Gen Nat
+nats : Fuel -> Gen CanBeEmptyStatic Nat
 nats = deriveGen
 
 mainFor : (depth : Nat) -> IO ()

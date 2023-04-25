@@ -23,7 +23,7 @@ index _     []      = Nothing
 index Z     (x::_ ) = Just x
 index (S k) (_::xs) = index k xs
 
-listNats : Fuel -> Gen ListNat
+listNats : Fuel -> Gen CanBeEmptyStatic ListNat
 listNats = deriveGen
 
 -- Check that every number in every position is uniformly distributed (with the correction on the length of the list)

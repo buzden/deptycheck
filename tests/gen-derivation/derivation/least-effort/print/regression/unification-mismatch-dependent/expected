@@ -18,6 +18,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:3650} : IVar DerivedGen.X)
                           -> (MW ExplicitArg {arg:3653} : IVar DerivedGen.X)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                   $ (IApp. IVar DerivedGen.Z
                                          $ IVar {arg:3650}
                                          $ IVar {arg:3653}))))
@@ -38,6 +39,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:3650} : IVar DerivedGen.X)
                                              -> (MW ExplicitArg {arg:3653} : IVar DerivedGen.X)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                                      $ (IApp. IVar DerivedGen.Z
                                                             $ IVar {arg:3650}
                                                             $ IVar {arg:3653}))))
@@ -86,7 +88,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                    $ IVar Builtin.Refl))
                                                                        (IApp. INamedApp (IVar Prelude.pure)
                                                                                         f
-                                                                                        (IVar Test.DepTyCheck.Gen.Gen)
+                                                                                        (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                             $ Implicit True)
                                                                             $ (IApp. INamedApp (IVar DerivedGen.MkZ)
                                                                                                x
                                                                                                (IVar x)

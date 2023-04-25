@@ -18,6 +18,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg len : IVar Prelude.Types.Nat)
                           -> (MW ExplicitArg elem : IType)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                   $ (IApp. IVar Data.Vect.Vect
                                          $ IVar len
                                          $ IVar elem))))

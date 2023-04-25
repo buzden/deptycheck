@@ -18,6 +18,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
                           -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                   $ (IApp. IVar DerivedGen.LT2
                                          $ IVar {arg:3630}
                                          $ IVar {arg:3633}))))
@@ -35,7 +36,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                           $ IVar inter^<{arg:3633}>)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency')
                                                                       description
                                                                       (IApp. IVar Just
                                                                            $ IPrimVal DerivedGen.LT2[0, 1] (spend fuel))
@@ -64,6 +65,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                                      $ (IApp. IVar DerivedGen.LT2
                                                             $ IVar {arg:3630}
                                                             $ IVar {arg:3633}))))
@@ -75,6 +77,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
                                                      $ (IApp. IVar DerivedGen.LT2
                                                             $ IVar {arg:3630}
                                                             $ IVar {arg:3633}))))
@@ -101,7 +104,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                       $ IVar Builtin.Refl))
                                                           (IApp. INamedApp (IVar Prelude.pure)
                                                                            f
-                                                                           (IVar Test.DepTyCheck.Gen.Gen)
+                                                                           (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                $ Implicit True)
                                                                $ INamedApp (IVar DerivedGen.Base)
                                                                            x
                                                                            (IVar x))
@@ -133,7 +137,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                   $ (ILam.  (MW ExplicitArg ^bnd^{arg:3641} : Implicit False)
                                                          => (IApp. INamedApp (IVar Prelude.pure)
                                                                              f
-                                                                             (IVar Test.DepTyCheck.Gen.Gen)
+                                                                             (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                  $ Implicit True)
                                                                  $ (IApp. INamedApp (INamedApp (IVar DerivedGen.Step)
                                                                                                y
                                                                                                (IVar y))
