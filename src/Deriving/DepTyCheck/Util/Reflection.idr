@@ -341,6 +341,22 @@ public export
 isSameTypeAs : Name -> Name -> Elab Bool
 isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `eq` getInfo' expected |]
 
+export
+nameConformsTo : (cand, origin : Name) -> Bool
+nameConformsTo cand origin = do
+  let (cns, cn) = simplify cand
+  let (ons, on) = simplify origin
+  cn == on && (cns `isPrefixOf` ons) -- notice that namespaces are stored in the reverse order
+  where
+    simplify : Name -> (List String, Name)
+    simplify (NS (MkNS ns) nm) = mapFst (++ ns) $ simplify nm
+    simplify (DN _ nm)         = simplify nm
+    simplify x                 = ([], x)
+
+0 nct_corr_eq : nameConformsTo `{A.B.c} `{A.B.c} = True;  nct_corr_eq = Refl
+0 nct_corr_le : nameConformsTo `{B.c}   `{A.B.c} = True;  nct_corr_le = Refl
+0 nct_corr_ge : nameConformsTo `{A.B.c} `{B.c}   = False; nct_corr_ge = Refl
+
 -- simple syntactic search of a `IVar`, disregarding shadowing or whatever
 export
 allVarNames : TTImp -> LazyList Name

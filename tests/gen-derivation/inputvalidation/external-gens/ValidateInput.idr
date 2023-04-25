@@ -34,7 +34,7 @@ genY_nongen_autoimpl_dpair = deriveGen
 genY_nongen_autoimpl_list_nofuel : Fuel -> List Int => (a, b : Type) -> Gen CanBeEmptyStatic $ Y a b
 genY_nongen_autoimpl_list_nofuel = deriveGen
 
-genY_nongen_autoimpl_pair_nofuel : Fuel -> (Gen X, Gen CanBeEmptyStatic X') => (a, b : Type) -> Gen CanBeEmptyStatic $ Y a b
+genY_nongen_autoimpl_pair_nofuel : Fuel -> (Gen CanBeEmptyStatic X, Gen CanBeEmptyStatic X') => (a, b : Type) -> Gen CanBeEmptyStatic $ Y a b
 genY_nongen_autoimpl_pair_nofuel = deriveGen
 
 genY_nongen_autoimpl_dpair_nofuel : Fuel -> (a ** b ** Gen CanBeEmptyStatic $ Y a b) => (a, b : Type) -> Gen CanBeEmptyStatic $ Y a b

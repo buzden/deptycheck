@@ -51,13 +51,13 @@ ValidateInput:28:25--28:29
 
 Error: While processing right hand side of genY_noFuel_gened. Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
 
-ValidateInput:31:21--31:42
+ValidateInput:31:21--31:59
  27 | 
  28 | genY_noFuel_mid' : (b : Type) -> Gen CanBeEmptyStatic $ DPair {a = Type, p = \a => Y a b}
  29 | genY_noFuel_mid' = deriveGen
  30 | 
  31 | genY_noFuel_gened : Gen CanBeEmptyStatic (a ** b ** Y a b)
-                          ^^^^^^^^^^^^^^^^^^^^^
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Error: While processing right hand side of genY_missplFuel_aft. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
@@ -101,13 +101,13 @@ ValidateInput:53:32--53:36
 
 Error: While processing right hand side of genY_missplFuel_aft_autoimpl_imp. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
-ValidateInput:56:67--56:71
+ValidateInput:56:84--56:88
  52 | 
  53 | genY_missplFuel_mid_imp : (a : Type) -> {_ : Fuel} -> (b : Type) -> Gen CanBeEmptyStatic $ Y a b
  54 | genY_missplFuel_mid_imp = deriveGen
  55 | 
  56 | genY_missplFuel_aft_autoimpl_imp : Gen CanBeEmptyStatic X => {_ : Fuel} -> (a, b : Type) -> Gen CanBeEmptyStatic $ Y a b
-                                                                        ^^^^
+                                                                                         ^^^^
 
 Error: While processing right hand side of genY_unnamed_imp_fuel. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 

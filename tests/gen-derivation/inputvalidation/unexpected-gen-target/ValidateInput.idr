@@ -25,10 +25,10 @@ genOfInfs = deriveGen
 genOfDPair : Fuel -> (a ** b ** Gen CanBeEmptyStatic $ Y a b)
 genOfDPair = deriveGen
 
-genOfPair : Fuel -> (a, b : Type) -> (Gen (Y a b), Gen CanBeEmptyStatic (Y a b))
+genOfPair : Fuel -> (a, b : Type) -> (Gen CanBeEmptyStatic (Y a b), Gen CanBeEmptyStatic (Y a b))
 genOfPair = deriveGen
 
-genOfPair' : Fuel -> (a, b : Type) -> (Gen (Y a b), Gen CanBeEmptyStatic X)
+genOfPair' : Fuel -> (a, b : Type) -> (Gen CanBeEmptyStatic (Y a b), Gen CanBeEmptyStatic X)
 genOfPair' = deriveGen
 
 genOfFuns_pur : Fuel -> Gen CanBeEmptyStatic $ (a : Type) -> (b : Type) -> Y a b
@@ -57,5 +57,8 @@ genOfFuns_out_pair0 = deriveGen
 
 genOfFuns_out_pair1 : Fuel -> Gen CanBeEmptyStatic $ (1 b : Type) -> (a ** Y a b)
 genOfFuns_out_pair1 = deriveGen
+
+nonEmptyGen : Fuel -> Gen NonEmpty X
+nonEmptyGen = deriveGen
 
 -- TODO to add more type that cannot be said as "pure types inside a `Gen`", if needed.

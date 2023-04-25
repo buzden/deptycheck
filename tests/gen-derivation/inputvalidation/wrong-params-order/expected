@@ -31,13 +31,13 @@ ValidateInput:26:62--26:66
 
 Error: While processing right hand side of genY_wrong_gened_order. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:29:55--29:59
+ValidateInput:29:72--29:76
  25 | 
  26 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen CanBeEmptyStatic $ Y a b) => (Fuel -> (a, b : Type) -> Gen CanBeEmptyStatic $ Y a b) => Gen CanBeEmptyStatic X
  27 | genX_wrong_giv_order_autoimpl_rep = deriveGen
  28 | 
  29 | genY_wrong_gened_order : Fuel -> Gen CanBeEmptyStatic (b : Type ** a : Type ** Y a b)
-                                                            ^^^^
+                                                                             ^^^^
 
 Error: While processing right hand side of genY_wrong_gened_order'. Error during reflection: Generated arguments must go in the same order as in the target type
 
@@ -51,21 +51,21 @@ ValidateInput:11:10--11:14
 
 Error: While processing right hand side of genX_wrong_gened_order_autoimpl. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:35:73--35:77
+ValidateInput:35:90--35:94
  31 | 
  32 | genY_wrong_gened_order' : Fuel -> Gen CanBeEmptyStatic (b ** a ** Y a b)
  33 | genY_wrong_gened_order' = deriveGen
  34 | 
  35 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen CanBeEmptyStatic (b : Type ** a : Type ** Y a b)) => Gen CanBeEmptyStatic X
-                                                                              ^^^^
+                                                                                               ^^^^
 
 Error: While processing right hand side of genX_wrong_gened_order_autoimpl_rep. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:38:77--38:81
+ValidateInput:38:94--38:98
  34 | 
  35 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen CanBeEmptyStatic (b : Type ** a : Type ** Y a b)) => Gen CanBeEmptyStatic X
  36 | genX_wrong_gened_order_autoimpl = deriveGen
  37 | 
  38 | genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen CanBeEmptyStatic (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen CanBeEmptyStatic (a : Type ** b : Type ** Y a b)) => Gen CanBeEmptyStatic X
-                                                                                  ^^^^
+                                                                                                   ^^^^
 
