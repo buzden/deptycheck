@@ -412,7 +412,7 @@ namespace GenAlternatives
   export
   {em : _} -> Alternative (GenAlternatives False em) where
     empty = []
-    MkGenAlternatives xs <|> MkGenAlternatives ys = MkGenAlternatives $ xs <|> ys
+    xs <|> ys = MkGenAlternatives $ xs.unGenAlternatives <|> ys.unGenAlternatives
 
   -- implementation for `Monad` is below --
 
