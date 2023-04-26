@@ -352,7 +352,7 @@ namespace GenAlternatives
          (0 _ : IfUnsolved lem em) =>
          (0 _ : IfUnsolved rem em) =>
          Lazy (Gen lem a) -> Lazy (GenAlternatives e rem a) -> GenAlternatives ne em a
-  x :: xs = MkGenAlternatives $ (1, wrapLazy relax x) :: mapTaggedLazy relax xs.unGenAlternatives
+  x :: xs = MkGenAlternatives $ (1, relax x) :: mapTaggedLazy relax xs.unGenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export %inline
