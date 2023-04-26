@@ -7,7 +7,7 @@ import RunDerivedGen
 %language ElabReflection
 
 export
-checkedGen : Fuel -> (a, b : Nat) -> Gen CanBeEmptyStatic (a = b)
+checkedGen : Fuel -> (a, b : Nat) -> Gen MaybeEmpty (a = b)
 checkedGen = deriveGen
 
 main : IO ()

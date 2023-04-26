@@ -22,7 +22,7 @@ Show Y where
   show $ MkY1 l r = "MkY1 (\{show l}) (\{show r})"
   show $ MkY2 l r = "MkY2 (\{show l}) (\{show r})"
 
-checkedGen : Fuel -> Gen CanBeEmptyStatic Y
+checkedGen : Fuel -> Gen MaybeEmpty Y
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

@@ -11,13 +11,13 @@ data Y : Type -> Type -> Type where
 
 --- Not all arguments are named ---
 
-genY_unnamed_argument : Fuel -> (a, b : Type) -> Nat -> Gen CanBeEmptyStatic $ Y a b
+genY_unnamed_argument : Fuel -> (a, b : Type) -> Nat -> Gen MaybeEmpty $ Y a b
 genY_unnamed_argument = deriveGen
 
 --- Arguments shadowing ---
 
-genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen CanBeEmptyStatic $ Y a b
+genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
 genY_shadowed_by_auto_argument = deriveGen
 
-genY_shadowed_by_other_argument : Fuel -> (a : Type) -> (b : Type) -> (a : Type) -> Gen CanBeEmptyStatic $ Y a b
+genY_shadowed_by_other_argument : Fuel -> (a : Type) -> (b : Type) -> (a : Type) -> Gen MaybeEmpty $ Y a b
 genY_shadowed_by_other_argument = deriveGen

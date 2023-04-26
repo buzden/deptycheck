@@ -1,7 +1,7 @@
 1/3: Building AlternativeCore (AlternativeCore.idr)
 2/3: Building PrintDerivation (PrintDerivation.idr)
 3/3: Building DerivedGen (DerivedGen.idr)
-LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (a : Z) -> (b : Z) -> Gen CanBeEmptyStatic (W a b)
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (a : Z) -> (b : Z) -> Gen MaybeEmpty (W a b)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => (MW ExplicitArg outer^<a> : Implicit True)
@@ -18,7 +18,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:3662} : IVar DerivedGen.Z)
                           -> (MW ExplicitArg {arg:3665} : IVar DerivedGen.Z)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ (IApp. IVar DerivedGen.W
                                          $ IVar {arg:3662}
                                          $ IVar {arg:3665}))))
@@ -39,7 +39,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:3662} : IVar DerivedGen.Z)
                                              -> (MW ExplicitArg {arg:3665} : IVar DerivedGen.Z)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar DerivedGen.W
                                                             $ IVar {arg:3662}
                                                             $ IVar {arg:3665}))))

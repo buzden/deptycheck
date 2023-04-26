@@ -4,7 +4,7 @@ import DistrCheckCommon
 
 %default total
 
-bools : Gen CanBeEmptyStatic Bool
+bools : Gen MaybeEmpty Bool
 bools = frequency
           [ (1, pure True)
           , (2, pure False)

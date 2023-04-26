@@ -9,7 +9,7 @@ import public Infra
 data Y = Y0 | Y1
 
 cases : List TestCaseDesc
-cases = [ ("trivial type; no givens",) $ chk (getInfo "Y") [] $ Gen CanBeEmptyStatic Y
+cases = [ ("trivial type; no givens",) $ chk (getInfo "Y") [] $ Gen MaybeEmpty Y
         ]
 
 %runElab for_ cases checkAndLog

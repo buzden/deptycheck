@@ -11,7 +11,7 @@ data X = MkX (Bool, Bool)
 %runElab derive "X" [Generic, Meta, Show]
 
 export
-checkedGen : Fuel -> Gen CanBeEmptyStatic X
+checkedGen : Fuel -> Gen MaybeEmpty X
 checkedGen = deriveGen
 
 main : IO ()

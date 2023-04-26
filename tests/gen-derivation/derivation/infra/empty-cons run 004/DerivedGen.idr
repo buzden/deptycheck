@@ -13,7 +13,7 @@ data X : Nat -> Type where
 Show (X n) where
   show MkX = "MkX"
 
-checkedGen : Fuel -> Gen CanBeEmptyStatic (n ** X n)
+checkedGen : Fuel -> Gen MaybeEmpty (n ** X n)
 checkedGen = deriveGen @{EmptyCons}
 
 main : IO Unit

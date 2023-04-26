@@ -19,7 +19,7 @@ show' a b $ Step lt = ".\{show' a b lt}"
 {a, b : Nat} -> Show (LT2 a b) where
   show = show' a b
 
-checkedGen : Fuel -> (Fuel -> Gen CanBeEmptyStatic Nat) => Gen CanBeEmptyStatic (a ** b ** LT2 a b)
+checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty (a ** b ** LT2 a b)
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

@@ -1,7 +1,7 @@
 1/3: Building AlternativeCore (AlternativeCore.idr)
 2/3: Building PrintDerivation (PrintDerivation.idr)
 3/3: Building DerivedGen (DerivedGen.idr)
-LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen CanBeEmptyStatic Y
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen MaybeEmpty Y
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => ILocal (IApp. IVar <DerivedGen.Y>[] $ IVar ^outmost-fuel^)
@@ -11,7 +11,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 (MkTy <Prelude.Types.Nat>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ IVar Prelude.Types.Nat)))
          IClaim MW
                 Export
@@ -19,7 +19,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 (MkTy <Builtin.Unit>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ IVar Builtin.Unit)))
          IClaim MW
                 Export
@@ -27,7 +27,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 (MkTy <DerivedGen.X>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ (IApp. IVar Builtin.DPair.DPair
                                          $ IVar Prelude.Types.Nat
                                          $ (ILam.  (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
@@ -43,7 +43,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 (MkTy <DerivedGen.Y>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ IVar DerivedGen.Y)))
          IDef <Prelude.Types.Nat>[]
               [ PatClause (IApp. IVar <Prelude.Types.Nat>[]
@@ -78,7 +78,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    (MkTy <<Prelude.Types.Z>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ IVar Prelude.Types.Nat)))
                             IClaim MW
                                    Export
@@ -86,7 +86,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    (MkTy <<Prelude.Types.S>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ IVar Prelude.Types.Nat)))
                             IDef <<Prelude.Types.Z>>
                                  [ PatClause (IApp. IVar <<Prelude.Types.Z>>
@@ -119,7 +119,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    (MkTy <<Builtin.MkUnit>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ IVar Builtin.Unit)))
                             IDef <<Builtin.MkUnit>>
                                  [ PatClause (IApp. IVar <<Builtin.MkUnit>>
@@ -139,7 +139,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    (MkTy <<DerivedGen.MkX>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar Builtin.DPair.DPair
                                                             $ IVar Prelude.Types.Nat
                                                             $ (ILam.  (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
@@ -183,7 +183,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    (MkTy <<DerivedGen.MkY>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ IVar DerivedGen.Y)))
                             IDef <<DerivedGen.MkY>>
                                  [ PatClause (IApp. IVar <<DerivedGen.MkY>>

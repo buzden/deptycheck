@@ -84,12 +84,12 @@ checkTypeIsGen checkSide sig = do
 
   -- check the resulting type is `Gen`
   let IApp _ (IApp _ (IVar genFC topmostResultName) (IVar _ genEmptiness)) targetType = sigResult
-    | _ => failAt (getFC sigResult) "The result type of the generator function must be of type \"`Gen CanBeEmptyStatic` of desired result\""
+    | _ => failAt (getFC sigResult) "The result type of the generator function must be of type \"`Gen MaybeEmpty` of desired result\""
 
   unless !(topmostResultName `isSameTypeAs` `{Test.DepTyCheck.Gen.Gen}) $
-    failAt (getFC sigResult) "The result type of the generator function must be of type \"`Gen CanBeEmptyStatic` of desired result\""
+    failAt (getFC sigResult) "The result type of the generator function must be of type \"`Gen MaybeEmpty` of desired result\""
 
-  unless (genEmptiness `nameConformsTo` `{Test.DepTyCheck.Gen.Emptiness.CanBeEmptyStatic}) $
+  unless (genEmptiness `nameConformsTo` `{Test.DepTyCheck.Gen.Emptiness.MaybeEmpty}) $
     failAt genFC "Only `GenBeEmptyStatic` variant of generator is supported, `\{show genEmptiness}` is given"
     -- this check can be changed to `==` as soon as we gen the result type normalised properly.
 

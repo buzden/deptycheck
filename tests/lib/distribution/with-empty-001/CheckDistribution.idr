@@ -6,7 +6,7 @@ import DistrCheckCommon
 
 -- Credits for this test to Aleksei Volkov @AlgebraicWolf
 
-bools : Gen CanBeEmptyStatic Bool
+bools : Gen MaybeEmpty Bool
 bools = oneOf
           [ oneOf
               [ empty

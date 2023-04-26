@@ -30,7 +30,7 @@ Show Y where
   show $ MkY_LR g a = "MkY_LR (\{show g}) (\{show a})"
   show $ MkY_RL a g = "MkY_RL (\{show a}) (\{show g})"
 
-checkedGen : Fuel -> Gen CanBeEmptyStatic Y
+checkedGen : Fuel -> Gen MaybeEmpty Y
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

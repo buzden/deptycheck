@@ -6,38 +6,38 @@ ValidateInput:20:40--20:44
  17 | 
  18 | --- Wrong order of parameters ---
  19 | 
- 20 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen CanBeEmptyStatic $ Y a b
+ 20 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b
                                              ^^^^
 
 Error: While processing right hand side of genX_wrong_giv_order_autoimpl. Error during reflection: Given arguments must go in the same order as in the target type
 
 ValidateInput:23:58--23:62
  19 | 
- 20 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen CanBeEmptyStatic $ Y a b
+ 20 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b
  21 | genY_wrong_giv_order = deriveGen
  22 | 
- 23 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen CanBeEmptyStatic $ Y a b) => Gen CanBeEmptyStatic X
+ 23 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
                                                                ^^^^
 
 Error: While processing right hand side of genX_wrong_giv_order_autoimpl_rep. Error during reflection: Given arguments must go in the same order as in the target type
 
 ValidateInput:26:62--26:66
  22 | 
- 23 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen CanBeEmptyStatic $ Y a b) => Gen CanBeEmptyStatic X
+ 23 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
  24 | genX_wrong_giv_order_autoimpl = deriveGen
  25 | 
- 26 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen CanBeEmptyStatic $ Y a b) => (Fuel -> (a, b : Type) -> Gen CanBeEmptyStatic $ Y a b) => Gen CanBeEmptyStatic X
+ 26 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
                                                                    ^^^^
 
 Error: While processing right hand side of genY_wrong_gened_order. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:29:72--29:76
+ValidateInput:29:66--29:70
  25 | 
- 26 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen CanBeEmptyStatic $ Y a b) => (Fuel -> (a, b : Type) -> Gen CanBeEmptyStatic $ Y a b) => Gen CanBeEmptyStatic X
+ 26 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
  27 | genX_wrong_giv_order_autoimpl_rep = deriveGen
  28 | 
- 29 | genY_wrong_gened_order : Fuel -> Gen CanBeEmptyStatic (b : Type ** a : Type ** Y a b)
-                                                                             ^^^^
+ 29 | genY_wrong_gened_order : Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)
+                                                                       ^^^^
 
 Error: While processing right hand side of genY_wrong_gened_order'. Error during reflection: Generated arguments must go in the same order as in the target type
 
@@ -51,21 +51,21 @@ ValidateInput:11:10--11:14
 
 Error: While processing right hand side of genX_wrong_gened_order_autoimpl. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:35:90--35:94
+ValidateInput:35:84--35:88
  31 | 
- 32 | genY_wrong_gened_order' : Fuel -> Gen CanBeEmptyStatic (b ** a ** Y a b)
+ 32 | genY_wrong_gened_order' : Fuel -> Gen MaybeEmpty (b ** a ** Y a b)
  33 | genY_wrong_gened_order' = deriveGen
  34 | 
- 35 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen CanBeEmptyStatic (b : Type ** a : Type ** Y a b)) => Gen CanBeEmptyStatic X
-                                                                                               ^^^^
+ 35 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => Gen MaybeEmpty X
+                                                                                         ^^^^
 
 Error: While processing right hand side of genX_wrong_gened_order_autoimpl_rep. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:38:94--38:98
+ValidateInput:38:88--38:92
  34 | 
- 35 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen CanBeEmptyStatic (b : Type ** a : Type ** Y a b)) => Gen CanBeEmptyStatic X
+ 35 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => Gen MaybeEmpty X
  36 | genX_wrong_gened_order_autoimpl = deriveGen
  37 | 
- 38 | genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen CanBeEmptyStatic (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen CanBeEmptyStatic (a : Type ** b : Type ** Y a b)) => Gen CanBeEmptyStatic X
-                                                                                                   ^^^^
+ 38 | genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen MaybeEmpty (a : Type ** b : Type ** Y a b)) => Gen MaybeEmpty X
+                                                                                             ^^^^
 

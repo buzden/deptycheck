@@ -7,4 +7,4 @@ import PrintDerivation
 
 %language ElabReflection
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen CanBeEmptyStatic Unit
+%runElab printDerived @{EmptyCons} $ Fuel -> Gen MaybeEmpty Unit

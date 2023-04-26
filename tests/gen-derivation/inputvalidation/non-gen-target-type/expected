@@ -9,7 +9,7 @@ ValidateInput:14:8--14:16
  14 | list : List Int
              ^^^^^^^^
 
-Error: While processing right hand side of list'. Error during reflection: The result type of the generator function must be of type "`Gen CanBeEmptyStatic` of desired result"
+Error: While processing right hand side of list'. Error during reflection: The result type of the generator function must be of type "`Gen MaybeEmpty` of desired result"
 
 ValidateInput:17:17--17:25
  13 | 
@@ -29,7 +29,7 @@ ValidateInput:20:5--20:17
  20 | y : Y Int String
           ^^^^^^^^^^^^
 
-Error: While processing right hand side of y'. Error during reflection: The result type of the generator function must be of type "`Gen CanBeEmptyStatic` of desired result"
+Error: While processing right hand side of y'. Error during reflection: The result type of the generator function must be of type "`Gen MaybeEmpty` of desired result"
 
 ValidateInput:23:14--23:26
  19 | 

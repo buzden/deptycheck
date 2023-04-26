@@ -9,14 +9,14 @@ import DistrCheckCommon
 
 %default total
 
-nats : (n : Nat) -> Gen CanBeEmptyStatic Nat
+nats : (n : Nat) -> Gen MaybeEmpty Nat
 nats n = elements' [1 .. n]
 
-genFin : (n : Nat) -> Gen CanBeEmptyStatic $ Fin n
+genFin : (n : Nat) -> Gen MaybeEmpty $ Fin n
 genFin Z     = empty
 genFin (S n) = elements' $ forget $ allFins n
 
-genAnyFin : Gen CanBeEmptyStatic Nat => Gen CanBeEmptyStatic (n ** Fin n)
+genAnyFin : Gen MaybeEmpty Nat => Gen MaybeEmpty (n ** Fin n)
 genAnyFin @{genNat} = oneOf $ do
   n <- [ genNat ]
   f <- [ genFin n ]

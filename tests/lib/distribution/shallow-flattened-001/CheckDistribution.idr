@@ -6,10 +6,10 @@ import DistrCheckCommon
 
 %default total
 
-bools : Gen CanBeEmptyStatic Bool
+bools : Gen MaybeEmpty Bool
 bools = elements [True, False]
 
-eb : Gen CanBeEmptyStatic $ Either Bool Bool
+eb : Gen MaybeEmpty $ Either Bool Bool
 eb = oneOf
        $  ( Left  <$> alternativesOf bools )
        ++ ( Right <$> alternativesOf bools )

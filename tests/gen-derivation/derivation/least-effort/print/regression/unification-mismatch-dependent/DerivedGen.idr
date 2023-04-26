@@ -21,4 +21,4 @@ data Z : X -> X -> Type where
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (x : X) -> (x' : X) -> Gen CanBeEmptyStatic $ Z x x'
+%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (x : X) -> (x' : X) -> Gen MaybeEmpty $ Z x x'

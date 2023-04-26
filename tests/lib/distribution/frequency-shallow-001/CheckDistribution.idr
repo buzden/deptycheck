@@ -6,7 +6,7 @@ import DistrCheckCommon
 
 %default total
 
-eb : Gen CanBeEmptyStatic $ Either Bool Bool
+eb : Gen MaybeEmpty $ Either Bool Bool
 eb = frequency
        [ ( 1, Left  <$> elements [True, False] )
        , ( 2, Right <$> frequency [ (4, pure True), (5, pure False) ] )

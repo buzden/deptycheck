@@ -6,7 +6,7 @@ import DistrCheckCommon
 
 %default total
 
-eb : Gen CanBeEmptyStatic $ Either Bool Bool
+eb : Gen MaybeEmpty $ Either Bool Bool
 eb = oneOf
        $  Left  `mapAlternativesOf` frequency [ (1000000, pure True), (4000000, pure False) ]
        ++ Right `mapAlternativesOf` frequency [ (1, pure True), (4, pure False) ]

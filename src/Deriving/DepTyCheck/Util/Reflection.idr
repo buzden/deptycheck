@@ -156,7 +156,7 @@ liftNat k = `(Prelude.integerToNat ~(primVal $ BI $ cast k))
 export
 callOneOf : (desc : String) -> List TTImp -> TTImp
 callOneOf _    [v]      = v
-callOneOf desc variants = `(Test.DepTyCheck.Gen.oneOf {description=Just ~(primVal $ Str desc)} {em=CanBeEmptyStatic}) .$ liftList variants
+callOneOf desc variants = `(Test.DepTyCheck.Gen.oneOf {description=Just ~(primVal $ Str desc)} {em=MaybeEmpty}) .$ liftList variants
 
 -- List of weights and subgenerators
 export

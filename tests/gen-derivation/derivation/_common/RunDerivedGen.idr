@@ -9,20 +9,20 @@ import System.Random.Pure.StdGen
 %default total
 
 export %hint
-smallStrs : Fuel -> Gen CanBeEmptyStatic String
+smallStrs : Fuel -> Gen MaybeEmpty String
 smallStrs _ = elements ["", "a", "bc"]
 
 export %hint
-smallNats : Fuel -> Gen CanBeEmptyStatic Nat
+smallNats : Fuel -> Gen MaybeEmpty Nat
 smallNats _ = elements [0, 10]
 
 export
-aVect : Fuel -> (Fuel -> Gen CanBeEmptyStatic a) => (n : Nat) -> Gen CanBeEmptyStatic (Vect n a)
+aVect : Fuel -> (Fuel -> Gen MaybeEmpty a) => (n : Nat) -> Gen MaybeEmpty (Vect n a)
 aVect f Z             = [| [] |]
 aVect f (S n) @{genA} = [| genA f :: aVect f n @{genA} |]
 
 export %hint
-someTypes : Fuel -> Gen CanBeEmptyStatic Type
+someTypes : Fuel -> Gen MaybeEmpty Type
 someTypes _ = elements [Nat, String, Bool]
 
 export
@@ -31,7 +31,7 @@ Show (a = b) where
 
 public export
 data GenForRun : Type where
-  G : Show x => (Fuel -> Gen CanBeEmptyStatic x) -> GenForRun
+  G : Show x => (Fuel -> Gen MaybeEmpty x) -> GenForRun
 
 export
 runGs : List GenForRun -> IO Unit

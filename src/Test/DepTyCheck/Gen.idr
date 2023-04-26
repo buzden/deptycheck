@@ -54,7 +54,7 @@ record OneOfAlternatives (0 em : Emptiness) (0 a : Type)
 export
 data Gen : Emptiness -> Type -> Type where
 
-  Empty : Gen CanBeEmptyStatic a
+  Empty : Gen MaybeEmpty a
 
   Pure  : a -> Gen em a
 
@@ -85,7 +85,7 @@ Gen1 = Gen NonEmpty
 ||| You should prefer to be polymorphic on emptiness instead.
 public export %inline
 Gen0 : Type -> Type
-Gen0 = Gen CanBeEmptyStatic
+Gen0 = Gen MaybeEmpty
 
 ----------------------------
 --- Equivalence relation ---
@@ -167,8 +167,8 @@ relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
 export
 strengthen : {em : _} -> Gen iem a -> Maybe $ Gen em a
 
-strengthen {em=CanBeEmptyStatic} Empty = Just Empty
-strengthen {em=_}                Empty = Nothing
+strengthen {em=MaybeEmpty} Empty = Just Empty
+strengthen {em=_}          Empty = Nothing
 
 strengthen $ Pure x = Just $ Pure x
 strengthen $ Raw x  = Just $ Raw x
@@ -293,20 +293,20 @@ ap g (Pure x) = relax $ g <&> \f => f x
 ap (Raw sfl) (Raw sfr) = Raw $ sfl <*> sfr
 
 ap {em=NonEmpty} @{NN} @{NN} (OneOf @{ao} oo) g with (ao) _ | NN = OneOf @{NN} $ mapOneOf oo $ \x => assert_total ap x g
-ap {em=CanBeEmptyDynamic} (OneOf oo) g = OneOf @{DD} $ mapOneOf oo $ \x => assert_total ap x g
-ap {em=CanBeEmptyStatic}  @{_} @{rr} (OneOf @{_} @{au} oo) g = maybe Empty (OneOf @{AS} @{DD}) $
+ap {em=MaybeEmptyDeep} (OneOf oo) g = OneOf @{DD} $ mapOneOf oo $ \x => assert_total ap x g
+ap {em=MaybeEmpty}  @{_} @{rr} (OneOf @{_} @{au} oo) g = maybe Empty (OneOf @{AS} @{DD}) $
   trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} x g
 
 ap {em=NonEmpty} @{NN} @{NN} g (OneOf @{ao} oo) with (ao) _ | NN = OneOf @{NN} $ mapOneOf oo $ assert_total ap g
-ap {em=CanBeEmptyDynamic} g (OneOf oo) = OneOf @{DD} $ mapOneOf oo $ assert_total ap g
-ap {em=CanBeEmptyStatic} @{ll} g (OneOf @{_} @{au} oo) = maybe Empty (OneOf @{AS} @{DD}) $
+ap {em=MaybeEmptyDeep} g (OneOf oo) = OneOf @{DD} $ mapOneOf oo $ assert_total ap g
+ap {em=MaybeEmpty} @{ll} g (OneOf @{_} @{au} oo) = maybe Empty (OneOf @{AS} @{DD}) $
   trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} g x
 
 ap @{ll}      (Bind @{bo} x f) (Raw y) = Bind @{bindToOuterRelax bo ll} x $ \c => assert_total $ ap @{reflexive} @{reflexive} (f c) (Raw y)
 ap @{_} @{rr} (Raw y) (Bind @{bo} x f) = Bind @{bindToOuterRelax bo rr} x $ \c => assert_total $ ap @{reflexive} @{reflexive} (Raw y) (f c)
 
 ap @{ll} @{rr} (Bind @{lbo} x f) (Bind {biem} @{rbo} y g) with (canBeEmpty em)
-  _ | Right cb = Bind {biem=CanBeEmptyStatic} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
+  _ | Right cb = Bind {biem=MaybeEmpty} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
   ap @{NN} @{NN} (Bind @{lbo} x f) (Bind {biem=_} @{rbo} y g) | Left Refl with (extractNE lbo) | (extractNE rbo)
     _ | Refl | Refl = Bind @{lbo} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
 
@@ -321,8 +321,8 @@ export
   Pure x   >>= nf = nf x
   Raw g    >>= nf = Bind @{reflexive} g nf
   (OneOf @{ao} oo >>= nf) {em=NonEmpty} with (ao) _ | NN = OneOf $ mapOneOf oo $ assert_total (>>= nf)
-  (OneOf @{ao} oo >>= nf) {em=CanBeEmptyDynamic} = OneOf $ mapOneOf oo $ assert_total (>>= nf) . relax @{ao}
-  (OneOf oo >>= nf) {em=CanBeEmptyStatic} = maybe Empty (OneOf @{AS} @{DD}) $
+  (OneOf @{ao} oo >>= nf) {em=MaybeEmptyDeep} = OneOf $ mapOneOf oo $ assert_total (>>= nf) . relax @{ao}
+  (OneOf oo >>= nf) {em=MaybeEmpty} = maybe Empty (OneOf @{AS} @{DD}) $
     trMOneOf oo $ \x => strengthen $ assert_total $ relax x >>= nf
   Bind {biem} x f >>= nf with (order {rel=NoWeaker} biem em)
     _ | Left _  = Bind x $ \x => assert_total $ relax (f x) >>= nf
@@ -433,14 +433,14 @@ namespace OneOf
   public export
   data AltsNonEmpty : Bool -> Emptiness -> Type where
     NT : AltsNonEmpty True   NonEmpty
-    DT : AltsNonEmpty True   CanBeEmptyDynamic
-    Sx : AltsNonEmpty altsNe CanBeEmptyStatic
+    DT : AltsNonEmpty True   MaybeEmptyDeep
+    Sx : AltsNonEmpty altsNe MaybeEmpty
 
   export %defaulthint
   altsNonEmptyTrue : {em : _} -> AltsNonEmpty True em
-  altsNonEmptyTrue {em=NonEmpty         } = NT
-  altsNonEmptyTrue {em=CanBeEmptyDynamic} = DT
-  altsNonEmptyTrue {em=CanBeEmptyStatic } = Sx
+  altsNonEmptyTrue {em=NonEmpty      } = NT
+  altsNonEmptyTrue {em=MaybeEmptyDeep} = DT
+  altsNonEmptyTrue {em=MaybeEmpty    } = Sx
 
 ||| Choose one of the given generators uniformly.
 |||
@@ -452,14 +452,14 @@ oneOf : {default Nothing description : Maybe String} ->
         alem `NoWeaker` em =>
         AltsNonEmpty altsNe em =>
         (0 _ : IfUnsolved alem em) =>
-        (0 _ : IfUnsolved altsNe $ em /= CanBeEmptyStatic) =>
+        (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
         GenAlternatives altsNe alem a -> Gen em a
 oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlternatives xs = OneOf $ MkOneOf description xs $ Val _
-oneOf {em=CanBeEmptyDynamic} @{_} @{DT} x = case x of MkGenAlternatives xs => OneOf $ MkOneOf description xs $ Val _
-oneOf {em=CanBeEmptyStatic}             x = case x of MkGenAlternatives xs => do
+oneOf {em=MaybeEmptyDeep} @{_} @{DT} x = case x of MkGenAlternatives xs => OneOf $ MkOneOf description xs $ Val _
+oneOf {em=MaybeEmpty}             x = case x of MkGenAlternatives xs => do
   let u : Maybe $ LazyLst1 (_, Lazy _) :=
-            strengthen $ flip mapMaybe xs $ \wg => (fst wg,) . delay <$> Gen.strengthen {em=CanBeEmptyDynamic} (snd wg)
-  maybe Empty (\gs' => OneOf {alem=CanBeEmptyDynamic} $ MkOneOf description gs' $ Val _) u
+            strengthen $ flip mapMaybe xs $ \wg => (fst wg,) . delay <$> Gen.strengthen {em=MaybeEmptyDeep} (snd wg)
+  maybe Empty (\gs' => OneOf {alem=MaybeEmptyDeep} $ MkOneOf description gs' $ Val _) u
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -473,7 +473,7 @@ frequency : {default Nothing description : Maybe String} ->
             alem `NoWeaker` em =>
             AltsNonEmpty altsNe em =>
             (0 _ : IfUnsolved alem em) =>
-            (0 _ : IfUnsolved altsNe $ em /= CanBeEmptyStatic) =>
+            (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
             LazyLst altsNe (PosNat, Lazy (Gen alem a)) -> Gen em a
 frequency = oneOf {description} . MkGenAlternatives
 
@@ -491,7 +491,7 @@ elements : {default Nothing description : Maybe String} ->
            {em : _} ->
            AltsNonEmpty altsNe em =>
            (0 _ : IfUnsolved em NonEmpty) =>
-           (0 _ : IfUnsolved altsNe $ em /= CanBeEmptyStatic) =>
+           (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
            LazyLst altsNe a -> Gen em a
 elements = oneOf {alem=NonEmpty} {description} . altsFromList
 
@@ -523,8 +523,8 @@ deepAlternativesOf (S k) gen = processAlternatives' alternativesOf $ deepAlterna
 ||| except for empty generator, which would still be returned as empty generator.
 export
 forgetStructure : {em : _} -> Gen em a -> Gen em a
-forgetStructure Empty               = Empty
-forgetStructure g@(Raw _)           = g
+forgetStructure Empty     = Empty
+forgetStructure g@(Raw _) = g
 forgetStructure g with (canBeEmpty em)
   _ | Right _   = MkRawGen (unGen' g) `Bind` maybe Empty Pure
   _ | Left Refl = Raw $ MkRawGen $ unGen1 g
@@ -596,8 +596,8 @@ iterate (S n) f x = iterate n f $ f x
 -- TODO to reimplement `variant` to ensure that preserves the structure as far as it can.
 export
 variant : {em : _} -> Nat -> Gen em a -> Gen em a
-variant _     Empty = Empty
-variant Z       gen = gen
+variant _ Empty = Empty
+variant Z gen   = gen
 variant n gen with (canBeEmpty em)
   _ | Right _   = MkRawGen (iterate n independent $ unGen' gen) `Bind` maybe Empty Pure
   _ | Left Refl = Raw $ MkRawGen $ iterate n independent $ unGen1 gen

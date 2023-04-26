@@ -21,7 +21,7 @@ Show X where
   show (X2 True x)  = "X2 True \{show x}"
   show (X2 False x) = "X2 False \{show x}"
 
-checkedGen : Fuel -> Gen CanBeEmptyStatic X
+checkedGen : Fuel -> Gen MaybeEmpty X
 checkedGen = deriveGen
 
 main : IO ()

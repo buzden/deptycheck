@@ -2,11 +2,11 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Error during reflection: Target type's argument must be a variable name
 
-DerivedGen:10:91--10:97
+DerivedGen:10:79--10:85
  06 | 
  07 | %language ElabReflection
  08 | 
  09 | export
- 10 | checkedGen : Fuel -> (Fuel -> Gen CanBeEmptyStatic String) => Gen CanBeEmptyStatic (Maybe String)
-                                                                                                ^^^^^^
+ 10 | checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (Maybe String)
+                                                                                    ^^^^^^
 

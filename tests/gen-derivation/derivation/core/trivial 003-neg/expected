@@ -3,10 +3,10 @@
 Error: While processing right hand side of checkedGen. Error during reflection: Target type of a derived `Gen` cannot be a `Gen`
 
 DerivedGen:13:14--13:23
- 09 | Show (x ** Gen CanBeEmptyStatic x) where
+ 09 | Show (x ** Gen MaybeEmpty x) where
  10 |   show _ = "a generator"
  11 | 
- 12 | checkedGen : Fuel -> (em : _) -> Gen CanBeEmptyStatic (a ** Gen em a)
+ 12 | checkedGen : Fuel -> (em : _) -> Gen MaybeEmpty (a ** Gen em a)
  13 | checkedGen = deriveGen
                    ^^^^^^^^^
 

@@ -11,7 +11,7 @@ data X = MkX String Nat
 %runElab derive "X" [Generic, Meta, Show]
 
 export
-checkedGen : Fuel -> (Fuel -> Gen CanBeEmptyStatic String) => (Fuel -> Gen CanBeEmptyStatic Nat) => Gen CanBeEmptyStatic X
+checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty String) => (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty X
 checkedGen = deriveGen
 
 main : IO ()

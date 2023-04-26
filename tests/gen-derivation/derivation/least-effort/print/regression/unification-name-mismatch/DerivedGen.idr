@@ -19,4 +19,4 @@ data Y : (xs : X) -> (ys : X) -> Type where
   A : Y (x :: xs) (x :: xs)
   B : Y xs ys -> Y (x :: xs) (y :: ys)
 
-%runElab printDerived $ Fuel -> (xs : X) -> (ys : X) -> Gen CanBeEmptyStatic $ Y xs ys
+%runElab printDerived $ Fuel -> (xs : X) -> (ys : X) -> Gen MaybeEmpty $ Y xs ys

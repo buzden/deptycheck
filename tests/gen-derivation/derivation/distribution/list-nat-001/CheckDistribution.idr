@@ -23,10 +23,10 @@ index _     []      = Nothing
 index Z     (x::_ ) = Just x
 index (S k) (_::xs) = index k xs
 
-listNats : Fuel -> (Fuel -> Gen CanBeEmptyStatic Nat) => Gen CanBeEmptyStatic ListNat
+listNats : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty ListNat
 listNats = deriveGen
 
-nats : Fuel -> Gen CanBeEmptyStatic Nat
+nats : Fuel -> Gen MaybeEmpty Nat
 nats = deriveGen
 
 -- Check that every number in every position is uniformly distributed (with the correction on the length of the list)
