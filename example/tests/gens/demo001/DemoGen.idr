@@ -15,25 +15,25 @@ import System.Random.Pure.StdGen
 %default total
 
 %hint
-interestingType : Gen Type'
+interestingType : Gen0 Type'
 interestingType = elements [Int', String', Bool']
 
-alphaChar : Gen Char
+alphaChar : Gen0 Char
 alphaChar = choose ('a', 'z')
 
-alphaString : Gen String
+alphaString : Gen0 String
 alphaString = map pack $ sequence $ List.replicate !(choose (1, 3)) alphaChar
 
 %hint
-varName : Gen Name
+varName : Gen0 Name
 varName = fromString <$> alphaString
 
-simpleValue : {a : Type'} -> Gen $ idrTypeOf a
+simpleValue : {a : Type'} -> Gen0 $ idrTypeOf a
 simpleValue {a=Int'}    = choose (-100, 100)
 simpleValue {a=String'} = alphaString
 simpleValue {a=Bool'}   = chooseAny
 
-recExpr : ({x : Type'} -> Gen $ Expression vars regs x) -> {a : Type'} -> Gen $ Expression vars regs a
+recExpr : ({x : Type'} -> Gen0 $ Expression vars regs x) -> {a : Type'} -> Gen0 $ Expression vars regs a
 recExpr sub {a=Int'}    = oneOf [ U (+1) {opName="inc"} <$> sub {x=Int'}
                                 , B (+) {opName="+"} <$> sub {x=Int'} <*> sub {x=Int'}
                                 , B (*) {opName="*"} <$> sub {x=Int'} <*> sub {x=Int'}
@@ -49,11 +49,11 @@ recExpr sub {a=Bool'}   = oneOf [ U not {opName="!"} <$> sub {x=Bool'}
                                 ]
 
 %hint
-interestingExpr : {a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen (Expression vars regs a)
+interestingExpr : {a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen0 (Expression vars regs a)
 interestingExpr = exprGen (limit 3) simpleValue recExpr
 
 export
-someStatementGen : {rc : Nat} -> Gen (postV ** postR ** Statement [] (AllUndefined {rc}) postV postR)
+someStatementGen : {rc : Nat} -> Gen0 (postV ** postR ** Statement [] (AllUndefined {rc}) postV postR)
 someStatementGen = statement_gen (limit 12) [] AllUndefined
 
 export
