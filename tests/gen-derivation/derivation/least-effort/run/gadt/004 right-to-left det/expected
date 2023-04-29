@@ -5,20 +5,20 @@ Generated values:
 -----
 MkY_RL (MkX 4 16) (MkXG_4)
 -----
-MkY_RL (MkX 4 3) (MkXG_4)
+MkY_LR (MkXG_5) (MkX 5 19)
 -----
-MkY_RL (MkX 4 17) (MkXG_4)
------
-MkY_RL (MkX 5 10) (MkXG_5)
------
-MkY_RL (MkX 5 5) (MkXG_5)
------
-MkY_RL (MkX 4 3) (MkXG_4)
+MkY_LR (MkXG_5) (MkX 5 2)
 -----
 MkY_RL (MkX 4 11) (MkXG_4)
 -----
-MkY_RL (MkX 5 8) (MkXG_5)
+MkY_RL (MkX 4 11) (MkXG_4)
 -----
-MkY_RL (MkX 5 4) (MkXG_5)
+MkY_LR (MkXG_5) (MkX 5 10)
 -----
-MkY_RL (MkX 5 7) (MkXG_5)
+MkY_LR (MkXG_5) (MkX 5 14)
+-----
+MkY_RL (MkX 4 2) (MkXG_4)
+-----
+MkY_RL (MkX 4 6) (MkXG_4)
+-----
+MkY_RL (MkX 5 15) (MkXG_5)
