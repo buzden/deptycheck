@@ -10,7 +10,7 @@ import DistrCheckCommon
 %default total
 
 nats : (n : Nat) -> Gen MaybeEmpty Nat
-nats n = elements' [1 .. n]
+nats n = elements [1 .. n]
 
 genFin : (n : Nat) -> Gen MaybeEmpty $ Fin n
 genFin Z     = empty

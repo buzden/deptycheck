@@ -78,7 +78,7 @@ genAnyQ f (x::xs) = oneOf
   :: There `mapAlternativesOf` genAnyQ f xs
 
 genName : Gen MaybeEmpty Name
-genName = [| elements (cast <$> ['x', 'y', 'z']) ++ elements' (show <$> [the Nat 1 .. 3]) |]
+genName = [| elements (cast <$> ['x', 'y', 'z']) ++ elements (show <$> [the Nat 1 .. 3]) |]
 
 genNames : Gen MaybeEmpty (List Name)
 genNames = listOf genName
