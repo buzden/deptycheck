@@ -503,7 +503,10 @@ elements : {default Nothing description : Maybe String} ->
 elements = oneOf {alem=NonEmpty} {description} . altsFromList
 
 export %inline
-elements' : Foldable f => {default Nothing description : Maybe String} -> f a -> Gen0 a
+elements' : Foldable f =>
+            (0 _ : IfUnsolved f List) =>
+            {default Nothing description : Maybe String} ->
+            f a -> Gen0 a
 elements' xs = elements {description} $ relaxF $ fromList $ toList xs
 
 ------------------------------
