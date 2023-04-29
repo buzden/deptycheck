@@ -183,6 +183,13 @@ strengthen $ Bind {biem} x f with (decCanBeEmpty em)
     NonEmpty => Just $ Bind x f
     _        => Nothing
 
+--------------------
+--- More utility ---
+--------------------
+
+filterOutEmpty : OneOfAlternatives em a -> Maybe $ OneOfAlternatives MaybeEmptyDeep a
+filterOutEmpty $ MkOneOf desc gens _ = strengthen (mapMaybe (traverse $ map delay . strengthen . force) gens) <&> \gs => MkOneOf desc gs $ Val _
+
 -----------------------------
 --- Very basic generators ---
 -----------------------------
@@ -294,13 +301,13 @@ ap (Raw sfl) (Raw sfr) = Raw $ sfl <*> sfr
 
 ap {em=NonEmpty} @{NN} @{NN} (OneOf @{ao} oo) g with (ao) _ | NN = OneOf @{NN} $ mapOneOf oo $ \x => assert_total ap x g
 ap {em=MaybeEmptyDeep} (OneOf oo) g = OneOf @{DD} $ mapOneOf oo $ \x => assert_total ap x g
-ap {em=MaybeEmpty}  @{_} @{rr} (OneOf @{_} @{au} oo) g = maybe Empty (OneOf @{AS} @{DD}) $
-  trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} x g
+ap {em=MaybeEmpty}  @{_} @{rr} (OneOf @{_} @{au} oo) g = maybe Empty OneOf $ filterOutEmpty $
+  mapOneOf oo $ \x => assert_total $ ap @{AS} x g
 
 ap {em=NonEmpty} @{NN} @{NN} g (OneOf @{ao} oo) with (ao) _ | NN = OneOf @{NN} $ mapOneOf oo $ assert_total ap g
 ap {em=MaybeEmptyDeep} g (OneOf oo) = OneOf @{DD} $ mapOneOf oo $ assert_total ap g
-ap {em=MaybeEmpty} @{ll} g (OneOf @{_} @{au} oo) = maybe Empty (OneOf @{AS} @{DD}) $
-  trMOneOf oo $ \x => strengthen $ assert_total $ ap @{AS} g x
+ap {em=MaybeEmpty} @{ll} g (OneOf @{_} @{au} oo) = maybe Empty OneOf $ filterOutEmpty $
+  mapOneOf oo $ \x => assert_total $ ap @{AS} g x
 
 ap @{ll}      (Bind @{bo} x f) (Raw y) = Bind @{bindToOuterRelax bo ll} x $ \c => assert_total $ ap @{reflexive} @{reflexive} (f c) (Raw y)
 ap @{_} @{rr} (Raw y) (Bind @{bo} x f) = Bind @{bindToOuterRelax bo rr} x $ \c => assert_total $ ap @{reflexive} @{reflexive} (Raw y) (f c)
@@ -322,8 +329,8 @@ export
   Raw g    >>= nf = Bind @{reflexive} g nf
   (OneOf @{ao} oo >>= nf) {em=NonEmpty} with (ao) _ | NN = OneOf $ mapOneOf oo $ assert_total (>>= nf)
   (OneOf @{ao} oo >>= nf) {em=MaybeEmptyDeep} = OneOf $ mapOneOf oo $ assert_total (>>= nf) . relax @{ao}
-  (OneOf oo >>= nf) {em=MaybeEmpty} = maybe Empty (OneOf @{AS} @{DD}) $
-    trMOneOf oo $ \x => strengthen $ assert_total $ relax x >>= nf
+  (OneOf oo >>= nf) {em=MaybeEmpty} = maybe Empty OneOf $ filterOutEmpty $
+    mapOneOf oo $ \x => assert_total $ relax x >>= nf
   Bind {biem} x f >>= nf with (order {rel=NoWeaker} biem em)
     _ | Left _  = Bind x $ \x => assert_total $ relax (f x) >>= nf
     _ | Right _ = Bind {biem} x $ \x => assert_total $ relax (f x) >>= relax . nf
