@@ -71,7 +71,7 @@ showSomeStatements : {default 0 variant : Nat} -> {default 2 regCount : Nat} -> 
 showSomeStatements count =
   traverse_ putStrLn $
     intersperse "\n----\n" $
-      (concat . map showStatement . someStatement {rc=regCount}) <$> [variant .. (variant + count)]
+      (concat . map showStatement . someStatement {rc=regCount}) <$> fromList [variant .. (variant + count)]
 
 export
 main : IO ()

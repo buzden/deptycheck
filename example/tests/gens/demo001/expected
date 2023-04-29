@@ -20,8 +20,9 @@ puts(as_str(-47 + (89 * -60)));
 
 ----
 
-[0] = (4 + (93 + 21)) * ((30 + 17) + inc(2));
-// regs ty after: [Int, -]
+bool z;
+[1] = -44;
+// regs ty after: [-, Int]
 
 ----
 
@@ -38,8 +39,16 @@ puts(as_str(-47 + (89 * -60)));
 
 ----
 
-[1] = (inc(-91) * (-66 + -65)) < inc(-54 * -57);
-// regs ty after: [-, Bool]
+int k;
+[0] = as_str(-31 + (-95 + 46));
+[1] = k;
+[1] = as_str((-41 * 13) + -87);
+k = k;
+k = ((77 * k) + inc(k)) * (-14 * -93);
+k = inc(74) + inc(-6);
+[0] = True;
+k = inc(inc(k));
+// regs ty after: [Bool, String]
 
 ----
 
