@@ -36,14 +36,14 @@ The current focus for now is on *test data generators* and *automatic derivation
 Generators in the simplest case produce a bunch of values of appropriate type:
 
 ```idris
-genSomeStrings : Gen String
+genSomeStrings : Gen NonEmpty String
 genSomeStrings = elements ["one", "two", "three"]
 ```
 
 You can combine several generators into one:
 
 ```idris
-genMoreStrings : Gen String
+genMoreStrings : Gen NonEmpty String
 genMoreStrings = oneOf [genSomeStrings, elements ["more", "even more"]]
 ```
 
@@ -56,7 +56,7 @@ genMoreStrings = oneOf [genSomeStrings, elements ["more", "even more"]]
 So, the following generator is **not** equivalent to the `genMoreStrings` from above:
 
 ```idris
-genMoreStrings' : Gen String
+genMoreStrings' : Gen NonEmpty String
 genMoreStrings' = elements ["one", "two", "three", "more", "even more"]
 ```
 
@@ -65,7 +65,7 @@ In `genMoreStrings'` all values are distributed uniformly.
 To achieve the same result with reusing `genSomeStrings` generator, we need to dig into it deeper with `alternativesOf` function:
 
 ```idris
-genMoreStrings'' : Gen String
+genMoreStrings'' : Gen NonEmpty String
 genMoreStrings'' = oneOf $ alternativesOf genMoreStrings ++ alternativesOf (elements ["more", "even more"])
 ```
 
@@ -80,7 +80,7 @@ For example, consider a generator of lists with length not greater than given.
 There are a lot of possible implementations, but consider a recursive one:
 
 ```idris
-genListsN : Gen a -> (n : Nat) -> Gen $ List a
+genListsN : Gen NonEmpty a -> (n : Nat) -> Gen NonEmpty $ List a
 genListsN _    Z     = [| [] |]
 genListsN genA (S n) = oneOf $ [| [] |]
                             :: [| [genA] :: alternativesOf (genListsN genA n) |]
@@ -99,7 +99,7 @@ Generators can be combined with operations from `Applicative` interface:
 ```idris
 data X = MkX String String
 
-genStrPairs : Gen X
+genStrPairs : Gen NonEmpty X
 genStrPairs = [| MkX genSomeStrings genMoreStrings |]
 ```
 
@@ -115,15 +115,18 @@ thus we need to have an empty generator
 if we want to have a generator for any `Fin n` (and sometimes we really want):
 
 ```idris
-genFin : (n : Nat) -> Gen $ Fin n
+genFin : (n : Nat) -> Gen MaybeEmpty $ Fin n
 genFin Z     = empty
-genFin (S n) = elements $ forget $ allFins n
+genFin (S n) = elements' $ allFins n
 ```
+
+As you can see from examples above,
+there is a special marking of generator's emptiness in the first type argument of the `Gen` type.
 
 Generators are also monads:
 
 ```idris
-genAnyFin : Gen Nat => Gen (n ** Fin n)
+genAnyFin : Gen MaybeEmpty Nat => Gen MaybeEmpty (n ** Fin n)
 genAnyFin @{genNat} = do
   n <- genNat
   f <- genFin n
@@ -141,7 +144,7 @@ After that, all fins for each particular `n` are distributed evenly, because it 
 You need to use `alternativesOf` if you want all possible resulted values to be distributed evenly, e.g.:
 
 ```idris
-genAnyFin' : Gen Nat => Gen (n ** Fin n)
+genAnyFin' : Gen MaybeEmpty Nat => Gen MaybeEmpty (n ** Fin n)
 genAnyFin' @{genNat} = oneOf $ do
   n <- alternativesOf genNat
   f <- alternativesOf $ genFin n
@@ -157,7 +160,7 @@ where `genAnyFin' @{elements [1, 2]}` would be equivalent to `elements [(1**0), 
 Thus, they have the same domain, but different distributions.
 
 <!-- idris
-app_non_even, app_non_even_inlined, app_even, app_even_inlined : Gen (n ** Fin n)
+app_non_even, app_non_even_inlined, app_even, app_even_inlined : Gen MaybeEmpty (n ** Fin n)
 app_non_even = genAnyFin @{elements [1, 2]}
 app_non_even_inlined = oneOf [pure (1**0), elements [(2**0), (2**1)]]
 app_even = genAnyFin' @{elements [1, 2]}
@@ -174,7 +177,7 @@ It allows to forget actual structure of a generator in terms of its alternatives
 Consider one more alternative of `genAnyFin`, now the given `genNat` is wrapped with `forgetStructure`:
 
 ```idris
-genAnyFin'' : Gen Nat => Gen (n ** Fin n)
+genAnyFin'' : Gen MaybeEmpty Nat => Gen MaybeEmpty (n ** Fin n)
 genAnyFin'' @{genNat} = do
   n <- forgetStructure genNat
   f <- genFin n
@@ -225,7 +228,7 @@ namespace ForgetStructureNote
   e = 4
   f = 5
 
-  g1, g2, g3 : Gen (Nat, Nat)
+  g1, g2, g3 : Gen NonEmpty (Nat, Nat)
   g1 = do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
   g2 = do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }
   g3 = do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
@@ -287,7 +290,7 @@ For simplicity, fuel pattern is used for all derived generators.
 To invoke derivation, we use `deriveGen` macro:
 
 ```idris
-genNat : Fuel -> Gen Nat
+genNat : Fuel -> Gen MaybeEmpty Nat
 genNat = deriveGen
 ```
 
@@ -306,6 +309,10 @@ Of course, we do not support all possible dependent types.
 For example, for now, we do not support type-polymorphic types and
 GADTs which have function calls in type indices of their constructors.
 However, we are constantly working for widening supported types.
+
+> **Note**
+>
+> For now, derivation is supported only for `MaybeEmpty` generators.
 
 <!-- Example of non-trivial derivation should go here -->
 
