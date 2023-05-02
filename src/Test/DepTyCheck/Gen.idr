@@ -189,8 +189,7 @@ strengthen $ Bind {biem} x f with (decCanBeEmpty em)
 filterOutEmpty : OneOfAlternatives em a -> Maybe $ OneOfAlternatives MaybeEmptyDeep a
 filterOutEmpty $ MkOneOf desc gens _ = strengthen (mapMaybe (traverse $ map delay . strengthen . force) gens) <&> \gs => MkOneOf desc gs $ Val _
 
-mkOneOf : {em : _} -> {alem : _} ->
-          alem `NoWeaker` em =>
+mkOneOf : alem `NoWeaker` em =>
           NotImmediatelyEmpty alem =>
           (desc : Maybe String) ->
           (gens : LazyLst1 (PosNat, Lazy (Gen alem a))) ->
@@ -464,7 +463,7 @@ namespace OneOf
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : {default Nothing description : Maybe String} ->
-        {alem : _} -> {em : _} ->
+        {em : _} ->
         alem `NoWeaker` em =>
         AltsNonEmpty altsNe em =>
         (0 _ : IfUnsolved alem em) =>
@@ -484,7 +483,7 @@ oneOf {em=MaybeEmpty} x = case x of MkGenAlternatives xs => do
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
 frequency : {default Nothing description : Maybe String} ->
-            {alem : _} -> {em : _} ->
+            {em : _} ->
             alem `NoWeaker` em =>
             AltsNonEmpty altsNe em =>
             (0 _ : IfUnsolved alem em) =>
@@ -494,7 +493,6 @@ frequency = oneOf {description} . MkGenAlternatives
 
 export %inline
 frequency' : {default Nothing description : Maybe String} ->
-             {alem : _} ->
              LazyLst altsNe (Nat, Lazy (Gen alem a)) -> Gen0 a
 frequency' = frequency {description} . mapMaybe (\(freq, gen) => toPosNat freq <&> (, gen))
 
