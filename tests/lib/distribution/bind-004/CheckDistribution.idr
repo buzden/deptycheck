@@ -15,7 +15,10 @@ f 10 = pure False
 f _  = empty
 
 g : Gen MaybeEmpty $ Maybe Bool
-g = elements [1 .. 30] >>= f <&> Just
+g = oneOf
+  [ pure Nothing
+  , elements [1 .. 30] >>= f <&> Just
+  ]
 
 main : IO ()
 main = do
