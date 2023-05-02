@@ -190,6 +190,16 @@ strengthen $ Bind {biem} x f with (decCanBeEmpty em)
 filterOutEmpty : OneOfAlternatives em a -> Maybe $ OneOfAlternatives MaybeEmptyDeep a
 filterOutEmpty $ MkOneOf desc gens _ = strengthen (mapMaybe (traverse $ map delay . strengthen . force) gens) <&> \gs => MkOneOf desc gs $ Val _
 
+mkOneOf : {em : _} -> {alem : _} ->
+          alem `NoWeaker` em =>
+          NotImmediatelyEmpty alem =>
+          (desc : Maybe String) ->
+          (gens : LazyLst1 (PosNat, Lazy (Gen alem a))) ->
+          Gen em a
+mkOneOf desc gens = OneOf $ MkOneOf desc gens $ Val _
+-- TODO to make elimination of a single element
+-- TODO to think whether to propagate description deeper in the case of elimination
+
 -----------------------------
 --- Very basic generators ---
 -----------------------------
@@ -461,12 +471,11 @@ oneOf : {default Nothing description : Maybe String} ->
         (0 _ : IfUnsolved alem em) =>
         (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
         GenAlternatives altsNe alem a -> Gen em a
-oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlternatives xs = OneOf $ MkOneOf description xs $ Val _
-oneOf {em=MaybeEmptyDeep} @{_} @{DT} x = case x of MkGenAlternatives xs => OneOf $ MkOneOf description xs $ Val _
-oneOf {em=MaybeEmpty}             x = case x of MkGenAlternatives xs => do
-  let u : Maybe $ LazyLst1 (_, Lazy _) :=
-            strengthen $ flip mapMaybe xs $ \wg => (fst wg,) . delay <$> Gen.strengthen {em=MaybeEmptyDeep} (snd wg)
-  maybe Empty (\gs' => OneOf {alem=MaybeEmptyDeep} $ MkOneOf description gs' $ Val _) u
+oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlternatives xs = mkOneOf description xs
+oneOf {em=MaybeEmptyDeep} @{_} @{DT} x = case x of MkGenAlternatives xs => mkOneOf description xs
+oneOf {em=MaybeEmpty} x = case x of MkGenAlternatives xs => do
+  maybe Empty (mkOneOf description) $ strengthen $ flip mapMaybe xs $
+    \wg => (fst wg,) . delay <$> Gen.strengthen {em=MaybeEmptyDeep} (snd wg)
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
