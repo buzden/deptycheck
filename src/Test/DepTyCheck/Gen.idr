@@ -60,13 +60,12 @@ data Gen : Emptiness -> Type -> Type where
 
   Raw   : RawGen a -> Gen em a
 
-  OneOf : {em : _} -> {alem : _} ->
-          alem `NoWeaker` em =>
+  OneOf : alem `NoWeaker` em =>
           NotImmediatelyEmpty alem =>
           OneOfAlternatives alem a -> Gen em a
 
-  Bind  : {em : _} -> {biem : _} ->
-          BindToOuter biem em =>
+  Bind  : {biem : _} ->
+          (0 _ : BindToOuter biem em) =>
           RawGen c -> (c -> Gen biem a) -> Gen em a
 
 record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
