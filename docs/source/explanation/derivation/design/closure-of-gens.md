@@ -27,7 +27,7 @@ mutual
 namespace GenCloj_DerivTask {
 -->
 ```idris
-genX : Fuel -> Gen X
+genX : Fuel -> Gen MaybeEmpty X
 genX = deriveGen
 ```
 <!-- idris
@@ -40,11 +40,11 @@ In this case, derived generator function would have the following structure.
 namespace GenCloj {
 -->
 ```idris
-genX : Fuel -> Gen X
+genX : Fuel -> Gen MaybeEmpty X
 genX fuel = data_X fuel
   where
-    data_X : Fuel -> Gen X
-    data_Y : Fuel -> Gen Y
+    data_X : Fuel -> Gen MaybeEmpty X
+    data_Y : Fuel -> Gen MaybeEmpty Y
     data_X fuel = ?xs_gen_body
     data_Y fuel = ?ys_gen_body
 ```
@@ -63,7 +63,8 @@ Maybe, more realistic example, e.g. alternating list of e.g. `Nat`s and `String`
 The current design decision is that all subgenerators that are derived for the particular derivation task
 are local to the function for that derivation task.
 That is, if some other derivation task will need a derived generator for the datatype `Y`,
-now function of type `Fuel -> Gen Y` would be derived twice, both times as a local function of derived generator for particular derivation task.
+now function of type `Fuel -> Gen MaybeEmpty Y` would be derived twice,
+both times as a local function of derived generator for particular derivation task.
 
 This is done because each call to the `deriveGen` macro is fully independent.
 No state is shared between calls to macros.

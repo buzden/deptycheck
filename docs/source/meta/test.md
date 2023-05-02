@@ -11,6 +11,6 @@ import Test.DepTyCheck.Gen
 This module contains a simple gen example:
 
 ```idris
-genN : Gen Nat
+genN : Gen NonEmpty Nat
 genN = elements [0, 1]
 ```

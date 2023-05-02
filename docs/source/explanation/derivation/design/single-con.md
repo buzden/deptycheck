@@ -30,19 +30,19 @@ We could derive for them something like this:
 namespace SingleCon_Simple {
 -->
 ```idris
-genX : Fuel -> Gen X
+genX : Fuel -> Gen MaybeEmpty X
 genX fuel = data_X fuel
   where
-    data_X : Fuel -> Gen X
-    data_Y : Fuel -> Gen Y
+    data_X : Fuel -> Gen MaybeEmpty X
+    data_Y : Fuel -> Gen MaybeEmpty Y
 
     data_X fuel = case fuel of
         Dry    => oneOf [con_X0 Dry, con_X1 Dry]
         More f => oneOf [con_X0 f  , con_X1 f  , con_X2 f]
       where
-        con_X0 : Fuel -> Gen X
-        con_X1 : Fuel -> Gen X
-        con_X2 : Fuel -> Gen X
+        con_X0 : Fuel -> Gen MaybeEmpty X
+        con_X1 : Fuel -> Gen MaybeEmpty X
+        con_X2 : Fuel -> Gen MaybeEmpty X
 
         con_X0 fuel = [| X0               |]
         con_X1 fuel = [| X1               |]
@@ -52,8 +52,8 @@ genX fuel = data_X fuel
         Dry    => oneOf [con_Y0 Dry]
         More f => oneOf [con_Y0 f  , con_Y1 f]
       where
-        con_Y0 : Fuel -> Gen Y
-        con_Y1 : Fuel -> Gen Y
+        con_Y0 : Fuel -> Gen MaybeEmpty Y
+        con_Y1 : Fuel -> Gen MaybeEmpty Y
 
         con_Y0 fuel = [| Y0               |]
         con_Y1 fuel = [| Y1 (data_X fuel) |]
@@ -76,19 +76,19 @@ The following code would be derived.
 namespace SingleCon_Full {
 -->
 ```idris
-genX : Fuel -> Gen X
+genX : Fuel -> Gen MaybeEmpty X
 genX fuel = data_X fuel
   where
-    data_X : Fuel -> Gen X
-    data_Y : Fuel -> Gen Y
+    data_X : Fuel -> Gen MaybeEmpty X
+    data_Y : Fuel -> Gen MaybeEmpty Y
 
     data_X fuel = case fuel of
         Dry    => oneOf [con_X0 Dry, con_X1 Dry]
         More f => oneOf [con_X0 f  , con_X1 f  , con_X2 f]
       where
-        con_X0 : Fuel -> Gen X
-        con_X1 : Fuel -> Gen X
-        con_X2 : Fuel -> Gen X
+        con_X0 : Fuel -> Gen MaybeEmpty X
+        con_X1 : Fuel -> Gen MaybeEmpty X
+        con_X2 : Fuel -> Gen MaybeEmpty X
 
         con_X0 fuel = oneOf [ pure X0 ]
         con_X1 fuel = oneOf [ pure X1 ]
@@ -99,8 +99,8 @@ genX fuel = data_X fuel
         Dry    => oneOf [con_Y0 Dry]
         More f => oneOf [con_Y0 f  , con_Y1 f]
       where
-        con_Y0 : Fuel -> Gen Y
-        con_Y1 : Fuel -> Gen Y
+        con_Y0 : Fuel -> Gen MaybeEmpty Y
+        con_Y1 : Fuel -> Gen MaybeEmpty Y
 
         con_Y0 fuel = oneOf [ pure Y0 ]
         con_Y1 fuel = oneOf [ do x <- data_X fuel
@@ -139,7 +139,7 @@ data D : Bool -> Type where
 namespace TypIdx_Gend_DerivTask {
 -->
 ```idris
-genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => Gen (b ** D b)
+genD_idx_generated : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (b ** D b)
 genD_idx_generated = deriveGen
 ```
 <!-- idris
@@ -152,18 +152,18 @@ For this derivation task the following generator function would be derived.
 namespace TypIdx_Gend_DerivedExample {
 -->
 ```idris
-genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => Gen (b ** D b)
+genD_idx_generated : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (b ** D b)
 genD_idx_generated @{data_Nat} @{data_String} fuel = data_D_giv_no fuel
   where
-    data_Bool : Fuel -> Gen Bool
-    data_D_giv_no : Fuel -> Gen (b ** D b)
+    data_Bool : Fuel -> Gen MaybeEmpty Bool
+    data_D_giv_no : Fuel -> Gen MaybeEmpty (b ** D b)
 
     data_Bool fuel = case fuel of
         Dry    => oneOf [con_True Dry, con_False Dry]
         More f => oneOf [con_True f, con_False f]
       where
-        con_True  : Fuel -> Gen Bool
-        con_False : Fuel -> Gen Bool
+        con_True  : Fuel -> Gen MaybeEmpty Bool
+        con_False : Fuel -> Gen MaybeEmpty Bool
 
         con_True  fuel = oneOf [pure True]
         con_False fuel = oneOf [pure False]
@@ -172,10 +172,10 @@ genD_idx_generated @{data_Nat} @{data_String} fuel = data_D_giv_no fuel
         Dry    => oneOf [con_JJ Dry, con_TL Dry]
         More f => oneOf [con_JJ f, con_FN f, con_TL f, con_TR f]
       where
-        con_JJ : Fuel -> Gen (b ** D b)
-        con_FN : Fuel -> Gen (b ** D b)
-        con_TL : Fuel -> Gen (b ** D b)
-        con_TR : Fuel -> Gen (b ** D b)
+        con_JJ : Fuel -> Gen MaybeEmpty (b ** D b)
+        con_FN : Fuel -> Gen MaybeEmpty (b ** D b)
+        con_TL : Fuel -> Gen MaybeEmpty (b ** D b)
+        con_TR : Fuel -> Gen MaybeEmpty (b ** D b)
 
         con_JJ fuel = oneOf [ do b  <- data_Bool fuel
                                  n1 <- data_Nat fuel
@@ -214,7 +214,7 @@ But since the target data type has a type argument, we can have a derivation tas
 namespace TypIdx_Givn_DerivTask {
 -->
 ```idris
-genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => (b : Bool) -> Gen (D b)
+genD_idx_generated : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (Fuel -> Gen MaybeEmpty String) => (b : Bool) -> Gen MaybeEmpty (D b)
 genD_idx_generated = deriveGen
 ```
 <!-- idris
@@ -227,18 +227,18 @@ It means that all the internal generators would also have additional argument an
 namespace TypIdx_Givn_DerivedStructure_BeforeMatch {
 -->
 ```idris
-genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => (b : Bool) -> Gen (D b)
+genD_idx_generated : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (Fuel -> Gen MaybeEmpty String) => (b : Bool) -> Gen MaybeEmpty (D b)
 genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
   where
-    data_D_giv_b : Fuel -> (b : Bool) -> Gen (D b)
+    data_D_giv_b : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
     data_D_giv_b fuel b = case fuel of
         Dry    => oneOf [con_JJ Dry b, con_TL Dry b]
         More f => oneOf [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
       where
-        con_JJ : Fuel -> (b : Bool) -> Gen (D b)
-        con_FN : Fuel -> (b : Bool) -> Gen (D b)
-        con_TL : Fuel -> (b : Bool) -> Gen (D b)
-        con_TR : Fuel -> (b : Bool) -> Gen (D b)
+        con_JJ : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
+        con_FN : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
+        con_TL : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
+        con_TR : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
 
         con_JJ fuel b = ?body_for_JJ_cons
         con_FN fuel b = ?body_for_FN_cons
@@ -266,18 +266,18 @@ So, the structure of the derived generator with the given type index would be th
 namespace TypIdx_Givn_DerivedStructure_WithMatch {
 -->
 ```idris
-genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => (b : Bool) -> Gen (D b)
+genD_idx_generated : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (Fuel -> Gen MaybeEmpty String) => (b : Bool) -> Gen MaybeEmpty (D b)
 genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
   where
-    data_D_giv_b : Fuel -> (b : Bool) -> Gen (D b)
+    data_D_giv_b : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
     data_D_giv_b fuel b = case fuel of
         Dry    => oneOf [con_JJ Dry b, con_TL Dry b]
         More f => oneOf [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
       where
-        con_JJ : Fuel -> (b : Bool) -> Gen (D b)
-        con_FN : Fuel -> (b : Bool) -> Gen (D b)
-        con_TL : Fuel -> (b : Bool) -> Gen (D b)
-        con_TR : Fuel -> (b : Bool) -> Gen (D b)
+        con_JJ : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
+        con_FN : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
+        con_TL : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
+        con_TR : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
 
         con_JJ fuel b = ?body_for_JJ_cons
 
@@ -317,12 +317,12 @@ The final structure of the derived generator would be the following.
 namespace TypIdx_Givn_DerivedFinal {
 -->
 ```idris
-genD_idx_generated : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => (b : Bool) -> Gen (D b)
+genD_idx_generated : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (Fuel -> Gen MaybeEmpty String) => (b : Bool) -> Gen MaybeEmpty (D b)
 genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
   where
-    data_Bool : Fuel -> Gen Bool
-    data_D_giv_no : Fuel -> Gen (b ** D b)
-    data_D_giv_b : Fuel -> (b : Bool) -> Gen (D b)
+    data_Bool : Fuel -> Gen MaybeEmpty Bool
+    data_D_giv_no : Fuel -> Gen MaybeEmpty (b ** D b)
+    data_D_giv_b : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
 
     data_Bool fuel = ?gen_for_Bool_as_above
     data_D_giv_no fuel = ?gen_for_D_with_no_given_as_above
@@ -331,10 +331,10 @@ genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
         Dry    => oneOf [con_JJ Dry b, con_TL Dry b]
         More f => oneOf [con_JJ f b, con_FN f b, con_TL f b, con_TR f b]
       where
-        con_JJ : Fuel -> (b : Bool) -> Gen (D b)
-        con_FN : Fuel -> (b : Bool) -> Gen (D b)
-        con_TL : Fuel -> (b : Bool) -> Gen (D b)
-        con_TR : Fuel -> (b : Bool) -> Gen (D b)
+        con_JJ : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
+        con_FN : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
+        con_TL : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
+        con_TR : Fuel -> (b : Bool) -> Gen MaybeEmpty (D b)
 
         con_JJ fuel b = oneOf [ do n1 <- data_Nat fuel
                                    n2 <- data_Nat fuel
@@ -387,7 +387,7 @@ Consider the following derivation task.
 namespace Eq_AllGened_DerivTask {
 -->
 ```idris
-genEqN_all_gened : Fuel -> (Fuel -> Gen Nat) => Gen (n ** m ** EqualN n m)
+genEqN_all_gened : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty (n ** m ** EqualN n m)
 genEqN_all_gened = deriveGen
 ```
 <!-- idris
@@ -400,15 +400,15 @@ For this case, derivation of a generator is straightforward:
 namespace Eq_AllGened_Derived {
 -->
 ```idris
-genEqN_all_gened : Fuel -> (Fuel -> Gen Nat) => Gen (n ** m ** EqualN n m)
+genEqN_all_gened : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty (n ** m ** EqualN n m)
 genEqN_all_gened @{data_Nat} fuel = data_EqualN_giv_no fuel
   where
-    data_EqualN_giv_no : Fuel -> Gen (n ** m ** EqualN n m)
+    data_EqualN_giv_no : Fuel -> Gen MaybeEmpty (n ** m ** EqualN n m)
     data_EqualN_giv_no fuel = case fuel of
         Dry    => oneOf [ con_ReflN Dry ]
         More f => oneOf [ con_ReflN f   ]
       where
-        con_ReflN : Fuel -> Gen (n ** m ** EqualN n m)
+        con_ReflN : Fuel -> Gen MaybeEmpty (n ** m ** EqualN n m)
         con_ReflN fuel = oneOf [ do x <- data_Nat fuel
                                     pure (_ ** _ ** ReflN {x}) ]
 
@@ -427,7 +427,7 @@ Consider we have the following derivation task.
 namespace Eq_LeftGened_DerivTask {
 -->
 ```idris
-genEqN_right_gened : Fuel -> (n : Nat) -> Gen (m ** EqualN n m)
+genEqN_right_gened : Fuel -> (n : Nat) -> Gen MaybeEmpty (m ** EqualN n m)
 genEqN_right_gened = deriveGen
 ```
 <!-- idris
@@ -440,15 +440,15 @@ The only difference with the previous one is that one of naturals is simply give
 namespace Eq_LeftGened_Derived {
 -->
 ```idris
-genEqN_right_gened : Fuel -> (Fuel -> Gen Nat) => (n : Nat) -> Gen (m ** EqualN n m)
+genEqN_right_gened : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (n : Nat) -> Gen MaybeEmpty (m ** EqualN n m)
 genEqN_right_gened @{data_Nat} fuel n = data_EqualN_giv_l fuel n
   where
-    data_EqualN_giv_l : Fuel -> (n : Nat) -> Gen (m ** EqualN n m)
+    data_EqualN_giv_l : Fuel -> (n : Nat) -> Gen MaybeEmpty (m ** EqualN n m)
     data_EqualN_giv_l fuel n = case fuel of
         Dry    => oneOf [ con_ReflN Dry n ]
         More f => oneOf [ con_ReflN f   n ]
       where
-        con_ReflN : Fuel -> (n : Nat) -> Gen (m ** EqualN n m)
+        con_ReflN : Fuel -> (n : Nat) -> Gen MaybeEmpty (m ** EqualN n m)
         con_ReflN fuel n = oneOf [ do pure (_ ** ReflN {x=n}) ]
 ```
 <!-- idris
@@ -470,7 +470,7 @@ So, consider the following derivation task.
 namespace Eq_AllGiven_DerivTask {
 -->
 ```idris
-genEqN_all_given : Fuel -> (n, m : Nat) -> Gen $ EqualN n m
+genEqN_all_given : Fuel -> (n, m : Nat) -> Gen MaybeEmpty $ EqualN n m
 genEqN_all_given = deriveGen
 ```
 <!-- idris
@@ -503,15 +503,15 @@ For the last derivation task, derived generator would be the following.
 namespace Eq_AllGiven_Derived {
 -->
 ```idris
-genEqN_all_given : Fuel -> (Fuel -> Gen Nat) => (n, m : Nat) -> Gen $ EqualN n m
+genEqN_all_given : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (n, m : Nat) -> Gen MaybeEmpty $ EqualN n m
 genEqN_all_given @{data_Nat} fuel n = data_EqualN_giv_l_r fuel n
   where
-    data_EqualN_giv_l_r : Fuel -> (n, m : Nat) -> Gen $ EqualN n m
+    data_EqualN_giv_l_r : Fuel -> (n, m : Nat) -> Gen MaybeEmpty $ EqualN n m
     data_EqualN_giv_l_r fuel n m = case fuel of
         Dry    => oneOf [ con_ReflN Dry n m ]
         More f => oneOf [ con_ReflN f   n m ]
       where
-        con_ReflN : Fuel -> (n, m : Nat) -> Gen $ EqualN n m
+        con_ReflN : Fuel -> (n, m : Nat) -> Gen MaybeEmpty $ EqualN n m
         con_ReflN fuel n m = case decEq n m of
           No  _    => empty
           Yes Refl => oneOf [ pure $ ReflN {x=n} ]
@@ -550,7 +550,7 @@ Consider the hardest derivation task, the one, where both type arguments are giv
 namespace DeepEq_AllGiven_DerivTask {
 -->
 ```idris
-genLT2_all_given : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
+genLT2_all_given : Fuel -> (n, m : Nat) -> Gen MaybeEmpty $ LT2 n m
 genLT2_all_given = deriveGen
 ```
 <!-- idris
@@ -561,16 +561,16 @@ genLT2_all_given = deriveGen
 namespace DeepEq_AllGiven_Derivation {
 -->
 ```idris
-genLT2_all_given : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
+genLT2_all_given : Fuel -> (n, m : Nat) -> Gen MaybeEmpty $ LT2 n m
 genLT2_all_given fuel n m = data_LT2_given_l_r fuel n m
   where
-    data_LT2_given_l_r : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
+    data_LT2_given_l_r : Fuel -> (n, m : Nat) -> Gen MaybeEmpty $ LT2 n m
     data_LT2_given_l_r fuel n m = case fuel of
         Dry    => oneOf [ con_Base Dry n m ]
         More f => oneOf [ con_Base f   n m, con_Step f n m ]
       where
-        con_Base : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
-        con_Step : Fuel -> (n, m : Nat) -> Gen $ LT2 n m
+        con_Base : Fuel -> (n, m : Nat) -> Gen MaybeEmpty $ LT2 n m
+        con_Step : Fuel -> (n, m : Nat) -> Gen MaybeEmpty $ LT2 n m
 
         con_Base fuel n (S (S m)) = case decEq n m of
           No  _    => empty
@@ -624,17 +624,17 @@ data ND : Type where
 ```
 
 ```idris
-genND : Fuel -> (Fuel -> Gen (a ** b ** Sub2 a b)) => Gen ND
+genND : Fuel -> (Fuel -> Gen MaybeEmpty (a ** b ** Sub2 a b)) => Gen MaybeEmpty ND
 genND = deriveGen
 ```
 
 It is an open question whether should be always use given generator for `Sub2`,
 which can produce a value for the argument `z` of the constructor `MkND`,
-and derive generator `Fuel -> (z : Nat) -> Gen (x ** Sub1 x z)` for `Sub1`.
+and derive generator `Fuel -> (z : Nat) -> Gen MaybeEmpty (x ** Sub1 x z)` for `Sub1`.
 In this case, we will generate value of `Sub2` first and then a value of `Sub1`.
 
-Or alternatively, we can try to derive generators `Fuel -> (z : Nat) -> Gen (y ** Sub2 y z)`
-and `Fuel -> Gen (a ** b ** Sub1 a b)` and to generate arguments of `MkND` in the other way,
+Or alternatively, we can try to derive generators `Fuel -> (z : Nat) -> Gen MaybeEmpty (y ** Sub2 y z)`
+and `Fuel -> Gen MaybeEmpty (a ** b ** Sub1 a b)` and to generate arguments of `MkND` in the other way,
 ignoring the given external generator.
 
 Or, maybe, we may want to derive a generator that combines both of these approaches.
