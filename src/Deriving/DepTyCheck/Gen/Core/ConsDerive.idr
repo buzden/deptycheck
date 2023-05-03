@@ -174,21 +174,11 @@ namespace NonObligatoryExts
       -- Arguments that no other argument depends on
       let rightmostArgs = fromFoldable {f=Vect _} range `difference` (givs `union` concat deps)
 
-      ---------------------------------------------------------------
-      -- Manage different possible variants of generation ordering --
-      ---------------------------------------------------------------
-
-      -- Prepare info about which arguments are independent and thus can be ordered arbitrarily
-      let disjDeps = disjointDepSets rawDeps givs
-
-      -- Acquire order(s) in what we will generate arguments
-      let allOrders = List.singleton $ depsLTR.asList ++ leftToRightArgs ++ rightmostArgs.asList
-
       --------------------------
       -- Producing the result --
       --------------------------
 
-      callOneOf "\{logPosition con} (orders)" <$> traverse genForOrder allOrders
+      genForOrder $ depsLTR.asList ++ leftToRightArgs ++ rightmostArgs.asList
 
       where
 
