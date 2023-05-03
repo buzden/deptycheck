@@ -222,8 +222,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                   [ PatClause (IApp. IVar Builtin.DPair.MkDPair
                                                                                    $ IBindVar n
                                                                                    $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                          $ IBindVar k
-                                                                                          $ IBindVar ^bnd^{arg:3654}))
+                                                                                          $ IBindVar m
+                                                                                          $ IBindVar ^bnd^{arg:3651}))
                                                                               (IApp. IVar >>=
                                                                                    $ (IApp. IVar <DerivedGen.X>[0]
                                                                                           $ IVar ^outmost-fuel^
@@ -232,8 +232,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                           => ICase (IVar {lamc:0})
                                                                                                    (Implicit False)
                                                                                                    [ PatClause (IApp. IVar Builtin.DPair.MkDPair
-                                                                                                                    $ IBindVar m
-                                                                                                                    $ IBindVar ^bnd^{arg:3651})
+                                                                                                                    $ IBindVar k
+                                                                                                                    $ IBindVar ^bnd^{arg:3654})
                                                                                                                (IApp. INamedApp (IVar Prelude.pure)
                                                                                                                                 f
                                                                                                                                 (IApp. IVar Test.DepTyCheck.Gen.Gen
