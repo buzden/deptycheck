@@ -154,7 +154,7 @@ trMOneOf (MkOneOf desc gs tw) f with (trMTaggedLazy f gs) proof trm
 --relax' $ Bind @{bo} x f     = Bind @{bindToOuterRelax bo %search} x f
 
 export
-relax : {em : _} -> iem `NoWeaker` em => Gen iem a -> Gen em a
+relax : iem `NoWeaker` em => Gen iem a -> Gen em a
 relax @{AS} Empty      = Empty
 relax $ Pure x         = Pure x
 relax $ Raw x          = Raw x
@@ -195,9 +195,11 @@ mkOneOf desc gens = OneOf $ MkOneOf desc gens $ Val _
 -- TODO to make elimination of a single element
 -- TODO to think whether to propagate description deeper in the case of elimination
 
-filterOutEmpty : OneOfAlternatives em a -> Gen MaybeEmpty a
-filterOutEmpty $ MkOneOf desc gens _ = fromMaybe Empty $ map (mkOneOf {alem=MaybeEmptyDeep} desc) $
-  strengthen $ flip mapMaybe gens $ traverse $ map delay . strengthen . force
+filterOutEmpty : {em : _} -> OneOfAlternatives em a -> Gen MaybeEmpty a
+filterOutEmpty ooa with (canBeNotImmediatelyEmpty em)
+  _                                    | Right _   = OneOf ooa
+  filterOutEmpty $ MkOneOf desc gens _ | Left Refl = fromMaybe Empty $ map (mkOneOf {alem=MaybeEmptyDeep} desc) $
+    strengthen $ flip mapMaybe gens $ traverse $ map delay . strengthen . force
 
 -----------------------------
 --- Very basic generators ---
