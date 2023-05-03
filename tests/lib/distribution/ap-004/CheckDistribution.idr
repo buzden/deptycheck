@@ -29,7 +29,7 @@ record NSB where
   bf : Bool
 
 g : Nat -> Nat -> Gen MaybeEmpty NSB
-g n m = [| MkNSB (nats' n) (strs' m) (forgetStructure bools') |]
+g n m = [| MkNSB (nats' n) (strs' m) (forgetAlternatives bools') |]
 
 mainFor : Nat -> Nat -> IO ()
 mainFor n m = do

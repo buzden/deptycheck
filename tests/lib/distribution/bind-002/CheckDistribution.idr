@@ -18,7 +18,7 @@ genFin (S n) = elements' $ forget $ allFins n
 
 genAnyFin : Gen MaybeEmpty Nat => Gen MaybeEmpty (n ** Fin n)
 genAnyFin @{genNat} = do
-  n <- forgetStructure genNat
+  n <- forgetAlternatives genNat
   f <- genFin n
   pure (n ** f)
 

@@ -171,15 +171,15 @@ Despite monadic bind of generators interprets left-hand side generators as a who
 it looks inside it when the resulting generator is being asked for alternatives by `alternativesOf` function or its variants.
 
 For example, `alternativesOf` being applied to `genAnyFin @{elements [1, 2]}` would produce two alternatives.
-Sometimes this can be undesirable, thus, a `forgetStructure` function exists.
+Sometimes this can be undesirable, thus, a `forgetAlternatives` function exists.
 It allows to forget actual structure of a generator in terms of its alternatives.
 
-Consider one more alternative of `genAnyFin`, now the given `genNat` is wrapped with `forgetStructure`:
+Consider one more alternative of `genAnyFin`, now the given `genNat` is wrapped with `forgetAlternatives`:
 
 ```idris
 genAnyFin'' : Gen MaybeEmpty Nat => Gen MaybeEmpty (n ** Fin n)
 genAnyFin'' @{genNat} = do
-  n <- forgetStructure genNat
+  n <- forgetAlternatives genNat
   f <- genFin n
   pure (n ** f)
 ```
@@ -202,8 +202,8 @@ main_genAnyFin''_alternatives_count_corr = putStrLn $ show $ length (alternative
 > Consider three generators:
 >
 > - `do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
-> - `do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }`
-> - `do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
+> - `do { e1 <- elements [a, b, c]; e2 <- forgetAlternatives $ elements [d, e, f]; pure (e1, e2) }`
+> - `do { e1 <- forgetAlternatives $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
 >
 > The first two generators would have three alternatives each when inspected by `alternativesOf`,
 > where the third one would have only one.
@@ -230,32 +230,32 @@ namespace ForgetStructureNote
 
   g1, g2, g3 : Gen NonEmpty (Nat, Nat)
   g1 = do { e1 <- elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
-  g2 = do { e1 <- elements [a, b, c]; e2 <- forgetStructure $ elements [d, e, f]; pure (e1, e2) }
-  g3 = do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
+  g2 = do { e1 <- elements [a, b, c]; e2 <- forgetAlternatives $ elements [d, e, f]; pure (e1, e2) }
+  g3 = do { e1 <- forgetAlternatives $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
 
   export
-  main_forgetStructure_note_ex1_alternatives_count_corr : IO ()
-  main_forgetStructure_note_ex1_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g1)
+  main_forgetAlternatives_note_ex1_alternatives_count_corr : IO ()
+  main_forgetAlternatives_note_ex1_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g1)
 
   export
-  main_forgetStructure_note_ex2_alternatives_count_corr : IO ()
-  main_forgetStructure_note_ex2_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g2)
+  main_forgetAlternatives_note_ex2_alternatives_count_corr : IO ()
+  main_forgetAlternatives_note_ex2_alternatives_count_corr = putStrLn $ show $ 3 == length (alternativesOf g2)
 
   export
-  main_forgetStructure_note_ex3_alternatives_count_corr : IO ()
-  main_forgetStructure_note_ex3_alternatives_count_corr = putStrLn $ show $ 1 == length (alternativesOf g3)
+  main_forgetAlternatives_note_ex3_alternatives_count_corr : IO ()
+  main_forgetAlternatives_note_ex3_alternatives_count_corr = putStrLn $ show $ 1 == length (alternativesOf g3)
 
   export
-  main_forgetStructure_note_ex1_alternatives_sq_count_corr : IO ()
-  main_forgetStructure_note_ex1_alternatives_sq_count_corr = putStrLn $ show $ 9 == length (deepAlternativesOf 2 g1)
+  main_forgetAlternatives_note_ex1_alternatives_sq_count_corr : IO ()
+  main_forgetAlternatives_note_ex1_alternatives_sq_count_corr = putStrLn $ show $ 9 == length (deepAlternativesOf 2 g1)
 
   export
-  main_forgetStructure_note_ex2_alternatives_sq_count_corr : IO ()
-  main_forgetStructure_note_ex2_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (deepAlternativesOf 2 g2)
+  main_forgetAlternatives_note_ex2_alternatives_sq_count_corr : IO ()
+  main_forgetAlternatives_note_ex2_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (deepAlternativesOf 2 g2)
 
   export
-  main_forgetStructure_note_ex3_alternatives_sq_count_corr : IO ()
-  main_forgetStructure_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (deepAlternativesOf 2 g3)
+  main_forgetAlternatives_note_ex3_alternatives_sq_count_corr : IO ()
+  main_forgetAlternatives_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (deepAlternativesOf 2 g3)
 -->
 
 Also, here you can see that we can use generators as `auto`-parameters,

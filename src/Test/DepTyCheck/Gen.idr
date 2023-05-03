@@ -534,12 +534,12 @@ deepAlternativesOf 1     gen = alternativesOf gen
 deepAlternativesOf (S k) gen = processAlternatives' alternativesOf $ deepAlternativesOf k gen
 
 ||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
-||| except for empty generator, which would still be returned as empty generator.
+||| except for an empty generator, which would still be returned as an empty generator.
 export
-forgetStructure : {em : _} -> Gen em a -> Gen em a
-forgetStructure Empty     = Empty
-forgetStructure g@(Raw _) = g
-forgetStructure g with (canBeEmpty em)
+forgetAlternatives : {em : _} -> Gen em a -> Gen em a
+forgetAlternatives Empty     = Empty
+forgetAlternatives g@(Raw _) = g
+forgetAlternatives g with (canBeEmpty em)
   _ | Right _   = MkRawGen (unGen' g) `Bind` maybe Empty Pure
   _ | Left Refl = Raw $ MkRawGen $ unGen1 g
 

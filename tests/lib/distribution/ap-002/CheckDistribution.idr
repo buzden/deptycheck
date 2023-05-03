@@ -28,7 +28,7 @@ record NSB where
   bf : Bool
 
 g : Nat -> Nat -> Gen MaybeEmpty NSB
-g n m = [| MkNSB (forgetStructure $ nats' n) (strs' m) bools' |]
+g n m = [| MkNSB (forgetAlternatives $ nats' n) (strs' m) bools' |]
 
 mainFor : Nat -> Nat -> IO ()
 mainFor n m = do
