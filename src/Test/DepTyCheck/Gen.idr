@@ -537,6 +537,8 @@ deepAlternativesOf (S k) gen = processAlternatives' alternativesOf $ deepAlterna
 ||| except for an empty generator, which would still be returned as an empty generator.
 |||
 ||| This function must not change distribution when the resulting generator used with usual `Gen` combinators.
+|||
+||| Please notice that this function does NOT influence to the result of `deepAlternativesOf`, if depth is increased by 1.
 export
 forgetAlternatives : {em : _} -> Gen em a -> Gen em a
 forgetAlternatives g@(OneOf {}) = case canBeNotImmediatelyEmpty em of
@@ -555,6 +557,11 @@ forgetAlternatives g = g
 ||| Most probably, you need the lighter version of this function called `forgetAlternatives`.
 ||| The difference is that `forgetAlternatives` do not influence on the resulting distribution,
 ||| when this function may ruin it unexpectedly.
+|||
+||| But despite `forgetAlternatives`, this function acts on `deepAlternativesOf`
+||| like `forgetAlternatives` acts on `alternativesOf`,
+||| i.e. `deepAlternativesOf` would give a single alternative for any depth
+||| being applied to the result of this function.
 export
 forgetStructure : {em : _} -> Gen em a -> Gen em a
 forgetStructure Empty     = Empty
