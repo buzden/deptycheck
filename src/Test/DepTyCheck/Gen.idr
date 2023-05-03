@@ -328,8 +328,30 @@ ap @{ll} @{rr} (Bind @{lbo} x f) (Bind {biem} @{rbo} y g) with (canBeEmpty em)
 
 export
 {em : _} -> Applicative (Gen em) where
+
   pure = Pure
-  (<*>) = ap
+
+  Empty <*> _ = Empty
+  _ <*> Empty = Empty
+
+  Pure f <*> g = f <$> g
+  g <*> Pure x = g <&> \f => f x
+
+  Raw sfl <*> Raw sfr = Raw $ sfl <*> sfr
+
+  OneOf @{ao} @{au} {alem} oo <*> g = case canBeNotImmediatelyEmpty em of
+    Right _   => OneOf {em} $ mapOneOf oo $ \x => assert_total $ relax x <*> g
+    Left Refl => maybe Empty (\g => OneOf $ mapOneOf oo $ \x => assert_total $ relax x <*> g) $ strengthen {em=MaybeEmptyDeep} g
+  g <*> OneOf oo = case canBeNotImmediatelyEmpty em of
+    Right _   => OneOf {em} $ mapOneOf oo $ \x => assert_total $ g <*> relax x
+    Left Refl => maybe Empty (\g => OneOf $ mapOneOf oo $ \x => assert_total $ g <*> relax x) $ strengthen {em=MaybeEmptyDeep} g
+
+  Bind x f <*> Raw y = Bind x $ \c => f c <*> Raw y
+  Raw y <*> Bind x f = Bind x $ \c => assert_total $ Raw y <*> f c
+
+  Bind {biem=bl} @{lbo} x f <*> Bind {biem=br} @{rbo} y g = case order {rel=NoWeaker} bl br of
+    Left  _ => Bind {biem=br} [| (x, y) |] $ \(l, r) => assert_total $ relax (f l) <*> g r
+    Right _ => Bind {biem=bl} [| (x, y) |] $ \(l, r) => assert_total $ f l <*> relax (g r)
 
 export
 {em : _} -> Monad (Gen em) where
