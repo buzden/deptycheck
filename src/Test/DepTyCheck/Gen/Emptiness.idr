@@ -136,6 +136,12 @@ NotImmediatelyEmpty : Emptiness -> Type
 NotImmediatelyEmpty em = em `NoWeaker` MaybeEmptyDeep
 
 export
+canBeNotImmediatelyEmpty : (em : _) -> Either (em = MaybeEmpty) (NotImmediatelyEmpty em)
+canBeNotImmediatelyEmpty NonEmpty       = %search
+canBeNotImmediatelyEmpty MaybeEmptyDeep = %search
+canBeNotImmediatelyEmpty MaybeEmpty     = %search
+
+export
 relaxAnyCanBeEmpty : CanBeEmpty cbe => em `NoWeaker` MaybeEmptyDeep -> em `NoWeaker` cbe
 relaxAnyCanBeEmpty @{DD} ND = %search
 relaxAnyCanBeEmpty @{DD} DD = %search

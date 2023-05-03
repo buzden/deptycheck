@@ -255,7 +255,40 @@ namespace ForgetStructureNote
 
   export
   main_forgetAlternatives_note_ex3_alternatives_sq_count_corr : IO ()
-  main_forgetAlternatives_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (deepAlternativesOf 2 g3)
+  main_forgetAlternatives_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (deepAlternativesOf 2 g3)
+-->
+
+> **Note**
+>
+> Please notice that `deepAlternativesOf` can "see" through `forgetAlternatives`, so count of deep alternatives of depth `2`
+> for the third case would still be `3`.
+> If you really need to hide the full structure even from the `deepAlternativesOf`, you can be much stronger version called
+> `forgetStructure`:
+>
+> - `do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }`
+>
+> This this case both `alternativesOf` and even `deepAlternativesOf` would give you the single alternative.
+> But please keep in mind that monadic composition of a generator with forgotten structure and some significantly empty generator function
+> (like `oneOf [g1, forgetStrcuture g2 >>= f]`) may have unexpected distribution of values.
+> Probability of values produced by the `f` related to the probability of values produced by `g1` may be divided by the
+> probability of the generator `forgetStructure g2 >>= f` to produce a non-empty value.
+>
+> When you are using the weaker `forgetAlternatives` instead of `forgetStructure`, distributions are more predictable
+> in case when `g2` has some non-trivial structure of alternatives.
+
+<!-- idris
+namespace ForgetStructureNote
+
+  g4 : Gen NonEmpty (Nat, Nat)
+  g4 = do { e1 <- forgetStructure $ elements [a, b, c]; e2 <- elements [d, e, f]; pure (e1, e2) }
+
+  export
+  main_forgetAlternatives_note_ex4_alternatives_count_corr : IO ()
+  main_forgetAlternatives_note_ex4_alternatives_count_corr = putStrLn $ show $ 1 == length (alternativesOf g4)
+
+  export
+  main_forgetAlternatives_note_ex4_alternatives_sq_count_corr : IO ()
+  main_forgetAlternatives_note_ex4_alternatives_sq_count_corr = putStrLn $ show $ 1 == length (deepAlternativesOf 2 g4)
 -->
 
 Also, here you can see that we can use generators as `auto`-parameters,

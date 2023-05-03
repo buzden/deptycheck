@@ -533,13 +533,33 @@ deepAlternativesOf 0     gen = [ gen ]
 deepAlternativesOf 1     gen = alternativesOf gen
 deepAlternativesOf (S k) gen = processAlternatives' alternativesOf $ deepAlternativesOf k gen
 
-||| Returns generator with internal structure hidden (say, revealed by `alternativesOf`),
+||| Returns generator with internal structure hidden for `alternativesOf`,
 ||| except for an empty generator, which would still be returned as an empty generator.
+|||
+||| This function must not change distribution when the resulting generator used with usual `Gen` combinators.
 export
 forgetAlternatives : {em : _} -> Gen em a -> Gen em a
-forgetAlternatives Empty     = Empty
-forgetAlternatives g@(Raw _) = g
-forgetAlternatives g with (canBeEmpty em)
+forgetAlternatives g@(OneOf {}) = case canBeNotImmediatelyEmpty em of
+  Right _   => single g
+  Left Refl => maybe Empty single $ strengthen {em=MaybeEmptyDeep} g
+  where
+    %inline single : iem `NoWeaker` MaybeEmptyDeep => iem `NoWeaker` em => Gen iem a -> Gen em a
+    single g = OneOf $ MkOneOf (Just "forgetAlternatives") [(1, g)] $ Val _
+    -- `mkOneOf` is not used here intentionally, since if `mkOneOf` is changed to eliminate single-element `MkOneOf`'s, we still want such behaviour here.
+forgetAlternatives g = g
+
+||| Returns generator with internal structure hidden to anything, including combinators,
+||| except for an empty generator, which would still be returned as an empty generator.
+|||
+||| Apply with care! Don't use until you understand what you are doing!
+||| Most probably, you need the lighter version of this function called `forgetAlternatives`.
+||| The difference is that `forgetAlternatives` do not influence on the resulting distribution,
+||| when this function may ruin it unexpectedly.
+export
+forgetStructure : {em : _} -> Gen em a -> Gen em a
+forgetStructure Empty     = Empty
+forgetStructure g@(Raw _) = g
+forgetStructure g with (canBeEmpty em)
   _ | Right _   = MkRawGen (unGen' g) `Bind` maybe Empty Pure
   _ | Left Refl = Raw $ MkRawGen $ unGen1 g
 
