@@ -297,35 +297,6 @@ Functor (Gen em) where
   map f $ OneOf oo = OneOf $ mapOneOf oo $ assert_total $ map f
   map f $ Bind x g = Bind x $ assert_total map f . g
 
-ap : {em : _} ->
-     lem `NoWeaker` em =>
-     rem `NoWeaker` em =>
-     Gen lem (a -> b) -> Gen rem a -> Gen em b
-
-ap @{AS}      Empty _ = Empty
-ap @{_} @{AS} _ Empty = Empty
-
-ap (Pure f) g = relax $ f <$> g
-ap g (Pure x) = relax $ g <&> \f => f x
-
-ap (Raw sfl) (Raw sfr) = Raw $ sfl <*> sfr
-
-ap {em=NonEmpty} @{NN} @{NN} (OneOf @{ao} oo) g with (ao) _ | NN = OneOf @{NN} $ mapOneOf oo $ \x => assert_total ap x g
-ap {em=MaybeEmptyDeep} (OneOf oo) g = OneOf @{DD} $ mapOneOf oo $ \x => assert_total ap x g
-ap {em=MaybeEmpty}  @{_} @{rr} (OneOf @{_} @{au} oo) g = filterOutEmpty $ mapOneOf oo $ \x => assert_total $ ap @{AS} x g
-
-ap {em=NonEmpty} @{NN} @{NN} g (OneOf @{ao} oo) with (ao) _ | NN = OneOf @{NN} $ mapOneOf oo $ assert_total ap g
-ap {em=MaybeEmptyDeep} g (OneOf oo) = OneOf @{DD} $ mapOneOf oo $ assert_total ap g
-ap {em=MaybeEmpty} @{ll} g (OneOf @{_} @{au} oo) = filterOutEmpty $ mapOneOf oo $ \x => assert_total $ ap @{AS} g x
-
-ap @{ll}      (Bind @{bo} x f) (Raw y) = Bind @{bindToOuterRelax bo ll} x $ \c => assert_total $ ap @{reflexive} @{reflexive} (f c) (Raw y)
-ap @{_} @{rr} (Raw y) (Bind @{bo} x f) = Bind @{bindToOuterRelax bo rr} x $ \c => assert_total $ ap @{reflexive} @{reflexive} (Raw y) (f c)
-
-ap @{ll} @{rr} (Bind @{lbo} x f) (Bind {biem} @{rbo} y g) with (canBeEmpty em)
-  _ | Right cb = Bind {biem=MaybeEmpty} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
-  ap @{NN} @{NN} (Bind @{lbo} x f) (Bind {biem=_} @{rbo} y g) | Left Refl with (extractNE lbo) | (extractNE rbo)
-    _ | Refl | Refl = Bind @{lbo} [| (x, y) |] $ \(l, r) => assert_total $ ap (f l) (g r)
-
 export
 {em : _} -> Applicative (Gen em) where
 
