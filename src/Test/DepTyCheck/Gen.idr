@@ -207,7 +207,7 @@ export
 choose : Random a => (0 _ : IfUnsolved ne NonEmpty) => (a, a) -> Gen ne a
 choose bounds = Raw $ MkRawGen $ getRandomR bounds
 
-export
+export %inline
 empty : Gen0 a
 empty = Empty
 

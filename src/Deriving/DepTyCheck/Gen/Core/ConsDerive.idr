@@ -187,6 +187,10 @@ namespace NonObligatoryExts
         rightmost <- indepPermutations' disjDeps rightmostArgs
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
+      --------------------------
+      -- Producing the result --
+      --------------------------
+
       callOneOf "\{logPosition con} (orders)" <$> traverse genForOrder allOrders
 
       where
