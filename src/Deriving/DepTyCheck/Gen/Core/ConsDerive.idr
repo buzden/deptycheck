@@ -187,6 +187,8 @@ namespace NonObligatoryExts
         rightmost <- indepPermutations' disjDeps rightmostArgs
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
+      let allOrders = take 1 allOrders
+
       --------------------------
       -- Producing the result --
       --------------------------
