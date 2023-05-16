@@ -18,4 +18,5 @@ mutual
 
   data Y = Y0 | Y1 (X Nat)
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen (a ** X a)
+main : IO Unit
+main = %runElab printDerived @{EmptyCons} $ Fuel -> Gen (a ** X a)

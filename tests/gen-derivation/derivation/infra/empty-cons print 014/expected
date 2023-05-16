@@ -8,7 +8,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => (MW ExplicitArg m : IVar Prelude.Types.Nat)
     => (MW ExplicitArg p : IVar Prelude.Types.Nat)
     => (MW ExplicitArg k : IVar Prelude.Types.Nat)
-    => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:3662} : IVar Data.Fuel.Fuel)
+    => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:3663} : IVar Data.Fuel.Fuel)
                                                         -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                                 $ IPrimVal String))
     => ILocal (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]

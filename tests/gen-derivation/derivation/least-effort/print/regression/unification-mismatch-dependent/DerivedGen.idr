@@ -21,4 +21,5 @@ data Z : X -> X -> Type where
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (x : X) -> (x' : X) -> Gen $ Z x x'
+main : IO Unit
+main = %runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (x : X) -> (x' : X) -> Gen $ Z x x'

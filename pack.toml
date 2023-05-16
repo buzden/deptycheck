@@ -7,7 +7,7 @@ collection = "nightly-230515"
 [idris2]
 url     = "https://github.com/buzden/Idris2"
 version = "0.6.0"
-commit  = "5e9ae63d95d690c19c6aa7564939f9dec24872cb"
+commit  = "2baaa36c52b8af7caa94377a0b246e0a57750348"
 
 [install]
 whitelist = [ "deptycheck-tests", "pil-tests", "deptycheck-docs" ]

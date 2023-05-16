@@ -21,4 +21,5 @@ data Z : Type where
 data W : Z -> Z -> Type where
   MkW : W (MkZ (MkX n m False)) (MkZ (MkX n m True))
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (a : Z) -> (b : Z) -> Gen (W a b)
+main : IO Unit
+main = %runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (a : Z) -> (b : Z) -> Gen (W a b)

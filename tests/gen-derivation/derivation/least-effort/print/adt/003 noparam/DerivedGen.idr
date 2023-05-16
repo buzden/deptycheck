@@ -7,4 +7,5 @@ import PrintDerivation
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen Nat
+main : IO Unit
+main = %runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen Nat

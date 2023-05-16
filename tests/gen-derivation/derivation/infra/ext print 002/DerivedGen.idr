@@ -7,4 +7,5 @@ import PrintDerivation
 
 %language ElabReflection
 
-%runElab printDerived @{Ext_XSS} $ Fuel -> (Fuel -> Gen String) => Gen XSS
+main : IO Unit
+main = %runElab printDerived @{Ext_XSS} $ Fuel -> (Fuel -> Gen String) => Gen XSS

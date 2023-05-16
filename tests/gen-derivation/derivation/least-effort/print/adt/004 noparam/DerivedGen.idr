@@ -11,4 +11,5 @@ data X : Type where
   E : X
   R : X -> Nat -> X
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen X
+main : IO Unit
+main = %runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen X

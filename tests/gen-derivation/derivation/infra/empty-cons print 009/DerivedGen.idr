@@ -13,4 +13,5 @@ data Y = Y0 | Y1
 
 data X = X0 | X1 | X2 Y
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen X
+main : IO Unit
+main = %runElab printDerived @{EmptyCons} $ Fuel -> Gen X

@@ -11,4 +11,5 @@ data X : Nat -> Nat -> Type where
   XE : X n n
   XS : X n (S n)
 
-%runElab printDerived @{EmptyCons} $ Fuel -> (n, m : Nat) -> Gen (X n m)
+main : IO Unit
+main = %runElab printDerived @{EmptyCons} $ Fuel -> (n, m : Nat) -> Gen (X n m)

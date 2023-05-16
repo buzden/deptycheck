@@ -15,4 +15,5 @@ mutual
 
   data Y = Y0 | Y1 X
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen X
+main : IO Unit
+main = %runElab printDerived @{EmptyCons} $ Fuel -> Gen X

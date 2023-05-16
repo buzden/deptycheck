@@ -4,7 +4,7 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen Nat)} -> Gen Bool
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW AutoImplicit external^<Prelude.Types.Nat>[] : IPi.  (MW ExplicitArg {arg:3634} : IVar Data.Fuel.Fuel)
+    => (MW AutoImplicit external^<Prelude.Types.Nat>[] : IPi.  (MW ExplicitArg {arg:3635} : IVar Data.Fuel.Fuel)
                                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                                     $ IVar Prelude.Types.Nat))
     => ILocal (IApp. IVar <Prelude.Basics.Bool>[] $ IVar ^outmost-fuel^)

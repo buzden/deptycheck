@@ -7,4 +7,5 @@ import PrintDerivation
 
 %language ElabReflection
 
-%runElab printDerived @{EmptyBody} $ Fuel -> Gen Unit
+main : IO Unit
+main = %runElab printDerived @{EmptyBody} $ Fuel -> Gen Unit

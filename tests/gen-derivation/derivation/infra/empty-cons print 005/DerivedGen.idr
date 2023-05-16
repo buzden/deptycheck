@@ -10,4 +10,5 @@ import PrintDerivation
 data X : Nat -> Type where
   MkX : X n
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen (n : Nat ** X n)
+main : IO Unit
+main = %runElab printDerived @{EmptyCons} $ Fuel -> Gen (n : Nat ** X n)

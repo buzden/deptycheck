@@ -15,4 +15,5 @@ data Y : Type where
   MkY1 : X_GADT n m -> X_GADT n k -> Y
   MkY2 : X_GADT n m -> X_GADT k m -> Y
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen Y
+main : IO Unit
+main = %runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen Y
