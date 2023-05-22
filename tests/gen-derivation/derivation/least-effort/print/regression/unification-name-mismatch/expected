@@ -4,12 +4,12 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (xs : X) -> (ys : X) -> Gen (Y xs ys)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg xs : IVar DerivedGen.X)
-    => (MW ExplicitArg ys : IVar DerivedGen.X)
+    => (MW ExplicitArg outer^<xs> : Implicit True)
+    => (MW ExplicitArg outer^<ys> : Implicit True)
     => ILocal (IApp. IVar <DerivedGen.Y>[0, 1]
                    $ IVar ^outmost-fuel^
-                   $ IVar xs
-                   $ IVar ys)
+                   $ IVar outer^<xs>
+                   $ IVar outer^<ys>)
          IClaim MW
                 Export
                 []
@@ -24,15 +24,15 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.Y>[0, 1]
               [ PatClause (IApp. IVar <DerivedGen.Y>[0, 1]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar xs
-                               $ IBindVar ys)
+                               $ IBindVar inter^<xs>
+                               $ IBindVar inter^<ys>)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar <<DerivedGen.A>>
                                                           $ IVar Data.Fuel.Dry
-                                                          $ IVar xs
-                                                          $ IVar ys)
+                                                          $ IVar inter^<xs>
+                                                          $ IVar inter^<ys>)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
@@ -45,16 +45,16 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                $ IPrimVal 1)
                                                                         $ (IApp. IVar <<DerivedGen.A>>
                                                                                $ IVar ^fuel_arg^
-                                                                               $ IVar xs
-                                                                               $ IVar ys))
+                                                                               $ IVar inter^<xs>
+                                                                               $ IVar inter^<ys>))
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar Builtin.MkPair
                                                                                $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
                                                                                       $ IVar ^sub^fuel_arg^)
                                                                                $ (IApp. IVar <<DerivedGen.B>>
                                                                                       $ IVar ^sub^fuel_arg^
-                                                                                      $ IVar xs
-                                                                                      $ IVar ys))
+                                                                                      $ IVar inter^<xs>
+                                                                                      $ IVar inter^<ys>))
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export

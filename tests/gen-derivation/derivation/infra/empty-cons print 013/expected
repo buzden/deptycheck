@@ -4,16 +4,16 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (n : Nat) -> (m : Nat) -> (p : Nat) -> (k : Nat) -> Gen (X n m p k)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg n : IVar Prelude.Types.Nat)
-    => (MW ExplicitArg m : IVar Prelude.Types.Nat)
-    => (MW ExplicitArg p : IVar Prelude.Types.Nat)
-    => (MW ExplicitArg k : IVar Prelude.Types.Nat)
+    => (MW ExplicitArg outer^<n> : Implicit True)
+    => (MW ExplicitArg outer^<m> : Implicit True)
+    => (MW ExplicitArg outer^<p> : Implicit True)
+    => (MW ExplicitArg outer^<k> : Implicit True)
     => ILocal (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]
                    $ IVar ^outmost-fuel^
-                   $ IVar n
-                   $ IVar m
-                   $ IVar p
-                   $ IVar k)
+                   $ IVar outer^<n>
+                   $ IVar outer^<m>
+                   $ IVar outer^<p>
+                   $ IVar outer^<k>)
          IClaim MW
                 Export
                 []
@@ -32,10 +32,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.X>[0, 1, 2, 3]
               [ PatClause (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:3630}
-                               $ IBindVar {arg:3633}
-                               $ IBindVar {arg:3636}
-                               $ IBindVar {arg:3639})
+                               $ IBindVar inter^<{arg:3630}>
+                               $ IBindVar inter^<{arg:3633}>
+                               $ IBindVar inter^<{arg:3636}>
+                               $ IBindVar inter^<{arg:3639}>)
                           (ILocal (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
                                                    description
                                                    (IApp. IVar Just
@@ -43,17 +43,17 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<DerivedGen.XE>>
                                                      $ IVar ^fuel_arg^
-                                                     $ IVar {arg:3630}
-                                                     $ IVar {arg:3633}
-                                                     $ IVar {arg:3636}
-                                                     $ IVar {arg:3639})
+                                                     $ IVar inter^<{arg:3630}>
+                                                     $ IVar inter^<{arg:3633}>
+                                                     $ IVar inter^<{arg:3636}>
+                                                     $ IVar inter^<{arg:3639}>)
                                               $ (IApp. IVar ::
                                                      $ (IApp. IVar <<DerivedGen.XS>>
                                                             $ IVar ^fuel_arg^
-                                                            $ IVar {arg:3630}
-                                                            $ IVar {arg:3633}
-                                                            $ IVar {arg:3636}
-                                                            $ IVar {arg:3639})
+                                                            $ IVar inter^<{arg:3630}>
+                                                            $ IVar inter^<{arg:3633}>
+                                                            $ IVar inter^<{arg:3636}>
+                                                            $ IVar inter^<{arg:3639}>)
                                                      $ IVar Nil))))
                             IClaim MW
                                    Export

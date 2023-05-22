@@ -255,6 +255,10 @@ nameForGen : ExternalGenSignature -> Name
 nameForGen sig = let (ty, givs) = characteristics sig in UN $ Basic $ "external^<\{ty}>\{show givs}"
 -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
 
+-- this is a workarond for Idris compiler bug #2983
+nameMod : Name -> Name
+nameMod n = UN $ Basic "outer^<\{show n}>"
+
 internalGenCallingLambda : Elaboration m => CheckResult DerivationTask -> TTImp -> m TTImp
 internalGenCallingLambda (sig ** exts ** givsPos) call = do
     let Just args = joinEithersPos sig.givenParams.asList exts.externals givsPos
@@ -265,14 +269,14 @@ internalGenCallingLambda (sig ** exts ** givsPos) call = do
 
   -- either given param or auto param
   mkLam : Either (Fin sig.targetType.args.length, ArgExplicitness, Name) (ExternalGenSignature, TTImp) -> TTImp -> TTImp
-  mkLam $ Left (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just name .| (index' sig.targetType.args idx).type
+  mkLam $ Left (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just (nameMod name) .| implicitTrue -- (index' sig.targetType.args idx).type -- no type because of `nameMod` above
   mkLam $ Right (extSig, ty)     = lam $ MkArg MW AutoImplicit .| Just (nameForGen extSig) .| ty
                                    -- TODO to think whether it's okay to calculate the name twice: here and below for a map
 
 callMainDerivedGen : CanonicGen m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
 callMainDerivedGen sig fuelArg =
   let Element intSig prf = internalise sig in
-  callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var name
+  callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var $ nameMod name
 
 wrapFuel : (fuelArg : Name) -> TTImp -> TTImp
 wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)

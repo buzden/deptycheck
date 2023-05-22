@@ -152,10 +152,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.X>[0]
               [ PatClause (IApp. IVar <DerivedGen.X>[0]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:3630})
+                               $ IBindVar inter^<{arg:3630}>)
                           (ILocal (IApp. IVar <<DerivedGen.MkX>>
                                        $ IVar ^fuel_arg^
-                                       $ IVar {arg:3630}))
+                                       $ IVar inter^<{arg:3630}>))
                             IClaim MW
                                    Export
                                    []
