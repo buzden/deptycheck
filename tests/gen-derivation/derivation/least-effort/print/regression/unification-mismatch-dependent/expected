@@ -4,12 +4,12 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (x : X) -> (x' : X) -> Gen (Z x x')
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg x : IVar DerivedGen.X)
-    => (MW ExplicitArg x' : IVar DerivedGen.X)
+    => (MW ExplicitArg outer^<x> : Implicit True)
+    => (MW ExplicitArg outer^<x'> : Implicit True)
     => ILocal (IApp. IVar <DerivedGen.Z>[0, 1]
                    $ IVar ^outmost-fuel^
-                   $ IVar x
-                   $ IVar x')
+                   $ IVar outer^<x>
+                   $ IVar outer^<x'>)
          IClaim MW
                 Export
                 []
@@ -24,12 +24,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.Z>[0, 1]
               [ PatClause (IApp. IVar <DerivedGen.Z>[0, 1]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:3650}
-                               $ IBindVar {arg:3653})
+                               $ IBindVar inter^<{arg:3650}>
+                               $ IBindVar inter^<{arg:3653}>)
                           (ILocal (IApp. IVar <<DerivedGen.MkZ>>
                                        $ IVar ^fuel_arg^
-                                       $ IVar {arg:3650}
-                                       $ IVar {arg:3653}))
+                                       $ IVar inter^<{arg:3650}>
+                                       $ IVar inter^<{arg:3653}>))
                             IClaim MW
                                    Export
                                    []

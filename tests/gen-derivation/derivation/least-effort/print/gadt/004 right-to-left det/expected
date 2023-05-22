@@ -179,7 +179,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.X_GADT>[0]
               [ PatClause (IApp. IVar <DerivedGen.X_GADT>[0]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:3630})
+                               $ IBindVar inter^<{arg:3630}>)
                           (ILocal (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
                                                    description
                                                    (IApp. IVar Just
@@ -187,11 +187,11 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<DerivedGen.MkXG_4>>
                                                      $ IVar ^fuel_arg^
-                                                     $ IVar {arg:3630})
+                                                     $ IVar inter^<{arg:3630}>)
                                               $ (IApp. IVar ::
                                                      $ (IApp. IVar <<DerivedGen.MkXG_5>>
                                                             $ IVar ^fuel_arg^
-                                                            $ IVar {arg:3630})
+                                                            $ IVar inter^<{arg:3630}>)
                                                      $ IVar Nil))))
                             IClaim MW
                                    Export
@@ -337,10 +337,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.X_ADT>[0]
               [ PatClause (IApp. IVar <DerivedGen.X_ADT>[0]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:3651})
+                               $ IBindVar inter^<{arg:3651}>)
                           (ILocal (IApp. IVar <<DerivedGen.MkX>>
                                        $ IVar ^fuel_arg^
-                                       $ IVar {arg:3651}))
+                                       $ IVar inter^<{arg:3651}>))
                             IClaim MW
                                    Export
                                    []

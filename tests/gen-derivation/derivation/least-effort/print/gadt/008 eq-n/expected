@@ -4,8 +4,10 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (a : Nat) -> Gen (b : Nat ** EqualN a b)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg a : IVar Prelude.Types.Nat)
-    => ILocal (IApp. IVar <DerivedGen.EqualN>[0] $ IVar ^outmost-fuel^ $ IVar a)
+    => (MW ExplicitArg outer^<a> : Implicit True)
+    => ILocal (IApp. IVar <DerivedGen.EqualN>[0]
+                   $ IVar ^outmost-fuel^
+                   $ IVar outer^<a>)
          IClaim MW
                 Export
                 []
@@ -22,10 +24,10 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.EqualN>[0]
               [ PatClause (IApp. IVar <DerivedGen.EqualN>[0]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:3630})
+                               $ IBindVar inter^<{arg:3630}>)
                           (ILocal (IApp. IVar <<DerivedGen.ReflN>>
                                        $ IVar ^fuel_arg^
-                                       $ IVar {arg:3630}))
+                                       $ IVar inter^<{arg:3630}>))
                             IClaim MW
                                    Export
                                    []

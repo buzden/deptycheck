@@ -195,7 +195,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.X_GADT>[0]
               [ PatClause (IApp. IVar <DerivedGen.X_GADT>[0]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:3630})
+                               $ IBindVar inter^<{arg:3630}>)
                           (ILocal (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
                                                    description
                                                    (IApp. IVar Just
@@ -203,11 +203,11 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<DerivedGen.MkXG_4>>
                                                      $ IVar ^fuel_arg^
-                                                     $ IVar {arg:3630})
+                                                     $ IVar inter^<{arg:3630}>)
                                               $ (IApp. IVar ::
                                                      $ (IApp. IVar <<DerivedGen.MkXG_5>>
                                                             $ IVar ^fuel_arg^
-                                                            $ IVar {arg:3630})
+                                                            $ IVar inter^<{arg:3630}>)
                                                      $ IVar Nil))))
                             IClaim MW
                                    Export
@@ -281,7 +281,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.X_GADT>[1]
               [ PatClause (IApp. IVar <DerivedGen.X_GADT>[1]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:3633})
+                               $ IBindVar inter^<{arg:3633}>)
                           (ILocal (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
                                                    description
                                                    (IApp. IVar Just
@@ -289,11 +289,11 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<DerivedGen.MkXG_4>>
                                                      $ IVar ^fuel_arg^
-                                                     $ IVar {arg:3633})
+                                                     $ IVar inter^<{arg:3633}>)
                                               $ (IApp. IVar ::
                                                      $ (IApp. IVar <<DerivedGen.MkXG_5>>
                                                             $ IVar ^fuel_arg^
-                                                            $ IVar {arg:3633})
+                                                            $ IVar inter^<{arg:3633}>)
                                                      $ IVar Nil))))
                             IClaim MW
                                    Export

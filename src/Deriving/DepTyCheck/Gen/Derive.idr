@@ -95,12 +95,20 @@ defArgNames : {sig : GenSignature} -> Vect sig.givenParams.size String
 defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.args
 
 export %inline
+canonicDefaultLHS' : (namesFun : String -> String) -> GenSignature -> Name -> (fuel : String) -> TTImp
+canonicDefaultLHS' nmf sig n fuel = callCanonic sig n .| bindVar fuel .| bindVar . nmf <$> defArgNames
+
+export %inline
+canonicDefaultRHS' : (namesFun : String -> String) -> GenSignature -> Name -> (fuel : TTImp) -> TTImp
+canonicDefaultRHS' nmf sig n fuel = callCanonic sig n fuel .| varStr . nmf <$> defArgNames
+
+export %inline
 canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
-canonicDefaultLHS sig n fuel = callCanonic sig n .| bindVar fuel .| bindVar <$> defArgNames
+canonicDefaultLHS = canonicDefaultLHS' id
 
 export %inline
 canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
-canonicDefaultRHS sig n fuel = callCanonic sig n fuel .| varStr <$> defArgNames
+canonicDefaultRHS = canonicDefaultRHS' id
 
 ---------------------------------
 --- External-facing functions ---

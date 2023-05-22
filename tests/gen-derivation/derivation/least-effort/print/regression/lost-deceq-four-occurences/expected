@@ -4,16 +4,16 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (x1 : Nat) -> (x2 : Nat) -> (x3 : Nat) -> (x4 : Nat) -> Gen (X x1 x2 x3 x4)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg x1 : IVar Prelude.Types.Nat)
-    => (MW ExplicitArg x2 : IVar Prelude.Types.Nat)
-    => (MW ExplicitArg x3 : IVar Prelude.Types.Nat)
-    => (MW ExplicitArg x4 : IVar Prelude.Types.Nat)
+    => (MW ExplicitArg outer^<x1> : Implicit True)
+    => (MW ExplicitArg outer^<x2> : Implicit True)
+    => (MW ExplicitArg outer^<x3> : Implicit True)
+    => (MW ExplicitArg outer^<x4> : Implicit True)
     => ILocal (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]
                    $ IVar ^outmost-fuel^
-                   $ IVar x1
-                   $ IVar x2
-                   $ IVar x3
-                   $ IVar x4)
+                   $ IVar outer^<x1>
+                   $ IVar outer^<x2>
+                   $ IVar outer^<x3>
+                   $ IVar outer^<x4>)
          IClaim MW
                 Export
                 []
@@ -32,16 +32,16 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <DerivedGen.X>[0, 1, 2, 3]
               [ PatClause (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar {arg:3630}
-                               $ IBindVar {arg:3633}
-                               $ IBindVar {arg:3636}
-                               $ IBindVar {arg:3639})
+                               $ IBindVar inter^<{arg:3630}>
+                               $ IBindVar inter^<{arg:3633}>
+                               $ IBindVar inter^<{arg:3636}>
+                               $ IBindVar inter^<{arg:3639}>)
                           (ILocal (IApp. IVar <<DerivedGen.MkX>>
                                        $ IVar ^fuel_arg^
-                                       $ IVar {arg:3630}
-                                       $ IVar {arg:3633}
-                                       $ IVar {arg:3636}
-                                       $ IVar {arg:3639}))
+                                       $ IVar inter^<{arg:3630}>
+                                       $ IVar inter^<{arg:3633}>
+                                       $ IVar inter^<{arg:3636}>
+                                       $ IVar inter^<{arg:3639}>))
                             IClaim MW
                                    Export
                                    []

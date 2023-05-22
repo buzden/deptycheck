@@ -4,8 +4,10 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (a : Type) -> Gen (n : Nat ** Vect n a)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg a : IType)
-    => ILocal (IApp. IVar <Data.Vect.Vect>[1] $ IVar ^outmost-fuel^ $ IVar a)
+    => (MW ExplicitArg outer^<a> : Implicit True)
+    => ILocal (IApp. IVar <Data.Vect.Vect>[1]
+                   $ IVar ^outmost-fuel^
+                   $ IVar outer^<a>)
          IClaim MW
                 Export
                 []
@@ -22,13 +24,13 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IDef <Data.Vect.Vect>[1]
               [ PatClause (IApp. IVar <Data.Vect.Vect>[1]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar elem)
+                               $ IBindVar inter^<elem>)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
                                                      (IApp. IVar <<Data.Vect.Nil>>
                                                           $ IVar Data.Fuel.Dry
-                                                          $ IVar elem)
+                                                          $ IVar inter^<elem>)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
@@ -41,14 +43,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                $ IPrimVal 1)
                                                                         $ (IApp. IVar <<Data.Vect.Nil>>
                                                                                $ IVar ^fuel_arg^
-                                                                               $ IVar elem))
+                                                                               $ IVar inter^<elem>))
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar Builtin.MkPair
                                                                                $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
                                                                                       $ IVar ^sub^fuel_arg^)
                                                                                $ (IApp. IVar <<Data.Vect.(::)>>
                                                                                       $ IVar ^sub^fuel_arg^
-                                                                                      $ IVar elem))
+                                                                                      $ IVar inter^<elem>))
                                                                         $ IVar Nil))) ]))
                             IClaim MW
                                    Export
