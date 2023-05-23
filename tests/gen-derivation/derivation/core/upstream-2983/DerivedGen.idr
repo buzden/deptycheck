@@ -16,7 +16,7 @@ data AtIndex : (n : Nat) -> Bool -> VectMaybeAnyType n -> Type where
 Show (AtIndex n v xs) where
   show _ = "Here"
 
-checkedGen : Fuel -> (n : Nat) -> (b : Bool) -> (v : VectMaybeAnyType n) -> Gen $ AtIndex n b v
+checkedGen : Fuel -> (n : Nat) -> (b : Bool) -> (v : VectMaybeAnyType n) -> Gen MaybeEmpty $ AtIndex n b v
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()
