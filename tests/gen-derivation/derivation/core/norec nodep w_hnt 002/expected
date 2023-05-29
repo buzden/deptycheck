@@ -1,0 +1,7 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Error during reflection: While processing right hand side of $resolved17513,<DerivedGen.X>[]. While processing right hand side of $resolved17513,<DerivedGen.X>[],<<DerivedGen.MkX>>. Undefined name Test.DepTyCheck.Gen.NonEmpty.GenAlternatives.GenAlternatives. 
+Did you mean any of: GenAlternatives', Alternative, IAlternative, MkAlternative, deepAlternativesOf, or mapAlternativesOf?
+[ fatal ] Error when executing system command.
+          Command: "build/exec/_tmppack"
+          Error code: 127
