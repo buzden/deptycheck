@@ -17,6 +17,8 @@ import Data.Singleton
 import Data.Stream
 import Data.Vect
 
+import Debug.Trace
+
 import Decidable.Equality
 
 import public Language.Implicits.IfUnsolved
@@ -457,7 +459,11 @@ oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlternatives xs = mkOneOf description xs
 oneOf {em=MaybeEmptyDeep} @{_} @{DT} x = case x of MkGenAlternatives xs => mkOneOf description xs
 oneOf {em=MaybeEmpty} x = case x of MkGenAlternatives xs => do
   maybe Empty (mkOneOf description) $ strengthen $ flip mapMaybe xs $
-    \wg => (fst wg,) . delay <$> Gen.strengthen {em=MaybeEmptyDeep} (snd wg)
+    \wg => (fst wg,) . delay <$> lg (Gen.strengthen {em=MaybeEmptyDeep} (snd wg))
+  where
+    lg : forall a. Maybe a -> Maybe a
+    lg Nothing    = trace "unsuccessful strengthening @ \{fromMaybe "<no description>" description}" Nothing
+    lg x@(Just _) = x
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
