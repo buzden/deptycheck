@@ -459,10 +459,11 @@ oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlternatives xs = mkOneOf description xs
 oneOf {em=MaybeEmptyDeep} @{_} @{DT} x = case x of MkGenAlternatives xs => mkOneOf description xs
 oneOf {em=MaybeEmpty} x = case x of MkGenAlternatives xs => do
   maybe Empty (mkOneOf description) $ strengthen $ flip mapMaybe xs $
+   trace "oneOf: \{fromMaybe "<no description>" description}: before filtering" $
     \wg => (fst wg,) . delay <$> lg (Gen.strengthen {em=MaybeEmptyDeep} (snd wg))
   where
     lg : forall a. Maybe a -> Maybe a
-    lg Nothing    = trace "unsuccessful strengthening @ \{fromMaybe "<no description>" description}" Nothing
+    lg Nothing    = trace "oneOf: \{fromMaybe "<no description>" description}: filtered out empty gen" Nothing
     lg x@(Just _) = x
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
