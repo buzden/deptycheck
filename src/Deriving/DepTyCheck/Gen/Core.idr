@@ -54,7 +54,7 @@ ConstructorDerivator => DerivatorCore where
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
 
     -- generate the case expression deciding whether will we go into recursive constructors or not
-    let outmostRHS = fuelDecisionExpr fuelArg consRecs
+    let outmostRHS = fuelDecisionExpr !oneofDesc fuelArg consRecs
 
     -- return function definition
     pure [ canonicDefaultLHS' namesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
@@ -69,24 +69,24 @@ ConstructorDerivator => DerivatorCore where
     namesWrapper : String -> String
     namesWrapper s = "inter^<\{s}>"
 
-    oneofDesc : String -> TTImp
-    oneofDesc add = `(~(primVal $ Str $ logPosition sig) ++ " (" ++ ~(primVal $ Str add) ++ ")")
+    oneofDesc : m $ String -> TTImp
+    oneofDesc = pure $ \add => `(~(primVal $ Str $ logPosition sig) ++ " (" ++ ~(primVal $ Str add) ++ ")")
 
-    fuelDecisionExpr : (fuelArg : String) -> List (Con, Recursiveness) -> TTImp
-    fuelDecisionExpr fuelAr consRecs = do
+    fuelDecisionExpr : (ooDesc : String -> TTImp) -> (fuelArg : String) -> List (Con, Recursiveness) -> TTImp
+    fuelDecisionExpr ooDesc fuelAr consRecs = do
 
       -- check if there are any recursive constructors
       let True = isJust $ find ((== Recursive) . snd) consRecs
         | False =>
             -- no recursive constructors, thus just call all without spending fuel
-            callOneOf (oneofDesc "non-recursive") (consRecs <&> callConsGen (varStr fuelAr) . fst)
+            callOneOf (ooDesc "non-recursive") (consRecs <&> callConsGen (varStr fuelAr) . fst)
 
       -- pattern match on the fuel argument
       iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
           let nonRecCons = fst <$> filter ((== NonRecursive) . snd) consRecs in
-          let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf (oneofDesc "dry fuel") (nonRecCons <&> callConsGen dry)
+          let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf (ooDesc "dry fuel") (nonRecCons <&> callConsGen dry)
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
@@ -96,7 +96,7 @@ ConstructorDerivator => DerivatorCore where
           let weight : Recursiveness -> TTImp
               weight Recursive    = var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
               weight NonRecursive = liftNat 1
-          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency (oneofDesc "spend fuel")
+          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency (ooDesc "spend fuel")
                                                            (consRecs <&> \(con, rec) => (weight rec, callConsGen (varStr $ selectFuel rec) con))
         ]
 
