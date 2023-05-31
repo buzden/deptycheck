@@ -51,7 +51,7 @@ ConstructorDerivator => DerivatorCore where
       pure (con, toRec r)
 
     -- generate the case expression deciding whether will we go into recursive constructors or not
-    let outmostRHS = fuelDecisionExpr !oneofDesc fuelArg consRecs
+    let outmostRHS = fuelDecisionExpr oneofDesc fuelArg consRecs
 
     -- return function definition
     pure [ canonicDefaultLHS' namesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
@@ -70,23 +70,19 @@ ConstructorDerivator => DerivatorCore where
     namesWrapper : String -> String
     namesWrapper s = "inter^<\{s}>"
 
-    oneofDesc : m $ String -> TTImp
-    oneofDesc = do
-      givens <- for (sig.givenParams.asList <&> index' sig.targetType.args) $ \given => do
-        ty <- check given.type
-        sh <- search $ Show ty
-        pure $ case sh of
-          Just _  => `( showPrec Open ~(varStr $ namesWrapper $ show $ argName given) )
-          Nothing => primVal $ Str "*"
-      let givens = intersperse (primVal $ Str " ") givens
-      pure $ \add => List.foldl1 (\l, r => `(~l ++ ~r)) $
-                       [ primVal $ Str $ logPosition sig ]
-                       ++ givens
-                       ++ [ primVal $ Str " (fuel="
-                          , `(leftDepth ~(varStr fuelArg))
-                          , primVal $ Str ")"
-                          ]
-                       ++ (primVal . Str <$> [ " (", add, ")"])
+    oneofDesc : String -> TTImp
+    oneofDesc add = do
+      let givens = sig.givenParams.asList <&> index' sig.targetType.args <&> \given =>
+                     `( showPrec Open ~(varStr $ namesWrapper $ show $ argName given) )
+      let givens = mergeReplicate (primVal $ Str " ") givens
+      List.foldl1 (\l, r => `(~l ++ ~r)) $
+        [ primVal $ Str $ logPosition sig ]
+        ++ givens
+        ++ [ primVal $ Str " (fuel="
+           , `(show $ leftDepth ~(varStr fuelArg))
+           , primVal $ Str ")"
+           ]
+        ++ (primVal . Str <$> [ " (", add, ")"])
 
     fuelDecisionExpr : (ooDesc : String -> TTImp) -> (fuelArg : String) -> List (Con, Recursiveness) -> TTImp
     fuelDecisionExpr ooDesc fuelAr consRecs = do

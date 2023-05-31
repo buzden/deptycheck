@@ -165,6 +165,13 @@ callFrequency _    [(_, v)] = v
 callFrequency desc variants = `(Test.DepTyCheck.Gen.frequency' {description=Just ~desc}) .$
                                 liftList (variants <&> \(freq, subgen) => var `{Builtin.MkPair} .$ freq .$ subgen)
 
+-- For debugging printing of given values
+export %defaulthint
+ShowAny : Show a
+ShowAny = S where
+  [S] Show a where
+    show _ = "*"
+
 -- TODO to think of better placement for this function; this anyway is intended to be called from the derived code.
 public export
 leftDepth : Fuel -> Nat
