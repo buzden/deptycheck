@@ -78,7 +78,7 @@ public export %inline
 Gen1 : Type -> Type
 Gen1 = Gen NonEmpty
 
-||| Generator with least guaranteed on emptiness.
+||| Generator with least guarantees on emptiness.
 |||
 ||| This type should not be used as an input argument unless it is strictly required.
 ||| You should prefer to be polymorphic on emptiness instead.
@@ -147,11 +147,6 @@ trMOneOf (MkOneOf desc gs tw) f with (trMTaggedLazy f gs) proof trm
 
 --export
 --relax' : {em : _} -> iem `NoWeaker` em => (original : Gen iem a) -> (relaxed : Gen em a ** relaxed `Equiv` original)
---relax' @{AS} Empty          = (Empty ** EE)
---relax' $ Pure x             = (Pure x ** EP)
---relax' $ Raw x              = (Raw x ** ER)
---relax' $ OneOf @{wo} x@(MkOneOf _ _ _)      = (OneOf @{transitive' wo %search} x ** EO)
---relax' $ Bind @{bo} x f     = Bind @{bindToOuterRelax bo %search} x f
 
 export
 relax : iem `NoWeaker` em => Gen iem a -> Gen em a
@@ -161,7 +156,8 @@ relax $ Raw x          = Raw x
 relax $ OneOf @{wo} x  = OneOf @{transitive' wo %search} x
 relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
 
--- strengthen' : {em : _} -> (gw : Gen iem a) -> Dec (gs : Gen em a ** gs `Equiv` gw)
+--export
+--strengthen' : {em : _} -> (gw : Gen iem a) -> Dec (gs : Gen em a ** gs `Equiv` gw)
 
 export
 strengthen : {em : _} -> Gen iem a -> Maybe $ Gen em a
