@@ -7,6 +7,6 @@ DerivedGen:14:31--14:34
  11 | Show a => Show b => Show (X a b) where
  12 |   show (MkX m) = "MkX \{show m}"
  13 | 
- 14 | checkedGen : Fuel -> (Fuel -> Gen a) => (Fuel -> Gen b) => Gen (X a b)
+ 14 | checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty a) => (Fuel -> Gen MaybeEmpty b) => Gen MaybeEmpty (X a b)
                                     ^^^
 

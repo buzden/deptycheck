@@ -7,4 +7,4 @@ import PrintDerivation
 
 %language ElabReflection
 
-%runElab printDerived @{Ext_XSN} $ Fuel -> (Fuel -> Gen String) => (n : Nat) -> Gen (X'S n)
+%runElab printDerived @{Ext_XSN} $ Fuel -> (Fuel -> Gen MaybeEmpty String) => (n : Nat) -> Gen MaybeEmpty (X'S n)

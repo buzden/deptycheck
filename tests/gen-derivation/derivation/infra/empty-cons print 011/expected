@@ -1,7 +1,7 @@
 1/3: Building AlternativeCore (AlternativeCore.idr)
 2/3: Building PrintDerivation (PrintDerivation.idr)
 3/3: Building DerivedGen (DerivedGen.idr)
-LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen (a : Type ** X a)
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen MaybeEmpty (a : Type ** X a)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => ILocal (IApp. IVar <DerivedGen.X>[] $ IVar ^outmost-fuel^)
@@ -11,6 +11,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 (MkTy <DerivedGen.X>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ (IApp. IVar Builtin.DPair.DPair
                                          $ IType
                                          $ (ILam.  (MW ExplicitArg {arg:3639} : IType)
@@ -21,10 +22,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
-                                                                      description
-                                                                      (IApp. IVar Just
-                                                                           $ IPrimVal DerivedGen.X[] (dry fuel))
+                                                     (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                                 description
+                                                                                 (IApp. IVar Just
+                                                                                      $ IPrimVal DerivedGen.X[] (dry fuel)))
+                                                                      em
+                                                                      (IVar MaybeEmpty)
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar <<DerivedGen.X0>>
                                                                         $ IVar Data.Fuel.Dry)
@@ -34,7 +37,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency')
                                                                       description
                                                                       (IApp. IVar Just
                                                                            $ IPrimVal DerivedGen.X[] (spend fuel))
@@ -63,6 +66,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    (MkTy <<DerivedGen.X0>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar Builtin.DPair.DPair
                                                             $ IType
                                                             $ (ILam.  (MW ExplicitArg {arg:3639} : IType)
@@ -74,6 +78,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    (MkTy <<DerivedGen.X1>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar Builtin.DPair.DPair
                                                             $ IType
                                                             $ (ILam.  (MW ExplicitArg {arg:3639} : IType)
@@ -85,6 +90,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                    (MkTy <<DerivedGen.X2>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar Builtin.DPair.DPair
                                                             $ IType
                                                             $ (ILam.  (MW ExplicitArg {arg:3639} : IType)

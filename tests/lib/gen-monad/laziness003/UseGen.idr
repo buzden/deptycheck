@@ -5,13 +5,12 @@ import Data.List.Lazy
 import Debug.Trace
 
 import Test.DepTyCheck.Gen
-import Test.DepTyCheck.Gen.NonEmpty
 
 import System.Random.Pure.StdGen
 
 %default total
 
-g : Gen Nat
+g : Gen MaybeEmpty Nat
 g = trace "--- outmost gen ---" $ oneOf
   [ oneOf $ trace "-- list with pure 4, 5 --"
       [ pure $ trace "pure 4" 4

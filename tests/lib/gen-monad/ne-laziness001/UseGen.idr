@@ -2,7 +2,7 @@ module UseGen
 
 import Debug.Trace
 
-import Test.DepTyCheck.Gen.NonEmpty
+import Test.DepTyCheck.Gen
 
 import System.Random.Pure.StdGen
 
@@ -15,4 +15,4 @@ g = trace "--- outmost gen ---" $ oneOf
   ]
 
 main : IO Unit
-main = putStrLn $ show $ take 10 $ unGenTryAll someStdGen g
+main = putStrLn $ show $ take 10 $ unGenAll someStdGen g

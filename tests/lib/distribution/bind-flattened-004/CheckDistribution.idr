@@ -9,23 +9,18 @@ import DistrCheckCommon
 
 %default total
 
-nats : (n : Nat) -> Gen Nat
+nats : (n : Nat) -> Gen MaybeEmpty Nat
 nats n = elements [1 .. n]
 
-genFin : (n : Nat) -> Gen $ Fin n
+genFin : (n : Nat) -> Gen MaybeEmpty $ Fin n
 genFin Z     = empty
-genFin (S n) = elements $ forget $ allFins n
+genFin (S n) = elements' $ forget $ allFins n
 
-genAnyFin : Gen Nat => Gen (n ** Fin n)
+genAnyFin : Gen MaybeEmpty Nat => Gen MaybeEmpty (n ** Fin n)
 genAnyFin @{genNat} = oneOf $ do
   n <- [ genNat ]
   f <- [ genFin n ]
   pure (n ** f)
-
-Eq (n ** Fin n) where
-  (n ** f) == (n' ** f') with (n `decEq` n')
-    (n ** f) == (n ** f') | Yes Refl = f == f'
-    _                     | No _     = False
 
 mainFor : Nat -> IO ()
 mainFor Z     = pure ()

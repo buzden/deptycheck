@@ -2,11 +2,11 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Error during reflection: All arguments of the target type must be different
 
-DerivedGen:9:46--9:48
+DerivedGen:9:68--9:70
  5 | %default total
  6 | 
  7 | %language ElabReflection
  8 | 
- 9 | checkedGen : Fuel -> (Fuel -> Gen a) => Gen (a, a)
-                                                  ^^
+ 9 | checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty a) => Gen MaybeEmpty (a, a)
+                                                                        ^^
 

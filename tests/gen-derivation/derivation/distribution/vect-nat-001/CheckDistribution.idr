@@ -18,10 +18,10 @@ index : Fin n -> VectNat n -> Nat
 index FZ     (x::_ ) = x
 index (FS k) (_::xs) = index k xs
 
-vectNats : Fuel -> (Fuel -> Gen Nat) => (n : Nat) -> Gen $ VectNat n
+vectNats : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (n : Nat) -> Gen MaybeEmpty $ VectNat n
 vectNats = deriveGen
 
-nats : Fuel -> Gen Nat
+nats : Fuel -> Gen MaybeEmpty Nat
 nats = deriveGen
 
 -- Check that every number in every position is uniformly distributed

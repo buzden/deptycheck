@@ -9,9 +9,9 @@ import DistrCheckCommon
 
 %default total
 
-genFin : (n : Nat) -> Gen $ Fin n
+genFin : (n : Nat) -> Gen MaybeEmpty $ Fin n
 genFin Z     = empty
-genFin (S n) = elements $ forget $ allFins n
+genFin (S n) = elements' $ forget $ allFins n
 
 mainFor : Nat -> IO ()
 mainFor Z     = pure ()

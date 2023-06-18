@@ -19,6 +19,13 @@ public export %inline
 fromInteger : (x : Integer) -> (0 _ : So $ x >= 1) => PosNat
 fromInteger x = Element (cast x) (believe_me $ ItIsSucc {n=1})
 
+export
+Range PosNat where
+  rangeFrom fr = rangeFrom fr.fst <&> \x => Element x $ believe_me $ ItIsSucc {n=1}
+  rangeFromThen fr th = rangeFromThen fr.fst th.fst <&> \x => Element x $ believe_me $ ItIsSucc {n=1}
+  rangeFromTo fr to = rangeFromTo fr.fst to.fst <&> \x => Element x $ believe_me $ ItIsSucc {n=1}
+  rangeFromThenTo fr th to = rangeFromThenTo fr.fst th.fst to.fst <&> \x => Element x $ believe_me $ ItIsSucc {n=1}
+
 --- Simple arithmetics ---
 
 public export %inline

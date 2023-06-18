@@ -1,7 +1,7 @@
 1/3: Building AlternativeCore (AlternativeCore.idr)
 2/3: Building PrintDerivation (PrintDerivation.idr)
 3/3: Building DerivedGen (DerivedGen.idr)
-LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (n : Nat) -> (m : Nat) -> (p : Nat) -> (k : Nat) -> {auto conArg : ((arg : Fuel) -> Gen String)} -> Gen (X n m p k)
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (n : Nat) -> (m : Nat) -> (p : Nat) -> (k : Nat) -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty String)} -> Gen MaybeEmpty (X n m p k)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => (MW ExplicitArg outer^<n> : Implicit True)
@@ -10,6 +10,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => (MW ExplicitArg outer^<k> : Implicit True)
     => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:3662} : IVar Data.Fuel.Fuel)
                                                         -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                                 $ IPrimVal String))
     => ILocal (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]
                    $ IVar ^outmost-fuel^
@@ -27,6 +28,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:3636} : IVar Prelude.Types.Nat)
                           -> (MW ExplicitArg {arg:3639} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ (IApp. IVar DerivedGen.X
                                          $ IVar {arg:3630}
                                          $ IVar {arg:3633}
@@ -39,10 +41,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                $ IBindVar inter^<{arg:3633}>
                                $ IBindVar inter^<{arg:3636}>
                                $ IBindVar inter^<{arg:3639}>)
-                          (ILocal (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
-                                                   description
-                                                   (IApp. IVar Just
-                                                        $ IPrimVal DerivedGen.X[0, 1, 2, 3] (non-recursive))
+                          (ILocal (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                              description
+                                                              (IApp. IVar Just
+                                                                   $ IPrimVal DerivedGen.X[0, 1, 2, 3] (non-recursive)))
+                                                   em
+                                                   (IVar MaybeEmpty)
                                        $ (IApp. IVar ::
                                               $ (IApp. IVar <<DerivedGen.XE>>
                                                      $ IVar ^fuel_arg^
@@ -68,6 +72,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:3636} : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg {arg:3639} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar DerivedGen.X
                                                             $ IVar {arg:3630}
                                                             $ IVar {arg:3633}
@@ -83,6 +88,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:3636} : IVar Prelude.Types.Nat)
                                              -> (MW ExplicitArg {arg:3639} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar DerivedGen.X
                                                             $ IVar {arg:3630}
                                                             $ IVar {arg:3633}

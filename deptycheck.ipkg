@@ -28,7 +28,7 @@ modules = Data.Nat.Pos
         , Deriving.DepTyCheck.Util.Reflection
         , Deriving.DepTyCheck.Util.Syntax
         , Test.DepTyCheck.Gen
-        , Test.DepTyCheck.Gen.NonEmpty
+        , Test.DepTyCheck.Gen.Emptiness
 
 depends = contrib
         , elab-util

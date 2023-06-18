@@ -156,13 +156,13 @@ liftNat k = `(Prelude.integerToNat ~(primVal $ BI $ cast k))
 export
 callOneOf : (desc : String) -> List TTImp -> TTImp
 callOneOf _    [v]      = v
-callOneOf desc variants = namedApp (var `{Test.DepTyCheck.Gen.oneOf}) `{description} `(Just ~(primVal $ Str desc)) .$ liftList variants
+callOneOf desc variants = `(Test.DepTyCheck.Gen.oneOf {description=Just ~(primVal $ Str desc)} {em=MaybeEmpty}) .$ liftList variants
 
 -- List of weights and subgenerators
 export
 callFrequency : (desc : String) -> List (TTImp, TTImp) -> TTImp
 callFrequency _    [(_, v)] = v
-callFrequency desc variants = namedApp (var `{Test.DepTyCheck.Gen.frequency}) `{description} `(Just ~(primVal $ Str desc)) .$
+callFrequency desc variants = `(Test.DepTyCheck.Gen.frequency' {description=Just ~(primVal $ Str desc)}) .$
                                 liftList (variants <&> \(freq, subgen) => var `{Builtin.MkPair} .$ freq .$ subgen)
 
 -- TODO to think of better placement for this function; this anyway is intended to be called from the derived code.
@@ -340,6 +340,22 @@ argDeps args = do
 public export
 isSameTypeAs : Name -> Name -> Elab Bool
 isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `eq` getInfo' expected |]
+
+export
+nameConformsTo : (cand, origin : Name) -> Bool
+nameConformsTo cand origin = do
+  let (cns, cn) = simplify cand
+  let (ons, on) = simplify origin
+  cn == on && (cns `isPrefixOf` ons) -- notice that namespaces are stored in the reverse order
+  where
+    simplify : Name -> (List String, Name)
+    simplify (NS (MkNS ns) nm) = mapFst (++ ns) $ simplify nm
+    simplify (DN _ nm)         = simplify nm
+    simplify x                 = ([], x)
+
+0 nct_corr_eq : nameConformsTo `{A.B.c} `{A.B.c} = True;  nct_corr_eq = Refl
+0 nct_corr_le : nameConformsTo `{B.c}   `{A.B.c} = True;  nct_corr_le = Refl
+0 nct_corr_ge : nameConformsTo `{A.B.c} `{B.c}   = False; nct_corr_ge = Refl
 
 -- simple syntactic search of a `IVar`, disregarding shadowing or whatever
 export

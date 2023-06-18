@@ -15,7 +15,7 @@ Show (X b1 b2) where
   show (X0 b1 b2 _) = "X0 \{show b1} \{show b2} Refl"
   show X1           = "X1"
 
-checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen (X b1 b2)
+checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen MaybeEmpty (X b1 b2)
 checkedGen = deriveGen
 
 main : IO ()

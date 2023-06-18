@@ -13,4 +13,4 @@ data X : String -> Nat -> Type where
 data Y : Type where
   MkY : X n m -> X n k -> Y
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (Fuel -> Gen String) => (Fuel -> Gen Nat) => Gen Y
+%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (Fuel -> Gen MaybeEmpty String) => (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty Y

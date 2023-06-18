@@ -6,10 +6,10 @@ import DistrCheckCommon
 
 %default total
 
-ints : Gen Int
+ints : Gen MaybeEmpty Int
 ints = chooseAny
 
-lists : (maxLen : Nat) -> Gen a -> Gen $ List a
+lists : (maxLen : Nat) -> Gen MaybeEmpty a -> Gen MaybeEmpty $ List a
 lists Z     _  = pure []
 lists (S n) as = oneOf
   $  [| [] |]

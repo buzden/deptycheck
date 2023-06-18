@@ -43,13 +43,13 @@ namespace BothPreAndPost
   [ShowStmt] Show (preDefs ** postDefs ** Stmts preDefs postDefs) where
     show (preDefs ** postDefs ** stmt) = "-- pre defs: \{show preDefs}\n\{show stmt}\n-- post defs: \{show postDefs}"
 
-runOnce : (variant : Nat) -> Gen a -> LazyList a
+runOnce : (variant : Nat) -> Gen MaybeEmpty a -> LazyList a
 runOnce v = unGenTryN 100 someStdGen . variant v
 
 for' : Monad f => LazyList a -> (a -> f Unit) -> f Unit
 for' xs g = foldrLazy ((>>) . g) (pure ()) xs
 
-printOnce : Show a => (n : Nat) -> Gen a -> IO Unit
+printOnce : Show a => (n : Nat) -> Gen MaybeEmpty a -> IO Unit
 printOnce n gen = for' (iterateN n S Z) $ \v => do
   print "\n---------\n"
   let (x::_) = runOnce v gen

@@ -6,7 +6,7 @@ DerivedGen:15:14--15:23
  11 | %runElab derive "X" [Generic, Meta, Show]
  12 | 
  13 | export
- 14 | checkedGen : Fuel -> (Fuel -> Gen String) => (Fuel -> Gen Nat) => Gen X
+ 14 | checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty String) => (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty X
  15 | checkedGen = deriveGen
                    ^^^^^^^^^
 

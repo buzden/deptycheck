@@ -1,7 +1,7 @@
 1/3: Building AlternativeCore (AlternativeCore.idr)
 2/3: Building PrintDerivation (PrintDerivation.idr)
 3/3: Building DerivedGen (DerivedGen.idr)
-LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (x : X) -> (x' : X) -> Gen (Z x x')
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (x : X) -> (x' : X) -> Gen MaybeEmpty (Z x x')
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
     => (MW ExplicitArg outer^<x> : Implicit True)
@@ -18,6 +18,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:3650} : IVar DerivedGen.X)
                           -> (MW ExplicitArg {arg:3653} : IVar DerivedGen.X)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ (IApp. IVar DerivedGen.Z
                                          $ IVar {arg:3650}
                                          $ IVar {arg:3653}))))
@@ -38,6 +39,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              -> (MW ExplicitArg {arg:3650} : IVar DerivedGen.X)
                                              -> (MW ExplicitArg {arg:3653} : IVar DerivedGen.X)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar DerivedGen.Z
                                                             $ IVar {arg:3650}
                                                             $ IVar {arg:3653}))))
@@ -86,7 +88,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                    $ IVar Builtin.Refl))
                                                                        (IApp. INamedApp (IVar Prelude.pure)
                                                                                         f
-                                                                                        (IVar Test.DepTyCheck.Gen.Gen)
+                                                                                        (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                             $ Implicit True)
                                                                             $ (IApp. INamedApp (IVar DerivedGen.MkZ)
                                                                                                x
                                                                                                (IVar x)

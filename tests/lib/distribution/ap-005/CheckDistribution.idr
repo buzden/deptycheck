@@ -18,9 +18,9 @@ strs m = [0 .. m] <&> \n => "s\{show n}"
 bools : List Bool
 bools = [False, True]
 
-nats' = elements . nats
-strs' = elements . strs
-bools' = elements bools
+nats' = elements' . nats
+strs' = elements' . strs
+bools' = elements' bools
 
 record NSB where
   constructor MkNSB
@@ -28,8 +28,8 @@ record NSB where
   sf : String
   bf : Bool
 
-g : Nat -> Nat -> Gen NSB
-g n m = [| MkNSB (forgetStructure $ nats' n) (forgetStructure $ strs' m) (forgetStructure bools') |]
+g : Nat -> Nat -> Gen MaybeEmpty NSB
+g n m = [| MkNSB (forgetAlternatives $ nats' n) (forgetAlternatives $ strs' m) (forgetAlternatives bools') |]
 
 mainFor : Nat -> Nat -> IO ()
 mainFor n m = do

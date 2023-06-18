@@ -29,7 +29,8 @@ rather than just a data value.
 
 ### Context: `Gen`-`Arbitrary` duality in QuickCheck
 
-Haskell's property-based testing founder, QuickCheck, has distinction between `Gen` datatype and `Arbitrary` typeclass.
+Haskell's property-based testing founder, [QuickCheck](https://hackage.haskell.org/package/QuickCheck),
+has distinction between `Gen` datatype and `Arbitrary` typeclass.
 Both are, in a sense, generators of values but they are playing different roles.
 
 Particular `Gen`'s, being a datatype, are first-class citizens, i.e. can be passed to and returned from functions.
@@ -56,7 +57,9 @@ listOfLength n | n <= 0    = pure []
                | otherwise = (:) <$> arbitrary <*> listOfLength (n - 1)
 ```
 
-:::{note} Property-based libraries with integrated shrinking, like Hedgehog, may have no typeclass like `Arbitrary`.
+:::{note}
+Property-based libraries with integrated shrinking, like [Hedgehog](https://hackage.haskell.org/package/hedgehog),
+may have no typeclass like `Arbitrary`.
 :::
 
 ### Universal `Gen` in DepTyCheck
@@ -72,26 +75,47 @@ an ordinary or an `auto`-parameter respectively.
 Consider functions, analogues to above QuickCheck-based ones, but using DepTyCheck:
 
 ```idris
-semGens : Semigroup a => Gen a -> Gen a -> Gen a
+semGens : Semigroup a => {em : _} -> Gen em a -> Gen em a -> Gen em a
 semGens x y = [| x <+> y |]
 
-listOfLength : (genA : Gen a) => Nat -> Gen (List a)
+listOfLength : {em : _} -> (genA : Gen em a) => Nat -> Gen em (List a)
 listOfLength Z     = pure []
 listOfLength (S n) = [| genA :: listOfLength n |]
 ```
 
 <!-- idris
-vectOfLength : (genA : Gen a) => (n : Nat) -> Gen (Vect n a)
+vectOfLength : {em : _} -> (genA : Gen em a) => (n : Nat) -> Gen em (Vect n a)
 vectOfLength Z     = pure []
 vectOfLength (S n) = [| genA :: vectOfLength n |]
 -->
 
-## Result of generation
-
-:::{todo} ability to index possible generated values
+:::{note}
+Please, notice that DepTyCheck's `Gen` type contains an additional type argument,
+which stands for emptiness markup.
+For instance, `Gen MaybeEmpty a` is a possibly empty generator of values of type `a`,
+where `Gen NonEmpty a` is a definitely non-empty generator.
+For details, see [below](sect-gen-emptiness).
 :::
 
-:::{todo} close values (until shuffled) are likely to be similar (but still different)
+(sect-gen-emptiness)=
+
+## Can generator be empty?
+
+:::{todo} why generators must support emptiness (take example from the readme)
+:::
+
+:::{todo} emptiness marking preservation in combinations
+:::
+
+:::{todo} "type aliases" for most useful generators types (two of three, ha-ha)
+:::
+
+## Result of generation
+
+:::{todo} Value, or maybe value (depending on emptiness)
+:::
+
+:::{todo} Random nature of generation
 :::
 
 (sect-gen-totality)=

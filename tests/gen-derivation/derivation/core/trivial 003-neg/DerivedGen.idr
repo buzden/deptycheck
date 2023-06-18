@@ -6,11 +6,11 @@ import RunDerivedGen
 
 %language ElabReflection
 
-Show (x ** Gen x) where
+Show (x ** Gen MaybeEmpty x) where
   show _ = "a generator"
 
-checkedGen : Fuel -> Gen (a ** Gen a)
+checkedGen : Fuel -> (em : _) -> Gen MaybeEmpty (a ** Gen em a)
 checkedGen = deriveGen
 
 main : IO ()
-main = runGs [ G checkedGen ]
+main = runGs [ G $ \fl => checkedGen fl MaybeEmpty ]

@@ -63,4 +63,4 @@ namespace VectMaybeAnyType
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (n : Nat) -> (v : VectMaybeAnyType n) -> Gen (i ** t ** AtIndex n i t v)
+%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (n : Nat) -> (v : VectMaybeAnyType n) -> Gen MaybeEmpty (i ** t ** AtIndex n i t v)

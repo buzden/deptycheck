@@ -43,7 +43,7 @@ DecEq X where
 
 %language ElabReflection
 
-checkedGen : Fuel -> (x : X) -> (x' : X) -> Gen $ Z x x'
+checkedGen : Fuel -> (x : X) -> (x' : X) -> Gen MaybeEmpty $ Z x x'
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

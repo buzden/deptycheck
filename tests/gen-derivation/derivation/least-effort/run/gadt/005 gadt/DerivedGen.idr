@@ -20,7 +20,7 @@ Show (D b) where
   show $ TL s     = "TL \{show s}"
   show $ TR s d   = "TR \{show s} (\{show d})"
 
-checkedGen : Fuel -> (Fuel -> Gen Nat) => (Fuel -> Gen String) => Gen (b ** D b)
+checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (b ** D b)
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()

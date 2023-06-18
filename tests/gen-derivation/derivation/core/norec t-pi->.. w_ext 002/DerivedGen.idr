@@ -6,7 +6,7 @@ import RunDerivedGen
 
 %language ElabReflection
 
-checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen (x = y)
+checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen MaybeEmpty (x = y)
 checkedGen = deriveGen
 
 main : IO ()

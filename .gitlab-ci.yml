@@ -115,7 +115,6 @@ pil:test:
   stage: pil:test
   needs:
     - pil:build
-    - deptycheck:test:lib
   script:
     - pack test pil
 
