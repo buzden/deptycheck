@@ -101,14 +101,13 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                         $ IVar Nil)))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency')
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
                                                                       description
                                                                       (IApp. IVar Just
                                                                            $ IPrimVal DerivedGen.D[] (spend fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar Builtin.MkPair
-                                                                        $ (IApp. IVar Prelude.integerToNat
-                                                                               $ IPrimVal 1)
+                                                                        $ IVar Data.Nat.Pos.one
                                                                         $ (IApp. IVar <<DerivedGen.JJ>>
                                                                                $ IVar ^fuel_arg^))
                                                                  $ (IApp. IVar ::
@@ -119,8 +118,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                       $ IVar ^sub^fuel_arg^))
                                                                         $ (IApp. IVar ::
                                                                                $ (IApp. IVar Builtin.MkPair
-                                                                                      $ (IApp. IVar Prelude.integerToNat
-                                                                                             $ IPrimVal 1)
+                                                                                      $ IVar Data.Nat.Pos.one
                                                                                       $ (IApp. IVar <<DerivedGen.TL>>
                                                                                              $ IVar ^fuel_arg^))
                                                                                $ (IApp. IVar ::

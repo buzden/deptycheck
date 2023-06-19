@@ -34,14 +34,13 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                           $ IVar inter^<{arg:3630}>)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency')
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
                                                                       description
                                                                       (IApp. IVar Just
                                                                            $ IPrimVal DerivedGen.LT2[0] (spend fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar Builtin.MkPair
-                                                                        $ (IApp. IVar Prelude.integerToNat
-                                                                               $ IPrimVal 1)
+                                                                        $ IVar Data.Nat.Pos.one
                                                                         $ (IApp. IVar <<DerivedGen.Base>>
                                                                                $ IVar ^fuel_arg^
                                                                                $ IVar inter^<{arg:3630}>))

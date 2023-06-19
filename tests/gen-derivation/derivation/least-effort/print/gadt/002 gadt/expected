@@ -35,14 +35,13 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                           $ IVar Data.Fuel.Dry)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency')
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
                                                                       description
                                                                       (IApp. IVar Just
                                                                            $ IPrimVal Prelude.Types.Nat[] (spend fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar Builtin.MkPair
-                                                                        $ (IApp. IVar Prelude.integerToNat
-                                                                               $ IPrimVal 1)
+                                                                        $ IVar Data.Nat.Pos.one
                                                                         $ (IApp. IVar <<Prelude.Types.Z>>
                                                                                $ IVar ^fuel_arg^))
                                                                  $ (IApp. IVar ::
@@ -98,14 +97,13 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                           $ IVar Data.Fuel.Dry)
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency')
+                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
                                                                       description
                                                                       (IApp. IVar Just
                                                                            $ IPrimVal Data.Fin.Fin[] (spend fuel))
                                                           $ (IApp. IVar ::
                                                                  $ (IApp. IVar Builtin.MkPair
-                                                                        $ (IApp. IVar Prelude.integerToNat
-                                                                               $ IPrimVal 1)
+                                                                        $ IVar Data.Nat.Pos.one
                                                                         $ (IApp. IVar <<Data.Fin.FZ>>
                                                                                $ IVar ^fuel_arg^))
                                                                  $ (IApp. IVar ::
