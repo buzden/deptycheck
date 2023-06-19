@@ -20,6 +20,7 @@ import Data.Vect
 
 import Decidable.Equality
 
+import Language.Reflection
 import public Language.Implicits.IfUnsolved
 
 import public Test.DepTyCheck.Gen.Emptiness
@@ -213,6 +214,43 @@ mkOneOf : alem `NoWeaker` em =>
           Gen em a
 mkOneOf gens = OneOf $ MkGenAlts gens
 -- TODO to make elimination of a single element
+
+----------------------------
+--- "Smaller" generators ---
+----------------------------
+
+export
+smaller' : Inf (Gen em a) -> Gen em a
+smaller' = ?Smaller
+
+export
+interface CanFromInfGen em a g where
+  fromInfGen : Inf (Gen em a) -> g
+
+export
+CanFromInfGen em a (Gen em a) where
+  fromInfGen = force
+
+export
+CanFromInfGen em a (Inf (Gen em a)) where
+  fromInfGen = id
+
+export %macro %inline
+smaller : CanFromInfGen em a b => Inf (Gen em a) -> Elab b
+smaller g = do
+
+  -- check that `g` typechecks as a separate total function
+  -- commented out because of the compiler's issue https://github.com/idris-lang/Idris2/issues/2993
+  --qg <- quote g -- this will require `public export` on `data Gen` due to too deep quotation
+  --name <- genSym "smcheck"
+  --ty <- fromMaybe `(InfGen.Gen.Gen ?) <$> goal
+  --let claim = IClaim EmptyFC MW Private [Totality Total] $ MkTy EmptyFC EmptyFC name ty
+  --let body = IDef EmptyFC name $ pure $ PatClause EmptyFC (IVar EmptyFC name) qg
+  --let ns = INamespace EmptyFC (MkNS [show !(genSym "Sm"), "SmChecks"]) [claim, body]
+  --declare [ns] <|> failAt (getFC qg) "Can't prove that generator under `smaller` is total"
+
+  -- form the resulting wrapping expression
+  pure $ fromInfGen $ smaller' $ assert_total g
 
 --------------------------
 --- Running generators ---
