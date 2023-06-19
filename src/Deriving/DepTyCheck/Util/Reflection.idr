@@ -3,6 +3,7 @@ module Deriving.DepTyCheck.Util.Reflection
 
 import public Data.Fin
 import public Data.Fuel
+import public Data.Nat.Pos
 import public Data.List.Lazy
 import public Data.These
 import public Data.Vect.Dependent
@@ -149,9 +150,8 @@ liftList : Foldable f => f TTImp -> TTImp
 liftList = foldr (\l, r => `(~l :: ~r)) `([])
 
 export
-liftNat : Nat -> TTImp
-liftNat k = `(Prelude.integerToNat ~(primVal $ BI $ cast k))
-  -- we are using `integerToNat` instead of explicit application of `S` and `Z` to make this look nicer in prints.
+liftWeight1 : TTImp
+liftWeight1 = `(Data.Nat.Pos.one)
 
 export
 callOneOf : (desc : String) -> List TTImp -> TTImp
@@ -162,16 +162,16 @@ callOneOf desc variants = `(Test.DepTyCheck.Gen.oneOf {description=Just ~(primVa
 export
 callFrequency : (desc : String) -> List (TTImp, TTImp) -> TTImp
 callFrequency _    [(_, v)] = v
-callFrequency desc variants = `(Test.DepTyCheck.Gen.frequency' {description=Just ~(primVal $ Str desc)}) .$
+callFrequency desc variants = `(Test.DepTyCheck.Gen.frequency {description=Just ~(primVal $ Str desc)}) .$
                                 liftList (variants <&> \(freq, subgen) => var `{Builtin.MkPair} .$ freq .$ subgen)
 
 -- TODO to think of better placement for this function; this anyway is intended to be called from the derived code.
 public export
-leftDepth : Fuel -> Nat
+leftDepth : Fuel -> PosNat
 leftDepth = go 1 where
-  go : Nat -> Fuel -> Nat
+  go : PosNat -> Fuel -> PosNat
   go n Dry      = n
-  go n (More x) = go (S n) x
+  go n (More x) = go (succ n) x
 
 export
 isSimpleBindVar : TTImp -> Bool

@@ -29,6 +29,14 @@ Range PosNat where
 --- Simple arithmetics ---
 
 public export %inline
+succ : PosNat -> PosNat
+succ $ Element n _ = Element (S n) %search
+
+public export %inline
+one : PosNat
+one = 1
+
+public export %inline
 (+) : PosNat -> PosNat -> PosNat
 Element (S n) _ + Element (S m) _ = Element (S n + S m) ItIsSucc
 
@@ -60,6 +68,10 @@ public export
 toPosNat : Nat -> Maybe PosNat
 toPosNat Z       = Nothing
 toPosNat k@(S _) = Just $ Element k ItIsSucc
+
+public export %inline
+fromNat : (x : Nat) -> (0 _ : IsSucc x) => PosNat
+fromNat x = Element x %search
 
 --- Greatest common divisor ---
 

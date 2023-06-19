@@ -92,7 +92,7 @@ ConstructorDerivator => DerivatorCore where
               selectFuel NonRecursive = fuelAr
           let weight : Recursiveness -> TTImp
               weight Recursive    = var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
-              weight NonRecursive = liftNat 1
+              weight NonRecursive = liftWeight1
           var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)"
                                                            (consRecs <&> \(con, rec) => (weight rec, callConsGen (varStr $ selectFuel rec) con))
         ]
