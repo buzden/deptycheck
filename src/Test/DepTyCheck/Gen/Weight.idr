@@ -21,6 +21,10 @@ namespace Nat
   Size : Weight Nat
   Size = Sized S
 
+  public export
+  One : Weight Nat
+  One = Abs 1
+
 namespace PosNat
 
   export
@@ -31,6 +35,10 @@ namespace PosNat
   public export
   Size : Weight PosNat
   Size = Sized $ \n => Element (S n) ItIsSucc
+
+  public export %inline
+  One : Weight PosNat
+  One = Abs 1
 
 public export
 Semigroup sz => Semigroup (Weight sz) where
@@ -44,6 +52,6 @@ Monoid sz => Monoid (Weight sz) where
   neutral = Abs neutral
 
 public export
-weight : Nat -> Weight sz -> sz
-weight _ $ Abs x   = x
-weight n $ Sized f = f n
+weightAtSize : (size : Nat) -> Weight sz -> sz
+weightAtSize _ $ Abs x   = x
+weightAtSize n $ Sized f = f n
