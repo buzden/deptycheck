@@ -58,19 +58,27 @@ record GenAlternatives (0 mustBeNotEmpty : Bool) (em : Emptiness) (a : Type)
 export
 data Gen : Emptiness -> Type -> Type where
 
-  Empty : Gen MaybeEmpty a
+  Empty   : Gen MaybeEmpty a
 
-  Pure  : a -> Gen em a
+  Pure    : a -> Gen em a
 
-  Raw   : RawGen a -> Gen em a
+  Raw     : RawGen a -> Gen em a
 
-  OneOf : alem `NoWeaker` em =>
-          NotImmediatelyEmpty alem =>
-          GenAlternatives True alem a -> Gen em a
+  OneOf   : alem `NoWeaker` em =>
+            NotImmediatelyEmpty alem =>
+            GenAlternatives True alem a -> Gen em a
 
-  Bind  : {biem : _} ->
-          (0 _ : BindToOuter biem em) =>
-          RawGen c -> (c -> Gen biem a) -> Gen em a
+  Bind    : {biem : _} ->
+            (0 _ : BindToOuter biem em) =>
+            RawGen c -> (c -> Gen biem a) -> Gen em a
+
+  Smaller : {siem : _} ->
+            CanBeEmpty em =>
+            Inf (Gen siem a) -> Gen em a
+
+-- Original `ResetSize` can be coded as an additional boolean flag to `OneOf`.
+-- Additional thought is that `resetSize (OneOf ...)` can return the same `OneOf` node, only with the flag switched.
+-- TODO to implement flag and function above (including changing `unGen`s appropriately), and remove this comment.
 
   Labelled : Label -> Gen em a -> Gen em a
 
@@ -127,6 +135,7 @@ data Equiv : Gen lem a -> Gen rem a -> Type where
   ER : Raw x `Equiv` Raw x
   EO : lgs `AltsEquiv` rgs => OneOf @{lalemem} @{lalemcd} (MkGenAlts lgs) `Equiv` OneOf @{ralemem} @{ralemcd} (MkGenAlts rgs)
   EB : Bind @{lbo} x g `Equiv` Bind @{rbo} x g
+  ES : g `Equiv` h => Smaller @{lcbe} (Delay g) `Equiv` Smaller @{rcbe} (Delay h)
 
 data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, Lazy (Gen lem a)) -> Type where
   Nil  : [] `AltsEquiv` []
@@ -179,6 +188,7 @@ relax $ Raw x          = Raw x
 relax $ OneOf @{wo} x  = OneOf @{transitive' wo %search} x
 relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
 relax $ Labelled l x   = label l $ relax x
+relax $ Smaller @{c} x = Smaller @{transitive' c %search} x
 
 --export
 --strengthen' : {em : _} -> (gw : Gen iem a) -> Dec (gs : Gen em a ** gs `Equiv` gw)
@@ -203,6 +213,14 @@ strengthen $ Bind {biem} x f with (decCanBeEmpty em)
     _        => Nothing
 
 strengthen $ Labelled l x = label l <$> strengthen x
+
+strengthen $ Smaller {siem} x with (decCanBeEmpty em)
+  _ | Yes _ = Just $ Smaller x
+  _ | No  _ = case siem of
+    NonEmpty => Just ?strsm
+    _        => Nothing
+
+{-
 
 --------------------
 --- More utility ---
