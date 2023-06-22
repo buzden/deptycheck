@@ -24,7 +24,7 @@ test = "tests/tests.ipkg"
 
 [custom.all.pil]
 type = "local"
-path = "example"
+path = "examples/pil"
 ipkg = "pil.ipkg"
 test = "tests/tests.ipkg"
 
