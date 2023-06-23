@@ -38,7 +38,7 @@ ConstructorDerivator => DerivatorCore where
     when .| sig.targetType.name == `{Test.DepTyCheck.Gen.Gen} .| fail "Target type of a derived `Gen` cannot be a `Gen`"
 
     -- generate claims for generators per constructors
-    let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
+    let consClaims = sig.targetType.cons <&> \con => genClaim (consGenName con) (canonicSig sig)
 
     -- derive bodies for generators per constructors
     consBodies <- for sig.targetType.cons $ \con => logBounds "consBody" [sig, con] $

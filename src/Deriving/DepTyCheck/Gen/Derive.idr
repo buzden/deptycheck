@@ -116,4 +116,4 @@ canonicDefaultRHS = canonicDefaultRHS' id
 
 export
 deriveCanonical : DerivatorCore => CanonicGen m => GenSignature -> Name -> m (Decl, Decl)
-deriveCanonical sig name = pure (export' name (canonicSig sig), def name !(canonicBody sig name))
+deriveCanonical sig name = pure (genClaim name (canonicSig sig), def name !(canonicBody sig name))

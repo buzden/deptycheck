@@ -186,6 +186,10 @@ export
 outmostFuelArg : Name
 outmostFuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
 
+export
+genClaim : Name -> TTImp -> Decl
+genClaim = claim MW Export [Memoise]
+
 ---------------------------------------
 --- Working around primitive values ---
 ---------------------------------------

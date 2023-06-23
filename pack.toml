@@ -7,7 +7,7 @@ collection = "nightly-230515"
 [idris2]
 url     = "https://github.com/buzden/Idris2"
 version = "0.6.0"
-commit  = "5e9ae63d95d690c19c6aa7564939f9dec24872cb"
+commit  = "ac0b0acc0289517140387bc7eeb277c6feb76dae"
 
 [install]
 whitelist = [ "deptycheck-tests", "pil-tests", "deptycheck-docs" ]
@@ -40,7 +40,7 @@ ipkg = "docs.ipkg"
 [custom.all.elab-util]
 type   = "git"
 url    = "https://github.com/buzden/idris2-elab-util"
-commit = "e2cd24824d2c215a88d7d160d73a25cc67ca9d28"
+commit = "d4094ced71570a6f10df4c2486ea90778da2f7e3"
 ipkg   = "elab-util.ipkg"
 
 [custom.all.sop]
