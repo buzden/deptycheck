@@ -47,8 +47,7 @@ genMoreStrings : Gen NonEmpty String
 genMoreStrings = oneOf [genSomeStrings, elements ["more", "even more"]]
 ```
 
-> **Note**
->
+> [!NOTE]\
 > All generators listed in `oneOf` are meant to be distributed uniformly between each other as a whole thing.
 > That is, in `genMoreStrings` values `"one"`, `"two"` and `"three"` have the same probability to be generated
 > and this probability is `2/3` of probability for `"more"` or `"even more"` to appear.
@@ -69,8 +68,7 @@ genMoreStrings'' : Gen NonEmpty String
 genMoreStrings'' = oneOf $ alternativesOf genMoreStrings ++ alternativesOf (elements ["more", "even more"])
 ```
 
-> **Note**
->
+> [!NOTE]\
 > There are also functions based on the `alternativesOf`, allowing to map values from all alternatives in a single expression
 > named `mapAlternativesOf` and `mapAlternativesWith`.
 
@@ -89,8 +87,7 @@ genListsN genA (S n) = oneOf $ [| [] |]
 Distribution of lengths of lists produced by this generator is uniform,
 thanks to `alternativesOf` function.
 
-> **Note**
->
+> [!NOTE]\
 > If we were not using `alternativesOf` at all (say, with expression `[| genA :: genListsN genA n |]`),
 > probability of getting a list of length `n+1` would be 2 times *less* than getting a list of length `n`.
 
@@ -103,8 +100,7 @@ genStrPairs : Gen NonEmpty X
 genStrPairs = [| MkX genSomeStrings genMoreStrings |]
 ```
 
-> **Note**
->
+> [!NOTE]\
 > The number of alternatives acquired by `alternativesOf` function of an applicative combination
 > of two generators is a product of numbers of alternatives of those generators.
 
@@ -194,8 +190,7 @@ main_genAnyFin''_alternatives_count_corr : IO ()
 main_genAnyFin''_alternatives_count_corr = putStrLn $ show $ length (alternativesOf $ genAnyFin'' @{elements [1, 2]}) == 1
 -->
 
-> **Note**
->
+> [!NOTE]\
 > Search for alternatives through the series of monadic binds can go to the first generator that
 > is produced with no alternatives.
 >
@@ -258,8 +253,7 @@ namespace ForgetStructureNote
   main_forgetAlternatives_note_ex3_alternatives_sq_count_corr = putStrLn $ show $ 3 == length (deepAlternativesOf 2 g3)
 -->
 
-> **Note**
->
+> [!NOTE]\
 > Please notice that `deepAlternativesOf` can "see" through `forgetAlternatives`, so count of deep alternatives of depth `2`
 > for the third case would still be `3`.
 > If you really need to hide the full structure even from the `deepAlternativesOf`, you can be much stronger version called
@@ -343,8 +337,7 @@ For example, for now, we do not support type-polymorphic types and
 GADTs which have function calls in type indices of their constructors.
 However, we are constantly working for widening supported types.
 
-> **Note**
->
+> [!NOTE]\
 > For now, derivation is supported only for `MaybeEmpty` generators.
 
 <!-- Example of non-trivial derivation should go here -->
@@ -355,8 +348,7 @@ More on design of derivator can be found in [documentation](https://deptycheck.r
 
 For building and testing we use [`pack`](https://github.com/stefan-hoeck/idris2-pack/) package manager.
 
-> **Note**
->
+> [!NOTE]\
 > Notice, that we've gone mad as far as possible, so even calling for makefile of Sphinx for building documentation
 > is done through `pack` and `prebuild` action inside an appropriate `ipkg` file.
 >
