@@ -353,20 +353,28 @@ More on design of derivator can be found in [documentation](https://deptycheck.r
 
 ## Usage and installation
 
-For building it is crucial to use [`pack`](https://github.com/stefan-hoeck/idris2-pack/) package manager.
-Unfortunately, we are not using in a full flavour,
-we still depend on a legacy `Makefile`-based build system,
-but anyway it is used for the particular compiler and environment selection.
+For building and testing we use [`pack`](https://github.com/stefan-hoeck/idris2-pack/) package manager.
+
+> **Note**
+>
+> Notice, that we've gone mad as far as possible, so even calling for makefile of Sphinx for building documentation
+> is done through `pack` and `prebuild` action inside an appropriate `ipkg` file.
+>
+> Despite that, to make [LSP](https://github.com/idris-community/idris2-lsp) working well,
+> only a single code-related `ipkg` file is left in the top-level folder of the project.
+
+The main `pack`'s collection we test against is in the file called [`.pack-collection`](/.pack-collection) in the root of this repository.
+Also, we test against the latest pack collection nightly.
 
 We try to use as fresh version of the Idris 2 compiler as possible.
-The `pack`'s collection we test against is in the file called [`.pack-collection`](/.pack-collection) in the root of this repository.
-We may set specific compiler version in the local `pack.toml` file, if we need to.
+But, we depend on particular features, like [this PR](https://github.com/idris-lang/Idris2/pull/2791),
+so we may set specific compiler version in the local `pack.toml` file.
 
-Derivation facility of this library has en external dependency to the [`idris2-elab-util`](https://github.com/stefan-hoeck/idris2-elab-util/) package.
-In order to run tests, you will also need [`idris2-sop`](https://github.com/stefan-hoeck/idris2-sop) package.
+Similar thing happens with couple of thirdparty dependencies.
+For example, we didn't manage to migrate [one big overhaul](https://github.com/stefan-hoeck/idris2-elab-util/pull/56) of the `elab-util` package,
+thus we maintain a pre-overhaul fork with necessary compatibility updates.
+These versions are also set in the local `pack.toml` configuration file.
 
-For building, installing and testing we have a makefile, thus we use simple old `make` utility to do this.
-Installation is done with a built-in facility of the Idris 2 compiler,
-so consult to [its documentation](https://idris2.readthedocs.io/en/latest/reference/packages.html?highlight=--install#using-package-files)
-to see where the library is installed.
-It the future, we are planning to migrate all stuff related to building, testing and installation to `pack`.
+Due to the stuff above, DepTyCheck is not yet committed to the pack collection.
+If you plan to use it, you need to copy particular versions of the compiler and dependencies
+from the library's `pack.toml` to a local `pack.toml`.
