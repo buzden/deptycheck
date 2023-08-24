@@ -6,6 +6,7 @@ import Control.Monad.Random
 import public Control.Monad.Random.Interface
 import Control.Monad.State
 import public Control.Monad.State.Interface
+import Control.Monad.Writer
 
 import Data.Bool
 import Data.Fuel
@@ -14,6 +15,7 @@ import Data.List
 import Data.List.Lazy
 import public Data.CheckedEmpty.List.Lazy
 import Data.Singleton
+import Data.SnocList
 import Data.Stream
 import Data.Vect
 
@@ -263,6 +265,33 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 --      Current `unGen` should be renamed to `unGen1` and not be exported.
 --      Current `unGenTryN` should be changed returning `LazyList (a, g)` and
 --      new `unGen` should be implemented trying `retry` times from config using this (`g` must be stored to restore correct state of seed).
+
+-- All functions from this namespace are meant to be removed as soon as we implement proper model coverage collection
+namespace CollectingDescs
+
+  export
+  0 ModelCoverage : Type
+  ModelCoverage = SnocList String
+
+  export
+  unGenD : MonadRandom m => MonadError () m => MonadWriter ModelCoverage m => Gen em a -> m a
+  unGenD $ Empty    = throwError ()
+  unGenD $ Pure x   = pure x
+  unGenD $ Raw sf   = sf.unRawGen
+  unGenD $ OneOf oo = do
+    whenJust oo.desc $ tell . pure
+    assert_total unGenD . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
+  unGenD $ Bind x f = x.unRawGen >>= unGenD . f
+
+  export
+  unGenTryAllD : RandomGen g => (seed : g) -> Gen em a -> Stream $ Maybe (ModelCoverage, a)
+  unGenTryAllD seed gen = do
+    let (seed, sv) = runRandom seed $ runMaybeT $ runWriterT $ unGen {m=WriterT ModelCoverage $ MaybeT Rand} gen
+    map swap sv :: unGenTryAllD seed gen
+
+  export
+  unGenTryND : RandomGen g => (n : Nat) -> g -> Gen em a -> LazyList (ModelCoverage, a)
+  unGenTryND n = mapMaybe id .: take (limit n) .: unGenTryAllD
 
 ---------------------------------------
 --- Standard combination interfaces ---
