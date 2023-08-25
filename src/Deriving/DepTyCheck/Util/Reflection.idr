@@ -601,3 +601,25 @@ namespace UpToRenaming
   export
   [UpToRenaming] Eq TTImp where
     x == y = (x == y) @{UpToSubst @{empty}}
+
+-- Returns a list without duplications
+export
+allInvolvedTypes : Elaboration m => TypeInfo -> m $ List TypeInfo
+allInvolvedTypes ti = toList <$> go [ti] empty where
+  go : (left : List TypeInfo) -> (curr : SortedMap Name TypeInfo) -> m $ SortedMap Name TypeInfo
+  go left curr = do
+    let (c::left) = filter (not . isJust . flip lookup curr . name) left
+      | [] => pure curr
+    let next = insert c.name c curr
+    args <- join <$> for c.args typesOfArg
+    cons <- join <$> for c.cons typesOfCon
+    assert_total $ go (args ++ cons ++ left) next
+    where
+      typesOfExpr : TTImp -> m $ List TypeInfo
+      typesOfExpr expr = map (mapMaybe id) $ for (allVarNames expr) $ catch . getInfo'
+
+      typesOfArg : NamedArg -> m $ List TypeInfo
+      typesOfArg arg = typesOfExpr arg.type
+
+      typesOfCon : Con -> m $ List TypeInfo
+      typesOfCon con = [| typesOfExpr con.type ++ (join <$> for con.args typesOfArg) |]

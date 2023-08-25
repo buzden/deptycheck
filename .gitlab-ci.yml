@@ -93,6 +93,7 @@ deptycheck:test:derive:
         - utils/canonicsig/
         - utils/cons-analysis/
         - utils/arg-deps/
+        - utils/involved-types/
         - least-effort/print/adt
         - least-effort/print/gadt
         - least-effort/print/regression
