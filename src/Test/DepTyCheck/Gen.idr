@@ -270,8 +270,17 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 namespace CollectingDescs
 
   export
-  0 ModelCoverage : Type
-  ModelCoverage = SnocList String
+  record ModelCoverage where
+    constructor MkModelCoverage
+    unModelCoverage : SnocList String
+
+  export
+  Semigroup ModelCoverage where
+    (<+>) = MkModelCoverage .: (<+>) `on` unModelCoverage
+
+  export
+  Monoid ModelCoverage where
+    neutral = MkModelCoverage neutral
 
   export
   unGenD : MonadRandom m => MonadError () m => MonadWriter ModelCoverage m => Gen em a -> m a
@@ -279,7 +288,7 @@ namespace CollectingDescs
   unGenD $ Pure x   = pure x
   unGenD $ Raw sf   = sf.unRawGen
   unGenD $ OneOf oo = do
-    whenJust oo.desc $ tell . pure
+    whenJust oo.desc $ tell . MkModelCoverage . pure
     assert_total unGenD . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
   unGenD $ Bind x f = x.unRawGen >>= unGenD . f
 
