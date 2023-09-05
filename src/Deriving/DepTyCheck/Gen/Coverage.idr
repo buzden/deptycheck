@@ -39,4 +39,4 @@ coverageGenInfo _ = do
   pure $ MkCoverageGenInfo involvedTypes (involvedTypes >>= cons)
 
 export
-data RawCoverage : Type
+showModelCoverage : CoverageGenInfo g -> ModelCoverage -> String
