@@ -35,8 +35,7 @@ coverageGenInfo _ = do
     | _ => failAt (getFC lhs) "Wrong number of type arguments of a generator"
   let (_, IVar _ genTy) = unDPair $ getExpr genTy
     | (_, genTy) => failAt (getFC genTy) "Expected a type name"
-  tyInfo <- getInfo' genTy
-  involvedTypes <- allInvolvedTypes tyInfo
+  involvedTypes <- allInvolvedTypes =<< getInfo' genTy
   pure $ MkCoverageGenInfo $ fromList $ involvedTypes <&> map cons . dup
 
   where
