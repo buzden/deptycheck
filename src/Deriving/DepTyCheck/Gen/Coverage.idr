@@ -4,6 +4,8 @@
 ||| e.g. involved types and their constructors.
 module Deriving.DepTyCheck.Gen.Coverage
 
+import Data.SortedMap
+
 import Language.Reflection
 import Language.Reflection.Types
 import Language.Reflection.Syntax
@@ -17,8 +19,7 @@ import Test.DepTyCheck.Gen
 export
 record CoverageGenInfo g where
   constructor MkCoverageGenInfo
-  involvedTypes : List TypeInfo
-  involvedCons  : Lazy (List Con)
+  involvedTypesAndCons : SortedMap TypeInfo $ List Con
 
 export %macro
 coverageGenInfo : (0 x : g) -> Elab $ CoverageGenInfo x
@@ -36,7 +37,14 @@ coverageGenInfo _ = do
     | (_, genTy) => failAt (getFC genTy) "Expected a type name"
   tyInfo <- getInfo' genTy
   involvedTypes <- allInvolvedTypes tyInfo
-  pure $ MkCoverageGenInfo involvedTypes (involvedTypes >>= cons)
+  pure $ MkCoverageGenInfo $ fromList $ involvedTypes <&> map cons . dup
+
+  where
+    Eq TypeInfo where
+      (==) = (==) `on` name
+
+    Ord TypeInfo where
+      compare = comparing name
 
 export
 showModelCoverage : CoverageGenInfo g -> ModelCoverage -> String
