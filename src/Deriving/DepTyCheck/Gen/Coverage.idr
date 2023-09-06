@@ -24,20 +24,8 @@ record CoverageGenInfo (0 g : k) where
   constructors : SortedMap String (TypeInfo, Con)
   coverageInfo : SortedMap TypeInfo (Bool, SortedMap Con Bool)
 
-export %macro
-initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
-initCoverageInfo _ = do
-  genTy <- quote g
-  let (_, genTy) = unPi genTy
-  let (lhs, args) = unAppAny genTy
-  let IVar _ lhsName = lhs
-    | _ => failAt (getFC lhs) "Generator or generator function expected"
-  let True = lhsName `nameConformsTo` `{Test.DepTyCheck.Gen.Gen}
-    | _ => failAt (getFC lhs) "Return type must be a generator of some type"
-  let [_, genTy] = args
-    | _ => failAt (getFC lhs) "Wrong number of type arguments of a generator"
-  let (_, IVar _ genTy) = unDPair $ getExpr genTy
-    | (_, genTy) => failAt (getFC genTy) "Expected a type name"
+coverageGenInfo : Name -> Elab $ CoverageGenInfo x
+coverageGenInfo genTy = do
   involvedTypes <- allInvolvedTypes =<< getInfo' genTy
   let cov  = fromList $ involvedTypes <&> \ty => (ty, (False, fromList $ ty.cons <&> (, False)))
   let tys  = fromList $ involvedTypes <&> \ty => (show ty.name, ty)
@@ -56,6 +44,26 @@ initCoverageInfo _ = do
 
     Ord Con where
       compare = comparing name
+
+export %macro
+initCoverageInfo' : (n : Name) -> Elab $ CoverageGenInfo n
+initCoverageInfo' n = coverageGenInfo n
+
+export %macro
+initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
+initCoverageInfo _ = do
+  genTy <- quote g
+  let (_, genTy) = unPi genTy
+  let (lhs, args) = unAppAny genTy
+  let IVar _ lhsName = lhs
+    | _ => failAt (getFC lhs) "Generator or generator function expected"
+  let True = lhsName `nameConformsTo` `{Test.DepTyCheck.Gen.Gen}
+    | _ => failAt (getFC lhs) "Return type must be a generator of some type"
+  let [_, genTy] = args
+    | _ => failAt (getFC lhs) "Wrong number of type arguments of a generator"
+  let (_, IVar _ genTy) = unDPair $ getExpr genTy
+    | (_, genTy) => failAt (getFC genTy) "Expected a type name"
+  coverageGenInfo genTy
 
 export
 Show (CoverageGenInfo g) where
