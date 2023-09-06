@@ -269,7 +269,7 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 -- All functions from this namespace are meant to be removed as soon as we implement proper model coverage collection
 namespace CollectingDescs
 
-  export
+  public export
   record ModelCoverage where
     constructor MkModelCoverage
     unModelCoverage : SnocList String
