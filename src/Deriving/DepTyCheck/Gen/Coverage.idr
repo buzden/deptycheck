@@ -74,14 +74,16 @@ Show (CoverageGenInfo g) where
     let noConsCovered  = all (== False) conCovs
 
     let tyCovStr = joinBy ", " $
-                     (if tyCov then ["mentioned"] else ["not menioned"]) ++
-                     (if anyCons then ["no constructors"]
+                     (if tyCov && noConsCovered then ["mentioned"]
+                      else if not tyCov && (not anyCons || not noConsCovered) then ["not menioned"]
+                      else []) ++
+                     (if not anyCons then ["no constructors"]
                       else if allConsCovered then ["covered fully"]
                       else if noConsCovered then ["not covered"]
                       else ["covered partially"]
                      )
     joinBy "\n" $ (::) "\{show ti.name} \{tyCovStr}" $ whenTs anyCons $ map ("  - " ++) $
-      SortedMap.toList cons <&> \(co, coCov) => "\{show co.name}: \{the String $ if coCov then "" else "not "} covered"
+      SortedMap.toList cons <&> \(co, coCov) => "\{show co.name}: \{the String $ if coCov then "" else "not "}covered"
 
 infixOf : Eq a => List a -> List a -> Maybe (List a, List a)
 infixOf = map (map snd) .: infixOfBy (\x, y => if x == y then Just () else Nothing)
