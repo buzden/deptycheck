@@ -7,11 +7,11 @@ module Deriving.DepTyCheck.Gen.Coverage
 import Data.List
 import Data.SortedMap
 
-import Language.Reflection
-import Language.Reflection.Types
-import Language.Reflection.Syntax
+import public Language.Reflection
+import public Language.Reflection.Types
+import public Language.Reflection.Syntax
 
-import Deriving.DepTyCheck.Util.Reflection
+import public Deriving.DepTyCheck.Util.Reflection
 
 import Test.DepTyCheck.Gen
 
