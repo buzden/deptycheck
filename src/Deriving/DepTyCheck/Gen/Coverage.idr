@@ -91,13 +91,13 @@ registerCoverage mc cgi = foldr registerCoverage1 cgi mc.unModelCoverage where
   registerCoverage1 str cgi = do
     let str' = fastUnpack str
     -- Try type
-    let Nothing = fastUnpack "[" `infixOf` str'
-      | Just (ty, _) => do
-        let Just ti = lookup (fastPack ty) cgi.types | Nothing => cgi
-        { coverageInfo $= update (mapFst $ const True) ti } cgi
+    let ty = maybe str (fastPack . fst) $ fastUnpack "[" `infixOf` str'
+    let tyMod = case lookup ty cgi.types of
+                  Just ti => { coverageInfo $= update (mapFst $ const True) ti }
+                  Nothing => id
     -- Try constructor
-    let Nothing = fastUnpack " " `infixOf` str'
-      | Just (co, _) => do
-        let Just (ti, co) = lookup (fastPack co) cgi.constructors | Nothing => cgi
-        { coverageInfo $= update (mapSnd $ insert co True) ti } cgi
-    cgi
+    let co = maybe str (fastPack . fst) $ fastUnpack " " `infixOf` str'
+    let coMod : (_ -> CoverageGenInfo g) := case lookup co cgi.constructors of
+                  Just (ti, co) => { coverageInfo $= update (mapSnd $ insert co True) ti }
+                  Nothing       => id
+    tyMod $ coMod $ cgi
