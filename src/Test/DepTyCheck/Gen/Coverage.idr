@@ -12,11 +12,11 @@ import Data.List
 import Data.Singleton
 import Data.SortedMap
 
+import public Deriving.DepTyCheck.Util.Reflection
+
 import public Language.Reflection
 import public Language.Reflection.Types
 import public Language.Reflection.Syntax
-
-import public Deriving.DepTyCheck.Util.Reflection
 
 import Test.DepTyCheck.Gen
 
