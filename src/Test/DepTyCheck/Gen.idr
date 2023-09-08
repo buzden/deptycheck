@@ -6,7 +6,6 @@ import Control.Monad.Random
 import public Control.Monad.Random.Interface
 import Control.Monad.State
 import public Control.Monad.State.Interface
-import Control.Monad.Writer
 
 import Data.Bool
 import Data.Fuel
@@ -47,6 +46,7 @@ transport z Refl = z
 --- Definition of the `Gen` ---
 -------------------------------
 
+public export -- this export can be removed as soon as `Coverage` is implemented properly
 record RawGen a where
   constructor MkRawGen
   unRawGen : forall m. MonadRandom m => m a
@@ -70,6 +70,7 @@ data Gen : Emptiness -> Type -> Type where
           (0 _ : BindToOuter biem em) =>
           RawGen c -> (c -> Gen biem a) -> Gen em a
 
+public export -- this export can be removed as soon as `Coverage` is implemented properly
 record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
   constructor MkOneOf
   desc : Maybe String
@@ -265,42 +266,6 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 --      Current `unGen` should be renamed to `unGen1` and not be exported.
 --      Current `unGenTryN` should be changed returning `LazyList (a, g)` and
 --      new `unGen` should be implemented trying `retry` times from config using this (`g` must be stored to restore correct state of seed).
-
--- All functions from this namespace are meant to be removed as soon as we implement proper model coverage collection
-namespace CollectingDescs
-
-  public export
-  record ModelCoverage where
-    constructor MkModelCoverage
-    unModelCoverage : SnocList String
-
-  export
-  Semigroup ModelCoverage where
-    (<+>) = MkModelCoverage .: (<+>) `on` unModelCoverage
-
-  export
-  Monoid ModelCoverage where
-    neutral = MkModelCoverage neutral
-
-  export
-  unGenD : MonadRandom m => MonadError () m => MonadWriter ModelCoverage m => Gen em a -> m a
-  unGenD $ Empty    = throwError ()
-  unGenD $ Pure x   = pure x
-  unGenD $ Raw sf   = sf.unRawGen
-  unGenD $ OneOf oo = do
-    whenJust oo.desc $ tell . MkModelCoverage . pure
-    assert_total unGenD . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
-  unGenD $ Bind x f = x.unRawGen >>= unGenD . f
-
-  export
-  unGenTryAllD : RandomGen g => (seed : g) -> Gen em a -> Stream $ Maybe (ModelCoverage, a)
-  unGenTryAllD seed gen = do
-    let (seed, sv) = runRandom seed $ runMaybeT $ runWriterT $ unGen {m=WriterT ModelCoverage $ MaybeT Rand} gen
-    map swap sv :: unGenTryAllD seed gen
-
-  export
-  unGenTryND : RandomGen g => (n : Nat) -> g -> Gen em a -> LazyList (ModelCoverage, a)
-  unGenTryND n = mapMaybe id .: take (limit n) .: unGenTryAllD
 
 ---------------------------------------
 --- Standard combination interfaces ---

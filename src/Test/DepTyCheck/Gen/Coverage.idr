@@ -2,9 +2,14 @@
 |||
 ||| Model coverage means a coverage in terms of the original data structure that is being generated,
 ||| e.g. involved types and their constructors.
-module Deriving.DepTyCheck.Gen.Coverage
+module Test.DepTyCheck.Gen.Coverage
+
+import Control.Monad.Maybe
+import Control.Monad.Random
+import Control.Monad.Writer
 
 import Data.List
+import Data.Singleton
 import Data.SortedMap
 
 import public Language.Reflection
@@ -16,6 +21,39 @@ import public Deriving.DepTyCheck.Util.Reflection
 import Test.DepTyCheck.Gen
 
 %default total
+
+public export
+record ModelCoverage where
+  constructor MkModelCoverage
+  unModelCoverage : SnocList String
+
+export
+Semigroup ModelCoverage where
+  (<+>) = MkModelCoverage .: (<+>) `on` unModelCoverage
+
+export
+Monoid ModelCoverage where
+  neutral = MkModelCoverage neutral
+
+export
+unGenD : MonadRandom m => MonadError () m => MonadWriter ModelCoverage m => Gen em a -> m a
+unGenD $ Empty    = throwError ()
+unGenD $ Pure x   = pure x
+unGenD $ Raw sf   = sf.unRawGen
+unGenD $ OneOf oo = do
+  whenJust oo.desc $ tell . MkModelCoverage . pure
+  assert_total unGenD . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
+unGenD $ Bind x f = x.unRawGen >>= unGenD . f
+
+export
+unGenTryAllD : RandomGen g => (seed : g) -> Gen em a -> Stream $ Maybe (ModelCoverage, a)
+unGenTryAllD seed gen = do
+  let (seed, sv) = runRandom seed $ runMaybeT $ runWriterT $ unGen {m=WriterT ModelCoverage $ MaybeT Rand} gen
+  map swap sv :: unGenTryAllD seed gen
+
+export
+unGenTryND : RandomGen g => (n : Nat) -> g -> Gen em a -> LazyList (ModelCoverage, a)
+unGenTryND n = mapMaybe id .: take (limit n) .: unGenTryAllD
 
 export
 record CoverageGenInfo (0 g : k) where

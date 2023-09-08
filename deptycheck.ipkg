@@ -12,7 +12,6 @@ modules = Data.Nat.Pos
         , Data.Vect.Dependent
         , Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
-        , Deriving.DepTyCheck.Gen.Coverage
         , Deriving.DepTyCheck.Gen.Derive
         , Deriving.DepTyCheck.Gen.Entry
         , Deriving.DepTyCheck.Gen.Core
@@ -29,6 +28,7 @@ modules = Data.Nat.Pos
         , Deriving.DepTyCheck.Util.Reflection
         , Deriving.DepTyCheck.Util.Syntax
         , Test.DepTyCheck.Gen
+        , Test.DepTyCheck.Gen.Coverage
         , Test.DepTyCheck.Gen.Emptiness
 
 depends = contrib
