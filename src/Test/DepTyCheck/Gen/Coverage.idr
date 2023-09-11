@@ -22,7 +22,7 @@ import Test.DepTyCheck.Gen
 
 %default total
 
-public export
+export
 record ModelCoverage where
   constructor MkModelCoverage
   unModelCoverage : SortedSet String
