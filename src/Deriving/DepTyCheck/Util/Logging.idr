@@ -28,10 +28,19 @@ length : LogPosition -> Nat
 length []      = Z
 length (_::xs) = S $ length xs
 
+public export
+DefaultLogLevel : Nat
+DefaultLogLevel = 5
+
 export
-logBounds : Elaboration m => {default 5 level : Nat} -> (subTopic : String) -> So (subTopic /= "") => (position : LogPosition) -> m a -> m a
-logBounds subTopic position action = do
+logPoint : Elaboration m => {default DefaultLogLevel level : Nat} -> (subTopic : String) -> So (subTopic /= "") => (position : LogPosition) -> (mark : String) -> m ()
+logPoint subTopic position mark = do
   let topic = "deptycheck.derive.\{subTopic}"
+  logMsg topic level "\{position}\{mark}"
+
+export
+logBounds : Elaboration m => {default DefaultLogLevel level : Nat} -> (subTopic : String) -> So (subTopic /= "") => (position : LogPosition) -> m a -> m a
+logBounds subTopic position action = do
   let ticksCnt = (4 `minus` length position) `max` 1
 
   let startFence = replicate ticksCnt '_'
@@ -40,7 +49,7 @@ logBounds subTopic position action = do
   let endFence = replicate ticksCnt '^'
   let endMark = "\{endFence}  end  \{endFence}"
 
-  let lg : String -> m () := \mark => logMsg topic level "\{position}\{mark}"
+  let lg = logPoint {level} subTopic position
 
   -- vertical monadic style seems to use much less memory than `lg startMark *> action <* lg endMark`
   lg startMark
