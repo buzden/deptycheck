@@ -11,6 +11,7 @@ import public Data.SortedSet
 import public Data.Vect
 import public Data.Vect.Dependent
 
+import public Deriving.DepTyCheck.Util.Alternative
 import public Deriving.DepTyCheck.Util.Fin
 import public Deriving.DepTyCheck.Util.Syntax
 
@@ -71,6 +72,11 @@ export
 inits' : (xs : List a) -> DVect xs.length $ \idx => Vect (S $ finToNat idx) a
 inits' []      = []
 inits' (x::xs) = [x] :: ((x ::) <$> inits' xs)
+
+export
+findLastIndex : (a -> Bool) -> (xs : List a) -> Maybe $ Fin xs.length
+findLastIndex f []      = Nothing
+findLastIndex f (x::xs) = FS <$> findLastIndex f xs <|> whenT (f x) FZ
 
 --- Transitive clojure stuff ---
 

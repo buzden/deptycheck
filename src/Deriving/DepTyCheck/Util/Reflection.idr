@@ -35,7 +35,10 @@ Interpolation TTImp where
 
 export
 SingleLogPosition Con where
-  logPosition con = "\{show con.name}"
+  logPosition con = do
+    let fullName = show con.name
+    let fullName' = unpack fullName
+    maybe fullName (pack . flip drop fullName' . S . finToNat) $ findLastIndex (== '.') fullName'
 
 ----------------------------------------------
 --- Compiler-based `TTImp` transformations ---
