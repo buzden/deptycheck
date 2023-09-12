@@ -61,6 +61,6 @@ checkEq desc res e1 e2 = do
 
   where
     wrapCase : TTImp -> TTImp
-    wrapCase e = ICase EmptyFC `(2 + zz) `(Prelude.Some.Typ) [cs `{x}, cs `{z}] where
+    wrapCase e = ICase EmptyFC [] `(2 + zz) `(Prelude.Some.Typ) [cs `{x}, cs `{z}] where
       cs : Name -> Clause
       cs n = PatClause EmptyFC (var n) e

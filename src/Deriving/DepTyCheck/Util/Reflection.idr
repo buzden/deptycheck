@@ -368,7 +368,7 @@ allVarNames expr = ttimp expr where
     ttimp $ IPi _ _ z _ argTy retTy         = ttimp argTy ++ ttimp retTy ++ piInfo z
     ttimp $ ILam _ _ z _ argTy lamTy        = ttimp argTy ++ ttimp lamTy ++ piInfo z
     ttimp $ ILet _ _ _ _ nTy nVal sc        = ttimp nTy ++ ttimp nVal ++ ttimp sc -- should we check `nTy` here?
-    ttimp $ ICase _ _ ty xs                 = ttimp ty ++ assert_total (foldMap clause xs)
+    ttimp $ ICase _ _ _ ty xs               = ttimp ty ++ assert_total (foldMap clause xs)
     ttimp $ ILocal _ xs y                   = assert_total (foldMap decl xs) ++ ttimp y
     ttimp $ IUpdate _ xs y                  = assert_total (foldMap fieldUpdate xs) ++ ttimp y
     ttimp $ IApp _ y z                      = ttimp y ++ ttimp z
@@ -456,7 +456,7 @@ hasNameInsideDeep nm expr = evalStateT .| the (SortedSet Name) empty .| hasInsid
       ttimp $ IPi _ _ z _ argTy retTy         = ttimp argTy || ttimp retTy || piInfo z
       ttimp $ ILam _ _ z _ argTy lamTy        = ttimp argTy || ttimp lamTy || piInfo z
       ttimp $ ILet _ _ _ _ nTy nVal sc        = ttimp nTy || ttimp nVal || ttimp sc -- should we check `nTy` here?
-      ttimp $ ICase _ _ ty xs                 = ttimp ty || assert_total (any clause xs)
+      ttimp $ ICase _ _ _ ty xs               = ttimp ty || assert_total (any clause xs)
       ttimp $ ILocal _ xs y                   = assert_total (any decl xs) || ttimp y
       ttimp $ IUpdate _ xs y                  = assert_total (any fieldUpdate xs) || ttimp y
       ttimp $ IApp _ y z                      = ttimp y || ttimp z
@@ -549,8 +549,8 @@ namespace UpToRenaming
       ILet _ _ c n ty val s == ILet _ _ c' n' ty' val' s' =
         c == c' && ty == ty' && val == val' && (assert_total $ compWithSubst (Just n) (Just n') s s')
 
-      ICase _ t ty cs == ICase _ t' ty' cs' =
-        t == t' && ty == ty' && (assert_total $ cs == cs')
+      ICase _ os t ty cs == ICase _ os' t' ty' cs' =
+        t == t' && (assert_total $ os == os') && ty == ty' && (assert_total $ cs == cs')
       ILocal _ ds e == ILocal _ ds' e' =
         (assert_total $ ds == ds') && e == e'
       IUpdate _ fs t == IUpdate _ fs' t' =
