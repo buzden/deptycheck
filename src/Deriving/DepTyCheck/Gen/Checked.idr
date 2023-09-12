@@ -93,6 +93,7 @@ namespace ClojuringCanonicImpl
   ClojuringContext m =
     ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
     , MonadState  (SortedMap GenSignature Name) m                         -- gens already asked to be derived
+    , MonadState  (List (GenSignature, Name)) m                           -- queue of gens to be derived
     , MonadWriter (List Decl, List Decl) m                                -- function declarations and bodies
     )
 
@@ -111,6 +112,9 @@ namespace ClojuringCanonicImpl
   DerivatorCore => ClojuringContext m => Elaboration m => CanonicGen m where
     callGen sig fuel values = do
 
+      -- check if we are the first, then we need to start the loop
+      let startLoop = null !(get {stateType=List _})
+
       -- look for external gens, and call it if exists
       let Nothing = lookupLengthChecked sig !ask
         | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values
@@ -119,7 +123,7 @@ namespace ClojuringCanonicImpl
       internalGenName <- do
 
         -- look for existing (already derived) internals, use it if exists
-        let Nothing = lookup sig !get
+        let Nothing = SortedMap.lookup sig !get
           | Just name => pure name
 
         -- nothing found, then derive! acquire the name
@@ -128,17 +132,35 @@ namespace ClojuringCanonicImpl
         -- remember that we're responsible for this signature derivation
         modify $ insert sig name
 
-        -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
-        (genFunClaim, genFunBody) <- logBounds "type" [sig] $ assert_total $ deriveCanonical sig name
-
-        -- remember the derived stuff
-        tell ([genFunClaim], [genFunBody])
+        -- remember the task to derive
+        modify $ (::) (sig, name)
 
         -- return the name of the newly derived generator
         pure name
 
+      -- start the derivation loop, if needed
+      when startLoop deriveAll
+
       -- call the internal gen
       pure $ callCanonic sig internalGenName fuel values
+
+      where
+
+        deriveOne : (GenSignature, Name) -> m ()
+        deriveOne (sig, name) = do
+
+          -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
+          (genFunClaim, genFunBody) <- logBounds "type" [sig] $ assert_total $ deriveCanonical sig name
+
+          -- remember the derived stuff
+          tell ([genFunClaim], [genFunBody])
+
+        deriveAll : m ()
+        deriveAll = do
+          toDerive <- get {stateType=List _}
+          put {stateType=List _} []
+          for_ toDerive deriveOne
+          when (not $ null toDerive) $ assert_total $ deriveAll
 
   --- Canonic-dischagring function ---
 
@@ -146,5 +168,5 @@ namespace ClojuringCanonicImpl
   runCanonic : DerivatorCore => SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
-    (x, defs, bodies) <- evalRWST exts empty calc {s=SortedMap GenSignature Name} {w=(_, _)}
+    (x, defs, bodies) <- evalRWST exts (empty, empty) calc {s=(SortedMap GenSignature Name, List (GenSignature, Name))} {w=(_, _)}
     pure (x, defs ++ bodies)
