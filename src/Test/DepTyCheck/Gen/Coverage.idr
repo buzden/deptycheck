@@ -12,6 +12,7 @@ import Data.List
 import Data.Singleton
 import Data.SortedMap
 
+import public Deriving.DepTyCheck.Util.Logging
 import public Deriving.DepTyCheck.Util.Reflection
 
 import public Language.Reflection
@@ -121,7 +122,7 @@ Show (CoverageGenInfo g) where
                       else ["covered partially"]
                      )
     joinBy "\n" $ (::) "\{show ti.name} \{tyCovStr}" $ whenTs anyCons $ map ("  - " ++) $
-      SortedMap.toList cons <&> \(co, coCov) => "\{show co.name}: \{the String $ if coCov then "" else "not "}covered"
+      SortedMap.toList cons <&> \(co, coCov) => "\{logPosition co}: \{the String $ if coCov then "" else "not "}covered"
 
 infixOf : Eq a => List a -> List a -> Maybe (List a, List a)
 infixOf = map (map snd) .: infixOfBy (\x, y => if x == y then Just () else Nothing)
