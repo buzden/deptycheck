@@ -4,6 +4,7 @@ module Deriving.DepTyCheck.Gen.Checked
 import public Control.Monad.Either
 import public Control.Monad.Reader
 import public Control.Monad.State
+import public Control.Monad.State.Tuple
 import public Control.Monad.Writer
 import public Control.Monad.RWS
 
@@ -91,8 +92,8 @@ namespace ClojuringCanonicImpl
   ClojuringContext : (Type -> Type) -> Type
   ClojuringContext m =
     ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
-    , MonadState  (SortedMap GenSignature Name) m -- gens already asked to be derived
-    , MonadWriter (List Decl, List Decl) m -- function declarations and bodies
+    , MonadState  (SortedMap GenSignature Name) m                         -- gens already asked to be derived
+    , MonadWriter (List Decl, List Decl) m                                -- function declarations and bodies
     )
 
   nameForGen : GenSignature -> Name
