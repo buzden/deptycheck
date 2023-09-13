@@ -94,6 +94,7 @@ namespace ClojuringCanonicImpl
     ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
     , MonadState  (SortedMap GenSignature Name) m                         -- gens already asked to be derived
     , MonadState  (List (GenSignature, Name)) m                           -- queue of gens to be derived
+    , MonadState  Bool m                                                  -- flat that there is a need to start derivation loop
     , MonadWriter (List Decl, List Decl) m                                -- function declarations and bodies
     )
 
@@ -113,7 +114,9 @@ namespace ClojuringCanonicImpl
     callGen sig fuel values = do
 
       -- check if we are the first, then we need to start the loop
-      let startLoop = null !(get {stateType=List _})
+      startLoop <- get {stateType=Bool}
+      -- say that no one needs any more startups, we are in charge
+      put False
 
       -- look for external gens, and call it if exists
       let Nothing = lookupLengthChecked sig !ask
@@ -133,13 +136,17 @@ namespace ClojuringCanonicImpl
         modify $ insert sig name
 
         -- remember the task to derive
-        modify $ (::) (sig, name)
+        modify {stateType=List _} $ (::) (sig, name)
 
         -- return the name of the newly derived generator
         pure name
 
-      -- start the derivation loop, if needed
-      when startLoop deriveAll
+      -- if we were first to start the derivation loop, then...
+      when startLoop $ do
+        -- start the derivation loop itself
+        deriveAll
+        -- we now are not in charge of the derivation loop, so reset the flag
+        put True
 
       -- call the internal gen
       pure $ callCanonic sig internalGenName fuel values
@@ -168,5 +175,5 @@ namespace ClojuringCanonicImpl
   runCanonic : DerivatorCore => SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
-    (x, defs, bodies) <- evalRWST exts (empty, empty) calc {s=(SortedMap GenSignature Name, List (GenSignature, Name))} {w=(_, _)}
+    (x, defs, bodies) <- evalRWST exts (empty, empty, True) calc {s=(SortedMap GenSignature Name, List (GenSignature, Name), _)} {w=(_, _)}
     pure (x, defs ++ bodies)
