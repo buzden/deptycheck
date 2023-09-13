@@ -15,14 +15,6 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IClaim MW
                 Export
                 []
-                (MkTy <Prelude.Types.Nat>[]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ IVar Prelude.Types.Nat)))
-         IClaim MW
-                Export
-                []
                 (MkTy <AlternativeCore.X'S>[0]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (MW ExplicitArg {arg:5277} : IVar Prelude.Types.Nat)
@@ -30,8 +22,18 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                   $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ (IApp. IVar AlternativeCore.X'S
                                          $ IVar {arg:5277}))))
-         IDef <Prelude.Types.Nat>[]
-              [ PatClause (IApp. IVar <Prelude.Types.Nat>[] $ IBindVar fuel)
+         IClaim MW
+                Export
+                []
+                (MkTy <Prelude.Types.Nat>[]
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                  $ IVar Prelude.Types.Nat)))
+         IDef <AlternativeCore.X'S>[0]
+              [ PatClause (IApp. IVar <AlternativeCore.X'S>[0]
+                               $ IBindVar fuel
+                               $ Implicit True)
                           (IApp. IVar <*>
                                $ (IApp. IVar <$>
                                       $ IVar MkXSN
@@ -39,10 +41,8 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                              $ IVar ^outmost-fuel^))
                                $ (IApp. IVar <Prelude.Types.Nat>[]
                                       $ IVar fuel)) ]
-         IDef <AlternativeCore.X'S>[0]
-              [ PatClause (IApp. IVar <AlternativeCore.X'S>[0]
-                               $ IBindVar fuel
-                               $ Implicit True)
+         IDef <Prelude.Types.Nat>[]
+              [ PatClause (IApp. IVar <Prelude.Types.Nat>[] $ IBindVar fuel)
                           (IApp. IVar <*>
                                $ (IApp. IVar <$>
                                       $ IVar MkXSN
