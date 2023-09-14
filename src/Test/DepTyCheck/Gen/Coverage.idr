@@ -49,7 +49,7 @@ unGenD $ Bind x f = x.unRawGen >>= unGenD . f
 export
 unGenTryAllD : RandomGen g => (seed : g) -> Gen em a -> Stream $ Maybe (ModelCoverage, a)
 unGenTryAllD seed gen = do
-  let (seed, sv) = runRandom seed $ runMaybeT $ runWriterT $ unGen {m=WriterT ModelCoverage $ MaybeT Rand} gen
+  let (seed, sv) = runRandom seed $ runMaybeT $ runWriterT $ unGenD {m=WriterT ModelCoverage $ MaybeT Rand} gen
   map swap sv :: unGenTryAllD seed gen
 
 export
