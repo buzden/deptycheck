@@ -7,18 +7,18 @@ X1 False
 -----
 X0
 -----
+X1 True
+-----
 X0
+-----
+X1 False
 -----
 X0
 -----
 X1 True
 -----
-X1 True
+X1 False
 -----
-X0
+X1 False
 -----
-X1 True
------
-X2 False 5
------
-X0
+X2 False 12

@@ -48,16 +48,32 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<Prelude.Basics.False>>
                                  [ PatClause (IApp. IVar <<Prelude.Basics.False>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. INamedApp (IVar Prelude.pure)
-                                                              f
-                                                              (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                   $ Implicit True)
-                                                  $ IVar Prelude.Basics.False) ]
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal Prelude.Basics.False (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                            f
+                                                                            (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                 $ Implicit True)
+                                                                $ IVar Prelude.Basics.False)
+                                                         $ IVar Nil)) ]
                             IDef <<Prelude.Basics.True>>
                                  [ PatClause (IApp. IVar <<Prelude.Basics.True>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. INamedApp (IVar Prelude.pure)
-                                                              f
-                                                              (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                   $ Implicit True)
-                                                  $ IVar Prelude.Basics.True) ] ]
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal Prelude.Basics.True (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                            f
+                                                                            (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                 $ Implicit True)
+                                                                $ IVar Prelude.Basics.True)
+                                                         $ IVar Nil)) ] ]

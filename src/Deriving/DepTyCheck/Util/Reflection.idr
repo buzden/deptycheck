@@ -158,7 +158,7 @@ liftWeight1 = `(Data.Nat.Pos.one)
 
 export
 callOneOf : (desc : String) -> List TTImp -> TTImp
-callOneOf _    [v]      = v
+--callOneOf _    [v]      = v -- commented out to not to lose the description; uncomment back as soon as we have proper model coverage nodes
 callOneOf desc variants = `(Test.DepTyCheck.Gen.oneOf {description=Just ~(primVal $ Str desc)} {em=MaybeEmpty}) .$ liftList variants
 
 -- List of weights and subgenerators

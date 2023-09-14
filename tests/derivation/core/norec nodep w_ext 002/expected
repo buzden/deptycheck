@@ -3,22 +3,22 @@
 Generated values:
 -----
 -----
-MkX "a" ""
------
 MkX "" ""
------
-MkX "" "a"
 -----
 MkX "a" "a"
 -----
 MkX "" "a"
+-----
+MkX "" ""
+-----
+MkX "a" "a"
+-----
+MkX "" ""
+-----
+MkX "a" ""
 -----
 MkX "a" "bc"
 -----
-MkX "" ""
------
-MkX "bc" "a"
+MkX "a" ""
 -----
 MkX "a" "a"
------
-MkX "a" ""

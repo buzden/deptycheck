@@ -9,20 +9,20 @@ X0 True False
 -----
 X0 True False
 -----
+X1
+-----
+X1
+-----
+X0 True False
+-----
+X1
+-----
 X0 True False
 -----
 X0 True False
 -----
 X1
 -----
-X1
------
-X1
------
-X1
------
-X1
------
 -----
 X1
 -----
@@ -30,17 +30,17 @@ X0 True True
 -----
 X0 True True
 -----
+X1
+-----
+X1
+-----
+X0 True True
+-----
+X1
+-----
 X0 True True
 -----
 X0 True True
------
-X1
------
-X1
------
-X1
------
-X1
 -----
 X1
 -----
@@ -51,20 +51,20 @@ X0 False True
 -----
 X0 False True
 -----
+X1
+-----
+X1
+-----
+X0 False True
+-----
+X1
+-----
 X0 False True
 -----
 X0 False True
 -----
 X1
 -----
-X1
------
-X1
------
-X1
------
-X1
------
 -----
 X1
 -----
@@ -72,16 +72,16 @@ X0 False False
 -----
 X0 False False
 -----
+X1
+-----
+X1
+-----
+X0 False False
+-----
+X1
+-----
 X0 False False
 -----
 X0 False False
------
-X1
------
-X1
------
-X1
------
-X1
 -----
 X1

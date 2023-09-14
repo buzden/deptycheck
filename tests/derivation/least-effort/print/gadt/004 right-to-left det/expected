@@ -87,8 +87,16 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar <<Prelude.Types.Z>>
-                                                          $ IVar Data.Fuel.Dry)
+                                                     (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                                 description
+                                                                                 (IApp. IVar Just
+                                                                                      $ IPrimVal Prelude.Types.Nat[] (dry fuel)))
+                                                                      em
+                                                                      (IVar MaybeEmpty)
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar <<Prelude.Types.Z>>
+                                                                        $ IVar Data.Fuel.Dry)
+                                                                 $ IVar Nil))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
@@ -126,29 +134,53 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<Prelude.Types.Z>>
                                  [ PatClause (IApp. IVar <<Prelude.Types.Z>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. INamedApp (IVar Prelude.pure)
-                                                              f
-                                                              (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                   $ Implicit True)
-                                                  $ IVar Prelude.Types.Z) ]
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal Prelude.Types.Z (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                            f
+                                                                            (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                 $ Implicit True)
+                                                                $ IVar Prelude.Types.Z)
+                                                         $ IVar Nil)) ]
                             IDef <<Prelude.Types.S>>
                                  [ PatClause (IApp. IVar <<Prelude.Types.S>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar >>=
-                                                  $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                         $ IVar ^cons_fuel^)
-                                                  $ (ILam.  (MW ExplicitArg ^bnd^{arg:651} : Implicit False)
-                                                         => (IApp. INamedApp (IVar Prelude.pure)
-                                                                             f
-                                                                             (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                  $ Implicit True)
-                                                                 $ (IApp. IVar Prelude.Types.S
-                                                                        $ IVar ^bnd^{arg:651})))) ] ]
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal Prelude.Types.S (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. IVar >>=
+                                                                $ (IApp. IVar <Prelude.Types.Nat>[]
+                                                                       $ IVar ^cons_fuel^)
+                                                                $ (ILam.  (MW ExplicitArg ^bnd^{arg:651} : Implicit False)
+                                                                       => (IApp. INamedApp (IVar Prelude.pure)
+                                                                                           f
+                                                                                           (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                $ Implicit True)
+                                                                               $ (IApp. IVar Prelude.Types.S
+                                                                                      $ IVar ^bnd^{arg:651}))))
+                                                         $ IVar Nil)) ] ]
          IDef <DerivedGen.X_ADT>[]
               [ PatClause (IApp. IVar <DerivedGen.X_ADT>[]
                                $ IBindVar ^fuel_arg^)
-                          (ILocal (IApp. IVar <<DerivedGen.MkX>>
-                                       $ IVar ^fuel_arg^))
+                          (ILocal (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                              description
+                                                              (IApp. IVar Just
+                                                                   $ IPrimVal DerivedGen.X_ADT[] (non-recursive)))
+                                                   em
+                                                   (IVar MaybeEmpty)
+                                       $ (IApp. IVar ::
+                                              $ (IApp. IVar <<DerivedGen.MkX>>
+                                                     $ IVar ^fuel_arg^)
+                                              $ IVar Nil)))
                             IClaim MW
                                    Export
                                    []
@@ -168,25 +200,33 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<DerivedGen.MkX>>
                                  [ PatClause (IApp. IVar <<DerivedGen.MkX>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar >>=
-                                                  $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                         $ IVar ^outmost-fuel^)
-                                                  $ (ILam.  (MW ExplicitArg n : Implicit False)
-                                                         => (IApp. IVar >>=
-                                                                 $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                                        $ IVar ^outmost-fuel^)
-                                                                 $ (ILam.  (MW ExplicitArg m : Implicit False)
-                                                                        => (IApp. INamedApp (IVar Prelude.pure)
-                                                                                            f
-                                                                                            (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                                 $ Implicit True)
-                                                                                $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                       $ Implicit True
-                                                                                       $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                              $ Implicit True
-                                                                                              $ (IApp. IVar DerivedGen.MkX
-                                                                                                     $ IVar n
-                                                                                                     $ IVar m)))))))) ] ]
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal DerivedGen.MkX (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. IVar >>=
+                                                                $ (IApp. IVar <Prelude.Types.Nat>[]
+                                                                       $ IVar ^outmost-fuel^)
+                                                                $ (ILam.  (MW ExplicitArg n : Implicit False)
+                                                                       => (IApp. IVar >>=
+                                                                               $ (IApp. IVar <Prelude.Types.Nat>[]
+                                                                                      $ IVar ^outmost-fuel^)
+                                                                               $ (ILam.  (MW ExplicitArg m : Implicit False)
+                                                                                      => (IApp. INamedApp (IVar Prelude.pure)
+                                                                                                          f
+                                                                                                          (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                               $ Implicit True)
+                                                                                              $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                     $ Implicit True
+                                                                                                     $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                            $ Implicit True
+                                                                                                            $ (IApp. IVar DerivedGen.MkX
+                                                                                                                   $ IVar n
+                                                                                                                   $ IVar m))))))))
+                                                         $ IVar Nil)) ] ]
          IDef <DerivedGen.X_GADT>[0]
               [ PatClause (IApp. IVar <DerivedGen.X_GADT>[0]
                                $ IBindVar ^fuel_arg^
@@ -242,13 +282,21 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                 $ (IApp. IVar Prelude.Types.S
                                                                        $ (IApp. IVar Prelude.Types.S
                                                                               $ IVar Prelude.Types.Z)))))
-                                             (IApp. INamedApp (IVar Prelude.pure)
-                                                              f
-                                                              (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                   $ Implicit True)
-                                                  $ (IApp. IVar Builtin.DPair.MkDPair
-                                                         $ Implicit True
-                                                         $ IVar DerivedGen.MkXG_4))
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal DerivedGen.MkXG_4 (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                            f
+                                                                            (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                 $ Implicit True)
+                                                                $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                       $ Implicit True
+                                                                       $ IVar DerivedGen.MkXG_4))
+                                                         $ IVar Nil))
                                  , PatClause (IApp. IVar <<DerivedGen.MkXG_4>>
                                                   $ Implicit True
                                                   $ Implicit True)
@@ -262,19 +310,27 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                        $ (IApp. IVar Prelude.Types.S
                                                                               $ (IApp. IVar Prelude.Types.S
                                                                                      $ IVar Prelude.Types.Z))))))
-                                             (IApp. IVar >>=
-                                                  $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                         $ IVar ^outmost-fuel^)
-                                                  $ (ILam.  (MW ExplicitArg m : Implicit False)
-                                                         => (IApp. INamedApp (IVar Prelude.pure)
-                                                                             f
-                                                                             (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                  $ Implicit True)
-                                                                 $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                        $ Implicit True
-                                                                        $ INamedApp (IVar DerivedGen.MkXG_5)
-                                                                                    m
-                                                                                    (IVar m)))))
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal DerivedGen.MkXG_5 (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. IVar >>=
+                                                                $ (IApp. IVar <Prelude.Types.Nat>[]
+                                                                       $ IVar ^outmost-fuel^)
+                                                                $ (ILam.  (MW ExplicitArg m : Implicit False)
+                                                                       => (IApp. INamedApp (IVar Prelude.pure)
+                                                                                           f
+                                                                                           (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                $ Implicit True)
+                                                                               $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                      $ Implicit True
+                                                                                      $ INamedApp (IVar DerivedGen.MkXG_5)
+                                                                                                  m
+                                                                                                  (IVar m)))))
+                                                         $ IVar Nil))
                                  , PatClause (IApp. IVar <<DerivedGen.MkXG_5>>
                                                   $ Implicit True
                                                   $ Implicit True)
@@ -330,40 +386,64 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<DerivedGen.MkXG_4>>
                                  [ PatClause (IApp. IVar <<DerivedGen.MkXG_4>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. INamedApp (IVar Prelude.pure)
-                                                              f
-                                                              (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                   $ Implicit True)
-                                                  $ (IApp. IVar Builtin.DPair.MkDPair
-                                                         $ Implicit True
-                                                         $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                $ Implicit True
-                                                                $ IVar DerivedGen.MkXG_4))) ]
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal DerivedGen.MkXG_4 (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                            f
+                                                                            (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                 $ Implicit True)
+                                                                $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                       $ Implicit True
+                                                                       $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                              $ Implicit True
+                                                                              $ IVar DerivedGen.MkXG_4)))
+                                                         $ IVar Nil)) ]
                             IDef <<DerivedGen.MkXG_5>>
                                  [ PatClause (IApp. IVar <<DerivedGen.MkXG_5>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar >>=
-                                                  $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                         $ IVar ^outmost-fuel^)
-                                                  $ (ILam.  (MW ExplicitArg m : Implicit False)
-                                                         => (IApp. INamedApp (IVar Prelude.pure)
-                                                                             f
-                                                                             (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                  $ Implicit True)
-                                                                 $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                        $ Implicit True
-                                                                        $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                               $ Implicit True
-                                                                               $ INamedApp (IVar DerivedGen.MkXG_5)
-                                                                                           m
-                                                                                           (IVar m)))))) ] ]
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal DerivedGen.MkXG_5 (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. IVar >>=
+                                                                $ (IApp. IVar <Prelude.Types.Nat>[]
+                                                                       $ IVar ^outmost-fuel^)
+                                                                $ (ILam.  (MW ExplicitArg m : Implicit False)
+                                                                       => (IApp. INamedApp (IVar Prelude.pure)
+                                                                                           f
+                                                                                           (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                $ Implicit True)
+                                                                               $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                      $ Implicit True
+                                                                                      $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                             $ Implicit True
+                                                                                             $ INamedApp (IVar DerivedGen.MkXG_5)
+                                                                                                         m
+                                                                                                         (IVar m))))))
+                                                         $ IVar Nil)) ] ]
          IDef <DerivedGen.X_ADT>[0]
               [ PatClause (IApp. IVar <DerivedGen.X_ADT>[0]
                                $ IBindVar ^fuel_arg^
                                $ IBindVar inter^<{arg:3651}>)
-                          (ILocal (IApp. IVar <<DerivedGen.MkX>>
-                                       $ IVar ^fuel_arg^
-                                       $ IVar inter^<{arg:3651}>))
+                          (ILocal (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                              description
+                                                              (IApp. IVar Just
+                                                                   $ IPrimVal DerivedGen.X_ADT[0] (non-recursive)))
+                                                   em
+                                                   (IVar MaybeEmpty)
+                                       $ (IApp. IVar ::
+                                              $ (IApp. IVar <<DerivedGen.MkX>>
+                                                     $ IVar ^fuel_arg^
+                                                     $ IVar inter^<{arg:3651}>)
+                                              $ IVar Nil)))
                             IClaim MW
                                    Export
                                    []
@@ -382,19 +462,27 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                  [ PatClause (IApp. IVar <<DerivedGen.MkX>>
                                                   $ IBindVar ^cons_fuel^
                                                   $ IBindVar n)
-                                             (IApp. IVar >>=
-                                                  $ (IApp. IVar <Prelude.Types.Nat>[]
-                                                         $ IVar ^outmost-fuel^)
-                                                  $ (ILam.  (MW ExplicitArg m : Implicit False)
-                                                         => (IApp. INamedApp (IVar Prelude.pure)
-                                                                             f
-                                                                             (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                  $ Implicit True)
-                                                                 $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                        $ Implicit True
-                                                                        $ (IApp. IVar DerivedGen.MkX
-                                                                               $ IVar n
-                                                                               $ IVar m))))) ] ]
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal DerivedGen.MkX (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. IVar >>=
+                                                                $ (IApp. IVar <Prelude.Types.Nat>[]
+                                                                       $ IVar ^outmost-fuel^)
+                                                                $ (ILam.  (MW ExplicitArg m : Implicit False)
+                                                                       => (IApp. INamedApp (IVar Prelude.pure)
+                                                                                           f
+                                                                                           (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                $ Implicit True)
+                                                                               $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                      $ Implicit True
+                                                                                      $ (IApp. IVar DerivedGen.MkX
+                                                                                             $ IVar n
+                                                                                             $ IVar m)))))
+                                                         $ IVar Nil)) ] ]
          IDef <DerivedGen.Y>[]
               [ PatClause (IApp. IVar <DerivedGen.Y>[] $ IBindVar ^fuel_arg^)
                           (ILocal (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
@@ -429,74 +517,90 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                             IDef <<DerivedGen.MkY_LR>>
                                  [ PatClause (IApp. IVar <<DerivedGen.MkY_LR>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar >>=
-                                                  $ (IApp. IVar <DerivedGen.X_ADT>[]
-                                                         $ IVar ^outmost-fuel^)
-                                                  $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                         => ICase (IVar {lamc:0})
-                                                                  (Implicit False)
-                                                                  [ PatClause (IApp. IVar Builtin.DPair.MkDPair
-                                                                                   $ IBindVar n
-                                                                                   $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                          $ IBindVar k
-                                                                                          $ IBindVar ^bnd^{arg:3675}))
-                                                                              (IApp. IVar >>=
-                                                                                   $ (IApp. IVar <DerivedGen.X_GADT>[0]
-                                                                                          $ IVar ^outmost-fuel^
-                                                                                          $ IVar n)
-                                                                                   $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                                                          => ICase (IVar {lamc:0})
-                                                                                                   (Implicit False)
-                                                                                                   [ PatClause (IApp. IVar Builtin.DPair.MkDPair
-                                                                                                                    $ IBindVar m
-                                                                                                                    $ IBindVar ^bnd^{arg:3672})
-                                                                                                               (IApp. INamedApp (IVar Prelude.pure)
-                                                                                                                                f
-                                                                                                                                (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                                                                     $ Implicit True)
-                                                                                                                    $ (IApp. INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY_LR)
-                                                                                                                                                             k
-                                                                                                                                                             (IVar k))
-                                                                                                                                                  m
-                                                                                                                                                  (IVar m))
-                                                                                                                                       n
-                                                                                                                                       (IVar n)
-                                                                                                                           $ IVar ^bnd^{arg:3672}
-                                                                                                                           $ IVar ^bnd^{arg:3675})) ])) ])) ]
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal DerivedGen.MkY_LR (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. IVar >>=
+                                                                $ (IApp. IVar <DerivedGen.X_ADT>[]
+                                                                       $ IVar ^outmost-fuel^)
+                                                                $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                       => ICase (IVar {lamc:0})
+                                                                                (Implicit False)
+                                                                                [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                 $ IBindVar n
+                                                                                                 $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                        $ IBindVar k
+                                                                                                        $ IBindVar ^bnd^{arg:3675}))
+                                                                                            (IApp. IVar >>=
+                                                                                                 $ (IApp. IVar <DerivedGen.X_GADT>[0]
+                                                                                                        $ IVar ^outmost-fuel^
+                                                                                                        $ IVar n)
+                                                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                                                        => ICase (IVar {lamc:0})
+                                                                                                                 (Implicit False)
+                                                                                                                 [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                                                  $ IBindVar m
+                                                                                                                                  $ IBindVar ^bnd^{arg:3672})
+                                                                                                                             (IApp. INamedApp (IVar Prelude.pure)
+                                                                                                                                              f
+                                                                                                                                              (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                                                                   $ Implicit True)
+                                                                                                                                  $ (IApp. INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY_LR)
+                                                                                                                                                                           k
+                                                                                                                                                                           (IVar k))
+                                                                                                                                                                m
+                                                                                                                                                                (IVar m))
+                                                                                                                                                     n
+                                                                                                                                                     (IVar n)
+                                                                                                                                         $ IVar ^bnd^{arg:3672}
+                                                                                                                                         $ IVar ^bnd^{arg:3675})) ])) ]))
+                                                         $ IVar Nil)) ]
                             IDef <<DerivedGen.MkY_RL>>
                                  [ PatClause (IApp. IVar <<DerivedGen.MkY_RL>>
                                                   $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar >>=
-                                                  $ (IApp. IVar <DerivedGen.X_GADT>[]
-                                                         $ IVar ^outmost-fuel^)
-                                                  $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                         => ICase (IVar {lamc:0})
-                                                                  (Implicit False)
-                                                                  [ PatClause (IApp. IVar Builtin.DPair.MkDPair
-                                                                                   $ IBindVar n
-                                                                                   $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                          $ IBindVar k
-                                                                                          $ IBindVar ^bnd^{arg:3684}))
-                                                                              (IApp. IVar >>=
-                                                                                   $ (IApp. IVar <DerivedGen.X_ADT>[0]
-                                                                                          $ IVar ^outmost-fuel^
-                                                                                          $ IVar n)
-                                                                                   $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                                                          => ICase (IVar {lamc:0})
-                                                                                                   (Implicit False)
-                                                                                                   [ PatClause (IApp. IVar Builtin.DPair.MkDPair
-                                                                                                                    $ IBindVar m
-                                                                                                                    $ IBindVar ^bnd^{arg:3681})
-                                                                                                               (IApp. INamedApp (IVar Prelude.pure)
-                                                                                                                                f
-                                                                                                                                (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                                                                     $ Implicit True)
-                                                                                                                    $ (IApp. INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY_RL)
-                                                                                                                                                             k
-                                                                                                                                                             (IVar k))
-                                                                                                                                                  m
-                                                                                                                                                  (IVar m))
-                                                                                                                                       n
-                                                                                                                                       (IVar n)
-                                                                                                                           $ IVar ^bnd^{arg:3681}
-                                                                                                                           $ IVar ^bnd^{arg:3684})) ])) ])) ] ]
+                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                         description
+                                                                         (IApp. IVar Just
+                                                                              $ IPrimVal DerivedGen.MkY_RL (orders)))
+                                                              em
+                                                              (IVar MaybeEmpty)
+                                                  $ (IApp. IVar ::
+                                                         $ (IApp. IVar >>=
+                                                                $ (IApp. IVar <DerivedGen.X_GADT>[]
+                                                                       $ IVar ^outmost-fuel^)
+                                                                $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                       => ICase (IVar {lamc:0})
+                                                                                (Implicit False)
+                                                                                [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                 $ IBindVar n
+                                                                                                 $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                        $ IBindVar k
+                                                                                                        $ IBindVar ^bnd^{arg:3684}))
+                                                                                            (IApp. IVar >>=
+                                                                                                 $ (IApp. IVar <DerivedGen.X_ADT>[0]
+                                                                                                        $ IVar ^outmost-fuel^
+                                                                                                        $ IVar n)
+                                                                                                 $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                                                        => ICase (IVar {lamc:0})
+                                                                                                                 (Implicit False)
+                                                                                                                 [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                                                  $ IBindVar m
+                                                                                                                                  $ IBindVar ^bnd^{arg:3681})
+                                                                                                                             (IApp. INamedApp (IVar Prelude.pure)
+                                                                                                                                              f
+                                                                                                                                              (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                                                                   $ Implicit True)
+                                                                                                                                  $ (IApp. INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY_RL)
+                                                                                                                                                                           k
+                                                                                                                                                                           (IVar k))
+                                                                                                                                                                m
+                                                                                                                                                                (IVar m))
+                                                                                                                                                     n
+                                                                                                                                                     (IVar n)
+                                                                                                                                         $ IVar ^bnd^{arg:3681}
+                                                                                                                                         $ IVar ^bnd^{arg:3684})) ])) ]))
+                                                         $ IVar Nil)) ] ]

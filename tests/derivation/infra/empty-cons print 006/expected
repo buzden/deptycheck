@@ -29,9 +29,17 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar <<Data.Vect.Nil>>
-                                                          $ IVar Data.Fuel.Dry
-                                                          $ IVar inter^<elem>)
+                                                     (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                                                 description
+                                                                                 (IApp. IVar Just
+                                                                                      $ IPrimVal Data.Vect.Vect[1] (dry fuel)))
+                                                                      em
+                                                                      (IVar MaybeEmpty)
+                                                          $ (IApp. IVar ::
+                                                                 $ (IApp. IVar <<Data.Vect.Nil>>
+                                                                        $ IVar Data.Fuel.Dry
+                                                                        $ IVar inter^<elem>)
+                                                                 $ IVar Nil))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
                                                      (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
