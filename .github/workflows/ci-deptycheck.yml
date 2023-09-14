@@ -188,8 +188,8 @@ jobs:
         run: |
           (
           echo -n "derivation-test-sets=["
-          find tests/gen-derivation/ -type f,l -name run | \
-            grep -v '/_' | sed 's|^tests/gen-derivation/|"|' | sed 's|/[^/]*/run$|"|' | \
+          find tests/derivation/ -type f,l -name run | \
+            grep -v '/_' | sed 's|^tests/derivation/|"|' | sed 's|/[^/]*/run$|"|' | \
             sort | uniq | awk 'ORS=", "' | head -c -2
           echo "]"
           ) >> "$GITHUB_OUTPUT"
@@ -216,7 +216,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: pack test deptycheck "gen-derivation/${{matrix.test_set}}"
+      - run: pack test deptycheck "derivation/${{matrix.test_set}}"
 
   #################
   # Test examples #
