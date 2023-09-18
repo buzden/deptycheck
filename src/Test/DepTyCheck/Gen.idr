@@ -42,6 +42,38 @@ wrapLazy f = delay . f . force
 transport : Singleton x -> x = y -> Singleton y
 transport z Refl = z
 
+----------------
+--- Labeling ---
+----------------
+
+namespace Labels
+
+  export
+  data Label : Type where
+    StringLabel : String -> Label
+
+  export %inline
+  FromString Label where
+    fromString = StringLabel
+
+  export
+  Eq Label where
+    StringLabel x == StringLabel y = x == y
+
+  export
+  Ord Label where
+    compare = comparing $ \(StringLabel x) => x
+
+  public export
+  interface CanManageLabels (0 m : Type -> Type) where
+    manageLabel : Label -> m a -> m a
+
+  export %defaulthint
+  IgnoreLabels : CanManageLabels m
+  IgnoreLabels = I where
+    [I] CanManageLabels m where
+      manageLabel _ = id
+
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
@@ -49,7 +81,7 @@ transport z Refl = z
 public export -- this export can be removed as soon as `Coverage` is implemented properly
 record RawGen a where
   constructor MkRawGen
-  unRawGen : forall m. MonadRandom m => m a
+  unRawGen : forall m. MonadRandom m => CanManageLabels m => m a
 
 record OneOfAlternatives (0 em : Emptiness) (0 a : Type)
 
@@ -69,6 +101,8 @@ data Gen : Emptiness -> Type -> Type where
   Bind  : {biem : _} ->
           (0 _ : BindToOuter biem em) =>
           RawGen c -> (c -> Gen biem a) -> Gen em a
+
+  Labelled : Label -> Gen em a -> Gen em a
 
 public export -- this export can be removed as soon as `Coverage` is implemented properly
 record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
@@ -158,6 +192,7 @@ relax $ Pure x         = Pure x
 relax $ Raw x          = Raw x
 relax $ OneOf @{wo} x  = OneOf @{transitive' wo %search} x
 relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
+relax $ Labelled l x   = Labelled l $ relax x
 
 --export
 --strengthen' : {em : _} -> (gw : Gen iem a) -> Dec (gs : Gen em a ** gs `Equiv` gw)
@@ -180,6 +215,8 @@ strengthen $ Bind {biem} x f with (decCanBeEmpty em)
   _ | No  _ = case biem of
     NonEmpty => Just $ Bind x f
     _        => Nothing
+
+strengthen $ Labelled l x = Labelled l <$> strengthen x
 
 --------------------
 --- More utility ---
@@ -210,6 +247,10 @@ export %inline
 empty : Gen0 a
 empty = Empty
 
+export %inline
+label : Label -> Gen em a -> Gen em a
+label = Labelled
+
 --------------------------
 --- Running generators ---
 --------------------------
@@ -217,11 +258,12 @@ empty = Empty
 --- Non-empty generators ---
 
 export
-unGen1 : MonadRandom m => Gen1 a -> m a
+unGen1 : MonadRandom m => CanManageLabels m => Gen1 a -> m a
 unGen1 $ Pure x         = pure x
 unGen1 $ Raw sf         = sf.unRawGen
 unGen1 $ OneOf @{NN} oo = assert_total unGen1 . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
 unGen1 $ Bind @{bo} x f = case extractNE bo of Refl => x.unRawGen >>= unGen1 . f
+unGen1 $ Labelled l x   = manageLabel l $ unGen1 x
 
 export
 unGenAll' : RandomGen g => (seed : g) -> Gen1 a -> Stream (g, a)
@@ -236,15 +278,16 @@ unGenAll = map snd .: unGenAll'
 --- Possibly empty generators ---
 
 export
-unGen : MonadRandom m => MonadError () m => Gen em a -> m a
-unGen $ Empty    = throwError ()
-unGen $ Pure x   = pure x
-unGen $ Raw sf   = sf.unRawGen
-unGen $ OneOf oo = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
-unGen $ Bind x f = x.unRawGen >>= unGen . f
+unGen : MonadRandom m => MonadError () m => CanManageLabels m => Gen em a -> m a
+unGen $ Empty        = throwError ()
+unGen $ Pure x       = pure x
+unGen $ Raw sf       = sf.unRawGen
+unGen $ OneOf oo     = assert_total unGen . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
+unGen $ Bind x f     = x.unRawGen >>= unGen . f
+unGen $ Labelled l x = manageLabel l $ unGen x
 
 export %inline
-unGen' : MonadRandom m => Gen em a -> m $ Maybe a
+unGen' : MonadRandom m => CanManageLabels m => Gen em a -> m $ Maybe a
 unGen' = runMaybeT . unGen {m=MaybeT m}
 
 export
@@ -284,11 +327,12 @@ Applicative RawGen where
 
 export
 Functor (Gen em) where
-  map f $ Empty    = Empty
-  map f $ Pure x   = Pure $ f x
-  map f $ Raw sf   = Raw $ f <$> sf
-  map f $ OneOf oo = OneOf $ mapOneOf oo $ assert_total $ map f
-  map f $ Bind x g = Bind x $ assert_total map f . g
+  map f $ Empty        = Empty
+  map f $ Pure x       = Pure $ f x
+  map f $ Raw sf       = Raw $ f <$> sf
+  map f $ OneOf oo     = OneOf $ mapOneOf oo $ assert_total $ map f
+  map f $ Bind x g     = Bind x $ assert_total map f . g
+  map f $ Labelled l x = Labelled l $ map f x
 
 export
 {em : _} -> Applicative (Gen em) where
@@ -302,6 +346,9 @@ export
   g <*> Pure x = g <&> \f => f x
 
   Raw sfl <*> Raw sfr = Raw $ sfl <*> sfr
+
+  Labelled l x <*> y = Labelled l $ x <*> y
+  x <*> Labelled l y = Labelled l $ x <*> y
 
   OneOf @{ao} @{au} {alem} oo <*> g = case canBeNotImmediatelyEmpty em of
     Right _   => OneOf {em} $ mapOneOf oo $ \x => assert_total $ relax x <*> g
@@ -329,6 +376,7 @@ export
   Bind {biem} x f >>= nf with (order {rel=NoWeaker} biem em)
     _ | Left _  = Bind x $ \x => assert_total $ relax (f x) >>= nf
     _ | Right _ = Bind {biem} x $ \x => assert_total $ relax (f x) >>= relax . nf
+  Labelled l x >>= nf = Labelled l $ x >>= nf
 
 -----------------------------------------
 --- Detour: special list of lazy gens ---
@@ -503,8 +551,9 @@ elements' xs = elements {description} $ relaxF $ fromList $ toList xs
 
 export
 alternativesOf : {em : _} -> Gen em a -> GenAlternatives True em a
-alternativesOf $ OneOf oo = MkGenAlternatives $ gens $ mapOneOf oo relax
-alternativesOf g          = [g]
+alternativesOf $ OneOf oo     = MkGenAlternatives $ gens $ mapOneOf oo relax
+alternativesOf $ Labelled l x = processAlternatives (Labelled l) $ alternativesOf x
+alternativesOf g              = [g]
 
 ||| Any depth alternatives fetching.
 |||
@@ -532,6 +581,7 @@ forgetAlternatives g@(OneOf {}) = case canBeNotImmediatelyEmpty em of
     %inline single : iem `NoWeaker` MaybeEmptyDeep => iem `NoWeaker` em => Gen iem a -> Gen em a
     single g = OneOf $ MkOneOf (Just "forgetAlternatives") [(1, g)] $ Val _
     -- `mkOneOf` is not used here intentionally, since if `mkOneOf` is changed to eliminate single-element `MkOneOf`'s, we still want such behaviour here.
+forgetAlternatives (Labelled l x) = Labelled l $ forgetAlternatives x
 forgetAlternatives g = g
 
 ||| Returns generator with internal structure hidden to anything, including combinators,

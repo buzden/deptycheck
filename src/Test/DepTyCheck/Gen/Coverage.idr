@@ -26,7 +26,7 @@ import Test.DepTyCheck.Gen
 export
 record ModelCoverage where
   constructor MkModelCoverage
-  unModelCoverage : SortedSet String
+  unModelCoverage : SortedSet Label
 
 export
 Semigroup ModelCoverage where
@@ -41,9 +41,7 @@ unGenD : MonadRandom m => MonadError () m => MonadWriter ModelCoverage m => Gen 
 unGenD $ Empty    = throwError ()
 unGenD $ Pure x   = pure x
 unGenD $ Raw sf   = sf.unRawGen
-unGenD $ OneOf oo = do
-  whenJust oo.desc $ tell . MkModelCoverage . singleton
-  assert_total unGenD . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
+unGenD $ OneOf oo = assert_total unGenD . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
 unGenD $ Bind x f = x.unRawGen >>= unGenD . f
 
 export
