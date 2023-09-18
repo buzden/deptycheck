@@ -82,7 +82,6 @@ namespace Labels
 --- Definition of the `Gen` ---
 -------------------------------
 
-public export -- this export can be removed as soon as `Coverage` is implemented properly
 record RawGen a where
   constructor MkRawGen
   unRawGen : forall m. MonadRandom m => CanManageLabels m => m a
@@ -108,7 +107,6 @@ data Gen : Emptiness -> Type -> Type where
 
   Labelled : Label -> Gen em a -> Gen em a
 
-public export -- this export can be removed as soon as `Coverage` is implemented properly
 record OneOfAlternatives (0 em : Emptiness) (0 a : Type) where
   constructor MkOneOf
   gens : LazyLst1 (PosNat, Lazy (Gen em a))
