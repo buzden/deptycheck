@@ -22,17 +22,12 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
               [ PatClause (IApp. IVar <DerivedGen.X>[0]
                                $ IBindVar ^fuel_arg^
                                $ IBindVar inter^<{arg:3630}>)
-                          (ILocal (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
-                                                              description
-                                                              (IApp. IVar Just
-                                                                   $ IPrimVal DerivedGen.X[0] (non-recursive)))
-                                                   em
-                                                   (IVar MaybeEmpty)
-                                       $ (IApp. IVar ::
-                                              $ (IApp. IVar <<DerivedGen.MkX>>
-                                                     $ IVar ^fuel_arg^
-                                                     $ IVar inter^<{arg:3630}>)
-                                              $ IVar Nil)))
+                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
+                                       $ (IApp. IVar fromString
+                                              $ IPrimVal DerivedGen.X[0] (non-recursive))
+                                       $ (IApp. IVar <<DerivedGen.MkX>>
+                                              $ IVar ^fuel_arg^
+                                              $ IVar inter^<{arg:3630}>)))
                             IClaim MW
                                    Export
                                    []
@@ -47,18 +42,13 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                  [ PatClause (IApp. IVar <<DerivedGen.MkX>>
                                                   $ IBindVar ^cons_fuel^
                                                   $ IBindVar n)
-                                             (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
-                                                                         description
-                                                                         (IApp. IVar Just
-                                                                              $ IPrimVal DerivedGen.MkX (orders)))
-                                                              em
-                                                              (IVar MaybeEmpty)
-                                                  $ (IApp. IVar ::
-                                                         $ (IApp. INamedApp (IVar Prelude.pure)
-                                                                            f
-                                                                            (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                 $ Implicit True)
-                                                                $ INamedApp (IVar DerivedGen.MkX)
-                                                                            n
-                                                                            (IVar n))
-                                                         $ IVar Nil)) ] ]
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal DerivedGen.MkX (orders))
+                                                  $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                     f
+                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                          $ Implicit True)
+                                                         $ INamedApp (IVar DerivedGen.MkX)
+                                                                     n
+                                                                     (IVar n))) ] ]

@@ -9,11 +9,11 @@ Generated values:
 -----
 (2 ** (Just RefTy ** ..!))
 -----
+(2 ** (Just RefTy ** ..!))
+-----
+(2 ** (Just RefTy ** ..!))
+-----
 (1 ** (Just PrimTy ** .!))
------
-(2 ** (Just RefTy ** ..!))
------
-(2 ** (Just RefTy ** ..!))
 -----
 (2 ** (Just RefTy ** ..!))
 -----

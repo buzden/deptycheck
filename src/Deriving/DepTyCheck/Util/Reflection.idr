@@ -157,15 +157,19 @@ liftWeight1 : TTImp
 liftWeight1 = `(Data.Nat.Pos.one)
 
 export
+labelGen : (desc : String) -> TTImp -> TTImp
+labelGen desc expr = `(Test.DepTyCheck.Gen.label (fromString ~(primVal $ Str desc)) ~expr)
+
+export
 callOneOf : (desc : String) -> List TTImp -> TTImp
---callOneOf _    [v]      = v -- commented out to not to lose the description; uncomment back as soon as we have proper model coverage nodes
-callOneOf desc variants = `(Test.DepTyCheck.Gen.oneOf {description=Just ~(primVal $ Str desc)} {em=MaybeEmpty}) .$ liftList variants
+callOneOf desc [v]      = labelGen desc v
+callOneOf desc variants = labelGen desc $ `(Test.DepTyCheck.Gen.oneOf {em=MaybeEmpty}) .$ liftList variants
 
 -- List of weights and subgenerators
 export
 callFrequency : (desc : String) -> List (TTImp, TTImp) -> TTImp
 callFrequency _    [(_, v)] = v
-callFrequency desc variants = `(Test.DepTyCheck.Gen.frequency {description=Just ~(primVal $ Str desc)}) .$
+callFrequency desc variants = labelGen desc $ var `{Test.DepTyCheck.Gen.frequency} .$
                                 liftList (variants <&> \(freq, subgen) => var `{Builtin.MkPair} .$ freq .$ subgen)
 
 -- TODO to think of better placement for this function; this anyway is intended to be called from the derived code.

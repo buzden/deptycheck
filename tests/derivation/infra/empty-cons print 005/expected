@@ -19,16 +19,11 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                         $ IVar {arg:3630}))))))
          IDef <DerivedGen.X>[]
               [ PatClause (IApp. IVar <DerivedGen.X>[] $ IBindVar ^fuel_arg^)
-                          (ILocal (IApp. INamedApp (INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
-                                                              description
-                                                              (IApp. IVar Just
-                                                                   $ IPrimVal DerivedGen.X[] (non-recursive)))
-                                                   em
-                                                   (IVar MaybeEmpty)
-                                       $ (IApp. IVar ::
-                                              $ (IApp. IVar <<DerivedGen.MkX>>
-                                                     $ IVar ^fuel_arg^)
-                                              $ IVar Nil)))
+                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
+                                       $ (IApp. IVar fromString
+                                              $ IPrimVal DerivedGen.X[] (non-recursive))
+                                       $ (IApp. IVar <<DerivedGen.MkX>>
+                                              $ IVar ^fuel_arg^)))
                             IClaim MW
                                    Export
                                    []
