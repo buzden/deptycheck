@@ -36,18 +36,13 @@ export
 Monoid ModelCoverage where
   neutral = MkModelCoverage neutral
 
-export
-unGenD : MonadRandom m => MonadError () m => MonadWriter ModelCoverage m => Gen em a -> m a
-unGenD $ Empty    = throwError ()
-unGenD $ Pure x   = pure x
-unGenD $ Raw sf   = sf.unRawGen
-unGenD $ OneOf oo = assert_total unGenD . force . pickWeighted oo.gens . finToNat =<< randomFin oo.totalWeight.unVal
-unGenD $ Bind x f = x.unRawGen >>= unGenD . f
+MonadWriter ModelCoverage m => CanManageLabels m where
+  manageLabel l x = tell (MkModelCoverage $ singleton l) >> x
 
 export
 unGenTryAllD : RandomGen g => (seed : g) -> Gen em a -> Stream $ Maybe (ModelCoverage, a)
 unGenTryAllD seed gen = do
-  let (seed, sv) = runRandom seed $ runMaybeT $ runWriterT $ unGenD {m=WriterT ModelCoverage $ MaybeT Rand} gen
+  let (seed, sv) = runRandom seed $ runMaybeT $ runWriterT $ unGen {m=WriterT ModelCoverage $ MaybeT Rand} gen
   map swap sv :: unGenTryAllD seed gen
 
 export
@@ -134,8 +129,9 @@ update f k m = do
 export
 registerCoverage : ModelCoverage -> CoverageGenInfo g -> CoverageGenInfo g
 registerCoverage mc cgi = foldr registerCoverage1 cgi mc.unModelCoverage where
-  registerCoverage1 : String -> CoverageGenInfo g -> CoverageGenInfo g
+  registerCoverage1 : Label -> CoverageGenInfo g -> CoverageGenInfo g
   registerCoverage1 str cgi = do
+    let str = show str
     let str' = fastUnpack str
     -- Try type
     let ty = maybe str (fastPack . fst) $ fastUnpack "[" `infixOf` str'

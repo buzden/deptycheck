@@ -56,6 +56,10 @@ namespace Labels
   FromString Label where
     fromString = StringLabel
 
+  export %inline
+  Show Label where
+    show (StringLabel x) = x
+
   export
   Eq Label where
     StringLabel x == StringLabel y = x == y
