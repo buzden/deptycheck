@@ -74,11 +74,11 @@ data Gen : Emptiness -> Type -> Type where
   Labelled : Label -> Gen em a -> Gen em a
 
 record GenAlternatives (0 mustBeNotEmpty : Bool) (em : Emptiness) (a : Type) where
-  constructor MkGenAlternatives
-  unGenAlternatives : LazyLst mustBeNotEmpty (PosNat, Lazy (Gen em a))
+  constructor MkGenAlts
+  unGenAlts : LazyLst mustBeNotEmpty (PosNat, Lazy (Gen em a))
 
 (.totalWeight) : GenAlternatives True em a -> PosNat
-(.totalWeight) oo = foldl1 (+) (oo.unGenAlternatives <&> \x => fst x)
+(.totalWeight) oo = foldl1 (+) (oo.unGenAlts <&> \x => fst x)
 
 public export %inline
 Gen1 : Type -> Type
@@ -124,7 +124,7 @@ data Equiv : Gen lem a -> Gen rem a -> Type where
   EE : Empty `Equiv` Empty
   EP : Pure x `Equiv` Pure x
   ER : Raw x `Equiv` Raw x
-  EO : lgs `AltsEquiv` rgs => OneOf @{lalemem} @{lalemcd} (MkGenAlternatives lgs) `Equiv` OneOf @{ralemem} @{ralemcd} (MkGenAlternatives rgs)
+  EO : lgs `AltsEquiv` rgs => OneOf @{lalemem} @{lalemcd} (MkGenAlts lgs) `Equiv` OneOf @{ralemem} @{ralemcd} (MkGenAlts rgs)
   EB : Bind @{lbo} x g `Equiv` Bind @{rbo} x g
 
 data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, Lazy (Gen lem a)) -> Type where
@@ -147,7 +147,7 @@ mapTaggedLazy : (a -> b) -> LazyLst ne (tag, Lazy a) -> LazyLst ne (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
 mapOneOf : GenAlternatives True iem a -> (Gen iem a -> Gen em b) -> GenAlternatives True em b
-mapOneOf (MkGenAlternatives gs) f = MkGenAlternatives $ mapTaggedLazy f gs
+mapOneOf (MkGenAlts gs) f = MkGenAlts $ mapTaggedLazy f gs
 
 traverseMaybe : (a -> Maybe b) -> LazyLst ne a -> Maybe $ LazyLst ne b
 traverseMaybe f []      = Just []
@@ -162,9 +162,9 @@ trMTaggedLazy = traverseMaybe . m . wrapLazy where
 
 -- TODO to make the proof properly
 trMOneOf : GenAlternatives True iem a -> (Gen iem a -> Maybe $ Gen em b) -> Maybe $ GenAlternatives True em b
-trMOneOf (MkGenAlternatives gs) f with (trMTaggedLazy f gs) proof trm
+trMOneOf (MkGenAlts gs) f with (trMTaggedLazy f gs) proof trm
   _ | Nothing = Nothing
-  _ | Just gs' = Just $ MkGenAlternatives gs'
+  _ | Just gs' = Just $ MkGenAlts gs'
 
 -----------------------------
 --- Emptiness tweakenings ---
@@ -214,7 +214,7 @@ mkOneOf : alem `NoWeaker` em =>
           NotImmediatelyEmpty alem =>
           (gens : LazyLst1 (PosNat, Lazy (Gen alem a))) ->
           Gen em a
-mkOneOf gens = OneOf $ MkGenAlternatives gens
+mkOneOf gens = OneOf $ MkGenAlts gens
 -- TODO to make elimination of a single element
 
 --------------------------
@@ -227,7 +227,7 @@ export
 unGen1 : MonadRandom m => CanManageLabels m => Gen1 a -> m a
 unGen1 $ Pure x         = pure x
 unGen1 $ Raw sf         = sf.unRawGen
-unGen1 $ OneOf @{NN} oo = assert_total unGen1 . force . pickWeighted oo.unGenAlternatives . finToNat =<< randomFin oo.totalWeight
+unGen1 $ OneOf @{NN} oo = assert_total unGen1 . force . pickWeighted oo.unGenAlts . finToNat =<< randomFin oo.totalWeight
 unGen1 $ Bind @{bo} x f = case extractNE bo of Refl => x.unRawGen >>= unGen1 . f
 unGen1 $ Labelled l x   = manageLabel l $ unGen1 x
 
@@ -248,7 +248,7 @@ unGen : MonadRandom m => MonadError () m => CanManageLabels m => Gen em a -> m a
 unGen $ Empty        = throwError ()
 unGen $ Pure x       = pure x
 unGen $ Raw sf       = sf.unRawGen
-unGen $ OneOf oo     = assert_total unGen . force . pickWeighted oo.unGenAlternatives . finToNat =<< randomFin oo.totalWeight
+unGen $ OneOf oo     = assert_total unGen . force . pickWeighted oo.unGenAlts . finToNat =<< randomFin oo.totalWeight
 unGen $ Bind x f     = x.unRawGen >>= unGen . f
 unGen $ Labelled l x = manageLabel l $ unGen x
 
@@ -337,7 +337,7 @@ export
   Raw g    >>= nf = Bind @{reflexive} g nf
   (OneOf @{ao} oo >>= nf) {em=NonEmpty} with (ao) _ | NN = OneOf $ mapOneOf oo $ assert_total (>>= nf)
   (OneOf @{ao} oo >>= nf) {em=MaybeEmptyDeep} = OneOf $ mapOneOf oo $ assert_total (>>= nf) . relax @{ao}
-  (OneOf {alem} (MkGenAlternatives gs) >>= nf) {em=MaybeEmpty} = maybe Empty (mkOneOf {alem=MaybeEmptyDeep}) $
+  (OneOf {alem} (MkGenAlts gs) >>= nf) {em=MaybeEmpty} = maybe Empty (mkOneOf {alem=MaybeEmptyDeep}) $
     strengthen $ flip mapMaybe gs $ traverse $ map delay . strengthen . assert_total (>>= nf) . relax . force
   Bind {biem} x f >>= nf with (order {rel=NoWeaker} biem em)
     _ | Left _  = Bind x $ \x => assert_total $ relax (f x) >>= nf
@@ -352,7 +352,7 @@ namespace GenAlternatives
 
   export %inline
   Nil : GenAlternatives False em a
-  Nil = MkGenAlternatives []
+  Nil = MkGenAlts []
 
   export %inline
   (::) : {em : _} ->
@@ -363,7 +363,7 @@ namespace GenAlternatives
          (0 _ : IfUnsolved lem em) =>
          (0 _ : IfUnsolved rem em) =>
          Lazy (Gen lem a) -> Lazy (GenAlternatives e rem a) -> GenAlternatives ne em a
-  x :: xs = MkGenAlternatives $ (1, relax x) :: mapTaggedLazy relax xs.unGenAlternatives
+  x :: xs = MkGenAlts $ (1, relax x) :: mapTaggedLazy relax xs.unGenAlts
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export %inline
@@ -375,29 +375,29 @@ namespace GenAlternatives
          (0 _ : IfUnsolved nel False) =>
          (0 _ : IfUnsolved ner False) =>
          GenAlternatives nel lem a -> Lazy (GenAlternatives ner rem a) -> GenAlternatives (nel || ner) em a
-  xs ++ ys = MkGenAlternatives $ mapTaggedLazy relax xs.unGenAlternatives ++ mapTaggedLazy relax ys.unGenAlternatives
+  xs ++ ys = MkGenAlts $ mapTaggedLazy relax xs.unGenAlts ++ mapTaggedLazy relax ys.unGenAlts
 
   public export %inline
   length : GenAlternatives ne em a -> Nat
-  length $ MkGenAlternatives alts = length alts
+  length $ MkGenAlts alts = length alts
 
   export %inline
   processAlternatives : (Gen em a -> Gen em b) -> GenAlternatives ne em a -> GenAlternatives ne em b
-  processAlternatives f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapSnd (wrapLazy f)
+  processAlternatives f $ MkGenAlts xs = MkGenAlts $ xs <&> mapSnd (wrapLazy f)
 
   export %inline
   processAlternativesMaybe : (Gen em a -> Maybe $ Lazy (Gen em b)) -> GenAlternatives ne em a -> GenAlternatives False em b
-  processAlternativesMaybe f $ MkGenAlternatives xs = MkGenAlternatives $ mapMaybe (\(t, x) => (t,) <$> f x) xs
+  processAlternativesMaybe f $ MkGenAlts xs = MkGenAlts $ mapMaybe (\(t, x) => (t,) <$> f x) xs
 
   export %inline
   processAlternatives'' : (Gen em a -> GenAlternatives neb em b) -> GenAlternatives nea em a -> GenAlternatives (nea && neb) em b
   processAlternatives'' f = mapGens where
 
     mapWeight : forall a, nea. (PosNat -> PosNat) -> GenAlternatives nea em a -> GenAlternatives nea em a
-    mapWeight f $ MkGenAlternatives xs = MkGenAlternatives $ xs <&> mapFst f
+    mapWeight f $ MkGenAlts xs = MkGenAlts $ xs <&> mapFst f
 
     mapGens : GenAlternatives nea em a -> GenAlternatives (nea && neb) em b
-    mapGens $ MkGenAlternatives xs = MkGenAlternatives $ xs `bind` \(w, x) => unGenAlternatives $ mapWeight (w *) $ f x
+    mapGens $ MkGenAlts xs = MkGenAlts $ xs `bind` \(w, x) => unGenAlts $ mapWeight (w *) $ f x
 
   export %inline
   processAlternatives' : (Gen em a -> GenAlternatives ne em b) -> GenAlternatives ne em a -> GenAlternatives ne em b
@@ -405,11 +405,11 @@ namespace GenAlternatives
 
   export %inline
   relax : GenAlternatives True em a -> GenAlternatives ne em a
-  relax $ MkGenAlternatives alts = MkGenAlternatives $ relaxT alts
+  relax $ MkGenAlts alts = MkGenAlts $ relaxT alts
 
   export %inline
   strengthen : GenAlternatives ne em a -> Maybe $ GenAlternatives True em a
-  strengthen $ MkGenAlternatives xs = MkGenAlternatives <$> strengthen xs
+  strengthen $ MkGenAlts xs = MkGenAlts <$> strengthen xs
 
   export
   Functor (GenAlternatives ne em) where
@@ -423,13 +423,13 @@ namespace GenAlternatives
   export
   {em : _} -> Alternative (GenAlternatives False em) where
     empty = []
-    xs <|> ys = MkGenAlternatives $ xs.unGenAlternatives <|> ys.unGenAlternatives
+    xs <|> ys = MkGenAlts $ xs.unGenAlts <|> ys.unGenAlts
 
   -- implementation for `Monad` is below --
 
 export
 {em : _} -> Cast (LazyLst ne a) (GenAlternatives ne em a) where
-  cast = MkGenAlternatives . map (\x => (1, pure x))
+  cast = MkGenAlts . map (\x => (1, pure x))
 
 public export %inline
 altsFromList : {em : _} -> LazyLst ne a -> GenAlternatives ne em a
@@ -464,9 +464,9 @@ oneOf : {em : _} ->
         (0 _ : IfUnsolved alem em) =>
         (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
         GenAlternatives altsNe alem a -> Gen em a
-oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlternatives xs = mkOneOf xs
-oneOf {em=MaybeEmptyDeep} @{_} @{DT} x = case x of MkGenAlternatives xs => mkOneOf xs
-oneOf {em=MaybeEmpty} x = case x of MkGenAlternatives xs => do
+oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlts xs = mkOneOf xs
+oneOf {em=MaybeEmptyDeep} @{_} @{DT} x = case x of MkGenAlts xs => mkOneOf xs
+oneOf {em=MaybeEmpty} x = case x of MkGenAlts xs => do
   maybe Empty mkOneOf $ strengthen $ flip mapMaybe xs $
     \wg => (fst wg,) . delay <$> Gen.strengthen {em=MaybeEmptyDeep} (snd wg)
 
@@ -483,7 +483,7 @@ frequency : {em : _} ->
             (0 _ : IfUnsolved alem em) =>
             (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
             LazyLst altsNe (PosNat, Lazy (Gen alem a)) -> Gen em a
-frequency = oneOf . MkGenAlternatives
+frequency = oneOf . MkGenAlts
 
 ||| Choose one of the given values uniformly.
 |||
@@ -508,7 +508,7 @@ elements' xs = elements $ relaxF $ fromList $ toList xs
 
 export
 alternativesOf : {em : _} -> Gen em a -> GenAlternatives True em a
-alternativesOf $ OneOf oo     = MkGenAlternatives $ unGenAlternatives $ mapOneOf oo relax
+alternativesOf $ OneOf oo     = MkGenAlts $ unGenAlts $ mapOneOf oo relax
 alternativesOf $ Labelled l x = processAlternatives (label l) $ alternativesOf x
 alternativesOf g              = [g]
 
@@ -536,8 +536,8 @@ forgetAlternatives g@(OneOf {}) = case canBeNotImmediatelyEmpty em of
   Left Refl => maybe Empty single $ strengthen {em=MaybeEmptyDeep} g
   where
     %inline single : iem `NoWeaker` MaybeEmptyDeep => iem `NoWeaker` em => Gen iem a -> Gen em a
-    single g = label "forgetAlternatives" $ OneOf $ MkGenAlternatives [(1, g)]
-    -- `mkOneOf` is not used here intentionally, since if `mkOneOf` can be changed to eliminate single-element `MkGenAlternatives`'s, we still want such behaviour here.
+    single g = label "forgetAlternatives" $ OneOf $ MkGenAlts [(1, g)]
+    -- `mkOneOf` is not used here intentionally, since if `mkOneOf` can be changed to eliminate single-element `MkGenAlts`'s, we still want such behaviour here.
 forgetAlternatives (Labelled l x) = label l $ forgetAlternatives x
 forgetAlternatives g = g
 
