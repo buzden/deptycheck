@@ -81,9 +81,8 @@ export %macro
 initCoverageInfo' : (n : Name) -> Elab $ CoverageGenInfo n
 initCoverageInfo' n = coverageGenInfo n
 
-export %macro
-initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
-initCoverageInfo _ = do
+genTypeName : (0 _ : Type) -> Elab Name
+genTypeName g = do
   genTy <- quote g
   let (_, genTy) = unPi genTy
   let (lhs, args) = unAppAny genTy
@@ -95,7 +94,11 @@ initCoverageInfo _ = do
     | _ => failAt (getFC lhs) "Wrong number of type arguments of a generator"
   let (_, IVar _ genTy) = unDPair $ getExpr genTy
     | (_, genTy) => failAt (getFC genTy) "Expected a type name"
-  coverageGenInfo genTy
+  pure genTy
+
+export %macro
+initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
+initCoverageInfo _ = genTypeName g >>= coverageGenInfo
 
 export
 Show (CoverageGenInfo g) where
