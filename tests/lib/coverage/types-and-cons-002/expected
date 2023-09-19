@@ -1,0 +1,15 @@
+1/1: Building PrintCoverage (PrintCoverage.idr)
+
+Prelude.Types.Nat covered fully
+  - S: covered
+  - Z: covered
+
+PrintCoverage.X covered fully
+  - X1: covered
+  - X2: covered
+  - X3: covered
+
+PrintCoverage.Y covered fully
+  - Y1: covered
+  - Y2: covered
+  - Y3: covered

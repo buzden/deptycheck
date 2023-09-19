@@ -92,8 +92,9 @@ genTypeName g = do
     | _ => failAt (getFC lhs) "Return type must be a generator of some type"
   let [_, genTy] = args
     | _ => failAt (getFC lhs) "Wrong number of type arguments of a generator"
-  let (_, IVar _ genTy) = unDPair $ getExpr genTy
-    | (_, genTy) => failAt (getFC genTy) "Expected a type name"
+  let (_, genTy) = unDPair $ getExpr genTy
+  let (IVar _ genTy, _) = unApp genTy
+    | (genTy, _) => failAt (getFC genTy) "Expected a type name"
   pure genTy
 
 export %macro
