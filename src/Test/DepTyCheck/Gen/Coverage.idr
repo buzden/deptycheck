@@ -112,14 +112,14 @@ withCoverage gen = do
   tyLabelStr <- quote "\{show tyName}[?]"
   let matchCon = \con => reAppAny (var con.name) $ con.args <&> flip appArg implicitTrue
   let matchDPair = \expr => foldr (\_, r => var "Builtin.DPair.MkDPair" .$ implicitTrue .$ r) expr dpairLefts
-  labeller <- check `(\val => Test.DepTyCheck.Gen.label (fromString ~tyLabelStr) ~(
-                iCase (var "val") implicitTrue $ tyInfo.cons <&> \con =>
-                  patClause
+  let conClause = \con => patClause
                     (as `{x} $ matchDPair $ matchCon con)
                     (var "Test.DepTyCheck.Gen.label"
                       .$ (var "fromString" .$ primVal (Str "\{show con.name} (user-defined)"))
                       .$ `(pure x)
                     )
+  labeller <- check `(\val => Test.DepTyCheck.Gen.label (fromString ~tyLabelStr) ~(
+                iCase (var "val") implicitTrue $ tyInfo.cons <&> conClause
               ))
   pure $ gen >>= labeller
 
