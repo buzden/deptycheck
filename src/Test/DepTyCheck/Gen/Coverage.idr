@@ -101,6 +101,28 @@ export %macro
 initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
 initCoverageInfo _ = genTypeName g >>= coverageGenInfo
 
+export %macro
+withCoverage : {em : _} -> (gen : Gen em a) -> Elab $ Gen em a
+withCoverage gen = do
+  tyExpr <- quote a
+  let (dpairLefts, tyExpr) = unDPair tyExpr
+  let (IVar _ tyName, _) = unApp tyExpr
+    | (genTy, _) => failAt (getFC genTy) "Expected a normal type name"
+  tyInfo <- getInfo' tyName
+  tyLabelStr <- quote "\{show tyName}[?]"
+  let matchCon = \con => reAppAny (var con.name) $ con.args <&> flip appArg implicitTrue
+  let matchDPair = \expr => foldr (\_, r => var "Builtin.DPair.MkDPair" .$ implicitTrue .$ r) expr dpairLefts
+  labeller <- check `(\val => Test.DepTyCheck.Gen.label (fromString ~tyLabelStr) ~(
+                iCase (var "val") implicitTrue $ tyInfo.cons <&> \con =>
+                  patClause
+                    (as `{x} $ matchDPair $ matchCon con)
+                    (var "Test.DepTyCheck.Gen.label"
+                      .$ (var "fromString" .$ primVal (Str "\{show con.name} (user-defined)"))
+                      .$ `(pure x)
+                    )
+              ))
+  pure $ gen >>= labeller
+
 export
 Show (CoverageGenInfo g) where
   show cgi = joinBy "\n\n" $ SortedMap.toList cgi.coverageInfo <&> \(ti, tyCov, cons) => do
