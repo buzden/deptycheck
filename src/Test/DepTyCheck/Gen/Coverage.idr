@@ -105,22 +105,32 @@ export %macro
 withCoverage : {em : _} -> (gen : Gen em a) -> Elab $ Gen em a
 withCoverage gen = do
   tyExpr <- quote a
-  let (dpairLefts, tyExpr) = unDPair tyExpr
-  let (IVar _ tyName, _) = unApp tyExpr
+  let (dpairLefts, tyRExpr) = unDPair tyExpr
+  let (IVar _ tyName, _) = unApp tyRExpr
     | (genTy, _) => failAt (getFC genTy) "Expected a normal type name"
   tyInfo <- getInfo' tyName
   tyLabelStr <- quote "\{show tyName}[?]"
   let matchCon = \con => reAppAny (var con.name) $ con.args <&> flip appArg implicitTrue
   let matchDPair = \expr => foldr (\_, r => var "Builtin.DPair.MkDPair" .$ implicitTrue .$ r) expr dpairLefts
   let asName = UN $ Basic "^x^"
+  let unitConClause = \con => patClause (matchDPair $ matchCon con) `(Builtin.MkUnit)
   let conClause = \con => patClause
                     (as asName $ matchDPair $ matchCon con)
                     (var "Test.DepTyCheck.Gen.label"
                       .$ (var "fromString" .$ primVal (Str "\{show con.name} (user-defined)"))
                       .$ `(pure ~(var asName))
                     )
+  goodClauses <- for tyInfo.cons $ \con => do
+    let funName = `{conCheckingFun}
+    res <- catch $ check {expected=Unit} $ flip local (var "Builtin.MkUnit")
+             [ claim M0 Private [Totality PartialOK] funName `(~tyExpr -> Builtin.Unit)
+             , def funName $ pure $ patClause (var funName .$ bindVar "var") $
+                 iCase (var "var") implicitTrue [ unitConClause con ]
+             ]
+    pure $ res $> conClause con
+  let goodClauses = mapMaybe id goodClauses
   labeller <- check `(\val => Test.DepTyCheck.Gen.label (fromString ~tyLabelStr) ~(
-                iCase (var "val") implicitTrue $ tyInfo.cons <&> conClause
+                iCase (var "val") implicitTrue goodClauses
               ))
   pure $ gen >>= labeller
 
