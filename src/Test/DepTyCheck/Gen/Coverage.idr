@@ -61,9 +61,9 @@ record CoverageGenInfo (0 g : k) where
 coverageGenInfo : Name -> Elab $ CoverageGenInfo x
 coverageGenInfo genTy = do
   involvedTypes <- allInvolvedTypes =<< getInfo' genTy
-  let cov  = fromList $ involvedTypes <&> \ty => (ty, (False, fromList $ ty.cons <&> (, False)))
+  let cov  = fromList $ involvedTypes <&> \ty => (ty, False, fromList $ ty.cons <&> (, False))
   let tys  = fromList $ involvedTypes <&> \ty => (show ty.name, ty)
-  let cons = fromList $ (involvedTypes >>= \ty => (ty,) <$> ty.cons) <&> \(ty, co) => (show co.name, (ty, co))
+  let cons = fromList $ (involvedTypes >>= \ty => (ty,) <$> ty.cons) <&> \(ty, co) => (show co.name, ty, co)
   pure $ MkCoverageGenInfo tys cons cov
 
   where
