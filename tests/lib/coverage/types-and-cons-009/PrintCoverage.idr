@@ -11,6 +11,8 @@ import System.Random.Pure.StdGen
 
 %language ElabReflection
 
+%hide Language.Reflection.Syntax.var
+
 data X : (post : List ()) -> Type where
   XZ : X post
   XS : X post -> X (var::post)
