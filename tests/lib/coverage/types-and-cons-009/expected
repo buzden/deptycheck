@@ -1,0 +1,43 @@
+1/1: Building PrintCoverage (PrintCoverage.idr)
+Warning: We are about to implicitly bind the following lowercase names.
+You may be unintentionally shadowing the associated global definitions:
+  var is shadowing Language.Reflection.Syntax.var
+
+PrintCoverage:16:3--16:5
+ 12 | %language ElabReflection
+ 13 | 
+ 14 | data X : (post : List ()) -> Type where
+ 15 |   XZ : X post
+ 16 |   XS : X post -> X (var::post)
+        ^^
+
+
+Builtin.Unit not covered
+  - MkUnit: not covered
+
+Prelude.Basics.List not covered
+  - (::): not covered
+  - Nil: not covered
+
+PrintCoverage.X not covered
+  - XS: not covered
+  - XZ: not covered
+
+PrintCoverage.Y not covered
+  - MkY: not covered
+
+--------
+
+Builtin.Unit not covered
+  - MkUnit: not covered
+
+Prelude.Basics.List not covered
+  - (::): not covered
+  - Nil: not covered
+
+PrintCoverage.X covered partially
+  - XS: covered
+  - XZ: not covered
+
+PrintCoverage.Y not covered
+  - MkY: not covered
