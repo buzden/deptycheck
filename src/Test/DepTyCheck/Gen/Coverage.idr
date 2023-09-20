@@ -103,6 +103,10 @@ export %macro
 initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
 initCoverageInfo _ = genTypeName g >>= coverageGenInfo
 
+||| Adds labelling of types and constructors to a given generator
+|||
+||| Added labelling is not deep, i.e. it adds labels only for the returned type of a generator.
+||| If returned type is a dependent pair, the rightmost type is taken into the account.
 export %macro
 withCoverage : {em : _} -> (gen : Gen em a) -> Elab $ Gen em a
 withCoverage gen = do
