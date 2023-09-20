@@ -111,9 +111,7 @@ export %macro
 withCoverage : {em : _} -> (gen : Gen em a) -> Elab $ Gen em a
 withCoverage gen = do
   tyExpr <- quote a
-  let tyExpr = flip mapTTImp tyExpr $ \case
-                 IHole {} => implicitTrue
-                 x        => x
+  let tyExpr = flip mapTTImp tyExpr $ \case IHole {} => implicitTrue; x => x
   let (dpairLefts, tyRExpr) = unDPair tyExpr
   let (IVar _ tyName, _) = unApp tyRExpr
     | (genTy, _) => failAt (getFC genTy) "Expected a normal type name"
