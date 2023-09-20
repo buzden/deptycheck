@@ -134,25 +134,27 @@ withCoverage gen = do
               ))
   pure $ gen >>= labeller
 
-export
-Show (CoverageGenInfo g) where
-  show cgi = joinBy "\n\n" $ SortedMap.toList cgi.coverageInfo <&> \(ti, tyCov, cons) => do
-    let conCovs = values cons
-    let anyCons = not $ null conCovs
-    let allConsCovered = all (== True)  conCovs
-    let noConsCovered  = all (== False) conCovs
+toString : CoverageGenInfo g -> String
+toString cgi = joinBy "\n\n" $ SortedMap.toList cgi.coverageInfo <&> \(ti, tyCov, cons) => do
+  let conCovs = values cons
+  let anyCons = not $ null conCovs
+  let allConsCovered = all (== True)  conCovs
+  let noConsCovered  = all (== False) conCovs
 
-    let tyCovStr = joinBy ", " $
-                     (if tyCov && noConsCovered then ["mentioned"]
-                      else if not tyCov && (not anyCons || not noConsCovered) then ["not menioned"]
-                      else []) ++
-                     (if not anyCons then ["no constructors"]
-                      else if allConsCovered then ["covered fully"]
-                      else if noConsCovered then ["not covered"]
-                      else ["covered partially"]
-                     )
-    joinBy "\n" $ (::) "\{show ti.name} \{tyCovStr}" $ whenTs anyCons $ map ("  - " ++) $
-      SortedMap.toList cons <&> \(co, coCov) => "\{logPosition co}: \{the String $ if coCov then "" else "not "}covered"
+  let tyCovStr = joinBy ", " $
+                   (if tyCov && noConsCovered then ["mentioned"]
+                    else if not tyCov && (not anyCons || not noConsCovered) then ["not menioned"]
+                    else []) ++
+                   (if not anyCons then ["no constructors"]
+                    else if allConsCovered then ["covered fully"]
+                    else if noConsCovered then ["not covered"]
+                    else ["covered partially"]
+                   )
+  joinBy "\n" $ (::) "\{show ti.name} \{tyCovStr}" $ whenTs anyCons $ map ("  - " ++) $
+    SortedMap.toList cons <&> \(co, coCov) => "\{logPosition co}: \{the String $ if coCov then "" else "not "}covered"
+
+export
+Show (CoverageGenInfo g) where show = toString
 
 infixOf : Eq a => List a -> List a -> Maybe (List a, List a)
 infixOf = map (map snd) .: infixOfBy (\x, y => if x == y then Just () else Nothing)
