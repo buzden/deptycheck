@@ -4,6 +4,8 @@
 ||| e.g. involved types and their constructors.
 module Test.DepTyCheck.Gen.Coverage
 
+import Control.ANSI
+
 import Control.Monad.Maybe
 import Control.Monad.Random
 import Control.Monad.Writer
@@ -134,27 +136,42 @@ withCoverage gen = do
               ))
   pure $ gen >>= labeller
 
-toString : CoverageGenInfo g -> String
-toString cgi = joinBy "\n\n" $ SortedMap.toList cgi.coverageInfo <&> \(ti, tyCov, cons) => do
+c : (colourful : Bool) -> Color -> String -> String
+c False _   = id
+c True  col = show . colored col
+
+||| Boldens the rightmost name after the last dot, if coloured
+showType : (colourful : Bool) -> TypeInfo -> String
+showType False ti = show ti.name
+showType True  ti = joinBy "." $ forget $ uncurry lappend $ map (singleton . show . bolden) $ unsnoc $ split (== '.') $ show ti.name
+
+toString : (colourful : Bool) -> CoverageGenInfo g -> String
+toString col cgi = joinBy "\n\n" $ SortedMap.toList cgi.coverageInfo <&> \(ti, tyCov, cons) => do
   let conCovs = values cons
   let anyCons = not $ null conCovs
   let allConsCovered = all (== True)  conCovs
   let noConsCovered  = all (== False) conCovs
 
+  let c = c col
   let tyCovStr = joinBy ", " $
-                   (if tyCov && noConsCovered then ["mentioned"]
-                    else if not tyCov && (not anyCons || not noConsCovered) then ["not menioned"]
+                   (if tyCov && noConsCovered then [c BrightYellow "mentioned"]
+                    else if not tyCov && (not anyCons || not noConsCovered) then [c BrightYellow "not menioned"]
                     else []) ++
-                   (if not anyCons then ["no constructors"]
-                    else if allConsCovered then ["covered fully"]
-                    else if noConsCovered then ["not covered"]
-                    else ["covered partially"]
+                   (if not anyCons then [c Cyan "no constructors"]
+                    else if allConsCovered then [c BrightGreen "covered fully"]
+                    else if noConsCovered then [c BrightRed "not covered"]
+                    else [c BrightYellow "covered partially"]
                    )
-  joinBy "\n" $ (::) "\{show ti.name} \{tyCovStr}" $ whenTs anyCons $ map ("  - " ++) $
-    SortedMap.toList cons <&> \(co, coCov) => "\{logPosition co}: \{the String $ if coCov then "" else "not "}covered"
+  joinBy "\n" $ (::) "\{showType col ti} \{tyCovStr}" $ whenTs anyCons $ map ("  - " ++) $
+    SortedMap.toList cons <&> \(co, coCov) => do
+      let status : String := if coCov then c BrightGreen "covered" else c BrightRed "not covered"
+      "\{logPosition co}: \{status}"
 
 export
-Show (CoverageGenInfo g) where show = toString
+Show (CoverageGenInfo g) where show = toString False
+
+export
+[Colourful] Show (CoverageGenInfo g) where show = toString True
 
 infixOf : Eq a => List a -> List a -> Maybe (List a, List a)
 infixOf = map (map snd) .: infixOfBy (\x, y => if x == y then Just () else Nothing)
