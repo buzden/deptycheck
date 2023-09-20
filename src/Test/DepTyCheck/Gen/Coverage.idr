@@ -127,16 +127,16 @@ withCoverage gen = do
                       .$ `(pure ~(var asName))
                     )
   goodClauses <- for tyInfo.cons $ \con => do
-    let funName = `{conCheckingFun}
+    let funName = UN $ Basic "^conCheckingFun^"
     res <- catch $ check {expected=Unit} $ flip local (var "Builtin.MkUnit")
              [ claim M0 Private [Totality PartialOK] funName `(~tyExpr -> Builtin.Unit)
-             , def funName $ pure $ patClause (var funName .$ bindVar "var") $
-                 iCase (var "var") implicitTrue [ unitConClause con ]
+             , def funName $ pure $ patClause (var funName .$ bindVar "^var^") $
+                 iCase (var "^var^") implicitTrue [ unitConClause con ]
              ]
     pure $ res $> conClause con
   let goodClauses = mapMaybe id goodClauses
-  labeller <- check `(\val => Test.DepTyCheck.Gen.label (fromString ~tyLabelStr) ~(
-                iCase (var "val") implicitTrue goodClauses
+  labeller <- check $ lam (lambdaArg "^val^") $ `(Test.DepTyCheck.Gen.label (fromString ~tyLabelStr) ~(
+                iCase (var "^val^") implicitTrue goodClauses
               ))
   pure $ gen >>= labeller
 
