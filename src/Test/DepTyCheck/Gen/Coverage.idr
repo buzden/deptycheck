@@ -132,6 +132,8 @@ withCoverage gen = do
              iCase (var "^var^") implicitTrue [ unitConClause con ]
     pure $ res $> conClause con
   let goodClauses = mapMaybe id goodClauses
+  let _::_ = goodClauses
+    | [] => failAt (getFC tyExpr) "Unable to find any appropriate constructor for the type \{show tyRExpr}"
   labeller <- check $ lam (lambdaArg "^val^") $ `(Test.DepTyCheck.Gen.label (fromString ~tyLabelStr) ~(
                 iCase (var "^val^") implicitTrue goodClauses
               ))
