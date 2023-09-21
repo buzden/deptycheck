@@ -111,7 +111,6 @@ export %macro
 withCoverage : {em : _} -> (gen : Gen em a) -> Elab $ Gen em a
 withCoverage gen = do
   tyExpr <- quote a
-  let tyExpr = flip mapTTImp tyExpr $ \case IHole {} => implicitTrue; x => x
   let (dpairLefts, tyRExpr) = unDPair tyExpr
   let (IVar _ tyName, _) = unApp tyRExpr
     | (genTy, _) => failAt (getFC genTy) "Expected a normal type name"
@@ -129,11 +128,8 @@ withCoverage gen = do
                     )
   goodClauses <- for tyInfo.cons $ \con => do
     let funName = UN $ Basic "^conCheckingFun^"
-    res <- catch $ check {expected=Unit} $ flip local (var "Builtin.MkUnit")
-             [ claim M0 Private [Totality PartialOK] funName `(~tyExpr -> Builtin.Unit)
-             , def funName $ pure $ patClause (var funName .$ bindVar "^var^") $
-                 iCase (var "^var^") implicitTrue [ unitConClause con ]
-             ]
+    res <- catch $ check {expected=a -> Unit} $ lam (lambdaArg "^var^") $ `(Builtin.assert_total) .$
+             iCase (var "^var^") implicitTrue [ unitConClause con ]
     pure $ res $> conClause con
   let goodClauses = mapMaybe id goodClauses
   labeller <- check $ lam (lambdaArg "^val^") $ `(Test.DepTyCheck.Gen.label (fromString ~tyLabelStr) ~(
