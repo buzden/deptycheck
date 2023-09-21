@@ -89,6 +89,27 @@ public export %inline
 Gen0 : Type -> Type
 Gen0 = Gen MaybeEmpty
 
+-----------------------------
+--- Very basic generators ---
+-----------------------------
+
+export
+chooseAny : Random a => (0 _ : IfUnsolved ne NonEmpty) => Gen ne a
+chooseAny = Raw $ MkRawGen getRandom
+
+export
+choose : Random a => (0 _ : IfUnsolved ne NonEmpty) => (a, a) -> Gen ne a
+choose bounds = Raw $ MkRawGen $ getRandomR bounds
+
+export %inline
+empty : Gen0 a
+empty = Empty
+
+export
+label : Label -> Gen em a -> Gen em a
+label _ Empty = Empty
+label l g     = Labelled l g
+
 ----------------------------
 --- Equivalence relation ---
 ----------------------------
@@ -158,7 +179,7 @@ relax $ Pure x         = Pure x
 relax $ Raw x          = Raw x
 relax $ OneOf @{wo} x  = OneOf @{transitive' wo %search} x
 relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
-relax $ Labelled l x   = Labelled l $ relax x
+relax $ Labelled l x   = label l $ relax x
 
 --export
 --strengthen' : {em : _} -> (gw : Gen iem a) -> Dec (gs : Gen em a ** gs `Equiv` gw)
@@ -182,7 +203,7 @@ strengthen $ Bind {biem} x f with (decCanBeEmpty em)
     NonEmpty => Just $ Bind x f
     _        => Nothing
 
-strengthen $ Labelled l x = Labelled l <$> strengthen x
+strengthen $ Labelled l x = label l <$> strengthen x
 
 --------------------
 --- More utility ---
@@ -194,26 +215,6 @@ mkOneOf : alem `NoWeaker` em =>
           Gen em a
 mkOneOf gens = OneOf $ MkOneOf gens $ Val _
 -- TODO to make elimination of a single element
-
------------------------------
---- Very basic generators ---
------------------------------
-
-export
-chooseAny : Random a => (0 _ : IfUnsolved ne NonEmpty) => Gen ne a
-chooseAny = Raw $ MkRawGen getRandom
-
-export
-choose : Random a => (0 _ : IfUnsolved ne NonEmpty) => (a, a) -> Gen ne a
-choose bounds = Raw $ MkRawGen $ getRandomR bounds
-
-export %inline
-empty : Gen0 a
-empty = Empty
-
-export %inline
-label : Label -> Gen em a -> Gen em a
-label = Labelled
 
 --------------------------
 --- Running generators ---
@@ -296,7 +297,7 @@ Functor (Gen em) where
   map f $ Raw sf       = Raw $ f <$> sf
   map f $ OneOf oo     = OneOf $ mapOneOf oo $ assert_total $ map f
   map f $ Bind x g     = Bind x $ assert_total map f . g
-  map f $ Labelled l x = Labelled l $ map f x
+  map f $ Labelled l x = label l $ map f x
 
 export
 {em : _} -> Applicative (Gen em) where
@@ -311,8 +312,8 @@ export
 
   Raw sfl <*> Raw sfr = Raw $ sfl <*> sfr
 
-  Labelled l x <*> y = Labelled l $ x <*> y
-  x <*> Labelled l y = Labelled l $ x <*> y
+  Labelled l x <*> y = label l $ x <*> y
+  x <*> Labelled l y = label l $ x <*> y
 
   OneOf @{ao} @{au} {alem} oo <*> g = case canBeNotImmediatelyEmpty em of
     Right _   => OneOf {em} $ mapOneOf oo $ \x => assert_total $ relax x <*> g
@@ -340,7 +341,7 @@ export
   Bind {biem} x f >>= nf with (order {rel=NoWeaker} biem em)
     _ | Left _  = Bind x $ \x => assert_total $ relax (f x) >>= nf
     _ | Right _ = Bind {biem} x $ \x => assert_total $ relax (f x) >>= relax . nf
-  Labelled l x >>= nf = Labelled l $ x >>= nf
+  Labelled l x >>= nf = label l $ x >>= nf
 
 -----------------------------------------
 --- Detour: special list of lazy gens ---
@@ -512,7 +513,7 @@ elements' xs = elements $ relaxF $ fromList $ toList xs
 export
 alternativesOf : {em : _} -> Gen em a -> GenAlternatives True em a
 alternativesOf $ OneOf oo     = MkGenAlternatives $ gens $ mapOneOf oo relax
-alternativesOf $ Labelled l x = processAlternatives (Labelled l) $ alternativesOf x
+alternativesOf $ Labelled l x = processAlternatives (label l) $ alternativesOf x
 alternativesOf g              = [g]
 
 ||| Any depth alternatives fetching.
@@ -539,9 +540,9 @@ forgetAlternatives g@(OneOf {}) = case canBeNotImmediatelyEmpty em of
   Left Refl => maybe Empty single $ strengthen {em=MaybeEmptyDeep} g
   where
     %inline single : iem `NoWeaker` MaybeEmptyDeep => iem `NoWeaker` em => Gen iem a -> Gen em a
-    single g = Labelled "forgetAlternatives" $ OneOf $ MkOneOf [(1, g)] $ Val _
+    single g = label "forgetAlternatives" $ OneOf $ MkOneOf [(1, g)] $ Val _
     -- `mkOneOf` is not used here intentionally, since if `mkOneOf` is changed to eliminate single-element `MkOneOf`'s, we still want such behaviour here.
-forgetAlternatives (Labelled l x) = Labelled l $ forgetAlternatives x
+forgetAlternatives (Labelled l x) = label l $ forgetAlternatives x
 forgetAlternatives g = g
 
 ||| Returns generator with internal structure hidden to anything, including combinators,
