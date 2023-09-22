@@ -1,0 +1,16 @@
+1/1: Building PrintCoverage (PrintCoverage.idr)
+
+Builtin.Unit not covered
+  - MkUnit: not covered
+
+Prelude.Basics.Bool not covered
+  - False: not covered
+  - True: not covered
+
+Prelude.Types.Maybe not covered
+  - Just: not covered
+  - Nothing: not covered
+
+PrintCoverage.X covered partially
+  - X1: covered
+  - X2: not covered

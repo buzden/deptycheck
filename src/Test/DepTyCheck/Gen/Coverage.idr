@@ -103,6 +103,28 @@ export %macro
 initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
 initCoverageInfo _ = genTypeName g >>= coverageGenInfo
 
+-- Derives function `A -> Label` where `A` is determined by the given `TypeInfo`
+consLabellingFun : (funName : Name) -> TypeInfo -> List Decl
+consLabellingFun funName ti = do
+
+  let claim = do
+    let argNames : List Nat := [1, 2 .. ti.args.length] -- will be empty if length is `0`
+    let argNames = argNames <&> \n => UN $ Basic "^a\{show n}^"
+    let argsWithNames = ti.args `zip` argNames
+    let tyApplied = reAppAny (var ti.name) $ argsWithNames <&> \(arg, name) => appArg arg $ var name
+    let sig = foldr
+                (\(arg, name) => pi $ MkArg M0 ImplicitArg (Just name) arg.type)
+                `(~tyApplied -> Test.DepTyCheck.Gen.Labels.Label)
+                argsWithNames
+    private' funName sig
+
+  let body = do
+    let matchCon = \con => reAppAny (var con.name) $ con.args <&> flip appArg implicitTrue
+    def funName $ ti.cons <&> \con =>
+      patClause (var funName .$ matchCon con) $ var "fromString" .$ primVal (Str $ "\{show con.name} (user-defined)")
+
+  [claim, body]
+
 ||| Adds labelling of types and constructors to a given generator
 |||
 ||| Added labelling is not deep, i.e. it adds labels only for the returned type of a generator.
@@ -115,29 +137,20 @@ withCoverage gen = do
   let (IVar _ tyName, _) = unApp tyRExpr
     | (genTy, _) => failAt (getFC genTy) "Expected a normal type name"
   tyInfo <- getInfo' tyName
-  tyLabelStr <- quote "\{show tyName}[?]"
-  let matchCon = \con => reAppAny (var con.name) $ con.args <&> flip appArg implicitTrue
   let matchDPair = \expr => foldr (\_, r => var "Builtin.DPair.MkDPair" .$ implicitTrue .$ r) expr dpairLefts
-  let asName = UN $ Basic "^x^"
-  let unitConClause = \con => patClause (matchDPair $ matchCon con) `(Builtin.MkUnit)
-  let conClause = \con => patClause
-                    (as asName $ matchDPair $ matchCon con)
-                    (var "Test.DepTyCheck.Gen.label"
-                      .$ (var "fromString" .$ primVal (Str "\{show con.name} (user-defined)"))
-                      .$ `(pure ~(var asName))
-                    )
-  goodClauses <- for tyInfo.cons $ \con => do
-    let funName = UN $ Basic "^conCheckingFun^"
-    res <- catch $ check {expected=a -> Unit} $ lam (lambdaArg "^var^") $ `(Builtin.assert_total) .$
-             iCase (var "^var^") implicitTrue [ unitConClause con ]
-    pure $ res $> conClause con
-  let goodClauses = mapMaybe id goodClauses
-  let _::_ = goodClauses
-    | [] => failAt (getFC tyExpr) "Unable to find any appropriate constructor for the type \{show tyRExpr}"
-  labeller <- check $ lam (lambdaArg "^val^") $ `(Test.DepTyCheck.Gen.label (fromString ~tyLabelStr) ~(
-                iCase (var "^val^") implicitTrue goodClauses
-              ))
-  pure $ gen >>= labeller
+  let tyLabelStr = "\{show tyName}[?]"
+  let labelledValName = UN $ Basic "^val^"
+  let labellingFunName = UN $ Basic "^labelling^"
+  let undpairedVal = "^undpaired^"
+  labeller <- check $ lam (lambdaArg labelledValName) $
+                local (consLabellingFun labellingFunName tyInfo) $
+                  `(Test.DepTyCheck.Gen.label
+                     ~(iCase (var labelledValName) implicitTrue $ pure $
+                       patClause
+                         (matchDPair $ bindVar undpairedVal)
+                         (var labellingFunName .$ varStr undpairedVal))
+                     (pure ~(var labelledValName)))
+  pure $ label (fromString tyLabelStr) $ gen >>= labeller
 
 c : (colourful : Bool) -> Color -> String -> String
 c False _   = id
