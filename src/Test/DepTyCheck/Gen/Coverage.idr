@@ -108,14 +108,11 @@ consLabellingFun : (funName : Name) -> TypeInfo -> List Decl
 consLabellingFun funName ti = do
 
   let claim = do
-    let argNames : List Nat := [1, 2 .. ti.args.length] -- will be empty if length is `0`
-    let argNames = argNames <&> \n => UN $ Basic "^a\{show n}^"
-    let argsWithNames = ti.args `zip` argNames
-    let tyApplied = reAppAny (var ti.name) $ argsWithNames <&> \(arg, name) => appArg arg $ var name
+    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ Arg.name arg
     let sig = foldr
-                (\(arg, name) => pi $ MkArg M0 ImplicitArg (Just name) arg.type)
+                (pi . {count := M0, piInfo := ImplicitArg, name $= Just})
                 `(~tyApplied -> Test.DepTyCheck.Gen.Labels.Label)
-                argsWithNames
+                ti.args
     private' funName sig
 
   let body = do

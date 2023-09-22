@@ -1,0 +1,50 @@
+1/1: Building PrintCoverage (PrintCoverage.idr)
+
+Data.Fin.Fin not covered
+  - FS: not covered
+  - FZ: not covered
+
+Data.Nat.IsSucc not covered
+  - ItIsSucc: not covered
+
+Prelude.Types.Nat not covered
+  - S: not covered
+  - Z: not covered
+
+PrintCoverage.X not covered
+  - X1: not covered
+  - X2: not covered
+
+--------
+
+Data.Fin.Fin not covered
+  - FS: not covered
+  - FZ: not covered
+
+Data.Nat.IsSucc not covered
+  - ItIsSucc: not covered
+
+Prelude.Types.Nat not covered
+  - S: not covered
+  - Z: not covered
+
+PrintCoverage.X covered fully
+  - X1: covered
+  - X2: covered
+
+--------
+
+Data.Fin.Fin not covered
+  - FS: not covered
+  - FZ: not covered
+
+Data.Nat.IsSucc not covered
+  - ItIsSucc: not covered
+
+Prelude.Types.Nat not covered
+  - S: not covered
+  - Z: not covered
+
+PrintCoverage.X covered partially
+  - X1: not covered
+  - X2: covered
