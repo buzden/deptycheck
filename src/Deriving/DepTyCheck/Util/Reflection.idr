@@ -34,6 +34,10 @@ Interpolation TTImp where
   interpolate expr = show $ assert_total $ pretty {ann=Unit} expr
 
 export
+Interpolation Decl where
+  interpolate decl = show $ assert_total $ pretty {ann=Unit} decl
+
+export
 SingleLogPosition Con where
   logPosition con = do
     let fullName = show con.name
