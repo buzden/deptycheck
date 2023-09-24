@@ -186,9 +186,6 @@ Show (CoverageGenInfo g) where show = toString False
 export
 [Colourful] Show (CoverageGenInfo g) where show = toString True
 
-infixOf : Eq a => List a -> List a -> Maybe (List a, List a)
-infixOf = map (map snd) .: infixOfBy (\x, y => if x == y then Just () else Nothing)
-
 export
 registerCoverage : ModelCoverage -> CoverageGenInfo g -> CoverageGenInfo g
 registerCoverage mc cgi = foldr registerCoverage1 cgi mc.unModelCoverage where

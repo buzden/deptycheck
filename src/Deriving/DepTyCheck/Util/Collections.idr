@@ -43,6 +43,10 @@ findConsequentsWhich f xs =
     Nothing => []
     Just tl => filter .| uncurry f .| xs `zip` tl
 
+public export
+infixOf : Eq a => List a -> List a -> Maybe (List a, List a)
+infixOf = map (map snd) .: infixOfBy (\x, y => if x == y then Just () else Nothing)
+
 public export %inline
 toNatList : Foldable f => f (Fin n) -> List Nat
 toNatList = map finToNat . toList
