@@ -189,12 +189,6 @@ export
 infixOf : Eq a => List a -> List a -> Maybe (List a, List a)
 infixOf = map (map snd) .: infixOfBy (\x, y => if x == y then Just () else Nothing)
 
-update : (v -> v) -> k -> SortedMap k v -> SortedMap k v
-update f k m = do
-  let Just v = lookup k m
-    | Nothing => m
-  insert k (f v) m
-
 export
 registerCoverage : ModelCoverage -> CoverageGenInfo g -> CoverageGenInfo g
 registerCoverage mc cgi = foldr registerCoverage1 cgi mc.unModelCoverage where
@@ -205,11 +199,11 @@ registerCoverage mc cgi = foldr registerCoverage1 cgi mc.unModelCoverage where
     -- Try type
     let ty = maybe str (fastPack . fst) $ fastUnpack "[" `infixOf` str'
     let tyMod = case lookup ty cgi.types of
-                  Just ti => { coverageInfo $= update (mapFst $ const True) ti }
+                  Just ti => { coverageInfo $= updateExisting (mapFst $ const True) ti }
                   Nothing => id
     -- Try constructor
     let co = maybe str (fastPack . fst) $ fastUnpack " " `infixOf` str'
     let coMod : (_ -> CoverageGenInfo g) := case lookup co cgi.constructors of
-                  Just (ti, co) => { coverageInfo $= update (mapSnd $ insert co True) ti }
+                  Just (ti, co) => { coverageInfo $= updateExisting (mapSnd $ insert co True) ti }
                   Nothing       => id
     tyMod $ coMod $ cgi
