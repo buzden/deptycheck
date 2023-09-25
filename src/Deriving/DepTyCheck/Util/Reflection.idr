@@ -343,6 +343,30 @@ argDeps args = do
   Monoid a => Applicative f => Monoid (f a) where
     neutral = pure neutral
 
+------------------------------------
+--- Analysis of type definitions ---
+------------------------------------
+
+||| Derives function `A -> B` where `A` is determined by the given `TypeInfo`, `B` is determined by `retTy`
+|||
+||| For each constructor of `A` the `matcher` function is applied and its result (of type `B`) is used as a result.
+||| Currently, `B` must be a non-dependent type.
+export
+deriveMatchingCons : (retTy : TTImp) -> (matcher : Con -> TTImp) -> (funName : Name) -> TypeInfo -> List Decl
+deriveMatchingCons retTy matcher funName ti = do
+  let claim = do
+    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ Arg.name arg
+    let sig = foldr
+                (pi . {count := M0, piInfo := ImplicitArg, name $= Just})
+                `(~tyApplied -> ~retTy)
+                ti.args
+    private' funName sig
+  let body = do
+    let matchCon = \con => reAppAny (var con.name) $ con.args <&> flip appArg implicitTrue
+    def funName $ ti.cons <&> \con =>
+      patClause (var funName .$ matchCon con) $ matcher con
+  [claim, body]
+
 -------------------------------------------------
 --- Syntactic analysis of `TTImp` expressions ---
 -------------------------------------------------
@@ -631,3 +655,23 @@ allInvolvedTypes ti = toList <$> go [ti] empty where
 
       typesOfCon : Con -> m $ List TypeInfo
       typesOfCon con = [| typesOfExpr con.type ++ (join <$> for con.args typesOfArg) |]
+
+||| Returns a name by the generator's type
+|||
+||| Say, for the `Fuel -> Gen em (n ** Fin n)` it returns name of `Data.Fin.Fin`
+export
+genTypeName : (0 _ : Type) -> Elab Name
+genTypeName g = do
+  genTy <- quote g
+  let (_, genTy) = unPi genTy
+  let (lhs, args) = unAppAny genTy
+  let IVar _ lhsName = lhs
+    | _ => failAt (getFC lhs) "Generator or generator function expected"
+  let True = lhsName `nameConformsTo` `{Test.DepTyCheck.Gen.Gen}
+    | _ => failAt (getFC lhs) "Return type must be a generator of some type"
+  let [_, genTy] = args
+    | _ => failAt (getFC lhs) "Wrong number of type arguments of a generator"
+  let (_, genTy) = unDPair $ getExpr genTy
+  let (IVar _ genTy, _) = unApp genTy
+    | (genTy, _) => failAt (getFC genTy) "Expected a type name"
+  pure genTy

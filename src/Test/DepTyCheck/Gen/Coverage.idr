@@ -83,44 +83,9 @@ export %macro
 initCoverageInfo' : (n : Name) -> Elab $ CoverageGenInfo n
 initCoverageInfo' n = coverageGenInfo n
 
-genTypeName : (0 _ : Type) -> Elab Name
-genTypeName g = do
-  genTy <- quote g
-  let (_, genTy) = unPi genTy
-  let (lhs, args) = unAppAny genTy
-  let IVar _ lhsName = lhs
-    | _ => failAt (getFC lhs) "Generator or generator function expected"
-  let True = lhsName `nameConformsTo` `{Test.DepTyCheck.Gen.Gen}
-    | _ => failAt (getFC lhs) "Return type must be a generator of some type"
-  let [_, genTy] = args
-    | _ => failAt (getFC lhs) "Wrong number of type arguments of a generator"
-  let (_, genTy) = unDPair $ getExpr genTy
-  let (IVar _ genTy, _) = unApp genTy
-    | (genTy, _) => failAt (getFC genTy) "Expected a type name"
-  pure genTy
-
 export %macro
 initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
 initCoverageInfo _ = genTypeName g >>= coverageGenInfo
-
--- Derives function `A -> Label` where `A` is determined by the given `TypeInfo`
-consLabellingFun : (funName : Name) -> TypeInfo -> List Decl
-consLabellingFun funName ti = do
-
-  let claim = do
-    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ Arg.name arg
-    let sig = foldr
-                (pi . {count := M0, piInfo := ImplicitArg, name $= Just})
-                `(~tyApplied -> Test.DepTyCheck.Gen.Labels.Label)
-                ti.args
-    private' funName sig
-
-  let body = do
-    let matchCon = \con => reAppAny (var con.name) $ con.args <&> flip appArg implicitTrue
-    def funName $ ti.cons <&> \con =>
-      patClause (var funName .$ matchCon con) $ var "fromString" .$ primVal (Str $ "\{show con.name} (user-defined)")
-
-  [claim, body]
 
 ||| Adds labelling of types and constructors to a given generator
 |||
@@ -139,8 +104,12 @@ withCoverage gen = do
   let labelledValName = UN $ Basic "^val^"
   let labellingFunName = UN $ Basic "^labelling^"
   let undpairedVal = "^undpaired^"
+  let consLabellingFun = deriveMatchingCons
+                           `(Test.DepTyCheck.Gen.Labels.Label)
+                           (\con => var "fromString" .$ primVal (Str $ "\{show con.name} (user-defined)"))
+                           labellingFunName tyInfo
   labeller <- check $ lam (lambdaArg labelledValName) $
-                local (consLabellingFun labellingFunName tyInfo) $
+                local consLabellingFun $
                   `(Test.DepTyCheck.Gen.label
                      ~(iCase (var labelledValName) implicitTrue $ pure $
                        patClause
