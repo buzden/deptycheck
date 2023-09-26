@@ -1,0 +1,15 @@
+1/1: Building PrintCoverage (PrintCoverage.idr)
+
+Number of successfully generated samples: 100
+
+Prelude.Basics.Bool not covered
+  - False: not covered
+  - True: not covered
+
+PrintCoverage.X covered partially
+  - XF: covered
+  - XT: not covered
+
+PrintCoverage.Y covered partially
+  - YF: covered
+  - YT: not covered
