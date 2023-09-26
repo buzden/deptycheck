@@ -1,0 +1,31 @@
+1/1: Building PrintCoverage (PrintCoverage.idr)
+
+Builtin.Unit not covered
+  - MkUnit: not covered
+
+Prelude.Basics.List not covered
+  - (::): not covered
+  - Nil: not covered
+
+PrintCoverage.X not covered
+  - XS: not covered
+  - XZ: not covered
+
+PrintCoverage.Y not covered
+  - MkY: not covered
+
+--------
+
+Builtin.Unit not covered
+  - MkUnit: not covered
+
+Prelude.Basics.List not covered
+  - (::): not covered
+  - Nil: not covered
+
+PrintCoverage.X covered partially
+  - XS: covered
+  - XZ: not covered
+
+PrintCoverage.Y not covered
+  - MkY: not covered

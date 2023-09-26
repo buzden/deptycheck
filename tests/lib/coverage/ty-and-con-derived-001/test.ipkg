@@ -1,0 +1,6 @@
+package a-test
+executable = a-test
+
+depends = deptycheck
+
+main = PrintCoverage

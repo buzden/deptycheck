@@ -34,6 +34,10 @@ Interpolation TTImp where
   interpolate expr = show $ assert_total $ pretty {ann=Unit} expr
 
 export
+Interpolation Decl where
+  interpolate decl = show $ assert_total $ pretty {ann=Unit} decl
+
+export
 SingleLogPosition Con where
   logPosition con = do
     let fullName = show con.name
@@ -157,15 +161,19 @@ liftWeight1 : TTImp
 liftWeight1 = `(Data.Nat.Pos.one)
 
 export
+labelGen : (desc : String) -> TTImp -> TTImp
+labelGen desc expr = `(Test.DepTyCheck.Gen.label (fromString ~(primVal $ Str desc)) ~expr)
+
+export
 callOneOf : (desc : String) -> List TTImp -> TTImp
-callOneOf _    [v]      = v
-callOneOf desc variants = `(Test.DepTyCheck.Gen.oneOf {description=Just ~(primVal $ Str desc)} {em=MaybeEmpty}) .$ liftList variants
+callOneOf desc [v]      = labelGen desc v
+callOneOf desc variants = labelGen desc $ `(Test.DepTyCheck.Gen.oneOf {em=MaybeEmpty}) .$ liftList variants
 
 -- List of weights and subgenerators
 export
 callFrequency : (desc : String) -> List (TTImp, TTImp) -> TTImp
 callFrequency _    [(_, v)] = v
-callFrequency desc variants = `(Test.DepTyCheck.Gen.frequency {description=Just ~(primVal $ Str desc)}) .$
+callFrequency desc variants = labelGen desc $ var `{Test.DepTyCheck.Gen.frequency} .$
                                 liftList (variants <&> \(freq, subgen) => var `{Builtin.MkPair} .$ freq .$ subgen)
 
 -- TODO to think of better placement for this function; this anyway is intended to be called from the derived code.
@@ -334,6 +342,30 @@ argDeps args = do
 
   Monoid a => Applicative f => Monoid (f a) where
     neutral = pure neutral
+
+------------------------------------
+--- Analysis of type definitions ---
+------------------------------------
+
+||| Derives function `A -> B` where `A` is determined by the given `TypeInfo`, `B` is determined by `retTy`
+|||
+||| For each constructor of `A` the `matcher` function is applied and its result (of type `B`) is used as a result.
+||| Currently, `B` must be a non-dependent type.
+export
+deriveMatchingCons : (retTy : TTImp) -> (matcher : Con -> TTImp) -> (funName : Name) -> TypeInfo -> List Decl
+deriveMatchingCons retTy matcher funName ti = do
+  let claim = do
+    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ Arg.name arg
+    let sig = foldr
+                (pi . {count := M0, piInfo := ImplicitArg, name $= Just})
+                `(~tyApplied -> ~retTy)
+                ti.args
+    private' funName sig
+  let body = do
+    let matchCon = \con => reAppAny (var con.name) $ con.args <&> flip appArg implicitTrue
+    def funName $ ti.cons <&> \con =>
+      patClause (var funName .$ matchCon con) $ matcher con
+  [claim, body]
 
 -------------------------------------------------
 --- Syntactic analysis of `TTImp` expressions ---
@@ -601,3 +633,45 @@ namespace UpToRenaming
   export
   [UpToRenaming] Eq TTImp where
     x == y = (x == y) @{UpToSubst @{empty}}
+
+-- Returns a list without duplications
+export
+allInvolvedTypes : Elaboration m => TypeInfo -> m $ List TypeInfo
+allInvolvedTypes ti = toList <$> go [ti] empty where
+  go : (left : List TypeInfo) -> (curr : SortedMap Name TypeInfo) -> m $ SortedMap Name TypeInfo
+  go left curr = do
+    let (c::left) = filter (not . isJust . flip lookup curr . name) left
+      | [] => pure curr
+    let next = insert c.name c curr
+    args <- join <$> for c.args typesOfArg
+    cons <- join <$> for c.cons typesOfCon
+    assert_total $ go (args ++ cons ++ left) next
+    where
+      typesOfExpr : TTImp -> m $ List TypeInfo
+      typesOfExpr expr = map (mapMaybe id) $ for (allVarNames expr) $ catch . getInfo'
+
+      typesOfArg : NamedArg -> m $ List TypeInfo
+      typesOfArg arg = typesOfExpr arg.type
+
+      typesOfCon : Con -> m $ List TypeInfo
+      typesOfCon con = [| typesOfExpr con.type ++ (join <$> for con.args typesOfArg) |]
+
+||| Returns a name by the generator's type
+|||
+||| Say, for the `Fuel -> Gen em (n ** Fin n)` it returns name of `Data.Fin.Fin`
+export
+genTypeName : (0 _ : Type) -> Elab Name
+genTypeName g = do
+  genTy <- quote g
+  let (_, genTy) = unPi genTy
+  let (lhs, args) = unAppAny genTy
+  let IVar _ lhsName = lhs
+    | _ => failAt (getFC lhs) "Generator or generator function expected"
+  let True = lhsName `nameConformsTo` `{Test.DepTyCheck.Gen.Gen}
+    | _ => failAt (getFC lhs) "Return type must be a generator of some type"
+  let [_, genTy] = args
+    | _ => failAt (getFC lhs) "Wrong number of type arguments of a generator"
+  let (_, genTy) = unDPair $ getExpr genTy
+  let (IVar _ genTy, _) = unApp genTy
+    | (genTy, _) => failAt (getFC genTy) "Expected a type name"
+  pure genTy

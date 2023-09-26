@@ -15,8 +15,11 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                   $ IVar Builtin.Unit)))
          IDef <Builtin.Unit>[]
               [ PatClause (IApp. IVar <Builtin.Unit>[] $ IBindVar ^fuel_arg^)
-                          (ILocal (IApp. IVar <<Builtin.MkUnit>>
-                                       $ IVar ^fuel_arg^))
+                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
+                                       $ (IApp. IVar fromString
+                                              $ IPrimVal Builtin.Unit[] (non-recursive))
+                                       $ (IApp. IVar <<Builtin.MkUnit>>
+                                              $ IVar ^fuel_arg^)))
                             IClaim MW
                                    Export
                                    []

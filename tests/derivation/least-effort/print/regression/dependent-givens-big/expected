@@ -40,32 +40,35 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar <<DerivedGen.VectMaybeAnyType.Here>>
-                                                          $ IVar Data.Fuel.Dry
-                                                          $ IVar inter^<n>
-                                                          $ IVar inter^<{arg:4011}>)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal DerivedGen.VectMaybeAnyType.AtIndex[0, 3] (dry fuel))
+                                                          $ (IApp. IVar <<DerivedGen.VectMaybeAnyType.Here>>
+                                                                 $ IVar Data.Fuel.Dry
+                                                                 $ IVar inter^<n>
+                                                                 $ IVar inter^<{arg:4011}>))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
-                                                                      description
-                                                                      (IApp. IVar Just
-                                                                           $ IPrimVal DerivedGen.VectMaybeAnyType.AtIndex[0, 3] (spend fuel))
-                                                          $ (IApp. IVar ::
-                                                                 $ (IApp. IVar Builtin.MkPair
-                                                                        $ IVar Data.Nat.Pos.one
-                                                                        $ (IApp. IVar <<DerivedGen.VectMaybeAnyType.Here>>
-                                                                               $ IVar ^fuel_arg^
-                                                                               $ IVar inter^<n>
-                                                                               $ IVar inter^<{arg:4011}>))
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal DerivedGen.VectMaybeAnyType.AtIndex[0, 3] (spend fuel))
+                                                          $ (IApp. IVar Test.DepTyCheck.Gen.frequency
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar Builtin.MkPair
-                                                                               $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
-                                                                                      $ IVar ^sub^fuel_arg^)
-                                                                               $ (IApp. IVar <<DerivedGen.VectMaybeAnyType.There>>
-                                                                                      $ IVar ^sub^fuel_arg^
+                                                                               $ IVar Data.Nat.Pos.one
+                                                                               $ (IApp. IVar <<DerivedGen.VectMaybeAnyType.Here>>
+                                                                                      $ IVar ^fuel_arg^
                                                                                       $ IVar inter^<n>
                                                                                       $ IVar inter^<{arg:4011}>))
-                                                                        $ IVar Nil))) ]))
+                                                                        $ (IApp. IVar ::
+                                                                               $ (IApp. IVar Builtin.MkPair
+                                                                                      $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
+                                                                                             $ IVar ^sub^fuel_arg^)
+                                                                                      $ (IApp. IVar <<DerivedGen.VectMaybeAnyType.There>>
+                                                                                             $ IVar ^sub^fuel_arg^
+                                                                                             $ IVar inter^<n>
+                                                                                             $ IVar inter^<{arg:4011}>))
+                                                                               $ IVar Nil)))) ]))
                             IClaim MW
                                    Export
                                    []
@@ -122,21 +125,24 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                      (Implicit True)
                                                          $ IBindVar x
                                                          $ IBindVar xs))
-                                             (IApp. INamedApp (IVar Prelude.pure)
-                                                              f
-                                                              (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                   $ Implicit True)
-                                                  $ (IApp. IVar Builtin.DPair.MkDPair
-                                                         $ Implicit True
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal DerivedGen.VectMaybeAnyType.Here (orders))
+                                                  $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                     f
+                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                          $ Implicit True)
                                                          $ (IApp. IVar Builtin.DPair.MkDPair
                                                                 $ Implicit True
-                                                                $ INamedApp (INamedApp (INamedApp (IVar DerivedGen.VectMaybeAnyType.Here)
-                                                                                                  n
-                                                                                                  (IVar n))
-                                                                                       xs
-                                                                                       (IVar xs))
-                                                                            x
-                                                                            (IVar x))))
+                                                                $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                       $ Implicit True
+                                                                       $ INamedApp (INamedApp (INamedApp (IVar DerivedGen.VectMaybeAnyType.Here)
+                                                                                                         n
+                                                                                                         (IVar n))
+                                                                                              xs
+                                                                                              (IVar xs))
+                                                                                   x
+                                                                                   (IVar x)))))
                                  , PatClause (IApp. IVar <<DerivedGen.VectMaybeAnyType.Here>>
                                                   $ Implicit True
                                                   $ Implicit True
@@ -152,39 +158,42 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                      (Implicit True)
                                                          $ IBindVar z
                                                          $ IBindVar zs))
-                                             (IApp. IVar >>=
-                                                  $ (IApp. IVar <DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]
-                                                         $ IVar ^cons_fuel^
-                                                         $ IVar n
-                                                         $ IVar zs)
-                                                  $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                         => ICase (IVar {lamc:0})
-                                                                  (Implicit False)
-                                                                  [ PatClause (IApp. IVar Builtin.DPair.MkDPair
-                                                                                   $ IBindVar i
-                                                                                   $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                          $ IBindVar x
-                                                                                          $ IBindVar ^bnd^{arg:4025}))
-                                                                              (IApp. INamedApp (IVar Prelude.pure)
-                                                                                               f
-                                                                                               (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                                    $ Implicit True)
-                                                                                   $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                          $ Implicit True
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal DerivedGen.VectMaybeAnyType.There (orders))
+                                                  $ (IApp. IVar >>=
+                                                         $ (IApp. IVar <DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]
+                                                                $ IVar ^cons_fuel^
+                                                                $ IVar n
+                                                                $ IVar zs)
+                                                         $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                => ICase (IVar {lamc:0})
+                                                                         (Implicit False)
+                                                                         [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                          $ IBindVar i
+                                                                                          $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                 $ IBindVar x
+                                                                                                 $ IBindVar ^bnd^{arg:4025}))
+                                                                                     (IApp. INamedApp (IVar Prelude.pure)
+                                                                                                      f
+                                                                                                      (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                           $ Implicit True)
                                                                                           $ (IApp. IVar Builtin.DPair.MkDPair
                                                                                                  $ Implicit True
-                                                                                                 $ (IApp. INamedApp (INamedApp (INamedApp (INamedApp (INamedApp (IVar DerivedGen.VectMaybeAnyType.There)
-                                                                                                                                                                z
-                                                                                                                                                                (IVar z))
-                                                                                                                                                     n
-                                                                                                                                                     (IVar n))
-                                                                                                                                          zs
-                                                                                                                                          (IVar zs))
-                                                                                                                               x
-                                                                                                                               (IVar x))
-                                                                                                                    i
-                                                                                                                    (IVar i)
-                                                                                                        $ IVar ^bnd^{arg:4025})))) ]))
+                                                                                                 $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                        $ Implicit True
+                                                                                                        $ (IApp. INamedApp (INamedApp (INamedApp (INamedApp (INamedApp (IVar DerivedGen.VectMaybeAnyType.There)
+                                                                                                                                                                       z
+                                                                                                                                                                       (IVar z))
+                                                                                                                                                            n
+                                                                                                                                                            (IVar n))
+                                                                                                                                                 zs
+                                                                                                                                                 (IVar zs))
+                                                                                                                                      x
+                                                                                                                                      (IVar x))
+                                                                                                                           i
+                                                                                                                           (IVar i)
+                                                                                                               $ IVar ^bnd^{arg:4025})))) ])))
                                  , PatClause (IApp. IVar <<DerivedGen.VectMaybeAnyType.There>>
                                                   $ Implicit True
                                                   $ Implicit True

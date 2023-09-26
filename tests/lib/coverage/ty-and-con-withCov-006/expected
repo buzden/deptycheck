@@ -1,0 +1,31 @@
+1/1: Building PrintCoverage (PrintCoverage.idr)
+
+Prelude.Types.[1mNat[0m [38;5;9mnot covered[0m
+  - S: [38;5;9mnot covered[0m
+  - Z: [38;5;9mnot covered[0m
+
+PrintCoverage.[1mX[0m [38;5;11mcovered partially[0m
+  - X1: [38;5;10mcovered[0m
+  - X2: [38;5;9mnot covered[0m
+  - X3: [38;5;10mcovered[0m
+
+PrintCoverage.[1mY[0m [38;5;11mcovered partially[0m
+  - Y1: [38;5;10mcovered[0m
+  - Y2: [38;5;9mnot covered[0m
+  - Y3: [38;5;10mcovered[0m
+
+--------
+
+Prelude.Types.[1mNat[0m [38;5;9mnot covered[0m
+  - S: [38;5;9mnot covered[0m
+  - Z: [38;5;9mnot covered[0m
+
+PrintCoverage.[1mX[0m [38;5;11mcovered partially[0m
+  - X1: [38;5;10mcovered[0m
+  - X2: [38;5;9mnot covered[0m
+  - X3: [38;5;10mcovered[0m
+
+PrintCoverage.[1mY[0m [38;5;11mcovered partially[0m
+  - Y1: [38;5;9mnot covered[0m
+  - Y2: [38;5;9mnot covered[0m
+  - Y3: [38;5;10mcovered[0m

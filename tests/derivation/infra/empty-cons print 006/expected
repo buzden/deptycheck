@@ -29,29 +29,32 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                           (ILocal (ICase (IVar ^fuel_arg^)
                                          (IVar Data.Fuel.Fuel)
                                          [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar <<Data.Vect.Nil>>
-                                                          $ IVar Data.Fuel.Dry
-                                                          $ IVar inter^<elem>)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Data.Vect.Vect[1] (dry fuel))
+                                                          $ (IApp. IVar <<Data.Vect.Nil>>
+                                                                 $ IVar Data.Fuel.Dry
+                                                                 $ IVar inter^<elem>))
                                          , PatClause (IApp. IVar Data.Fuel.More
                                                           $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. INamedApp (IVar Test.DepTyCheck.Gen.frequency)
-                                                                      description
-                                                                      (IApp. IVar Just
-                                                                           $ IPrimVal Data.Vect.Vect[1] (spend fuel))
-                                                          $ (IApp. IVar ::
-                                                                 $ (IApp. IVar Builtin.MkPair
-                                                                        $ IVar Data.Nat.Pos.one
-                                                                        $ (IApp. IVar <<Data.Vect.Nil>>
-                                                                               $ IVar ^fuel_arg^
-                                                                               $ IVar inter^<elem>))
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Data.Vect.Vect[1] (spend fuel))
+                                                          $ (IApp. IVar Test.DepTyCheck.Gen.frequency
                                                                  $ (IApp. IVar ::
                                                                         $ (IApp. IVar Builtin.MkPair
-                                                                               $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
-                                                                                      $ IVar ^sub^fuel_arg^)
-                                                                               $ (IApp. IVar <<Data.Vect.(::)>>
-                                                                                      $ IVar ^sub^fuel_arg^
+                                                                               $ IVar Data.Nat.Pos.one
+                                                                               $ (IApp. IVar <<Data.Vect.Nil>>
+                                                                                      $ IVar ^fuel_arg^
                                                                                       $ IVar inter^<elem>))
-                                                                        $ IVar Nil))) ]))
+                                                                        $ (IApp. IVar ::
+                                                                               $ (IApp. IVar Builtin.MkPair
+                                                                                      $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
+                                                                                             $ IVar ^sub^fuel_arg^)
+                                                                                      $ (IApp. IVar <<Data.Vect.(::)>>
+                                                                                             $ IVar ^sub^fuel_arg^
+                                                                                             $ IVar inter^<elem>))
+                                                                               $ IVar Nil)))) ]))
                             IClaim MW
                                    Export
                                    []
