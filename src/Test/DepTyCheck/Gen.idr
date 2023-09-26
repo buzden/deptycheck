@@ -146,7 +146,7 @@ data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, 
 mapTaggedLazy : (a -> b) -> LazyLst ne (tag, Lazy a) -> LazyLst ne (tag, Lazy b)
 mapTaggedLazy = map . mapSnd . wrapLazy
 
-mapOneOf : GenAlternatives True iem a -> (Gen iem a -> Gen em b) -> GenAlternatives True em b
+mapOneOf : GenAlternatives ne iem a -> (Gen iem a -> Gen em b) -> GenAlternatives ne em b
 mapOneOf (MkGenAlts gs) f = MkGenAlts $ mapTaggedLazy f gs
 
 traverseMaybe : (a -> Maybe b) -> LazyLst ne a -> Maybe $ LazyLst ne b
@@ -155,16 +155,13 @@ traverseMaybe f (x::xs) = case f x of
   Nothing => Nothing
   Just y  => (y ::) <$> traverseMaybe f xs
 
-trMTaggedLazy : (a -> Maybe b) -> LazyLst1 (tag, Lazy a) -> Maybe $ LazyLst1 (tag, Lazy b)
+trMTaggedLazy : (a -> Maybe b) -> LazyLst ne (tag, Lazy a) -> Maybe $ LazyLst ne (tag, Lazy b)
 trMTaggedLazy = traverseMaybe . m . wrapLazy where
   m : (Lazy a -> Lazy (Maybe b)) -> (tag, Lazy a) -> Maybe (tag, (Lazy b))
   m f (tg, lz) = (tg,) . delay <$> f lz
 
--- TODO to make the proof properly
-trMOneOf : GenAlternatives True iem a -> (Gen iem a -> Maybe $ Gen em b) -> Maybe $ GenAlternatives True em b
-trMOneOf (MkGenAlts gs) f with (trMTaggedLazy f gs) proof trm
-  _ | Nothing = Nothing
-  _ | Just gs' = Just $ MkGenAlts gs'
+trMOneOf : GenAlternatives ne iem a -> (Gen iem a -> Maybe $ Gen em b) -> Maybe $ GenAlternatives ne em b
+trMOneOf (MkGenAlts gs) f = MkGenAlts <$> trMTaggedLazy f gs
 
 -----------------------------
 --- Emptiness tweakenings ---
@@ -383,7 +380,7 @@ namespace GenAlternatives
 
   export %inline
   processAlternatives : (Gen em a -> Gen em b) -> GenAlternatives ne em a -> GenAlternatives ne em b
-  processAlternatives f $ MkGenAlts xs = MkGenAlts $ xs <&> mapSnd (wrapLazy f)
+  processAlternatives = flip mapOneOf
 
   export %inline
   processAlternativesMaybe : (Gen em a -> Maybe $ Lazy (Gen em b)) -> GenAlternatives ne em a -> GenAlternatives False em b
