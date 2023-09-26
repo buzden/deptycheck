@@ -33,7 +33,7 @@ main = do
      let mc = concatMap fst vs
      let ci = registerCoverage mc ci
      putStrLn $ show ci
-  putStrLn "\n--------\n"
+  putStrLn "--------\n"
   do let vs = unGenTryND 100 someStdGen $ genY 3
      let mc = concatMap fst vs
      let ci = registerCoverage mc ci
