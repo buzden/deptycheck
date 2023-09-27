@@ -13,3 +13,4 @@ You can look at the `original framework <https://diataxis.fr/explanation/>`_ to 
 
   explanation/generators
   explanation/derivation
+  explanation/specifications
