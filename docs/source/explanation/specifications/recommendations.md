@@ -1,9 +1,9 @@
 # Practical recommendations
 
 This is a collection of principles,
-thoughts and ideas that I have developed based on my experience of writing DepTyCheck specifications for programming languages.
-Some of them are incomplete, some highlight possible problems that don't have a good solution yet,
-but, I suppose, reading this could give you some thoughts and ideas regarding writing specifications.
+thoughts and ideas that were developed based on the experience of writing DepTyCheck specifications for programming languages.
+Some of them are incomplete, some highlight possible problems that don't have a good solution yet.
+However, reading this could give you some thoughts and ideas regarding writing specifications.
 
 ## Basic outline of programming language's (static) semantics specification
 
@@ -15,12 +15,12 @@ This context can be represented as a set of indices of a type.
 Then the changes to these contexts can be defined as applying constructors to the indices,
 and the restrictions can be imposed via inductively defined predicates on the context values.
 
-It should be noted that, as MiniJava specification had taught me,
-attempting to modify the context in a complex, function-like way, leads to signification performance degradation.
-I still outline the general approach to defining such mutations below, but they should be used with caution.
-It is better to be able to define the context in an append only way, and generally keep the specification as concise as possible.
+It should be noted that attempting to modify the context in a complex, function-like way, leads to signification performance degradation.
+This was discovered after implementing a specification for a MiniJava subset that featured tracking of variable initialization via a flag attached to a variable.
+This article features a general outline of defining such mutations, however they should be used with caution.
+It is better to be able to define the context in an constructo-application-only way, and generally keep the specification as concise as possible.
 
-In my opinion, a good starting point of writing a specification is a language's grammar.
+A good starting point of writing a specification is a language's grammar.
 You could start by creating an empty type that will represent some construct and adding comments for each possible grammatical construct.
 After that, identify what kind of restrictions the construct requires you to impose on the context,
 and add a constructor that represents the construct along with the necessary restrictions.
@@ -55,7 +55,7 @@ Moreover, the use of a predicate expressed in such a manner would lead to brute 
 One could instead express predicate/function as another type, whose indices are arguments of a function/predicate (and, in case of a function, the returned value is also an index).
 The predicate/function is defined by pattern-matching on the arguments.
 The basic idea is that the resulting type should be inhabited iff the predicate is satisfied, or the function yields a certain result for the provided arguments.
-For instance, we can lift addition of natural numbers to a type level the following way:
+For instance, one can lift addition of natural numbers to a type level the following way:
 
 ```idris
 data Add : Nat -> Nat -> Nat -> Type where
@@ -66,7 +66,7 @@ data Add : Nat -> Nat -> Nat -> Type where
 It is a bit unclear how general this procedure can be.
 It seems that all partial recursive functions on naturals numbers can be encoded as types,
 hence allowing for encoding of any computation that can be run by a turing-complete model of execution.
-I have a strong belief that indexed types can be arithmetised (i.e. allow for an injective computable encoding as natural numbers),
+There is a strong belief that indexed types can be arithmetised (i. e. allow for an injective computable encoding as natural numbers),
 but this is yet to be carefully proven.
 If that indeed holds true, this means that the procedure is indeed general enough, at least on paper.
 
@@ -75,6 +75,7 @@ One must remember to caveats when it comes to this encoding:
   might need to define pattern-matching more precisely,
 - The depth of recursion would be limited by the fuel supplied to the generator. Since large specifications tend to run well on small fuel
   only, you wouldn't be able to define complex predicates or computations.
+
 ## Fortunate and unfortunate orderings of generators
 
 DepTyCheck might choose a specific ordering of generators that might lead to a terrible performance.
@@ -100,7 +101,7 @@ Because of this, to tie the recursive knot and avoid working with obnoxious tele
 one would have to use something like "bare" natural number to allow circular references.
 
 Because of this caveat, it is not immediately obvious which one should be preferred.
-I would suggest implementing two versions of some small specification and comparing generation and derivation time on both.
+It is suggested to implement two versions of some small specification and comparing generation and derivation time on both.
 
 ## `List`- vs. `SnocList`-like representation of programs
 
