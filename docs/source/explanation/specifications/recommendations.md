@@ -33,7 +33,7 @@ gradually expanding it to add new language features.
 ## Encoding functions and predicates and why you might not want to
 
 Sometimes, you might need to define a complex predicate, or set a new index value to be some non-trivial result of a function application.
-Since DepTyCheck can't work with types whose indices are set to be the result of a function application:
+Unfortunately, DepTyCheck cannot derive a generator with a given index in case this index is obtained via function application:
 
 <!-- idris
 {-
@@ -42,7 +42,10 @@ Since DepTyCheck can't work with types whose indices are set to be the result of
 ```idris
 data X : T -> Type where
   ...
-  Xk : ... -> X (f x) -- Won't work with DepTyCheck
+  Xk : ... -> X (f x)
+
+genX : Fuel -> (t : T) -> Gen MaybeEmpty $ X t
+genX = %runElab deriveGen -- Won't work
 ```
 
 <!-- idris
@@ -65,6 +68,13 @@ For instance, one can lift addition of natural numbers to a type level the follo
 data Add : Nat -> Nat -> Nat -> Type where
   AddZ : Add Z n n
   AddS : Add n m k -> Add (S n) m (S k)
+```
+
+Or represent the fact that some number is even:
+```idris
+data IsEven : Nat -> Type where
+  ZeroEven : IsEven 0
+  EvenImpSSEven : IsEven n -> IsEven (S (S n))
 ```
 
 It is a bit unclear how general this procedure can be.
