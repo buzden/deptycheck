@@ -16,7 +16,8 @@ Then the changes to these contexts can be defined as applying constructors to th
 and the restrictions can be imposed via inductively defined predicates on the context values.
 
 It should be noted that attempting to modify the context in a complex, function-like way, leads to signification performance degradation.
-This was discovered after implementing a specification for a MiniJava subset that featured tracking of variable initialization via a flag attached to a variable.
+This was discovered after implementing a specification for a MiniJava subset
+that featured tracking of variable initialization via a flag attached to a variable.
 This article features a general outline of defining such mutations, however they should be used with caution.
 It is better to be able to define the context in an constructo-application-only way, and generally keep the specification as concise as possible.
 
@@ -49,12 +50,15 @@ data X : T -> Type where
 -->
 
 Alternatively, you might want to specify that a type satisfies a certain predicate.
-Since [DepTyCheck can be buggy when it comes to `So` in specifications](https://github.com/buzden/deptycheck/issues/10), using predicates expressed as a boolean function is not ideal.
+Since [DepTyCheck can be buggy when it comes to `So` in specifications](https://github.com/buzden/deptycheck/issues/10),
+using predicates expressed as a boolean function is not ideal.
 Moreover, the use of a predicate expressed in such a manner would lead to brute forcing its value.
 
-One could instead express predicate/function as another type, whose indices are arguments of a function/predicate (and, in case of a function, the returned value is also an index).
+One could instead express predicate/function as another type, whose indices are arguments of a function/predicate
+(and, in case of a function, the returned value is also an index).
 The predicate/function is defined by pattern-matching on the arguments.
-The basic idea is that the resulting type should be inhabited iff the predicate is satisfied, or the function yields a certain result for the provided arguments.
+The basic idea is that the resulting type should be inhabited iff the predicate is satisfied,
+or the function yields a certain result for the provided arguments.
 For instance, one can lift addition of natural numbers to a type level the following way:
 
 ```idris
@@ -71,6 +75,7 @@ but this is yet to be carefully proven.
 If that indeed holds true, this means that the procedure is indeed general enough, at least on paper.
 
 One must remember to caveats when it comes to this encoding:
+
 - Unlike with functions, there will be no "taking the first satisfactory branch of pattern-matching" semantics. Because of this, you
   might need to define pattern-matching more precisely,
 - The depth of recursion would be limited by the fuel supplied to the generator. Since large specifications tend to run well on small fuel
@@ -83,14 +88,15 @@ For instance, it might try to generate a set of fields, and then look through th
 This would lead the terrible performance, because it is essentially "brute-forcing" the set rather than picking a specific one.
 
 Currently, there is no fix for this issue, but one might try the following:
+
 - Reorder constructor fields
 - Move problematic constructor to a separate data structure, and provide handwritten generator
 - Come up with a way (perhaps, it could be a part of yet-to-be-developed specification eDSL) that would allow specifying a preferred ordering
 
-
 ## Names vs. de Brujin indices
 
 One would inevitably have to reference the names available in the current context, and this could be generally done in two ways:
+
 - Give a concrete name to each variable when it first introduced
 - Reference variables via de Brujin indices and supply names to them during test printing
 
