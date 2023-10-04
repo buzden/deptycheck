@@ -23,8 +23,8 @@ Prelude.Basics.List not covered
   - (::): not covered
   - Nil: not covered
 
-PrintCoverage.X covered partially
-  - XS: covered
+PrintCoverage.X covered partially (300 times)
+  - XS: covered (300 times)
   - XZ: not covered
 
 PrintCoverage.Y not covered

@@ -135,18 +135,19 @@ toString col cgi = (++ "\n") $ joinBy "\n\n" $ mapMaybe (\ti => lookup ti cgi.co
   let noConsCovered  = all (== 0) conCovs
 
   let c = c col
+  let cntAddition = \cnt : Nat => " (\{show cnt} time\{if cnt /= 1 then "s" else ""})"
   let tyCovStr = joinBy ", " $
-                   (if tyCovCnt /= 0 && noConsCovered then [c BrightYellow "mentioned"]
+                   (if tyCovCnt /= 0 && noConsCovered then [c BrightYellow "mentioned" ++ cntAddition tyCovCnt]
                     else if tyCovCnt == 0 && (not anyCons || not noConsCovered) then [c BrightYellow "not menioned"]
                     else []) ++
                    (if not anyCons then [c Cyan "no constructors"]
-                    else if allConsCovered then [c BrightGreen "covered fully"]
+                    else if allConsCovered then [c BrightGreen "covered fully" ++ cntAddition tyCovCnt]
                     else if noConsCovered then [c BrightRed "not covered"]
-                    else [c BrightYellow "covered partially"]
+                    else [c BrightYellow "covered partially" ++ cntAddition tyCovCnt]
                    )
   joinBy "\n" $ (::) "\{showType col ti} \{tyCovStr}" $ whenTs anyCons $ map ("  - " ++) $
     SortedMap.toList cons <&> \(co, coCovCnt) => do
-      let status : String := if coCovCnt /= 0 then c BrightGreen "covered" else c BrightRed "not covered"
+      let status : String := if coCovCnt /= 0 then c BrightGreen "covered" ++ cntAddition coCovCnt else c BrightRed "not covered"
       "\{logPosition co}: \{status}"
 
 export
