@@ -634,15 +634,6 @@ namespace UpToRenaming
   [UpToRenaming] Eq TTImp where
     x == y = (x == y) @{UpToSubst @{empty}}
 
-Ord Count where
-  compare M0 M0 = EQ
-  compare M0 _  = LT
-  compare _  M0 = GT
-  compare M1 M1 = EQ
-  compare MW MW = EQ
-  compare MW M1 = GT
-  compare M1 MW = LT
-
 -- Returns a list without duplications
 export
 allInvolvedTypes : Elaboration m => (minimalRig : Count) -> TypeInfo -> m $ List TypeInfo
