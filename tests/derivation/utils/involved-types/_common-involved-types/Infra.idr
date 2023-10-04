@@ -11,7 +11,7 @@ import Deriving.DepTyCheck.Gen.Core.Util
 printInvolvedTypesVerdict : Name -> List Name -> Elab Unit
 printInvolvedTypesVerdict tyName expected = do
   logMsg "gen.auto.involved-types" 0 "given type: \{show tyName}"
-  invTys <- allInvolvedTypes !(getInfo' tyName)
+  invTys <- allInvolvedTypes M0 !(getInfo' tyName)
   let invTys   = sortBy (comparing show) $ invTys <&> name
   expected <- for expected $ map name . getInfo'
   let expected = sortBy (comparing show) expected

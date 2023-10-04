@@ -634,27 +634,39 @@ namespace UpToRenaming
   [UpToRenaming] Eq TTImp where
     x == y = (x == y) @{UpToSubst @{empty}}
 
+Ord Count where
+  compare M0 M0 = EQ
+  compare M0 _  = LT
+  compare _  M0 = GT
+  compare M1 M1 = EQ
+  compare MW MW = EQ
+  compare MW M1 = GT
+  compare M1 MW = LT
+
 -- Returns a list without duplications
 export
-allInvolvedTypes : Elaboration m => TypeInfo -> m $ List TypeInfo
-allInvolvedTypes ti = toList <$> go [ti] empty where
+allInvolvedTypes : Elaboration m => (minimalRig : Count) -> TypeInfo -> m $ List TypeInfo
+allInvolvedTypes minimalRig ti = toList <$> go [ti] empty where
   go : (left : List TypeInfo) -> (curr : SortedMap Name TypeInfo) -> m $ SortedMap Name TypeInfo
   go left curr = do
     let (c::left) = filter (not . isJust . flip lookup curr . name) left
       | [] => pure curr
     let next = insert c.name c curr
-    args <- join <$> for c.args typesOfArg
+    args <- atRig M0 $ join <$> for c.args typesOfArg
     cons <- join <$> for c.cons typesOfCon
     assert_total $ go (args ++ cons ++ left) next
     where
+      atRig : Count -> m (List a) -> m (List a)
+      atRig rig act = if rig >= minimalRig then act else pure []
+
       typesOfExpr : TTImp -> m $ List TypeInfo
       typesOfExpr expr = map (mapMaybe id) $ for (allVarNames expr) $ catch . getInfo'
 
       typesOfArg : NamedArg -> m $ List TypeInfo
-      typesOfArg arg = typesOfExpr arg.type
+      typesOfArg arg = atRig arg.count $ typesOfExpr arg.type
 
       typesOfCon : Con -> m $ List TypeInfo
-      typesOfCon con = [| typesOfExpr con.type ++ (join <$> for con.args typesOfArg) |]
+      typesOfCon con = [| atRig M0 (typesOfExpr con.type) ++ (join <$> for con.args typesOfArg) |]
 
 ||| Returns a name by the generator's type
 |||
