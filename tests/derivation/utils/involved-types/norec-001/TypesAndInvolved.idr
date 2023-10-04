@@ -10,10 +10,14 @@ data X : Type -> Type -> Type where
   XX : Either a b -> X a b
 
 public export
-typesAndInvolved : List (Name, List Name)
+typesAndInvolved : List (Name, Count, List Name)
 typesAndInvolved =
-  [ ("Bool", ["Prelude.Basics.Bool"])
-  , ("Bool", ["Bool"])
-  , ("X", ["Prelude.Types.Either", "TypesAndInvolved.X"])
-  , ("X", ["X", "Either"])
+  [ ("Bool", M0, ["Prelude.Basics.Bool"])
+  , ("Bool", M0, ["Bool"])
+  , ("Bool", MW, ["Prelude.Basics.Bool"])
+  , ("Bool", MW, ["Bool"])
+  , ("X", M0, ["Prelude.Types.Either", "TypesAndInvolved.X"])
+  , ("X", M0, ["X", "Either"])
+  , ("X", MW, ["Prelude.Types.Either", "TypesAndInvolved.X"])
+  , ("X", MW, ["X", "Either"])
   ]

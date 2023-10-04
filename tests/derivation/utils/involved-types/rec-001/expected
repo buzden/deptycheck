@@ -3,3 +3,4 @@
 LOG gen.auto.involved-types:0: given type: Nat
 LOG gen.auto.involved-types:0: given type: List
 LOG gen.auto.involved-types:0: given type: Vect
+LOG gen.auto.involved-types:0: given type: Vect
