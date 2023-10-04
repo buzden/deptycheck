@@ -1,9 +1,5 @@
 1/1: Building PrintCoverage (PrintCoverage.idr)
 
-Data.Fin.Fin not covered
-  - FS: not covered
-  - FZ: not covered
-
 Data.Nat.IsSucc not covered
   - ItIsSucc: not covered
 
@@ -17,10 +13,6 @@ PrintCoverage.X not covered
 
 --------
 
-Data.Fin.Fin not covered
-  - FS: not covered
-  - FZ: not covered
-
 Data.Nat.IsSucc not covered
   - ItIsSucc: not covered
 
@@ -33,10 +25,6 @@ PrintCoverage.X covered fully
   - X2: covered
 
 --------
-
-Data.Fin.Fin not covered
-  - FS: not covered
-  - FZ: not covered
 
 Data.Nat.IsSucc not covered
   - ItIsSucc: not covered

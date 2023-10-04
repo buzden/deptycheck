@@ -8,10 +8,10 @@ import Language.Reflection.Syntax
 %default total
 
 public export
-typesAndInvolved : List (Name, List Name)
+typesAndInvolved : List (Name, Count, List Name)
 typesAndInvolved =
-  [ ("Odd", ["Odd", "Even"])
-  , ("TTImp",
+  [ ("Odd", M0, ["Odd", "Even"])
+  , ("TTImp", M0,
     [ "AltType"
     , "BindMode"
     , "BuiltinType"

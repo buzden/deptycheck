@@ -8,10 +8,10 @@ import Deriving.DepTyCheck.Gen.Core.Util
 
 %language ElabReflection
 
-printInvolvedTypesVerdict : Name -> List Name -> Elab Unit
-printInvolvedTypesVerdict tyName expected = do
+printInvolvedTypesVerdict : Name -> Count -> List Name -> Elab Unit
+printInvolvedTypesVerdict tyName minRig expected = do
   logMsg "gen.auto.involved-types" 0 "given type: \{show tyName}"
-  invTys <- allInvolvedTypes !(getInfo' tyName)
+  invTys <- allInvolvedTypes minRig !(getInfo' tyName)
   let invTys   = sortBy (comparing show) $ invTys <&> name
   expected <- for expected $ map name . getInfo'
   let expected = sortBy (comparing show) expected
@@ -20,4 +20,4 @@ printInvolvedTypesVerdict tyName expected = do
     logMsg "gen.auto.involved-types" 0 "found   : \{show invTys}"
     logMsg "gen.auto.involved-types" 0 "expected: \{show expected}"
 
-%runElab for_ typesAndInvolved $ uncurry printInvolvedTypesVerdict
+%runElab for_ typesAndInvolved $ \(n, r, ns) => printInvolvedTypesVerdict n r ns
