@@ -28,18 +28,18 @@ import Test.DepTyCheck.Gen
 export
 record ModelCoverage where
   constructor MkModelCoverage
-  unModelCoverage : SortedSet Label
+  unModelCoverage : SortedMap Label Nat
 
 export
 Semigroup ModelCoverage where
-  (<+>) = MkModelCoverage .: (<+>) `on` unModelCoverage
+  (<+>) = MkModelCoverage .: mergeWith (+) `on` unModelCoverage
 
 export
 Monoid ModelCoverage where
-  neutral = MkModelCoverage neutral
+  neutral = MkModelCoverage empty
 
 MonadWriter ModelCoverage m => CanManageLabels m where
-  manageLabel l x = tell (MkModelCoverage $ singleton l) >> x
+  manageLabel l x = tell (MkModelCoverage $ singleton l 1) >> x
 
 export
 unGenTryAllD : RandomGen g => (seed : g) -> Gen em a -> Stream $ Maybe (ModelCoverage, a)
@@ -56,12 +56,12 @@ record CoverageGenInfo (0 g : k) where
   constructor MkCoverageGenInfo
   types        : SortedMap String TypeInfo
   constructors : SortedMap String (TypeInfo, Con)
-  coverageInfo : SortedMap TypeInfo (Bool, SortedMap Con Bool)
+  coverageInfo : SortedMap TypeInfo (Nat, SortedMap Con Nat)
 
 coverageGenInfo : Name -> Elab $ CoverageGenInfo x
 coverageGenInfo genTy = do
   involvedTypes <- allInvolvedTypes MW =<< getInfo' genTy
-  let cov  = fromList $ involvedTypes <&> \ty => (ty, False, fromList $ ty.cons <&> (, False))
+  let cov  = fromList $ involvedTypes <&> \ty => (ty, 0, fromList $ ty.cons <&> (, 0))
   let tys  = fromList $ involvedTypes <&> \ty => (show ty.name, ty)
   let cons = fromList $ (involvedTypes >>= \ty => (ty,) <$> ty.cons) <&> \(ty, co) => (show co.name, ty, co)
   pure $ MkCoverageGenInfo tys cons cov
@@ -128,16 +128,16 @@ showType False ti = show ti.name
 showType True  ti = joinBy "." $ forget $ uncurry lappend $ map (singleton . show . bolden) $ unsnoc $ split (== '.') $ show ti.name
 
 toString : (colourful : Bool) -> CoverageGenInfo g -> String
-toString col cgi = (++ "\n") $ joinBy "\n\n" $ mapMaybe (\ti => lookup ti cgi.coverageInfo <&> (ti,)) (SortedMap.values cgi.types) <&> \(ti, tyCov, cons) => do
+toString col cgi = (++ "\n") $ joinBy "\n\n" $ mapMaybe (\ti => lookup ti cgi.coverageInfo <&> (ti,)) (SortedMap.values cgi.types) <&> \(ti, tyCovCnt, cons) => do
   let conCovs = values cons
   let anyCons = not $ null conCovs
-  let allConsCovered = all (== True)  conCovs
-  let noConsCovered  = all (== False) conCovs
+  let allConsCovered = all (/= 0) conCovs
+  let noConsCovered  = all (== 0) conCovs
 
   let c = c col
   let tyCovStr = joinBy ", " $
-                   (if tyCov && noConsCovered then [c BrightYellow "mentioned"]
-                    else if not tyCov && (not anyCons || not noConsCovered) then [c BrightYellow "not menioned"]
+                   (if tyCovCnt /= 0 && noConsCovered then [c BrightYellow "mentioned"]
+                    else if tyCovCnt == 0 && (not anyCons || not noConsCovered) then [c BrightYellow "not menioned"]
                     else []) ++
                    (if not anyCons then [c Cyan "no constructors"]
                     else if allConsCovered then [c BrightGreen "covered fully"]
@@ -145,8 +145,8 @@ toString col cgi = (++ "\n") $ joinBy "\n\n" $ mapMaybe (\ti => lookup ti cgi.co
                     else [c BrightYellow "covered partially"]
                    )
   joinBy "\n" $ (::) "\{showType col ti} \{tyCovStr}" $ whenTs anyCons $ map ("  - " ++) $
-    SortedMap.toList cons <&> \(co, coCov) => do
-      let status : String := if coCov then c BrightGreen "covered" else c BrightRed "not covered"
+    SortedMap.toList cons <&> \(co, coCovCnt) => do
+      let status : String := if coCovCnt /= 0 then c BrightGreen "covered" else c BrightRed "not covered"
       "\{logPosition co}: \{status}"
 
 export
@@ -157,19 +157,19 @@ export
 
 export
 registerCoverage : ModelCoverage -> CoverageGenInfo g -> CoverageGenInfo g
-registerCoverage mc cgi = foldr registerCoverage1 cgi mc.unModelCoverage where
-  registerCoverage1 : Label -> CoverageGenInfo g -> CoverageGenInfo g
-  registerCoverage1 str cgi = do
+registerCoverage mc cgi = foldr registerCoverage1 cgi $ toList mc.unModelCoverage where
+  registerCoverage1 : (Label, Nat) -> CoverageGenInfo g -> CoverageGenInfo g
+  registerCoverage1 (str, cnt) cgi = do
     let str = show str
     let str' = fastUnpack str
     -- Try type
     let ty = maybe str (fastPack . fst) $ fastUnpack "[" `infixOf` str'
     let tyMod = case lookup ty cgi.types of
-                  Just ti => { coverageInfo $= updateExisting (mapFst $ const True) ti }
+                  Just ti => { coverageInfo $= flip updateExisting ti $ mapFst (+cnt) }
                   Nothing => id
     -- Try constructor
     let co = maybe str (fastPack . fst) $ fastUnpack " " `infixOf` str'
     let coMod : (_ -> CoverageGenInfo g) := case lookup co cgi.constructors of
-                  Just (ti, co) => { coverageInfo $= updateExisting (mapSnd $ insert co True) ti }
+                  Just (ti, co) => { coverageInfo $= flip updateExisting ti $ mapSnd $ updateExisting (+cnt) co }
                   Nothing       => id
     tyMod $ coMod $ cgi
