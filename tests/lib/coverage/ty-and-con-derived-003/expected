@@ -2,10 +2,6 @@
 
 Number of successfully generated samples: 100
 
-Prelude.Basics.Bool not covered
-  - False: not covered
-  - True: not covered
-
 PrintCoverage.X covered partially
   - XF: covered
   - XT: not covered
