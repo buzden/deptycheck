@@ -4,15 +4,15 @@ Prelude.Types.[1mNat[0m [38;5;9mnot covered[0m
   - S: [38;5;9mnot covered[0m
   - Z: [38;5;9mnot covered[0m
 
-PrintCoverage.[1mX[0m [38;5;11mcovered partially[0m
-  - X1: [38;5;10mcovered[0m
+PrintCoverage.[1mX[0m [38;5;11mcovered partially[0m (118 times)
+  - X1: [38;5;10mcovered[0m (54 times)
   - X2: [38;5;9mnot covered[0m
-  - X3: [38;5;10mcovered[0m
+  - X3: [38;5;10mcovered[0m (64 times)
 
-PrintCoverage.[1mY[0m [38;5;11mcovered partially[0m
-  - Y1: [38;5;10mcovered[0m
+PrintCoverage.[1mY[0m [38;5;11mcovered partially[0m (100 times)
+  - Y1: [38;5;10mcovered[0m (41 times)
   - Y2: [38;5;9mnot covered[0m
-  - Y3: [38;5;10mcovered[0m
+  - Y3: [38;5;10mcovered[0m (59 times)
 
 --------
 
@@ -20,13 +20,13 @@ Prelude.Types.[1mNat[0m [38;5;9mnot covered[0m
   - S: [38;5;9mnot covered[0m
   - Z: [38;5;9mnot covered[0m
 
-PrintCoverage.[1mX[0m [38;5;11mcovered partially[0m
-  - X1: [38;5;10mcovered[0m
+PrintCoverage.[1mX[0m [38;5;11mcovered partially[0m (200 times)
+  - X1: [38;5;10mcovered[0m (95 times)
   - X2: [38;5;9mnot covered[0m
-  - X3: [38;5;10mcovered[0m
+  - X3: [38;5;10mcovered[0m (105 times)
 
-PrintCoverage.[1mY[0m [38;5;11mcovered partially[0m
+PrintCoverage.[1mY[0m [38;5;11mcovered partially[0m (100 times)
   - Y1: [38;5;9mnot covered[0m
   - Y2: [38;5;9mnot covered[0m
-  - Y3: [38;5;10mcovered[0m
+  - Y3: [38;5;10mcovered[0m (100 times)
 

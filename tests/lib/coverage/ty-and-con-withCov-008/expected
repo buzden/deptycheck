@@ -7,7 +7,7 @@ Prelude.Types.Maybe not covered
   - Just: not covered
   - Nothing: not covered
 
-PrintCoverage.X covered partially
-  - X1: covered
+PrintCoverage.X covered partially (100 times)
+  - X1: covered (100 times)
   - X2: not covered
 

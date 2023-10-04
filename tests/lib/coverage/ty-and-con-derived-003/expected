@@ -2,11 +2,11 @@
 
 Number of successfully generated samples: 100
 
-PrintCoverage.X covered partially
-  - XF: covered
+PrintCoverage.X covered partially (100 times)
+  - XF: covered (100 times)
   - XT: not covered
 
-PrintCoverage.Y covered partially
-  - YF: covered
+PrintCoverage.Y covered partially (100 times)
+  - YF: covered (100 times)
   - YT: not covered
 

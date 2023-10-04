@@ -20,9 +20,9 @@ Prelude.Types.Nat not covered
   - S: not covered
   - Z: not covered
 
-PrintCoverage.X covered fully
-  - X1: covered
-  - X2: covered
+PrintCoverage.X covered fully (100 times)
+  - X1: covered (47 times)
+  - X2: covered (53 times)
 
 --------
 
@@ -33,7 +33,7 @@ Prelude.Types.Nat not covered
   - S: not covered
   - Z: not covered
 
-PrintCoverage.X covered partially
+PrintCoverage.X covered partially (100 times)
   - X1: not covered
-  - X2: covered
+  - X2: covered (100 times)
 
