@@ -34,7 +34,7 @@ namespace NonObligatoryExts
   ||| It is seemingly most simple to implement, maybe the fastest and
   ||| fits well when external generators are provided for non-dependent types.
   export
-  LeastEffort : ConstructorDerivator
+  LeastEffort : {default False simplificationHack : Bool} -> ConstructorDerivator
   LeastEffort = CD where
     %inline
     [CD] ConstructorDerivator where
@@ -190,7 +190,7 @@ namespace NonObligatoryExts
           rightmost <- indepPermutations' disjDeps rightmostArgs
           pure $ leftmost ++ leftToRightArgs ++ rightmost
 
-        let allOrders = take 1 allOrders
+        let allOrders = if simplificationHack then take 1 allOrders else allOrders
 
         --------------------------
         -- Producing the result --
