@@ -10,4 +10,4 @@ import PrintDerivation
 data X : Nat -> Type where
   MkX : X n
 
-%runElab printDerived @{EmptyBody} $ Fuel -> Gen MaybeEmpty (n : Nat ** X n)
+%runElab printDerived {core=EmptyBody} $ Fuel -> Gen MaybeEmpty (n : Nat ** X n)

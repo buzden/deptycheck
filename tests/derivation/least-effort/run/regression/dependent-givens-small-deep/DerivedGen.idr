@@ -15,7 +15,7 @@ Show (X n f) where
 %language ElabReflection
 
 checkedGen : Fuel -> (n : Nat) -> (f : Fin n) -> Gen MaybeEmpty $ X n f
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs

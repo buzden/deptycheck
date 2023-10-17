@@ -27,7 +27,7 @@ checkedGen : Fuel ->
              (a : Z) ->
              (b : Z) ->
              Gen MaybeEmpty $ W a b
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs

@@ -10,7 +10,7 @@ import Data.Vect
 %language ElabReflection
 
 checkedGen : Fuel -> (a : Type) -> Gen MaybeEmpty (n ** Vect n a)
-checkedGen = deriveGen @{EmptyBody}
+checkedGen = deriveGen {core=EmptyBody}
 
 Show (a ** Vect n a) where
   show _ = "Vect ..."

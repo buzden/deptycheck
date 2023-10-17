@@ -10,7 +10,7 @@ import Data.Vect
 %language ElabReflection
 
 checkedGen : Fuel -> Gen MaybeEmpty (n ** a ** Vect n a)
-checkedGen = deriveGen @{CallSelf}
+checkedGen = deriveGen {core=CallSelf}
 
 Show (n ** a ** Vect n a) where
   show _ = "Vect ..."

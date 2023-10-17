@@ -40,7 +40,3 @@ runGs checkedGens = do
   let genedValues = checkedGens <&> \(G gen) => map show $ unGenTryN 10 someStdGen $ gen $ limit 20
   let delim = (putStrLn "-----" >>)
   for_ genedValues $ delim . Lazy.traverse_ (delim . putStrLn)
-
-export %hint
-UsedConstructorDerivator : ConstructorDerivator
-UsedConstructorDerivator = LeastEffort

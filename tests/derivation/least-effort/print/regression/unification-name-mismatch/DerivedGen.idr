@@ -7,10 +7,6 @@ import PrintDerivation
 
 %language ElabReflection
 
-%hint
-UsedConstructorDerivator : ConstructorDerivator
-UsedConstructorDerivator = LeastEffort
-
 data X : Type where
   Nil : X
   (::) : Unit -> X -> X

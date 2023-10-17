@@ -13,7 +13,7 @@ data X : Nat -> Type where
   show MkX = "MkX : X \{show n}"
 
 checkedGen : Fuel -> (n : Nat) -> Gen MaybeEmpty (X n)
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs

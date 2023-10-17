@@ -19,7 +19,7 @@ Show Y where
   show $ MkY xnm xnk = "MkY (\{show xnm}) (\{show xnk})"
 
 checkedGen : Fuel -> Gen MaybeEmpty Y
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs

@@ -11,4 +11,4 @@ data X : Nat -> Bool -> Type where
   X0 : X 0 True
   X1 : X 1 False
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen MaybeEmpty (n : Nat ** b : Bool ** X n b)
+%runElab printDerived {core=EmptyCons} $ Fuel -> Gen MaybeEmpty (n : Nat ** b : Bool ** X n b)

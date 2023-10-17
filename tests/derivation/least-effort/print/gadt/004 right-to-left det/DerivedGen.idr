@@ -20,4 +20,4 @@ data Y : Type where
   -- Should be generated right-to-left because of GADT on the right
   MkY_RL : X_ADT n m -> X_GADT n k -> Y
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty Y
+%runElab printDerived @{LeastEffort} $ Fuel -> Gen MaybeEmpty Y

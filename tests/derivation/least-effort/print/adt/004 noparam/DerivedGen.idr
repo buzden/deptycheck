@@ -11,4 +11,4 @@ data X : Type where
   E : X
   R : X -> Nat -> X
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty X
+%runElab printDerived @{LeastEffort} $ Fuel -> Gen MaybeEmpty X

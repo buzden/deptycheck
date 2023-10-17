@@ -1,11 +1,11 @@
 module PrintDerivation
 
-import public Deriving.DepTyCheck.Gen.Entry
+import public Deriving.DepTyCheck.Gen
 
 %language ElabReflection
 
 export covering
-printDerived : DerivatorCore => Type -> Elab Unit
+printDerived : ConstructorDerivator => (core : DerivatorCore) => Type -> Elab Unit
 printDerived ty = do
   ty <- quote ty
   logSugaredTerm "gen.auto.derive.infra" 0 "type" ty

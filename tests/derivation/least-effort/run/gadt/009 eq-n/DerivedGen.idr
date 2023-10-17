@@ -15,7 +15,7 @@ data EqualN : Nat -> Nat -> Type where
   show ReflN = "ReflN : EqualN \{show a} \{show b}"
 
 checkedGen : Fuel -> (b : Nat) -> Gen MaybeEmpty (a ** EqualN a b)
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs

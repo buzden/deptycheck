@@ -10,7 +10,7 @@ import Data.Vect
 %language ElabReflection
 
 checkedGen : Fuel -> (n : Nat) -> (a : Type) -> Gen MaybeEmpty (Vect n a)
-checkedGen = deriveGen @{CallSelf}
+checkedGen = deriveGen {core=CallSelf}
 
 main : IO Unit
 main = runGs

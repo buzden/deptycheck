@@ -9,7 +9,7 @@ import Data.Fin
 %language ElabReflection
 
 checkedGen : Fuel -> (n : Nat) -> Gen MaybeEmpty $ Fin n
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs

@@ -10,4 +10,4 @@ data X : Nat -> Nat -> Nat -> Type where
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (x1 : Nat) -> (x2 : Nat) -> (x3 : Nat) -> Gen MaybeEmpty $ X x1 x2 x3
+%runElab printDerived @{LeastEffort} $ Fuel -> (x1 : Nat) -> (x2 : Nat) -> (x3 : Nat) -> Gen MaybeEmpty $ X x1 x2 x3

@@ -80,9 +80,15 @@ export
 callCanonic : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> TTImp
 callCanonic _ = foldl app .: appFuel
 
+--- Interfaces ---
+
+public export
+interface ConstructorDerivator where
+  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
+
 public export
 interface DerivatorCore where
-  canonicBody : CanonicGen m => GenSignature -> Name -> m $ List Clause
+  canonicBody : ConstructorDerivator => CanonicGen m => GenSignature -> Name -> m $ List Clause
 
 -- NOTE: Implementation of `internalGenBody` cannot know the `Name` of the called gen, thus it cannot use `callInternalGen` function directly.
 --       It have to use `callGen` function from `CanonicGen` interface instead.
@@ -115,5 +121,5 @@ canonicDefaultRHS = canonicDefaultRHS' id
 ---------------------------------
 
 export
-deriveCanonical : DerivatorCore => CanonicGen m => GenSignature -> Name -> m (Decl, Decl)
+deriveCanonical : DerivatorCore => ConstructorDerivator => CanonicGen m => GenSignature -> Name -> m (Decl, Decl)
 deriveCanonical sig name = pure (export' name (canonicSig sig), def name !(canonicBody sig name))

@@ -10,4 +10,4 @@ import PrintDerivation
 data EqualN : Nat -> Nat -> Type where
   ReflN : EqualN x x
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (a, b : Nat) -> Gen MaybeEmpty $ EqualN a b
+%runElab printDerived @{LeastEffort} $ Fuel -> (a, b : Nat) -> Gen MaybeEmpty $ EqualN a b

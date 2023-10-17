@@ -15,7 +15,7 @@ Show X where
   show (R x n) = "R (\{show x}) \{show n}"
 
 checkedGen : Fuel -> Gen MaybeEmpty X
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs [ G $ \fl => checkedGen fl ]

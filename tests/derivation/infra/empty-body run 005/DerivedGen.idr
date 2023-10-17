@@ -14,7 +14,7 @@ Show (X n) where
   show MkX = "MkX"
 
 checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty (n ** X n)
-checkedGen = deriveGen @{EmptyBody}
+checkedGen = deriveGen {core=EmptyBody}
 
 main : IO Unit
 main = runGs

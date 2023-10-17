@@ -1,0 +1,6 @@
+rm -rf build
+
+flock "$1" pack -q install-deps derive.ipkg && \
+idris2 --check --no-color --console-width 0 --no-banner --find-ipkg DerivedGen.idr
+
+rm -rf build

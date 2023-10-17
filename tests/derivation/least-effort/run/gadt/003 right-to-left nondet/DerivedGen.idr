@@ -23,7 +23,7 @@ Show Y where
   show $ MkY2 l r = "MkY2 (\{show l}) (\{show r})"
 
 checkedGen : Fuel -> Gen MaybeEmpty Y
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs

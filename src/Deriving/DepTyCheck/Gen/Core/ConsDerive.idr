@@ -17,12 +17,6 @@ import public Deriving.DepTyCheck.Util.DepPerm
 --- Derivation of a generator for constructor ---
 -------------------------------------------------
 
---- Interface ---
-
-public export
-interface ConstructorDerivator where
-  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
-
 --- Particular tactics ---
 
 ||| "Non-obligatory" means that some present external generator of some type

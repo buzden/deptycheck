@@ -9,4 +9,4 @@ import Data.Vect
 
 %language ElabReflection
 
-%runElab printDerived @{EmptyBody} $ Fuel -> Gen MaybeEmpty (n : Nat ** a : Type ** Vect n a)
+%runElab printDerived {core=EmptyBody} $ Fuel -> Gen MaybeEmpty (n : Nat ** a : Type ** Vect n a)

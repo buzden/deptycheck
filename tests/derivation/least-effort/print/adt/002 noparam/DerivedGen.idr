@@ -7,4 +7,4 @@ import PrintDerivation
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty Bool
+%runElab printDerived @{LeastEffort} $ Fuel -> Gen MaybeEmpty Bool

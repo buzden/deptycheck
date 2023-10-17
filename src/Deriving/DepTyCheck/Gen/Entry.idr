@@ -290,7 +290,7 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 ------------------------------
 
 export
-deriveGenExpr : DerivatorCore => (signature : TTImp) -> Elab TTImp
+deriveGenExpr : ConstructorDerivator => (core : DerivatorCore) => (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
   checkResult@(signature ** externals ** _) <- checkTypeIsGen DerivationTask signature
   let externalsSigToName = fromList $ externals.externals <&> \(sig, _) => (sig, nameForGen sig)
@@ -336,7 +336,7 @@ deriveGenExpr signature = do
 |||
 |||
 export %macro
-deriveGen : DerivatorCore => Elab a
+deriveGen : ConstructorDerivator => (core : DerivatorCore) => Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
@@ -356,7 +356,7 @@ deriveGen = do
 |||   genX = deriveGenFor $ Fuel -> (Fuel -> Gen Y) => (a : A) -> (c : C) -> Gen (b ** X a b c)
 |||   ```
 export %macro
-deriveGenFor : DerivatorCore => (0 a : Type) -> Elab a
+deriveGenFor : ConstructorDerivator => (core : DerivatorCore) => (0 a : Type) -> Elab a
 deriveGenFor a = do
   sig <- quote a
   tt <- deriveGenExpr sig

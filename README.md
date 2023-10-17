@@ -299,12 +299,6 @@ You can read more on the design of generators in [documentation](https://deptych
 
 ## Derivation of generators
 
-<!-- idris
-%hint
-UsedConstructorDerivator : ConstructorDerivator
-UsedConstructorDerivator = LeastEffort
--->
-
 DepTyCheck supports automatic derivation of generators using the datatype definition.
 
 For now, it is not tunable at all, however, it is planned to be added.

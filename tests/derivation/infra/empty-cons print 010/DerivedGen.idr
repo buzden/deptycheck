@@ -15,4 +15,4 @@ mutual
 
   data Y = Y0 | Y1 X
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen MaybeEmpty X
+%runElab printDerived {core=EmptyCons} $ Fuel -> Gen MaybeEmpty X

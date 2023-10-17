@@ -28,7 +28,7 @@ Eq Recursiveness where
 ----------------------------
 
 export
-ConstructorDerivator => DerivatorCore where
+DerivatorCore where
   canonicBody sig n = do
 
     -- check that there is at least one constructor

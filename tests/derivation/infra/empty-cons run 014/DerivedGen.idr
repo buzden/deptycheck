@@ -18,7 +18,7 @@ data X : Nat -> Nat -> Nat -> Nat -> Type where
   show XS = "XS : X \{show n} \{show m} \{show p} \{show k}"
 
 checkedGen : Fuel -> (n, m, p, k : Nat) -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (X n m p k)
-checkedGen = deriveGen @{EmptyCons}
+checkedGen = deriveGen {core=EmptyCons}
 
 main : IO Unit
 main = runGs

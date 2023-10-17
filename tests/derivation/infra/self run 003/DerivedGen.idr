@@ -8,7 +8,7 @@ import RunDerivedGen
 %language ElabReflection
 
 checkedGen : Fuel -> Gen MaybeEmpty Nat
-checkedGen = deriveGen @{CallSelf}
+checkedGen = deriveGen {core=CallSelf}
 
 main : IO Unit
 main = runGs [ G checkedGen ]

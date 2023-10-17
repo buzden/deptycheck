@@ -34,7 +34,7 @@ checkedGen : Fuel ->
              (xs : X) ->
              (ys : X) ->
              Gen MaybeEmpty $ Y xs ys
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs

@@ -21,7 +21,7 @@ Show (D b) where
   show $ TR s d   = "TR \{show s} (\{show d})"
 
 checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (Fuel -> Gen MaybeEmpty String) => (b : Bool) -> Gen MaybeEmpty $ D b
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs

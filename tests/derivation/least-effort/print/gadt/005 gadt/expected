@@ -4,11 +4,11 @@
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty Nat)} -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty String)} -> Gen MaybeEmpty (b : Bool ** D b)
 LOG gen.auto.derive.infra:0: 
 ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW AutoImplicit external^<Prelude.Types.Nat>[] : IPi.  (MW ExplicitArg {arg:3672} : IVar Data.Fuel.Fuel)
+    => (MW AutoImplicit external^<Prelude.Types.Nat>[] : IPi.  (MW ExplicitArg {arg:3673} : IVar Data.Fuel.Fuel)
                                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                                     $ IVar Prelude.Types.Nat))
-    => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:3679} : IVar Data.Fuel.Fuel)
+    => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:3680} : IVar Data.Fuel.Fuel)
                                                         -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                                 $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                                 $ IPrimVal String))

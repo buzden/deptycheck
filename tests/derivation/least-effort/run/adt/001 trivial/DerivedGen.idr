@@ -7,7 +7,7 @@ import RunDerivedGen
 %language ElabReflection
 
 checkedGen : Fuel -> Gen MaybeEmpty Unit
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs [ G $ \fl => checkedGen fl ]

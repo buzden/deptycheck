@@ -31,7 +31,7 @@ Show Y where
   show $ MkY_RL a g = "MkY_RL (\{show a}) (\{show g})"
 
 checkedGen : Fuel -> Gen MaybeEmpty Y
-checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+checkedGen = deriveGen @{LeastEffort}
 
 main : IO ()
 main = runGs

@@ -9,4 +9,4 @@ import Data.Fin
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (n : Nat) -> Gen MaybeEmpty $ Fin n
+%runElab printDerived @{LeastEffort} $ Fuel -> (n : Nat) -> Gen MaybeEmpty $ Fin n

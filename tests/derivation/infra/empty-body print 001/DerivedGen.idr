@@ -7,4 +7,4 @@ import PrintDerivation
 
 %language ElabReflection
 
-%runElab printDerived @{EmptyBody} $ Fuel -> Gen MaybeEmpty Unit
+%runElab printDerived {core=EmptyBody} $ Fuel -> Gen MaybeEmpty Unit
