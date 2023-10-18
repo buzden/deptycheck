@@ -4,6 +4,9 @@ version = 0.4
 
 authors = "Denis Buzdalov"
 
+sourcedir = "src"
+builddir = ".build"
+
 modules = Example.Pil.Lang
         , Example.Pil.Lang.Aspects.Types
         , Example.Pil.Lang.Aspects.Registers
@@ -17,5 +20,3 @@ modules = Example.Pil.Lang
         , Data.List.Lookup
 
 depends = deptycheck
-
-sourcedir = "src"
