@@ -6,6 +6,9 @@ brief = "Property-based testing with dependent types"
 
 license = "MPL-2.0"
 
+sourcedir = "src"
+builddir = ".build"
+
 version = 0.0.220712
 
 modules = Data.Nat.Pos
@@ -38,5 +41,3 @@ depends = contrib
         , mtl-tuple-impls
         , random-pure
         , typelevel-emptiness-collections
-
-sourcedir = "src"
