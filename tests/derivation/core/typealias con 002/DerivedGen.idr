@@ -15,7 +15,10 @@ data X : Type where
   X1 : Bool -> X
   X2 : ConstantUseTypeAlias True -> ConstantUseTypeAlias False -> X
 
-%runElab derive "X" [Generic, Meta, Show]
+Show X where
+  show X0 = "X0"
+  show (X1 b) = "X1 \{show b}"
+  show (X2 b n) = "X2 \{show b} \{show n}"
 
 checkedGen : Fuel -> Gen MaybeEmpty X
 checkedGen = deriveGen

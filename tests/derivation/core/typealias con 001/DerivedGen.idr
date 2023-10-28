@@ -14,7 +14,9 @@ data X : Type where
   X1 : Bool -> X
   X2 : Bool -> SimpleTypeAlias -> X
 
-%runElab derive "X" [Generic, Meta, Show]
+%hint
+XShow : Show X
+XShow = %runElab derive
 
 checkedGen : Fuel -> Gen MaybeEmpty X
 checkedGen = deriveGen

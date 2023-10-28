@@ -8,7 +8,9 @@ import public RunDerivedGen
 
 data X = MkX Bool
 
-%runElab derive "X" [Generic, Meta, Show]
+%hint
+XShow : Show X
+XShow = %runElab derive
 
 gensGen : Fuel -> (em : _) -> Gen MaybeEmpty (a ** Gen em a)
 gensGen fuel MaybeEmpty = elements

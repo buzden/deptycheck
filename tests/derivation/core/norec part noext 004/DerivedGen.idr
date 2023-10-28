@@ -8,7 +8,9 @@ import RunDerivedGen
 
 data X = MkX (Bool, Bool)
 
-%runElab derive "X" [Generic, Meta, Show]
+%hint
+XShow : Show X
+XShow = %runElab derive
 
 export
 checkedGen : Fuel -> Gen MaybeEmpty X

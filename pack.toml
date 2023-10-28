@@ -41,9 +41,3 @@ type   = "git"
 url    = "https://github.com/buzden/idris2-elab-util"
 commit = "6ff9878208940a9f8074f9030e272f4ca176d64f"
 ipkg   = "elab-util.ipkg"
-
-[custom.all.sop]
-type   = "git"
-url    = "https://github.com/buzden/idris2-sop"
-commit = "a9efb67d23adf3808bfd887781586ef318c56f35"
-ipkg   = "sop.ipkg"

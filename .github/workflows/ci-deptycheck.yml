@@ -75,7 +75,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: pack install elab-util mtl-tuple-impls random-pure sop summary-stat
+      - run: pack install elab-util mtl-tuple-impls random-pure summary-stat
 
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
