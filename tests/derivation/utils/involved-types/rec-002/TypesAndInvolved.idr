@@ -47,5 +47,6 @@ typesAndInvolved =
     , "Maybe"
     , "Nat"
     , "Pair"
+    , "WithDefault"
     ])
   ]
