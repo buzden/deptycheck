@@ -2,11 +2,11 @@
 ### Settings ###
 ################
 
-collection = "nightly-231017"
+collection = "nightly-231027"
 
 [idris2]
 url     = "https://github.com/buzden/Idris2"
-commit  = "80e09d7eb915155370a9c191d4aa0d7db417716e"
+commit  = "bdeb8f24af40d816c4107f3edc37adbc9f8d0e86"
 
 [install]
 whitelist = [ "deptycheck-docs" ]
@@ -39,7 +39,7 @@ ipkg = "docs.ipkg"
 [custom.all.elab-util]
 type   = "git"
 url    = "https://github.com/buzden/idris2-elab-util"
-commit = "85279ff5b357ff01e946316c06351c1fc9b7f685"
+commit = "6ff9878208940a9f8074f9030e272f4ca176d64f"
 ipkg   = "elab-util.ipkg"
 
 [custom.all.sop]
