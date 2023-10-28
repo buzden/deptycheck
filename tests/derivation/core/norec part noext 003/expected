@@ -2,11 +2,11 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Error during reflection: Only applications to non-polymorphic type constructors are supported at the moment
 
-DerivedGen:14:14--14:23
- 10 | 
- 11 | %runElab derive "X" [Generic, Meta, Show]
- 12 | 
- 13 | checkedGen : Fuel -> Gen MaybeEmpty X
- 14 | checkedGen = deriveGen
+DerivedGen:16:14--16:23
+ 12 | XShow : Show X
+ 13 | XShow = %runElab derive
+ 14 | 
+ 15 | checkedGen : Fuel -> Gen MaybeEmpty X
+ 16 | checkedGen = deriveGen
                    ^^^^^^^^^
 

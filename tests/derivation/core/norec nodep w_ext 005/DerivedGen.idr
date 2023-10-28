@@ -8,7 +8,9 @@ import public RunDerivedGen
 
 data X = MkX Void
 
-%runElab derive "X" [Generic, Meta, Show]
+%hint
+XShow : Show X
+XShow = %runElab derive
 
 voidsGen : Fuel -> Gen MaybeEmpty Void
 voidsGen _ = empty
