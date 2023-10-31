@@ -10,3 +10,4 @@ builddir = ".build"
 depends = deptycheck
 
 modules = Data.SortedBinTree
+        , Data.SortedBinTree.Gen
