@@ -1,0 +1,12 @@
+package sorted-trees
+
+version = 0.4
+
+authors = "Denis Buzdalov"
+
+sourcedir = "src"
+builddir = ".build"
+
+depends = deptycheck
+
+modules = Data.SortedBinTree
