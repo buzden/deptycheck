@@ -34,8 +34,7 @@ stages:
   - deptycheck:test:lib
   - deptycheck:test:docs
   - deptycheck:test:derive
-  - examples:build
-  - examples:test
+  - examples:build-and-test
 
 thirdparties:build:
   stage: thirdparties:build
@@ -107,33 +106,18 @@ deptycheck:test:derive:
   script:
     - NUM_THREADS=2 pack test deptycheck derivation/"$test_set"
 
-pil:build:
-  stage: examples:build
+example:build-and-test:
+  stage: examples:build-and-test
   needs:
     - deptycheck:build
+  parallel:
+    matrix:
+      - EXAMPLE:
+        - pil
+        - sorted-trees
   script:
-    - pack build pil
-
-pil:test:
-  stage: examples:test
-  needs:
-    - pil:build
-  script:
-    - pack test pil
-
-sorted-trees:build:
-  stage: examples:build
-  needs:
-    - deptycheck:build
-  script:
-    - pack build sorted-trees
-
-sorted-trees:test:
-  stage: examples:test
-  needs:
-    - sorted-trees:build
-  script:
-    - pack test sorted-trees
+    - pack build "$EXAMPLE"
+    - pack test "$EXAMPLE"
 
 include:
   - remote: 'https://jobs.r2devops.io/latest/super_linter.yml'

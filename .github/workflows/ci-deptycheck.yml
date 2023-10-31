@@ -225,7 +225,7 @@ jobs:
   #################
 
   examples-build:
-    name: Build examples
+    name: Build and test examples
     needs:
       - prepare-pack
       - deptycheck-build-lib
@@ -247,38 +247,4 @@ jobs:
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: pack build "${{matrix.example}}"
-
-      - name: Tar the `pack` dir
-        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
-      - name: Tar built TTC files
-        run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
-      - name: Save built PIL
-        uses: actions/upload-artifact@v3
-        with:
-          name: built-${{matrix.example}}
-          path: ${{ env.pack_dir_file }}
-
-  examples-test:
-    name: Test examples
-    needs:
-      - prepare-pack
-      - deptycheck-build-lib
-      - examples-build
-    runs-on: ubuntu-latest
-    container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    strategy:
-      fail-fast: false # all test cases are more or less independent
-      matrix:
-        example:
-          - pil
-          - sorted-trees
-    steps:
-      - uses: actions/checkout@v3
-      - name: Restore built PIL
-        uses: actions/download-artifact@v3
-        with:
-          name: built-${{matrix.example}}
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
-
       - run: pack test "${{matrix.example}}"
