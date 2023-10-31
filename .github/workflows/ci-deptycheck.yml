@@ -224,13 +224,19 @@ jobs:
   # Test examples #
   #################
 
-  pil-build:
-    name: Build PIL example
+  examples-build:
+    name: Build examples
     needs:
       - prepare-pack
       - deptycheck-build-lib
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    strategy:
+      fail-fast: false # all test cases are more or less independent
+      matrix:
+        example:
+          - pil
+          - sorted-trees
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
@@ -240,7 +246,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: pack build pil
+      - run: pack build "${{matrix.example}}"
 
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
@@ -249,24 +255,30 @@ jobs:
       - name: Save built PIL
         uses: actions/upload-artifact@v3
         with:
-          name: built-pil
+          name: built-${{matrix.example}}
           path: ${{ env.pack_dir_file }}
 
-  pil-test:
-    name: Test PIL example
+  examples-test:
+    name: Test examples
     needs:
       - prepare-pack
       - deptycheck-build-lib
-      - pil-build
+      - examples-build
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    strategy:
+      fail-fast: false # all test cases are more or less independent
+      matrix:
+        example:
+          - pil
+          - sorted-trees
     steps:
       - uses: actions/checkout@v3
       - name: Restore built PIL
         uses: actions/download-artifact@v3
         with:
-          name: built-pil
+          name: built-${{matrix.example}}
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: pack test pil
+      - run: pack test "${{matrix.example}}"
