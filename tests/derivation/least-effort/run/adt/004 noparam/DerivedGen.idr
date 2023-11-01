@@ -10,9 +10,9 @@ data X : Type where
   E : X
   R : X -> Nat -> X
 
-Show X where
-  show E = "E"
-  show (R x n) = "R (\{show x}) \{show n}"
+%hint
+XShow : Show X
+XShow = %runElab derive
 
 checkedGen : Fuel -> Gen MaybeEmpty X
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
