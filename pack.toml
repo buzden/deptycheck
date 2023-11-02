@@ -2,12 +2,6 @@
 ### Settings ###
 ################
 
-collection = "nightly-231031"
-
-[idris2]
-url     = "https://github.com/buzden/Idris2"
-commit  = "da18d0976c96bfdad56b4c941ad82f405da0f300"
-
 [install]
 whitelist = [ "deptycheck-docs" ]
 
