@@ -46,6 +46,7 @@ jobs:
       - run: pack update-db
       - name: Switch to appropriate `pack` collection
         run: pack switch "$( if [[ '${{ github.event_name }}' == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
+      - run: ./.patch-chez-gc-handler idris2
 
       - name: Tar the `pack` dir
         run: tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
