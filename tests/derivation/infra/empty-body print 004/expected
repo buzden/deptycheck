@@ -13,11 +13,11 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 []
                 (MkTy <DerivedGen.X>[0]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ (IApp. IVar DerivedGen.X
-                                         $ IVar {arg:3630}))))
+                                         $ IVar {arg:1}))))
          IDef <DerivedGen.X>[0]
               [ PatClause (IApp. IVar <DerivedGen.X>[0]
                                $ Implicit True

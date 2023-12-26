@@ -15,18 +15,18 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                 []
                 (MkTy <DerivedGen.X>[0, 1]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
-                          -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
+                          -> (MW ExplicitArg {arg:2} : IVar Prelude.Types.Nat)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                   $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ (IApp. IVar DerivedGen.X
-                                         $ IVar {arg:3630}
-                                         $ IVar {arg:3633}))))
+                                         $ IVar {arg:1}
+                                         $ IVar {arg:2}))))
          IDef <DerivedGen.X>[0, 1]
               [ PatClause (IApp. IVar <DerivedGen.X>[0, 1]
                                $ IBindVar ^fuel_arg^
-                               $ IBindVar inter^<{arg:3630}>
-                               $ IBindVar inter^<{arg:3633}>)
+                               $ IBindVar inter^<{arg:1}>
+                               $ IBindVar inter^<{arg:2}>)
                           (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
                                        $ (IApp. IVar fromString
                                               $ IPrimVal DerivedGen.X[0, 1] (non-recursive))
@@ -36,38 +36,38 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                               $ (IApp. IVar ::
                                                      $ (IApp. IVar <<DerivedGen.XE>>
                                                             $ IVar ^fuel_arg^
-                                                            $ IVar inter^<{arg:3630}>
-                                                            $ IVar inter^<{arg:3633}>)
+                                                            $ IVar inter^<{arg:1}>
+                                                            $ IVar inter^<{arg:2}>)
                                                      $ (IApp. IVar ::
                                                             $ (IApp. IVar <<DerivedGen.XS>>
                                                                    $ IVar ^fuel_arg^
-                                                                   $ IVar inter^<{arg:3630}>
-                                                                   $ IVar inter^<{arg:3633}>)
+                                                                   $ IVar inter^<{arg:1}>
+                                                                   $ IVar inter^<{arg:2}>)
                                                             $ IVar Nil)))))
                             IClaim MW
                                    Export
                                    []
                                    (MkTy <<DerivedGen.XE>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:2} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                      $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar DerivedGen.X
-                                                            $ IVar {arg:3630}
-                                                            $ IVar {arg:3633}))))
+                                                            $ IVar {arg:1}
+                                                            $ IVar {arg:2}))))
                             IClaim MW
                                    Export
                                    []
                                    (MkTy <<DerivedGen.XS>>
                                          (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:3630} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:3633} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
+                                             -> (MW ExplicitArg {arg:2} : IVar Prelude.Types.Nat)
                                              -> (IApp. IVar Test.DepTyCheck.Gen.Gen
                                                      $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar DerivedGen.X
-                                                            $ IVar {arg:3630}
-                                                            $ IVar {arg:3633}))))
+                                                            $ IVar {arg:1}
+                                                            $ IVar {arg:2}))))
                             IDef <<DerivedGen.XE>>
                                  [ WithClause (IApp. IVar <<DerivedGen.XE>>
                                                    $ IBindVar ^cons_fuel^
