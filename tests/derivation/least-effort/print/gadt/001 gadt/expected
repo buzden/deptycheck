@@ -101,7 +101,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                          $ (IApp. IVar <Data.Fin.Fin>[0]
                                                                 $ IVar ^cons_fuel^
                                                                 $ IVar k)
-                                                         $ (ILam.  (MW ExplicitArg ^bnd^{arg:3095} : Implicit False)
+                                                         $ (ILam.  (MW ExplicitArg ^bnd^{arg:1} : Implicit False)
                                                                 => (IApp. INamedApp (IVar Prelude.pure)
                                                                                     f
                                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
@@ -109,7 +109,7 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                         $ (IApp. INamedApp (IVar Data.Fin.FS)
                                                                                            k
                                                                                            (IVar k)
-                                                                               $ IVar ^bnd^{arg:3095})))))
+                                                                               $ IVar ^bnd^{arg:1})))))
                                  , PatClause (IApp. IVar <<Data.Fin.FS>>
                                                   $ Implicit True
                                                   $ Implicit True)

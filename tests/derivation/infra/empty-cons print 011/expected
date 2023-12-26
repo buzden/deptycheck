@@ -14,9 +14,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                   $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                   $ (IApp. IVar Builtin.DPair.DPair
                                          $ IType
-                                         $ (ILam.  (MW ExplicitArg {arg:3639} : IType)
+                                         $ (ILam.  (MW ExplicitArg {arg:1} : IType)
                                                 => (IApp. IVar DerivedGen.X
-                                                        $ IVar {arg:3639}))))))
+                                                        $ IVar {arg:1}))))))
          IDef <DerivedGen.X>[]
               [ PatClause (IApp. IVar <DerivedGen.X>[] $ IBindVar ^fuel_arg^)
                           (ILocal (ICase (IVar ^fuel_arg^)
@@ -67,9 +67,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                      $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar Builtin.DPair.DPair
                                                             $ IType
-                                                            $ (ILam.  (MW ExplicitArg {arg:3639} : IType)
+                                                            $ (ILam.  (MW ExplicitArg {arg:1} : IType)
                                                                    => (IApp. IVar DerivedGen.X
-                                                                           $ IVar {arg:3639}))))))
+                                                                           $ IVar {arg:1}))))))
                             IClaim MW
                                    Export
                                    []
@@ -79,9 +79,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                      $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar Builtin.DPair.DPair
                                                             $ IType
-                                                            $ (ILam.  (MW ExplicitArg {arg:3639} : IType)
+                                                            $ (ILam.  (MW ExplicitArg {arg:1} : IType)
                                                                    => (IApp. IVar DerivedGen.X
-                                                                           $ IVar {arg:3639}))))))
+                                                                           $ IVar {arg:1}))))))
                             IClaim MW
                                    Export
                                    []
@@ -91,9 +91,9 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                      $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
                                                      $ (IApp. IVar Builtin.DPair.DPair
                                                             $ IType
-                                                            $ (ILam.  (MW ExplicitArg {arg:3639} : IType)
+                                                            $ (ILam.  (MW ExplicitArg {arg:1} : IType)
                                                                    => (IApp. IVar DerivedGen.X
-                                                                           $ IVar {arg:3639}))))))
+                                                                           $ IVar {arg:1}))))))
                             IDef <<DerivedGen.X0>>
                                  [ PatClause (IApp. IVar <<DerivedGen.X0>>
                                                   $ IBindVar ^cons_fuel^)
