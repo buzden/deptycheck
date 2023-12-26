@@ -4,6 +4,7 @@ module Deriving.DepTyCheck.Gen.Checked
 import public Control.Monad.Either
 import public Control.Monad.Reader
 import public Control.Monad.State
+import public Control.Monad.State.Tuple
 import public Control.Monad.Writer
 import public Control.Monad.RWS
 
@@ -93,6 +94,7 @@ namespace ClojuringCanonicImpl
     ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
     , MonadState  (SortedMap GenSignature Name) m -- gens already asked to be derived
     , MonadWriter (List Decl, List Decl) m -- function declarations and bodies
+    , MonadState  (SortedMap Name Recursiveness) m -- constructors with already calculated recursiveness
     )
 
   nameForGen : GenSignature -> Name
@@ -118,7 +120,7 @@ namespace ClojuringCanonicImpl
       internalGenName <- do
 
         -- look for existing (already derived) internals, use it if exists
-        let Nothing = lookup sig !get
+        let Nothing = SortedMap.lookup sig !get
           | Just name => pure name
 
         -- nothing found, then derive! acquire the name
@@ -140,8 +142,12 @@ namespace ClojuringCanonicImpl
       pure $ callCanonic sig internalGenName fuel values
 
     consRec ty = ty.cons <&> \con => (con,) $ do
+      let Nothing = SortedMap.lookup con.name !get
+        | Just rec => pure rec
       let conExprs = map type con.args ++ (getExpr <$> snd (unAppAny con.type))
-      toRec <$> any (hasNameInsideDeep ty.name) conExprs
+      r <- toRec <$> any (hasNameInsideDeep ty.name) conExprs
+      modify $ SortedMap.insert con.name r
+      pure r
 
       where
         toRec : Bool -> Recursiveness
@@ -154,5 +160,5 @@ namespace ClojuringCanonicImpl
   runCanonic : DerivatorCore => SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
-    (x, defs, bodies) <- evalRWST exts empty calc {s=SortedMap GenSignature Name} {w=(_, _)}
+    (x, defs, bodies) <- evalRWST exts (empty, empty) calc {s=(SortedMap GenSignature Name, SortedMap Name Recursiveness)} {w=(_, _)}
     pure (x, defs ++ bodies)
