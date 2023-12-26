@@ -39,6 +39,22 @@ public export
 Ord GenSignature where
   compare = comparing characteristics
 
+-----------------------------------------
+--- Utility functions and definitions ---
+-----------------------------------------
+
+--- Ancillary data structures ---
+
+public export
+data Recursiveness = Recursive | NonRecursive
+
+public export
+Eq Recursiveness where
+  Recursive    == Recursive    = True
+  NonRecursive == NonRecursive = True
+  Recursive    == NonRecursive = False
+  NonRecursive == Recursive    = False
+
 ----------------------
 --- Main interface ---
 ----------------------
@@ -46,10 +62,12 @@ Ord GenSignature where
 public export
 interface Elaboration m => CanonicGen m where
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m TTImp
+  consRec : (ty : TypeInfo) -> List (Con, m Recursiveness)
 
 export
 CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
   callGen sig fuel params = lift $ callGen sig fuel params
+  consRec ty = map @{Compose} lift $ consRec ty
 
 --- Low-level derivation interface ---
 

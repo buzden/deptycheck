@@ -139,6 +139,15 @@ namespace ClojuringCanonicImpl
       -- call the internal gen
       pure $ callCanonic sig internalGenName fuel values
 
+    consRec ty = ty.cons <&> \con => (con,) $ do
+      let conExprs = map type con.args ++ (getExpr <$> snd (unAppAny con.type))
+      toRec <$> any (hasNameInsideDeep ty.name) conExprs
+
+      where
+        toRec : Bool -> Recursiveness
+        toRec True  = Recursive
+        toRec False = NonRecursive
+
   --- Canonic-dischagring function ---
 
   export

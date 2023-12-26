@@ -9,20 +9,6 @@ import public Language.Reflection.Types
 
 %default total
 
------------------------------------------
---- Utility functions and definitions ---
------------------------------------------
-
---- Ancillary data structures ---
-
-data Recursiveness = Recursive | NonRecursive
-
-Eq Recursiveness where
-  Recursive    == Recursive    = True
-  NonRecursive == NonRecursive = True
-  Recursive    == NonRecursive = False
-  NonRecursive == Recursive    = False
-
 ----------------------------
 --- Derivation functions ---
 ----------------------------
@@ -45,10 +31,7 @@ ConstructorDerivator => DerivatorCore where
       canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
     -- calculate which constructors are recursive and which are not
-    consRecs <- for sig.targetType.cons $ \con => logBounds "consRec" [sig, con] $ do
-      let conExprs = map type con.args ++ (getExpr <$> snd (unAppAny con.type))
-      r <- any (hasNameInsideDeep sig.targetType.name) conExprs
-      pure (con, toRec r)
+    consRecs <- for (consRec sig.targetType) $ \(con, rec) => logBounds "consRec" [sig, con] $ pure (con, !rec)
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
@@ -101,10 +84,6 @@ ConstructorDerivator => DerivatorCore where
 
         callConsGen : (fuel : TTImp) -> Con -> TTImp
         callConsGen fuel con = canonicDefaultRHS' namesWrapper sig .| consGenName con .| fuel
-
-    toRec : Bool -> Recursiveness
-    toRec True  = Recursive
-    toRec False = NonRecursive
 
 export
 MainCoreDerivator : ConstructorDerivator => DerivatorCore
