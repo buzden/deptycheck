@@ -3,12 +3,17 @@ module Deriving.DepTyCheck.Util.Logging
 import public Data.So
 
 import public Language.Reflection
+import public Language.Reflection.Types
 
 %default total
 
 public export
 interface SingleLogPosition a where
   logPosition : a -> String
+
+export
+SingleLogPosition TypeInfo where
+  logPosition = show . name
 
 public export
 data LogPosition : Type where

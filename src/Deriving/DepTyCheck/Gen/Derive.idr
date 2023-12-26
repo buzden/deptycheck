@@ -62,12 +62,12 @@ Eq Recursiveness where
 public export
 interface Elaboration m => CanonicGen m where
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m TTImp
-  consRec : (ty : TypeInfo) -> List (Con, m Recursiveness)
+  consRec : (ty : TypeInfo) -> m $ List (Con, Recursiveness)
 
 export
 CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
   callGen sig fuel params = lift $ callGen sig fuel params
-  consRec ty = map @{Compose} lift $ consRec ty
+  consRec = lift . consRec
 
 --- Low-level derivation interface ---
 

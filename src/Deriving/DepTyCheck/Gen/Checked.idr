@@ -141,13 +141,13 @@ namespace ClojuringCanonicImpl
       -- call the internal gen
       pure $ callCanonic sig internalGenName fuel values
 
-    consRec ty = ty.cons <&> \con => (con,) $ do
+    consRec ty = for ty.cons $ \con => logBounds "consRec" [ty, con] $ do
       let Nothing = SortedMap.lookup con.name !get
-        | Just rec => pure rec
+        | Just rec => pure (con, rec)
       let conExprs = map type con.args ++ (getExpr <$> snd (unAppAny con.type))
       r <- toRec <$> any (hasNameInsideDeep ty.name) conExprs
       modify $ SortedMap.insert con.name r
-      pure r
+      pure (con, r)
 
       where
         toRec : Bool -> Recursiveness
