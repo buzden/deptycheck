@@ -129,6 +129,9 @@ namespace ClojuringCanonicImpl
         -- remember that we're responsible for this signature derivation
         modify $ insert sig name
 
+        -- compute and cache constructors recursiveness
+        ignore $ consRec sig.targetType
+
         -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
         (genFunClaim, genFunBody) <- logBounds "type" [sig] $ assert_total $ deriveCanonical sig name
 
