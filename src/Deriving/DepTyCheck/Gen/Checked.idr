@@ -145,7 +145,7 @@ namespace ClojuringCanonicImpl
       let Nothing = SortedMap.lookup ty.name !get
         | Just recs => pure recs
       recs <- for ty.cons $ \con => logBounds "consRec" [ty, con] $ do
-        let conExprs = map type con.args ++ (getExpr <$> snd (unAppAny con.type))
+        let conExprs = map type (filter ((/= M0) . count) con.args) ++ (getExpr <$> snd (unAppAny con.type))
         r <- any (hasNameInsideDeep ty.name) conExprs
         pure (con, toRec r)
       modify $ SortedMap.insert ty.name recs
