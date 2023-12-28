@@ -486,8 +486,9 @@ hasNameInsideDeep nm expr = evalStateT .| the (SortedSet Name) empty .| hasInsid
                                                     modify $ insert n
                                                     Just ty <- catch (getInfo' n)
                                                       | Nothing => pure False
-                                                    let subexprs = (map type ty.args) ++ (ty.cons >>= \con => con.type :: map type con.args)
-                                                    assert_total $ any ttimp subexprs
+                                                    logBounds "consRec.deep" [ty] $ do
+                                                      let subexprs = (map type ty.args) ++ (ty.cons >>= \con => con.type :: map type con.args)
+                                                      assert_total $ any ttimp subexprs
       ttimp $ IPi _ _ z _ argTy retTy         = ttimp argTy || ttimp retTy || piInfo z
       ttimp $ ILam _ _ z _ argTy lamTy        = ttimp argTy || ttimp lamTy || piInfo z
       ttimp $ ILet _ _ _ _ nTy nVal sc        = ttimp nTy || ttimp nVal || ttimp sc -- should we check `nTy` here?
