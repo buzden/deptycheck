@@ -47,8 +47,9 @@ ConstructorDerivator => DerivatorCore where
     -- calculate which constructors are recursive and which are not
     consRecs <- for sig.targetType.cons $ \con => logBounds "consRec" [sig, con] $ do
       let conExprs = map type con.args ++ (getExpr <$> snd (unAppAny con.type))
-      r <- any (hasNameInsideDeep sig.targetType.name) conExprs
+      let r = any (hasNameInsideDeep sig.targetType.name) conExprs
       pure (con, toRec r)
+      -- TODO to get rid of `for`, move `logBounds` somewhere else
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend

@@ -37,6 +37,8 @@ namespace NonObligatoryExts
   [LeastEffort] {default False simplificationHack : Bool} -> ConstructorDerivator where
     consGenExpr sig con givs fuel = do
 
+      let niit : NamesInfoInTypes = %search    -- I don't why it won't be found without this
+
       -------------------------------------------------------------
       -- Prepare intermediate data and functions using this data --
       -------------------------------------------------------------
@@ -114,7 +116,7 @@ namespace NonObligatoryExts
                 | No _ => fail "INTERNAL ERROR: error in given params set length computation"
 
               -- Check if called subgenerator can call the current one
-              mutRec <- hasNameInsideDeep sig.targetType.name $ var subsig.targetType.name
+              let mutRec = hasNameInsideDeep sig.targetType.name $ var subsig.targetType.name
 
               -- Decide whether to use local (decreasing) or outmost fuel, depending on whether we are in mutual recursion with subgen
               let subfuel = if mutRec then fuel else var outmostFuelArg
