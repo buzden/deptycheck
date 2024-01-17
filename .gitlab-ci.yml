@@ -50,6 +50,7 @@ deptycheck:build:
     - thirdparties:build
   script:
     - pack build deptycheck
+    - pack install deptycheck
 
 deptycheck:docs:
   stage: deptycheck:docs
