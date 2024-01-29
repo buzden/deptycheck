@@ -224,13 +224,39 @@ jobs:
   # Test examples #
   #################
 
-  pil-build:
-    name: Build PIL example
+  get-examples:
+    name: Aquire examples
+    needs:
+      - deptycheck-build-lib
+    runs-on: ubuntu-latest
+    outputs:
+      examples: ${{ steps.get-examples.outputs.examples }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Get derivation test sets
+        id: get-examples
+        run: |
+          (
+          echo -n "examples=["
+          find examples/ -mindepth 1 -maxdepth 1 -type d | \
+            sed 's|^examples/|"|' | sed 's|$|"|' | \
+            sort | uniq | awk 'ORS=", "' | head -c -2
+          echo "]"
+          ) >> "$GITHUB_OUTPUT"
+
+  examples-build:
+    name: Build and test examples
     needs:
       - prepare-pack
       - deptycheck-build-lib
+      - get-examples
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    strategy:
+      fail-fast: false # all test cases are more or less independent
+      matrix:
+        example: ${{ fromJSON(needs.get-examples.outputs.examples) }}
     steps:
       - uses: actions/checkout@v3
       - name: Restore built DepTyCheck
@@ -240,33 +266,5 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: pack build pil
-
-      - name: Tar the `pack` dir
-        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
-      - name: Tar built TTC files
-        run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
-      - name: Save built PIL
-        uses: actions/upload-artifact@v3
-        with:
-          name: built-pil
-          path: ${{ env.pack_dir_file }}
-
-  pil-test:
-    name: Test PIL example
-    needs:
-      - prepare-pack
-      - deptycheck-build-lib
-      - pil-build
-    runs-on: ubuntu-latest
-    container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Restore built PIL
-        uses: actions/download-artifact@v3
-        with:
-          name: built-pil
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
-
-      - run: pack test pil
+      - run: pack build "${{matrix.example}}"
+      - run: pack test "${{matrix.example}}"

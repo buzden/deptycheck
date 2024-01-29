@@ -5,9 +5,9 @@
 [install]
 whitelist = [ "deptycheck-docs" ]
 
-##############
-### Locals ###
-##############
+##################
+### DepTyCheck ###
+##################
 
 [custom.all.deptycheck]
 type = "local"
@@ -15,16 +15,26 @@ path = "."
 ipkg = "deptycheck.ipkg"
 test = "tests/tests.ipkg"
 
+[custom.all.docs]
+type = "local"
+path = "docs"
+ipkg = "docs.ipkg"
+
+################
+### Examples ###
+################
+
 [custom.all.pil]
 type = "local"
 path = "examples/pil"
 ipkg = "pil.ipkg"
 test = "tests/tests.ipkg"
 
-[custom.all.docs]
+[custom.all.sorted-trees]
 type = "local"
-path = "docs"
-ipkg = "docs.ipkg"
+path = "examples/sorted-trees"
+ipkg = "sorted-trees.ipkg"
+test = "tests/tests.ipkg"
 
 ####################
 ### Thirdparties ###
