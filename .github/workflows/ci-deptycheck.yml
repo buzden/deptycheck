@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - run: pack update-db
       - name: Switch to appropriate `pack` collection
@@ -51,7 +51,7 @@ jobs:
       - name: Tar the `pack` dir
         run: tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
       - name: Save state of `pack`
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pack-dir
           path: ${{ env.pack_dir_file }}
@@ -66,11 +66,11 @@ jobs:
         run: |
           apt-get update
           apt-get -y install git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Restore state of `pack`
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pack-dir
       - name: Untar the `pack` dir
@@ -81,7 +81,7 @@ jobs:
       - name: Tar the `pack` dir
         run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
       - name: Save built thirdparties
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: built-thirdparties
           path: ${{ env.pack_dir_file }}
@@ -98,9 +98,9 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Restore built thirdparties
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: built-thirdparties
       - name: Untar the `pack` dir
@@ -114,7 +114,7 @@ jobs:
       - name: Tar built TTC files
         run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built DepTyCheck
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: built-deptycheck
           path: ${{ env.pack_dir_file }}
@@ -127,9 +127,9 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
@@ -146,7 +146,7 @@ jobs:
     runs-on: ubuntu-latest
     container: sphinxdoc/sphinx:latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install dependencies
         run: pip3 install -r docs/requirements.txt
       - run: alias sh=bash
@@ -161,9 +161,9 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
@@ -184,7 +184,7 @@ jobs:
       derivation-test-sets: ${{ steps.get-derivation-test-sets.outputs.derivation-test-sets }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Get derivation test sets
         id: get-derivation-test-sets
         run: |
@@ -210,9 +210,9 @@ jobs:
         test_set: ${{ fromJSON(needs.get-derivation-test-sets.outputs.derivation-test-sets) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
@@ -233,7 +233,7 @@ jobs:
       examples: ${{ steps.get-examples.outputs.examples }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Get derivation test sets
         id: get-examples
         run: |
@@ -258,9 +258,9 @@ jobs:
       matrix:
         example: ${{ fromJSON(needs.get-examples.outputs.examples) }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
