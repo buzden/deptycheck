@@ -127,6 +127,4 @@ super_linter:
   stage: lint
   needs: []
   image:
-    name: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/github/super-linter:slim-v4
-  variables:
-    VALIDATE_JSCPD_ALL_CODEBASE: "true"
+    name: ghcr.io/super-linter/super-linter:slim-v6.0.0
