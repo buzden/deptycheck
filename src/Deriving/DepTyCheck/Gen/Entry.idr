@@ -273,7 +273,8 @@ internalGenCallingLambda (sig ** exts ** givsPos) call = do
 
   -- either given param or auto param
   mkLam : Either (Fin sig.targetType.args.length, ArgExplicitness, Name) (ExternalGenSignature, TTImp) -> TTImp -> TTImp
-  mkLam $ Left (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just (nameMod name) .| implicitTrue -- (index' sig.targetType.args idx).type -- no type because of `nameMod` above
+  mkLam $ Left (idx, expl, name) = lam $ MkArg MW expl.toTT .| Just (nameMod name) .| implicitTrue -- (index' sig.targetType.args idx).type
+                                                                                   -- ^^^ no type because of `nameMod` above
   mkLam $ Right (extSig, ty)     = lam $ MkArg MW AutoImplicit .| Just (nameForGen extSig) .| ty
                                    -- TODO to think whether it's okay to calculate the name twice: here and below for a map
 

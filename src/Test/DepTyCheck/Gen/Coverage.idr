@@ -128,7 +128,8 @@ showType False ti = show ti.name
 showType True  ti = joinBy "." $ forget $ uncurry lappend $ map (singleton . show . bolden) $ unsnoc $ split (== '.') $ show ti.name
 
 toString : (colourful : Bool) -> CoverageGenInfo g -> String
-toString col cgi = (++ "\n") $ joinBy "\n\n" $ mapMaybe (\ti => lookup ti cgi.coverageInfo <&> (ti,)) (SortedMap.values cgi.types) <&> \(ti, tyCovCnt, cons) => do
+toString col cgi = (++ "\n") $ joinBy "\n\n" $
+                     mapMaybe (\ti => lookup ti cgi.coverageInfo <&> (ti,)) (SortedMap.values cgi.types) <&> \(ti, tyCovCnt, cons) => do
   let conCovs = values cons
   let anyCons = not $ null conCovs
   let allConsCovered = all (/= 0) conCovs

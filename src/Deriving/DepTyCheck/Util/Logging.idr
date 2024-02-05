@@ -33,13 +33,25 @@ DefaultLogLevel : Nat
 DefaultLogLevel = 5
 
 export
-logPoint : Elaboration m => {default DefaultLogLevel level : Nat} -> (subTopic : String) -> So (subTopic /= "") => (position : LogPosition) -> (mark : String) -> m ()
+logPoint :
+  Elaboration m =>
+  {default DefaultLogLevel level : Nat} ->
+  (subTopic : String) -> So (subTopic /= "") =>
+  (position : LogPosition) ->
+  (mark : String) ->
+  m ()
 logPoint subTopic position mark = do
   let topic = "deptycheck.derive.\{subTopic}"
   logMsg topic level "\{position}\{mark}"
 
 export
-logBounds : Elaboration m => {default DefaultLogLevel level : Nat} -> (subTopic : String) -> So (subTopic /= "") => (position : LogPosition) -> m a -> m a
+logBounds :
+  Elaboration m =>
+  {default DefaultLogLevel level : Nat} ->
+  (subTopic : String) -> So (subTopic /= "") =>
+  (position : LogPosition) ->
+  m a ->
+  m a
 logBounds subTopic position action = do
   let ticksCnt = (4 `minus` length position) `max` 1
 

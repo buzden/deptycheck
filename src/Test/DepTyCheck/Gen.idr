@@ -534,7 +534,8 @@ forgetAlternatives g@(OneOf {}) = case canBeNotImmediatelyEmpty em of
   where
     %inline single : iem `NoWeaker` MaybeEmptyDeep => iem `NoWeaker` em => Gen iem a -> Gen em a
     single g = label "forgetAlternatives" $ OneOf $ MkGenAlts [(1, g)]
-    -- `mkOneOf` is not used here intentionally, since if `mkOneOf` can be changed to eliminate single-element `MkGenAlts`'s, we still want such behaviour here.
+    -- `mkOneOf` is not used here intentionally, since if `mkOneOf` can be changed to eliminate single-element `MkGenAlts`'s,
+    -- we still want such behaviour here.
 forgetAlternatives (Labelled l x) = label l $ forgetAlternatives x
 forgetAlternatives g = g
 

@@ -65,11 +65,12 @@ canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel)
   returnTy = `(Test.DepTyCheck.Gen.Gen Test.DepTyCheck.Gen.Emptiness.MaybeEmpty ~(buildDPair targetTypeApplied generatedArgs)) where
 
     targetTypeApplied : TTImp
-    targetTypeApplied = foldr apply (extractTargetTyExpr sig.targetType) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => case piInfo of
-                          ExplicitArg   => (.$ var name)
-                          ImplicitArg   => \f => namedApp f name $ var name
-                          DefImplicit _ => \f => namedApp f name $ var name
-                          AutoImplicit  => (`autoApp` var name)
+    targetTypeApplied = foldr apply (extractTargetTyExpr sig.targetType) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) =>
+                          case piInfo of
+                            ExplicitArg   => (.$ var name)
+                            ImplicitArg   => \f => namedApp f name $ var name
+                            DefImplicit _ => \f => namedApp f name $ var name
+                            AutoImplicit  => (`autoApp` var name)
 
     generatedArgs : List (Name, TTImp)
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>

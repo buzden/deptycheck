@@ -70,13 +70,19 @@ bad_if_access_local = block $ do
 
 -- Registers are correctly merged in if clauses --
 
-bad_if_taints_register : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
+bad_if_taints_register :
+  {0 regs : Registers 5} ->
+  {cond : Expression vars (regs `With` (3, Just Int')) Bool'} ->
+  Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
 bad_if_taints_register = block $ do
   3 %= C 1
   if__ cond (3 %= C 2) (3 %= C True)
   Int'. "x" !#= R 3
 
-bad_if_single_branch_taint : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
+bad_if_single_branch_taint :
+  {0 regs : Registers 5} ->
+  {cond : Expression vars (regs `With` (3, Just Int')) Bool'} ->
+  Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
 bad_if_single_branch_taint = block $ do
   3 %= C 1
   if__ cond (3 %= C "foo") nop
