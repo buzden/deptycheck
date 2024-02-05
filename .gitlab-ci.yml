@@ -1,3 +1,4 @@
+---
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   PACK_DIR: /root/.pack
