@@ -16,6 +16,8 @@ on:
     # We want to run in the beginning of the day, right after the `pack` collection is built at the end of the previous day.
     - cron: '0 1 * * *'
 
+permissions: read-all
+
 concurrency:
   group: ${{ github.workflow }}@${{ github.ref }}
   cancel-in-progress: true

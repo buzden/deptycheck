@@ -128,21 +128,21 @@ Negative:69:17--69:22
 
 Error: While processing right hand side of bad_if_taints_register. Can't find an implementation for IsJust (index (natToFinLT 3) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Int')) (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just Bool')))).
 
-Negative:77:17--77:20
- 73 | bad_if_taints_register : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
- 74 | bad_if_taints_register = block $ do
- 75 |   3 %= C 1
- 76 |   if__ cond (3 %= C 2) (3 %= C True)
- 77 |   Int'. "x" !#= R 3
+Negative:80:17--80:20
+ 76 |   Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
+ 77 | bad_if_taints_register = block $ do
+ 78 |   3 %= C 1
+ 79 |   if__ cond (3 %= C 2) (3 %= C True)
+ 80 |   Int'. "x" !#= R 3
                       ^^^
 
 Error: While processing right hand side of bad_if_single_branch_taint. Can't find an implementation for IsJust (index (natToFinLT 3) (Merge (With (With regs (FS (FS (FS FZ)), Just Int')) (FS (FS (FS FZ)), Just String')) (With regs (FS (FS (FS FZ)), Just Int')))).
 
-Negative:83:18--83:21
- 79 | bad_if_single_branch_taint : {0 regs : Registers 5} -> {cond : Expression vars (regs `With` (3, Just Int')) Bool'} -> Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
- 80 | bad_if_single_branch_taint = block $ do
- 81 |   3 %= C 1
- 82 |   if__ cond (3 %= C "foo") nop
- 83 |   Int' . "x" !#= R 3
+Negative:89:18--89:21
+ 85 |   Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
+ 86 | bad_if_single_branch_taint = block $ do
+ 87 |   3 %= C 1
+ 88 |   if__ cond (3 %= C "foo") nop
+ 89 |   Int' . "x" !#= R 3
                        ^^^
 

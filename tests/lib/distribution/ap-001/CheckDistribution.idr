@@ -48,7 +48,8 @@ mainFor n m = do
     [ coverWith (ratio 1 (S m) * ratio 1 2) (\nsb => nsb.sf == m' && nsb.bf == b') | m' <- strs m, b' <- bools ]
   -- Triples
   printVerdict (g n m) $ fromList $
-    [ coverWith (ratio 1 (S n) * ratio 1 (S m) * ratio 1 2) (\nsb => nsb.nf == n' && nsb.sf == m' && nsb.bf == b') | n' <- nats n, m' <- strs m, b' <- bools ]
+    [ coverWith (ratio 1 (S n) * ratio 1 (S m) * ratio 1 2) (\nsb => nsb.nf == n' && nsb.sf == m' && nsb.bf == b') |
+      n' <- nats n, m' <- strs m, b' <- bools ]
 
 main : IO ()
 main = do

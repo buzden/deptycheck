@@ -21,22 +21,22 @@ ValidateInput:23:58--23:62
 
 Error: While processing right hand side of genX_wrong_giv_order_autoimpl_rep. Error during reflection: Given arguments must go in the same order as in the target type
 
-ValidateInput:26:62--26:66
- 22 | 
+ValidateInput:27:28--27:32
  23 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
  24 | genX_wrong_giv_order_autoimpl = deriveGen
  25 | 
- 26 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
-                                                                   ^^^^
+ 26 | genX_wrong_giv_order_autoimpl_rep :
+ 27 |   Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
+                                 ^^^^
 
 Error: While processing right hand side of genY_wrong_gened_order. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:29:66--29:70
- 25 | 
- 26 | genX_wrong_giv_order_autoimpl_rep : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
- 27 | genX_wrong_giv_order_autoimpl_rep = deriveGen
- 28 | 
- 29 | genY_wrong_gened_order : Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)
+ValidateInput:30:66--30:70
+ 26 | genX_wrong_giv_order_autoimpl_rep :
+ 27 |   Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
+ 28 | genX_wrong_giv_order_autoimpl_rep = deriveGen
+ 29 | 
+ 30 | genY_wrong_gened_order : Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)
                                                                        ^^^^
 
 Error: While processing right hand side of genY_wrong_gened_order'. Error during reflection: Generated arguments must go in the same order as in the target type
@@ -51,21 +51,21 @@ ValidateInput:11:10--11:14
 
 Error: While processing right hand side of genX_wrong_gened_order_autoimpl. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:35:84--35:88
- 31 | 
- 32 | genY_wrong_gened_order' : Fuel -> Gen MaybeEmpty (b ** a ** Y a b)
- 33 | genY_wrong_gened_order' = deriveGen
- 34 | 
- 35 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => Gen MaybeEmpty X
+ValidateInput:36:84--36:88
+ 32 | 
+ 33 | genY_wrong_gened_order' : Fuel -> Gen MaybeEmpty (b ** a ** Y a b)
+ 34 | genY_wrong_gened_order' = deriveGen
+ 35 | 
+ 36 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => Gen MaybeEmpty X
                                                                                          ^^^^
 
 Error: While processing right hand side of genX_wrong_gened_order_autoimpl_rep. Error during reflection: Generated arguments must go in the same order as in the target type
 
-ValidateInput:38:88--38:92
- 34 | 
- 35 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => Gen MaybeEmpty X
- 36 | genX_wrong_gened_order_autoimpl = deriveGen
- 37 | 
- 38 | genX_wrong_gened_order_autoimpl_rep : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen MaybeEmpty (a : Type ** b : Type ** Y a b)) => Gen MaybeEmpty X
-                                                                                             ^^^^
+ValidateInput:40:52--40:56
+ 36 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => Gen MaybeEmpty X
+ 37 | genX_wrong_gened_order_autoimpl = deriveGen
+ 38 | 
+ 39 | genX_wrong_gened_order_autoimpl_rep :
+ 40 |   Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen MaybeEmpty (a : Type ** b : Type ** Y a b)) => Gen MaybeEmpty X
+                                                         ^^^^
 

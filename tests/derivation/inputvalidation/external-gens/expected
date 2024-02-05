@@ -71,21 +71,21 @@ ValidateInput:40:48--40:50
 
 Error: While processing right hand side of genY_require_self_autoimpl. Error during reflection: External generators contain the generator asked to be derived
 
-ValidateInput:45:94--45:97
- 41 | genY_nongen_autoimpl_dpair_nofuel = deriveGen
+ValidateInput:46:67--46:70
  42 | 
  43 | --- Result is alteady in externals ---
  44 | 
- 45 | genY_require_self_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty X) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => (a, b : Type) -> Gen MaybeEmpty $ Y a b
-                                                                                                   ^^^
+ 45 | genY_require_self_autoimpl :
+ 46 |   Fuel -> (Fuel -> Gen MaybeEmpty X) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) =>
+                                                                        ^^^
 
 Error: While processing right hand side of genY_autoimpl_in_autoimpl. Error during reflection: Auto-implicit argument should not contain its own auto-implicit arguments
 
-ValidateInput:50:113--50:116
- 46 | genY_require_self_autoimpl = deriveGen
- 47 | 
- 48 | --- Auto-implicits are present inside auto-implicits ---
+ValidateInput:53:87--53:90
  49 | 
- 50 | genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => (a : Type) -> Gen MaybeEmpty (b ** Y a b)) => Gen MaybeEmpty (a ** b ** Y a b)
-                                                                                                                      ^^^
+ 50 | --- Auto-implicits are present inside auto-implicits ---
+ 51 | 
+ 52 | genY_autoimpl_in_autoimpl :
+ 53 |   Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => (a : Type) -> Gen MaybeEmpty (b ** Y a b)) =>
+                                                                                            ^^^
 

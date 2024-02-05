@@ -42,10 +42,14 @@ genY_nongen_autoimpl_dpair_nofuel = deriveGen
 
 --- Result is alteady in externals ---
 
-genY_require_self_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty X) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => (a, b : Type) -> Gen MaybeEmpty $ Y a b
+genY_require_self_autoimpl :
+  Fuel -> (Fuel -> Gen MaybeEmpty X) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) =>
+  (a, b : Type) -> Gen MaybeEmpty $ Y a b
 genY_require_self_autoimpl = deriveGen
 
 --- Auto-implicits are present inside auto-implicits ---
 
-genY_autoimpl_in_autoimpl : Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => (a : Type) -> Gen MaybeEmpty (b ** Y a b)) => Gen MaybeEmpty (a ** b ** Y a b)
+genY_autoimpl_in_autoimpl :
+  Fuel -> (Fuel -> (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => (a : Type) -> Gen MaybeEmpty (b ** Y a b)) =>
+  Gen MaybeEmpty (a ** b ** Y a b)
 genY_autoimpl_in_autoimpl = deriveGen

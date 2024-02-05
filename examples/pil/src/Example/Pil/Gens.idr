@@ -269,7 +269,8 @@ namespace Statements_given_preV_preR
 
   public export
   0 Statement_postV_postR_Gen : Type
-  Statement_postV_postR_Gen = SpecGen $ {rc : Nat} -> (preV : Variables) -> (preR : Registers rc) -> Gen0 (postV ** postR ** Statement preV preR postV postR)
+  Statement_postV_postR_Gen = SpecGen $ {rc : Nat} -> (preV : Variables) -> (preR : Registers rc) ->
+                                        Gen0 (postV ** postR ** Statement preV preR postV postR)
 
   nop_gen   : Statement_postV_postR_Gen
   dot_gen   : Statement_postV_postR_Gen
