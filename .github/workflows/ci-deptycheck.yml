@@ -27,7 +27,6 @@ defaults:
     shell: bash
 
 env:
-  PACK_DIR: /root/.pack
   pack_dir_file: pack-dir.tar
 
 # TODO to reduce duplication, e.g. by using https://docs.github.com/en/actions/using-workflows/reusing-workflows
@@ -51,7 +50,7 @@ jobs:
       - run: ./.patch-chez-gc-handler idris2
 
       - name: Tar the `pack` dir
-        run: tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
+        run: tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
       - name: Save state of `pack`
         uses: actions/upload-artifact@v4
         with:
@@ -81,7 +80,7 @@ jobs:
       - run: pack install elab-util mtl-tuple-impls random-pure summary-stat
 
       - name: Tar the `pack` dir
-        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
+        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
       - name: Save built thirdparties
         uses: actions/upload-artifact@v4
         with:
@@ -112,7 +111,7 @@ jobs:
       - run: pack install deptycheck
 
       - name: Tar the `pack` dir
-        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "${{ env.PACK_DIR }}"
+        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
       - name: Tar built TTC files
         run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built DepTyCheck
