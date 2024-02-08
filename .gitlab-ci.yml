@@ -1,7 +1,6 @@
 ---
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  PACK_DIR: /root/.pack
 
 default:
   image: ghcr.io/stefan-hoeck/idris2-pack:latest
