@@ -16,14 +16,6 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
          IClaim MW
                 Export
                 []
-                (MkTy <Prelude.Basics.Bool>[]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ IVar Prelude.Basics.Bool)))
-         IClaim MW
-                Export
-                []
                 (MkTy <DerivedGen.D>[]
                       (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
                           -> (IApp. IVar Test.DepTyCheck.Gen.Gen
@@ -33,60 +25,14 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                          $ (ILam.  (MW ExplicitArg {arg:3630} : IVar Prelude.Basics.Bool)
                                                 => (IApp. IVar DerivedGen.D
                                                         $ IVar {arg:3630}))))))
-         IDef <Prelude.Basics.Bool>[]
-              [ PatClause (IApp. IVar <Prelude.Basics.Bool>[]
-                               $ IBindVar ^fuel_arg^)
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
-                                       $ (IApp. IVar fromString
-                                              $ IPrimVal Prelude.Basics.Bool[] (non-recursive))
-                                       $ (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
-                                                          em
-                                                          (IVar MaybeEmpty)
-                                              $ (IApp. IVar ::
-                                                     $ (IApp. IVar <<Prelude.Basics.False>>
-                                                            $ IVar ^fuel_arg^)
-                                                     $ (IApp. IVar ::
-                                                            $ (IApp. IVar <<Prelude.Basics.True>>
-                                                                   $ IVar ^fuel_arg^)
-                                                            $ IVar Nil)))))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<Prelude.Basics.False>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ IVar Prelude.Basics.Bool)))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<Prelude.Basics.True>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ IVar Prelude.Basics.Bool)))
-                            IDef <<Prelude.Basics.False>>
-                                 [ PatClause (IApp. IVar <<Prelude.Basics.False>>
-                                                  $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar Test.DepTyCheck.Gen.label
-                                                  $ (IApp. IVar fromString
-                                                         $ IPrimVal Prelude.Basics.False (orders))
-                                                  $ (IApp. INamedApp (IVar Prelude.pure)
-                                                                     f
-                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                          $ Implicit True)
-                                                         $ IVar Prelude.Basics.False)) ]
-                            IDef <<Prelude.Basics.True>>
-                                 [ PatClause (IApp. IVar <<Prelude.Basics.True>>
-                                                  $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar Test.DepTyCheck.Gen.label
-                                                  $ (IApp. IVar fromString
-                                                         $ IPrimVal Prelude.Basics.True (orders))
-                                                  $ (IApp. INamedApp (IVar Prelude.pure)
-                                                                     f
-                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                          $ Implicit True)
-                                                         $ IVar Prelude.Basics.True)) ] ]
+         IClaim MW
+                Export
+                []
+                (MkTy <Prelude.Basics.Bool>[]
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                  $ IVar Prelude.Basics.Bool)))
          IDef <DerivedGen.D>[]
               [ PatClause (IApp. IVar <DerivedGen.D>[] $ IBindVar ^fuel_arg^)
                           (ILocal (ICase (IVar ^fuel_arg^)
@@ -289,3 +235,57 @@ ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
                                                                                                                                    (IVar b)
                                                                                                                        $ IVar ^bnd^{arg:3659}
                                                                                                                        $ IVar ^bnd^{arg:3662}))))) ]))) ] ]
+         IDef <Prelude.Basics.Bool>[]
+              [ PatClause (IApp. IVar <Prelude.Basics.Bool>[]
+                               $ IBindVar ^fuel_arg^)
+                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
+                                       $ (IApp. IVar fromString
+                                              $ IPrimVal Prelude.Basics.Bool[] (non-recursive))
+                                       $ (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
+                                                          em
+                                                          (IVar MaybeEmpty)
+                                              $ (IApp. IVar ::
+                                                     $ (IApp. IVar <<Prelude.Basics.False>>
+                                                            $ IVar ^fuel_arg^)
+                                                     $ (IApp. IVar ::
+                                                            $ (IApp. IVar <<Prelude.Basics.True>>
+                                                                   $ IVar ^fuel_arg^)
+                                                            $ IVar Nil)))))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Prelude.Basics.False>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ IVar Prelude.Basics.Bool)))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Prelude.Basics.True>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ IVar Prelude.Basics.Bool)))
+                            IDef <<Prelude.Basics.False>>
+                                 [ PatClause (IApp. IVar <<Prelude.Basics.False>>
+                                                  $ IBindVar ^cons_fuel^)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Prelude.Basics.False (orders))
+                                                  $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                     f
+                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                          $ Implicit True)
+                                                         $ IVar Prelude.Basics.False)) ]
+                            IDef <<Prelude.Basics.True>>
+                                 [ PatClause (IApp. IVar <<Prelude.Basics.True>>
+                                                  $ IBindVar ^cons_fuel^)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Prelude.Basics.True (orders))
+                                                  $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                     f
+                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                          $ Implicit True)
+                                                         $ IVar Prelude.Basics.True)) ] ]
