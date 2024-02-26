@@ -1,5 +1,5 @@
 ---
-name: Build and test
+name: DepTyCheck
 
 on:
   push:
@@ -87,7 +87,7 @@ jobs:
   ############################
 
   deptycheck-build-lib:
-    name: Build DepTyCheck lib
+    name: Build the lib
     needs:
       - prepare-pack
       - thirdparties-build
@@ -126,7 +126,7 @@ jobs:
   ########$##################
 
   deptycheck-build-docs:
-    name: Build DepTyCheck docs
+    name: Build the docs
     runs-on: ubuntu-latest
     container: sphinxdoc/sphinx:latest
     steps:
@@ -163,7 +163,7 @@ jobs:
           ) >> "$GITHUB_OUTPUT"
 
   deptycheck-test:
-    name: Test DepTyCheck
+    name: Test the lib
     needs:
       - prepare-pack
       - deptycheck-build-lib
