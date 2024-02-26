@@ -106,7 +106,13 @@ jobs:
       - run: pack install deptycheck
 
       - name: Tar the `pack` dir
-        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
+        run: |
+          ls -lh1R "$PACK_DIR" > pack-dir-files-list.pre
+          tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
+          EXITCODE="$?"
+          ls -lh1R "$PACK_DIR" > pack-dir-files-list.post
+          diff pack-dir-files-list.p[ro]*
+          exit "$EXITCODE"
       - name: Tar built TTC files
         run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built DepTyCheck
