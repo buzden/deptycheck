@@ -121,13 +121,39 @@ jobs:
           name: built-deptycheck
           path: ${{ env.pack_dir_file }}
 
+  get-lib-test-sets:
+    name: Aquire test sets for the lib
+    needs:
+      - deptycheck-build-lib
+    runs-on: ubuntu-latest
+    outputs:
+      lib-test-sets: ${{ steps.get-lib-test-sets.outputs.lib-test-sets }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get lib test sets
+        id: get-lib-test-sets
+        run: |
+          (
+          echo -n "lib-test-sets=["
+          find tests/lib/ -type f,l -name run | \
+            grep -v '/_' | sed -e 's|^tests/lib/|"|' -e 's|distribution/\([^-]*\)-.*/run|distribution/\1"|' -e 's|/[^/]*/run$|"|' | \
+            sort | uniq | awk 'ORS=", "' | head -c -2
+          echo "]"
+          ) >> "$GITHUB_OUTPUT"
+
   deptycheck-test-lib:
     name: Test DepTyCheck lib
     needs:
       - prepare-pack
       - deptycheck-build-lib
+      - get-lib-test-sets
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    strategy:
+      fail-fast: false # all test cases are more or less independent
+      matrix:
+        test_set: ${{ fromJSON(needs.get-lib-test-sets.outputs.lib-test-sets) }}
     steps:
       - uses: actions/checkout@v4
       - name: Restore built DepTyCheck
@@ -137,7 +163,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: pack test deptycheck lib/
+      - run: pack test deptycheck "lib/${{matrix.test_set}}"
 
   ##########################
   # Test deptycheck's docs #
