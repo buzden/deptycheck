@@ -1,0 +1,55 @@
+---
+default:
+  interruptible: true
+
+stages:
+  - lint
+  - docs
+  - deptycheck
+
+include:
+  - remote: 'https://jobs.r2devops.io/latest/super_linter.yml'
+super_linter:
+  stage: lint
+  needs: []
+  image:
+    name: ghcr.io/super-linter/super-linter:slim-v6
+
+deptycheck:docs:
+  stage: docs
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/sphinxdoc/sphinx:latest
+  needs: []
+  script:
+    - pip3 install -r docs/requirements.txt
+    - alias sh=bash
+    # - pack build docs # `pack` is unaccessible here, thus:
+    - cd docs && eval "$(grep prebuild docs.ipkg | sed 's/.*"\(.*\)"/\1/')"
+
+deptycheck:prepare-pipeline:
+  stage: deptycheck
+  needs: []
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/ubuntu:latest
+  script:
+    - >
+      TEST_SETS="$(
+        find tests/ -type f,l -name run | grep -v '/_' |
+          sed -e 's|^tests/|"|' -e 's|\(.*\)distribution/\([^-]*\)-[^/]*/run|\1distribution/\2"|' -e 's|/[^/]*/run$|"|' |
+          sort | uniq | awk 'ORS=", "' | head -c -2
+      )"
+    - >
+      EXAMPLES_SET="$(
+        find examples/ -mindepth 1 -maxdepth 1 -type d |
+          sed 's|^examples/|"|' | sed 's|$|"|' |
+          sort | uniq | awk 'ORS=", "' | head -c -2
+      )"
+    - sed -e "s|TEST_SETS|$TEST_SETS|" -e "s|EXAMPLES_SET|$EXAMPLES_SET|" .gitlab/deptycheck.yml > deptycheck-generated.yml
+  artifacts:
+    paths:
+      - deptycheck-generated.yml
+deptycheck:run-pipeline:
+  stage: deptycheck
+  needs: [ deptycheck:prepare-pipeline ]
+  trigger:
+    include:
+      - job: deptycheck:prepare-pipeline
+        artifact: deptycheck-generated.yml
