@@ -41,7 +41,7 @@ thirdparties:build:
   needs:
     - pack:prepare
   script:
-    - pack install elab-util mtl-tuple-impls random-pure summary-stat
+    - pack install-deps deptycheck
 
 deptycheck:build:
   stage: deptycheck:build
