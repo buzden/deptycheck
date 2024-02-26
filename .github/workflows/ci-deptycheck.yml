@@ -1,5 +1,5 @@
 ---
-name: Build and test
+name: DepTyCheck
 
 on:
   push:
@@ -82,12 +82,12 @@ jobs:
           name: built-thirdparties
           path: ${{ env.pack_dir_file }}
 
-  ############################################
-  # Build and test deptycheck library itself #
-  ############################################
+  ############################
+  # Build DepTyCheck library #
+  ############################
 
   deptycheck-build-lib:
-    name: Build DepTyCheck lib
+    name: Build the lib
     needs:
       - prepare-pack
       - thirdparties-build
@@ -121,30 +121,12 @@ jobs:
           name: built-deptycheck
           path: ${{ env.pack_dir_file }}
 
-  deptycheck-test-lib:
-    name: Test DepTyCheck lib
-    needs:
-      - prepare-pack
-      - deptycheck-build-lib
-    runs-on: ubuntu-latest
-    container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v4
-        with:
-          name: built-deptycheck
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
-
-      - run: pack test deptycheck lib/
-
-  ##########################
-  # Test deptycheck's docs #
-  ##########################
+  #######$###################
+  # Build DepTyCheck's docs #
+  ########$##################
 
   deptycheck-build-docs:
-    name: Build DepTyCheck docs
+    name: Build the docs
     runs-on: ubuntu-latest
     container: sphinxdoc/sphinx:latest
     steps:
@@ -155,61 +137,43 @@ jobs:
       # - run: pack build docs # `pack` is unaccessible here, thus:
       - run: cd docs && eval "$(grep prebuild docs.ipkg | sed 's/.*"\(.*\)"/\1/')"
 
-  deptycheck-test-docs:
-    name: Test DepTyCheck docs
-    needs:
-      - prepare-pack
-      - deptycheck-build-lib
-    runs-on: ubuntu-latest
-    container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v4
-        with:
-          name: built-deptycheck
-      - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+  ###################
+  # Test DepTyCheck #
+  ###################
 
-      - run: pack test deptycheck docs/
-
-  ################################
-  # Test deptycheck's derivation #
-  ################################
-
-  get-derivation-test-sets:
-    name: Aquire test sets for derivation
+  get-test-sets:
+    name: Aquire test sets
     needs:
       - deptycheck-build-lib
     runs-on: ubuntu-latest
     outputs:
-      derivation-test-sets: ${{ steps.get-derivation-test-sets.outputs.derivation-test-sets }}
+      test-sets: ${{ steps.get-test-sets.outputs.test-sets }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Get derivation test sets
-        id: get-derivation-test-sets
+      - name: Get test sets
+        id: get-test-sets
         run: |
           (
-          echo -n "derivation-test-sets=["
-          find tests/derivation/ -type f,l -name run | \
-            grep -v '/_' | sed 's|^tests/derivation/|"|' | sed 's|/[^/]*/run$|"|' | \
+          echo -n "test-sets=["
+          find tests/ -type f,l -name run | grep -v '/_' | \
+            sed -e 's|^tests/|"|' -e 's|\(.*\)distribution/\([^-]*\)-[^/]*/run|\1distribution/\2"|' -e 's|/[^/]*/run$|"|' | \
             sort | uniq | awk 'ORS=", "' | head -c -2
           echo "]"
           ) >> "$GITHUB_OUTPUT"
 
-  deptycheck-test-derivation:
-    name: Test DepTyCheck's derivation
+  deptycheck-test:
+    name: Test the lib
     needs:
       - prepare-pack
       - deptycheck-build-lib
-      - get-derivation-test-sets
+      - get-test-sets
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     strategy:
       fail-fast: false # all test cases are more or less independent
       matrix:
-        test_set: ${{ fromJSON(needs.get-derivation-test-sets.outputs.derivation-test-sets) }}
+        test_set: ${{ fromJSON(needs.get-test-sets.outputs.test-sets) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -220,7 +184,7 @@ jobs:
       - name: Untar the `pack` dir
         run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
-      - run: pack test deptycheck "derivation/${{matrix.test_set}}"
+      - run: pack test deptycheck "${{matrix.test_set}}"
 
   #################
   # Test examples #
@@ -236,7 +200,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Get derivation test sets
+      - name: Get examples
         id: get-examples
         run: |
           (
