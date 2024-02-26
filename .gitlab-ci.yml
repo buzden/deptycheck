@@ -27,24 +27,21 @@ pack:prepare:
     - ./.patch-chez-gc-handler idris2
 
 stages:
-  - thirdparties:build
   - lint
-  - deptycheck:build
+  - deptycheck:lib
   - deptycheck:docs
-  - deptycheck:test:lib
-  - deptycheck:test:docs
-  - examples:build-and-test
-  - deptycheck:test:derive
+  - examples
+  - deptycheck:derivation
 
 thirdparties:build:
-  stage: thirdparties:build
+  stage: deptycheck:lib
   needs:
     - pack:prepare
   script:
-    - pack install elab-util mtl-tuple-impls random-pure summary-stat
+    - pack install-deps deptycheck
 
 deptycheck:build:
-  stage: deptycheck:build
+  stage: deptycheck:lib
   needs:
     - thirdparties:build
   script:
@@ -62,21 +59,21 @@ deptycheck:docs:
     - cd docs && eval "$(grep prebuild docs.ipkg | sed 's/.*"\(.*\)"/\1/')"
 
 deptycheck:test:lib:
-  stage: deptycheck:test:lib
+  stage: deptycheck:lib
   needs:
     - deptycheck:build
   script:
     - pack test deptycheck lib/
 
 deptycheck:test:docs:
-  stage: deptycheck:test:docs
+  stage: deptycheck:docs
   needs:
     - deptycheck:build
   script:
     - pack test deptycheck docs/
 
 deptycheck:test:derive:
-  stage: deptycheck:test:derive
+  stage: deptycheck:derivation
   needs:
     - deptycheck:build
   only:
@@ -107,7 +104,7 @@ deptycheck:test:derive:
     - NUM_THREADS=2 pack test deptycheck derivation/"$test_set"
 
 example:build-and-test:
-  stage: examples:build-and-test
+  stage: examples
   needs:
     - deptycheck:build
   parallel:
