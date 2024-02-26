@@ -123,4 +123,4 @@ super_linter:
   stage: lint
   needs: []
   image:
-    name: ghcr.io/super-linter/super-linter:slim-v6.0.0
+    name: ghcr.io/super-linter/super-linter:slim-v6
