@@ -13,7 +13,8 @@ on:
       - main
       - master
 
-permissions: read-all
+permissions:
+  statuses: write
 
 concurrency:
   group: ${{ github.workflow }}@${{ github.ref }}
