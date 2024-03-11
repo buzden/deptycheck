@@ -7,13 +7,15 @@ stages:
   - docs
   - deptycheck
 
-include:
-  - remote: 'https://jobs.r2devops.io/latest/super_linter.yml'
 super_linter:
   stage: lint
   needs: []
   image:
     name: ghcr.io/super-linter/super-linter:slim-v6
+  script: [ "true" ]
+  variables:
+    RUN_LOCAL: "true"
+    DEFAULT_WORKSPACE: $CI_PROJECT_DIR
 
 deptycheck:docs:
   stage: docs
