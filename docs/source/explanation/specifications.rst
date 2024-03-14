@@ -10,3 +10,4 @@ It may contain information about design decisions, alternatives, context and rel
   :maxdepth: 2
 
   specifications/recommendations
+  specifications/experiments
