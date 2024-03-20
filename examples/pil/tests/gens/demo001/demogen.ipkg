@@ -5,4 +5,4 @@ authors = "Denis Buzdalov"
 modules = DemoGen
 opts = "--no-color --console-width 0"
 
-depends = pil, contrib, deptycheck
+depends = pil, deptycheck

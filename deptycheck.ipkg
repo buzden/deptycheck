@@ -35,8 +35,7 @@ modules = Data.Nat.Pos
         , Test.DepTyCheck.Gen.Emptiness
         , Test.DepTyCheck.Gen.Labels
 
-depends = contrib
-        , elab-util
+depends = elab-util
         , if-unsolved-implicit
         , mtl-tuple-impls
         , random-pure

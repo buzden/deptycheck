@@ -4,4 +4,4 @@ authors = "Denis Buzdalov"
 
 main = CheckDistribution
 
-depends = deptycheck, summary-stat, contrib
+depends = deptycheck, summary-stat
