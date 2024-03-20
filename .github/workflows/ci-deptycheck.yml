@@ -111,8 +111,11 @@ jobs:
           tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
           EXITCODE="$?"
           ls -lh1R "$PACK_DIR" > pack-dir-files-list.post
+          echo "----"
           diff pack-dir-files-list.p[ro]*
-          exit "$EXITCODE"
+          if [ "$EXITCODE" != 0 ] && [ "$EXITCODE" != 1 ]; then
+            exit "$EXITCODE"
+          fi
       - name: Tar built TTC files
         run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built DepTyCheck
