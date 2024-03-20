@@ -44,7 +44,11 @@ deptycheck:prepare-pipeline:
           sed 's|^examples/|"|' | sed 's|$|"|' |
           sort | uniq | awk 'ORS=", "' | head -c -2
       )"
-    - sed -e "s|TEST_SETS|$TEST_SETS|" -e "s|EXAMPLES_SET|$EXAMPLES_SET|" .gitlab/deptycheck.yml > deptycheck-generated.yml
+    - >
+      sed -e "s|TEST_SETS|$TEST_SETS|" \
+        -e "s|EXAMPLES_SET|$EXAMPLES_SET|" \
+        -e 's|\$CI_PIPELINE_SOURCE|'"$CI_PIPELINE_SOURCE|" \
+        .gitlab/deptycheck.yml > deptycheck-generated.yml
   artifacts:
     paths:
       - deptycheck-generated.yml
