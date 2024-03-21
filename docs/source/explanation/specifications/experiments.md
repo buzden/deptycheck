@@ -1,72 +1,95 @@
 # Experiments
 
-This section presents some simple experiments investigating how the complexity of the generated type affects the derivation time.
+There are many possible ways to change types and derivation tasks.
+Some of them are presented on this page.
+For the types presented, it's investigated how type complexity affects derivation time.
+
+All experiments were performed with the following settings:
+```idris
+%language ElabReflection
+
+%hint
+UsedConstructorDerivator : ConstructorDerivator
+UsedConstructorDerivator = LeastEffort {simplificationHack = True}
+```
+
+The version of the compiler used is `https://github.com/buzden/Idris2/commit/9ab96dacd4f855674028d68de0a013ac7926c73d`.
 
 ## Constructors
 
 In the first experiment, it is found out how the number of constructors affects the derivation time.
-A simple type dependent on `Nat` was created. The number of constructors increased with each iteration.
+A simple type dependent on `Nat` was created.
+The number of constructors increased with each iteration.
+
 ```idris
 data SomeType : Nat -> Type where
-MkST1: SomeType 0
-MkST2: SomeType 0
-MkST3: SomeType 0
- -- More constructors ...
-```
-
-It turns out that when new constructors are added, derivation time grows linearly.
-```
-chart
+  MkST1: SomeType 0
+  MkST2: SomeType 0
+  MkST3: SomeType 0
+  -- More constructors ...
 ```
 
 ## Arguments
 
 In this experiment, the dependence of derivation time on the number of arguments in the constructors is measured.
-A type with multiple constructors was created. The number of arguments in the constructors increased with each iteration.
+A simple dependent type with one constructor was created.
+The number of arguments increased with each iteration.
+The derivation task was not changed during the experiment.
+
 ```idris
-data A1 : Type where
-MkA: A1
+data SomeType : Nat -> Type where
+  MkST: (n: Nat) -> (n: Nat) -> SomeType n
 
-data SomeType : Nat -> A1 -> Bool -> Type where
-MkST1: (n: Nat) -> (i: A1) -> (b: Bool) -> SomeType n
-MkST2: SomeType 0 -- MkST2: (n: Nat) -> (i: A1) -> (b: Bool) -> SomeType n
-MkST3: SomeType 0 -- MkST3: (n: Nat) -> (i: A1) -> (b: Bool) -> SomeType n
+public export
+genCustom : Fuel -> Gen MaybeEmpty $ (n ** SomeType n)
+genCustom = deriveGen
 ```
 
-The following chart shows the results.
-```
-chart
-```
+## Givens vs Pairs
 
-## Givens VS Pairs
+This experiment tested how givens affect derivation time compared to pairs of types.
+The idea of the experiment is to try two different generators for the same generated type.
 
-This experiment tested how givens affect derivation time compared to pairs of types. The idea of the experiment is to try two different generators for the same generated type.
+The generated type has only one constructor with no arguments.
+With each iteration a new `Nat` was added to the signature.
+The value of `Nat` was always `0` (`Z`) to simplify the type.
 
-The generated type has only one constructor with no arguments. With each iteration a new `Nat` was added to the signature. The value of `Nat` was always `0` (`Z`) to simplify the type.
 ```idris
--- data X: Nat -> Type where
--- X1: X 0
 data X: Nat -> Nat -> Type where
-X1: X 0 0
--- data X: Nat -> Nat -> Nat -> Type where
--- X1: X 0 0 0
+  X1: X 0 0
 ```
 
-This is how generator with 2 givens looks like:
+This is how derivation task with 2 givens:
+
 ```idris
 public export
 genCustom : Fuel -> (a: Nat) -> (b: Nat) -> Gen MaybeEmpty $ X a b
 genCustom = deriveGen
 ```
 
-And this is the generator with the pair of types:
+And this is the derivation task with the pair of types:
+
 ```idris
 public export
 genCustom : Fuel -> Gen MaybeEmpty $ (a ** b ** X a b)
 genCustom = deriveGen
 ```
 
-The experiment showed that the derivation time of both types of generators increases linearly. However, the derivation time of generators with givens grows faster.
-```
-chart
+## Conclusion
+
+The types used were very simple, so changing them didn't cause a combinatorial explosion.
+With each change, the derivation time increased linearly but at different rates.
+
+There is a list of changes ordered by increasing impact on derivation time.
+1. Adding a pair of types
+2. Adding a given to the derivation task
+3. Adding conctructor to the generated type
+4. Adding an argument to some constructor of the generated type
+
+There's one more detail. The values that index types also affect the derivation time.
+For example, derivation task for `SomeType` indexed by `0` was completed 20 times faster than for indexed by `2147483648`.
+
+```idris
+data SomeType : Nat -> Type where
+  MkST: SomeType 2147483648
 ```
