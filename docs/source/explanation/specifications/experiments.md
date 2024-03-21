@@ -5,7 +5,7 @@ Some of them are presented on this page.
 For the types presented, it's investigated how type complexity affects derivation time.
 
 All experiments were performed with the following settings:
-```idris
+```
 %language ElabReflection
 
 %hint
@@ -39,8 +39,8 @@ The derivation task was not changed during the experiment.
 ```idris
 data Args : Nat -> Type where
   MkArgs: (n: Nat) -> (n: Nat) -> Args n
-
-public export
+```
+```
 genArgs : Fuel -> Gen MaybeEmpty $ (n ** Args n)
 genArgs = deriveGen
 ```
@@ -61,16 +61,14 @@ data X: Nat -> Nat -> Type where
 
 This is how derivation task with 2 givens:
 
-```idris
-public export
+```
 genXGivens : Fuel -> (a: Nat) -> (b: Nat) -> Gen MaybeEmpty $ X a b
 genXGivens = deriveGen
 ```
 
 And this is the derivation task with the pair of types:
 
-```idris
-public export
+```
 genXPairs : Fuel -> Gen MaybeEmpty $ (a ** b ** X a b)
 genXPairs = deriveGen
 ```
@@ -91,6 +89,6 @@ There's one more detail. The values that index types also affect the derivation 
 For example, derivation task for `SomeType` indexed by `0` was completed 20 times faster than for indexed by `2147483648`.
 
 ```idris
-data LongNum : Nat -> Type where
-  MkST: LongNum 2147483648
+-- data LongNum : Nat -> Type where
+--   MkST: LongNum 2147483648
 ```
