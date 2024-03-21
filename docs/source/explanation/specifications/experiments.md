@@ -74,10 +74,10 @@ genXGivens = deriveGen
 
 And this is the derivation task with the pair of types:
 
-::: {code} idris
+``` idris <!--- The space between backticks and idris is obligated! So linter understands that it's a code-block, but the code doesn't compile --->
 genXPairs : Fuel -> Gen MaybeEmpty $ (a ** b ** X a b)
 genXPairs = deriveGen
-:::
+```
 
 ## Conclusion
 
