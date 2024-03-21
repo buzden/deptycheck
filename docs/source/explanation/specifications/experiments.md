@@ -5,7 +5,12 @@ Some of them are presented on this page.
 For the types presented, it's investigated how type complexity affects derivation time.
 
 All experiments were performed with the following settings:
-```
+
+<!-- idris
+import Deriving.DepTyCheck.Gen
+-->
+
+```idris
 %language ElabReflection
 
 %hint
@@ -40,10 +45,11 @@ The derivation task was not changed during the experiment.
 data Args : Nat -> Type where
   MkArgs: (n: Nat) -> (n: Nat) -> Args n
 ```
-```
+
+::: {code} idris
 genArgs : Fuel -> Gen MaybeEmpty $ (n ** Args n)
 genArgs = deriveGen
-```
+:::
 
 ## Givens vs Pairs
 
@@ -61,17 +67,17 @@ data X: Nat -> Nat -> Type where
 
 This is how derivation task with 2 givens:
 
-```
+::: {code} idris
 genXGivens : Fuel -> (a: Nat) -> (b: Nat) -> Gen MaybeEmpty $ X a b
 genXGivens = deriveGen
-```
+:::
 
 And this is the derivation task with the pair of types:
 
-```
+::: {code} idris
 genXPairs : Fuel -> Gen MaybeEmpty $ (a ** b ** X a b)
 genXPairs = deriveGen
-```
+:::
 
 ## Conclusion
 
@@ -88,7 +94,7 @@ There is a list of changes ordered by increasing impact on derivation time.
 There's one more detail. The values that index types also affect the derivation time.
 For example, derivation task for `SomeType` indexed by `0` was completed 20 times faster than for indexed by `2147483648`.
 
-```idris
--- data LongNum : Nat -> Type where
---   MkST: LongNum 2147483648
-```
+::: {code} idris
+data LongNum : Nat -> Type where
+  MkST: LongNum 2147483648
+:::
