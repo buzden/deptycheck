@@ -8,6 +8,10 @@ All experiments were performed with the following settings:
 
 <!-- idris
 import Deriving.DepTyCheck.Gen
+%hide Deriving.DepTyCheck.Gen.Entry.deriveGen
+
+-- a stub pretending it is a derivator
+deriveGen : a
 -->
 
 ```idris
@@ -46,10 +50,10 @@ data Args : Nat -> Type where
   MkArgs: (n: Nat) -> (n: Nat) -> Args n
 ```
 
-::: {code} idris
+```idris
 genArgs : Fuel -> Gen MaybeEmpty $ (n ** Args n)
 genArgs = deriveGen
-:::
+```
 
 ## Givens vs Pairs
 
@@ -67,14 +71,14 @@ data X: Nat -> Nat -> Type where
 
 This is how derivation task with 2 givens:
 
-::: {code} idris
+```idris
 genXGivens : Fuel -> (a: Nat) -> (b: Nat) -> Gen MaybeEmpty $ X a b
 genXGivens = deriveGen
-:::
+```
 
 And this is the derivation task with the pair of types:
 
-``` idris <!--- The space between backticks and idris is obligated! So linter understands that it's a code-block, but the code doesn't compile --->
+```idris
 genXPairs : Fuel -> Gen MaybeEmpty $ (a ** b ** X a b)
 genXPairs = deriveGen
 ```
@@ -92,9 +96,9 @@ There is a list of changes ordered by increasing impact on derivation time.
 4. Adding an argument to some constructor of the generated type
 
 There's one more detail. The values that index types also affect the derivation time.
-For example, derivation task for `SomeType` indexed by `0` was completed 20 times faster than for indexed by `2147483648`.
+For example, derivation task for `SomeType` indexed by `0` was completed 20 times faster than for indexed by `2147483647`.
 
-::: {code} idris
+::: {code} idris <!--- This code takes too long to compile --->
 data LongNum : Nat -> Type where
-  MkST: LongNum 2147483648
+  MkST: LongNum 2147483647
 :::
