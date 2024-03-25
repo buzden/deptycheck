@@ -9,5 +9,5 @@ import System.Random.Pure.StdGen
 
 main : IO ()
 main = do
-  let vals = unGenTryN 10 someStdGen $ genSortedBinTrees $ limit 6
+  let vals = unGenTryN 10 someStdGen $ genSortedBinTree $ limit 6
   Lazy.for_ vals $ putStrLn . show . sorted . toList

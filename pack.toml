@@ -30,10 +30,10 @@ path = "examples/pil"
 ipkg = "pil.ipkg"
 test = "tests/tests.ipkg"
 
-[custom.all.sorted-trees]
+[custom.all.sorted-tree]
 type = "local"
-path = "examples/sorted-trees"
-ipkg = "sorted-trees.ipkg"
+path = "examples/sorted-tree"
+ipkg = "sorted-tree.ipkg"
 test = "tests/tests.ipkg"
 
 ####################
