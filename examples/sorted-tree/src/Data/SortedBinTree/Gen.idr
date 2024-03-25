@@ -14,5 +14,5 @@ UsedConstructorDerivator : ConstructorDerivator
 UsedConstructorDerivator = LeastEffort {simplificationHack = True}
 
 export
-genSortedBinTrees : Fuel -> Gen MaybeEmpty SortedBinTree
-genSortedBinTrees = deriveGen
+genSortedBinTree : Fuel -> Gen MaybeEmpty SortedBinTree
+genSortedBinTree = deriveGen

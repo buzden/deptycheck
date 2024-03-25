@@ -1,4 +1,4 @@
-package sorted-trees-tests
+package sorted-tree-tests
 
 main = Tests
 executable = runtests
