@@ -36,6 +36,12 @@ path = "examples/sorted-tree"
 ipkg = "sorted-tree.ipkg"
 test = "tests/tests.ipkg"
 
+[custom.all.sorted-list]
+type = "local"
+path = "examples/sorted-list"
+ipkg = "sorted-list.ipkg"
+test = "tests/tests.ipkg"
+
 ####################
 ### Thirdparties ###
 ####################
