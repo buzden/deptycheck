@@ -1,0 +1,590 @@
+1/2: Building PrintDerivation (PrintDerivation.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
+LOG gen.auto.derive.infra:0: 
+ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
+    => ILocal (IApp. IVar <Data.List.Sorted.SortedList>[] $ IVar ^outmost-fuel^)
+         IClaim MW
+                Export
+                []
+                (MkTy <Data.List.Sorted.SortedList>[]
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                  $ IVar Data.List.Sorted.SortedList)))
+         IClaim MW
+                Export
+                []
+                (MkTy <Data.List.Sorted.SortedList.FirstGT>[]
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                  $ (IApp. IVar Builtin.DPair.DPair
+                                         $ IVar Prelude.Types.Nat
+                                         $ (ILam.  (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
+                                                => (IApp. IVar Builtin.DPair.DPair
+                                                        $ IVar Data.List.Sorted.SortedList
+                                                        $ (ILam.  (MW ExplicitArg {arg:2} : IVar Data.List.Sorted.SortedList)
+                                                               => (IApp. IVar Data.List.Sorted.SortedList.FirstGT
+                                                                       $ IVar {arg:1}
+                                                                       $ IVar {arg:2}))))))))
+         IClaim MW
+                Export
+                []
+                (MkTy <Data.List.Sorted.SortedList.FirstGT>[0]
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                  $ (IApp. IVar Builtin.DPair.DPair
+                                         $ IVar Data.List.Sorted.SortedList
+                                         $ (ILam.  (MW ExplicitArg {arg:2} : IVar Data.List.Sorted.SortedList)
+                                                => (IApp. IVar Data.List.Sorted.SortedList.FirstGT
+                                                        $ IVar {arg:1}
+                                                        $ IVar {arg:2}))))))
+         IClaim MW
+                Export
+                []
+                (MkTy <Data.Nat.LTE>[0]
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (MW ExplicitArg n : IVar Prelude.Types.Nat)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                  $ (IApp. IVar Builtin.DPair.DPair
+                                         $ IVar Prelude.Types.Nat
+                                         $ (ILam.  (MW ExplicitArg m : IVar Prelude.Types.Nat)
+                                                => (IApp. IVar Data.Nat.LTE
+                                                        $ IVar n
+                                                        $ IVar m))))))
+         IClaim MW
+                Export
+                []
+                (MkTy <Prelude.Types.Nat>[]
+                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                  $ IVar Prelude.Types.Nat)))
+         IDef <Data.List.Sorted.SortedList>[]
+              [ PatClause (IApp. IVar <Data.List.Sorted.SortedList>[]
+                               $ IBindVar ^fuel_arg^)
+                          (ILocal (ICase (IVar ^fuel_arg^)
+                                         (IVar Data.Fuel.Fuel)
+                                         [ PatClause (IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Data.List.Sorted.SortedList[] (dry fuel))
+                                                          $ (IApp. IVar <<Data.List.Sorted.Nil>>
+                                                                 $ IVar Data.Fuel.Dry))
+                                         , PatClause (IApp. IVar Data.Fuel.More
+                                                          $ IBindVar ^sub^fuel_arg^)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Data.List.Sorted.SortedList[] (spend fuel))
+                                                          $ (IApp. IVar Test.DepTyCheck.Gen.frequency
+                                                                 $ (IApp. IVar ::
+                                                                        $ (IApp. IVar Builtin.MkPair
+                                                                               $ IVar Data.Nat.Pos.one
+                                                                               $ (IApp. IVar <<Data.List.Sorted.Nil>>
+                                                                                      $ IVar ^fuel_arg^))
+                                                                        $ (IApp. IVar ::
+                                                                               $ (IApp. IVar Builtin.MkPair
+                                                                                      $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
+                                                                                             $ IVar ^sub^fuel_arg^)
+                                                                                      $ (IApp. IVar <<Data.List.Sorted.(::)>>
+                                                                                             $ IVar ^sub^fuel_arg^))
+                                                                               $ IVar Nil)))) ]))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Data.List.Sorted.Nil>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ IVar Data.List.Sorted.SortedList)))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Data.List.Sorted.(::)>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ IVar Data.List.Sorted.SortedList)))
+                            IDef <<Data.List.Sorted.Nil>>
+                                 [ PatClause (IApp. IVar <<Data.List.Sorted.Nil>>
+                                                  $ IBindVar ^cons_fuel^)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Data.List.Sorted.Nil (orders))
+                                                  $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                     f
+                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                          $ Implicit True)
+                                                         $ IVar Data.List.Sorted.Nil)) ]
+                            IDef <<Data.List.Sorted.(::)>>
+                                 [ PatClause (IApp. IVar <<Data.List.Sorted.(::)>>
+                                                  $ IBindVar ^cons_fuel^)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Data.List.Sorted.(::) (orders))
+                                                  $ (IApp. IVar >>=
+                                                         $ (IApp. IVar <Data.List.Sorted.SortedList.FirstGT>[]
+                                                                $ IVar ^cons_fuel^)
+                                                         $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                => ICase (IVar {lamc:0})
+                                                                         (Implicit False)
+                                                                         [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                          $ IBindVar x
+                                                                                          $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                 $ IBindVar xs
+                                                                                                 $ IBindVar ^bnd^{conArg:1}))
+                                                                                     (IApp. INamedApp (IVar Prelude.pure)
+                                                                                                      f
+                                                                                                      (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                           $ Implicit True)
+                                                                                          $ IAutoApp (IApp. IVar Data.List.Sorted.(::)
+                                                                                                          $ IVar x
+                                                                                                          $ IVar xs)
+                                                                                                     (IVar ^bnd^{conArg:1})) ]))) ] ]
+         IDef <Data.List.Sorted.SortedList.FirstGT>[]
+              [ PatClause (IApp. IVar <Data.List.Sorted.SortedList.FirstGT>[]
+                               $ IBindVar ^fuel_arg^)
+                          (ILocal (ICase (IVar ^fuel_arg^)
+                                         (IVar Data.Fuel.Fuel)
+                                         [ PatClause (IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Data.List.Sorted.SortedList.FirstGT[] (dry fuel))
+                                                          $ (IApp. IVar <<Data.List.Sorted.SortedList.Nil>>
+                                                                 $ IVar Data.Fuel.Dry))
+                                         , PatClause (IApp. IVar Data.Fuel.More
+                                                          $ IBindVar ^sub^fuel_arg^)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Data.List.Sorted.SortedList.FirstGT[] (spend fuel))
+                                                          $ (IApp. IVar Test.DepTyCheck.Gen.frequency
+                                                                 $ (IApp. IVar ::
+                                                                        $ (IApp. IVar Builtin.MkPair
+                                                                               $ IVar Data.Nat.Pos.one
+                                                                               $ (IApp. IVar <<Data.List.Sorted.SortedList.Nil>>
+                                                                                      $ IVar ^fuel_arg^))
+                                                                        $ (IApp. IVar ::
+                                                                               $ (IApp. IVar Builtin.MkPair
+                                                                                      $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
+                                                                                             $ IVar ^sub^fuel_arg^)
+                                                                                      $ (IApp. IVar <<Data.List.Sorted.SortedList.(::)>>
+                                                                                             $ IVar ^sub^fuel_arg^))
+                                                                               $ IVar Nil)))) ]))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Data.List.Sorted.SortedList.Nil>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                            $ IVar Prelude.Types.Nat
+                                                            $ (ILam.  (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
+                                                                   => (IApp. IVar Builtin.DPair.DPair
+                                                                           $ IVar Data.List.Sorted.SortedList
+                                                                           $ (ILam.  (MW ExplicitArg {arg:2} : IVar Data.List.Sorted.SortedList)
+                                                                                  => (IApp. IVar Data.List.Sorted.SortedList.FirstGT
+                                                                                          $ IVar {arg:1}
+                                                                                          $ IVar {arg:2}))))))))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Data.List.Sorted.SortedList.(::)>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                            $ IVar Prelude.Types.Nat
+                                                            $ (ILam.  (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
+                                                                   => (IApp. IVar Builtin.DPair.DPair
+                                                                           $ IVar Data.List.Sorted.SortedList
+                                                                           $ (ILam.  (MW ExplicitArg {arg:2} : IVar Data.List.Sorted.SortedList)
+                                                                                  => (IApp. IVar Data.List.Sorted.SortedList.FirstGT
+                                                                                          $ IVar {arg:1}
+                                                                                          $ IVar {arg:2}))))))))
+                            IDef <<Data.List.Sorted.SortedList.Nil>>
+                                 [ PatClause (IApp. IVar <<Data.List.Sorted.SortedList.Nil>>
+                                                  $ IBindVar ^cons_fuel^)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Data.List.Sorted.SortedList.Nil (orders))
+                                                  $ (IApp. IVar >>=
+                                                         $ (IApp. IVar <Prelude.Types.Nat>[]
+                                                                $ IVar ^outmost-fuel^)
+                                                         $ (ILam.  (MW ExplicitArg n : Implicit False)
+                                                                => (IApp. INamedApp (IVar Prelude.pure)
+                                                                                    f
+                                                                                    (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                         $ Implicit True)
+                                                                        $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                               $ Implicit True
+                                                                               $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                      $ Implicit True
+                                                                                      $ INamedApp (IVar Data.List.Sorted.SortedList.Nil)
+                                                                                                  n
+                                                                                                  (IVar n))))))) ]
+                            IDef <<Data.List.Sorted.SortedList.(::)>>
+                                 [ PatClause (IApp. IVar <<Data.List.Sorted.SortedList.(::)>>
+                                                  $ IBindVar ^cons_fuel^)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Data.List.Sorted.SortedList.(::) (orders))
+                                                  $ (IApp. IVar >>=
+                                                         $ (IApp. IVar <Prelude.Types.Nat>[]
+                                                                $ IVar ^outmost-fuel^)
+                                                         $ (ILam.  (MW ExplicitArg n : Implicit False)
+                                                                => (IApp. IVar >>=
+                                                                        $ (IApp. IVar <Data.Nat.LTE>[0]
+                                                                               $ IVar ^outmost-fuel^
+                                                                               $ (IApp. IVar Prelude.Types.S
+                                                                                      $ IVar n))
+                                                                        $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                               => ICase (IVar {lamc:0})
+                                                                                        (Implicit False)
+                                                                                        [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                         $ IBindVar x
+                                                                                                         $ IBindVar ^bnd^{arg:3})
+                                                                                                    (IApp. IVar >>=
+                                                                                                         $ (IApp. IVar <Data.List.Sorted.SortedList.FirstGT>[0]
+                                                                                                                $ IVar ^cons_fuel^
+                                                                                                                $ IVar x)
+                                                                                                         $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                                                                => ICase (IVar {lamc:0})
+                                                                                                                         (Implicit False)
+                                                                                                                         [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                                                          $ IBindVar xs
+                                                                                                                                          $ IBindVar prf)
+                                                                                                                                     (IApp. INamedApp (IVar Prelude.pure)
+                                                                                                                                                      f
+                                                                                                                                                      (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                                                                           $ Implicit True)
+                                                                                                                                          $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                                                                 $ Implicit True
+                                                                                                                                                 $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                                                                        $ Implicit True
+                                                                                                                                                        $ (IApp. INamedApp (INamedApp (INamedApp (INamedApp (IVar Data.List.Sorted.SortedList.(::))
+                                                                                                                                                                                                            xs
+                                                                                                                                                                                                            (IVar xs))
+                                                                                                                                                                                                 x
+                                                                                                                                                                                                 (IVar x))
+                                                                                                                                                                                      prf
+                                                                                                                                                                                      (IVar prf))
+                                                                                                                                                                           n
+                                                                                                                                                                           (IVar n)
+                                                                                                                                                               $ IVar ^bnd^{arg:3})))) ])) ]))))) ] ]
+         IDef <Data.List.Sorted.SortedList.FirstGT>[0]
+              [ PatClause (IApp. IVar <Data.List.Sorted.SortedList.FirstGT>[0]
+                               $ IBindVar ^fuel_arg^
+                               $ IBindVar inter^<{arg:1}>)
+                          (ILocal (ICase (IVar ^fuel_arg^)
+                                         (IVar Data.Fuel.Fuel)
+                                         [ PatClause (IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Data.List.Sorted.SortedList.FirstGT[0] (dry fuel))
+                                                          $ (IApp. IVar <<Data.List.Sorted.SortedList.Nil>>
+                                                                 $ IVar Data.Fuel.Dry
+                                                                 $ IVar inter^<{arg:1}>))
+                                         , PatClause (IApp. IVar Data.Fuel.More
+                                                          $ IBindVar ^sub^fuel_arg^)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Data.List.Sorted.SortedList.FirstGT[0] (spend fuel))
+                                                          $ (IApp. IVar Test.DepTyCheck.Gen.frequency
+                                                                 $ (IApp. IVar ::
+                                                                        $ (IApp. IVar Builtin.MkPair
+                                                                               $ IVar Data.Nat.Pos.one
+                                                                               $ (IApp. IVar <<Data.List.Sorted.SortedList.Nil>>
+                                                                                      $ IVar ^fuel_arg^
+                                                                                      $ IVar inter^<{arg:1}>))
+                                                                        $ (IApp. IVar ::
+                                                                               $ (IApp. IVar Builtin.MkPair
+                                                                                      $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
+                                                                                             $ IVar ^sub^fuel_arg^)
+                                                                                      $ (IApp. IVar <<Data.List.Sorted.SortedList.(::)>>
+                                                                                             $ IVar ^sub^fuel_arg^
+                                                                                             $ IVar inter^<{arg:1}>))
+                                                                               $ IVar Nil)))) ]))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Data.List.Sorted.SortedList.Nil>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                            $ IVar Data.List.Sorted.SortedList
+                                                            $ (ILam.  (MW ExplicitArg {arg:2} : IVar Data.List.Sorted.SortedList)
+                                                                   => (IApp. IVar Data.List.Sorted.SortedList.FirstGT
+                                                                           $ IVar {arg:1}
+                                                                           $ IVar {arg:2}))))))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Data.List.Sorted.SortedList.(::)>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                            $ IVar Data.List.Sorted.SortedList
+                                                            $ (ILam.  (MW ExplicitArg {arg:2} : IVar Data.List.Sorted.SortedList)
+                                                                   => (IApp. IVar Data.List.Sorted.SortedList.FirstGT
+                                                                           $ IVar {arg:1}
+                                                                           $ IVar {arg:2}))))))
+                            IDef <<Data.List.Sorted.SortedList.Nil>>
+                                 [ PatClause (IApp. IVar <<Data.List.Sorted.SortedList.Nil>>
+                                                  $ IBindVar ^cons_fuel^
+                                                  $ IBindVar n)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Data.List.Sorted.SortedList.Nil (orders))
+                                                  $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                     f
+                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                          $ Implicit True)
+                                                         $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                $ Implicit True
+                                                                $ INamedApp (IVar Data.List.Sorted.SortedList.Nil)
+                                                                            n
+                                                                            (IVar n)))) ]
+                            IDef <<Data.List.Sorted.SortedList.(::)>>
+                                 [ PatClause (IApp. IVar <<Data.List.Sorted.SortedList.(::)>>
+                                                  $ IBindVar ^cons_fuel^
+                                                  $ IBindVar n)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Data.List.Sorted.SortedList.(::) (orders))
+                                                  $ (IApp. IVar >>=
+                                                         $ (IApp. IVar <Data.Nat.LTE>[0]
+                                                                $ IVar ^outmost-fuel^
+                                                                $ (IApp. IVar Prelude.Types.S
+                                                                       $ IVar n))
+                                                         $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                => ICase (IVar {lamc:0})
+                                                                         (Implicit False)
+                                                                         [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                          $ IBindVar x
+                                                                                          $ IBindVar ^bnd^{arg:3})
+                                                                                     (IApp. IVar >>=
+                                                                                          $ (IApp. IVar <Data.List.Sorted.SortedList.FirstGT>[0]
+                                                                                                 $ IVar ^cons_fuel^
+                                                                                                 $ IVar x)
+                                                                                          $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                                                 => ICase (IVar {lamc:0})
+                                                                                                          (Implicit False)
+                                                                                                          [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                                           $ IBindVar xs
+                                                                                                                           $ IBindVar prf)
+                                                                                                                      (IApp. INamedApp (IVar Prelude.pure)
+                                                                                                                                       f
+                                                                                                                                       (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                                                            $ Implicit True)
+                                                                                                                           $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                                                  $ Implicit True
+                                                                                                                                  $ (IApp. INamedApp (INamedApp (INamedApp (INamedApp (IVar Data.List.Sorted.SortedList.(::))
+                                                                                                                                                                                      xs
+                                                                                                                                                                                      (IVar xs))
+                                                                                                                                                                           x
+                                                                                                                                                                           (IVar x))
+                                                                                                                                                                prf
+                                                                                                                                                                (IVar prf))
+                                                                                                                                                     n
+                                                                                                                                                     (IVar n)
+                                                                                                                                         $ IVar ^bnd^{arg:3}))) ])) ]))) ] ]
+         IDef <Data.Nat.LTE>[0]
+              [ PatClause (IApp. IVar <Data.Nat.LTE>[0]
+                               $ IBindVar ^fuel_arg^
+                               $ IBindVar inter^<n>)
+                          (ILocal (ICase (IVar ^fuel_arg^)
+                                         (IVar Data.Fuel.Fuel)
+                                         [ PatClause (IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Data.Nat.LTE[0] (dry fuel))
+                                                          $ (IApp. IVar <<Data.Nat.LTEZero>>
+                                                                 $ IVar Data.Fuel.Dry
+                                                                 $ IVar inter^<n>))
+                                         , PatClause (IApp. IVar Data.Fuel.More
+                                                          $ IBindVar ^sub^fuel_arg^)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Data.Nat.LTE[0] (spend fuel))
+                                                          $ (IApp. IVar Test.DepTyCheck.Gen.frequency
+                                                                 $ (IApp. IVar ::
+                                                                        $ (IApp. IVar Builtin.MkPair
+                                                                               $ IVar Data.Nat.Pos.one
+                                                                               $ (IApp. IVar <<Data.Nat.LTEZero>>
+                                                                                      $ IVar ^fuel_arg^
+                                                                                      $ IVar inter^<n>))
+                                                                        $ (IApp. IVar ::
+                                                                               $ (IApp. IVar Builtin.MkPair
+                                                                                      $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
+                                                                                             $ IVar ^sub^fuel_arg^)
+                                                                                      $ (IApp. IVar <<Data.Nat.LTESucc>>
+                                                                                             $ IVar ^sub^fuel_arg^
+                                                                                             $ IVar inter^<n>))
+                                                                               $ IVar Nil)))) ]))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Data.Nat.LTEZero>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (MW ExplicitArg n : IVar Prelude.Types.Nat)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                            $ IVar Prelude.Types.Nat
+                                                            $ (ILam.  (MW ExplicitArg m : IVar Prelude.Types.Nat)
+                                                                   => (IApp. IVar Data.Nat.LTE
+                                                                           $ IVar n
+                                                                           $ IVar m))))))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Data.Nat.LTESucc>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (MW ExplicitArg n : IVar Prelude.Types.Nat)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ (IApp. IVar Builtin.DPair.DPair
+                                                            $ IVar Prelude.Types.Nat
+                                                            $ (ILam.  (MW ExplicitArg m : IVar Prelude.Types.Nat)
+                                                                   => (IApp. IVar Data.Nat.LTE
+                                                                           $ IVar n
+                                                                           $ IVar m))))))
+                            IDef <<Data.Nat.LTEZero>>
+                                 [ PatClause (IApp. IVar <<Data.Nat.LTEZero>>
+                                                  $ IBindVar ^cons_fuel^
+                                                  $ IVar Prelude.Types.Z)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Data.Nat.LTEZero (orders))
+                                                  $ (IApp. IVar >>=
+                                                         $ (IApp. IVar <Prelude.Types.Nat>[]
+                                                                $ IVar ^outmost-fuel^)
+                                                         $ (ILam.  (MW ExplicitArg right : Implicit False)
+                                                                => (IApp. INamedApp (IVar Prelude.pure)
+                                                                                    f
+                                                                                    (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                         $ Implicit True)
+                                                                        $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                               $ Implicit True
+                                                                               $ INamedApp (IVar Data.Nat.LTEZero)
+                                                                                           right
+                                                                                           (IVar right))))))
+                                 , PatClause (IApp. IVar <<Data.Nat.LTEZero>>
+                                                  $ Implicit True
+                                                  $ Implicit True)
+                                             (IVar empty) ]
+                            IDef <<Data.Nat.LTESucc>>
+                                 [ PatClause (IApp. IVar <<Data.Nat.LTESucc>>
+                                                  $ IBindVar ^cons_fuel^
+                                                  $ (IApp. IVar Prelude.Types.S
+                                                         $ IBindVar left))
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Data.Nat.LTESucc (orders))
+                                                  $ (IApp. IVar >>=
+                                                         $ (IApp. IVar <Data.Nat.LTE>[0]
+                                                                $ IVar ^cons_fuel^
+                                                                $ IVar left)
+                                                         $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
+                                                                => ICase (IVar {lamc:0})
+                                                                         (Implicit False)
+                                                                         [ PatClause (IApp. IVar Builtin.DPair.MkDPair
+                                                                                          $ IBindVar right
+                                                                                          $ IBindVar ^bnd^{arg:4})
+                                                                                     (IApp. INamedApp (IVar Prelude.pure)
+                                                                                                      f
+                                                                                                      (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                                           $ Implicit True)
+                                                                                          $ (IApp. IVar Builtin.DPair.MkDPair
+                                                                                                 $ Implicit True
+                                                                                                 $ (IApp. INamedApp (INamedApp (IVar Data.Nat.LTESucc)
+                                                                                                                               right
+                                                                                                                               (IVar right))
+                                                                                                                    left
+                                                                                                                    (IVar left)
+                                                                                                        $ IVar ^bnd^{arg:4}))) ])))
+                                 , PatClause (IApp. IVar <<Data.Nat.LTESucc>>
+                                                  $ Implicit True
+                                                  $ Implicit True)
+                                             (IVar empty) ] ]
+         IDef <Prelude.Types.Nat>[]
+              [ PatClause (IApp. IVar <Prelude.Types.Nat>[]
+                               $ IBindVar ^fuel_arg^)
+                          (ILocal (ICase (IVar ^fuel_arg^)
+                                         (IVar Data.Fuel.Fuel)
+                                         [ PatClause (IVar Data.Fuel.Dry)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Prelude.Types.Nat[] (dry fuel))
+                                                          $ (IApp. IVar <<Prelude.Types.Z>>
+                                                                 $ IVar Data.Fuel.Dry))
+                                         , PatClause (IApp. IVar Data.Fuel.More
+                                                          $ IBindVar ^sub^fuel_arg^)
+                                                     (IApp. IVar Test.DepTyCheck.Gen.label
+                                                          $ (IApp. IVar fromString
+                                                                 $ IPrimVal Prelude.Types.Nat[] (spend fuel))
+                                                          $ (IApp. IVar Test.DepTyCheck.Gen.frequency
+                                                                 $ (IApp. IVar ::
+                                                                        $ (IApp. IVar Builtin.MkPair
+                                                                               $ IVar Data.Nat.Pos.one
+                                                                               $ (IApp. IVar <<Prelude.Types.Z>>
+                                                                                      $ IVar ^fuel_arg^))
+                                                                        $ (IApp. IVar ::
+                                                                               $ (IApp. IVar Builtin.MkPair
+                                                                                      $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
+                                                                                             $ IVar ^sub^fuel_arg^)
+                                                                                      $ (IApp. IVar <<Prelude.Types.S>>
+                                                                                             $ IVar ^sub^fuel_arg^))
+                                                                               $ IVar Nil)))) ]))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Prelude.Types.Z>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ IVar Prelude.Types.Nat)))
+                            IClaim MW
+                                   Export
+                                   []
+                                   (MkTy <<Prelude.Types.S>>
+                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
+                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
+                                                     $ IVar Prelude.Types.Nat)))
+                            IDef <<Prelude.Types.Z>>
+                                 [ PatClause (IApp. IVar <<Prelude.Types.Z>>
+                                                  $ IBindVar ^cons_fuel^)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Prelude.Types.Z (orders))
+                                                  $ (IApp. INamedApp (IVar Prelude.pure)
+                                                                     f
+                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                          $ Implicit True)
+                                                         $ IVar Prelude.Types.Z)) ]
+                            IDef <<Prelude.Types.S>>
+                                 [ PatClause (IApp. IVar <<Prelude.Types.S>>
+                                                  $ IBindVar ^cons_fuel^)
+                                             (IApp. IVar Test.DepTyCheck.Gen.label
+                                                  $ (IApp. IVar fromString
+                                                         $ IPrimVal Prelude.Types.S (orders))
+                                                  $ (IApp. IVar >>=
+                                                         $ (IApp. IVar <Prelude.Types.Nat>[]
+                                                                $ IVar ^cons_fuel^)
+                                                         $ (ILam.  (MW ExplicitArg ^bnd^{arg:5} : Implicit False)
+                                                                => (IApp. INamedApp (IVar Prelude.pure)
+                                                                                    f
+                                                                                    (IApp. IVar Test.DepTyCheck.Gen.Gen
+                                                                                         $ Implicit True)
+                                                                        $ (IApp. IVar Prelude.Types.S
+                                                                               $ IVar ^bnd^{arg:5}))))) ] ]
