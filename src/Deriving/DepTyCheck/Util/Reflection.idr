@@ -162,18 +162,45 @@ export
 liftWeight1 : TTImp
 liftWeight1 = `(Data.Nat.Pos.one)
 
-export
-labelGen : (desc : String) -> TTImp -> TTImp
-labelGen desc expr = `(Test.DepTyCheck.Gen.label (fromString ~(primVal $ Str desc)) ~expr)
+namespace CompiletimeLabel
+
+  public export
+  data CTLabel = MkCTLabel TTImp
+
+  public export
+  FromString CTLabel where
+    fromString = MkCTLabel . primVal . Str
+
+  public export
+  Semigroup CTLabel where
+    MkCTLabel l <+> MkCTLabel r = MkCTLabel `(~l ++ ~r)
+
+  public export
+  Monoid CTLabel where
+    neutral = ""
+
+  namespace FromString
+    public export %inline
+    (.label) : String -> CTLabel
+    (.label) = fromString
+
+  namespace FromTTImp
+    public export %inline
+    (.label) : TTImp -> CTLabel
+    (.label) = MkCTLabel
 
 export
-callOneOf : (desc : String) -> List TTImp -> TTImp
+labelGen : (desc : CTLabel) -> TTImp -> TTImp
+labelGen (MkCTLabel desc) expr = `(Test.DepTyCheck.Gen.label (fromString ~desc) ~expr)
+
+export
+callOneOf : (desc : CTLabel) -> List TTImp -> TTImp
 callOneOf desc [v]      = labelGen desc v
 callOneOf desc variants = labelGen desc $ `(Test.DepTyCheck.Gen.oneOf {em=MaybeEmpty}) .$ liftList variants
 
 -- List of weights and subgenerators
 export
-callFrequency : (desc : String) -> List (TTImp, TTImp) -> TTImp
+callFrequency : (desc : CTLabel) -> List (TTImp, TTImp) -> TTImp
 callFrequency _    [(_, v)] = v
 callFrequency desc variants = labelGen desc $ var `{Test.DepTyCheck.Gen.frequency} .$
                                 liftList (variants <&> \(freq, subgen) => var `{Builtin.MkPair} .$ freq .$ subgen)
