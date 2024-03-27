@@ -18,6 +18,11 @@ import public Language.Reflection.Types
 data Recursiveness =
   ||| When constructor refers transitively to the type it belongs
   DirectlyRecursive |
+  ||| When constructor itself does not refer to the type it belongs,
+  ||| but its generated index either
+  ||| - refers to some constructor that is recursive, or
+  ||| - is general enough to be able to refer so some recursive constructor
+  IndexedByRecursive |
   ||| When constructor does not refer to the type it belongs,
   ||| nor to any recursive constructor in its generated indices
   NonRecursive
@@ -25,11 +30,13 @@ data Recursiveness =
 ||| Checks if the status is anyhow recursive, directly or through index
 isRec : Recursiveness -> Bool
 isRec DirectlyRecursive  = True
+isRec IndexedByRecursive = True
 isRec NonRecursive       = False
 
 ||| Check if we are able to call for this constructor on a dry fuel
 isDirectlyRec : Recursiveness -> Bool
 isDirectlyRec DirectlyRecursive  = True
+isDirectlyRec IndexedByRecursive = False
 isDirectlyRec NonRecursive       = False
 
 ||| Property is implication from the strong property to the weak one
@@ -61,7 +68,8 @@ ConstructorDerivator => DerivatorCore where
     consRecs <- logBounds "consRec" [sig] $ pure $ sig.targetType.cons <&> \con => do
       let False = isRecursive {containingType=Just sig.targetType} con
         | True => (con, DirectlyRecursive)
-      (con, NonRecursive)
+      -- this constructor is not directly recursive, check if any of generated indices are indexed by a recursive constructor
+      (con, ?foo)
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
