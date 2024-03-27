@@ -1,7 +1,5 @@
 package test
 
-authors = "Denis Buzdalov"
-
 main = CheckDistribution
 
 depends = deptycheck, summary-stat
