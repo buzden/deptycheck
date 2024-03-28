@@ -7,19 +7,21 @@ import public Data.Nat
 public export
 data SortedList : Type
 
-namespace SortedList
-  public export
-  data FirstGT : Nat -> SortedList -> Type
+public export
+data FirstGT : Nat -> SortedList -> Type
 
 data SortedList : Type where
   Nil  : SortedList
   (::) : (x : Nat) -> (xs : SortedList) -> FirstGT x xs => SortedList
 
-namespace SortedList
-  public export
-  data FirstGT : Nat -> SortedList -> Type where
-    Nil  : FirstGT n []
-    (::) : x `GT` n -> FirstGT n $ (x::xs) @{prf}
+data FirstGT : Nat -> SortedList -> Type where
+  E  : FirstGT n []
+  NE : x `GT` n -> FirstGT n $ (x::xs) @{prf}
+
+public export
+length : SortedList -> Nat
+length []      = Z
+length (_::xs) = S $ length xs
 
 public export
 toList : SortedList -> List Nat
