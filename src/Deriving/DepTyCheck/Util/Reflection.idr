@@ -410,22 +410,18 @@ allVarNames = SortedSet.toList . allVarNames'
 export
 record NamesInfoInTypes where
   constructor Names
-  names : SortedMap Name $ List TTImp
+  names : SortedMap Name $ SortedSet Name
 
 export
 hasNameInsideDeep : NamesInfoInTypes => Name -> TTImp -> Bool
-hasNameInsideDeep @{tyi} nm expr = hasInside empty [expr] where
+hasNameInsideDeep @{tyi} nm = hasInside empty . allVarNames where
 
-  hasInside : (visited : SortedSet Name) -> (toLook : List TTImp) -> Bool
+  hasInside : (visited : SortedSet Name) -> (toLook : List Name) -> Bool
   hasInside visited []           = False
-  hasInside visited (curr::rest) = do
-    let vs = allVarNames curr
-    let False = any (== nm) vs
-      | True => True
-    let nonVisited = filter (not . flip contains visited) vs
-    let new = nonVisited >>= \n => fromMaybe [] $ lookup n tyi.names
+  hasInside visited (curr::rest) = if curr == nm then True else do
+    let new = if contains curr visited then [] else maybe [] SortedSet.toList $ lookup curr tyi.names
     -- visited is limited and either growing or `new` is empty, thus `toLook` is strictly less
-    assert_total $ hasInside (visited `union` fromList nonVisited) (new ++ rest)
+    assert_total $ hasInside (insert curr visited) (new ++ rest)
 
 export
 getNamesInfoInTypes : Elaboration m => TypeInfo -> m NamesInfoInTypes
@@ -435,11 +431,14 @@ getNamesInfoInTypes ty = Names <$> go empty [ty]
     subexprs : TypeInfo -> List TTImp
     subexprs ty = map type ty.args ++ (ty.cons >>= \con => con.type :: map type con.args)
 
-    go : SortedMap Name (List TTImp) -> List TypeInfo -> m $ SortedMap Name (List TTImp)
+    go : SortedMap Name (SortedSet Name) -> List TypeInfo -> m $ SortedMap Name $ SortedSet Name
     go tyi []         = pure tyi
     go tyi (ti::rest) = do
-      let subes = subexprs ti
-      new <- map join $ for subes $ map (mapMaybe id) . traverse (catch . getInfo') . filter (isNothing . flip lookup tyi) . allVarNames
+      let subes = concatMap allVarNames' $ subexprs ti
+      new <- map join $ for (SortedSet.toList subes) $ \n =>
+               if isNothing $ lookup n tyi
+                 then map toList $ catch $ getInfo' n
+                 else pure []
       assert_total $ go (insert ti.name subes tyi) (new ++ rest)
 
 public export
