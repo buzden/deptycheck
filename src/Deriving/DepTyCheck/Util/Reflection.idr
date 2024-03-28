@@ -1,6 +1,8 @@
 ||| `Language.Reflection`-related utilities
 module Deriving.DepTyCheck.Util.Reflection
 
+import public Control.Applicative.Const
+
 import public Data.Fin
 import public Data.Fuel
 import public Data.Nat.Pos
@@ -394,171 +396,50 @@ nameConformsTo cand origin = do
 
 -- simple syntactic search of a `IVar`, disregarding shadowing or whatever
 export
-allVarNames : TTImp -> LazyList Name
-allVarNames expr = ttimp expr where
-  mutual
+allVarNames' : TTImp -> SortedSet Name
+allVarNames' = runConst . mapATTImp' f where
+  f : TTImp -> Const (SortedSet Name) TTImp -> Const (SortedSet Name) TTImp
+  f (IVar _ n) = const $ MkConst $ singleton n
+  f _          = id
 
-    ttimp : TTImp -> LazyList Name
-    ttimp $ IVar _ n                        = [n]
-    ttimp $ IPi _ _ z _ argTy retTy         = ttimp argTy ++ ttimp retTy ++ piInfo z
-    ttimp $ ILam _ _ z _ argTy lamTy        = ttimp argTy ++ ttimp lamTy ++ piInfo z
-    ttimp $ ILet _ _ _ _ nTy nVal sc        = ttimp nTy ++ ttimp nVal ++ ttimp sc -- should we check `nTy` here?
-    ttimp $ ICase _ _ _ ty xs               = ttimp ty ++ assert_total (foldMap clause xs)
-    ttimp $ ILocal _ xs y                   = assert_total (foldMap decl xs) ++ ttimp y
-    ttimp $ IUpdate _ xs y                  = assert_total (foldMap fieldUpdate xs) ++ ttimp y
-    ttimp $ IApp _ y z                      = ttimp y ++ ttimp z
-    ttimp $ INamedApp _ y _ w               = ttimp y ++ ttimp w
-    ttimp $ IAutoApp _ y z                  = ttimp y ++ ttimp z
-    ttimp $ IWithApp _ y z                  = ttimp y ++ ttimp z
-    ttimp $ ISearch _ _                     = []
-    ttimp $ IAlternative _ y xs             = altType y ++ assert_total (foldMap ttimp xs)
-    ttimp $ IRewrite _ y z                  = ttimp y ++ ttimp z
-    ttimp $ IBindHere _ _ z                 = ttimp z
-    ttimp $ IBindVar _ _                    = []
-    ttimp $ IAs _ _ _ _ w                   = ttimp w
-    ttimp $ IMustUnify _ _ z                = ttimp z
-    ttimp $ IDelayed _ _ z                  = ttimp z
-    ttimp $ IDelay _ y                      = ttimp y
-    ttimp $ IForce _ y                      = ttimp y
-    ttimp $ IQuote _ y                      = ttimp y
-    ttimp $ IQuoteName _ _                  = []
-    ttimp $ IQuoteDecl _ xs                 = assert_total $ foldMap decl xs
-    ttimp $ IUnquote _ y                    = ttimp y
-    ttimp $ IPrimVal _ _                    = []
-    ttimp $ IType _                         = []
-    ttimp $ IHole _ _                       = []
-    ttimp $ Implicit _ _                    = []
-    ttimp $ IWithUnambigNames _ _ y         = ttimp y
-
-    altType : AltType -> LazyList Name
-    altType FirstSuccess      = []
-    altType Unique            = []
-    altType (UniqueDefault x) = ttimp x
-
-    lncpt : List (Name, Count, PiInfo TTImp, TTImp) -> LazyList Name
-    lncpt = foldMap (\(_, _, pii, tt) => piInfo pii ++ ttimp tt)
-
-    ity : ITy -> LazyList Name
-    ity $ MkTy _ _ _ ty = ttimp ty
-
-    decl : Decl -> LazyList Name
-    decl $ IClaim _ _ _ _ t                         = ity t
-    decl $ IData _ _ _ z                            = data_ z
-    decl $ IDef _ _ xs                              = foldMap clause xs
-    decl $ IParameters _ xs ys                      = lncpt xs ++ assert_total (foldMap decl ys)
-    decl $ IRecord _ _ _ _ $ MkRecord _ _ ps _ _ fs = lncpt ps ++ foldMap (\(MkIField _ _ pii _ tt) => piInfo pii ++ ttimp tt) fs
-    decl $ INamespace _ _ xs                        = assert_total $ foldMap decl xs
-    decl $ ITransform _ _ z w                       = ttimp z ++ ttimp w
-    decl $ IRunElabDecl _ y                         = ttimp y
-    decl $ ILog _                                   = []
-    decl $ IBuiltin _ _ _                           = []
-
-    data_ : Data -> LazyList Name
-    data_ $ MkData x n tycon _ datacons = maybe [] ttimp tycon ++ foldMap ity datacons
-    data_ $ MkLater x n tycon           = ttimp tycon
-
-    fieldUpdate : IFieldUpdate -> LazyList Name
-    fieldUpdate $ ISetField    _ x = ttimp x
-    fieldUpdate $ ISetFieldApp _ x = ttimp x
-
-    clause : Clause -> LazyList Name
-    clause $ PatClause _ lhs rhs            = ttimp lhs ++ ttimp rhs
-    clause $ WithClause _ lhs _ wval _ _ xs = ttimp lhs ++ ttimp wval ++ assert_total (foldMap clause xs)
-    clause $ ImpossibleClause _ lhs         = ttimp lhs
-
-    piInfo : PiInfo TTImp -> LazyList Name
-    piInfo ImplicitArg     = []
-    piInfo ExplicitArg     = []
-    piInfo AutoImplicit    = []
-    piInfo (DefImplicit x) = ttimp x
+-- Same as `allVarNames'`, but returning `List`
+export
+allVarNames : TTImp -> List Name
+allVarNames = SortedSet.toList . allVarNames'
 
 export
-hasNameInsideDeep : Elaboration m => Name -> TTImp -> m Bool
-hasNameInsideDeep nm expr = evalStateT .| the (SortedSet Name) empty .| hasInside where
+record NamesInfoInTypes where
+  constructor Names
+  names : SortedMap Name $ SortedSet Name
 
-  hasInside : forall mm. Elaboration mm => MonadState (SortedSet Name) mm => mm Bool
-  hasInside = ttimp expr where
-    mutual
+export
+hasNameInsideDeep : NamesInfoInTypes => Name -> TTImp -> Bool
+hasNameInsideDeep @{tyi} nm = hasInside empty . allVarNames where
 
-      ttimp : TTImp -> mm Bool
-      ttimp $ IVar _ n                        = if n == nm then pure True else
-                                                  if contains n !get then pure False else do
-                                                    modify $ insert n
-                                                    Just ty <- catch (getInfo' n)
-                                                      | Nothing => pure False
-                                                    let subexprs = (map type ty.args) ++ (ty.cons >>= \con => con.type :: map type con.args)
-                                                    assert_total $ any ttimp subexprs
-      ttimp $ IPi _ _ z _ argTy retTy         = ttimp argTy || ttimp retTy || piInfo z
-      ttimp $ ILam _ _ z _ argTy lamTy        = ttimp argTy || ttimp lamTy || piInfo z
-      ttimp $ ILet _ _ _ _ nTy nVal sc        = ttimp nTy || ttimp nVal || ttimp sc -- should we check `nTy` here?
-      ttimp $ ICase _ _ _ ty xs               = ttimp ty || assert_total (any clause xs)
-      ttimp $ ILocal _ xs y                   = assert_total (any decl xs) || ttimp y
-      ttimp $ IUpdate _ xs y                  = assert_total (any fieldUpdate xs) || ttimp y
-      ttimp $ IApp _ y z                      = ttimp y || ttimp z
-      ttimp $ INamedApp _ y _ w               = ttimp y || ttimp w
-      ttimp $ IAutoApp _ y z                  = ttimp y || ttimp z
-      ttimp $ IWithApp _ y z                  = ttimp y || ttimp z
-      ttimp $ ISearch _ _                     = pure False
-      ttimp $ IAlternative _ y xs             = altType y || assert_total (any ttimp xs)
-      ttimp $ IRewrite _ y z                  = ttimp y || ttimp z
-      ttimp $ IBindHere _ _ z                 = ttimp z
-      ttimp $ IBindVar _ _                    = pure False
-      ttimp $ IAs _ _ _ _ w                   = ttimp w
-      ttimp $ IMustUnify _ _ z                = ttimp z
-      ttimp $ IDelayed _ _ z                  = ttimp z
-      ttimp $ IDelay _ y                      = ttimp y
-      ttimp $ IForce _ y                      = ttimp y
-      ttimp $ IQuote _ y                      = ttimp y
-      ttimp $ IQuoteName _ _                  = pure False
-      ttimp $ IQuoteDecl _ xs                 = assert_total $ any decl xs
-      ttimp $ IUnquote _ y                    = ttimp y
-      ttimp $ IPrimVal _ _                    = pure False
-      ttimp $ IType _                         = pure False
-      ttimp $ IHole _ _                       = pure False
-      ttimp $ Implicit _ _                    = pure False
-      ttimp $ IWithUnambigNames _ _ y         = ttimp y
+  hasInside : (visited : SortedSet Name) -> (toLook : List Name) -> Bool
+  hasInside visited []           = False
+  hasInside visited (curr::rest) = if curr == nm then True else do
+    let new = if contains curr visited then [] else maybe [] SortedSet.toList $ lookup curr tyi.names
+    -- visited is limited and either growing or `new` is empty, thus `toLook` is strictly less
+    assert_total $ hasInside (insert curr visited) (new ++ rest)
 
-      altType : AltType -> mm Bool
-      altType FirstSuccess      = pure False
-      altType Unique            = pure False
-      altType (UniqueDefault x) = ttimp x
+export
+getNamesInfoInTypes : Elaboration m => TypeInfo -> m NamesInfoInTypes
+getNamesInfoInTypes ty = Names <$> go empty [ty]
+  where
 
-      lncpt : List (Name, Count, PiInfo TTImp, TTImp) -> mm Bool
-      lncpt = any (\(_, _, pii, tt) => piInfo pii || ttimp tt)
+    subexprs : TypeInfo -> List TTImp
+    subexprs ty = map type ty.args ++ (ty.cons >>= \con => con.type :: map type con.args)
 
-      ity : ITy -> mm Bool
-      ity $ MkTy _ _ _ ty = ttimp ty
-
-      decl : Decl -> mm Bool
-      decl $ IClaim _ _ _ _ t                         = ity t
-      decl $ IData _ _ _ z                            = data_ z
-      decl $ IDef _ _ xs                              = any clause xs
-      decl $ IParameters _ xs ys                      = lncpt xs || assert_total (any decl ys)
-      decl $ IRecord _ _ _ _ $ MkRecord _ _ ps _ _ fs = lncpt ps || any (\(MkIField _ _ pii _ tt) => piInfo pii || ttimp tt) fs
-      decl $ INamespace _ _ xs                        = assert_total $ any decl xs
-      decl $ ITransform _ _ z w                       = ttimp z || ttimp w
-      decl $ IRunElabDecl _ y                         = ttimp y
-      decl $ ILog _                                   = pure False
-      decl $ IBuiltin _ _ _                           = pure False
-
-      data_ : Data -> mm Bool
-      data_ $ MkData x n tycon _ datacons = maybe (pure False) ttimp tycon || any ity datacons
-      data_ $ MkLater x n tycon           = ttimp tycon
-
-      fieldUpdate : IFieldUpdate -> mm Bool
-      fieldUpdate $ ISetField    _ x = ttimp x
-      fieldUpdate $ ISetFieldApp _ x = ttimp x
-
-      clause : Clause -> mm Bool
-      clause $ PatClause _ lhs rhs            = ttimp lhs || ttimp rhs
-      clause $ WithClause _ lhs _ wval _ _ xs = ttimp lhs || ttimp wval || assert_total (any clause xs)
-      clause $ ImpossibleClause _ lhs         = ttimp lhs
-
-      piInfo : PiInfo TTImp -> mm Bool
-      piInfo ImplicitArg     = pure False
-      piInfo ExplicitArg     = pure False
-      piInfo AutoImplicit    = pure False
-      piInfo (DefImplicit x) = ttimp x
+    go : SortedMap Name (SortedSet Name) -> List TypeInfo -> m $ SortedMap Name $ SortedSet Name
+    go tyi []         = pure tyi
+    go tyi (ti::rest) = do
+      let subes = concatMap allVarNames' $ subexprs ti
+      new <- map join $ for (SortedSet.toList subes) $ \n =>
+               if isNothing $ lookup n tyi
+                 then map toList $ catch $ getInfo' n
+                 else pure []
+      assert_total $ go (insert ti.name subes tyi) (new ++ rest)
 
 public export
 isVar : TTImp -> Bool
