@@ -76,14 +76,14 @@ ConstructorDerivator => DerivatorCore where
       let True = isJust $ find ((== Recursive) . snd) consRecs
         | False =>
             -- no recursive constructors, thus just call all without spending fuel
-            callOneOf "\{logPosition sig} (non-recursive)" (consRecs <&> callConsGen (varStr fuelAr) . fst)
+            callOneOf "\{logPosition sig} (non-recursive)".label (consRecs <&> callConsGen (varStr fuelAr) . fst)
 
       -- pattern match on the fuel argument
       iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
           let nonRecCons = fst <$> filter ((== NonRecursive) . snd) consRecs in
-          let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf "\{logPosition sig} (dry fuel)" (nonRecCons <&> callConsGen dry)
+          let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf "\{logPosition sig} (dry fuel)".label (nonRecCons <&> callConsGen dry)
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
@@ -93,7 +93,7 @@ ConstructorDerivator => DerivatorCore where
           let weight : Recursiveness -> TTImp
               weight Recursive    = var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
               weight NonRecursive = liftWeight1
-          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)"
+          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
                                                            (consRecs <&> \(con, rec) => (weight rec, callConsGen (varStr $ selectFuel rec) con))
         ]
 

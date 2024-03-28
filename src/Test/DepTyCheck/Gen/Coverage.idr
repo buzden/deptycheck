@@ -25,7 +25,8 @@ import Test.DepTyCheck.Gen
 
 %default total
 
-export
+||| Raw information of covered labels
+public export
 record ModelCoverage where
   constructor MkModelCoverage
   unModelCoverage : SortedMap Label Nat
@@ -51,6 +52,7 @@ export
 unGenTryND : RandomGen g => (n : Nat) -> g -> Gen em a -> LazyList (ModelCoverage, a)
 unGenTryND n = mapMaybe id .: take (limit n) .: unGenTryAllD
 
+||| Higher-level coverage information, in terms of types and constructors, etc.
 export
 record CoverageGenInfo (0 g : k) where
   constructor MkCoverageGenInfo

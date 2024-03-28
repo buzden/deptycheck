@@ -195,7 +195,7 @@ namespace NonObligatoryExts
       -- Producing the result --
       --------------------------
 
-      callOneOf "\{show con.name} (orders)" <$> traverse genForOrder allOrders
+      callOneOf "\{show con.name} (orders)".label <$> traverse genForOrder allOrders
 
       where
 
