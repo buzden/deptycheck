@@ -161,7 +161,7 @@ namespace NonObligatoryExts
       --------------------------------------------------------------------------------
 
       -- Acquire those variables that appear in non-trivial type expressions, i.e. those which needs to be generated before the left-to-right phase
-      let preLTR = leftToRightArgsTypeApp >>= \(MkTypeApp _ as) => rights (toList as) >>= toList . allVarNames
+      let preLTR = leftToRightArgsTypeApp >>= \(MkTypeApp _ as) => rights (toList as) >>= allVarNames
       let preLTR = SortedSet.fromList $ mapMaybe (flip lookup conArgIdxs) preLTR
 
       -- Find rightmost arguments among `preLTR`
