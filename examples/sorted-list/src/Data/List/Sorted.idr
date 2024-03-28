@@ -19,6 +19,11 @@ data FirstGT : Nat -> SortedList -> Type where
   NE : x `GT` n -> FirstGT n $ (x::xs) @{prf}
 
 public export
+length : SortedList -> Nat
+length []      = Z
+length (_::xs) = S $ length xs
+
+public export
 toList : SortedList -> List Nat
 toList []      = []
 toList (x::xs) = x :: toList xs
