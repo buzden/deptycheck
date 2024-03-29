@@ -55,8 +55,7 @@ ConstructorDerivator => DerivatorCore where
 
     -- calculate which constructors are recursive and which are not
     consRecs <- logBounds "consRec" [sig] $ pure $ sig.targetType.cons <&> \con => do
-      let conExprs = map type con.args ++ (getExpr <$> snd (unAppAny con.type))
-      let False = any (hasNameInsideDeep sig.targetType.name) conExprs
+      let False = any (hasNameInsideDeep sig.targetType.name) $ conSubexprs con
         | True => (con, DirectlyRecursive)
       (con, NonRecursive)
 

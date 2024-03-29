@@ -396,6 +396,10 @@ deriveMatchingCons retTy matcher funName ti = do
       patClause (var funName .$ matchCon con) $ matcher con
   [claim, body]
 
+public export
+conSubexprs : Con -> List TTImp
+conSubexprs con = map type con.args ++ (map getExpr $ snd $ unAppAny con.type)
+
 -------------------------------------------------
 --- Syntactic analysis of `TTImp` expressions ---
 -------------------------------------------------
@@ -438,19 +442,23 @@ export
 record NamesInfoInTypes where
   constructor Names
   types : SortedMap Name TypeInfo
+  cons  : SortedMap Name (TypeInfo, Con)
   namesInTypes : SortedMap TypeInfo $ SortedSet Name
 
 (.lookupByType) : NamesInfoInTypes -> Name -> Maybe $ SortedSet Name
 tyi.lookupByType = flip lookup tyi.types >=> flip lookup tyi.namesInTypes
 
+(.lookupByCon) : NamesInfoInTypes -> Name -> Maybe $ SortedSet Name
+tyi.lookupByCon = concatMap @{Deep} tyi.lookupByType . SortedSet.toList . concatMap allVarNames' . conSubexprs . snd <=< flip lookup tyi.cons
+
 Semigroup NamesInfoInTypes where
-  Names ts nit <+> Names ts' nit' = Names (ts `mergeLeft` ts') (nit <+> nit')
+  Names ts cs nit <+> Names ts' cs' nit' = Names (ts `mergeLeft` ts') (cs `mergeLeft` cs') (nit <+> nit')
 
 Eq TypeInfo where (==) = (==) `on` name
 Ord TypeInfo where compare = comparing name
 
 Monoid NamesInfoInTypes where
-  neutral = Names empty empty
+  neutral = Names empty empty empty
 
 export
 hasNameInsideDeep : NamesInfoInTypes => Name -> TTImp -> Bool
@@ -469,7 +477,7 @@ getNamesInfoInTypes ty = go neutral [ty]
   where
 
     subexprs : TypeInfo -> List TTImp
-    subexprs ty = map type ty.args ++ (ty.cons >>= \con => con.type :: map type con.args)
+    subexprs ty = map type ty.args ++ (ty.cons >>= conSubexprs)
 
     go : NamesInfoInTypes -> List TypeInfo -> m NamesInfoInTypes
     go tyi []         = pure tyi
@@ -481,6 +489,7 @@ getNamesInfoInTypes ty = go neutral [ty]
                  else pure []
       let next = { types $= insert ti.name ti
                  , namesInTypes $= insert ti subes
+                 , cons $= mergeLeft $ fromList $ ti.cons <&> \con => (con.name, ti, con)
                  } tyi
       assert_total $ go next (new ++ rest)
 
