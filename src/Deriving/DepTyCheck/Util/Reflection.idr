@@ -445,11 +445,14 @@ record NamesInfoInTypes where
   cons  : SortedMap Name (TypeInfo, Con)
   namesInTypes : SortedMap TypeInfo $ SortedSet Name
 
-(.lookupByType) : NamesInfoInTypes -> Name -> Maybe $ SortedSet Name
-tyi.lookupByType = flip lookup tyi.types >=> flip lookup tyi.namesInTypes
+lookupByType : NamesInfoInTypes => Name -> Maybe $ SortedSet Name
+lookupByType @{tyi} = flip lookup tyi.types >=> flip lookup tyi.namesInTypes
 
-(.lookupByCon) : NamesInfoInTypes -> Name -> Maybe $ SortedSet Name
-tyi.lookupByCon = concatMap @{Deep} tyi.lookupByType . SortedSet.toList . concatMap allVarNames' . conSubexprs . snd <=< flip lookup tyi.cons
+lookupByCon : NamesInfoInTypes => Name -> Maybe $ SortedSet Name
+lookupByCon @{tyi} = concatMap @{Deep} lookupByType . SortedSet.toList . concatMap allVarNames' . conSubexprs . snd <=< flip lookup tyi.cons
+
+typeByCon : NamesInfoInTypes => Con -> Maybe TypeInfo
+typeByCon @{tyi} = map fst . flip lookup tyi.cons . name
 
 Semigroup NamesInfoInTypes where
   Names ts cs nit <+> Names ts' cs' nit' = Names (ts `mergeLeft` ts') (cs `mergeLeft` cs') (nit <+> nit')
@@ -467,7 +470,7 @@ hasNameInsideDeep @{tyi} nm = hasInside empty . allVarNames where
   hasInside : (visited : SortedSet Name) -> (toLook : List Name) -> Bool
   hasInside visited []           = False
   hasInside visited (curr::rest) = if curr == nm then True else do
-    let new = if contains curr visited then [] else maybe [] SortedSet.toList $ tyi.lookupByType curr
+    let new = if contains curr visited then [] else maybe [] SortedSet.toList $ lookupByType curr
     -- visited is limited and either growing or `new` is empty, thus `toLook` is strictly less
     assert_total $ hasInside (insert curr visited) (new ++ rest)
 
@@ -484,7 +487,7 @@ getNamesInfoInTypes ty = go neutral [ty]
     go tyi (ti::rest) = do
       let subes = concatMap allVarNames' $ subexprs ti
       new <- map join $ for (SortedSet.toList subes) $ \n =>
-               if isNothing $ tyi.lookupByType n
+               if isNothing $ lookupByType n
                  then map toList $ catch $ getInfo' n
                  else pure []
       let next = { types $= insert ti.name ti
