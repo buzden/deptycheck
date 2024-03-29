@@ -55,7 +55,7 @@ ConstructorDerivator => DerivatorCore where
 
     -- calculate which constructors are recursive and which are not
     consRecs <- logBounds "consRec" [sig] $ pure $ sig.targetType.cons <&> \con => do
-      let False = any (hasNameInsideDeep sig.targetType.name) $ conSubexprs con
+      let False = isRecursive {containingType=Just sig.targetType} con
         | True => (con, DirectlyRecursive)
       (con, NonRecursive)
 
