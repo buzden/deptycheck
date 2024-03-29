@@ -437,7 +437,20 @@ allVarNames = SortedSet.toList . allVarNames'
 export
 record NamesInfoInTypes where
   constructor Names
-  names : SortedMap Name $ SortedSet Name
+  types : SortedMap Name TypeInfo
+  namesInTypes : SortedMap TypeInfo $ SortedSet Name
+
+(.lookupByType) : NamesInfoInTypes -> Name -> Maybe $ SortedSet Name
+tyi.lookupByType = flip lookup tyi.types >=> flip lookup tyi.namesInTypes
+
+Semigroup NamesInfoInTypes where
+  Names ts nit <+> Names ts' nit' = Names (ts `mergeLeft` ts') (nit <+> nit')
+
+Eq TypeInfo where (==) = (==) `on` name
+Ord TypeInfo where compare = comparing name
+
+Monoid NamesInfoInTypes where
+  neutral = Names empty empty
 
 export
 hasNameInsideDeep : NamesInfoInTypes => Name -> TTImp -> Bool
@@ -446,27 +459,30 @@ hasNameInsideDeep @{tyi} nm = hasInside empty . allVarNames where
   hasInside : (visited : SortedSet Name) -> (toLook : List Name) -> Bool
   hasInside visited []           = False
   hasInside visited (curr::rest) = if curr == nm then True else do
-    let new = if contains curr visited then [] else maybe [] SortedSet.toList $ lookup curr tyi.names
+    let new = if contains curr visited then [] else maybe [] SortedSet.toList $ tyi.lookupByType curr
     -- visited is limited and either growing or `new` is empty, thus `toLook` is strictly less
     assert_total $ hasInside (insert curr visited) (new ++ rest)
 
 export
 getNamesInfoInTypes : Elaboration m => TypeInfo -> m NamesInfoInTypes
-getNamesInfoInTypes ty = Names <$> go empty [ty]
+getNamesInfoInTypes ty = go neutral [ty]
   where
 
     subexprs : TypeInfo -> List TTImp
     subexprs ty = map type ty.args ++ (ty.cons >>= \con => con.type :: map type con.args)
 
-    go : SortedMap Name (SortedSet Name) -> List TypeInfo -> m $ SortedMap Name $ SortedSet Name
+    go : NamesInfoInTypes -> List TypeInfo -> m NamesInfoInTypes
     go tyi []         = pure tyi
     go tyi (ti::rest) = do
       let subes = concatMap allVarNames' $ subexprs ti
       new <- map join $ for (SortedSet.toList subes) $ \n =>
-               if isNothing $ lookup n tyi
+               if isNothing $ tyi.lookupByType n
                  then map toList $ catch $ getInfo' n
                  else pure []
-      assert_total $ go (insert ti.name subes tyi) (new ++ rest)
+      let next = { types $= insert ti.name ti
+                 , namesInTypes $= insert ti subes
+                 } tyi
+      assert_total $ go next (new ++ rest)
 
 public export
 isVar : TTImp -> Bool
