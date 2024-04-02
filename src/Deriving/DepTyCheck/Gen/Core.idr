@@ -64,12 +64,28 @@ ConstructorDerivator => DerivatorCore where
     consBodies <- for sig.targetType.cons $ \con => logBounds "consBody" [sig, con] $
       canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
+    -- prepare information about generated type arguments by constructors
+    genConParams <- either (uncurry failAt) pure $ for sig.targetType.cons.asVect $ \con => do
+      let conParams = snd $ unAppAny con.type
+      let Yes lengthCorrect = decEq conParams.length sig.targetType.args.length
+        | No _ => Left (getFC con.type, "INTERNAL ERROR: wrong count of unapp of constructor \{show con.name}")
+      let genConParams = sig.generatedParams.asVect <&> \gv => getExpr $ index' conParams $ rewrite lengthCorrect in gv
+      Right genConParams
+    -- clean up prefixes of potential indices, we kinda depend here on fact that constructor expressions are already normalised
+    let genConParams = transpose . map cutAppPrefix . transpose $ genConParams
+
     -- calculate which constructors are recursive and which are not
-    consRecs <- logBounds "consRec" [sig] $ pure $ sig.targetType.cons <&> \con => do
+    consRecs <- logBounds "consRec" [sig] $ pure $ sig.targetType.cons `zipV` genConParams <&> \(con, genConIdxs) => do
       let False = isRecursive {containingType=Just sig.targetType} con
         | True => (con, DirectlyRecursive)
       -- this constructor is not directly recursive, check if any of generated indices are indexed by a recursive constructor
-      (con, ?foo)
+      let conArgNames = fromList $ name <$> con.args
+      let namesInGivenConParams = concatMap allVarNames' genConIdxs
+      let externalNamesInGivenConParams = SortedSet.toList $ namesInGivenConParams `difference` conArgNames
+      -- now we want to check if external names can refer to non-constructors and/or recursive constructors;
+      -- if yes, then this constructor is potentially indexed by recursive something
+      let rec = if any ((/= Just False) . isRecursiveConstructor) externalNamesInGivenConParams then IndexedByRecursive else NonRecursive
+      (con, rec)
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend

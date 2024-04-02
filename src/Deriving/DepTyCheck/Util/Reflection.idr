@@ -15,6 +15,9 @@ import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
+import public Decidable.Equality
+import public Decidable.Equality.Core
+
 import public Deriving.DepTyCheck.Util.Alternative
 import public Deriving.DepTyCheck.Util.Collections
 import public Deriving.DepTyCheck.Util.Fin
@@ -580,6 +583,26 @@ namespace UpToRenaming
   export
   [UpToRenaming] Eq TTImp where
     x == y = (x == y) @{UpToSubst @{empty}}
+
+export
+cutAppPrefix : Vect n TTImp -> Vect n TTImp
+cutAppPrefix [] = []
+cutAppPrefix {n=S k} xs@(_::_) = do
+  let unappXs = xs <&> map @{Compose} getExpr . unAppAny
+  let S Z = List.length . nub @{UpToRenaming} $ fst <$> unappXs.asList
+    | _ => xs -- what is applied differs, to stop reduction
+  let first::unappXs = snd <$> unappXs
+  let unappXs : Maybe $ Vect k $ Vect first.length TTImp = for unappXs $ \lst => do
+    let Yes lc = decEq first.length lst.length
+      | No _ => Nothing
+    rewrite lc
+    Just lst.asVect
+  let Just unappXs = unappXs
+    | Nothing => xs -- different count of args in apps, stop reduction
+  let unappXs = transpose $ first.asVect :: unappXs
+  let [unevenApp] = filter ((> 1) . List.length . nub @{UpToRenaming} . toList) unappXs.asList
+    | _ => xs -- either all equal, or no single reduction point
+  unevenApp
 
 -- Returns a list without duplications
 export
