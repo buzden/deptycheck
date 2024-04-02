@@ -72,7 +72,7 @@ ConstructorDerivator => DerivatorCore where
       let genConParams = sig.generatedParams.asVect <&> \gv => getExpr $ index' conParams $ rewrite lengthCorrect in gv
       Right genConParams
     -- clean up prefixes of potential indices, we kinda depend here on fact that constructor expressions are already normalised
-    let genConParams = transpose . map cutAppPrefix . transpose $ genConParams
+    let genConParams = transpose . map (cutAppPrefix {n=sig.targetType.cons.length}) . transpose $ genConParams
 
     -- calculate which constructors are recursive and which are not
     consRecs <- logBounds "consRec" [sig] $ pure $ sig.targetType.cons `zipV` genConParams <&> \(con, genConIdxs) => do
