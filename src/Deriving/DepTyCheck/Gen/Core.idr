@@ -28,9 +28,13 @@ isRec DirectlyRecursive  = True
 isRec NonRecursive       = False
 
 ||| Check if we are able to call for this constructor on a dry fuel
-notDirectlyRec : Recursiveness -> Bool
-notDirectlyRec NonRecursive       = True
-notDirectlyRec DirectlyRecursive  = False
+isDirectlyRec : Recursiveness -> Bool
+isDirectlyRec DirectlyRecursive  = True
+isDirectlyRec NonRecursive       = False
+
+||| Property is implication from the strong property to the weak one
+0 recStrengthProp : So (isDirectlyRec r) -> So (isRec r)
+recStrengthProp {r=DirectlyRecursive} Oh = Oh
 
 ----------------------------
 --- Derivation functions ---
@@ -91,20 +95,15 @@ ConstructorDerivator => DerivatorCore where
       iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
-          let nonRecCons = fst <$> filter (notDirectlyRec . snd) consRecs in
+          let nonRecCons = fst <$> filter (not . isDirectlyRec . snd) consRecs in
           let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf "\{logPosition sig} (dry fuel)".label (nonRecCons <&> callConsGen dry)
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-          let selectFuel : Recursiveness -> String
-              selectFuel DirectlyRecursive  = subFuelArg
-              selectFuel NonRecursive       = fuelAr
-          let leftDepthExpr : ?; leftDepthExpr = var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
-          let weight : Recursiveness -> TTImp
-              weight DirectlyRecursive  = leftDepthExpr
-              weight NonRecursive       = liftWeight1
+          let selectFuel = \r => varStr $ if isDirectlyRec r then subFuelArg else fuelAr
+          let weight = \r => if isRec r then var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg else liftWeight1
           var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
-                                                           (consRecs <&> \(con, rec) => (weight rec, callConsGen (varStr $ selectFuel rec) con))
+                                                           (consRecs <&> \(con, rec) => (weight rec, callConsGen (selectFuel rec) con))
         ]
 
       where
