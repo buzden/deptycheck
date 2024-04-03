@@ -47,6 +47,17 @@ recStrengthProp {r=DirectlyRecursive} Oh = Oh
 --- Derivation functions ---
 ----------------------------
 
+[Short] Show TTImp where
+  show expr = do
+    let (l, rs) = unAppAny expr
+    "\{l}\{concatMap (const " (...)") rs}"
+
+printMatrix : Foldable f => Foldable t => Elaboration m => (desc : String) -> f (t TTImp) -> m ()
+printMatrix desc xxs = do
+  logMsg "debug" 0 desc
+  for_ xxs $ \xs => do
+    logMsg "debug" 0 "- \{joinBy ", " $ map (show @{Short}) $ toList xs}"
+
 export
 ConstructorDerivator => DerivatorCore where
   canonicBody sig n = do
@@ -72,20 +83,24 @@ ConstructorDerivator => DerivatorCore where
       let genConParams = sig.generatedParams.asVect <&> \gv => getExpr $ index' conParams $ rewrite lengthCorrect in gv
       Right genConParams
     -- clean up prefixes of potential indices, we kinda depend here on fact that constructor expressions are already normalised
+    printMatrix "before" genConParams
     let genConParams = transpose . map (cutAppPrefix {n=sig.targetType.cons.length}) . transpose $ genConParams
+    printMatrix "after" genConParams
 
     -- calculate which constructors are recursive and which are not
-    consRecs <- logBounds "consRec" [sig] $ pure $ sig.targetType.cons `zipV` genConParams <&> \(con, genConIdxs) => do
+    consRecs <- logBounds "consRec" [sig] $ for (sig.targetType.cons `zipV` genConParams) $ \(con, genConIdxs) => do
       let False = isRecursive {containingType=Just sig.targetType} con
-        | True => (con, DirectlyRecursive)
+        | True => pure (con, DirectlyRecursive)
       -- this constructor is not directly recursive, check if any of generated indices are indexed by a recursive constructor
       let conArgNames = fromList $ name <$> con.args
       let namesInGivenConParams = concatMap allVarNames' genConIdxs
+      logMsg "debug" 0 "\{show con.name}: names in givens: \{show namesInGivenConParams.asList}"
       let externalNamesInGivenConParams = SortedSet.toList $ namesInGivenConParams `difference` conArgNames
+      logMsg "debug" 0 "\{show con.name}: extrnal names in givens: \{show externalNamesInGivenConParams}"
       -- now we want to check if external names can refer to non-constructors and/or recursive constructors;
       -- if yes, then this constructor is potentially indexed by recursive something
       let rec = if any ((/= Just False) . isRecursiveConstructor) externalNamesInGivenConParams then IndexedByRecursive else NonRecursive
-      (con, rec)
+      pure (con, rec)
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
