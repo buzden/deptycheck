@@ -60,25 +60,20 @@ canonicConsBody sig name con = do
   -- Determine pairs of names which should be `decEq`'ed
   let getAndInc : forall m. MonadState Nat m => m Nat
       getAndInc = get <* modify S
-  ((givenConArgs, decEqedNames, nonBasicNamesReplacement, _), bindExprs) <-
-    runStateT (empty, empty, empty, 0) {stateType=(SortedSet Name, SortedSet (String, String), SortedMap Name String, Nat)} {m} $
+  ((givenConArgs, decEqedNames, _), bindExprs) <-
+    runStateT (empty, empty, 0) {stateType=(SortedSet Name, SortedSet (String, String), Nat)} {m} $
       for deepConsApps $ \(appliedNames ** bindExprF) => do
-        renamedAppliedNames <- for appliedNames.asVect $ \(origName, typeDetermined) => do
-          name <- case origName of
-            UN (Basic name) => pure name
-            complexName => do
-              let substName = bindNameRenamer complexName
-              modify $ insert complexName substName
-              pure substName
+        renamedAppliedNames <- for appliedNames.asVect $ \(name, typeDetermined) => do
+          let bindName = bindNameRenamer name
           if cast typeDetermined
             then pure $ const `(_) -- no need to match type-determined parameter by hand
-            else if contains origName !get
+            else if contains name !get
             then do
               -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-              let substName = "to_be_deceqed^^" ++ name ++ show !getAndInc
-              modify $ insert (name, substName)
-              pure $ \alreadyMatchedRenames => bindVar $ if contains substName alreadyMatchedRenames then name else substName
-            else modify (insert origName) $> const (bindVar name)
+              let substName = "to_be_deceqed^^" ++ bindName ++ show !getAndInc
+              modify $ insert (bindName, substName)
+              pure $ \alreadyMatchedRenames => bindVar $ if contains substName alreadyMatchedRenames then bindName else substName
+            else modify (insert name) $> const (bindVar bindName)
         let _ : Vect appliedNames.length $ SortedSet String -> TTImp = renamedAppliedNames
         pure $ \alreadyMatchedRenames => bindExprF $ \idx => index idx renamedAppliedNames $ alreadyMatchedRenames
   let bindExprs = \alreadyMatchedRenames => bindExprs <&> \f => f alreadyMatchedRenames
@@ -126,14 +121,9 @@ canonicConsBody sig name con = do
             argStrName $ MkArg {name=UN (Basic n), _} = Just n
             argStrName _                              = Nothing
 
-  let replaceNonBasicNames : Clause -> Clause
-      replaceNonBasicNames = mapClause $ \case
-        IVar fc n => IVar fc $ maybe n (UN . Basic) $ lookup n nonBasicNamesReplacement
-        expr => expr
-
   -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-  pure $ map replaceNonBasicNames $
+  pure $
     -- Happy case, given arguments conform out constructor's GADT indices
     [ deceqise (callCanonic sig name $ bindVar fuelArg) !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
     ++ if all isSimpleBindVar $ bindExprs empty then [] {- do not produce dead code if the happy case handles everything already -} else
