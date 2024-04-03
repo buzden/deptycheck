@@ -60,20 +60,25 @@ canonicConsBody sig name con = do
   -- Determine pairs of names which should be `decEq`'ed
   let getAndInc : forall m. MonadState Nat m => m Nat
       getAndInc = get <* modify S
-  ((givenConArgs, decEqedNames, _), bindExprs) <-
-    runStateT (empty, empty, 0) {stateType=(SortedSet String, SortedSet (String, String), Nat)} {m} $
+  ((givenConArgs, decEqedNames, nonBasicNamesReplacement, _), bindExprs) <-
+    runStateT (empty, empty, empty, 0) {stateType=(SortedSet Name, SortedSet (String, String), SortedMap Name String, Nat)} {m} $
       for deepConsApps $ \(appliedNames ** bindExprF) => do
-        renamedAppliedNames <- for appliedNames.asVect $ \(name, typeDetermined) => case name of
-          UN (Basic name) => if cast typeDetermined
+        renamedAppliedNames <- for appliedNames.asVect $ \(origName, typeDetermined) => do
+          name <- case origName of
+            UN (Basic name) => pure name
+            complexName => do
+              let substName = bindNameRenamer complexName
+              modify $ insert complexName substName
+              pure substName
+          if cast typeDetermined
             then pure $ const `(_) -- no need to match type-determined parameter by hand
-            else if contains name !get
+            else if contains origName !get
             then do
               -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
               let substName = "to_be_deceqed^^" ++ name ++ show !getAndInc
               modify $ insert (name, substName)
               pure $ \alreadyMatchedRenames => bindVar $ if contains substName alreadyMatchedRenames then name else substName
-            else modify (insert name) $> const (bindVar name)
-          badName => failAt conFC "Unsupported name `\{show badName}` of a parameter used in the constructor"
+            else modify (insert origName) $> const (bindVar name)
         let _ : Vect appliedNames.length $ SortedSet String -> TTImp = renamedAppliedNames
         pure $ \alreadyMatchedRenames => bindExprF $ \idx => index idx renamedAppliedNames $ alreadyMatchedRenames
   let bindExprs = \alreadyMatchedRenames => bindExprs <&> \f => f alreadyMatchedRenames
@@ -82,9 +87,9 @@ canonicConsBody sig name con = do
   let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
 
   -- Determine indices of constructor's arguments that are given
-  givenConArgs <- for givenConArgs.asList $ \givenArgNameStr => do
-    let Just idx = lookup (UN $ Basic givenArgNameStr) conArgIdxs
-      | Nothing => failAt conFC "INTERNAL ERROR: calculated given `\{givenArgNameStr}` is not found in an arguments list of the constructor"
+  givenConArgs <- for givenConArgs.asList $ \givenArgName => do
+    let Just idx = lookup givenArgName conArgIdxs
+      | Nothing => failAt conFC "INTERNAL ERROR: calculated given `\{show givenArgName}` is not found in an arguments list of the constructor"
     pure idx
 
   -- Equalise index values which must be propositionally equal to some parameters
@@ -121,9 +126,14 @@ canonicConsBody sig name con = do
             argStrName $ MkArg {name=UN (Basic n), _} = Just n
             argStrName _                              = Nothing
 
+  let replaceNonBasicNames : Clause -> Clause
+      replaceNonBasicNames = mapClause $ \case
+        IVar fc n => IVar fc $ maybe n (UN . Basic) $ lookup n nonBasicNamesReplacement
+        expr => expr
+
   -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-  pure $
+  pure $ map replaceNonBasicNames $
     -- Happy case, given arguments conform out constructor's GADT indices
     [ deceqise (callCanonic sig name $ bindVar fuelArg) !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
     ++ if all isSimpleBindVar $ bindExprs empty then [] {- do not produce dead code if the happy case handles everything already -} else

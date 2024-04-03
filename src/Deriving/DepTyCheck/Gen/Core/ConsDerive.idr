@@ -23,6 +23,11 @@ public export
 interface ConstructorDerivator where
   consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
 
+  ||| Workarond of inability to put an arbitrary name under `IBindVar`
+  bindNameRenamer : Name -> String
+  bindNameRenamer $ UN $ Basic n = n
+  bindNameRenamer n = "^bnd^" ++ show n
+
 --- Particular tactics ---
 
 ||| "Non-obligatory" means that some present external generator of some type
@@ -71,9 +76,7 @@ namespace NonObligatoryExts
 
       -- Decide how constructor arguments would be named during generation
       let bindNames : Vect (con.args.length) String
-          bindNames = flip mapWithPos .| fromList con.args .| \idx, arg => case argName arg of
-                        UN (Basic n) => n
-                        n            => (if contains idx givs then id else ("^bnd^" ++)) $ show n
+          bindNames = flip mapWithPos .| fromList con.args .| \_ => bindNameRenamer . argName
 
       -- Derive constructor calling expression for given order of generation
       let genForOrder : List (Fin con.args.length) -> m TTImp
