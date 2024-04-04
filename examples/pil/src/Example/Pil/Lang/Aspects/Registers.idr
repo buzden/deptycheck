@@ -128,7 +128,7 @@ Show (Registers rc) where
 
 --- Index-equivalence relation ---
 
-infix 0 =%=
+export infix 0 =%=
 
 -- Extensional equality regarding to the `index` function for any possible indexing argument.
 public export

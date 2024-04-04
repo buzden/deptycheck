@@ -34,7 +34,7 @@ data NoWeaker : (from, to : Emptiness) -> Type where
   DD : MaybeEmptyDeep `NoWeaker` MaybeEmptyDeep
   AS : em             `NoWeaker` MaybeEmpty
 
-infix 6 `NoWeaker`
+export infix 6 `NoWeaker`
 
 noWeaker : (from, to : Emptiness) -> Dec $ from `NoWeaker` to
 noWeaker NonEmpty       NonEmpty       = Yes %search
