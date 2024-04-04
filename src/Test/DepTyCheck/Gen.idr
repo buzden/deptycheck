@@ -573,6 +573,7 @@ mapAlternativesWith = flip mapAlternativesOf
 
 -- Priority is chosen to be able to use these operators without parenthesis
 -- in expressions of lists, i.e. involving operators `::` and `++`.
+export
 infix 8 `mapAlternativesOf`
       , `mapAlternativesWith`
 
@@ -596,7 +597,7 @@ suchThat_withPrf g p = mapMaybe lp g where
     lp x | True  = Just $ Element x $ eqToSo prf
     lp x | False = Nothing
 
-infixl 4 `suchThat`
+export infixl 4 `suchThat`
 
 public export
 suchThat : Gen em a -> (a -> Bool) -> Gen0 a

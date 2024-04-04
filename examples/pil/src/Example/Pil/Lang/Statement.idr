@@ -6,7 +6,7 @@ import public Example.Pil.Lang.Expression
 
 %default total
 
-infix 2 #=, ?#=, !#=, %=
+export infix 2 #=, ?#=, !#=, %=
 
 public export
 data Statement : (preV  : Variables) -> (preR  : Registers rc) ->

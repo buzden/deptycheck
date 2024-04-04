@@ -6,7 +6,7 @@ import public Infra
 
 %language ElabReflection
 
-infixr 3 `lam`
+private infixr 3 `lam`
 
 %runElab checkEq "fst, rename, diff names" True (\x : Nat => \y : Nat => x) (\v : Nat => \w : Nat => v)
 %runElab checkEq "fst, rename, same names" True (\x : Nat => \y : Nat => x) (\y : Nat => \x : Nat => y)

@@ -5,7 +5,7 @@ import Language.Reflection.Syntax
 
 %default total
 
-infix 1 @@@
+private infix 1 @@@
 
 (@@@) : b -> a -> (a, b)
 y @@@ x = (x, y)

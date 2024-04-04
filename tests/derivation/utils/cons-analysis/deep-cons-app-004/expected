@@ -26,31 +26,31 @@ LOG gen.auto.deep-cons-app:0: applied names:   []
 LOG gen.auto.deep-cons-app:0: bind expression: XX (Right [])
 LOG gen.auto.deep-cons-app:0: 
 LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b]
-LOG gen.auto.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S Z)) `MC` MM))))
+LOG gen.auto.deep-cons-app:0: original expression: XX (Left (MC (S Z) (MC (S (S Z)) (MC (S (S (S Z))) MM))))
 LOG gen.auto.deep-cons-app:0: ------------------------
 LOG gen.auto.deep-cons-app:0: applied names:   []
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S Z)) `MC` MM))))
+LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (MC (S Z) (MC (S (S Z)) (MC (S (S (S Z))) MM))))
 LOG gen.auto.deep-cons-app:0: 
 LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b]
-LOG gen.auto.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S n) `MC` (S (S (S Z)) `MC` MM))))
+LOG gen.auto.deep-cons-app:0: original expression: XX (Left (MC (S Z) (MC (S (S n)) (MC (S (S (S Z))) MM))))
 LOG gen.auto.deep-cons-app:0: ------------------------
 LOG gen.auto.deep-cons-app:0: applied names:   [n]
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (S Z `MC` (S (S n0) `MC` (S (S (S Z)) `MC` MM))))
+LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (MC (S Z) (MC (S (S n0)) (MC (S (S (S Z))) MM))))
 LOG gen.auto.deep-cons-app:0: 
 LOG gen.auto.deep-cons-app:0: given free names:    []
-LOG gen.auto.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S Z)) `MC` MM))))
+LOG gen.auto.deep-cons-app:0: original expression: XX (Left (MC (S Z) (MC (S (S Z)) (MC (S (S (S Z))) MM))))
 LOG gen.auto.deep-cons-app:0: ------------------------
 LOG gen.auto.deep-cons-app:0: applied names:   []
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S Z)) `MC` MM))))
+LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (MC (S Z) (MC (S (S Z)) (MC (S (S (S Z))) MM))))
 LOG gen.auto.deep-cons-app:0: 
 LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b, c]
-LOG gen.auto.deep-cons-app:0: original expression: XX (Left (a `MC` (b `MC` (c `MC` MM))))
+LOG gen.auto.deep-cons-app:0: original expression: XX (Left (MC a (MC b (MC c MM))))
 LOG gen.auto.deep-cons-app:0: ------------------------
 LOG gen.auto.deep-cons-app:0: applied names:   [a, b, c]
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (a0 `MC` (b1 `MC` (c2 `MC` MM))))
+LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (MC a0 (MC b1 (MC c2 MM))))
 LOG gen.auto.deep-cons-app:0: 
 LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b, c]
-LOG gen.auto.deep-cons-app:0: original expression: XX (Left (a `MC` (Z `MC` (c `MC` MM))))
+LOG gen.auto.deep-cons-app:0: original expression: XX (Left (MC a (MC Z (MC c MM))))
 LOG gen.auto.deep-cons-app:0: ------------------------
 LOG gen.auto.deep-cons-app:0: applied names:   [a, c]
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (a0 `MC` (Z `MC` (c1 `MC` MM))))
+LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (MC a0 (MC Z (MC c1 MM))))

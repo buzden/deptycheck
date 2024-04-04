@@ -5,7 +5,7 @@ import Language.Reflection.Syntax
 
 %default total
 
-infix 1 @@@
+private infix 1 @@@
 
 (@@@) : b -> a -> (a, b)
 y @@@ x = (x, y)
@@ -19,7 +19,7 @@ data MyList : Type -> Type where
   MM : MyList a
   MC : a -> MyList a -> MyList a
 
-infixr 5 `MC`
+private infixr 5 `MC`
 
 public export
 consApps : Elab $ List (List Name, TTImp)
