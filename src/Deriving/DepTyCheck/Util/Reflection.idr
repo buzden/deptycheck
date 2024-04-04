@@ -144,8 +144,8 @@ reAppAny1 l $ NamedApp n e = namedApp l n e
 reAppAny1 l $ AutoApp e    = autoApp l e
 reAppAny1 l $ WithApp e    = IWithApp EmptyFC l e
 
-public export
-reAppAny : TTImp -> List AnyApp -> TTImp
+public export %inline
+reAppAny : Foldable f => TTImp -> f AnyApp -> TTImp
 reAppAny = foldl reAppAny1
 
 --- Specific expressions building helpers ---
@@ -479,6 +479,11 @@ isRecursive : NamesInfoInTypes => (con : Con) -> {default Nothing containingType
 isRecursive con = case the (Maybe TypeInfo) $ containingType <|> typeByCon con of
   Just containingType => any (hasNameInsideDeep containingType.name) $ conSubexprs con
   Nothing             => False
+
+-- returns `Nothing` if given name is not a constructor
+export
+isRecursiveConstructor : NamesInfoInTypes => Name -> Maybe Bool
+isRecursiveConstructor @{tyi} n = flip lookup tyi.cons n <&> \(ty, con) => isRecursive {containingType=Just ty} con
 
 export
 getNamesInfoInTypes : Elaboration m => TypeInfo -> m NamesInfoInTypes
