@@ -27,6 +27,10 @@ namespace GenSignature
   characteristics : GenSignature -> (String, List Nat)
   characteristics $ MkGenSignature ty giv = (show ty.name, toNatList giv)
 
+public export %inline
+(.generatedParams) : (sig : GenSignature) -> SortedSet $ Fin sig.targetType.args.length
+sig.generatedParams = fromList (allFins sig.targetType.args.length) `difference` sig.givenParams
+
 export
 SingleLogPosition GenSignature where
   logPosition sig = "\{show sig.targetType.name}\{show sig.givenParams.asList}"

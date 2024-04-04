@@ -34,6 +34,22 @@ namespace List
   (.asVect) : (xs : List a) -> Vect xs.length a
   xs.asVect = fromList xs
 
+  public export
+  (.withIdx) : (xs : List a) -> List (Fin xs.length, a)
+  (.withIdx) []      = []
+  (.withIdx) (x::xs) = (FZ, x) :: (xs.withIdx <&> mapFst FS)
+
+namespace Vect
+
+  public export %inline
+  (.asList) : Vect n a -> List a
+  (.asList) = toList
+
+  public export
+  (.withIdx) : (xs : Vect n a) -> Vect n (Fin n, a)
+  (.withIdx) []      = []
+  (.withIdx) (x::xs) = (FZ, x) :: (xs.withIdx <&> mapFst FS)
+
 namespace SortedMap
 
   public export %inline

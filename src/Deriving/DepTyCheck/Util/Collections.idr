@@ -82,6 +82,13 @@ findLastIndex : (a -> Bool) -> (xs : List a) -> Maybe $ Fin xs.length
 findLastIndex f []      = Nothing
 findLastIndex f (x::xs) = FS <$> findLastIndex f xs <|> whenT (f x) FZ
 
+export
+zipV : (xs : List a) -> Vect xs.length b -> List (a, b)
+zipV []      []      = []
+zipV (x::xs) (y::ys) = (x, y) :: zipV xs ys
+
+export infixr 6 `zipV` -- as `zip`
+
 --- Transitive clojure stuff ---
 
 export covering

@@ -144,8 +144,8 @@ reAppAny1 l $ NamedApp n e = namedApp l n e
 reAppAny1 l $ AutoApp e    = autoApp l e
 reAppAny1 l $ WithApp e    = IWithApp EmptyFC l e
 
-public export
-reAppAny : TTImp -> List AnyApp -> TTImp
+public export %inline
+reAppAny : Foldable f => TTImp -> f AnyApp -> TTImp
 reAppAny = foldl reAppAny1
 
 --- Specific expressions building helpers ---
@@ -396,6 +396,10 @@ deriveMatchingCons retTy matcher funName ti = do
       patClause (var funName .$ matchCon con) $ matcher con
   [claim, body]
 
+public export
+conSubexprs : Con -> List TTImp
+conSubexprs con = map type con.args ++ (map getExpr $ snd $ unAppAny con.type)
+
 -------------------------------------------------
 --- Syntactic analysis of `TTImp` expressions ---
 -------------------------------------------------
@@ -437,7 +441,27 @@ allVarNames = SortedSet.toList . allVarNames'
 export
 record NamesInfoInTypes where
   constructor Names
-  names : SortedMap Name $ SortedSet Name
+  types : SortedMap Name TypeInfo
+  cons  : SortedMap Name (TypeInfo, Con)
+  namesInTypes : SortedMap TypeInfo $ SortedSet Name
+
+lookupByType : NamesInfoInTypes => Name -> Maybe $ SortedSet Name
+lookupByType @{tyi} = flip lookup tyi.types >=> flip lookup tyi.namesInTypes
+
+lookupByCon : NamesInfoInTypes => Name -> Maybe $ SortedSet Name
+lookupByCon @{tyi} = concatMap @{Deep} lookupByType . SortedSet.toList . concatMap allVarNames' . conSubexprs . snd <=< flip lookup tyi.cons
+
+typeByCon : NamesInfoInTypes => Con -> Maybe TypeInfo
+typeByCon @{tyi} = map fst . flip lookup tyi.cons . name
+
+Semigroup NamesInfoInTypes where
+  Names ts cs nit <+> Names ts' cs' nit' = Names (ts `mergeLeft` ts') (cs `mergeLeft` cs') (nit <+> nit')
+
+Eq TypeInfo where (==) = (==) `on` name
+Ord TypeInfo where compare = comparing name
+
+Monoid NamesInfoInTypes where
+  neutral = Names empty empty empty
 
 export
 hasNameInsideDeep : NamesInfoInTypes => Name -> TTImp -> Bool
@@ -446,27 +470,42 @@ hasNameInsideDeep @{tyi} nm = hasInside empty . allVarNames where
   hasInside : (visited : SortedSet Name) -> (toLook : List Name) -> Bool
   hasInside visited []           = False
   hasInside visited (curr::rest) = if curr == nm then True else do
-    let new = if contains curr visited then [] else maybe [] SortedSet.toList $ lookup curr tyi.names
+    let new = if contains curr visited then [] else maybe [] SortedSet.toList $ lookupByType curr
     -- visited is limited and either growing or `new` is empty, thus `toLook` is strictly less
     assert_total $ hasInside (insert curr visited) (new ++ rest)
 
 export
+isRecursive : NamesInfoInTypes => (con : Con) -> {default Nothing containingType : Maybe TypeInfo} -> Bool
+isRecursive con = case the (Maybe TypeInfo) $ containingType <|> typeByCon con of
+  Just containingType => any (hasNameInsideDeep containingType.name) $ conSubexprs con
+  Nothing             => False
+
+-- returns `Nothing` if given name is not a constructor
+export
+isRecursiveConstructor : NamesInfoInTypes => Name -> Maybe Bool
+isRecursiveConstructor @{tyi} n = flip lookup tyi.cons n <&> \(ty, con) => isRecursive {containingType=Just ty} con
+
+export
 getNamesInfoInTypes : Elaboration m => TypeInfo -> m NamesInfoInTypes
-getNamesInfoInTypes ty = Names <$> go empty [ty]
+getNamesInfoInTypes ty = go neutral [ty]
   where
 
     subexprs : TypeInfo -> List TTImp
-    subexprs ty = map type ty.args ++ (ty.cons >>= \con => con.type :: map type con.args)
+    subexprs ty = map type ty.args ++ (ty.cons >>= conSubexprs)
 
-    go : SortedMap Name (SortedSet Name) -> List TypeInfo -> m $ SortedMap Name $ SortedSet Name
+    go : NamesInfoInTypes -> List TypeInfo -> m NamesInfoInTypes
     go tyi []         = pure tyi
     go tyi (ti::rest) = do
       let subes = concatMap allVarNames' $ subexprs ti
       new <- map join $ for (SortedSet.toList subes) $ \n =>
-               if isNothing $ lookup n tyi
+               if isNothing $ lookupByType n
                  then map toList $ catch $ getInfo' n
                  else pure []
-      assert_total $ go (insert ti.name subes tyi) (new ++ rest)
+      let next = { types $= insert ti.name ti
+                 , namesInTypes $= insert ti subes
+                 , cons $= mergeLeft $ fromList $ ti.cons <&> \con => (con.name, ti, con)
+                 } tyi
+      assert_total $ go next (new ++ rest)
 
 public export
 isVar : TTImp -> Bool

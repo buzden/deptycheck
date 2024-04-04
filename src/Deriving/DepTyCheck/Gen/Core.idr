@@ -15,13 +15,26 @@ import public Language.Reflection.Types
 
 --- Ancillary data structures ---
 
-data Recursiveness = Recursive | NonRecursive
+data Recursiveness =
+  ||| When constructor refers transitively to the type it belongs
+  DirectlyRecursive |
+  ||| When constructor does not refer to the type it belongs,
+  ||| nor to any recursive constructor in its generated indices
+  NonRecursive
 
-Eq Recursiveness where
-  Recursive    == Recursive    = True
-  NonRecursive == NonRecursive = True
-  Recursive    == NonRecursive = False
-  NonRecursive == Recursive    = False
+||| Checks if the status is anyhow recursive, directly or through index
+isRec : Recursiveness -> Bool
+isRec DirectlyRecursive  = True
+isRec NonRecursive       = False
+
+||| Check if we are able to call for this constructor on a dry fuel
+isDirectlyRec : Recursiveness -> Bool
+isDirectlyRec DirectlyRecursive  = True
+isDirectlyRec NonRecursive       = False
+
+||| Property is implication from the strong property to the weak one
+0 recStrengthProp : So (isDirectlyRec r) -> So (isRec r)
+recStrengthProp {r=DirectlyRecursive} Oh = Oh
 
 ----------------------------
 --- Derivation functions ---
@@ -46,9 +59,9 @@ ConstructorDerivator => DerivatorCore where
 
     -- calculate which constructors are recursive and which are not
     consRecs <- logBounds "consRec" [sig] $ pure $ sig.targetType.cons <&> \con => do
-      let conExprs = map type con.args ++ (getExpr <$> snd (unAppAny con.type))
-      let r = any (hasNameInsideDeep sig.targetType.name) conExprs
-      (con, toRec r)
+      let False = isRecursive {containingType=Just sig.targetType} con
+        | True => (con, DirectlyRecursive)
+      (con, NonRecursive)
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
@@ -72,8 +85,8 @@ ConstructorDerivator => DerivatorCore where
     fuelDecisionExpr : (fuelArg : String) -> List (Con, Recursiveness) -> TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
-      -- check if there are any recursive constructors
-      let True = isJust $ find ((== Recursive) . snd) consRecs
+      -- check if there are any non-recursive constructors
+      let True = isJust $ find (isRec . snd) consRecs
         | False =>
             -- no recursive constructors, thus just call all without spending fuel
             callOneOf "\{logPosition sig} (non-recursive)".label (consRecs <&> callConsGen (varStr fuelAr) . fst)
@@ -82,29 +95,21 @@ ConstructorDerivator => DerivatorCore where
       iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
-          let nonRecCons = fst <$> filter ((== NonRecursive) . snd) consRecs in
+          let nonRecCons = fst <$> filter (not . isDirectlyRec . snd) consRecs in
           let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf "\{logPosition sig} (dry fuel)".label (nonRecCons <&> callConsGen dry)
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-          let selectFuel : Recursiveness -> String
-              selectFuel Recursive    = subFuelArg
-              selectFuel NonRecursive = fuelAr
-          let weight : Recursiveness -> TTImp
-              weight Recursive    = var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
-              weight NonRecursive = liftWeight1
+          let selectFuel = \r => varStr $ if isDirectlyRec r then subFuelArg else fuelAr
+          let weight = \r => if isRec r then var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg else liftWeight1
           var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
-                                                           (consRecs <&> \(con, rec) => (weight rec, callConsGen (varStr $ selectFuel rec) con))
+                                                           (consRecs <&> \(con, rec) => (weight rec, callConsGen (selectFuel rec) con))
         ]
 
       where
 
         callConsGen : (fuel : TTImp) -> Con -> TTImp
         callConsGen fuel con = canonicDefaultRHS' namesWrapper sig .| consGenName con .| fuel
-
-    toRec : Bool -> Recursiveness
-    toRec True  = Recursive
-    toRec False = NonRecursive
 
 export
 MainCoreDerivator : ConstructorDerivator => DerivatorCore
