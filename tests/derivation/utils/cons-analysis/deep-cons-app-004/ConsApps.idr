@@ -19,7 +19,7 @@ data MyList : Type -> Type where
   MM : MyList a
   MC : a -> MyList a -> MyList a
 
-private infixr 5 `MC`
+export infixr 5 `MC`
 
 public export
 consApps : Elab $ List (List Name, TTImp)
