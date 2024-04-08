@@ -357,7 +357,7 @@ For building and testing we use [`pack`](https://github.com/stefan-hoeck/idris2-
 > Despite that, to make [LSP](https://github.com/idris-community/idris2-lsp) working well,
 > only a single code-related `ipkg` file is left in the top-level folder of the project.
 
-The main `pack`'s collection we test against is in the file called [`.pack-collection`](/.pack-collection) in the root of this repository.
+The main `pack`'s collection we test the library against is the one mentioned in the last section of the library version.
 Also, we test against the latest pack collection nightly.
 
 We try to use as fresh version of the Idris 2 compiler and thirdparty libraries as possible.

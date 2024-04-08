@@ -1,1 +1,3 @@
-nightly-240404
+#!/bin/sh
+
+(grep 'version *= *\([0-9]\+.\)\+[0-9]\{6\}$' deptycheck.ipkg || echo 'latest') | sed 's/.*\./nightly-/'

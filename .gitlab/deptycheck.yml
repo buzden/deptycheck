@@ -20,7 +20,7 @@ pack:prepare:
   stage: .pre
   script:
     - pack update-db
-    - pack switch "$( if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then echo latest; else cat .pack-collection; fi )"
+    - pack switch "$( if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then echo latest; else ./.pack-collection; fi )"
     - ./.patch-chez-gc-handler idris2
 
 stages:
