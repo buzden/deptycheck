@@ -3,20 +3,28 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty Nat)} -> Gen MaybeEmpty Bool
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW AutoImplicit external^<Prelude.Types.Nat>[] : IPi.  (MW ExplicitArg {arg:1} : IVar Data.Fuel.Fuel)
-                                                            -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                    $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                                    $ IVar Prelude.Types.Nat))
-    => ILocal (IApp. IVar <Prelude.Basics.Bool>[] $ IVar ^outmost-fuel^)
-         IClaim MW
-                Export
-                []
-                (MkTy <Prelude.Basics.Bool>[]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ IVar Prelude.Basics.Bool)))
-         IDef <Prelude.Basics.Bool>[]
-              [ PatClause (IApp. IVar <Prelude.Basics.Bool>[] $ Implicit True)
-                          (IVar empty) ]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg
+      MW
+      AutoImplicit
+      (Just "external^<Prelude.Types.Nat>[]")
+      (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fuel.Fuel")
+       .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat")
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<Prelude.Basics.Bool>[]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Basics.Bool"
+                 })
+          , IDef emptyFC "<Prelude.Basics.Bool>[]" [var "<Prelude.Basics.Bool>[]" .$ implicitTrue .= var "empty"]
+          ]
+      , scope = var "<Prelude.Basics.Bool>[]" .$ var "^outmost-fuel^"
+      }
+

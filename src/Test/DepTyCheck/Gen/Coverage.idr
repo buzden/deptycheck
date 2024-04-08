@@ -18,8 +18,6 @@ import public Deriving.DepTyCheck.Util.Logging
 import public Deriving.DepTyCheck.Util.Reflection
 
 import public Language.Reflection
-import public Language.Reflection.Types
-import public Language.Reflection.Syntax
 
 import Test.DepTyCheck.Gen
 

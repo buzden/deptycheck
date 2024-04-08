@@ -21,23 +21,32 @@ import public Deriving.DepTyCheck.Util.Fin
 import public Deriving.DepTyCheck.Util.Logging
 import public Deriving.DepTyCheck.Util.Syntax
 
+import public Language.Reflection.Compat
 import public Language.Reflection.TTImp
-import public Language.Reflection.Types
 import public Language.Reflection.Pretty
 
+import public Text.PrettyPrint.Bernardy
+
 %default total
+
+%hide Language.Reflection.Syntax.pi
+%hide Language.Reflection.Syntax.piAll
+%hide Language.Reflection.Syntax.unPi
 
 -----------------------
 --- Pretty-printing ---
 -----------------------
 
+LayoutOpts : LayoutOpts
+LayoutOpts = Opts 152 -- acceptable line length
+
 export
 Interpolation TTImp where
-  interpolate expr = show $ assert_total $ pretty {ann=Unit} expr
+  interpolate = render LayoutOpts . pretty
 
 export
 Interpolation Decl where
-  interpolate decl = show $ assert_total $ pretty {ann=Unit} decl
+  interpolate = render LayoutOpts . pretty
 
 export
 SingleLogPosition Con where
@@ -591,7 +600,7 @@ allInvolvedTypes minimalRig ti = toList <$> go [ti] empty where
       | [] => pure curr
     let next = insert c.name c curr
     args <- atRig M0 $ join <$> for c.args typesOfArg
-    cons <- join <$> for c.cons typesOfCon
+    cons <- join <$> for c.tyCons typesOfCon
     assert_total $ go (args ++ cons ++ left) next
     where
       atRig : Count -> m (List a) -> m (List a)

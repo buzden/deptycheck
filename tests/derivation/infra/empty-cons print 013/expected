@@ -3,218 +3,222 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (n : Nat) -> (m : Nat) -> (p : Nat) -> (k : Nat) -> Gen MaybeEmpty (X n m p k)
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg outer^<n> : Implicit True)
-    => (MW ExplicitArg outer^<m> : Implicit True)
-    => (MW ExplicitArg outer^<p> : Implicit True)
-    => (MW ExplicitArg outer^<k> : Implicit True)
-    => ILocal (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]
-                   $ IVar ^outmost-fuel^
-                   $ IVar outer^<n>
-                   $ IVar outer^<m>
-                   $ IVar outer^<p>
-                   $ IVar outer^<k>)
-         IClaim MW
-                Export
-                []
-                (MkTy <DerivedGen.X>[0, 1, 2, 3]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
-                          -> (MW ExplicitArg {arg:2} : IVar Prelude.Types.Nat)
-                          -> (MW ExplicitArg {arg:3} : IVar Prelude.Types.Nat)
-                          -> (MW ExplicitArg {arg:4} : IVar Prelude.Types.Nat)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ (IApp. IVar DerivedGen.X
-                                         $ IVar {arg:1}
-                                         $ IVar {arg:2}
-                                         $ IVar {arg:3}
-                                         $ IVar {arg:4}))))
-         IDef <DerivedGen.X>[0, 1, 2, 3]
-              [ PatClause (IApp. IVar <DerivedGen.X>[0, 1, 2, 3]
-                               $ IBindVar ^fuel_arg^
-                               $ IBindVar inter^<{arg:1}>
-                               $ IBindVar inter^<{arg:2}>
-                               $ IBindVar inter^<{arg:3}>
-                               $ IBindVar inter^<{arg:4}>)
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
-                                       $ (IApp. IVar fromString
-                                              $ IPrimVal DerivedGen.X[0, 1, 2, 3] (non-recursive))
-                                       $ (IApp. INamedApp (IVar Test.DepTyCheck.Gen.oneOf)
-                                                          em
-                                                          (IVar MaybeEmpty)
-                                              $ (IApp. IVar ::
-                                                     $ (IApp. IVar <<DerivedGen.XE>>
-                                                            $ IVar ^fuel_arg^
-                                                            $ IVar inter^<{arg:1}>
-                                                            $ IVar inter^<{arg:2}>
-                                                            $ IVar inter^<{arg:3}>
-                                                            $ IVar inter^<{arg:4}>)
-                                                     $ (IApp. IVar ::
-                                                            $ (IApp. IVar <<DerivedGen.XS>>
-                                                                   $ IVar ^fuel_arg^
-                                                                   $ IVar inter^<{arg:1}>
-                                                                   $ IVar inter^<{arg:2}>
-                                                                   $ IVar inter^<{arg:3}>
-                                                                   $ IVar inter^<{arg:4}>)
-                                                            $ IVar Nil)))))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<DerivedGen.XE>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:2} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:3} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:4} : IVar Prelude.Types.Nat)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ (IApp. IVar DerivedGen.X
-                                                            $ IVar {arg:1}
-                                                            $ IVar {arg:2}
-                                                            $ IVar {arg:3}
-                                                            $ IVar {arg:4}))))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<DerivedGen.XS>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:2} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:3} : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:4} : IVar Prelude.Types.Nat)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ (IApp. IVar DerivedGen.X
-                                                            $ IVar {arg:1}
-                                                            $ IVar {arg:2}
-                                                            $ IVar {arg:3}
-                                                            $ IVar {arg:4}))))
-                            IDef <<DerivedGen.XE>>
-                                 [ WithClause (IApp. IVar <<DerivedGen.XE>>
-                                                   $ IBindVar ^cons_fuel^
-                                                   $ IBindVar n
-                                                   $ (IApp. IVar Prelude.Types.S
-                                                          $ IBindVar to_be_deceqed^^n0)
-                                                   $ IBindVar m
-                                                   $ IBindVar to_be_deceqed^^n1)
-                                              MW
-                                              (IApp. IVar Decidable.Equality.decEq
-                                                   $ IVar to_be_deceqed^^n0
-                                                   $ IVar n)
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ExplicitArg (Just "outer^<n>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<m>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<p>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<k>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<DerivedGen.X>[0, 1, 2, 3]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                     .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                     .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                     .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (var "DerivedGen.X" .$ var "{arg:1}" .$ var "{arg:2}" .$ var "{arg:3}" .$ var "{arg:4}")
+                 })
+          , IDef
+              emptyFC
+              "<DerivedGen.X>[0, 1, 2, 3]"
+              [       var "<DerivedGen.X>[0, 1, 2, 3]"
+                   .$ bindVar "^fuel_arg^"
+                   .$ bindVar "inter^<{arg:1}>"
+                   .$ bindVar "inter^<{arg:2}>"
+                   .$ bindVar "inter^<{arg:3}>"
+                   .$ bindVar "inter^<{arg:4}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.XE>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "DerivedGen.X" .$ var "{arg:1}" .$ var "{arg:2}" .$ var "{arg:3}" .$ var "{arg:4}")
+                                })
+                         , IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.XS>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "DerivedGen.X" .$ var "{arg:1}" .$ var "{arg:2}" .$ var "{arg:3}" .$ var "{arg:4}")
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.XE>>"
+                             [ withClause
+                                 { lhs =
+                                        var "<<DerivedGen.XE>>"
+                                     .$ bindVar "^cons_fuel^"
+                                     .$ bindVar "n"
+                                     .$ (var "Prelude.Types.S" .$ bindVar "to_be_deceqed^^n0")
+                                     .$ bindVar "m"
+                                     .$ bindVar "to_be_deceqed^^n1"
+                                 , rig = MW
+                                 , wval = var "Decidable.Equality.decEq" .$ var "to_be_deceqed^^n0" .$ var "n"
+                                 , prf = Nothing
+                                 , flags = []
+                                 , clauses =
+                                     [ withClause
+                                         { lhs =
+                                                var "<<DerivedGen.XE>>"
+                                             .$ bindVar "^cons_fuel^"
+                                             .$ bindVar "n"
+                                             .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                             .$ bindVar "m"
+                                             .$ bindVar "to_be_deceqed^^n1"
+                                             .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                         , rig = MW
+                                         , wval = var "Decidable.Equality.decEq" .$ var "to_be_deceqed^^n1" .$ var "n"
+                                         , prf = Nothing
+                                         , flags = []
+                                         , clauses =
+                                             [       var "<<DerivedGen.XE>>"
+                                                  .$ bindVar "^cons_fuel^"
+                                                  .$ bindVar "n"
+                                                  .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                                  .$ bindVar "m"
+                                                  .$ bindVar "n"
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                               .= var "empty"
+                                             ,       var "<<DerivedGen.XE>>"
+                                                  .$ bindVar "^cons_fuel^"
+                                                  .$ bindVar "n"
+                                                  .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                                  .$ bindVar "m"
+                                                  .$ bindVar "to_be_deceqed^^n1"
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                                  .$ (var "Prelude.No" .$ implicitTrue)
+                                               .= var "empty"
+                                             ]
+                                         }
+                                     ,       var "<<DerivedGen.XE>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ bindVar "n"
+                                          .$ (var "Prelude.Types.S" .$ bindVar "to_be_deceqed^^n0")
+                                          .$ bindVar "m"
+                                          .$ bindVar "to_be_deceqed^^n1"
+                                          .$ (var "Prelude.No" .$ implicitTrue)
+                                       .= var "empty"
+                                     ]
+                                 }
+                             , var "<<DerivedGen.XE>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.XS>>"
+                             [ withClause
+                                 { lhs =
+                                        var "<<DerivedGen.XS>>"
+                                     .$ bindVar "^cons_fuel^"
+                                     .$ bindVar "n"
+                                     .$ bindVar "to_be_deceqed^^n0"
+                                     .$ bindVar "m"
+                                     .$ bindVar "to_be_deceqed^^m1"
+                                 , rig = MW
+                                 , wval = var "Decidable.Equality.decEq" .$ var "to_be_deceqed^^m1" .$ var "m"
+                                 , prf = Nothing
+                                 , flags = []
+                                 , clauses =
+                                     [ withClause
+                                         { lhs =
+                                                var "<<DerivedGen.XS>>"
+                                             .$ bindVar "^cons_fuel^"
+                                             .$ bindVar "n"
+                                             .$ bindVar "to_be_deceqed^^n0"
+                                             .$ bindVar "m"
+                                             .$ bindVar "m"
+                                             .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                         , rig = MW
+                                         , wval = var "Decidable.Equality.decEq" .$ var "to_be_deceqed^^n0" .$ var "n"
+                                         , prf = Nothing
+                                         , flags = []
+                                         , clauses =
+                                             [       var "<<DerivedGen.XS>>"
+                                                  .$ bindVar "^cons_fuel^"
+                                                  .$ bindVar "n"
+                                                  .$ bindVar "n"
+                                                  .$ bindVar "m"
+                                                  .$ bindVar "m"
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                               .= var "empty"
+                                             ,       var "<<DerivedGen.XS>>"
+                                                  .$ bindVar "^cons_fuel^"
+                                                  .$ bindVar "n"
+                                                  .$ bindVar "to_be_deceqed^^n0"
+                                                  .$ bindVar "m"
+                                                  .$ bindVar "m"
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                                  .$ (var "Prelude.No" .$ implicitTrue)
+                                               .= var "empty"
+                                             ]
+                                         }
+                                     ,       var "<<DerivedGen.XS>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ bindVar "n"
+                                          .$ bindVar "to_be_deceqed^^n0"
+                                          .$ bindVar "m"
+                                          .$ bindVar "to_be_deceqed^^m1"
+                                          .$ (var "Prelude.No" .$ implicitTrue)
+                                       .= var "empty"
+                                     ]
+                                 }
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0, 1, 2, 3] (non-recursive)"))
+                         .$ (   var "Test.DepTyCheck.Gen.oneOf"
+                             .! ("em", var "MaybeEmpty")
+                             .$ (   var "::"
+                                 .$ (   var "<<DerivedGen.XE>>"
+                                     .$ var "^fuel_arg^"
+                                     .$ var "inter^<{arg:1}>"
+                                     .$ var "inter^<{arg:2}>"
+                                     .$ var "inter^<{arg:3}>"
+                                     .$ var "inter^<{arg:4}>")
+                                 .$ (   var "::"
+                                     .$ (   var "<<DerivedGen.XS>>"
+                                         .$ var "^fuel_arg^"
+                                         .$ var "inter^<{arg:1}>"
+                                         .$ var "inter^<{arg:2}>"
+                                         .$ var "inter^<{arg:3}>"
+                                         .$ var "inter^<{arg:4}>")
+                                     .$ var "Nil")))
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.X>[0, 1, 2, 3]" .$ var "^outmost-fuel^" .$ var "outer^<n>" .$ var "outer^<m>" .$ var "outer^<p>" .$ var "outer^<k>"
+      }
 
-                                              []
-                                              [ WithClause (IApp. IVar <<DerivedGen.XE>>
-                                                                $ IBindVar ^cons_fuel^
-                                                                $ IBindVar n
-                                                                $ (IApp. IVar Prelude.Types.S
-                                                                       $ IBindVar n)
-                                                                $ IBindVar m
-                                                                $ IBindVar to_be_deceqed^^n1
-                                                                $ (IApp. IVar Prelude.Yes
-                                                                       $ IVar Builtin.Refl))
-                                                           MW
-                                                           (IApp. IVar Decidable.Equality.decEq
-                                                                $ IVar to_be_deceqed^^n1
-                                                                $ IVar n)
-
-                                                           []
-                                                           [ PatClause (IApp. IVar <<DerivedGen.XE>>
-                                                                            $ IBindVar ^cons_fuel^
-                                                                            $ IBindVar n
-                                                                            $ (IApp. IVar Prelude.Types.S
-                                                                                   $ IBindVar n)
-                                                                            $ IBindVar m
-                                                                            $ IBindVar n
-                                                                            $ (IApp. IVar Prelude.Yes
-                                                                                   $ IVar Builtin.Refl)
-                                                                            $ (IApp. IVar Prelude.Yes
-                                                                                   $ IVar Builtin.Refl))
-                                                                       (IVar empty)
-                                                           , PatClause (IApp. IVar <<DerivedGen.XE>>
-                                                                            $ IBindVar ^cons_fuel^
-                                                                            $ IBindVar n
-                                                                            $ (IApp. IVar Prelude.Types.S
-                                                                                   $ IBindVar n)
-                                                                            $ IBindVar m
-                                                                            $ IBindVar to_be_deceqed^^n1
-                                                                            $ (IApp. IVar Prelude.Yes
-                                                                                   $ IVar Builtin.Refl)
-                                                                            $ (IApp. IVar Prelude.No
-                                                                                   $ Implicit True))
-                                                                       (IVar empty) ]
-                                              , PatClause (IApp. IVar <<DerivedGen.XE>>
-                                                               $ IBindVar ^cons_fuel^
-                                                               $ IBindVar n
-                                                               $ (IApp. IVar Prelude.Types.S
-                                                                      $ IBindVar to_be_deceqed^^n0)
-                                                               $ IBindVar m
-                                                               $ IBindVar to_be_deceqed^^n1
-                                                               $ (IApp. IVar Prelude.No
-                                                                      $ Implicit True))
-                                                          (IVar empty) ]
-                                 , PatClause (IApp. IVar <<DerivedGen.XE>>
-                                                  $ Implicit True
-                                                  $ Implicit True
-                                                  $ Implicit True
-                                                  $ Implicit True
-                                                  $ Implicit True)
-                                             (IVar empty) ]
-                            IDef <<DerivedGen.XS>>
-                                 [ WithClause (IApp. IVar <<DerivedGen.XS>>
-                                                   $ IBindVar ^cons_fuel^
-                                                   $ IBindVar n
-                                                   $ IBindVar to_be_deceqed^^n0
-                                                   $ IBindVar m
-                                                   $ IBindVar to_be_deceqed^^m1)
-                                              MW
-                                              (IApp. IVar Decidable.Equality.decEq
-                                                   $ IVar to_be_deceqed^^m1
-                                                   $ IVar m)
-
-                                              []
-                                              [ WithClause (IApp. IVar <<DerivedGen.XS>>
-                                                                $ IBindVar ^cons_fuel^
-                                                                $ IBindVar n
-                                                                $ IBindVar to_be_deceqed^^n0
-                                                                $ IBindVar m
-                                                                $ IBindVar m
-                                                                $ (IApp. IVar Prelude.Yes
-                                                                       $ IVar Builtin.Refl))
-                                                           MW
-                                                           (IApp. IVar Decidable.Equality.decEq
-                                                                $ IVar to_be_deceqed^^n0
-                                                                $ IVar n)
-
-                                                           []
-                                                           [ PatClause (IApp. IVar <<DerivedGen.XS>>
-                                                                            $ IBindVar ^cons_fuel^
-                                                                            $ IBindVar n
-                                                                            $ IBindVar n
-                                                                            $ IBindVar m
-                                                                            $ IBindVar m
-                                                                            $ (IApp. IVar Prelude.Yes
-                                                                                   $ IVar Builtin.Refl)
-                                                                            $ (IApp. IVar Prelude.Yes
-                                                                                   $ IVar Builtin.Refl))
-                                                                       (IVar empty)
-                                                           , PatClause (IApp. IVar <<DerivedGen.XS>>
-                                                                            $ IBindVar ^cons_fuel^
-                                                                            $ IBindVar n
-                                                                            $ IBindVar to_be_deceqed^^n0
-                                                                            $ IBindVar m
-                                                                            $ IBindVar m
-                                                                            $ (IApp. IVar Prelude.Yes
-                                                                                   $ IVar Builtin.Refl)
-                                                                            $ (IApp. IVar Prelude.No
-                                                                                   $ Implicit True))
-                                                                       (IVar empty) ]
-                                              , PatClause (IApp. IVar <<DerivedGen.XS>>
-                                                               $ IBindVar ^cons_fuel^
-                                                               $ IBindVar n
-                                                               $ IBindVar to_be_deceqed^^n0
-                                                               $ IBindVar m
-                                                               $ IBindVar to_be_deceqed^^m1
-                                                               $ (IApp. IVar Prelude.No
-                                                                      $ Implicit True))
-                                                          (IVar empty) ] ] ]

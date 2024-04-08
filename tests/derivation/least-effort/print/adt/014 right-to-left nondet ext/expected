@@ -3,198 +3,225 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty String)} -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty Nat)} -> Gen MaybeEmpty Y
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:1} : IVar Data.Fuel.Fuel)
-                                                        -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                                $ IPrimVal String))
-    => (MW AutoImplicit external^<Prelude.Types.Nat>[] : IPi.  (MW ExplicitArg {arg:2} : IVar Data.Fuel.Fuel)
-                                                            -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                    $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                                    $ IVar Prelude.Types.Nat))
-    => ILocal (IApp. IVar <DerivedGen.Y>[] $ IVar ^outmost-fuel^)
-         IClaim MW
-                Export
-                []
-                (MkTy <DerivedGen.Y>[]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ IVar DerivedGen.Y)))
-         IClaim MW
-                Export
-                []
-                (MkTy <DerivedGen.X>[0]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:3} : IPrimVal String)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ (IApp. IVar Builtin.DPair.DPair
-                                         $ IVar Prelude.Types.Nat
-                                         $ (ILam.  (MW ExplicitArg {arg:4} : IVar Prelude.Types.Nat)
-                                                => (IApp. IVar DerivedGen.X
-                                                        $ IVar {arg:3}
-                                                        $ IVar {arg:4}))))))
-         IClaim MW
-                Export
-                []
-                (MkTy <DerivedGen.X>[]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ (IApp. IVar Builtin.DPair.DPair
-                                         $ IPrimVal String
-                                         $ (ILam.  (MW ExplicitArg {arg:3} : IPrimVal String)
-                                                => (IApp. IVar Builtin.DPair.DPair
-                                                        $ IVar Prelude.Types.Nat
-                                                        $ (ILam.  (MW ExplicitArg {arg:4} : IVar Prelude.Types.Nat)
-                                                               => (IApp. IVar DerivedGen.X
-                                                                       $ IVar {arg:3}
-                                                                       $ IVar {arg:4}))))))))
-         IDef <DerivedGen.Y>[]
-              [ PatClause (IApp. IVar <DerivedGen.Y>[] $ IBindVar ^fuel_arg^)
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
-                                       $ (IApp. IVar fromString
-                                              $ IPrimVal DerivedGen.Y[] (non-recursive))
-                                       $ (IApp. IVar <<DerivedGen.MkY>>
-                                              $ IVar ^fuel_arg^)))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<DerivedGen.MkY>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ IVar DerivedGen.Y)))
-                            IDef <<DerivedGen.MkY>>
-                                 [ PatClause (IApp. IVar <<DerivedGen.MkY>>
-                                                  $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar Test.DepTyCheck.Gen.label
-                                                  $ (IApp. IVar fromString
-                                                         $ IPrimVal DerivedGen.MkY (orders))
-                                                  $ (IApp. IVar >>=
-                                                         $ (IApp. IVar <DerivedGen.X>[]
-                                                                $ IVar ^outmost-fuel^)
-                                                         $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                                => ICase (IVar {lamc:0})
-                                                                         (Implicit False)
-                                                                         [ PatClause (IApp. IVar Builtin.DPair.MkDPair
-                                                                                          $ IBindVar n
-                                                                                          $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                                 $ IBindVar k
-                                                                                                 $ IBindVar ^bnd^{arg:5}))
-                                                                                     (IApp. IVar >>=
-                                                                                          $ (IApp. IVar <DerivedGen.X>[0]
-                                                                                                 $ IVar ^outmost-fuel^
-                                                                                                 $ IVar n)
-                                                                                          $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                                                                 => ICase (IVar {lamc:0})
-                                                                                                          (Implicit False)
-                                                                                                          [ PatClause (IApp. IVar Builtin.DPair.MkDPair
-                                                                                                                           $ IBindVar m
-                                                                                                                           $ IBindVar ^bnd^{arg:6})
-                                                                                                                      (IApp. INamedApp (IVar Prelude.pure)
-                                                                                                                                       f
-                                                                                                                                       (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                                                                            $ Implicit True)
-                                                                                                                           $ (IApp. INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                                                                                    k
-                                                                                                                                                                    (IVar k))
-                                                                                                                                                         m
-                                                                                                                                                         (IVar m))
-                                                                                                                                              n
-                                                                                                                                              (IVar n)
-                                                                                                                                  $ IVar ^bnd^{arg:6}
-                                                                                                                                  $ IVar ^bnd^{arg:5})) ])) ]))) ] ]
-         IDef <DerivedGen.X>[0]
-              [ PatClause (IApp. IVar <DerivedGen.X>[0]
-                               $ IBindVar ^fuel_arg^
-                               $ IBindVar inter^<{arg:3}>)
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
-                                       $ (IApp. IVar fromString
-                                              $ IPrimVal DerivedGen.X[0] (non-recursive))
-                                       $ (IApp. IVar <<DerivedGen.MkX>>
-                                              $ IVar ^fuel_arg^
-                                              $ IVar inter^<{arg:3}>)))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<DerivedGen.MkX>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:3} : IPrimVal String)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ (IApp. IVar Builtin.DPair.DPair
-                                                            $ IVar Prelude.Types.Nat
-                                                            $ (ILam.  (MW ExplicitArg {arg:4} : IVar Prelude.Types.Nat)
-                                                                   => (IApp. IVar DerivedGen.X
-                                                                           $ IVar {arg:3}
-                                                                           $ IVar {arg:4}))))))
-                            IDef <<DerivedGen.MkX>>
-                                 [ PatClause (IApp. IVar <<DerivedGen.MkX>>
-                                                  $ IBindVar ^cons_fuel^
-                                                  $ IBindVar n)
-                                             (IApp. IVar Test.DepTyCheck.Gen.label
-                                                  $ (IApp. IVar fromString
-                                                         $ IPrimVal DerivedGen.MkX (orders))
-                                                  $ (IApp. IVar >>=
-                                                         $ (IApp. IVar external^<Prelude.Types.Nat>[]
-                                                                $ IVar ^outmost-fuel^)
-                                                         $ (ILam.  (MW ExplicitArg m : Implicit False)
-                                                                => (IApp. INamedApp (IVar Prelude.pure)
-                                                                                    f
-                                                                                    (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                         $ Implicit True)
-                                                                        $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                               $ Implicit True
-                                                                               $ (IApp. IVar DerivedGen.MkX
-                                                                                      $ IVar n
-                                                                                      $ IVar m)))))) ] ]
-         IDef <DerivedGen.X>[]
-              [ PatClause (IApp. IVar <DerivedGen.X>[] $ IBindVar ^fuel_arg^)
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
-                                       $ (IApp. IVar fromString
-                                              $ IPrimVal DerivedGen.X[] (non-recursive))
-                                       $ (IApp. IVar <<DerivedGen.MkX>>
-                                              $ IVar ^fuel_arg^)))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<DerivedGen.MkX>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ (IApp. IVar Builtin.DPair.DPair
-                                                            $ IPrimVal String
-                                                            $ (ILam.  (MW ExplicitArg {arg:3} : IPrimVal String)
-                                                                   => (IApp. IVar Builtin.DPair.DPair
-                                                                           $ IVar Prelude.Types.Nat
-                                                                           $ (ILam.  (MW ExplicitArg {arg:4} : IVar Prelude.Types.Nat)
-                                                                                  => (IApp. IVar DerivedGen.X
-                                                                                          $ IVar {arg:3}
-                                                                                          $ IVar {arg:4}))))))))
-                            IDef <<DerivedGen.MkX>>
-                                 [ PatClause (IApp. IVar <<DerivedGen.MkX>>
-                                                  $ IBindVar ^cons_fuel^)
-                                             (IApp. IVar Test.DepTyCheck.Gen.label
-                                                  $ (IApp. IVar fromString
-                                                         $ IPrimVal DerivedGen.MkX (orders))
-                                                  $ (IApp. IVar >>=
-                                                         $ (IApp. IVar external^<^prim^.String>[]
-                                                                $ IVar ^outmost-fuel^)
-                                                         $ (ILam.  (MW ExplicitArg n : Implicit False)
-                                                                => (IApp. IVar >>=
-                                                                        $ (IApp. IVar external^<Prelude.Types.Nat>[]
-                                                                               $ IVar ^outmost-fuel^)
-                                                                        $ (ILam.  (MW ExplicitArg m : Implicit False)
-                                                                               => (IApp. INamedApp (IVar Prelude.pure)
-                                                                                                   f
-                                                                                                   (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                                        $ Implicit True)
-                                                                                       $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                              $ Implicit True
-                                                                                              $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                                     $ Implicit True
-                                                                                                     $ (IApp. IVar DerivedGen.MkX
-                                                                                                            $ IVar n
-                                                                                                            $ IVar m))))))))) ] ]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg
+      MW
+      AutoImplicit
+      (Just "external^<^prim^.String>[]")
+      (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fuel.Fuel")
+       .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ primVal (PrT StringType))
+.=> MkArg
+      MW
+      AutoImplicit
+      (Just "external^<Prelude.Types.Nat>[]")
+      (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fuel.Fuel")
+       .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat")
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<DerivedGen.Y>[]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "DerivedGen.Y"
+                 })
+          , IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<DerivedGen.X>[0]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "{arg:3}") (primVal (PrT StringType))
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (   var "Builtin.DPair.DPair"
+                             .$ var "Prelude.Types.Nat"
+                             .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
+                                 .=> var "DerivedGen.X" .$ var "{arg:3}" .$ var "{arg:4}"))
+                 })
+          , IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<DerivedGen.X>[]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (   var "Builtin.DPair.DPair"
+                             .$ primVal (PrT StringType)
+                             .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (primVal (PrT StringType))
+                                 .=>    var "Builtin.DPair.DPair"
+                                     .$ var "Prelude.Types.Nat"
+                                     .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
+                                         .=> var "DerivedGen.X" .$ var "{arg:3}" .$ var "{arg:4}")))
+                 })
+          , IDef
+              emptyFC
+              "<DerivedGen.Y>[]"
+              [    var "<DerivedGen.Y>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.MkY>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "DerivedGen.Y"
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.MkY>>"
+                             [    var "<<DerivedGen.MkY>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.MkY (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<DerivedGen.X>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:0}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [       var "Builtin.DPair.MkDPair"
+                                                         .$ bindVar "n"
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "k" .$ bindVar "^bnd^{arg:5}")
+                                                      .=    var ">>="
+                                                         .$ (var "<DerivedGen.X>[0]" .$ var "^outmost-fuel^" .$ var "n")
+                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                                             .=> iCase
+                                                                   { sc = var "{lamc:0}"
+                                                                   , ty = implicitFalse
+                                                                   , clauses =
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "m" .$ bindVar "^bnd^{arg:6}"
+                                                                         .=    var "Prelude.pure"
+                                                                            .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                                            .$ (   var "DerivedGen.MkY"
+                                                                                .! ("k", var "k")
+                                                                                .! ("m", var "m")
+                                                                                .! ("n", var "n")
+                                                                                .$ var "^bnd^{arg:6}"
+                                                                                .$ var "^bnd^{arg:5}")
+                                                                       ]
+                                                                   })
+                                                    ]
+                                                }))
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[] (non-recursive)"))
+                         .$ (var "<<DerivedGen.MkY>>" .$ var "^fuel_arg^")
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<DerivedGen.X>[0]"
+              [    var "<DerivedGen.X>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<{arg:3}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.MkX>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:3}") (primVal (PrT StringType))
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (   var "Builtin.DPair.DPair"
+                                            .$ var "Prelude.Types.Nat"
+                                            .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
+                                                .=> var "DerivedGen.X" .$ var "{arg:3}" .$ var "{arg:4}"))
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.MkX>>"
+                             [    var "<<DerivedGen.MkX>>" .$ bindVar "^cons_fuel^" .$ bindVar "n"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.MkX (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "m") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Builtin.DPair.MkDPair" .$ implicitTrue .$ (var "DerivedGen.MkX" .$ var "n" .$ var "m"))))
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0] (non-recursive)"))
+                         .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:3}>")
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<DerivedGen.X>[]"
+              [    var "<DerivedGen.X>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.MkX>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (   var "Builtin.DPair.DPair"
+                                            .$ primVal (PrT StringType)
+                                            .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (primVal (PrT StringType))
+                                                .=>    var "Builtin.DPair.DPair"
+                                                    .$ var "Prelude.Types.Nat"
+                                                    .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
+                                                        .=> var "DerivedGen.X" .$ var "{arg:3}" .$ var "{arg:4}")))
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.MkX>>"
+                             [    var "<<DerivedGen.MkX>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.MkX (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "external^<^prim^.String>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "n") implicitFalse
+                                          .=>    var ">>="
+                                              .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                              .$ (    MkArg MW ExplicitArg (Just "m") implicitFalse
+                                                  .=>    var "Prelude.pure"
+                                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                      .$ (   var "Builtin.DPair.MkDPair"
+                                                          .$ implicitTrue
+                                                          .$ (   var "Builtin.DPair.MkDPair"
+                                                              .$ implicitTrue
+                                                              .$ (var "DerivedGen.MkX" .$ var "n" .$ var "m"))))))
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-recursive)"))
+                         .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^")
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.Y>[]" .$ var "^outmost-fuel^"
+      }
+

@@ -18,8 +18,6 @@ import public Decidable.Equality
 import public Deriving.DepTyCheck.Gen.Derive
 import public Deriving.DepTyCheck.Util
 
-import public Language.Reflection.Types
-
 import public Syntax.WithProof
 
 %default total

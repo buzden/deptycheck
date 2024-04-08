@@ -30,12 +30,15 @@ modules = Data.Nat.Pos
         , Deriving.DepTyCheck.Util.Logging
         , Deriving.DepTyCheck.Util.Reflection
         , Deriving.DepTyCheck.Util.Syntax
+        , Language.Reflection.Compat
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Coverage
         , Test.DepTyCheck.Gen.Emptiness
         , Test.DepTyCheck.Gen.Labels
 
-depends = elab-util
+depends = contrib
+        , elab-pretty
+        , elab-util
         , if-unsolved-implicit
         , mtl-tuple-impls
         , random-pure

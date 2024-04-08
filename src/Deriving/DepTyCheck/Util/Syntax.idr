@@ -5,8 +5,6 @@ import public Data.SortedMap.Dependent
 import public Data.SortedSet
 import public Data.Vect
 
-import public Language.Reflection.Types
-
 %default total
 
 ----------------------------
@@ -117,19 +115,3 @@ namespace Monad
   public export
   any : Monad n => (a -> n Bool) -> List a -> n Bool
   any = foldl (||) (pure False) .: map
-
--------------------------------------
---- Working around type inference ---
--------------------------------------
-
-public export
-argName : NamedArg -> Name
-argName = (.name)
-
-public export %inline
-(.tyArgs) : TypeInfo -> List NamedArg
-(.tyArgs) = args
-
-public export %inline
-(.conArgs) : Con -> List NamedArg
-(.conArgs) = args

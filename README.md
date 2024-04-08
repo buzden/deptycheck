@@ -359,13 +359,4 @@ For building and testing we use [`pack`](https://github.com/stefan-hoeck/idris2-
 
 The main `pack`'s collection we test the library against is the one mentioned in the last section of the library version.
 Also, we test against the latest pack collection nightly.
-
 We try to use as fresh version of the Idris 2 compiler and thirdparty libraries as possible.
-However, this is not absolute.
-For example, we didn't manage to migrate [one big overhaul](https://github.com/stefan-hoeck/idris2-elab-util/pull/56) of the `elab-util` package,
-thus we maintain a pre-overhaul fork with necessary compatibility updates.
-Used versions are set in the local `pack.toml` configuration file.
-
-Due to the stuff above, DepTyCheck is not yet committed to the pack collection.
-If you plan to use it, you need to copy particular versions of the compiler and dependencies
-from the library's `pack.toml` to a local `pack.toml`.

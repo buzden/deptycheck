@@ -9,6 +9,8 @@ import public Deriving.DepTyCheck.Gen.Derive
 
 %default total
 
+%hide Language.Reflection.Syntax.Arg.piInfo
+
 --- Utilities ---
 
 public export
@@ -117,7 +119,7 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
       typeDeterminedArgs : forall m. Elaboration m => (con : Con) -> m $ Vect con.args.length ConsDetermInfo
       typeDeterminedArgs con = do
         let conArgNames = fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
-        determined <- fromMaybe [] <$> map fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
+        determined <- fromMaybe [] . map fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
         let determined = mapMaybe (flip lookup conArgNames) determined
         pure $ map cast $ presenceVect $ fromList determined
 

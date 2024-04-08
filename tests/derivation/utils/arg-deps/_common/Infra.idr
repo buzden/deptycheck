@@ -4,10 +4,11 @@ import DepsCheck
 
 import Deriving.DepTyCheck.Util
 
-import Language.Reflection
-import Language.Reflection.Syntax
+import Language.Reflection.Compat
 
 %language ElabReflection
+
+%hide Language.Reflection.Syntax.piAll
 
 ppTy : Type -> Elab Unit
 ppTy ty = do
