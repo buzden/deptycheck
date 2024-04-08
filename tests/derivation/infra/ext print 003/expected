@@ -3,30 +3,41 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty String)} -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty Nat)} -> Gen MaybeEmpty XSN
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW AutoImplicit external^<^prim^.String>[] : IPi.  (MW ExplicitArg {arg:1} : IVar Data.Fuel.Fuel)
-                                                        -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                                $ IPrimVal String))
-    => (MW AutoImplicit external^<Prelude.Types.Nat>[] : IPi.  (MW ExplicitArg {arg:2} : IVar Data.Fuel.Fuel)
-                                                            -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                    $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                                    $ IVar Prelude.Types.Nat))
-    => ILocal (IApp. IVar <AlternativeCore.XSN>[] $ IVar ^outmost-fuel^)
-         IClaim MW
-                Export
-                []
-                (MkTy <AlternativeCore.XSN>[]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ IVar AlternativeCore.XSN)))
-         IDef <AlternativeCore.XSN>[]
-              [ PatClause (IApp. IVar <AlternativeCore.XSN>[] $ IBindVar fuel)
-                          (IApp. IVar <*>
-                               $ (IApp. IVar <$>
-                                      $ IVar MkXSN
-                                      $ (IApp. IVar external^<^prim^.String>[]
-                                             $ IVar ^outmost-fuel^))
-                               $ (IApp. IVar external^<Prelude.Types.Nat>[]
-                                      $ IVar ^outmost-fuel^)) ]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg
+      MW
+      AutoImplicit
+      (Just "external^<^prim^.String>[]")
+      (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fuel.Fuel")
+       .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ primVal (PrT StringType))
+.=> MkArg
+      MW
+      AutoImplicit
+      (Just "external^<Prelude.Types.Nat>[]")
+      (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fuel.Fuel")
+       .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat")
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<AlternativeCore.XSN>[]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "AlternativeCore.XSN"
+                 })
+          , IDef
+              emptyFC
+              "<AlternativeCore.XSN>[]"
+              [    var "<AlternativeCore.XSN>[]" .$ bindVar "fuel"
+                .=    var "<*>"
+                   .$ (var "<$>" .$ var "MkXSN" .$ (var "external^<^prim^.String>[]" .$ var "^outmost-fuel^"))
+                   .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+              ]
+          ]
+      , scope = var "<AlternativeCore.XSN>[]" .$ var "^outmost-fuel^"
+      }
+

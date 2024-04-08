@@ -3,230 +3,184 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (a : Z) -> (b : Z) -> Gen MaybeEmpty (W a b)
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg outer^<a> : Implicit True)
-    => (MW ExplicitArg outer^<b> : Implicit True)
-    => ILocal (IApp. IVar <DerivedGen.W>[0, 1]
-                   $ IVar ^outmost-fuel^
-                   $ IVar outer^<a>
-                   $ IVar outer^<b>)
-         IClaim MW
-                Export
-                []
-                (MkTy <DerivedGen.W>[0, 1]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:1} : IVar DerivedGen.Z)
-                          -> (MW ExplicitArg {arg:2} : IVar DerivedGen.Z)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ (IApp. IVar DerivedGen.W
-                                         $ IVar {arg:1}
-                                         $ IVar {arg:2}))))
-         IDef <DerivedGen.W>[0, 1]
-              [ PatClause (IApp. IVar <DerivedGen.W>[0, 1]
-                               $ IBindVar ^fuel_arg^
-                               $ IBindVar inter^<{arg:1}>
-                               $ IBindVar inter^<{arg:2}>)
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
-                                       $ (IApp. IVar fromString
-                                              $ IPrimVal DerivedGen.W[0, 1] (non-recursive))
-                                       $ (IApp. IVar <<DerivedGen.MkW>>
-                                              $ IVar ^fuel_arg^
-                                              $ IVar inter^<{arg:1}>
-                                              $ IVar inter^<{arg:2}>)))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<DerivedGen.MkW>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:1} : IVar DerivedGen.Z)
-                                             -> (MW ExplicitArg {arg:2} : IVar DerivedGen.Z)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ (IApp. IVar DerivedGen.W
-                                                            $ IVar {arg:1}
-                                                            $ IVar {arg:2}))))
-                            IDef <<DerivedGen.MkW>>
-                                 [ WithClause (IApp. IVar <<DerivedGen.MkW>>
-                                                   $ IBindVar ^cons_fuel^
-                                                   $ INamedApp (IApp. IVar DerivedGen.MkZ
-                                                                    $ (IApp. IVar DerivedGen.MkX
-                                                                           $ IBindVar n
-                                                                           $ IBindVar m
-                                                                           $ IVar Prelude.Basics.False))
-                                                               {conArg:1}
-                                                               (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                b
-                                                                                                (IVar Prelude.Basics.False))
-                                                                                     m
-                                                                                     (Implicit True))
-                                                                          n
-                                                                          (Implicit True))
-                                                   $ INamedApp (IApp. IVar DerivedGen.MkZ
-                                                                    $ (IApp. IVar DerivedGen.MkX
-                                                                           $ IBindVar to_be_deceqed^^n0
-                                                                           $ IBindVar to_be_deceqed^^m1
-                                                                           $ IVar Prelude.Basics.True))
-                                                               {conArg:1}
-                                                               (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                b
-                                                                                                (IVar Prelude.Basics.True))
-                                                                                     m
-                                                                                     (Implicit True))
-                                                                          n
-                                                                          (Implicit True)))
-                                              MW
-                                              (IApp. IVar Decidable.Equality.decEq
-                                                   $ IVar to_be_deceqed^^m1
-                                                   $ IVar m)
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ExplicitArg (Just "outer^<a>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<b>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<DerivedGen.W>[0, 1]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Z")
+                     .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Z")
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (var "DerivedGen.W" .$ var "{arg:1}" .$ var "{arg:2}")
+                 })
+          , IDef
+              emptyFC
+              "<DerivedGen.W>[0, 1]"
+              [    var "<DerivedGen.W>[0, 1]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<{arg:1}>" .$ bindVar "inter^<{arg:2}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.MkW>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Z")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Z")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "DerivedGen.W" .$ var "{arg:1}" .$ var "{arg:2}")
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.MkW>>"
+                             [ withClause
+                                 { lhs =
+                                        var "<<DerivedGen.MkW>>"
+                                     .$ bindVar "^cons_fuel^"
+                                     .$ (   var "DerivedGen.MkZ"
+                                         .$ (var "DerivedGen.MkX" .$ bindVar "n" .$ bindVar "m" .$ var "Prelude.Basics.False")
+                                         .! ( "{conArg:1}"
+                                            , var "DerivedGen.MkY" .! ("b", var "Prelude.Basics.False") .! ("m", implicitTrue) .! ("n", implicitTrue)
+                                            ))
+                                     .$ (   var "DerivedGen.MkZ"
+                                         .$ (   var "DerivedGen.MkX"
+                                             .$ bindVar "to_be_deceqed^^n0"
+                                             .$ bindVar "to_be_deceqed^^m1"
+                                             .$ var "Prelude.Basics.True")
+                                         .! ( "{conArg:1}"
+                                            , var "DerivedGen.MkY" .! ("b", var "Prelude.Basics.True") .! ("m", implicitTrue) .! ("n", implicitTrue)
+                                            ))
+                                 , rig = MW
+                                 , wval = var "Decidable.Equality.decEq" .$ var "to_be_deceqed^^m1" .$ var "m"
+                                 , prf = Nothing
+                                 , flags = []
+                                 , clauses =
+                                     [ withClause
+                                         { lhs =
+                                                var "<<DerivedGen.MkW>>"
+                                             .$ bindVar "^cons_fuel^"
+                                             .$ (   var "DerivedGen.MkZ"
+                                                 .$ (var "DerivedGen.MkX" .$ bindVar "n" .$ bindVar "m" .$ var "Prelude.Basics.False")
+                                                 .! ( "{conArg:1}"
+                                                    ,    var "DerivedGen.MkY"
+                                                      .! ("b", var "Prelude.Basics.False")
+                                                      .! ("m", implicitTrue)
+                                                      .! ("n", implicitTrue)
+                                                    ))
+                                             .$ (   var "DerivedGen.MkZ"
+                                                 .$ (var "DerivedGen.MkX" .$ bindVar "to_be_deceqed^^n0" .$ bindVar "m" .$ var "Prelude.Basics.True")
+                                                 .! ( "{conArg:1}"
+                                                    ,    var "DerivedGen.MkY"
+                                                      .! ("b", var "Prelude.Basics.True")
+                                                      .! ("m", implicitTrue)
+                                                      .! ("n", implicitTrue)
+                                                    ))
+                                             .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                         , rig = MW
+                                         , wval = var "Decidable.Equality.decEq" .$ var "to_be_deceqed^^n0" .$ var "n"
+                                         , prf = Nothing
+                                         , flags = []
+                                         , clauses =
+                                             [       var "<<DerivedGen.MkW>>"
+                                                  .$ bindVar "^cons_fuel^"
+                                                  .$ (   var "DerivedGen.MkZ"
+                                                      .$ (var "DerivedGen.MkX" .$ bindVar "n" .$ bindVar "m" .$ var "Prelude.Basics.False")
+                                                      .! ( "{conArg:1}"
+                                                         ,    var "DerivedGen.MkY"
+                                                           .! ("b", var "Prelude.Basics.False")
+                                                           .! ("m", implicitTrue)
+                                                           .! ("n", implicitTrue)
+                                                         ))
+                                                  .$ (   var "DerivedGen.MkZ"
+                                                      .$ (var "DerivedGen.MkX" .$ bindVar "n" .$ bindVar "m" .$ var "Prelude.Basics.True")
+                                                      .! ( "{conArg:1}"
+                                                         ,    var "DerivedGen.MkY"
+                                                           .! ("b", var "Prelude.Basics.True")
+                                                           .! ("m", implicitTrue)
+                                                           .! ("n", implicitTrue)
+                                                         ))
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                               .=    var "Test.DepTyCheck.Gen.label"
+                                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.MkW (orders)"))
+                                                  .$ (   var "Prelude.pure"
+                                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                      .$ (var "DerivedGen.MkW" .! ("m", var "m") .! ("n", var "n")))
+                                             ,       var "<<DerivedGen.MkW>>"
+                                                  .$ bindVar "^cons_fuel^"
+                                                  .$ (   var "DerivedGen.MkZ"
+                                                      .$ (var "DerivedGen.MkX" .$ bindVar "n" .$ bindVar "m" .$ var "Prelude.Basics.False")
+                                                      .! ( "{conArg:1}"
+                                                         ,    var "DerivedGen.MkY"
+                                                           .! ("b", var "Prelude.Basics.False")
+                                                           .! ("m", implicitTrue)
+                                                           .! ("n", implicitTrue)
+                                                         ))
+                                                  .$ (   var "DerivedGen.MkZ"
+                                                      .$ (   var "DerivedGen.MkX"
+                                                          .$ bindVar "to_be_deceqed^^n0"
+                                                          .$ bindVar "m"
+                                                          .$ var "Prelude.Basics.True")
+                                                      .! ( "{conArg:1}"
+                                                         ,    var "DerivedGen.MkY"
+                                                           .! ("b", var "Prelude.Basics.True")
+                                                           .! ("m", implicitTrue)
+                                                           .! ("n", implicitTrue)
+                                                         ))
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                                  .$ (var "Prelude.No" .$ implicitTrue)
+                                               .= var "empty"
+                                             ]
+                                         }
+                                     ,       var "<<DerivedGen.MkW>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ (   var "DerivedGen.MkZ"
+                                              .$ (var "DerivedGen.MkX" .$ bindVar "n" .$ bindVar "m" .$ var "Prelude.Basics.False")
+                                              .! ( "{conArg:1}"
+                                                 ,    var "DerivedGen.MkY"
+                                                   .! ("b", var "Prelude.Basics.False")
+                                                   .! ("m", implicitTrue)
+                                                   .! ("n", implicitTrue)
+                                                 ))
+                                          .$ (   var "DerivedGen.MkZ"
+                                              .$ (   var "DerivedGen.MkX"
+                                                  .$ bindVar "to_be_deceqed^^n0"
+                                                  .$ bindVar "to_be_deceqed^^m1"
+                                                  .$ var "Prelude.Basics.True")
+                                              .! ( "{conArg:1}"
+                                                 ,    var "DerivedGen.MkY"
+                                                   .! ("b", var "Prelude.Basics.True")
+                                                   .! ("m", implicitTrue)
+                                                   .! ("n", implicitTrue)
+                                                 ))
+                                          .$ (var "Prelude.No" .$ implicitTrue)
+                                       .= var "empty"
+                                     ]
+                                 }
+                             , var "<<DerivedGen.MkW>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.W[0, 1] (non-recursive)"))
+                         .$ (var "<<DerivedGen.MkW>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>" .$ var "inter^<{arg:2}>")
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.W>[0, 1]" .$ var "^outmost-fuel^" .$ var "outer^<a>" .$ var "outer^<b>"
+      }
 
-                                              []
-                                              [ WithClause (IApp. IVar <<DerivedGen.MkW>>
-                                                                $ IBindVar ^cons_fuel^
-                                                                $ INamedApp (IApp. IVar DerivedGen.MkZ
-                                                                                 $ (IApp. IVar DerivedGen.MkX
-                                                                                        $ IBindVar n
-                                                                                        $ IBindVar m
-                                                                                        $ IVar Prelude.Basics.False))
-                                                                            {conArg:1}
-                                                                            (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                             b
-                                                                                                             (IVar Prelude.Basics.False))
-                                                                                                  m
-                                                                                                  (Implicit True))
-                                                                                       n
-                                                                                       (Implicit True))
-                                                                $ INamedApp (IApp. IVar DerivedGen.MkZ
-                                                                                 $ (IApp. IVar DerivedGen.MkX
-                                                                                        $ IBindVar to_be_deceqed^^n0
-                                                                                        $ IBindVar m
-                                                                                        $ IVar Prelude.Basics.True))
-                                                                            {conArg:1}
-                                                                            (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                             b
-                                                                                                             (IVar Prelude.Basics.True))
-                                                                                                  m
-                                                                                                  (Implicit True))
-                                                                                       n
-                                                                                       (Implicit True))
-                                                                $ (IApp. IVar Prelude.Yes
-                                                                       $ IVar Builtin.Refl))
-                                                           MW
-                                                           (IApp. IVar Decidable.Equality.decEq
-                                                                $ IVar to_be_deceqed^^n0
-                                                                $ IVar n)
-
-                                                           []
-                                                           [ PatClause (IApp. IVar <<DerivedGen.MkW>>
-                                                                            $ IBindVar ^cons_fuel^
-                                                                            $ INamedApp (IApp. IVar DerivedGen.MkZ
-                                                                                             $ (IApp. IVar DerivedGen.MkX
-                                                                                                    $ IBindVar n
-                                                                                                    $ IBindVar m
-                                                                                                    $ IVar Prelude.Basics.False))
-                                                                                        {conArg:1}
-                                                                                        (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                                         b
-                                                                                                                         (IVar Prelude.Basics.False))
-                                                                                                              m
-                                                                                                              (Implicit True))
-                                                                                                   n
-                                                                                                   (Implicit True))
-                                                                            $ INamedApp (IApp. IVar DerivedGen.MkZ
-                                                                                             $ (IApp. IVar DerivedGen.MkX
-                                                                                                    $ IBindVar n
-                                                                                                    $ IBindVar m
-                                                                                                    $ IVar Prelude.Basics.True))
-                                                                                        {conArg:1}
-                                                                                        (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                                         b
-                                                                                                                         (IVar Prelude.Basics.True))
-                                                                                                              m
-                                                                                                              (Implicit True))
-                                                                                                   n
-                                                                                                   (Implicit True))
-                                                                            $ (IApp. IVar Prelude.Yes
-                                                                                   $ IVar Builtin.Refl)
-                                                                            $ (IApp. IVar Prelude.Yes
-                                                                                   $ IVar Builtin.Refl))
-                                                                       (IApp. IVar Test.DepTyCheck.Gen.label
-                                                                            $ (IApp. IVar fromString
-                                                                                   $ IPrimVal DerivedGen.MkW (orders))
-                                                                            $ (IApp. INamedApp (IVar Prelude.pure)
-                                                                                               f
-                                                                                               (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                                    $ Implicit True)
-                                                                                   $ INamedApp (INamedApp (IVar DerivedGen.MkW)
-                                                                                                          m
-                                                                                                          (IVar m))
-                                                                                               n
-                                                                                               (IVar n)))
-                                                           , PatClause (IApp. IVar <<DerivedGen.MkW>>
-                                                                            $ IBindVar ^cons_fuel^
-                                                                            $ INamedApp (IApp. IVar DerivedGen.MkZ
-                                                                                             $ (IApp. IVar DerivedGen.MkX
-                                                                                                    $ IBindVar n
-                                                                                                    $ IBindVar m
-                                                                                                    $ IVar Prelude.Basics.False))
-                                                                                        {conArg:1}
-                                                                                        (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                                         b
-                                                                                                                         (IVar Prelude.Basics.False))
-                                                                                                              m
-                                                                                                              (Implicit True))
-                                                                                                   n
-                                                                                                   (Implicit True))
-                                                                            $ INamedApp (IApp. IVar DerivedGen.MkZ
-                                                                                             $ (IApp. IVar DerivedGen.MkX
-                                                                                                    $ IBindVar to_be_deceqed^^n0
-                                                                                                    $ IBindVar m
-                                                                                                    $ IVar Prelude.Basics.True))
-                                                                                        {conArg:1}
-                                                                                        (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                                         b
-                                                                                                                         (IVar Prelude.Basics.True))
-                                                                                                              m
-                                                                                                              (Implicit True))
-                                                                                                   n
-                                                                                                   (Implicit True))
-                                                                            $ (IApp. IVar Prelude.Yes
-                                                                                   $ IVar Builtin.Refl)
-                                                                            $ (IApp. IVar Prelude.No
-                                                                                   $ Implicit True))
-                                                                       (IVar empty) ]
-                                              , PatClause (IApp. IVar <<DerivedGen.MkW>>
-                                                               $ IBindVar ^cons_fuel^
-                                                               $ INamedApp (IApp. IVar DerivedGen.MkZ
-                                                                                $ (IApp. IVar DerivedGen.MkX
-                                                                                       $ IBindVar n
-                                                                                       $ IBindVar m
-                                                                                       $ IVar Prelude.Basics.False))
-                                                                           {conArg:1}
-                                                                           (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                            b
-                                                                                                            (IVar Prelude.Basics.False))
-                                                                                                 m
-                                                                                                 (Implicit True))
-                                                                                      n
-                                                                                      (Implicit True))
-                                                               $ INamedApp (IApp. IVar DerivedGen.MkZ
-                                                                                $ (IApp. IVar DerivedGen.MkX
-                                                                                       $ IBindVar to_be_deceqed^^n0
-                                                                                       $ IBindVar to_be_deceqed^^m1
-                                                                                       $ IVar Prelude.Basics.True))
-                                                                           {conArg:1}
-                                                                           (INamedApp (INamedApp (INamedApp (IVar DerivedGen.MkY)
-                                                                                                            b
-                                                                                                            (IVar Prelude.Basics.True))
-                                                                                                 m
-                                                                                                 (Implicit True))
-                                                                                      n
-                                                                                      (Implicit True))
-                                                               $ (IApp. IVar Prelude.No
-                                                                      $ Implicit True))
-                                                          (IVar empty) ]
-                                 , PatClause (IApp. IVar <<DerivedGen.MkW>>
-                                                  $ Implicit True
-                                                  $ Implicit True
-                                                  $ Implicit True)
-                                             (IVar empty) ] ]

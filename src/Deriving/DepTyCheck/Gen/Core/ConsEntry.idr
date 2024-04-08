@@ -126,6 +126,6 @@ canonicConsBody sig name con = do
   pure $
     -- Happy case, given arguments conform out constructor's GADT indices
     [ deceqise (callCanonic sig name $ bindVar fuelArg) !(consGenExpr sig con .| fromList givenConArgs .| varStr fuelArg) ]
-    ++ if all isSimpleBindVar $ bindExprs empty then [] {- do not produce dead code if the happy case handles everything already -} else
+    ++ if all isSimpleBindVar $ bindExprs SortedSet.empty then [] {- do not produce dead code if the happy case handles everything already -} else
       -- The rest case, if given arguments do not conform to the current constructor then return empty generator
       [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(empty) ]

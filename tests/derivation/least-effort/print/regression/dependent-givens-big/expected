@@ -3,199 +3,183 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (n : Nat) -> (v : VectMaybeAnyType n) -> Gen MaybeEmpty (i : Fin n ** (t : MaybeAnyType ** AtIndex n i t v))
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg outer^<n> : Implicit True)
-    => (MW ExplicitArg outer^<v> : Implicit True)
-    => ILocal (IApp. IVar <DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]
-                   $ IVar ^outmost-fuel^
-                   $ IVar outer^<n>
-                   $ IVar outer^<v>)
-         IClaim MW
-                Export
-                []
-                (MkTy <DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg n : IVar Prelude.Types.Nat)
-                          -> (MW ExplicitArg {arg:1} : IApp. IVar DerivedGen.VectMaybeAnyType.VectMaybeAnyType
-                                                              $ IVar n)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ (IApp. IVar Builtin.DPair.DPair
-                                         $ (IApp. IVar Data.Fin.Fin $ IVar n)
-                                         $ (ILam.  (MW ExplicitArg {arg:2} : IApp. IVar Data.Fin.Fin
-                                                                                    $ IVar n)
-                                                => (IApp. IVar Builtin.DPair.DPair
-                                                        $ IVar DerivedGen.MaybeAnyType.MaybeAnyType
-                                                        $ (ILam.  (MW ExplicitArg {arg:3} : IVar DerivedGen.MaybeAnyType.MaybeAnyType)
-                                                               => (IApp. IVar DerivedGen.VectMaybeAnyType.AtIndex
-                                                                       $ IVar n
-                                                                       $ IVar {arg:2}
-                                                                       $ IVar {arg:3}
-                                                                       $ IVar {arg:1}))))))))
-         IDef <DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]
-              [ PatClause (IApp. IVar <DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]
-                               $ IBindVar ^fuel_arg^
-                               $ IBindVar inter^<n>
-                               $ IBindVar inter^<{arg:1}>)
-                          (ILocal (ICase (IVar ^fuel_arg^)
-                                         (IVar Data.Fuel.Fuel)
-                                         [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.label
-                                                          $ (IApp. IVar fromString
-                                                                 $ IPrimVal DerivedGen.VectMaybeAnyType.AtIndex[0, 3] (dry fuel))
-                                                          $ (IApp. IVar <<DerivedGen.VectMaybeAnyType.Here>>
-                                                                 $ IVar Data.Fuel.Dry
-                                                                 $ IVar inter^<n>
-                                                                 $ IVar inter^<{arg:1}>))
-                                         , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.label
-                                                          $ (IApp. IVar fromString
-                                                                 $ IPrimVal DerivedGen.VectMaybeAnyType.AtIndex[0, 3] (spend fuel))
-                                                          $ (IApp. IVar Test.DepTyCheck.Gen.frequency
-                                                                 $ (IApp. IVar ::
-                                                                        $ (IApp. IVar Builtin.MkPair
-                                                                               $ IVar Data.Nat.Pos.one
-                                                                               $ (IApp. IVar <<DerivedGen.VectMaybeAnyType.Here>>
-                                                                                      $ IVar ^fuel_arg^
-                                                                                      $ IVar inter^<n>
-                                                                                      $ IVar inter^<{arg:1}>))
-                                                                        $ (IApp. IVar ::
-                                                                               $ (IApp. IVar Builtin.MkPair
-                                                                                      $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
-                                                                                             $ IVar ^sub^fuel_arg^)
-                                                                                      $ (IApp. IVar <<DerivedGen.VectMaybeAnyType.There>>
-                                                                                             $ IVar ^sub^fuel_arg^
-                                                                                             $ IVar inter^<n>
-                                                                                             $ IVar inter^<{arg:1}>))
-                                                                               $ IVar Nil)))) ]))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<DerivedGen.VectMaybeAnyType.Here>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg n : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:1} : IApp. IVar DerivedGen.VectMaybeAnyType.VectMaybeAnyType
-                                                                                 $ IVar n)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ (IApp. IVar Builtin.DPair.DPair
-                                                            $ (IApp. IVar Data.Fin.Fin
-                                                                   $ IVar n)
-                                                            $ (ILam.  (MW ExplicitArg {arg:2} : IApp. IVar Data.Fin.Fin
-                                                                                                       $ IVar n)
-                                                                   => (IApp. IVar Builtin.DPair.DPair
-                                                                           $ IVar DerivedGen.MaybeAnyType.MaybeAnyType
-                                                                           $ (ILam.  (MW ExplicitArg {arg:3} : IVar DerivedGen.MaybeAnyType.MaybeAnyType)
-                                                                                  => (IApp. IVar DerivedGen.VectMaybeAnyType.AtIndex
-                                                                                          $ IVar n
-                                                                                          $ IVar {arg:2}
-                                                                                          $ IVar {arg:3}
-                                                                                          $ IVar {arg:1}))))))))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<DerivedGen.VectMaybeAnyType.There>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg n : IVar Prelude.Types.Nat)
-                                             -> (MW ExplicitArg {arg:1} : IApp. IVar DerivedGen.VectMaybeAnyType.VectMaybeAnyType
-                                                                                 $ IVar n)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ (IApp. IVar Builtin.DPair.DPair
-                                                            $ (IApp. IVar Data.Fin.Fin
-                                                                   $ IVar n)
-                                                            $ (ILam.  (MW ExplicitArg {arg:2} : IApp. IVar Data.Fin.Fin
-                                                                                                       $ IVar n)
-                                                                   => (IApp. IVar Builtin.DPair.DPair
-                                                                           $ IVar DerivedGen.MaybeAnyType.MaybeAnyType
-                                                                           $ (ILam.  (MW ExplicitArg {arg:3} : IVar DerivedGen.MaybeAnyType.MaybeAnyType)
-                                                                                  => (IApp. IVar DerivedGen.VectMaybeAnyType.AtIndex
-                                                                                          $ IVar n
-                                                                                          $ IVar {arg:2}
-                                                                                          $ IVar {arg:3}
-                                                                                          $ IVar {arg:1}))))))))
-                            IDef <<DerivedGen.VectMaybeAnyType.Here>>
-                                 [ PatClause (IApp. IVar <<DerivedGen.VectMaybeAnyType.Here>>
-                                                  $ IBindVar ^cons_fuel^
-                                                  $ (IApp. IVar Prelude.Types.S
-                                                         $ IBindVar n)
-                                                  $ (IApp. INamedApp (IVar DerivedGen.VectMaybeAnyType.(::))
-                                                                     n
-                                                                     (Implicit True)
-                                                         $ IBindVar x
-                                                         $ IBindVar xs))
-                                             (IApp. IVar Test.DepTyCheck.Gen.label
-                                                  $ (IApp. IVar fromString
-                                                         $ IPrimVal DerivedGen.VectMaybeAnyType.Here (orders))
-                                                  $ (IApp. INamedApp (IVar Prelude.pure)
-                                                                     f
-                                                                     (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                          $ Implicit True)
-                                                         $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                $ Implicit True
-                                                                $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                       $ Implicit True
-                                                                       $ INamedApp (INamedApp (INamedApp (IVar DerivedGen.VectMaybeAnyType.Here)
-                                                                                                         n
-                                                                                                         (IVar n))
-                                                                                              xs
-                                                                                              (IVar xs))
-                                                                                   x
-                                                                                   (IVar x)))))
-                                 , PatClause (IApp. IVar <<DerivedGen.VectMaybeAnyType.Here>>
-                                                  $ Implicit True
-                                                  $ Implicit True
-                                                  $ Implicit True)
-                                             (IVar empty) ]
-                            IDef <<DerivedGen.VectMaybeAnyType.There>>
-                                 [ PatClause (IApp. IVar <<DerivedGen.VectMaybeAnyType.There>>
-                                                  $ IBindVar ^cons_fuel^
-                                                  $ (IApp. IVar Prelude.Types.S
-                                                         $ IBindVar n)
-                                                  $ (IApp. INamedApp (IVar DerivedGen.VectMaybeAnyType.(::))
-                                                                     n
-                                                                     (Implicit True)
-                                                         $ IBindVar z
-                                                         $ IBindVar zs))
-                                             (IApp. IVar Test.DepTyCheck.Gen.label
-                                                  $ (IApp. IVar fromString
-                                                         $ IPrimVal DerivedGen.VectMaybeAnyType.There (orders))
-                                                  $ (IApp. IVar >>=
-                                                         $ (IApp. IVar <DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]
-                                                                $ IVar ^cons_fuel^
-                                                                $ IVar n
-                                                                $ IVar zs)
-                                                         $ (ILam.  (MW ExplicitArg {lamc:0} : Implicit False)
-                                                                => ICase (IVar {lamc:0})
-                                                                         (Implicit False)
-                                                                         [ PatClause (IApp. IVar Builtin.DPair.MkDPair
-                                                                                          $ IBindVar i
-                                                                                          $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                                 $ IBindVar x
-                                                                                                 $ IBindVar ^bnd^{arg:4}))
-                                                                                     (IApp. INamedApp (IVar Prelude.pure)
-                                                                                                      f
-                                                                                                      (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                                                                           $ Implicit True)
-                                                                                          $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                                 $ Implicit True
-                                                                                                 $ (IApp. IVar Builtin.DPair.MkDPair
-                                                                                                        $ Implicit True
-                                                                                                        $ (IApp. INamedApp (INamedApp (INamedApp (INamedApp (INamedApp (IVar DerivedGen.VectMaybeAnyType.There)
-                                                                                                                                                                       z
-                                                                                                                                                                       (IVar z))
-                                                                                                                                                            n
-                                                                                                                                                            (IVar n))
-                                                                                                                                                 zs
-                                                                                                                                                 (IVar zs))
-                                                                                                                                      x
-                                                                                                                                      (IVar x))
-                                                                                                                           i
-                                                                                                                           (IVar i)
-                                                                                                               $ IVar ^bnd^{arg:4})))) ])))
-                                 , PatClause (IApp. IVar <<DerivedGen.VectMaybeAnyType.There>>
-                                                  $ Implicit True
-                                                  $ Implicit True
-                                                  $ Implicit True)
-                                             (IVar empty) ] ]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ExplicitArg (Just "outer^<n>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<v>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.VectMaybeAnyType.VectMaybeAnyType" .$ var "n")
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (   var "Builtin.DPair.DPair"
+                             .$ (var "Data.Fin.Fin" .$ var "n")
+                             .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
+                                 .=>    var "Builtin.DPair.DPair"
+                                     .$ var "DerivedGen.MaybeAnyType.MaybeAnyType"
+                                     .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.MaybeAnyType.MaybeAnyType")
+                                         .=>    var "DerivedGen.VectMaybeAnyType.AtIndex"
+                                             .$ var "n"
+                                             .$ var "{arg:2}"
+                                             .$ var "{arg:3}"
+                                             .$ var "{arg:1}")))
+                 })
+          , IDef
+              emptyFC
+              "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]"
+              [    var "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>" .$ bindVar "inter^<{arg:1}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.VectMaybeAnyType.Here>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.VectMaybeAnyType.VectMaybeAnyType" .$ var "n")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (   var "Builtin.DPair.DPair"
+                                            .$ (var "Data.Fin.Fin" .$ var "n")
+                                            .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
+                                                .=>    var "Builtin.DPair.DPair"
+                                                    .$ var "DerivedGen.MaybeAnyType.MaybeAnyType"
+                                                    .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.MaybeAnyType.MaybeAnyType")
+                                                        .=>    var "DerivedGen.VectMaybeAnyType.AtIndex"
+                                                            .$ var "n"
+                                                            .$ var "{arg:2}"
+                                                            .$ var "{arg:3}"
+                                                            .$ var "{arg:1}")))
+                                })
+                         , IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.VectMaybeAnyType.There>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.VectMaybeAnyType.VectMaybeAnyType" .$ var "n")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (   var "Builtin.DPair.DPair"
+                                            .$ (var "Data.Fin.Fin" .$ var "n")
+                                            .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
+                                                .=>    var "Builtin.DPair.DPair"
+                                                    .$ var "DerivedGen.MaybeAnyType.MaybeAnyType"
+                                                    .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.MaybeAnyType.MaybeAnyType")
+                                                        .=>    var "DerivedGen.VectMaybeAnyType.AtIndex"
+                                                            .$ var "n"
+                                                            .$ var "{arg:2}"
+                                                            .$ var "{arg:3}"
+                                                            .$ var "{arg:1}")))
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.VectMaybeAnyType.Here>>"
+                             [       var "<<DerivedGen.VectMaybeAnyType.Here>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                  .$ (var "DerivedGen.VectMaybeAnyType.(::)" .! ("n", implicitTrue) .$ bindVar "x" .$ bindVar "xs")
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.Here (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (   var "Builtin.DPair.MkDPair"
+                                          .$ implicitTrue
+                                          .$ (   var "Builtin.DPair.MkDPair"
+                                              .$ implicitTrue
+                                              .$ (var "DerivedGen.VectMaybeAnyType.Here" .! ("n", var "n") .! ("xs", var "xs") .! ("x", var "x")))))
+                             , var "<<DerivedGen.VectMaybeAnyType.Here>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.VectMaybeAnyType.There>>"
+                             [       var "<<DerivedGen.VectMaybeAnyType.There>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                  .$ (var "DerivedGen.VectMaybeAnyType.(::)" .! ("n", implicitTrue) .$ bindVar "z" .$ bindVar "zs")
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.There (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]" .$ var "^cons_fuel^" .$ var "n" .$ var "zs")
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:0}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [       var "Builtin.DPair.MkDPair"
+                                                         .$ bindVar "i"
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:4}")
+                                                      .=    var "Prelude.pure"
+                                                         .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                         .$ (   var "Builtin.DPair.MkDPair"
+                                                             .$ implicitTrue
+                                                             .$ (   var "Builtin.DPair.MkDPair"
+                                                                 .$ implicitTrue
+                                                                 .$ (   var "DerivedGen.VectMaybeAnyType.There"
+                                                                     .! ("z", var "z")
+                                                                     .! ("n", var "n")
+                                                                     .! ("zs", var "zs")
+                                                                     .! ("x", var "x")
+                                                                     .! ("i", var "i")
+                                                                     .$ var "^bnd^{arg:4}")))
+                                                    ]
+                                                }))
+                             , var "<<DerivedGen.VectMaybeAnyType.There>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.AtIndex[0, 3] (dry fuel)"))
+                                    .$ (   var "<<DerivedGen.VectMaybeAnyType.Here>>"
+                                        .$ var "Data.Fuel.Dry"
+                                        .$ var "inter^<n>"
+                                        .$ var "inter^<{arg:1}>")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.AtIndex[0, 3] (spend fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (   var "Builtin.MkPair"
+                                                .$ var "Data.Nat.Pos.one"
+                                                .$ (   var "<<DerivedGen.VectMaybeAnyType.Here>>"
+                                                    .$ var "^fuel_arg^"
+                                                    .$ var "inter^<n>"
+                                                    .$ var "inter^<{arg:1}>"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (   var "<<DerivedGen.VectMaybeAnyType.There>>"
+                                                        .$ var "^sub^fuel_arg^"
+                                                        .$ var "inter^<n>"
+                                                        .$ var "inter^<{arg:1}>"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]" .$ var "^outmost-fuel^" .$ var "outer^<n>" .$ var "outer^<v>"
+      }
+

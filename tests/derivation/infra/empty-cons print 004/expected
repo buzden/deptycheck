@@ -3,43 +3,51 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (n : Nat) -> Gen MaybeEmpty (X n)
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg outer^<n> : Implicit True)
-    => ILocal (IApp. IVar <DerivedGen.X>[0]
-                   $ IVar ^outmost-fuel^
-                   $ IVar outer^<n>)
-         IClaim MW
-                Export
-                []
-                (MkTy <DerivedGen.X>[0]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ (IApp. IVar DerivedGen.X
-                                         $ IVar {arg:1}))))
-         IDef <DerivedGen.X>[0]
-              [ PatClause (IApp. IVar <DerivedGen.X>[0]
-                               $ IBindVar ^fuel_arg^
-                               $ IBindVar inter^<{arg:1}>)
-                          (ILocal (IApp. IVar Test.DepTyCheck.Gen.label
-                                       $ (IApp. IVar fromString
-                                              $ IPrimVal DerivedGen.X[0] (non-recursive))
-                                       $ (IApp. IVar <<DerivedGen.MkX>>
-                                              $ IVar ^fuel_arg^
-                                              $ IVar inter^<{arg:1}>)))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<DerivedGen.MkX>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ (IApp. IVar DerivedGen.X
-                                                            $ IVar {arg:1}))))
-                            IDef <<DerivedGen.MkX>>
-                                 [ PatClause (IApp. IVar <<DerivedGen.MkX>>
-                                                  $ IBindVar ^cons_fuel^
-                                                  $ IBindVar n)
-                                             (IVar empty) ] ]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ExplicitArg (Just "outer^<n>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<DerivedGen.X>[0]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "DerivedGen.X" .$ var "{arg:1}")
+                 })
+          , IDef
+              emptyFC
+              "<DerivedGen.X>[0]"
+              [    var "<DerivedGen.X>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<{arg:1}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.MkX>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "DerivedGen.X" .$ var "{arg:1}")
+                                })
+                         , IDef emptyFC "<<DerivedGen.MkX>>" [var "<<DerivedGen.MkX>>" .$ bindVar "^cons_fuel^" .$ bindVar "n" .= var "empty"]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0] (non-recursive)"))
+                         .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>")
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.X>[0]" .$ var "^outmost-fuel^" .$ var "outer^<n>"
+      }
+

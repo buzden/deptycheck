@@ -6,7 +6,7 @@ import public Deriving.DepTyCheck.Gen.Core
 
 import public Test.DepTyCheck.Gen
 
-import public Language.Reflection.Types
+import public Language.Reflection.Compat
 
 %default total
 
@@ -19,7 +19,7 @@ TestCaseDesc : Type
 TestCaseDesc = (String, TestCaseData)
 
 export
-chk : (ty : TypeInfo) -> List (Fin ty.args.length) -> Type -> TestCaseData
+chk : (ty : TypeInfo) -> List (Fin ty.tyArgs.length) -> Type -> TestCaseData
 chk ty giv expr = (canonicSig (MkGenSignature ty $ fromList giv), Fuel -> expr)
 
 export

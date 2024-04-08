@@ -3,22 +3,31 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen MaybeEmpty (n : Nat ** X n)
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => ILocal (IApp. IVar <DerivedGen.X>[] $ IVar ^outmost-fuel^)
-         IClaim MW
-                Export
-                []
-                (MkTy <DerivedGen.X>[]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ (IApp. IVar Builtin.DPair.DPair
-                                         $ IVar Prelude.Types.Nat
-                                         $ (ILam.  (MW ExplicitArg {arg:1} : IVar Prelude.Types.Nat)
-                                                => (IApp. IVar DerivedGen.X
-                                                        $ IVar {arg:1}))))))
-         IDef <DerivedGen.X>[]
-              [ PatClause (IApp. IVar <DerivedGen.X>[] $ IVar Dry) (IVar empty)
-              , PatClause (IApp. IVar <DerivedGen.X>[]
-                               $ (IApp. IVar More $ IBindVar fuel))
-                          (IApp. IVar <DerivedGen.X>[] $ IVar fuel) ]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<DerivedGen.X>[]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (   var "Builtin.DPair.DPair"
+                             .$ var "Prelude.Types.Nat"
+                             .$ (MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat") .=> var "DerivedGen.X" .$ var "{arg:1}"))
+                 })
+          , IDef
+              emptyFC
+              "<DerivedGen.X>[]"
+              [ var "<DerivedGen.X>[]" .$ var "Dry" .= var "empty"
+              , var "<DerivedGen.X>[]" .$ (var "More" .$ bindVar "fuel") .= var "<DerivedGen.X>[]" .$ var "fuel"
+              ]
+          ]
+      , scope = var "<DerivedGen.X>[]" .$ var "^outmost-fuel^"
+      }
+

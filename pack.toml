@@ -41,13 +41,3 @@ type = "local"
 path = "examples/sorted-list"
 ipkg = "sorted-list.ipkg"
 test = "tests/tests.ipkg"
-
-####################
-### Thirdparties ###
-####################
-
-[custom.all.elab-util]
-type   = "git"
-url    = "https://github.com/buzden/idris2-elab-util"
-commit = "f1fd467ea368e7a28ae280405e3bc1d41af6eec5"
-ipkg   = "elab-util.ipkg"

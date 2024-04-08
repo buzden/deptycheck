@@ -2,9 +2,7 @@ module ConsApps
 
 import public Data.Vect.Views.Extra
 
-import Language.Reflection
-import Language.Reflection.Syntax
-import Language.Reflection.Types
+import Language.Reflection.Compat
 
 %default total
 

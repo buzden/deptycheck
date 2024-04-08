@@ -3,93 +3,96 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (a : Type) -> Gen MaybeEmpty (n : Nat ** Vect n a)
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => (MW ExplicitArg outer^<a> : Implicit True)
-    => ILocal (IApp. IVar <Data.Vect.Vect>[1]
-                   $ IVar ^outmost-fuel^
-                   $ IVar outer^<a>)
-         IClaim MW
-                Export
-                []
-                (MkTy <Data.Vect.Vect>[1]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (MW ExplicitArg elem : IType)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ (IApp. IVar Builtin.DPair.DPair
-                                         $ IVar Prelude.Types.Nat
-                                         $ (ILam.  (MW ExplicitArg len : IVar Prelude.Types.Nat)
-                                                => (IApp. IVar Data.Vect.Vect
-                                                        $ IVar len
-                                                        $ IVar elem))))))
-         IDef <Data.Vect.Vect>[1]
-              [ PatClause (IApp. IVar <Data.Vect.Vect>[1]
-                               $ IBindVar ^fuel_arg^
-                               $ IBindVar inter^<elem>)
-                          (ILocal (ICase (IVar ^fuel_arg^)
-                                         (IVar Data.Fuel.Fuel)
-                                         [ PatClause (IVar Data.Fuel.Dry)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.label
-                                                          $ (IApp. IVar fromString
-                                                                 $ IPrimVal Data.Vect.Vect[1] (dry fuel))
-                                                          $ (IApp. IVar <<Data.Vect.Nil>>
-                                                                 $ IVar Data.Fuel.Dry
-                                                                 $ IVar inter^<elem>))
-                                         , PatClause (IApp. IVar Data.Fuel.More
-                                                          $ IBindVar ^sub^fuel_arg^)
-                                                     (IApp. IVar Test.DepTyCheck.Gen.label
-                                                          $ (IApp. IVar fromString
-                                                                 $ IPrimVal Data.Vect.Vect[1] (spend fuel))
-                                                          $ (IApp. IVar Test.DepTyCheck.Gen.frequency
-                                                                 $ (IApp. IVar ::
-                                                                        $ (IApp. IVar Builtin.MkPair
-                                                                               $ IVar Data.Nat.Pos.one
-                                                                               $ (IApp. IVar <<Data.Vect.Nil>>
-                                                                                      $ IVar ^fuel_arg^
-                                                                                      $ IVar inter^<elem>))
-                                                                        $ (IApp. IVar ::
-                                                                               $ (IApp. IVar Builtin.MkPair
-                                                                                      $ (IApp. IVar Deriving.DepTyCheck.Util.Reflection.leftDepth
-                                                                                             $ IVar ^sub^fuel_arg^)
-                                                                                      $ (IApp. IVar <<Data.Vect.(::)>>
-                                                                                             $ IVar ^sub^fuel_arg^
-                                                                                             $ IVar inter^<elem>))
-                                                                               $ IVar Nil)))) ]))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<Data.Vect.Nil>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg elem : IType)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ (IApp. IVar Builtin.DPair.DPair
-                                                            $ IVar Prelude.Types.Nat
-                                                            $ (ILam.  (MW ExplicitArg len : IVar Prelude.Types.Nat)
-                                                                   => (IApp. IVar Data.Vect.Vect
-                                                                           $ IVar len
-                                                                           $ IVar elem))))))
-                            IClaim MW
-                                   Export
-                                   []
-                                   (MkTy <<Data.Vect.(::)>>
-                                         (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                                             -> (MW ExplicitArg elem : IType)
-                                             -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                                     $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                                     $ (IApp. IVar Builtin.DPair.DPair
-                                                            $ IVar Prelude.Types.Nat
-                                                            $ (ILam.  (MW ExplicitArg len : IVar Prelude.Types.Nat)
-                                                                   => (IApp. IVar Data.Vect.Vect
-                                                                           $ IVar len
-                                                                           $ IVar elem))))))
-                            IDef <<Data.Vect.Nil>>
-                                 [ PatClause (IApp. IVar <<Data.Vect.Nil>>
-                                                  $ IBindVar ^cons_fuel^
-                                                  $ IBindVar elem)
-                                             (IVar empty) ]
-                            IDef <<Data.Vect.(::)>>
-                                 [ PatClause (IApp. IVar <<Data.Vect.(::)>>
-                                                  $ IBindVar ^cons_fuel^
-                                                  $ IBindVar elem)
-                                             (IVar empty) ] ]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ExplicitArg (Just "outer^<a>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<Data.Vect.Vect>[1]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "elem") type
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (   var "Builtin.DPair.DPair"
+                             .$ var "Prelude.Types.Nat"
+                             .$ (MkArg MW ExplicitArg (Just "len") (var "Prelude.Types.Nat") .=> var "Data.Vect.Vect" .$ var "len" .$ var "elem"))
+                 })
+          , IDef
+              emptyFC
+              "<Data.Vect.Vect>[1]"
+              [    var "<Data.Vect.Vect>[1]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<elem>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.Vect.Nil>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "elem") type
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (   var "Builtin.DPair.DPair"
+                                            .$ var "Prelude.Types.Nat"
+                                            .$ (    MkArg MW ExplicitArg (Just "len") (var "Prelude.Types.Nat")
+                                                .=> var "Data.Vect.Vect" .$ var "len" .$ var "elem"))
+                                })
+                         , IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.Vect.(::)>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "elem") type
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (   var "Builtin.DPair.DPair"
+                                            .$ var "Prelude.Types.Nat"
+                                            .$ (    MkArg MW ExplicitArg (Just "len") (var "Prelude.Types.Nat")
+                                                .=> var "Data.Vect.Vect" .$ var "len" .$ var "elem"))
+                                })
+                         , IDef emptyFC "<<Data.Vect.Nil>>" [var "<<Data.Vect.Nil>>" .$ bindVar "^cons_fuel^" .$ bindVar "elem" .= var "empty"]
+                         , IDef emptyFC "<<Data.Vect.(::)>>" [var "<<Data.Vect.(::)>>" .$ bindVar "^cons_fuel^" .$ bindVar "elem" .= var "empty"]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.Vect.Vect[1] (dry fuel)"))
+                                    .$ (var "<<Data.Vect.Nil>>" .$ var "Data.Fuel.Dry" .$ var "inter^<elem>")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.Vect.Vect[1] (spend fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (   var "Builtin.MkPair"
+                                                .$ var "Data.Nat.Pos.one"
+                                                .$ (var "<<Data.Vect.Nil>>" .$ var "^fuel_arg^" .$ var "inter^<elem>"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Data.Vect.(::)>>" .$ var "^sub^fuel_arg^" .$ var "inter^<elem>"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          ]
+      , scope = var "<Data.Vect.Vect>[1]" .$ var "^outmost-fuel^" .$ var "outer^<a>"
+      }
+

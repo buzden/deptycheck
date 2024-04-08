@@ -13,7 +13,7 @@ printInvolvedTypesVerdict tyName minRig expected = do
   logMsg "gen.auto.involved-types" 0 "given type: \{show tyName}"
   invTys <- allInvolvedTypes minRig !(getInfo' tyName)
   let invTys   = sortBy (comparing show) $ invTys <&> name
-  expected <- for expected $ map name . getInfo'
+  expected <- for expected $ map TypeInfo.name . getInfo'
   let expected = sortBy (comparing show) expected
   when (invTys /= expected) $ do
     logMsg "gen.auto.involved-types" 0 "-------- !!! --------"

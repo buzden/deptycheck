@@ -3,27 +3,34 @@
 3/3: Building DerivedGen (DerivedGen.idr)
 LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen MaybeEmpty (n : Nat ** (a : Type ** Vect n a))
 LOG gen.auto.derive.infra:0: 
-ILam.  (MW ExplicitArg ^outmost-fuel^ : IVar Data.Fuel.Fuel)
-    => ILocal (IApp. IVar <Data.Vect.Vect>[] $ IVar ^outmost-fuel^)
-         IClaim MW
-                Export
-                []
-                (MkTy <Data.Vect.Vect>[]
-                      (IPi.  (MW ExplicitArg : IVar Data.Fuel.Fuel)
-                          -> (IApp. IVar Test.DepTyCheck.Gen.Gen
-                                  $ IVar Test.DepTyCheck.Gen.Emptiness.MaybeEmpty
-                                  $ (IApp. IVar Builtin.DPair.DPair
-                                         $ IVar Prelude.Types.Nat
-                                         $ (ILam.  (MW ExplicitArg len : IVar Prelude.Types.Nat)
-                                                => (IApp. IVar Builtin.DPair.DPair
-                                                        $ IType
-                                                        $ (ILam.  (MW ExplicitArg elem : IType)
-                                                               => (IApp. IVar Data.Vect.Vect
-                                                                       $ IVar len
-                                                                       $ IVar elem))))))))
-         IDef <Data.Vect.Vect>[]
-              [ PatClause (IApp. IVar <Data.Vect.Vect>[] $ IVar Dry)
-                          (IVar empty)
-              , PatClause (IApp. IVar <Data.Vect.Vect>[]
-                               $ (IApp. IVar More $ IBindVar fuel))
-                          (IApp. IVar <Data.Vect.Vect>[] $ IVar fuel) ]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<Data.Vect.Vect>[]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (   var "Builtin.DPair.DPair"
+                             .$ var "Prelude.Types.Nat"
+                             .$ (    MkArg MW ExplicitArg (Just "len") (var "Prelude.Types.Nat")
+                                 .=>    var "Builtin.DPair.DPair"
+                                     .$ type
+                                     .$ (MkArg MW ExplicitArg (Just "elem") type .=> var "Data.Vect.Vect" .$ var "len" .$ var "elem")))
+                 })
+          , IDef
+              emptyFC
+              "<Data.Vect.Vect>[]"
+              [ var "<Data.Vect.Vect>[]" .$ var "Dry" .= var "empty"
+              , var "<Data.Vect.Vect>[]" .$ (var "More" .$ bindVar "fuel") .= var "<Data.Vect.Vect>[]" .$ var "fuel"
+              ]
+          ]
+      , scope = var "<Data.Vect.Vect>[]" .$ var "^outmost-fuel^"
+      }
+

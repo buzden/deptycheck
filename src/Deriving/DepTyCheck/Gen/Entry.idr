@@ -142,7 +142,7 @@ checkTypeIsGen checkSide sig = do
     | _ :: _ => failAt targetTypeFC "All arguments of the target type must be different"
 
   -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
-  let Yes targetTypeArgsLengthCorrect = targetType.args.length `decEq` targetTypeArgs.length
+  let Yes targetTypeArgsLengthCorrect = targetType.tyArgs.length `decEq` targetTypeArgs.length
     | No _ => fail "INTERNAL ERROR: unequal argument lists lengths: \{show targetTypeArgs.length} and \{show targetType.args.length}"
 
   ------------------------------------------------------------

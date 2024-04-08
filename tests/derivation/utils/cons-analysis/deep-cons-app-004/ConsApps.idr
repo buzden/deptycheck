@@ -1,7 +1,6 @@
 module ConsApps
 
-import Language.Reflection
-import Language.Reflection.Syntax
+import Language.Reflection.Compat
 
 %default total
 
