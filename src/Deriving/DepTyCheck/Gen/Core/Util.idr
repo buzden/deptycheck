@@ -118,7 +118,7 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
       ||| Determines which constructor's arguments would be definitely determined by fully known result type.
       typeDeterminedArgs : forall m. Elaboration m => (con : Con) -> m $ Vect con.args.length ConsDetermInfo
       typeDeterminedArgs con = do
-        let conArgNames = fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
+        let conArgNames = fromList $ mapI' con.args $ \idx, arg => (stname $ argName arg, idx)
         determined <- fromMaybe [] . map fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
         let determined = mapMaybe (flip lookup conArgNames) determined
         pure $ map cast $ presenceVect $ fromList determined
@@ -133,7 +133,7 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
           let searchFun : NamedArg -> Bool
               searchFun = case a of
                             PosApp _      => (== ExplicitArg) . piInfo
-                            NamedApp nm _ => \na => isImplicit na.piInfo && argName na == nm
+                            NamedApp nm _ => \na => isImplicit na.piInfo && argName na == Just nm
                             AutoApp _     => (== AutoImplicit) . piInfo
                             WithApp _     => const False
           let Just i = findIndex (searchFun . fst) xs

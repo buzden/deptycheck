@@ -67,9 +67,9 @@ normaliseAsType expr = quote !(check {expected=Type} expr)
 export
 normaliseCon : Elaboration m => Con -> m Con
 normaliseCon $ MkCon n args ty = do
-  let whole = piAll ty $ args <&> {name $= Just}
+  let whole = piAll ty args
   whole <- normaliseAsType whole
-  (args', ty) <- unPiNamed whole
+  let (args', ty) = unPi whole
   -- `quote` may corrupt names, workaround it:
   let args = args `zip` args' <&> \(pre, normd) => {name := argName pre} normd
   pure $ MkCon n args ty
@@ -117,8 +117,8 @@ data AnyApp
 public export
 appArg : NamedArg -> TTImp -> AnyApp
 appArg (MkArg {piInfo=ExplicitArg, _})         expr = PosApp expr
-appArg (MkArg {piInfo=ImplicitArg, name, _})   expr = NamedApp name expr
-appArg (MkArg {piInfo=DefImplicit _, name, _}) expr = NamedApp name expr
+appArg (MkArg {piInfo=ImplicitArg, name, _})   expr = NamedApp (stname name) expr
+appArg (MkArg {piInfo=DefImplicit _, name, _}) expr = NamedApp (stname name) expr
 appArg (MkArg {piInfo=AutoImplicit, _})        expr = AutoApp expr
 
 public export
@@ -304,10 +304,10 @@ argDeps args = do
   filteredArgs excluded = filterI' args $ \idx, _ => not $ contains idx excluded
 
   partialSig : (retTy : TTImp) -> (excluded : SortedSet $ Fin args.length) -> TTImp
-  partialSig retTy = piAll retTy . map {name $= Just, piInfo := ExplicitArg} . filteredArgs
+  partialSig retTy = piAll retTy . map {piInfo := ExplicitArg} . filteredArgs
 
   partialApp : (appliee : Name) -> (excluded : SortedSet $ Fin args.length) -> TTImp
-  partialApp n = appNames n . map name . filteredArgs
+  partialApp n = appNames n . map (stname . name) . filteredArgs
 
   fullSig : (retTy : TTImp) -> TTImp
   fullSig t = partialSig t empty
@@ -393,9 +393,9 @@ export
 deriveMatchingCons : (retTy : TTImp) -> (matcher : Con -> TTImp) -> (funName : Name) -> TypeInfo -> List Decl
 deriveMatchingCons retTy matcher funName ti = do
   let claim = do
-    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ Arg.name arg
+    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ stname $ name arg
     let sig = foldr
-                (pi . {count := M0, piInfo := ImplicitArg, name $= Just})
+                (pi . {count := M0, piInfo := ImplicitArg})
                 `(~tyApplied -> ~retTy)
                 ti.args
     private' funName sig

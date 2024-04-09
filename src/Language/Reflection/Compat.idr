@@ -22,21 +22,33 @@ import public Language.Reflection.Syntax.Ops
 --------------------------------------------------------------------------------
 
 public export
-record Arg (nameMandatory : Bool) where
+record Arg' where
   constructor MkArg
   count  : Count
   piInfo : PiInfo TTImp
-  name   : if nameMandatory then Name else Maybe Name
+  name   : Maybe Name
   type   : TTImp
 
+public export
+Arg : Bool -> Type
+Arg _ = Arg'
+
+%deprecate
 public export
 NamedArg : Type
 NamedArg = Arg True
 
-export
+public export
+stname : Maybe Name -> Name
+stname = fromMaybe $ UN Underscore
+
+public export
+data IsNamed : Arg' -> Type where
+  ItIsNamed : IsNamed $ MkArg c p (Just n) t
+
+export %deprecate
 namedArg : Elaboration m => Arg False -> m NamedArg
-namedArg (MkArg c p m t) =
-  maybe (genSym "x") pure m <&> \n => MkArg c p n t
+namedArg = pure
 
 export
 arg : TTImp -> Arg False
@@ -55,12 +67,6 @@ export
 unPi : TTImp -> (List $ Arg False, TTImp)
 unPi (IPi _ c p n at rt) = mapFst (MkArg c p n at ::) $ unPi rt
 unPi tpe                 = ([],tpe)
-
-||| Extracts properly named arguments from a function type.
-export
-unPiNamed : Elaboration m => TTImp -> m (List NamedArg, TTImp)
-unPiNamed v = let (args,rt') = unPi v
-               in (, rt') <$> traverse namedArg args
 
 --------------------------------------------------------------------------------
 --          Function Types
@@ -93,8 +99,8 @@ record Con where
 ||| Tries to lookup a constructor by name.
 export
 getCon : Elaboration m => Name -> m Con
-getCon n = do (n',tt)    <- lookupName n
-              (args,tpe) <- unPiNamed tt
+getCon n = do (n', tt) <- lookupName n
+              let (args, tpe) = unPi tt
               pure $ MkCon n' args tpe
 
 ||| Information about a data type
@@ -118,7 +124,7 @@ export
 getInfo' : Elaboration m => Name -> m TypeInfo
 getInfo' n = do
   (n',tt)        <- lookupName n
-  (args,IType _) <- unPiNamed tt
+  let (args,IType _) = unPi tt
     | (_,_) => fail "Type declaration does not end in IType"
   conNames       <- getCons n'
   cons           <- traverse getCon conNames
@@ -134,7 +140,7 @@ getInfo = getInfo'
 -------------------------------------
 
 public export
-argName : NamedArg -> Name
+argName : NamedArg -> Maybe Name
 argName = (.name)
 
 public export %inline
