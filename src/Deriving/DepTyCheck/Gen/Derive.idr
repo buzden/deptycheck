@@ -62,7 +62,7 @@ canonicSig : GenSignature -> TTImp
 canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
 
-  arg : Fin sig.targetType.args.length -> Arg False
+  arg : Fin sig.targetType.args.length -> Arg
   arg idx = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW ExplicitArg name type
 
   returnTy : TTImp

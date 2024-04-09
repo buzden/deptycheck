@@ -117,7 +117,7 @@ canonicConsBody sig name con = do
                 compare (origL, renL) (origR, renR) = comparing (flip lookup conNameToIdx) origL origR <+> compare renL renR
           SortedSet.toList . foldl (flip insert) (empty @{AsInCon})
           where
-            argStrName : NamedArg -> Maybe String
+            argStrName : Arg -> Maybe String
             argStrName $ MkArg {name=Just $ UN (Basic n), _} = Just n
             argStrName _                                     = Nothing
 

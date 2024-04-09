@@ -29,10 +29,6 @@ import public Text.PrettyPrint.Bernardy
 
 %default total
 
-%hide Language.Reflection.Syntax.pi
-%hide Language.Reflection.Syntax.piAll
-%hide Language.Reflection.Syntax.unPi
-
 -----------------------
 --- Pretty-printing ---
 -----------------------
@@ -88,13 +84,13 @@ isImplicit ExplicitArg     = False
 --- `DPair` type parsing and rebuilding stuff ---
 
 public export
-unDPair : TTImp -> (List (Arg False), TTImp)
+unDPair : TTImp -> (List Arg, TTImp)
 unDPair (IApp _ (IApp _ (IVar _ `{Builtin.DPair.DPair}) typ) (ILam _ cnt piInfo mbname _ lamTy)) =
     mapFst (MkArg cnt piInfo mbname typ ::) $ unDPair lamTy
 unDPair expr = ([], expr)
 
 public export
-unDPairUnAlt : TTImp -> Maybe (List (Arg False), TTImp)
+unDPairUnAlt : TTImp -> Maybe (List Arg, TTImp)
 unDPairUnAlt (IAlternative _ _ alts) = case filter (not . null . Builtin.fst) $ unDPair <$> alts of
   [x] => Just x
   _   => Nothing
@@ -115,7 +111,7 @@ data AnyApp
   | WithApp TTImp
 
 public export
-appArg : NamedArg -> TTImp -> AnyApp
+appArg : Arg -> TTImp -> AnyApp
 appArg (MkArg {piInfo=ExplicitArg, _})         expr = PosApp expr
 appArg (MkArg {piInfo=ImplicitArg, name, _})   expr = NamedApp (stname name) expr
 appArg (MkArg {piInfo=DefImplicit _, name, _}) expr = NamedApp (stname name) expr
@@ -291,7 +287,7 @@ doesTypecheckAs : Elaboration m => (0 expected : Type) -> TTImp -> m Bool
 doesTypecheckAs expected expr = try .| check {expected} expr $> True .| pure False
 
 export
-argDeps : Elaboration m => (args : List NamedArg) -> m $ DVect args.length $ SortedSet . Fin . Fin.finToNat
+argDeps : Elaboration m => (args : List Arg) -> m $ DVect args.length $ SortedSet . Fin . Fin.finToNat
 argDeps args = do
   ignore $ check {expected=Type} $ fullSig defaultRet -- we can't return trustful result if given arguments do not form a nice Pi type
   concatMap depsOfOne range
@@ -300,7 +296,7 @@ argDeps args = do
 
   %unbound_implicits off -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2040
 
-  filteredArgs : (excluded : SortedSet $ Fin args.length) -> List NamedArg
+  filteredArgs : (excluded : SortedSet $ Fin args.length) -> List Arg
   filteredArgs excluded = filterI' args $ \idx, _ => not $ contains idx excluded
 
   partialSig : (retTy : TTImp) -> (excluded : SortedSet $ Fin args.length) -> TTImp
@@ -609,7 +605,7 @@ allInvolvedTypes minimalRig ti = toList <$> go [ti] empty where
       typesOfExpr : TTImp -> m $ List TypeInfo
       typesOfExpr expr = map (mapMaybe id) $ for (allVarNames expr) $ catch . getInfo'
 
-      typesOfArg : NamedArg -> m $ List TypeInfo
+      typesOfArg : Arg -> m $ List TypeInfo
       typesOfArg arg = atRig arg.count $ typesOfExpr arg.type
 
       typesOfCon : Con -> m $ List TypeInfo

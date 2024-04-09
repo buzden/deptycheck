@@ -8,9 +8,6 @@ import Language.Reflection.Compat
 
 %language ElabReflection
 
-%hide Language.Reflection.Syntax.piAll
-%hide Language.Reflection.Syntax.unPi
-
 ppTy : Type -> Elab Unit
 ppTy ty = do
   expr <- quote ty

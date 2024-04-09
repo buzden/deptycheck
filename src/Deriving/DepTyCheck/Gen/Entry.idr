@@ -12,8 +12,6 @@ import public Test.DepTyCheck.Gen -- for `Gen` data type
 
 %default total
 
-%hide Language.Reflection.Syntax.unPi
-
 ----------------------------------------
 --- Internal functions and instances ---
 ----------------------------------------
@@ -160,7 +158,7 @@ checkTypeIsGen checkSide sig = do
   (givenParams, autoImplArgs, givenParamsPositions) <- do
     let
       classifyArg : forall m. Elaboration m =>
-                    NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
+                    Arg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
       classifyArg $ MkArg MW ImplicitArg (Just $ UN name) type = pure $ Left (Checked.ImplicitArg, name, type)
       classifyArg $ MkArg MW ExplicitArg (Just $ UN name) type = pure $ Left (Checked.ExplicitArg, name, type)
       classifyArg $ MkArg MW AutoImplicit (Just $ MN _ _) type = pure $ Right type

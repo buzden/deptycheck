@@ -15,74 +15,9 @@ import public Language.Reflection.Syntax.Ops
 
 %default total
 
-%hide Syntax.unPi
-
---------------------------------------------------------------------------------
---          Function Arguments
---------------------------------------------------------------------------------
-
-public export
-record Arg' where
-  constructor MkArg
-  count  : Count
-  piInfo : PiInfo TTImp
-  name   : Maybe Name
-  type   : TTImp
-
-public export
-Arg : Bool -> Type
-Arg _ = Arg'
-
-%deprecate
-public export
-NamedArg : Type
-NamedArg = Arg True
-
 public export
 stname : Maybe Name -> Name
 stname = fromMaybe $ UN Underscore
-
-public export
-data IsNamed : Arg' -> Type where
-  ItIsNamed : IsNamed $ MkArg c p (Just n) t
-
-export %deprecate
-namedArg : Elaboration m => Arg False -> m NamedArg
-namedArg = pure
-
-export
-arg : TTImp -> Arg False
-arg = MkArg MW ExplicitArg Nothing
-
-export
-erasedArg : TTImp -> Arg False
-erasedArg = MkArg M0 ExplicitArg Nothing
-
-export
-lambdaArg : Name -> Arg False
-lambdaArg n = MkArg MW ExplicitArg (Just n) implicitFalse
-
-||| Extracts the arguments from a function type.
-export
-unPi : TTImp -> (List $ Arg False, TTImp)
-unPi (IPi _ c p n at rt) = mapFst (MkArg c p n at ::) $ unPi rt
-unPi tpe                 = ([],tpe)
-
---------------------------------------------------------------------------------
---          Function Types
---------------------------------------------------------------------------------
-
-||| Defines a function type.
-|||
-||| This passes the fields of `Arg` to `IPi EmptyFC`
-export
-pi : Arg False -> (retTy : TTImp) -> TTImp
-pi (MkArg c p n t) = IPi EmptyFC c p n t
-
-||| Defines a function type taking the given arguments.
-export
-piAll : TTImp -> List (Arg False) -> TTImp
-piAll res = foldr pi res
 
 --------------------------------------------------------------------------------
 --          General Types
@@ -93,7 +28,7 @@ public export
 record Con where
   constructor MkCon
   name : Name
-  args : List NamedArg
+  args : List Arg
   type : TTImp
 
 ||| Tries to lookup a constructor by name.
@@ -114,7 +49,7 @@ public export
 record TypeInfo where
   constructor MkTypeInfo
   name : Name
-  args : List NamedArg
+  args : List Arg
   cons : List Con
 
 ||| Tries to get information about the data type specified
@@ -140,11 +75,11 @@ getInfo = getInfo'
 -------------------------------------
 
 public export
-argName : NamedArg -> Maybe Name
+argName : Arg -> Maybe Name
 argName = (.name)
 
 public export %inline
-(.tyArgs) : TypeInfo -> List NamedArg
+(.tyArgs) : TypeInfo -> List Arg
 (.tyArgs) = args
 
 public export %inline
@@ -152,5 +87,5 @@ public export %inline
 (.tyCons) = cons
 
 public export %inline
-(.conArgs) : Con -> List NamedArg
+(.conArgs) : Con -> List Arg
 (.conArgs) = args
