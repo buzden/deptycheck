@@ -51,7 +51,7 @@ jobs:
       - run: ./.patch-chez-gc-handler idris2
 
       - name: Tar the `pack` dir
-        run: tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
+        run: .github/tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
       - name: Save state of `pack`
         uses: actions/upload-artifact@v4
         with:
@@ -70,12 +70,12 @@ jobs:
         with:
           name: pack-dir
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+        run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: pack install-deps deptycheck
 
       - name: Tar the `pack` dir
-        run: tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
+        run: .github/tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
       - name: Save built thirdparties
         uses: actions/upload-artifact@v4
         with:
@@ -100,24 +100,15 @@ jobs:
         with:
           name: built-thirdparties
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+        run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: pack build deptycheck
       - run: pack install deptycheck
 
       - name: Tar the `pack` dir
-        run: |
-          ls -lh1R "$PACK_DIR" > pack-dir-files-list.pre
-          tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
-          EXITCODE="$?"
-          ls -lh1R "$PACK_DIR" > pack-dir-files-list.post
-          echo "----"
-          diff pack-dir-files-list.p[ro]*
-          if [ "$EXITCODE" != 0 ] && [ "$EXITCODE" != 1 ]; then
-            exit "$EXITCODE"
-          fi
+        run:  .github/tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
       - name: Tar built TTC files
-        run: find "$(pwd)" -name '*.tt[cm]' | tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
+        run: find "$(pwd)" -name '*.tt[cm]' | .github/tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
       - name: Save built DepTyCheck
         uses: actions/upload-artifact@v4
         with:
@@ -185,7 +176,7 @@ jobs:
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+        run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: pack test deptycheck "${{matrix.test_set}}"
 
@@ -233,7 +224,7 @@ jobs:
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
-        run: tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+        run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: pack build "${{matrix.example}}"
       - run: pack test "${{matrix.example}}"

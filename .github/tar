@@ -1,0 +1,7 @@
+#!/bin/sh
+
+tar "$@"
+EXITCODE="$?"
+if [ "$EXITCODE" != 0 ] && [ "$EXITCODE" != 1 ]; then
+  exit "$EXITCODE"
+fi
