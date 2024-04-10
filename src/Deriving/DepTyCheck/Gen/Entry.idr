@@ -60,7 +60,7 @@ checkTypeIsGen checkSide sig = do
   _ <- check {expected=Type} sig
 
   -- treat the given type expression as a (possibly 0-ary) function type
-  (sigArgs, sigResult) <- unPiNamed sig
+  let (sigArgs, sigResult) = unPi sig
 
   -----------------------------------------
   -- First checks in the given arguments --
@@ -71,7 +71,7 @@ checkTypeIsGen checkSide sig = do
     | [] => failAt (getFC sig) "No arguments in the generator function signature, at least a fuel argument must be present"
 
   -- check that the first argument an explicit unnamed one
-  let MkArg MW ExplicitArg (MN _ _) (IVar firstArgFC firstArgTypeName) = firstArg
+  let MkArg MW ExplicitArg (Just (MN _ _)) (IVar firstArgFC firstArgTypeName) = firstArg
     | _ => failAt (getFC firstArg.type) "The first argument must be explicit, unnamed, present at runtime and of type `Fuel`"
 
   -- check the type of the fuel argument
@@ -128,6 +128,9 @@ checkTypeIsGen checkSide sig = do
 
     _ => failAt targetTypeFC "Target type is not a simple name"
 
+  -- check that target type has all unnamed arguments resolved with machine-generated names
+  _ <- ensureTyArgsNamed targetType
+
   --------------------------------------------------
   -- Target type family's arguments' first checks --
   --------------------------------------------------
@@ -158,10 +161,11 @@ checkTypeIsGen checkSide sig = do
   (givenParams, autoImplArgs, givenParamsPositions) <- do
     let
       classifyArg : forall m. Elaboration m =>
-                    NamedArg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
-      classifyArg $ MkArg MW ImplicitArg (UN name) type = pure $ Left (Checked.ImplicitArg, name, type)
-      classifyArg $ MkArg MW ExplicitArg (UN name) type = pure $ Left (Checked.ExplicitArg, name, type)
-      classifyArg $ MkArg MW AutoImplicit (MN _ _) type = pure $ Right type
+                    Arg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
+      classifyArg $ MkArg MW ImplicitArg (Just $ UN name) type = pure $ Left (Checked.ImplicitArg, name, type)
+      classifyArg $ MkArg MW ExplicitArg (Just $ UN name) type = pure $ Left (Checked.ExplicitArg, name, type)
+      classifyArg $ MkArg MW AutoImplicit (Just $ MN _ _) type = pure $ Right type
+      classifyArg $ MkArg MW AutoImplicit Nothing         type = pure $ Right type
 
       classifyArg $ MkArg MW ImplicitArg     _ ty = failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
       classifyArg $ MkArg MW ExplicitArg     _ ty = failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"

@@ -19,6 +19,7 @@ public export
 record GenSignature where
   constructor MkGenSignature
   targetType : TypeInfo
+  {auto 0 targetTypeCorrect : AllTyArgsNamed targetType}
   givenParams : SortedSet $ Fin targetType.args.length
 
 namespace GenSignature
@@ -62,14 +63,15 @@ canonicSig : GenSignature -> TTImp
 canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
 
-  arg : Fin sig.targetType.args.length -> Arg False
-  arg idx = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW ExplicitArg (Just name) type
+  arg : Fin sig.targetType.args.length -> Arg
+  arg idx = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW ExplicitArg name type
 
   returnTy : TTImp
   returnTy = `(Test.DepTyCheck.Gen.Gen Test.DepTyCheck.Gen.Emptiness.MaybeEmpty ~(buildDPair targetTypeApplied generatedArgs)) where
 
     targetTypeApplied : TTImp
-    targetTypeApplied = foldr apply (extractTargetTyExpr sig.targetType) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) =>
+    targetTypeApplied = foldr apply (extractTargetTyExpr sig.targetType) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => do
+                          let name = stname name
                           case piInfo of
                             ExplicitArg   => (.$ var name)
                             ImplicitArg   => \f => namedApp f name $ var name
@@ -78,7 +80,7 @@ canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel)
 
     generatedArgs : List (Name, TTImp)
     generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
-                      ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (name, type)
+                      ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (stname name, type)
 
 -- Complementary to `canonicSig`
 export
@@ -97,7 +99,7 @@ interface DerivatorCore where
 --- Expressions generation utils ---
 
 defArgNames : {sig : GenSignature} -> Vect sig.givenParams.size String
-defArgNames = sig.givenParams.asVect <&> show . name . index' sig.targetType.args
+defArgNames = sig.givenParams.asVect <&> show . argName . index' sig.targetType.args
 
 export %inline
 canonicDefaultLHS' : (namesFun : String -> String) -> GenSignature -> Name -> (fuel : String) -> TTImp

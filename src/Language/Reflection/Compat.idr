@@ -5,6 +5,7 @@
 ||| This copying is done with the permission of Stefan Höck, the author and copyright holder of the `elab-util` library.
 module Language.Reflection.Compat
 
+import public Data.List.Quantifiers
 import public Data.List1
 import public Data.String
 import public Data.Vect
@@ -15,68 +16,13 @@ import public Language.Reflection.Syntax.Ops
 
 %default total
 
-%hide Syntax.unPi
-
---------------------------------------------------------------------------------
---          Function Arguments
---------------------------------------------------------------------------------
+public export
+stname : Maybe Name -> Name
+stname = fromMaybe $ UN Underscore
 
 public export
-record Arg (nameMandatory : Bool) where
-  constructor MkArg
-  count  : Count
-  piInfo : PiInfo TTImp
-  name   : if nameMandatory then Name else Maybe Name
-  type   : TTImp
-
-public export
-NamedArg : Type
-NamedArg = Arg True
-
-export
-namedArg : Elaboration m => Arg False -> m NamedArg
-namedArg (MkArg c p m t) =
-  maybe (genSym "x") pure m <&> \n => MkArg c p n t
-
-export
-arg : TTImp -> Arg False
-arg = MkArg MW ExplicitArg Nothing
-
-export
-erasedArg : TTImp -> Arg False
-erasedArg = MkArg M0 ExplicitArg Nothing
-
-export
-lambdaArg : Name -> Arg False
-lambdaArg n = MkArg MW ExplicitArg (Just n) implicitFalse
-
-||| Extracts the arguments from a function type.
-export
-unPi : TTImp -> (List $ Arg False, TTImp)
-unPi (IPi _ c p n at rt) = mapFst (MkArg c p n at ::) $ unPi rt
-unPi tpe                 = ([],tpe)
-
-||| Extracts properly named arguments from a function type.
-export
-unPiNamed : Elaboration m => TTImp -> m (List NamedArg, TTImp)
-unPiNamed v = let (args,rt') = unPi v
-               in (, rt') <$> traverse namedArg args
-
---------------------------------------------------------------------------------
---          Function Types
---------------------------------------------------------------------------------
-
-||| Defines a function type.
-|||
-||| This passes the fields of `Arg` to `IPi EmptyFC`
-export
-pi : Arg False -> (retTy : TTImp) -> TTImp
-pi (MkArg c p n t) = IPi EmptyFC c p n t
-
-||| Defines a function type taking the given arguments.
-export
-piAll : TTImp -> List (Arg False) -> TTImp
-piAll res = foldr pi res
+argName : Arg -> Name
+argName = stname . (.name)
 
 --------------------------------------------------------------------------------
 --          General Types
@@ -87,14 +33,14 @@ public export
 record Con where
   constructor MkCon
   name : Name
-  args : List NamedArg
+  args : List Arg
   type : TTImp
 
 ||| Tries to lookup a constructor by name.
 export
 getCon : Elaboration m => Name -> m Con
-getCon n = do (n',tt)    <- lookupName n
-              (args,tpe) <- unPiNamed tt
+getCon n = do (n', tt) <- lookupName n
+              let (args, tpe) = unPi tt
               pure $ MkCon n' args tpe
 
 ||| Information about a data type
@@ -108,7 +54,7 @@ public export
 record TypeInfo where
   constructor MkTypeInfo
   name : Name
-  args : List NamedArg
+  args : List Arg
   cons : List Con
 
 ||| Tries to get information about the data type specified
@@ -118,7 +64,7 @@ export
 getInfo' : Elaboration m => Name -> m TypeInfo
 getInfo' n = do
   (n',tt)        <- lookupName n
-  (args,IType _) <- unPiNamed tt
+  let (args,IType _) = unPi tt
     | (_,_) => fail "Type declaration does not end in IType"
   conNames       <- getCons n'
   cons           <- traverse getCon conNames
@@ -129,16 +75,44 @@ export %macro
 getInfo : Name -> Elab TypeInfo
 getInfo = getInfo'
 
+--- Namedness property ---
+
+public export
+data IsNamedArg : Arg -> Type where
+  ItIsNamed : IsNamedArg $ MkArg cnt pii (Just n) ty
+
+public export
+isNamedArg : (arg : Arg) -> Dec $ IsNamedArg arg
+isNamedArg (MkArg count piInfo (Just x) type) = Yes ItIsNamed
+isNamedArg (MkArg count piInfo Nothing type)  = No $ \case ItIsNamed impossible
+
+public export
+data ConArgsNamed : Con -> Type where
+  TheyAreNamed : All IsNamedArg ars -> ConArgsNamed $ MkCon nm ars ty
+
+public export
+areConArgsNamed : (con : Con) -> Dec $ ConArgsNamed con
+areConArgsNamed $ MkCon _ ars _ with (all isNamedArg ars)
+  _ | Yes ars' = Yes $ TheyAreNamed ars'
+  _ | No nars  = No $ \(TheyAreNamed ars') => nars ars'
+
+public export
+data AllTyArgsNamed : TypeInfo -> Type where
+  TheyAllAreNamed : All IsNamedArg ars -> All ConArgsNamed cns -> AllTyArgsNamed $ MkTypeInfo nm ars cns
+
+public export
+areAllTyArgsNamed : (ty : TypeInfo) -> Dec $ AllTyArgsNamed ty
+areAllTyArgsNamed $ MkTypeInfo _ ars cns with (all isNamedArg ars, all areConArgsNamed cns)
+  _ | (Yes ars', Yes cns') = Yes $ TheyAllAreNamed ars' cns'
+  _ | (No nars, _) = No $ \(TheyAllAreNamed ars' _) => nars ars'
+  _ | (_, No ncns) = No $ \(TheyAllAreNamed _ cns') => ncns cns'
+
 -------------------------------------
 --- Working around type inference ---
 -------------------------------------
 
-public export
-argName : NamedArg -> Name
-argName = (.name)
-
 public export %inline
-(.tyArgs) : TypeInfo -> List NamedArg
+(.tyArgs) : TypeInfo -> List Arg
 (.tyArgs) = args
 
 public export %inline
@@ -146,5 +120,5 @@ public export %inline
 (.tyCons) = cons
 
 public export %inline
-(.conArgs) : Con -> List NamedArg
+(.conArgs) : Con -> List Arg
 (.conArgs) = args

@@ -42,7 +42,7 @@ canonicConsBody sig name con = do
       conRetTypeArg idx = index' conRetTypeArgs $ rewrite conRetTypeArgsLengthCorrect in idx
 
   -- Determine names of the arguments of the constructor (as a function)
-  let conArgNames = fromList $ (.name) <$> con.args
+  let conArgNames = fromList $ argName <$> con.args
 
   -- For given arguments, determine whether they are
   --   - just a free name
@@ -117,9 +117,9 @@ canonicConsBody sig name con = do
                 compare (origL, renL) (origR, renR) = comparing (flip lookup conNameToIdx) origL origR <+> compare renL renR
           SortedSet.toList . foldl (flip insert) (empty @{AsInCon})
           where
-            argStrName : NamedArg -> Maybe String
-            argStrName $ MkArg {name=UN (Basic n), _} = Just n
-            argStrName _                              = Nothing
+            argStrName : Arg -> Maybe String
+            argStrName $ MkArg {name=Just $ UN (Basic n), _} = Just n
+            argStrName _                                     = Nothing
 
   -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend

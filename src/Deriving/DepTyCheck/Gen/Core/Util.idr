@@ -9,8 +9,6 @@ import public Deriving.DepTyCheck.Gen.Derive
 
 %default total
 
-%hide Language.Reflection.Syntax.Arg.piInfo
-
 --- Utilities ---
 
 public export
@@ -123,17 +121,17 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
         let determined = mapMaybe (flip lookup conArgNames) determined
         pure $ map cast $ presenceVect $ fromList determined
 
-      reorder : {formalArgs : List NamedArg} -> {apps : List AnyApp} -> Vect formalArgs.length a -> Maybe $ Vect apps.length a
+      reorder : {formalArgs : List Arg} -> {apps : List AnyApp} -> Vect formalArgs.length a -> Maybe $ Vect apps.length a
       reorder xs = reorder' (fromList formalArgs `zip` xs) apps where
-        reorder' : Vect n (NamedArg, a) -> (apps : List AnyApp) -> Maybe $ Vect apps.length a
+        reorder' : Vect n (Arg, a) -> (apps : List AnyApp) -> Maybe $ Vect apps.length a
         reorder' xs        []      = if isJust $ find ((== ExplicitArg) . piInfo . fst) xs
                                        then Nothing {- not all explicit parameters are used -} else Just []
         reorder' []        (_::_)  = Nothing
         reorder' xs@(_::_) (a::as) = do
-          let searchFun : NamedArg -> Bool
+          let searchFun : Arg -> Bool
               searchFun = case a of
                             PosApp _      => (== ExplicitArg) . piInfo
-                            NamedApp nm _ => \na => isImplicit na.piInfo && argName na == nm
+                            NamedApp nm _ => \na => isImplicit na.piInfo && na.name == Just nm
                             AutoApp _     => (== AutoImplicit) . piInfo
                             WithApp _     => const False
           let Just i = findIndex (searchFun . fst) xs

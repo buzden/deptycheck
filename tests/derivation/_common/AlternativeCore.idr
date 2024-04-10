@@ -36,7 +36,9 @@ EmptyCons = MainCoreDerivator @{EmptyCons'}
 ------------------------------
 
 callSimpleGen : CanonicGen m => TypeInfo -> (fuel : TTImp) -> m TTImp
-callSimpleGen tyi fuel = callGen (MkGenSignature tyi SortedSet.empty) fuel $ believe_me $ Vect.Nil {elem = TTImp}
+callSimpleGen tyi fuel = do
+  _ <- ensureTyArgsNamed tyi
+  callGen (MkGenSignature tyi SortedSet.empty) fuel $ believe_me $ Vect.Nil {elem = TTImp}
 
 callStrGen : CanonicGen m => (fuel : TTImp) -> m TTImp
 callStrGen = callSimpleGen $ typeInfoForPrimType StringType

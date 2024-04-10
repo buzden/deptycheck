@@ -54,6 +54,7 @@ public export
 record ExternalGenSignature where
   constructor MkExternalGenSignature
   targetType : TypeInfo
+  {auto 0 targetTypeCorrect : AllTyArgsNamed targetType}
   givenParams : SortedMap (Fin targetType.args.length) (ArgExplicitness, Name)
 
 namespace ExternalGenSignature

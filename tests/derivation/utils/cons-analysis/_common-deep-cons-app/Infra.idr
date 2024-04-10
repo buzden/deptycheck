@@ -8,6 +8,9 @@ import Deriving.DepTyCheck.Gen.Core.Util
 
 %language ElabReflection
 
+%hide Data.List.Quantifiers.Right
+%hide Data.List.Quantifiers.Left
+
 printDeepConsApp : List Name -> TTImp -> Elab Unit
 printDeepConsApp freeNames tyExpr = do
   logMsg         "gen.auto.deep-cons-app" 0 ""
