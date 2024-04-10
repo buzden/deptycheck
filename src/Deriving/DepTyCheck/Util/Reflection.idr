@@ -405,6 +405,13 @@ public export
 conSubexprs : Con -> List TTImp
 conSubexprs con = map type con.args ++ (map getExpr $ snd $ unAppAny con.type)
 
+export
+ensureTyArgsNamed : Elaboration m => (ty : TypeInfo) -> m $ AllTyArgsNamed ty
+ensureTyArgsNamed ty = do
+  let Yes prf = areAllTyArgsNamed ty
+    | No _ => fail "DepTyCheck blames the compiler: type info for type `\{ty.name}` contains unnamed arguments"
+  pure prf
+
 -------------------------------------------------
 --- Syntactic analysis of `TTImp` expressions ---
 -------------------------------------------------

@@ -19,6 +19,7 @@ public export
 record GenSignature where
   constructor MkGenSignature
   targetType : TypeInfo
+  {auto 0 targetTypeCorrect : AllTyArgsNamed targetType}
   givenParams : SortedSet $ Fin targetType.args.length
 
 namespace GenSignature

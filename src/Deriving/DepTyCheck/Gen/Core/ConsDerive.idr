@@ -67,6 +67,7 @@ namespace NonObligatoryExts
               lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{lhs}"
             let Yes lengthCorrect = decEq ty.args.length args.length
               | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
+            _ <- ensureTyArgsNamed ty
             pure $ MkTypeApp ty $ rewrite lengthCorrect in args.asVect <&> \arg => case getExpr arg of
               expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
               expr            => Right expr
@@ -206,6 +207,7 @@ namespace NonObligatoryExts
         data TypeApp : Type where
           MkTypeApp :
             (type : TypeInfo) ->
+            (0 _ : AllTyArgsNamed type) =>
             (argTypes : Vect type.args.length .| Either (Fin con.args.length) TTImp) ->
             TypeApp
 

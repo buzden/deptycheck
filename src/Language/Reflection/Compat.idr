@@ -5,6 +5,7 @@
 ||| This copying is done with the permission of Stefan Höck, the author and copyright holder of the `elab-util` library.
 module Language.Reflection.Compat
 
+import public Data.List.Quantifiers
 import public Data.List1
 import public Data.String
 import public Data.Vect
@@ -73,6 +74,38 @@ getInfo' n = do
 export %macro
 getInfo : Name -> Elab TypeInfo
 getInfo = getInfo'
+
+--- Namedness property ---
+
+public export
+data IsNamedArg : Arg -> Type where
+  ItIsNamed : IsNamedArg $ MkArg cnt pii (Just n) ty
+
+public export
+isNamedArg : (arg : Arg) -> Dec $ IsNamedArg arg
+isNamedArg (MkArg count piInfo (Just x) type) = Yes ItIsNamed
+isNamedArg (MkArg count piInfo Nothing type)  = No $ \case ItIsNamed impossible
+
+public export
+data ConArgsNamed : Con -> Type where
+  TheyAreNamed : All IsNamedArg ars -> ConArgsNamed $ MkCon nm ars ty
+
+public export
+areConArgsNamed : (con : Con) -> Dec $ ConArgsNamed con
+areConArgsNamed $ MkCon _ ars _ with (all isNamedArg ars)
+  _ | Yes ars' = Yes $ TheyAreNamed ars'
+  _ | No nars  = No $ \(TheyAreNamed ars') => nars ars'
+
+public export
+data AllTyArgsNamed : TypeInfo -> Type where
+  TheyAllAreNamed : All IsNamedArg ars -> All ConArgsNamed cns -> AllTyArgsNamed $ MkTypeInfo nm ars cns
+
+public export
+areAllTyArgsNamed : (ty : TypeInfo) -> Dec $ AllTyArgsNamed ty
+areAllTyArgsNamed $ MkTypeInfo _ ars cns with (all isNamedArg ars, all areConArgsNamed cns)
+  _ | (Yes ars', Yes cns') = Yes $ TheyAllAreNamed ars' cns'
+  _ | (No nars, _) = No $ \(TheyAllAreNamed ars' _) => nars ars'
+  _ | (_, No ncns) = No $ \(TheyAllAreNamed _ cns') => ncns cns'
 
 -------------------------------------
 --- Working around type inference ---

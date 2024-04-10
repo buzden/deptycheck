@@ -128,6 +128,9 @@ checkTypeIsGen checkSide sig = do
 
     _ => failAt targetTypeFC "Target type is not a simple name"
 
+  -- check that target type has all unnamed arguments resolved with machine-generated names
+  _ <- ensureTyArgsNamed targetType
+
   --------------------------------------------------
   -- Target type family's arguments' first checks --
   --------------------------------------------------
