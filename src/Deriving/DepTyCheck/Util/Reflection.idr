@@ -67,7 +67,7 @@ normaliseCon $ MkCon n args ty = do
   whole <- normaliseAsType whole
   let (args', ty) = unPi whole
   -- `quote` may corrupt names, workaround it:
-  let args = args `zip` args' <&> \(pre, normd) => {name := argName pre} normd
+  let args = args `zip` args' <&> \(pre, normd) => {name := pre.name} normd
   pure $ MkCon n args ty
 
 --------------------------------------------
@@ -303,7 +303,7 @@ argDeps args = do
   partialSig retTy = piAll retTy . map {piInfo := ExplicitArg} . filteredArgs
 
   partialApp : (appliee : Name) -> (excluded : SortedSet $ Fin args.length) -> TTImp
-  partialApp n = appNames n . map (stname . name) . filteredArgs
+  partialApp n = appNames n . map argName . filteredArgs
 
   fullSig : (retTy : TTImp) -> TTImp
   fullSig t = partialSig t empty
@@ -389,7 +389,7 @@ export
 deriveMatchingCons : (retTy : TTImp) -> (matcher : Con -> TTImp) -> (funName : Name) -> TypeInfo -> List Decl
 deriveMatchingCons retTy matcher funName ti = do
   let claim = do
-    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ stname $ name arg
+    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ argName arg
     let sig = foldr
                 (pi . {count := M0, piInfo := ImplicitArg})
                 `(~tyApplied -> ~retTy)

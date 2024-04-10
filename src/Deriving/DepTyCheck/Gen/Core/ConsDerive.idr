@@ -52,7 +52,7 @@ namespace NonObligatoryExts
       let conFC = getFC con.type
 
       -- Build a map from constructor's argument name to its index
-      let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (stname $ argName arg, idx)
+      let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
 
       -- Analyse that we can do subgeneration for each constructor argument
       -- Fails using `Elaboration` if the given expression is not an application to a type constructor
@@ -76,7 +76,7 @@ namespace NonObligatoryExts
 
       -- Decide how constructor arguments would be named during generation
       let bindNames : Vect (con.args.length) String
-          bindNames = flip mapWithPos .| fromList con.args .| \_ => bindNameRenamer . stname . argName
+          bindNames = flip mapWithPos .| fromList con.args .| \_ => bindNameRenamer . argName
 
       -- Derive constructor calling expression for given order of generation
       let genForOrder : List (Fin con.args.length) -> m TTImp
@@ -104,7 +104,7 @@ namespace NonObligatoryExts
               -- Those which are `Right` are given, those which are `Left` are needs to be generated.
               let depArgs : Vect typeOfGened.args.length (Either (Fin con.args.length) TTImp) := argsOfTypeOfGened <&> \case
                 Right expr => Right expr
-                Left i     => if contains i presentArguments then Right $ var $ stname $ argName $ index' con.args i else Left i
+                Left i     => if contains i presentArguments then Right $ var $ argName $ index' con.args i else Left i
 
               -- Determine which arguments will be on the left of dpair in subgen call, in correct order
               let subgeneratedArgs = mapMaybe getLeft $ toList depArgs

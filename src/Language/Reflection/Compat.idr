@@ -19,6 +19,10 @@ public export
 stname : Maybe Name -> Name
 stname = fromMaybe $ UN Underscore
 
+public export
+argName : Arg -> Name
+argName = stname . (.name)
+
 --------------------------------------------------------------------------------
 --          General Types
 --------------------------------------------------------------------------------
@@ -73,10 +77,6 @@ getInfo = getInfo'
 -------------------------------------
 --- Working around type inference ---
 -------------------------------------
-
-public export
-argName : Arg -> Maybe Name
-argName = (.name)
 
 public export %inline
 (.tyArgs) : TypeInfo -> List Arg

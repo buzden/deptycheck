@@ -98,7 +98,7 @@ interface DerivatorCore where
 --- Expressions generation utils ---
 
 defArgNames : {sig : GenSignature} -> Vect sig.givenParams.size String
-defArgNames = sig.givenParams.asVect <&> show . stname . name . index' sig.targetType.args
+defArgNames = sig.givenParams.asVect <&> show . argName . index' sig.targetType.args
 
 export %inline
 canonicDefaultLHS' : (namesFun : String -> String) -> GenSignature -> Name -> (fuel : String) -> TTImp
