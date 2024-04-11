@@ -111,9 +111,19 @@ holdsOnAnyInTrCl prop f xs = pure (any prop xs) || tr xs xs where
     let new = filter (not . (`elem` curr)) next
     pure (any prop new) || tr (curr ++ new) new
 
+export
+lengthConcat : (xs, ys : List a) -> length (xs ++ ys) = length xs + length ys
+lengthConcat []      ys = Refl
+lengthConcat (_::xs) ys = rewrite lengthConcat xs ys in Refl
+
 ------------------------
 --- `Vect` utilities ---
 ------------------------
+
+public export
+mapI : (f : Fin n -> a -> b) -> Vect n a -> Vect n b
+mapI f []      = []
+mapI f (x::xs) = f FZ x :: mapI (f . FS) xs
 
 export
 toListI : Vect n a -> List (a, Fin n)

@@ -4,8 +4,6 @@
 ||| e.g. involved types and their constructors.
 module Test.DepTyCheck.Gen.Coverage
 
-import Control.ANSI
-
 import Control.Monad.Maybe
 import Control.Monad.Random
 import Control.Monad.Writer
@@ -20,6 +18,8 @@ import public Deriving.DepTyCheck.Util.Reflection
 import public Language.Reflection
 
 import Test.DepTyCheck.Gen
+
+import Text.ANSI
 
 %default total
 

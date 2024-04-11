@@ -9,7 +9,6 @@ import public Data.Nat.Pos
 import public Data.List.Lazy
 import public Data.These
 import public Data.Vect.Dependent
-import public Data.Vect.Extra
 
 import public Data.SortedMap
 import public Data.SortedMap.Dependent
@@ -17,7 +16,6 @@ import public Data.SortedSet
 
 import public Deriving.DepTyCheck.Util.Alternative
 import public Deriving.DepTyCheck.Util.Collections
-import public Deriving.DepTyCheck.Util.Fin
 import public Deriving.DepTyCheck.Util.Logging
 import public Deriving.DepTyCheck.Util.Syntax
 
@@ -225,7 +223,7 @@ isSimpleBindVar _             = False
 
 export
 callCon : (con : Con) -> Vect con.args.length TTImp -> TTImp
-callCon con = reAppAny (var con.name) . toList . mapWithPos (appArg . index' con.args)
+callCon con = reAppAny (var con.name) . toList . mapI (appArg . index' con.args)
 
 export
 outmostFuelArg : Name

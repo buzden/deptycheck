@@ -1,8 +1,5 @@
 module Deriving.DepTyCheck.Gen.Core.Util
 
-import public Data.Fin.Extra
-import public Data.List.Equalities
-
 import public Decidable.Equality
 
 import public Deriving.DepTyCheck.Gen.Derive
@@ -105,7 +102,7 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
     where
       mergeApp : DeepConsAnalysisRes ccdi -> (AnyApp, DeepConsAnalysisRes ccdi) -> DeepConsAnalysisRes ccdi
       mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
-        let bindNames : Fin (namesL.length + namesR.length) -> _ := rewrite sym $ lengthDistributesOverAppend namesL namesR in bindNames
+        let bindNames : Fin (namesL.length + namesR.length) -> _ := rewrite sym $ lengthConcat namesL namesR in bindNames
         let lhs = bindL $ bindNames . indexSum . Left
         let rhs = bindR $ bindNames . indexSum . Right
         reAppAny1 lhs $ const rhs `mapExpr` anyApp

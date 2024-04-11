@@ -25,23 +25,23 @@ LOG gen.auto.deep-cons-app:0: ------------------------
 LOG gen.auto.deep-cons-app:0: applied names:   [len, elem]
 LOG gen.auto.deep-cons-app:0: bind expression: Vect (S len0) elem1
 LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [{a:4535}]
+LOG gen.auto.deep-cons-app:0: given free names:    [{a:1053}]
 LOG gen.auto.deep-cons-app:0: original expression: Split []
 LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [{a:4535}, {a:4535}]
+LOG gen.auto.deep-cons-app:0: applied names:   [{a:1053}, {a:1053}]
 LOG gen.auto.deep-cons-app:0: bind expression: Split []
 LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [{a:4545}, x]
+LOG gen.auto.deep-cons-app:0: given free names:    [a, x]
 LOG gen.auto.deep-cons-app:0: original expression: Split [x]
 LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [{a:4545}, {a:4545}, x, {a:4545}]
+LOG gen.auto.deep-cons-app:0: applied names:   [a, a, x, a]
 LOG gen.auto.deep-cons-app:0: bind expression: Split [x2]
 LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a, n, m, x, xs, y, ys]
+LOG gen.auto.deep-cons-app:0: given free names:    [a, x, xs, y, ys]
 LOG gen.auto.deep-cons-app:0: original expression: Split (x :: (xs ++ (y :: ys)))
 LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [a, n, m, n, m, a, x, m, a, n, xs, m, a, y, ys]
-LOG gen.auto.deep-cons-app:0: bind expression: Split (x6 :: (xs10 ++ (y13 :: ys14)))
+LOG gen.auto.deep-cons-app:0: applied names:   [a, a, x, a, xs, a, y, ys]
+LOG gen.auto.deep-cons-app:0: bind expression: Split (x2 :: (xs4 ++ (y6 :: ys7)))
 LOG gen.auto.deep-cons-app:0: 
 LOG gen.auto.deep-cons-app:0: given free names:    [a, x]
 LOG gen.auto.deep-cons-app:0: original expression: x = x

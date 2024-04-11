@@ -7,7 +7,6 @@ import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
 import public Deriving.DepTyCheck.Util.Collections
-import public Deriving.DepTyCheck.Util.Fin
 import public Deriving.DepTyCheck.Util.Syntax
 
 export

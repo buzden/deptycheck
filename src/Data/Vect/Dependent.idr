@@ -2,7 +2,6 @@ module Data.Vect.Dependent
 
 import Data.Either
 import Data.Fin
-import Data.Fin.Extra
 import Data.Vect
 
 -- TODO to refactor utils to not to have dependency to `Deriving.*` packages from here
@@ -38,7 +37,7 @@ tabulate = tabulateI
 --- Concating ---
 
 public export
-(++) : DVect n a -> DVect m b -> DVect (n + m) $ either a b . Fin.Extra.splitSum
+(++) : DVect n a -> DVect m b -> DVect (n + m) $ either a b . Fin.splitSum
 (++) []      ys = ys
 (++) (x::xs) ys = x :: rewrite funext $ \x => eitherBimapFusion a b FS id $ splitSum x in (xs ++ ys) where
   0 funext : ((x : _) -> f x = g x) -> f = g

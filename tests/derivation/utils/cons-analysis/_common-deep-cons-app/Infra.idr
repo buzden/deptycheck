@@ -2,8 +2,6 @@ module Infra
 
 import public ConsApps
 
-import Data.Vect.Extra
-
 import Deriving.DepTyCheck.Gen.Core.Util
 
 %language ElabReflection
