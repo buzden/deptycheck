@@ -77,7 +77,7 @@ namespace NonObligatoryExts
 
       -- Decide how constructor arguments would be named during generation
       let bindNames : Vect (con.args.length) String
-          bindNames = flip mapWithPos .| fromList con.args .| \_ => bindNameRenamer . argName
+          bindNames = flip mapI .| fromList con.args .| \_ => bindNameRenamer . argName
 
       -- Derive constructor calling expression for given order of generation
       let genForOrder : List (Fin con.args.length) -> m TTImp

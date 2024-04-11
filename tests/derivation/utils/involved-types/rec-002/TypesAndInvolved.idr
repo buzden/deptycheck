@@ -1,15 +1,18 @@
 module TypesAndInvolved
 
-import public Data.List.Alternating
-
 import Language.Reflection.Compat
 
 %default total
 
+-- Two mutually recursive types
+mutual
+  data X a b = MkX a (Y a b)
+  data Y a b = Nil | MkY a (X a b)
+
 public export
 typesAndInvolved : List (Name, Count, List Name)
 typesAndInvolved =
-  [ ("Odd", M0, ["Odd", "Even"])
+  [ ("X", M0, ["X", "Y"])
   , ("TTImp", M0,
     [ "AltType"
     , "BindMode"

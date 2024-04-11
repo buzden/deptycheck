@@ -1,6 +1,6 @@
 module ConsApps
 
-import public Data.Vect.Views.Extra
+import public Data.List.Views
 
 import Language.Reflection.Compat
 
@@ -18,7 +18,7 @@ consApps : Elab $ List (List Name, TTImp)
 consApps = join <$> sequence
   [ rhsConsOf `{Nat}
   , rhsConsOf `{Vect}
-  , rhsConsOf `{Data.Vect.Views.Extra.Split}
+  , rhsConsOf `{Data.List.Views.Split}
   , rhsConsOf `{Builtin.Equal}
   , rhsConsOf `{EqExp}
   ]

@@ -2,8 +2,6 @@ module Infra
 
 import public TypesAndInvolved
 
-import Data.Vect.Extra
-
 import Deriving.DepTyCheck.Gen.Core.Util
 
 %language ElabReflection

@@ -9,7 +9,6 @@ import public Control.Monad.Writer
 import public Control.Monad.RWS
 
 import public Data.DPair
-import public Data.Vect.Extra
 import public Data.SortedMap
 import public Data.SortedSet
 
@@ -17,8 +16,6 @@ import public Decidable.Equality
 
 import public Deriving.DepTyCheck.Gen.Derive
 import public Deriving.DepTyCheck.Util
-
-import public Syntax.WithProof
 
 %default total
 

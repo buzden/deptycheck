@@ -21,6 +21,19 @@ minus_last_gives_0 : (n : Nat) -> n - Fin.last = 0
 minus_last_gives_0 Z     = Refl
 minus_last_gives_0 (S k) = minus_last_gives_0 k
 
+--- Fin of sum ---
+
+public export
+indexSum : {m : Nat} -> Either (Fin m) (Fin n) -> Fin (m + n)
+indexSum (Left  l) = weakenN n l
+indexSum (Right r) = shift m r
+
+public export
+splitSum : {m : Nat} -> Fin (m + n) -> Either (Fin m) (Fin n)
+splitSum {m=Z}   k      = Right k
+splitSum {m=S m} FZ     = Left FZ
+splitSum {m=S m} (FS k) = mapFst FS $ splitSum k
+
 --- Collections of `Fin`s ---
 
 public export
