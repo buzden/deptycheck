@@ -15,7 +15,7 @@ The examples are the following:
 
 - hand-written generators
 
-  - [`pil`](pil/), The Primitive Imperative Language with scoped typed variables and typed registers
+  - [`pil-reg`](pil-reg/), The Primitive Imperative Language with scoped typed variables and typed registers
 
 - derived generators
 
