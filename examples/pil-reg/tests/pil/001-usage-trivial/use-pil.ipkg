@@ -1,8 +1,6 @@
 package dummy
 
-authors = "Denis Buzdalov"
-
 modules = UsePil
 opts = "--no-color --console-width 0"
 
-depends = pil
+depends = pil-reg

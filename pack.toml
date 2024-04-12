@@ -24,10 +24,10 @@ ipkg = "docs.ipkg"
 ### Examples ###
 ################
 
-[custom.all.pil]
+[custom.all.pil-reg]
 type = "local"
-path = "examples/pil"
-ipkg = "pil.ipkg"
+path = "examples/pil-reg"
+ipkg = "pil-reg.ipkg"
 test = "tests/tests.ipkg"
 
 [custom.all.sorted-tree]
