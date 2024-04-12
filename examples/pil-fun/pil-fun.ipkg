@@ -1,0 +1,13 @@
+package pil-fun
+
+version = 0.1
+
+authors = "Denis Buzdalov"
+
+sourcedir = "src"
+builddir = ".build"
+
+depends = deptycheck
+
+modules = Language.PilFun
+        , Language.PilFun.Gen
