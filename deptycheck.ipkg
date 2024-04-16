@@ -20,6 +20,7 @@ modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen.Core.ConsEntry
         , Deriving.DepTyCheck.Gen.Core.Util
         , Deriving.DepTyCheck.Gen.Checked
+        , Deriving.DepTyCheck.Util.Fusion
         , Deriving.DepTyCheck.Util.Logging
         , Deriving.DepTyCheck.Util.Reflection
         , Language.Reflection.Compat

@@ -1,0 +1,7 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG debug:0: IData Export
+
+      (MkData XY
+              IPi. (MW ExplicitArg n : IType) -> IType
+              []
+              [MkTy MkX_MkY (IApp. IVar XY $ IBindVar n)])

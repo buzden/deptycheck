@@ -1,0 +1,10 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG debug:0: IData Export
+
+      (MkData XY
+              IPi. (MW ExplicitArg n : IVar Prelude.Types.Nat) -> IType
+              []
+              [ MkTy MkX_MkY
+                     (IApp. IVar XY
+                          $ (IApp. IVar Prelude.Types.S
+                                 $ IVar Prelude.Types.Z)) ])
