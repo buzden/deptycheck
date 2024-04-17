@@ -1,5 +1,6 @@
 module Language.PilFun
 
+import Data.Nat
 import Data.Maybe
 import Data.List
 import Data.List.Quantifiers
@@ -11,17 +12,6 @@ data Literal : Ty -> Type where
   I : Nat  -> Literal Int'
   B : Bool -> Literal Bool'
 
-namespace Literals
-
-  export
-  fromInteger : Integer -> Literal Int'
-  fromInteger = I . fromInteger
-
-  export
-  True, False : Literal Bool'
-  True = B True
-  False = B False
-
 export infix 1 ==>
 
 record FunSig where
@@ -29,36 +19,74 @@ record FunSig where
   From : List Ty
   To   : Ty
 
-Var : Type
-Var = String
+data IndexIn : SnocList a -> Type where
+  Here  : IndexIn $ sx :< x
+  There : IndexIn sx -> IndexIn $ sx :< x
 
-Fun : Type
-Fun = String
+index : (sx : SnocList a) -> IndexIn sx -> a
+index (_ :<x) Here      = x
+index (sx:<_) (There i) = index sx i
+
+namespace DSL
+
+  -- The following definitions are only for DSL for indexation of vars and funs
+
+  namespace Literals
+
+    export
+    fromInteger : Integer -> Literal Int'
+    fromInteger = I . fromInteger
+
+    export
+    True, False : Literal Bool'
+    True = B True
+    False = B False
+
+  namespace IndexIn
+
+    public export
+    natToIndexIn : (n : Nat) -> {sx : SnocList a} -> n `LT` length sx => IndexIn sx
+    natToIndexIn 0     {sx=sx:<x}              = Here
+    natToIndexIn (S k) {sx=sx:<x} @{LTESucc l} = There $ natToIndexIn k
+
+    public export
+    weakenLT : {n : _} -> n `LT` m -> n `LTE` m
+    weakenLT {n=Z}   (LTESucc x) = LTEZero
+    weakenLT {n=S n} (LTESucc x) = LTESucc $ weakenLT x
+
+    public export
+    reverseLTMinus : {m, n : Nat} -> n `LT` m => (m `minus` S n) `LT` m
+    reverseLTMinus {n = Z} {m=S m} = rewrite minusZeroRight m in reflexive
+    reverseLTMinus {m=S m} {n=S n} @{LTESucc xx} = LTESucc $ weakenLT reverseLTMinus
+
+    public export
+    fromInteger : {sx : SnocList a} -> (n : Integer) -> (cast n `LT` length sx) => {- (x >= the Integer 0 = True) =>-} IndexIn sx
+    fromInteger n with (cast {to=Nat} n)
+      _ | n' = natToIndexIn (length sx `minus` S n') @{reverseLTMinus}
 
 Vars : Type
-Vars = List (Var, Ty)
+Vars = SnocList Ty
 
 Funs : Type
-Funs = List (Fun, FunSig)
+Funs = SnocList FunSig
 
-data IsIn : Var -> List (Var, a) -> Type where
-  MkIsIn : IsJust (lookup n xs) -> IsIn n xs
+Var : Vars -> Type
+Var = IndexIn
 
-0 (.found) : IsIn {a} n xs -> a
-(.found) $ MkIsIn _ with 0 (lookup n xs)
-  _ | Just x = x
+Fun : Funs -> Type
+Fun = IndexIn
 
 covering -- actually, all is total, but I don't want to bother with `assert_total` in types
 data Expr : Funs -> Vars -> Ty -> Type where
 
   C : (x : Literal ty) -> Expr funs vars ty
 
-  V : (n : Var) -> (0 lk : n `IsIn` vars) =>
-      Expr funs vars lk.found
+  V : (n : Var vars) ->
+      Expr funs vars $ index vars n
 
-  F : (n : Fun) -> (0 lk : n `IsIn` funs) =>
-      All (Expr funs vars) lk.found.From ->
-      Expr funs vars lk.found.To
+  F : (n : Fun funs) ->
+      All (Expr funs vars) (index funs n).From ->
+      Expr funs vars (index funs n).To
 
 export infix 2 #=
 
@@ -67,11 +95,11 @@ data Stmts : (funs  : Funs) ->
              (preV  : Vars) ->
              (postV : Vars) -> Type where
 
-  (.)  : (ty : Ty) -> (n : Var) ->
-         Stmts funs vars ((n, ty)::vars)
+  NewV : (ty : Ty) ->
+         Stmts funs vars $ vars :< ty
 
-  (#=) : (n : Var) -> (0 lk : n `IsIn` vars) =>
-         (v : Expr funs vars lk.found) ->
+  (#=) : (n : Var vars) ->
+         (v : Expr funs vars $ index vars n) ->
          Stmts funs vars vars
 
   If   : (cond : Expr funs vars Bool') ->
@@ -82,52 +110,64 @@ data Stmts : (funs  : Funs) ->
          Stmts funs preV postV
 
 StdF : Funs
-StdF = [ ("+" , [Int', Int'] ==> Int')
-       , ("<" , [Int', Int'] ==> Bool')
-       , ("++", [Int'] ==> Int')
-       , ("||", [Bool', Bool'] ==> Bool') ]
+StdF = [< [Int', Int'] ==> Int'    -- "+"
+       ,  [Int', Int'] ==> Bool'   -- "<"
+       ,  [Int'] ==> Int'          -- "++"
+       ,  [Bool', Bool'] ==> Bool' -- "||"
+       ]
+Plus, LT, Inc, Or : Fun StdF
+Plus = 0; LT = 1; Inc = 2; Or = 3
 
 covering
-program : Stmts StdF [] ?
+program : Stmts StdF [<] ?
 program = do
-  Int'. "x"
-  "x" #= C 5
-  Int'. "y"; Bool'. "res"
-  "y" #= F "+" [V "x", C 1]
-  If (F "<" [F "++" [V "x"], V "y"])
-     (do "y" #= C 0; "res" #= C False)
-     (do Int'. "z"; "z" #= F "+" [V "x", V "y"]
-         Bool'. "b"; "b" #= F "<" [V "x", C 5]
-         "res" #= F "||" [V "b", F "<" [V "z", C 6]])
+  NewV Int' -- 0
+  0 #= C 5
+  NewV Int' -- 1
+  NewV Bool' -- 2
+  1 #= F Plus [V 0, C 1]
+  If (F LT [F Inc [V 0], V 1])
+     (do 1 #= C 0
+         2 #= C False)
+     (do NewV Int' -- 3
+         3 #= F Plus [V 0, V 1]
+         NewV Bool' -- 4
+         4 #= F LT [V 0, C 5]
+         2 #= F Or [V 4, F LT [V 3, C 6]])
 
 failing "Mismatch between: Int' and Bool'"
-  bad : Stmts StdF [] ?
+  bad : Stmts StdF [<] ?
   bad = do
-    Int'. "x"; "x" #= C 5
-    Bool'. "y"; "y" #= F "+" [V "x", C 1]
+    NewV Int' -- 0
+    0 #= C 5
+    NewV Bool' -- 1
+    1 #= F Plus [V 0, C 1]
 
 failing "Mismatch between: [] and [Int']"
-  bad : Stmts StdF [] ?
+  bad : Stmts StdF [<] ?
   bad = do
-    Int'. "x"; "x" #= C 5
-    Int'. "y"; "y" #= F "+" [V "x"]
+    NewV Int' -- 0
+    0 #= C 5
+    NewV Int' -- 1
+    1 #= F Plus [V 0]
 
 failing "Mismatch between: Bool' and Int'"
-  bad : Stmts StdF [] ?
+  bad : Stmts StdF [<] ?
   bad = do
-    Int'. "x"; "x" #= C 5
-    Int'. "y"; "y" #= F "+" [C True, V "x"]
+    NewV Int' -- 0
+    0 #= C 5
+    NewV Int' -- 1
+    1 #= F Plus [C True, V 0]
 
-failing #"
-    Can't find an implementation for IsIn "z" [("x", Int')]"#
-  bad : Stmts StdF [] ?
+failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
+  bad : Stmts StdF [<] ?
   bad = do
-    Int'. "x"; "x" #= C 5
-    "z" #= V "x"
+    NewV Int' -- 0
+    0 #= C 5
+    2 #= V 0
 
-failing #"
-    Can't find an implementation for IsIn "z" [("x", Int')]"#
-  bad : Stmts StdF [] ?
+failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
+  bad : Stmts StdF [<] ?
   bad = do
-    Int'. "x"
-    "x" #= V "z"
+    NewV Int' -- 0
+    0 #= V 2
