@@ -7,6 +7,24 @@ import Data.List.Quantifiers
 Name : Type
 Name = String
 
+-- Types of this primitive imperative language
+data Ty = Int' | Bool'
+
+data Literal : Ty -> Type where
+  I : Nat  -> Literal Int'
+  B : Bool -> Literal Bool'
+
+namespace Literals
+
+  export
+  fromInteger : Integer -> Literal Int'
+  fromInteger = I . fromInteger
+
+  export
+  True, False : Literal Bool'
+  True = B True
+  False = B False
+
 data IsIn : Name -> List (Name, a) -> Type where
   MkIsIn : IsJust (lookup n xs) -> IsIn n xs
 
@@ -18,14 +36,14 @@ export infix 1 ==>
 
 record FunSig where
   constructor (==>)
-  From : List Type
-  To   : Type
+  From : List Ty
+  To   : Ty
 
 covering -- actually, all is total, but I don't want to bother with `assert_total` in types
-data Expr : List (Name, FunSig) -> List (Name, Type) ->
-            Type -> Type where
+data Expr : List (Name, FunSig) -> List (Name, Ty) ->
+            Ty -> Type where
 
-  C : (x : ty) -> Expr funs vars ty
+  C : (x : Literal ty) -> Expr funs vars ty
 
   V : (n : Name) -> (0 lk : n `IsIn` vars) =>
       Expr funs vars lk.found
@@ -38,17 +56,17 @@ export infix 2 #=
 
 covering
 data Stmts : (funs  : List (Name, FunSig)) ->
-             (preV  : List (Name, Type)) ->
-             (postV : List (Name, Type)) -> Type where
+             (preV  : List (Name, Ty)) ->
+             (postV : List (Name, Ty)) -> Type where
 
-  (.)  : (ty : Type) -> (n : Name) ->
+  (.)  : (ty : Ty) -> (n : Name) ->
          Stmts funs vars ((n, ty)::vars)
 
   (#=) : (n : Name) -> (0 lk : n `IsIn` vars) =>
          (v : Expr funs vars lk.found) ->
          Stmts funs vars vars
 
-  If   : (cond : Expr funs vars Bool) ->
+  If   : (cond : Expr funs vars Bool') ->
          Stmts funs vars vThen -> Stmts funs vars vElse ->
          Stmts funs vars vars
 
@@ -56,52 +74,52 @@ data Stmts : (funs  : List (Name, FunSig)) ->
          Stmts funs preV postV
 
 StdF : List (Name, FunSig)
-StdF = [ ("+" , [Int, Int] ==> Int)
-       , ("<" , [Int, Int] ==> Bool)
-       , ("++", [Int] ==> Int)
-       , ("||", [Bool, Bool] ==> Bool) ]
+StdF = [ ("+" , [Int', Int'] ==> Int')
+       , ("<" , [Int', Int'] ==> Bool')
+       , ("++", [Int'] ==> Int')
+       , ("||", [Bool', Bool'] ==> Bool') ]
 
 covering
 program : Stmts StdF [] ?
 program = do
-  Int. "x"
+  Int'. "x"
   "x" #= C 5
-  Int. "y"; Bool. "res"
+  Int'. "y"; Bool'. "res"
   "y" #= F "+" [V "x", C 1]
   If (F "<" [F "++" [V "x"], V "y"])
      (do "y" #= C 0; "res" #= C False)
-     (do Int. "z"; "z" #= F "+" [V "x", V "y"]
-         Bool. "b"; "b" #= F "<" [V "x", C 5]
+     (do Int'. "z"; "z" #= F "+" [V "x", V "y"]
+         Bool'. "b"; "b" #= F "<" [V "x", C 5]
          "res" #= F "||" [V "b", F "<" [V "z", C 6]])
 
-failing "Mismatch between: Int and Bool"
+failing "Mismatch between: Int' and Bool'"
   bad : Stmts StdF [] ?
   bad = do
-    Int. "x"; "x" #= C 5
-    Bool. "y"; "y" #= F "+" [V "x", C 1]
+    Int'. "x"; "x" #= C 5
+    Bool'. "y"; "y" #= F "+" [V "x", C 1]
 
-failing "Mismatch between: [] and [Int]"
+failing "Mismatch between: [] and [Int']"
   bad : Stmts StdF [] ?
   bad = do
-    Int. "x"; "x" #= C 5
-    Int. "y"; "y" #= F "+" [V "x"]
+    Int'. "x"; "x" #= C 5
+    Int'. "y"; "y" #= F "+" [V "x"]
 
-failing "Mismatch between: Bool and Int"
+failing "Mismatch between: Bool' and Int'"
   bad : Stmts StdF [] ?
   bad = do
-    Int. "x"; "x" #= C 5
-    Int. "y"; "y" #= F "+" [C True, V "x"]
+    Int'. "x"; "x" #= C 5
+    Int'. "y"; "y" #= F "+" [C True, V "x"]
 
 failing #"
-    Can't find an implementation for IsIn "z" [("x", Int)]"#
+    Can't find an implementation for IsIn "z" [("x", Int')]"#
   bad : Stmts StdF [] ?
   bad = do
-    Int. "x"; "x" #= C 5
+    Int'. "x"; "x" #= C 5
     "z" #= V "x"
 
 failing #"
-    Can't find an implementation for IsIn "z" [("x", Int)]"#
+    Can't find an implementation for IsIn "z" [("x", Int')]"#
   bad : Stmts StdF [] ?
   bad = do
-    Int. "x"
+    Int'. "x"
     "x" #= V "z"
