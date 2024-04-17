@@ -1,29 +1,67 @@
 module Language.PilFun
 
 import Data.Nat
-import Data.SnocList.Quantifiers
 
 -- Types of this primitive imperative language
+public export
 data Ty = Int' | Bool'
 
+public export
 data Literal : Ty -> Type where
   I : Nat  -> Literal Int'
   B : Bool -> Literal Bool'
 
+namespace SnocListTy
+
+  public export
+  data SnocListTy : Type where
+    Lin  : SnocListTy
+    (:<) : SnocListTy -> Ty -> SnocListTy
+
+  public export
+  data IndexIn : SnocListTy -> Type where
+    Here  : IndexIn $ sx :< x
+    There : IndexIn sx -> IndexIn $ sx :< x
+
+  public export
+  index : (sx : SnocListTy) -> IndexIn sx -> Ty
+  index (_ :<x) Here      = x
+  index (sx:<_) (There i) = index sx i
+
+  public export
+  length : SnocListTy -> Nat
+  length Lin = Z
+  length (sx :< _) = S $ length sx
+
 export infix 1 ==>
 
+public export
 record FunSig where
   constructor (==>)
-  From : SnocList Ty
+  From : SnocListTy
   To   : Ty
 
-data IndexIn : SnocList a -> Type where
-  Here  : IndexIn $ sx :< x
-  There : IndexIn sx -> IndexIn $ sx :< x
+namespace SnocListFunSig
 
-index : (sx : SnocList a) -> IndexIn sx -> a
-index (_ :<x) Here      = x
-index (sx:<_) (There i) = index sx i
+  public export
+  data SnocListFunSig : Type where
+    Lin  : SnocListFunSig
+    (:<) : SnocListFunSig -> FunSig -> SnocListFunSig
+
+  public export
+  data IndexIn : SnocListFunSig -> Type where
+    Here  : IndexIn $ sx :< x
+    There : IndexIn sx -> IndexIn $ sx :< x
+
+  public export
+  index : (sx : SnocListFunSig) -> IndexIn sx -> FunSig
+  index (_ :<x) Here      = x
+  index (sx:<_) (There i) = index sx i
+
+  public export
+  length : SnocListFunSig -> Nat
+  length Lin = Z
+  length (sx :< _) = S $ length sx
 
 namespace DSL
 
@@ -40,12 +78,7 @@ namespace DSL
     True = B True
     False = B False
 
-  namespace IndexIn
-
-    public export
-    natToIndexIn : (n : Nat) -> {sx : SnocList a} -> n `LT` length sx => IndexIn sx
-    natToIndexIn 0     {sx=sx:<x}              = Here
-    natToIndexIn (S k) {sx=sx:<x} @{LTESucc l} = There $ natToIndexIn k
+  namespace Utils
 
     public export
     weakenLT : {n : _} -> n `LT` m -> n `LTE` m
@@ -57,24 +90,51 @@ namespace DSL
     reverseLTMinus {n = Z} {m=S m} = rewrite minusZeroRight m in reflexive
     reverseLTMinus {m=S m} {n=S n} @{LTESucc xx} = LTESucc $ weakenLT reverseLTMinus
 
+  namespace SnocListTy.IndexIn
+
     public export
-    fromInteger : {sx : SnocList a} -> (n : Integer) -> (cast n `LT` length sx) => {- (x >= the Integer 0 = True) =>-} IndexIn sx
+    natToIndexIn : (n : Nat) -> {sx : SnocListTy} -> n `LT` length sx => IndexIn sx
+    natToIndexIn 0     {sx=sx:<x}              = Here
+    natToIndexIn (S k) {sx=sx:<x} @{LTESucc l} = There $ natToIndexIn k
+
+    public export
+    fromInteger : {sx : SnocListTy} -> (n : Integer) -> (cast n `LT` length sx) => {- (x >= the Integer 0 = True) =>-} IndexIn sx
     fromInteger n with (cast {to=Nat} n)
       _ | n' = natToIndexIn (length sx `minus` S n') @{reverseLTMinus}
 
+  namespace SnocListFunSig.IndexIn
+
+    public export
+    natToIndexIn : (n : Nat) -> {sx : SnocListFunSig} -> n `LT` length sx => IndexIn sx
+    natToIndexIn 0     {sx=sx:<x}              = Here
+    natToIndexIn (S k) {sx=sx:<x} @{LTESucc l} = There $ natToIndexIn k
+
+    public export
+    fromInteger : {sx : SnocListFunSig} -> (n : Integer) -> (cast n `LT` length sx) => {- (x >= the Integer 0 = True) =>-} IndexIn sx
+    fromInteger n with (cast {to=Nat} n)
+      _ | n' = natToIndexIn (length sx `minus` S n') @{reverseLTMinus}
+
+public export
 Vars : Type
-Vars = SnocList Ty
+Vars = SnocListTy
 
+public export
 Funs : Type
-Funs = SnocList FunSig
+Funs = SnocListFunSig
 
+public export
 Var : Vars -> Type
 Var = IndexIn
 
+public export
 Fun : Funs -> Type
 Fun = IndexIn
 
-covering -- actually, all is total, but I don't want to bother with `assert_total` in types
+public export
+data Expr : Funs -> Vars -> Ty -> Type
+public export
+data ExprsSnocList : Funs -> Vars -> SnocListTy -> Type
+
 data Expr : Funs -> Vars -> Ty -> Type where
 
   C : (x : Literal ty) -> Expr funs vars ty
@@ -83,12 +143,16 @@ data Expr : Funs -> Vars -> Ty -> Type where
       Expr funs vars $ index vars n
 
   F : (n : Fun funs) ->
-      All (Expr funs vars) (index funs n).From ->
+      ExprsSnocList funs vars (index funs n).From ->
       Expr funs vars (index funs n).To
+
+data ExprsSnocList : Funs -> Vars -> SnocListTy -> Type where
+  Lin  : ExprsSnocList funs vars [<]
+  (:<) : ExprsSnocList funs vars sx -> Expr funs vars ty -> ExprsSnocList funs vars (sx :< ty)
 
 export infix 2 #=
 
-covering
+public export
 data Stmts : (funs  : Funs) ->
              (preV  : Vars) ->
              (postV : Vars) -> Type where
@@ -116,7 +180,6 @@ StdF = [< [< Int', Int'] ==> Int'    -- "+"
 Plus, LT, Inc, Or : Fun StdF
 Plus = 0; LT = 1; Inc = 2; Or = 3
 
-covering
 program : Stmts StdF [<] ?
 program = do
   NewV Int' -- 0
