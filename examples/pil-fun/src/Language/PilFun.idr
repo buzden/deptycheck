@@ -173,23 +173,26 @@ data ExprsSnocList : Funs -> Vars -> SnocListTy -> Type where
 export infix 2 #=
 
 public export
-data Stmts : (funs  : Funs) ->
-             (preV  : Vars) ->
-             (postV : Vars) -> Type where
+data Stmts : (funs : Funs) ->
+             (preV : Vars) -> Type where
 
   NewV : (ty : Ty) ->
-         Stmts funs vars $ vars :< ty
+         (cont : Stmts funs $ vars :< ty) ->
+         Stmts funs vars
 
   (#=) : (n : Var vars) ->
          (v : Expr funs vars $ index vars n) ->
-         Stmts funs vars vars
+         (cont : Stmts funs vars) ->
+         Stmts funs vars
 
   If   : (cond : Expr funs vars Bool') ->
-         Stmts funs vars vThen -> Stmts funs vars vElse ->
-         Stmts funs vars vars
+         (th, el, cont : Stmts funs vars) ->
+         Stmts funs vars
 
-  (>>) : Stmts funs preV midV  -> Stmts funs midV postV ->
-         Stmts funs preV postV
+  Nop  : Stmts funs vars
+
+(>>) : (Stmts f' v' -> Stmts f v) -> Stmts f' v' -> Stmts f v
+(>>) = id
 
 StdF : Funs
 StdF = [< [< Int', Int'] ==> Int'    -- "+"
@@ -200,7 +203,7 @@ StdF = [< [< Int', Int'] ==> Int'    -- "+"
 Plus, LT, Inc, Or : Fun StdF
 Plus = 0; LT = 1; Inc = 2; Or = 3
 
-program : Stmts StdF [<] ?
+program : Stmts StdF [<]
 program = do
   NewV Int' -- 0
   0 #= C 5
@@ -209,46 +212,54 @@ program = do
   1 #= F Plus [< V 0, C 1]
   If (F LT [< F Inc [< V 0], V 1])
      (do 1 #= C 0
-         2 #= C False)
+         2 #= C False
+         Nop)
      (do NewV Int' -- 3
          3 #= F Plus [< V 0, V 1]
          NewV Bool' -- 4
          4 #= F LT [< V 0, C 5]
-         2 #= F Or [< V 4, F LT [< V 3, C 6]])
+         2 #= F Or [< V 4, F LT [< V 3, C 6]]
+         Nop)
+  Nop
 
 failing "Mismatch between: Int' and Bool'"
-  bad : Stmts StdF [<] ?
+  bad : Stmts StdF [<]
   bad = do
     NewV Int' -- 0
     0 #= C 5
     NewV Bool' -- 1
     1 #= F Plus [< V 0, C 1]
+    Nop
 
 failing "Mismatch between: [<] and [<Int']"
-  bad : Stmts StdF [<] ?
+  bad : Stmts StdF [<]
   bad = do
     NewV Int' -- 0
     0 #= C 5
     NewV Int' -- 1
     1 #= F Plus [< V 0]
+    Nop
 
 failing "Mismatch between: Bool' and Int'"
-  bad : Stmts StdF [<] ?
+  bad : Stmts StdF [<]
   bad = do
     NewV Int' -- 0
     0 #= C 5
     NewV Int' -- 1
     1 #= F Plus [< C True, V 0]
+    Nop
 
 failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
-  bad : Stmts StdF [<] ?
+  bad : Stmts StdF [<]
   bad = do
     NewV Int' -- 0
     0 #= C 5
     2 #= V 0
+    Nop
 
 failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
-  bad : Stmts StdF [<] ?
+  bad : Stmts StdF [<]
   bad = do
     NewV Int' -- 0
     0 #= V 2
+    Nop
