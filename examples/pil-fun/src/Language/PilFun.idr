@@ -2,9 +2,18 @@ module Language.PilFun
 
 import Data.Nat
 
+import Decidable.Equality
+
 -- Types of this primitive imperative language
 public export
 data Ty = Int' | Bool'
+
+export
+DecEq Ty where
+  decEq Int' Int' = Yes Refl
+  decEq Bool' Bool' = Yes Refl
+  decEq Int' Bool' = No $ \case Refl impossible
+  decEq Bool' Int' = No $ \case Refl impossible
 
 public export
 data Literal : Ty -> Type where
@@ -32,6 +41,17 @@ namespace SnocListTy
   length : SnocListTy -> Nat
   length Lin = Z
   length (sx :< _) = S $ length sx
+
+  export
+  Biinjective SnocListTy.(:<) where
+    biinjective Refl = (Refl, Refl)
+
+  export
+  DecEq SnocListTy where
+    decEq [<] [<] = Yes Refl
+    decEq (sx :< x) (sx' :< x') = decEqCong2 (decEq sx sx') (decEq x x')
+    decEq [<] (_:<_) = No $ \case Refl impossible
+    decEq (_:<_) [<] = No $ \case Refl impossible
 
 export infix 1 ==>
 
