@@ -4,9 +4,6 @@ import Data.Maybe
 import Data.List
 import Data.List.Quantifiers
 
-Name : Type
-Name = String
-
 -- Types of this primitive imperative language
 data Ty = Int' | Bool'
 
@@ -25,13 +22,6 @@ namespace Literals
   True = B True
   False = B False
 
-data IsIn : Name -> List (Name, a) -> Type where
-  MkIsIn : IsJust (lookup n xs) -> IsIn n xs
-
-0 (.found) : IsIn {a} n xs -> a
-(.found) $ MkIsIn _ with 0 (lookup n xs)
-  _ | Just x = x
-
 export infix 1 ==>
 
 record FunSig where
@@ -39,30 +29,48 @@ record FunSig where
   From : List Ty
   To   : Ty
 
+Var : Type
+Var = String
+
+Fun : Type
+Fun = String
+
+Vars : Type
+Vars = List (Var, Ty)
+
+Funs : Type
+Funs = List (Fun, FunSig)
+
+data IsIn : Var -> List (Var, a) -> Type where
+  MkIsIn : IsJust (lookup n xs) -> IsIn n xs
+
+0 (.found) : IsIn {a} n xs -> a
+(.found) $ MkIsIn _ with 0 (lookup n xs)
+  _ | Just x = x
+
 covering -- actually, all is total, but I don't want to bother with `assert_total` in types
-data Expr : List (Name, FunSig) -> List (Name, Ty) ->
-            Ty -> Type where
+data Expr : Funs -> Vars -> Ty -> Type where
 
   C : (x : Literal ty) -> Expr funs vars ty
 
-  V : (n : Name) -> (0 lk : n `IsIn` vars) =>
+  V : (n : Var) -> (0 lk : n `IsIn` vars) =>
       Expr funs vars lk.found
 
-  F : (n : Name) -> (0 lk : n `IsIn` funs) =>
+  F : (n : Fun) -> (0 lk : n `IsIn` funs) =>
       All (Expr funs vars) lk.found.From ->
       Expr funs vars lk.found.To
 
 export infix 2 #=
 
 covering
-data Stmts : (funs  : List (Name, FunSig)) ->
-             (preV  : List (Name, Ty)) ->
-             (postV : List (Name, Ty)) -> Type where
+data Stmts : (funs  : Funs) ->
+             (preV  : Vars) ->
+             (postV : Vars) -> Type where
 
-  (.)  : (ty : Ty) -> (n : Name) ->
+  (.)  : (ty : Ty) -> (n : Var) ->
          Stmts funs vars ((n, ty)::vars)
 
-  (#=) : (n : Name) -> (0 lk : n `IsIn` vars) =>
+  (#=) : (n : Var) -> (0 lk : n `IsIn` vars) =>
          (v : Expr funs vars lk.found) ->
          Stmts funs vars vars
 
@@ -73,7 +81,7 @@ data Stmts : (funs  : List (Name, FunSig)) ->
   (>>) : Stmts funs preV midV  -> Stmts funs midV postV ->
          Stmts funs preV postV
 
-StdF : List (Name, FunSig)
+StdF : Funs
 StdF = [ ("+" , [Int', Int'] ==> Int')
        , ("<" , [Int', Int'] ==> Bool')
        , ("++", [Int'] ==> Int')
