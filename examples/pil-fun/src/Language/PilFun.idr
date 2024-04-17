@@ -1,9 +1,7 @@
 module Language.PilFun
 
 import Data.Nat
-import Data.Maybe
-import Data.List
-import Data.List.Quantifiers
+import Data.SnocList.Quantifiers
 
 -- Types of this primitive imperative language
 data Ty = Int' | Bool'
@@ -16,7 +14,7 @@ export infix 1 ==>
 
 record FunSig where
   constructor (==>)
-  From : List Ty
+  From : SnocList Ty
   To   : Ty
 
 data IndexIn : SnocList a -> Type where
@@ -110,10 +108,10 @@ data Stmts : (funs  : Funs) ->
          Stmts funs preV postV
 
 StdF : Funs
-StdF = [< [Int', Int'] ==> Int'    -- "+"
-       ,  [Int', Int'] ==> Bool'   -- "<"
-       ,  [Int'] ==> Int'          -- "++"
-       ,  [Bool', Bool'] ==> Bool' -- "||"
+StdF = [< [< Int', Int'] ==> Int'    -- "+"
+       ,  [< Int', Int'] ==> Bool'   -- "<"
+       ,  [< Int'] ==> Int'          -- "++"
+       ,  [< Bool', Bool'] ==> Bool' -- "||"
        ]
 Plus, LT, Inc, Or : Fun StdF
 Plus = 0; LT = 1; Inc = 2; Or = 3
@@ -125,15 +123,15 @@ program = do
   0 #= C 5
   NewV Int' -- 1
   NewV Bool' -- 2
-  1 #= F Plus [V 0, C 1]
-  If (F LT [F Inc [V 0], V 1])
+  1 #= F Plus [< V 0, C 1]
+  If (F LT [< F Inc [< V 0], V 1])
      (do 1 #= C 0
          2 #= C False)
      (do NewV Int' -- 3
-         3 #= F Plus [V 0, V 1]
+         3 #= F Plus [< V 0, V 1]
          NewV Bool' -- 4
-         4 #= F LT [V 0, C 5]
-         2 #= F Or [V 4, F LT [V 3, C 6]])
+         4 #= F LT [< V 0, C 5]
+         2 #= F Or [< V 4, F LT [< V 3, C 6]])
 
 failing "Mismatch between: Int' and Bool'"
   bad : Stmts StdF [<] ?
@@ -141,15 +139,15 @@ failing "Mismatch between: Int' and Bool'"
     NewV Int' -- 0
     0 #= C 5
     NewV Bool' -- 1
-    1 #= F Plus [V 0, C 1]
+    1 #= F Plus [< V 0, C 1]
 
-failing "Mismatch between: [] and [Int']"
+failing "Mismatch between: [<] and [<Int']"
   bad : Stmts StdF [<] ?
   bad = do
     NewV Int' -- 0
     0 #= C 5
     NewV Int' -- 1
-    1 #= F Plus [V 0]
+    1 #= F Plus [< V 0]
 
 failing "Mismatch between: Bool' and Int'"
   bad : Stmts StdF [<] ?
@@ -157,7 +155,7 @@ failing "Mismatch between: Bool' and Int'"
     NewV Int' -- 0
     0 #= C 5
     NewV Int' -- 1
-    1 #= F Plus [C True, V 0]
+    1 #= F Plus [< C True, V 0]
 
 failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
   bad : Stmts StdF [<] ?
