@@ -57,16 +57,22 @@ export
 normaliseAsType : Elaboration m => TTImp -> m TTImp
 normaliseAsType expr = quote !(check {expected=Type} expr)
 
--- This is a workaround to not to change `elab-util`'s `gitInfo'`
+-- This is a workaround to not to change `elab-util`'s `getInfo'`
 export
 normaliseCon : Elaboration m => Con -> m Con
-normaliseCon $ MkCon n args ty = do
+normaliseCon orig@(MkCon n args ty) = do
   let whole = piAll ty args
-  whole <- normaliseAsType whole
+  Just whole <- catch $ normaliseAsType whole
+    | Nothing => pure orig -- didn't manage to normalise, e.g. due to private stuff
   let (args', ty) = unPi whole
   -- `quote` may corrupt names, workaround it:
   let args = args `zip` args' <&> \(pre, normd) => {name := pre.name} normd
   pure $ MkCon n args ty
+
+normaliseCons : Elaboration m => TypeInfo -> m TypeInfo
+normaliseCons ty = do
+  cons' <- for ty.cons normaliseCon
+  pure $ {cons := cons'} ty
 
 --------------------------------------------
 --- Parsing and rebuilding `TTImp` stuff ---
@@ -506,6 +512,7 @@ getNamesInfoInTypes ty = go neutral [ty]
     go : NamesInfoInTypes -> List TypeInfo -> m NamesInfoInTypes
     go tyi []         = pure tyi
     go tyi (ti::rest) = do
+      ti <- normaliseCons ti
       let subes = concatMap allVarNames' $ subexprs ti
       new <- map join $ for (SortedSet.toList subes) $ \n =>
                if isNothing $ lookupByType n
