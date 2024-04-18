@@ -11,6 +11,7 @@ import Deriving.DepTyCheck.Gen.Core.Util
 
 printDeepConsApp : List Name -> TTImp -> Elab Unit
 printDeepConsApp freeNames tyExpr = do
+  _ <- getNamesInfoInTypes' tyExpr
   logMsg         "gen.auto.deep-cons-app" 0 ""
   logMsg         "gen.auto.deep-cons-app" 0 "given free names:    \{show freeNames}"
   logSugaredTerm "gen.auto.deep-cons-app" 0 "original expression" tyExpr

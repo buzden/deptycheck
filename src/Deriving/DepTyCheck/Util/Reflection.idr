@@ -537,6 +537,16 @@ getNamesInfoInTypes ty = go neutral [ty]
                  } tyi
       assert_total $ go next (new ++ rest)
 
+export
+getNamesInfoInTypes' : Elaboration m => TTImp -> m NamesInfoInTypes
+getNamesInfoInTypes' expr = do
+  let varsFirstOrder = allVarNames expr
+  varsSecondOrder <- map concat $ Prelude.for varsFirstOrder $ \n => do
+                       ns <- getType n
+                       pure $ SortedSet.insert n $ flip concatMap ns $ \(n', ty) => insert n' $ allVarNames' ty
+  tys <- map (mapMaybe id) $ for (SortedSet.toList varsSecondOrder) $ catch . getInfo'
+  concat <$> Prelude.for tys getNamesInfoInTypes
+
 public export
 isVar : TTImp -> Bool
 isVar $ IVar {} = True

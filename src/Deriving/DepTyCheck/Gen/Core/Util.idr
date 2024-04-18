@@ -58,6 +58,7 @@ MaybeConsDetermInfo False = Unit
 ||| It returns correct bind expression only when all given bind names are different.
 export
 analyseDeepConsApp : Elaboration m =>
+                     NamesInfoInTypes =>
                      (collectConsDetermInfo : Bool) ->
                      (freeNames : SortedSet Name) ->
                      (analysedExpr : TTImp) ->
@@ -80,7 +81,8 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
                   else fail "Applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
-    con <- getCon lhsName -- or fail if `lhsName` is not a constructor
+    let Just con = lookupCon lhsName
+      | Nothing => fail "Name `\{lhsName}` is not a constructor"
 
     -- Aquire type-determination info, if needed
     typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
