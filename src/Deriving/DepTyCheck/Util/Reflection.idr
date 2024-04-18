@@ -235,9 +235,9 @@ export
 outmostFuelArg : Name
 outmostFuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
 
----------------------------------------
---- Working around primitive values ---
----------------------------------------
+---------------------------------------------------
+--- Working around primitive and special values ---
+---------------------------------------------------
 
 primTypeInfo : String -> TypeInfo
 primTypeInfo s = MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic s) [] []
@@ -281,6 +281,10 @@ extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Double" ) [
 extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "%World" ) [] [] = primVal $ PrT WorldType
 extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Type"   ) [] [] = type
 extractTargetTyExpr ti = var ti.name
+
+||| Returns a type constructor as `Con` by given type
+typeCon : TypeInfo -> Con
+typeCon ti = MkCon ti.name ti.args type
 
 ----------------------------------------------
 --- Analyzing dependently typed signatures ---
@@ -469,6 +473,15 @@ lookupByCon @{tyi} = concatMap @{Deep} lookupByType . SortedSet.toList . concatM
 
 typeByCon : NamesInfoInTypes => Con -> Maybe TypeInfo
 typeByCon @{tyi} = map fst . flip lookup tyi.cons . name
+
+export
+lookupType : NamesInfoInTypes => Name -> Maybe TypeInfo
+lookupType @{tyi} = flip lookup tyi.types
+
+export
+lookupCon : NamesInfoInTypes => Name -> Maybe Con
+lookupCon @{tyi} n = snd <$> lookup n tyi.cons
+                 <|> typeCon <$> lookup n tyi.types
 
 Semigroup NamesInfoInTypes where
   Names ts cs nit <+> Names ts' cs' nit' = Names (ts `mergeLeft` ts') (cs `mergeLeft` cs') (nit <+> nit')
