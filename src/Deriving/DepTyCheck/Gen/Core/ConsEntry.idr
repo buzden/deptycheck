@@ -52,8 +52,8 @@ canonicConsBody sig name con = do
   --   - something else (cannot manage yet)
   deepConsApps <- for sig.givenParams.asVect $ \idx => do
     let argExpr = conRetTypeArg idx
-    Just analysed <- analyseDeepConsApp True conArgNames argExpr
-      | Nothing => failAt conFC "Argument #\{show idx} is not supported yet (argument expression: \{show argExpr})"
+    let Right analysed = analyseDeepConsApp True conArgNames argExpr
+      | Left err => failAt conFC "Argument #\{show idx} is not supported yet, argument expression: \{show argExpr}, reason: \{err}"
     pure analysed
 
   -- Acquire LHS bind expressions for the given parameters
