@@ -235,6 +235,25 @@ export
 outmostFuelArg : Name
 outmostFuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
 
+||| Returns unnamespaced name and list of all namespaces stored in direct order
+|||
+||| Say, for `Data.Vect.Vect` it would return (["Data", "Vect"], `{Vect}).
+unNS : Name -> (List String, Name)
+unNS (NS (MkNS revNSs) nm) = mapFst (reverse revNSs ++) $ unNS nm
+unNS (DN _ nm)             = unNS nm
+unNS nm                    = ([], nm)
+
+||| Returns all names that are suffixes of a given name (incuding the original name itself).
+|||
+||| For example, for the name `Data.Vect.Vect` suffixes set would include
+||| `Data.Vect.Vect`, `Vect.Vect` and `Vect`.
+allNameSuffixes : Name -> List Name
+allNameSuffixes nm = do
+  let (nss, n) = unNS nm
+  tails nss <&> \case
+    [] => n
+    ns => NS (MkNS $ reverse ns) n
+
 ---------------------------------------------------
 --- Working around primitive and special values ---
 ---------------------------------------------------
@@ -482,6 +501,22 @@ export
 lookupCon : NamesInfoInTypes => Name -> Maybe Con
 lookupCon @{tyi} n = snd <$> lookup n tyi.cons
                  <|> typeCon <$> lookup n tyi.types
+
+||| Returns either resolved expression, or a non-unique name and the set of alternatives.
+-- We could use `Validated (SortedMap Name $ SortedSet Name) TTImp` as the result, if we depended on `contrib`.
+-- NOTICE: this function does not resolve re-export aliases, say, it does not resolve `Prelude.Nil` to `Prelude.Basics.Nil`.
+export
+resolveNamesUniquely : NamesInfoInTypes => (freeNames : SortedSet Name) -> TTImp -> Either (Name, SortedSet Name) TTImp
+resolveNamesUniquely @{tyi} freeNames = do
+  let allConsideredNames = keySet tyi.types `union` keySet tyi.cons
+  let reverseNamesMap = concatMap (uncurry SortedMap.singleton) $ allConsideredNames.asList >>= \n => allNameSuffixes n <&> (, SortedSet.singleton n)
+  mapATTImp' $ \case
+    v@(IVar fc n) => if contains n freeNames then id else do
+                       let Just resolvedAlts = lookup n reverseNamesMap | Nothing => id
+                       let [resolved] = SortedSet.toList resolvedAlts
+                         | _ => const $ Left (n, resolvedAlts)
+                       const $ pure $ IVar fc resolved
+    _ => id
 
 Semigroup NamesInfoInTypes where
   Names ts cs nit <+> Names ts' cs' nit' = Names (ts `mergeLeft` ts') (cs `mergeLeft` cs') (nit <+> nit')
