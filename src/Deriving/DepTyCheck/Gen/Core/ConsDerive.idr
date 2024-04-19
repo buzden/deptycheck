@@ -60,8 +60,9 @@ namespace NonObligatoryExts
           analyseTypeApp expr = do
             let (lhs, args) = unAppAny expr
             ty <- case lhs of
-              IVar _ lhsName     => try .| getInfo' lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
-                                        .| failAt (getFC lhs) "Only applications to non-polymorphic type constructors are supported at the moment"
+              IVar _ lhsName     => do let e = failAt (getFC lhs) $ "Only applications to non-polymorphic type constructors are supported"
+                                                                 ++ " at the moment, we found `\{lhsName}`"
+                                       maybe e pure $ lookupType lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
               lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{lhs}"

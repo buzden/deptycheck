@@ -26,7 +26,7 @@ consApps = pure
   [ `(XX $ Right Unit) @@@ []
   , `(XX $ Right a) @@@ ["a"]
   , `(XX $ Right MkUnit) @@@ []
-  , `(XX $ Right Prelude.Nil) @@@ []
+  , `(XX $ Right Prelude.Basics.Nil) @@@ []
   , `(XX $ Left $ S Z `MC` S (S Z) `MC` (S $ S $ S Z) `MC` MM) @@@ ["n", "a", "b"]
   , `(XX $ Left $ S Z `MC` S (S n) `MC` (S $ S $ S Z) `MC` MM) @@@ ["n", "a", "b"]
   , `(XX $ Left $ S Z `MC` S (S Z) `MC` (S $ S $ S Z) `MC` MM) @@@ []

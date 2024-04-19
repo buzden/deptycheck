@@ -57,19 +57,19 @@ MaybeConsDetermInfo False = Unit
 ||| This function requires bind variable names as input.
 ||| It returns correct bind expression only when all given bind names are different.
 export
-analyseDeepConsApp : Elaboration m =>
+analyseDeepConsApp : NamesInfoInTypes =>
                      (collectConsDetermInfo : Bool) ->
                      (freeNames : SortedSet Name) ->
                      (analysedExpr : TTImp) ->
-                     m $ Maybe $ DeepConsAnalysisRes collectConsDetermInfo
-analyseDeepConsApp ccdi freeNames = catch . isD where
+                     Either String $ DeepConsAnalysisRes collectConsDetermInfo
+analyseDeepConsApp ccdi freeNames = isD where
 
-  isD : TTImp -> Elab $ DeepConsAnalysisRes ccdi
+  isD : TTImp -> Either String $ DeepConsAnalysisRes ccdi
   isD e = do
 
     -- Treat given expression as a function application to some name
     let (IVar _ lhsName, args) = unAppAny e
-      | _ => fail "Not an application for some variable"
+      | _ => Left "not an application for some variable"
 
     -- Check if this is a free name
     let False = contains lhsName freeNames
@@ -77,17 +77,18 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
                   then do
                     let n = if ccdi then (lhsName, neutral) else lhsName
                     pure (singleton n ** \f => f FZ)
-                  else fail "Applying free name to some arguments"
+                  else Left "applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
-    con <- getCon lhsName -- or fail if `lhsName` is not a constructor
+    let Just con = lookupCon lhsName
+      | Nothing => Left "name `\{lhsName}` is not a constructor"
 
     -- Aquire type-determination info, if needed
     typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
     let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := typeDetermInfo
 
     let Just typeDetermInfo = reorder typeDetermInfo
-      | Nothing => fail "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
+      | Nothing => Left "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
 
     -- Analyze deeply all the arguments
     deepArgs <- for (args.asVect `zip` typeDetermInfo) $
@@ -111,10 +112,10 @@ analyseDeepConsApp ccdi freeNames = catch . isD where
       mapLstDPair f (lst ** d) = (map f lst ** rewrite lengthMap {f} lst in d)
 
       ||| Determines which constructor's arguments would be definitely determined by fully known result type.
-      typeDeterminedArgs : forall m. Elaboration m => (con : Con) -> m $ Vect con.args.length ConsDetermInfo
+      typeDeterminedArgs : (con : Con) -> Either String $ Vect con.args.length ConsDetermInfo
       typeDeterminedArgs con = do
         let conArgNames = fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
-        determined <- fromMaybe [] . map fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
+        determined <- fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
         let determined = mapMaybe (flip lookup conArgNames) determined
         pure $ map cast $ presenceVect $ fromList determined
 

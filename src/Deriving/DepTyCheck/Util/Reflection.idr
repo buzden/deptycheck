@@ -57,16 +57,22 @@ export
 normaliseAsType : Elaboration m => TTImp -> m TTImp
 normaliseAsType expr = quote !(check {expected=Type} expr)
 
--- This is a workaround to not to change `elab-util`'s `gitInfo'`
+-- This is a workaround to not to change `elab-util`'s `getInfo'`
 export
 normaliseCon : Elaboration m => Con -> m Con
-normaliseCon $ MkCon n args ty = do
+normaliseCon orig@(MkCon n args ty) = do
   let whole = piAll ty args
-  whole <- normaliseAsType whole
+  Just whole <- catch $ normaliseAsType whole
+    | Nothing => pure orig -- didn't manage to normalise, e.g. due to private stuff
   let (args', ty) = unPi whole
   -- `quote` may corrupt names, workaround it:
   let args = args `zip` args' <&> \(pre, normd) => {name := pre.name} normd
   pure $ MkCon n args ty
+
+normaliseCons : Elaboration m => TypeInfo -> m TypeInfo
+normaliseCons ty = do
+  cons' <- for ty.cons normaliseCon
+  pure $ {cons := cons'} ty
 
 --------------------------------------------
 --- Parsing and rebuilding `TTImp` stuff ---
@@ -229,9 +235,28 @@ export
 outmostFuelArg : Name
 outmostFuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
 
----------------------------------------
---- Working around primitive values ---
----------------------------------------
+||| Returns unnamespaced name and list of all namespaces stored in direct order
+|||
+||| Say, for `Data.Vect.Vect` it would return (["Data", "Vect"], `{Vect}).
+unNS : Name -> (List String, Name)
+unNS (NS (MkNS revNSs) nm) = mapFst (reverse revNSs ++) $ unNS nm
+unNS (DN _ nm)             = unNS nm
+unNS nm                    = ([], nm)
+
+||| Returns all names that are suffixes of a given name (incuding the original name itself).
+|||
+||| For example, for the name `Data.Vect.Vect` suffixes set would include
+||| `Data.Vect.Vect`, `Vect.Vect` and `Vect`.
+allNameSuffixes : Name -> List Name
+allNameSuffixes nm = do
+  let (nss, n) = unNS nm
+  tails nss <&> \case
+    [] => n
+    ns => NS (MkNS $ reverse ns) n
+
+---------------------------------------------------
+--- Working around primitive and special values ---
+---------------------------------------------------
 
 primTypeInfo : String -> TypeInfo
 primTypeInfo s = MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic s) [] []
@@ -275,6 +300,10 @@ extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Double" ) [
 extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "%World" ) [] [] = primVal $ PrT WorldType
 extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Type"   ) [] [] = type
 extractTargetTyExpr ti = var ti.name
+
+||| Returns a type constructor as `Con` by given type
+typeCon : TypeInfo -> Con
+typeCon ti = MkCon ti.name ti.args type
 
 ----------------------------------------------
 --- Analyzing dependently typed signatures ---
@@ -464,6 +493,31 @@ lookupByCon @{tyi} = concatMap @{Deep} lookupByType . SortedSet.toList . concatM
 typeByCon : NamesInfoInTypes => Con -> Maybe TypeInfo
 typeByCon @{tyi} = map fst . flip lookup tyi.cons . name
 
+export
+lookupType : NamesInfoInTypes => Name -> Maybe TypeInfo
+lookupType @{tyi} = flip lookup tyi.types
+
+export
+lookupCon : NamesInfoInTypes => Name -> Maybe Con
+lookupCon @{tyi} n = snd <$> lookup n tyi.cons
+                 <|> typeCon <$> lookup n tyi.types
+
+||| Returns either resolved expression, or a non-unique name and the set of alternatives.
+-- We could use `Validated (SortedMap Name $ SortedSet Name) TTImp` as the result, if we depended on `contrib`.
+-- NOTICE: this function does not resolve re-export aliases, say, it does not resolve `Prelude.Nil` to `Prelude.Basics.Nil`.
+export
+resolveNamesUniquely : NamesInfoInTypes => (freeNames : SortedSet Name) -> TTImp -> Either (Name, SortedSet Name) TTImp
+resolveNamesUniquely @{tyi} freeNames = do
+  let allConsideredNames = keySet tyi.types `union` keySet tyi.cons
+  let reverseNamesMap = concatMap (uncurry SortedMap.singleton) $ allConsideredNames.asList >>= \n => allNameSuffixes n <&> (, SortedSet.singleton n)
+  mapATTImp' $ \case
+    v@(IVar fc n) => if contains n freeNames then id else do
+                       let Just resolvedAlts = lookup n reverseNamesMap | Nothing => id
+                       let [resolved] = SortedSet.toList resolvedAlts
+                         | _ => const $ Left (n, resolvedAlts)
+                       const $ pure $ IVar fc resolved
+    _ => id
+
 Semigroup NamesInfoInTypes where
   Names ts cs nit <+> Names ts' cs' nit' = Names (ts `mergeLeft` ts') (cs `mergeLeft` cs') (nit <+> nit')
 
@@ -506,6 +560,7 @@ getNamesInfoInTypes ty = go neutral [ty]
     go : NamesInfoInTypes -> List TypeInfo -> m NamesInfoInTypes
     go tyi []         = pure tyi
     go tyi (ti::rest) = do
+      ti <- normaliseCons ti
       let subes = concatMap allVarNames' $ subexprs ti
       new <- map join $ for (SortedSet.toList subes) $ \n =>
                if isNothing $ lookupByType n
@@ -516,6 +571,16 @@ getNamesInfoInTypes ty = go neutral [ty]
                  , cons $= mergeLeft $ fromList $ ti.cons <&> \con => (con.name, ti, con)
                  } tyi
       assert_total $ go next (new ++ rest)
+
+export
+getNamesInfoInTypes' : Elaboration m => TTImp -> m NamesInfoInTypes
+getNamesInfoInTypes' expr = do
+  let varsFirstOrder = allVarNames expr
+  varsSecondOrder <- map concat $ Prelude.for varsFirstOrder $ \n => do
+                       ns <- getType n
+                       pure $ SortedSet.insert n $ flip concatMap ns $ \(n', ty) => insert n' $ allVarNames' ty
+  tys <- map (mapMaybe id) $ for (SortedSet.toList varsSecondOrder) $ catch . getInfo'
+  concat <$> Prelude.for tys getNamesInfoInTypes
 
 public export
 isVar : TTImp -> Bool
