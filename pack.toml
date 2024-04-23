@@ -36,6 +36,12 @@ path = "examples/sorted-tree-naive"
 ipkg = "sorted-tree-naive.ipkg"
 test = "tests/tests.ipkg"
 
+[custom.all.sorted-tree-indexed]
+type = "local"
+path = "examples/sorted-tree-indexed"
+ipkg = "sorted-tree-indexed.ipkg"
+test = "tests/tests.ipkg"
+
 [custom.all.pil-reg]
 type = "local"
 path = "examples/pil-reg"

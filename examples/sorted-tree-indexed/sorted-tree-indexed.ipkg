@@ -1,0 +1,13 @@
+package sorted-tree-indexed
+
+version = 0.4
+
+authors = "Denis Buzdalov"
+
+sourcedir = "src"
+builddir = ".build"
+
+depends = deptycheck
+
+modules = Data.SortedBinTree
+        , Data.SortedBinTree.Gen
