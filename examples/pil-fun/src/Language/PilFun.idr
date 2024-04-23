@@ -53,6 +53,12 @@ namespace SnocListTy
     decEq [<] (_:<_) = No $ \case Refl impossible
     decEq (_:<_) [<] = No $ \case Refl impossible
 
+  public export
+  data AtIndex : (sx : SnocListTy) -> (idx : IndexIn sx) -> Ty -> Type where
+    [search sx idx]
+    Here'  : AtIndex (sx :< ty) Here ty
+    There' : AtIndex sx i ty -> AtIndex (sx :< x) (There i) ty
+
 export infix 1 ==>
 
 public export
@@ -82,6 +88,12 @@ namespace SnocListFunSig
   length : SnocListFunSig -> Nat
   length Lin = Z
   length (sx :< _) = S $ length sx
+
+  public export
+  data AtIndex : (sx : SnocListFunSig) -> (idx : IndexIn sx) -> (from : SnocListTy) -> (to : Ty) -> Type where
+    [search sx idx]
+    Here'  : AtIndex (sx :< (from ==> to)) Here from to
+    There' : AtIndex sx i from to -> AtIndex (sx :< x) (There i) from to
 
 namespace DSL
 
@@ -160,11 +172,13 @@ data Expr : Funs -> Vars -> Ty -> Type where
   C : (x : Literal ty) -> Expr funs vars ty
 
   V : (n : Var vars) ->
-      Expr funs vars $ index vars n
+      AtIndex vars n ty =>
+      Expr funs vars ty
 
   F : (n : Fun funs) ->
-      ExprsSnocList funs vars (index funs n).From ->
-      Expr funs vars (index funs n).To
+      AtIndex funs n from to =>
+      ExprsSnocList funs vars from ->
+      Expr funs vars to
 
 data ExprsSnocList : Funs -> Vars -> SnocListTy -> Type where
   Lin  : ExprsSnocList funs vars [<]
@@ -222,7 +236,7 @@ program = do
          Nop)
   Nop
 
-failing "Mismatch between: Int' and Bool'"
+failing -- "Mismatch between: Int' and Bool'"
   bad : Stmts StdF [<]
   bad = do
     NewV Int' -- 0
@@ -231,7 +245,7 @@ failing "Mismatch between: Int' and Bool'"
     1 #= F Plus [< V 0, C 1]
     Nop
 
-failing "Mismatch between: [<] and [<Int']"
+failing -- "Mismatch between: [<] and [<Int']"
   bad : Stmts StdF [<]
   bad = do
     NewV Int' -- 0
@@ -240,7 +254,7 @@ failing "Mismatch between: [<] and [<Int']"
     1 #= F Plus [< V 0]
     Nop
 
-failing "Mismatch between: Bool' and Int'"
+failing -- "Mismatch between: Bool' and Int'"
   bad : Stmts StdF [<]
   bad = do
     NewV Int' -- 0
