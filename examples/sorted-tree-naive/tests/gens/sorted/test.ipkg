@@ -1,6 +1,6 @@
 package a-test
 
-depends = sorted-tree
+depends = sorted-tree-naive
 
 executable = a-test
 main = Main

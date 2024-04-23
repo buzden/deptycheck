@@ -24,20 +24,20 @@ ipkg = "docs.ipkg"
 ### Examples ###
 ################
 
-[custom.all.pil-reg]
-type = "local"
-path = "examples/pil-reg"
-ipkg = "pil-reg.ipkg"
-test = "tests/tests.ipkg"
-
-[custom.all.sorted-tree]
-type = "local"
-path = "examples/sorted-tree"
-ipkg = "sorted-tree.ipkg"
-test = "tests/tests.ipkg"
-
 [custom.all.sorted-list]
 type = "local"
 path = "examples/sorted-list"
 ipkg = "sorted-list.ipkg"
+test = "tests/tests.ipkg"
+
+[custom.all.sorted-tree-naive]
+type = "local"
+path = "examples/sorted-tree-naive"
+ipkg = "sorted-tree-naive.ipkg"
+test = "tests/tests.ipkg"
+
+[custom.all.pil-reg]
+type = "local"
+path = "examples/pil-reg"
+ipkg = "pil-reg.ipkg"
 test = "tests/tests.ipkg"
