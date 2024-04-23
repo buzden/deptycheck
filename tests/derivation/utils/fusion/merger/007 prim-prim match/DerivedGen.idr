@@ -8,7 +8,7 @@ import public Deriving.DepTyCheck.Gen.Core
 
 data X : String -> Type where
     MkX : X "0"
-  
+
 data Y : String -> Type where
     MkY : Y "0"
 

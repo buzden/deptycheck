@@ -8,7 +8,7 @@ import public Deriving.DepTyCheck.Gen.Core
 
 data X : Nat -> Type where
     MkX : X n
-  
+
 data Y : Nat -> Type where
     MkY : Y 1 -- unexpected behaviour for 0
 

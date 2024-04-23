@@ -8,9 +8,9 @@ import public Deriving.DepTyCheck.Gen.Core
 
 data X : Type -> Type where
     MkX : X n
-  
+
 data Y : Type -> Type where
-    MkY : Y n 
+    MkY : Y n
 
 %language ElabReflection
 

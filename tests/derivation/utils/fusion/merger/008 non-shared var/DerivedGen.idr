@@ -8,7 +8,7 @@ import public Deriving.DepTyCheck.Gen.Core
 
 data X : Type -> Type -> Type where
     MkX : X m n
-  
+
 data Y : Type -> Type -> Type where
     MkY : Y m n
 

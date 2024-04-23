@@ -52,7 +52,7 @@ alignArgs xs ys zs = reverse $ alignArgsInner [] xs ys zs where
 
 
 fuseConstrucror :  List Name -> (Con, List Name, Con, List Name) -> List (Name, List TTImp)
-fuseConstrucror zl (xc, xl, yc, yl) = do 
+fuseConstrucror zl (xc, xl, yc, yl) = do
   let xName = xc.name
   let yName = yc.name
   let xyName = joinBy "_" [nameStr xName, nameStr yName]
@@ -93,9 +93,9 @@ splitReturnType tnl anll = map (\(t, al) => foldConstructor t al) $ zip (map (va
 
 deriveFusion : List (TypeInfo, List Name) -> (List Decl)
 deriveFusion l = do
-  
-  let typeNames = map (\(n, _) => n.name) l 
-  let typeNamesStr = map nameStr typeNames 
+
+  let typeNames = map (\(n, _) => n.name) l
+  let typeNamesStr = map nameStr typeNames
   let joinedNames = joinBy "" typeNamesStr
   let fusionTypeName = UN $ Basic joinedNames
 
@@ -108,7 +108,7 @@ deriveFusion l = do
   let correctDecl = (length uniqueArgs) == (length uniqueNames)
   let typeSignature = buildIPi uniqueArgs
   let consProduct = [ (xc, xl, yc, yl) | (xt, xl) <- l, (yt, yl) <- l, xt.name < yt.name, xc <- xt.cons, yc <- yt.cons]
-  
+
   let preCons = join $ map (fuseConstrucror uniqueNames) consProduct
   let fusedCons = map (\(cn, lt) => mkTy cn (foldConstructor (var fusionTypeName) lt)) preCons
 
@@ -145,31 +145,19 @@ runFusion x xArgs y yArgs = do
   let zipped = [(xTI, xArgs), (yTI, yArgs)]
   declareFusion zipped
 
--- data X : Type -> Type where
---     MkX : X n
-  
--- data Y : Type -> Type where
---     MkY : Y n 
+-- data X : Type -> Type -> Type where
+--     MkX : X m n
+
+-- data Y : Type -> Type -> Type where
+--     MkY : Y m n
 
 -- %language ElabReflection
 
-data X : Type -> Type -> Type where
-    MkX : X m n
-  
-data Y : Type -> Type -> Type where
-    MkY : Y m n
-
-%language ElabReflection
-
-decl : List Decl
-decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{n}, `{k}]
-
 -- decl : List Decl
--- decl = %runElab runFusion `{X} [`{n}] `{Y} [`{n}]
-
--- splitXY : XY n -> (X n, Y n)
--- splitXY MkX_MkY = (MkX, MkY)
+-- decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{n}, `{k}]
 
 -- TODO: what happens with :doc
 -- tests for order of dependent arguments
 -- preserve order of args from left to right
+-- TODO: IClaim -> Pair, IDef -> MkPair
+-- TODO: fusion for more than 2 types
