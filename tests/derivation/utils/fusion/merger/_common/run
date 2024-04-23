@@ -3,6 +3,8 @@ rm -rf build
 NAMES_CLEANER="$(dirname "$(dirname "$(realpath "$1")")")"/.clean-names
 
 flock "$1" pack -q install-deps derive.ipkg && \
-idris2 --check --no-color --console-width 0 --no-banner --find-ipkg DerivedGen.idr && \
+idris2 --check --no-color --console-width 0 --no-banner --find-ipkg --exec test DerivedGen.idr | "$NAMES_CLEANER"
+
+# pack exec DerivedGen.idr 
 
 rm -rf build

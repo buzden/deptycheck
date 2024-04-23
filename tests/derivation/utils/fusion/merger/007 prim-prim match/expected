@@ -1,7 +1,13 @@
-1/1: Building DerivedGen (DerivedGen.idr)
-LOG debug:0: IData Export
-
-      (MkData XY
-              IPi. (MW ExplicitArg n : IPrimVal String) -> IType
-              []
-              [MkTy MkX_MkY (IApp. IVar XY $ IPrimVal 0)])
+[ IData
+    emptyFC
+    (specified Export)
+    Nothing
+    (MkData
+       emptyFC
+       "XY"
+       (Just
+          (    MkArg MW ExplicitArg (Just "n") (primVal (PrT StringType))
+           .-> type))
+       []
+       [mkTy {name = "MkX_MkY", type = var "XY" .$ primVal (Str "0")}])
+]

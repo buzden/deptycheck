@@ -1,10 +1,17 @@
-1/1: Building DerivedGen (DerivedGen.idr)
-LOG debug:0: IData Export
-
-      (MkData XY
-              IPi. (MW ExplicitArg n : IVar Prelude.Types.Nat) -> IType
-              []
-              [ MkTy MkX_MkY
-                     (IApp. IVar XY
-                          $ (IApp. IVar Prelude.Types.S
-                                 $ IVar Prelude.Types.Z)) ])
+[ IData
+    emptyFC
+    (specified Export)
+    Nothing
+    (MkData
+       emptyFC
+       "XY"
+       (Just
+          (MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat") .-> type))
+       []
+       [ mkTy
+           { name = "MkX_MkY"
+           , type =
+               var "XY" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z")
+           }
+       ])
+]

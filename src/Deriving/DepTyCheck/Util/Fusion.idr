@@ -15,10 +15,6 @@ matchArgs na la = if length na == length la then Just (zip la (map (.type) na)) 
 
 buildIPi : List (Name, TTImp) -> TTImp
 buildIPi l = piAll type (map (\(n, tti) => MkArg MW ExplicitArg (Just n) tti) l)
--- buildIPi l = buildIPiInner (reverse l) (type) where
---   buildIPiInner : List (Name, TTImp) -> TTImp -> TTImp
---   buildIPiInner [] res = res
---   buildIPiInner ((n, tt)::xs) res = buildIPiInner xs (IPi EmptyFC MW ExplicitArg (Just n) tt res)
 
 
 unifyArgs : TTImp -> TTImp -> Name -> TTImp
@@ -57,55 +53,73 @@ alignArgs xs ys zs = reverse $ alignArgsInner [] xs ys zs where
 
 fuseConstrucror :  List Name -> (Con, List Name, Con, List Name) -> List (Name, List TTImp)
 fuseConstrucror zl (xc, xl, yc, yl) = do 
-  let
-    xName = xc.name
-    yName = yc.name
-    xyName = joinBy "_" [nameStr xName, nameStr yName]
+  let xName = xc.name
+  let yName = yc.name
+  let xyName = joinBy "_" [nameStr xName, nameStr yName]
 
-    xType = xc.type
-    yType = yc.type
+  let xType = xc.type
+  let yType = yc.type
 
-    (_, xApps) = Reflection.unAppAny xType
-    (_, yApps) = Reflection.unAppAny yType
+  let (_, xApps) = Reflection.unAppAny xType
+  let (_, yApps) = Reflection.unAppAny yType
 
-    xArgs = map getExpr xApps
-    yArgs = map getExpr yApps
+  let xArgs = map getExpr xApps
+  let yArgs = map getExpr yApps
 
-    xArgsZipped = sortBy (\(n1, _), (n2, _) => compare n1 n2) $ zip xl xArgs
-    yArgsZipped = sortBy (\(n1, _), (n2, _) => compare n1 n2) $ zip yl yArgs
+  let xArgsZipped = sortBy (\(n1, _), (n2, _) => compare n1 n2) $ zip xl xArgs
+  let yArgsZipped = sortBy (\(n1, _), (n2, _) => compare n1 n2) $ zip yl yArgs
 
-    xyAligned = alignArgs xArgsZipped yArgsZipped zl
-    correctlyAligned = (==) 0 $ length $ Prelude.List.filter (\xy => xy == (type)) xyAligned
+  let xyAligned = alignArgs xArgsZipped yArgsZipped zl
+  let correctlyAligned = (==) 0 $ length $ Prelude.List.filter (\xy => xy == (type)) xyAligned
 
   if correctlyAligned then [(UN (Basic xyName), xyAligned)] else []
 
 
 foldConstructor : TTImp -> List TTImp -> TTImp
-foldConstructor res [] = res
-foldConstructor res (t::ts) = foldConstructor (app res t) ts
+foldConstructor = foldl app
 
 
-deriveFusion : List (TypeInfo, List Name) -> (List Decl, List Name)
-deriveFusion l = let
-  typeNames = map (\(n, _) => nameStr n.name) l 
-  fusionTypeName = UN (Basic $ joinBy "" typeNames)
+splitRhs : List TTImp -> TTImp
+splitRhs tpe = alternative (UniqueDefault $ foldConstructor (var `{Builtin.MkPair}) tpe) [foldConstructor (var `{Builtin.Pair}) tpe, foldConstructor (var `{Builtin.MkPair}) tpe]
 
-  typeArgs = map (\(ti, la) => matchArgs ti.args la) l
-  typeArgsDefault = map (\ta => case ta of {Just x => x; _ => []}) typeArgs -- should finish with error if any is Nothing
-  checkArgs = sortBy (\(n1, _), (n2, _) => compare n1 n2) $ join typeArgsDefault
-  uniqueArgs = nub checkArgs -- argument types should be same in every type
 
-  uniqueNames = nub $ sort $ join $ map (\(_, la) => la) l
-  -- uniqueNames = map (\(n, _) => n) uniqueArgs
+splitClauses : TTImp -> List (Con, Con) -> List Clause
+splitClauses sc  = map (\(xc, yc) => patClause (app sc $ var $ UN $ Basic (joinBy "_" [nameStr xc.name, nameStr yc.name])) (splitRhs [var (UN $ Basic $ nameStr xc.name), var (UN $ Basic $ nameStr yc.name)]))
 
-  correctDecl = (length uniqueArgs) == (length uniqueNames)
-  typeSignature = buildIPi uniqueArgs
-  consProduct = [ (xc, xl, yc, yl) | (xt, xl) <- l, (yt, yl) <- l, xt.name < yt.name, xc <- xt.cons, yc <- yt.cons]
 
-  preCons = join $ map (fuseConstrucror uniqueNames) consProduct
-  fusedCons = map (\(cn, lt) => mkTy cn (foldConstructor (var fusionTypeName) lt)) preCons
+splitReturnType : List Name -> List (List Name) -> List TTImp
+splitReturnType tnl anll = map (\(t, al) => foldConstructor t al) $ zip (map (var . UN . Basic . nameStr) tnl) (map (map (.bindVar)) anll)
+
+
+deriveFusion : List (TypeInfo, List Name) -> (List Decl)
+deriveFusion l = do
   
-  in if correctDecl then ([ iData Export fusionTypeName typeSignature [] fusedCons ], uniqueNames) else ([], [])
+  let typeNames = map (\(n, _) => n.name) l 
+  let typeNamesStr = map nameStr typeNames 
+  let joinedNames = joinBy "" typeNamesStr
+  let fusionTypeName = UN $ Basic joinedNames
+
+  let typeArgs = map (\(ti, la) => matchArgs ti.args la) l
+  let typeArgsDefault = map (\ta => case ta of {Just x => x; _ => []}) typeArgs -- should finish with error if any is Nothing
+  let checkArgs = sortBy (\(n1, _), (n2, _) => compare n1 n2) $ join typeArgsDefault
+  let uniqueArgs = nub checkArgs -- argument types should be same in every type
+  let uniqueNames = nub $ sort $ join $ map (\(_, la) => la) l
+
+  let correctDecl = (length uniqueArgs) == (length uniqueNames)
+  let typeSignature = buildIPi uniqueArgs
+  let consProduct = [ (xc, xl, yc, yl) | (xt, xl) <- l, (yt, yl) <- l, xt.name < yt.name, xc <- xt.cons, yc <- yt.cons]
+  
+  let preCons = join $ map (fuseConstrucror uniqueNames) consProduct
+  let fusedCons = map (\(cn, lt) => mkTy cn (foldConstructor (var fusionTypeName) lt)) preCons
+
+  let splitName = UN $ Basic ("split" ++ joinedNames)
+  let argNamesList = map (\(_, anl) => anl) l
+
+  let dataDecl  = iData Export fusionTypeName typeSignature [] fusedCons
+  let claimDecl = export' splitName ((arg $ foldConstructor (var fusionTypeName) (map (.bindVar) uniqueNames)) .-> splitRhs (splitReturnType typeNames argNamesList))
+  let defDecl   = def splitName $ splitClauses (var splitName) (map (\(cx, _, cy, _) => (cx, cy)) consProduct)
+
+  if correctDecl then [dataDecl, claimDecl, defDecl] else []
 
 
 buildConFromOther : TTImp -> List (Name, TTImp) -> List Name -> TTImp
@@ -115,64 +129,47 @@ buildConFromOther res la (n::ns) = do
   case ma of {Nothing => type; Just (_, tt) => buildConFromOther (app res tt) la ns}
 
 
-splitFusion : List ITy -> List Name -> List Name -> List Name -> List (ITy, ITy)
--- splitFusion (IData _ _ _ _ (MkData _ _ _ _ cons)) un xn yn = 
-splitFusion cs un xn yn = map (splitInner un xn yn) cs where
-  splitInner : List Name -> List Name -> List Name -> ITy -> (ITy, ITy)
-  splitInner un xn yn (MkTy _ _ cn ct) = do
-    let cs  = split ((==) '_') (nameStr cn)
-    let xcn = UN $ Basic $ head cs
-    let ycn = UN $ Basic $ last cs
-    let (_, args) = unApp ct
-    let zipped = zip un args
-    let xc  = mkTy xcn (buildConFromOther type zipped xn)
-    let yc  = mkTy ycn (buildConFromOther type zipped yn)
-    (xc, yc)
-
-
-declareFusion : List (TypeInfo, List Name) -> Elab ()
+declareFusion : List (TypeInfo, List Name) -> Elab (List Decl)
 declareFusion l = do
-  let (derived, _) = deriveFusion l
-  for_ derived $ logMsg "debug" 0 . interpolate
-  declare $ derived
-
-myFlow : List (TypeInfo, List Name) -> List Name -> List Name -> List (ITy, ITy)
-myFlow l xn yn = do
-  let (derived, un) = deriveFusion l
-  let ts = case derived of {[IData _ _ _ (MkData _ _ _ _ cons)] => cons; _ => []}
-  splitFusion ts un xn yn
+  let derived = deriveFusion l
+  -- logMsg "debug" 0 $ show derived
+  declare derived
+  pure $ take 1 derived
 
 
 public export
-runFusion : Name -> List Name -> Name -> List Name -> Elab ()
+runFusion : Name -> List Name -> Name -> List Name -> Elab (List Decl)
 runFusion x xArgs y yArgs = do
   xTI <- getInfo' x
   yTI <- getInfo' y
   let zipped = [(xTI, xArgs), (yTI, yArgs)]
   declareFusion zipped
 
-
--- data X : Type -> Type -> Type where
---     MkX : X m n
+-- data X : Type -> Type where
+--     MkX : X n
   
--- data Y : Type -> Type -> Type where
---     MkY : Y m n
-
-
-data X : Nat -> Type where
-    MkX : X 1
-  
-data Y : Nat -> Type where
-    MkY : Y 1
-
-%language ElabReflection
-
-%runElab runFusion `{X} [`{n}] `{Y} [`{n}]
+-- data Y : Type -> Type where
+--     MkY : Y n 
 
 -- %language ElabReflection
 
--- %runElab (runFusion `{X} [`{n}, `{m}] `{Y} [`{n}, `{m}])
+data X : Type -> Type -> Type where
+    MkX : X m n
+  
+data Y : Type -> Type -> Type where
+    MkY : Y m n
+
+%language ElabReflection
+
+decl : List Decl
+decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{n}, `{k}]
+
+-- decl : List Decl
+-- decl = %runElab runFusion `{X} [`{n}] `{Y} [`{n}]
+
+-- splitXY : XY n -> (X n, Y n)
+-- splitXY MkX_MkY = (MkX, MkY)
 
 -- TODO: what happens with :doc
--- pack test deptycheck fusion
 -- tests for order of dependent arguments
+-- preserve order of args from left to right

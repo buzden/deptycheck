@@ -14,4 +14,8 @@ data Y : Type -> Type -> Type where
 
 %language ElabReflection
 
-%runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{n}, `{m}]
+decl : List Decl
+decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{n}, `{m}]
+
+test : IO ()
+test = putPretty decl
