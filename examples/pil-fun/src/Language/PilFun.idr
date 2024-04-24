@@ -72,6 +72,11 @@ namespace SnocListTy
     Here'  : AtIndex (sx :< ty) Here ty
     There' : AtIndex sx i ty -> AtIndex (sx :< x) (There i) ty
 
+  public export
+  (++) : SnocListTy -> SnocListTy -> SnocListTy
+  (++) sx Lin       = sx
+  (++) sx (sy :< y) = (sx ++ sy) :< y
+
 export infix 1 ==>
 
 public export
@@ -214,6 +219,11 @@ data Stmts : (funs : Funs) ->
 
   NewV : (ty : Ty) ->
          (cont : Stmts funs (vars :< ty) retTy) ->
+         Stmts funs vars retTy
+
+  NewF : (sig : FunSig) ->
+         (body : Stmts funs (vars ++ sig.From) sig.To) ->
+         (cont : Stmts (funs :< sig) vars retTy) ->
          Stmts funs vars retTy
 
   (#=) : (n : Var vars) ->
