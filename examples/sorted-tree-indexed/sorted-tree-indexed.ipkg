@@ -1,4 +1,4 @@
-package sorted-tree
+package sorted-tree-indexed
 
 version = 0.4
 

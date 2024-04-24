@@ -9,7 +9,7 @@ license = "MPL-2.0"
 sourcedir = "src"
 builddir = ".build"
 
-version = 0.0.240407
+version = 0.0.240423
 
 modules = Data.Nat.Pos
         , Data.Vect.Dependent

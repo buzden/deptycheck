@@ -20,4 +20,6 @@ The examples are the following:
 - derived generators
 
   - [sorted lists](sorted-list/) of natural numbers
-  - [sorted binary trees](sorted-tree/) of natural numbers
+  - naive possibly empty [sorted binary trees](sorted-tree-naive/) of natural numbers, implemented as if without dependent types
+    with added limitations on sortedness
+  - [indexed non-empty sorted binary trees](sorted-tree-indexed/) of natural numbers, with direct type indices for value bounds
