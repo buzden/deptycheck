@@ -13,5 +13,5 @@ UsedConstructorDerivator : ConstructorDerivator
 UsedConstructorDerivator = LeastEffort {simplificationHack = True}
 
 export
-genStmts : Fuel -> (funs : Funs) -> (vars : Vars) -> Gen MaybeEmpty $ Stmts funs vars
+genStmts : Fuel -> (funs : Funs) -> (vars : Vars) -> (retTy : MaybeTy) -> Gen MaybeEmpty $ Stmts funs vars retTy
 genStmts = deriveGen

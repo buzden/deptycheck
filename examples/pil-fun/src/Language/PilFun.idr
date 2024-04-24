@@ -20,6 +20,19 @@ data Literal : Ty -> Type where
   I : Nat  -> Literal Int'
   B : Bool -> Literal Bool'
 
+public export
+data MaybeTy = Nothing | Just Ty
+
+export
+Injective PilFun.Just where injective Refl = Refl
+
+export
+DecEq MaybeTy where
+  decEq Nothing Nothing = Yes Refl
+  decEq (Just t) (Just t') = decEqCong (decEq t t')
+  decEq Nothing (Just _) = No $ \case Refl impossible
+  decEq (Just _) Nothing = No $ \case Refl impossible
+
 namespace SnocListTy
 
   public export
@@ -66,6 +79,14 @@ record FunSig where
   constructor (==>)
   From : SnocListTy
   To   : Ty
+
+export
+Biinjective (==>) where
+  biinjective Refl = (Refl, Refl)
+
+export
+DecEq FunSig where
+  decEq (f ==> t) (f' ==> t') = decEqCong2 (decEq f f') (decEq t t')
 
 namespace SnocListFunSig
 
@@ -188,24 +209,28 @@ export infix 2 #=
 
 public export
 data Stmts : (funs : Funs) ->
-             (preV : Vars) -> Type where
+             (vars : Vars) ->
+             (retTy : MaybeTy) -> Type where
 
   NewV : (ty : Ty) ->
-         (cont : Stmts funs $ vars :< ty) ->
-         Stmts funs vars
+         (cont : Stmts funs (vars :< ty) retTy) ->
+         Stmts funs vars retTy
 
   (#=) : (n : Var vars) ->
          (v : Expr funs vars $ index vars n) ->
-         (cont : Stmts funs vars) ->
-         Stmts funs vars
+         (cont : Stmts funs vars retTy) ->
+         Stmts funs vars retTy
 
   If   : (cond : Expr funs vars Bool') ->
-         (th, el, cont : Stmts funs vars) ->
-         Stmts funs vars
+         (th, el : Stmts funs vars Nothing) -> -- we assume that we don't return from inside `if`
+         (cont : Stmts funs vars retTy) ->
+         Stmts funs vars retTy
 
-  Nop  : Stmts funs vars
+  Ret  : Expr funs vars retTy -> Stmts funs vars $ Just retTy
 
-(>>) : (Stmts f' v' -> Stmts f v) -> Stmts f' v' -> Stmts f v
+  Nop  : Stmts funs vars Nothing
+
+(>>) : (Stmts f' v' rt' -> Stmts f v rt) -> Stmts f' v' rt' -> Stmts f v rt
 (>>) = id
 
 StdF : Funs
@@ -217,7 +242,7 @@ StdF = [< [< Int', Int'] ==> Int'    -- "+"
 Plus, LT, Inc, Or : Fun StdF
 Plus = 0; LT = 1; Inc = 2; Or = 3
 
-program : Stmts StdF [<]
+program : Stmts StdF [<] Nothing
 program = do
   NewV Int' -- 0
   0 #= C 5
@@ -237,7 +262,7 @@ program = do
   Nop
 
 failing -- "Mismatch between: Int' and Bool'"
-  bad : Stmts StdF [<]
+  bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' -- 0
     0 #= C 5
@@ -246,7 +271,7 @@ failing -- "Mismatch between: Int' and Bool'"
     Nop
 
 failing -- "Mismatch between: [<] and [<Int']"
-  bad : Stmts StdF [<]
+  bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' -- 0
     0 #= C 5
@@ -255,7 +280,7 @@ failing -- "Mismatch between: [<] and [<Int']"
     Nop
 
 failing -- "Mismatch between: Bool' and Int'"
-  bad : Stmts StdF [<]
+  bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' -- 0
     0 #= C 5
@@ -264,7 +289,7 @@ failing -- "Mismatch between: Bool' and Int'"
     Nop
 
 failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
-  bad : Stmts StdF [<]
+  bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' -- 0
     0 #= C 5
@@ -272,7 +297,7 @@ failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
     Nop
 
 failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
-  bad : Stmts StdF [<]
+  bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' -- 0
     0 #= V 2
