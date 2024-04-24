@@ -215,38 +215,39 @@ export infix 2 #=
 public export
 data Stmts : (funs : Funs) ->
              (vars : Vars) ->
+             (maxFunDepth : Nat) ->
              (retTy : MaybeTy) -> Type where
 
   NewV : (ty : Ty) ->
-         (cont : Stmts funs (vars :< ty) retTy) ->
-         Stmts funs vars retTy
+         (cont : Stmts funs (vars :< ty) mfd retTy) ->
+         Stmts funs vars mfd retTy
 
   NewF : (sig : FunSig) ->
-         (body : Stmts funs (vars ++ sig.From) sig.To) ->
-         (cont : Stmts (funs :< sig) vars retTy) ->
-         Stmts funs vars retTy
+         (body : Stmts funs (vars ++ sig.From) mfd sig.To) ->
+         (cont : Stmts (funs :< sig) vars (S mfd) retTy) ->
+         Stmts funs vars (S mfd) retTy
 
   (#=) : (n : Var vars) ->
          (v : Expr funs vars $ index vars n) ->
-         (cont : Stmts funs vars retTy) ->
-         Stmts funs vars retTy
+         (cont : Stmts funs vars mfd retTy) ->
+         Stmts funs vars mfd retTy
 
   If   : (cond : Expr funs vars Bool') ->
-         (th, el : Stmts funs vars Nothing) -> -- we assume that we don't return from inside `if`
-         (cont : Stmts funs vars retTy) ->
-         Stmts funs vars retTy
+         (th, el : Stmts funs vars mfd Nothing) -> -- we assume that we don't return from inside `if`
+         (cont : Stmts funs vars mfd retTy) ->
+         Stmts funs vars mfd retTy
 
   Call : (n : Fun funs) ->
          AtIndex funs n (from ==> Nothing) =>
          ExprsSnocList funs vars from ->
-         (cont : Stmts funs vars retTy) ->
-         Stmts funs vars retTy
+         (cont : Stmts funs vars mfd retTy) ->
+         Stmts funs vars mfd retTy
 
-  Ret  : Expr funs vars retTy -> Stmts funs vars $ Just retTy
+  Ret  : Expr funs vars retTy -> Stmts funs vars mfd $ Just retTy
 
-  Nop  : Stmts funs vars Nothing
+  Nop  : Stmts funs vars mfd Nothing
 
-(>>) : (Stmts f' v' rt' -> Stmts f v rt) -> Stmts f' v' rt' -> Stmts f v rt
+(>>) : (Stmts f' v' mfd' rt' -> Stmts f v mfd rt) -> Stmts f' v' mfd' rt' -> Stmts f v mfd rt
 (>>) = id
 
 StdF : Funs
@@ -261,7 +262,7 @@ Plus = 0; LT = 1; Inc = 2; Or = 3
 Print : Fun StdF
 Print = 4
 
-program : Stmts StdF [<] Nothing
+program : Stmts StdF [<] 0 Nothing
 program = do
   NewV Int' -- 0
   0 #= C 5
@@ -282,7 +283,7 @@ program = do
   Nop
 
 failing -- "Mismatch between: Int' and Bool'"
-  bad : Stmts StdF [<] Nothing
+  bad : Stmts StdF [<] 0 Nothing
   bad = do
     NewV Int' -- 0
     0 #= C 5
@@ -291,7 +292,7 @@ failing -- "Mismatch between: Int' and Bool'"
     Nop
 
 failing -- "Mismatch between: [<] and [<Int']"
-  bad : Stmts StdF [<] Nothing
+  bad : Stmts StdF [<] 0 Nothing
   bad = do
     NewV Int' -- 0
     0 #= C 5
@@ -300,7 +301,7 @@ failing -- "Mismatch between: [<] and [<Int']"
     Nop
 
 failing -- "Mismatch between: Bool' and Int'"
-  bad : Stmts StdF [<] Nothing
+  bad : Stmts StdF [<] 0 Nothing
   bad = do
     NewV Int' -- 0
     0 #= C 5
@@ -309,7 +310,7 @@ failing -- "Mismatch between: Bool' and Int'"
     Nop
 
 failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
-  bad : Stmts StdF [<] Nothing
+  bad : Stmts StdF [<] 0 Nothing
   bad = do
     NewV Int' -- 0
     0 #= C 5
@@ -317,7 +318,7 @@ failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
     Nop
 
 failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
-  bad : Stmts StdF [<] Nothing
+  bad : Stmts StdF [<] 0 Nothing
   bad = do
     NewV Int' -- 0
     0 #= V 2
