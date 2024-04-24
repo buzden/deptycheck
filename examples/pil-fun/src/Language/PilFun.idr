@@ -90,10 +90,10 @@ namespace SnocListFunSig
   length (sx :< _) = S $ length sx
 
   public export
-  data AtIndex : (sx : SnocListFunSig) -> (idx : IndexIn sx) -> (from : SnocListTy) -> (to : Ty) -> Type where
+  data AtIndex : (sx : SnocListFunSig) -> (idx : IndexIn sx) -> FunSig -> Type where
     [search sx idx]
-    Here'  : AtIndex (sx :< (from ==> to)) Here from to
-    There' : AtIndex sx i from to -> AtIndex (sx :< x) (There i) from to
+    Here'  : AtIndex (sx :< sig) Here sig
+    There' : AtIndex sx i sig -> AtIndex (sx :< x) (There i) sig
 
 namespace DSL
 
@@ -176,7 +176,7 @@ data Expr : Funs -> Vars -> Ty -> Type where
       Expr funs vars ty
 
   F : (n : Fun funs) ->
-      AtIndex funs n from to =>
+      AtIndex funs n (from ==> to) =>
       ExprsSnocList funs vars from ->
       Expr funs vars to
 
