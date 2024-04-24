@@ -78,7 +78,7 @@ public export
 record FunSig where
   constructor (==>)
   From : SnocListTy
-  To   : Ty
+  To   : MaybeTy
 
 export
 Biinjective (==>) where
@@ -197,7 +197,7 @@ data Expr : Funs -> Vars -> Ty -> Type where
       Expr funs vars ty
 
   F : (n : Fun funs) ->
-      AtIndex funs n (from ==> to) =>
+      AtIndex funs n (from ==> Just to) =>
       ExprsSnocList funs vars from ->
       Expr funs vars to
 
@@ -226,6 +226,12 @@ data Stmts : (funs : Funs) ->
          (cont : Stmts funs vars retTy) ->
          Stmts funs vars retTy
 
+  Call : (n : Fun funs) ->
+         AtIndex funs n (from ==> Nothing) =>
+         ExprsSnocList funs vars from ->
+         (cont : Stmts funs vars retTy) ->
+         Stmts funs vars retTy
+
   Ret  : Expr funs vars retTy -> Stmts funs vars $ Just retTy
 
   Nop  : Stmts funs vars Nothing
@@ -234,13 +240,16 @@ data Stmts : (funs : Funs) ->
 (>>) = id
 
 StdF : Funs
-StdF = [< [< Int', Int'] ==> Int'    -- "+"
-       ,  [< Int', Int'] ==> Bool'   -- "<"
-       ,  [< Int'] ==> Int'          -- "++"
-       ,  [< Bool', Bool'] ==> Bool' -- "||"
+StdF = [< [< Int', Int'] ==> Just Int'    -- "+"
+       ,  [< Int', Int'] ==> Just Bool'   -- "<"
+       ,  [< Int'] ==> Just Int'          -- "++"
+       ,  [< Bool', Bool'] ==> Just Bool' -- "||"
+       ,  [< Int' ] ==> Nothing           -- printf for ints
        ]
 Plus, LT, Inc, Or : Fun StdF
 Plus = 0; LT = 1; Inc = 2; Or = 3
+Print : Fun StdF
+Print = 4
 
 program : Stmts StdF [<] Nothing
 program = do
@@ -259,6 +268,7 @@ program = do
          4 #= F LT [< V 0, C 5]
          2 #= F Or [< V 4, F LT [< V 3, C 6]]
          Nop)
+  Call Print [< V 1]
   Nop
 
 failing -- "Mismatch between: Int' and Bool'"
