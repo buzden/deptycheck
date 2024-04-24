@@ -13,7 +13,7 @@ main = do
   let vals = unGenTryN 10 someStdGen $ genSortedBinTree1 $ limit 4
   Lazy.for_ vals $ \(mi ** ma ** tree) => do
     putStrLn "--------------"
-    putStrLn "min: \{mi}, max: \{ma}"
     let list = toList tree
+    putStrLn "min: \{mi}, max: \{ma}, length: \{length list}"
     putStrLn "as list: \{show list}"
     putStrLn "sorted: \{show $ sorted list}"
