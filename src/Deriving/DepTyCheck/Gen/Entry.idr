@@ -114,6 +114,9 @@ checkTypeIsGen checkSide sig = do
   -- Working with the target type familly --
   ------------------------------------------
 
+  -- normalise the target type expression, if can
+  targetType <- normaliseAsType targetType <|> pure targetType
+
   -- acquire `TypeInfo` out of the target type `TTImp` expression
   targetType <- case targetType of
 
