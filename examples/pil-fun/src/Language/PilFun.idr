@@ -159,6 +159,7 @@ data Stmts : (funs : Funs) ->
              (retTy : MaybeTy) -> Type where
 
   NewV : (ty : Ty) ->
+         (initial : Expr funs vars ty) ->
          (cont : Stmts funs (vars :< ty) mfd retTy) ->
          Stmts funs vars mfd retTy
 
