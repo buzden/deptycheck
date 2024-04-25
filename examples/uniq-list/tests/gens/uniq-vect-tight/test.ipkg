@@ -1,0 +1,6 @@
+package a-test
+
+depends = uniq-list
+
+executable = a-test
+main = Main

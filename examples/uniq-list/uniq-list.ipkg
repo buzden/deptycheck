@@ -1,0 +1,15 @@
+package uniq-list
+
+version = 0.1
+
+authors = "Denis Buzdalov"
+
+sourcedir = "src"
+builddir = ".build"
+
+depends = deptycheck
+
+modules = Data.List.Uniq
+        , Data.List.Uniq.Gen
+        , Data.Vect.Uniq
+        , Data.Vect.Uniq.Gen
