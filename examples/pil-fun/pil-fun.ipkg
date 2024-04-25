@@ -10,4 +10,5 @@ builddir = ".build"
 depends = deptycheck
 
 modules = Language.PilFun
+        , Language.PilFun.DSL
         , Language.PilFun.Gen
