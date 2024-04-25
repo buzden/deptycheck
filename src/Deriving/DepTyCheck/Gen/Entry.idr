@@ -82,6 +82,10 @@ checkTypeIsGen checkSide sig = do
   -- First looks at the resulting type of a generator function --
   ---------------------------------------------------------------
 
+  -- normalise the generator expression and the target type expression, if we can
+  -- CAUTION: if the result of this normalisation is a Pi-type, we won't count its arguments; so it would be an error
+  sigResult <- normaliseAsType sigResult <|> pure sigResult
+
   -- check the resulting type is `Gen`
   let IApp _ (IApp _ (IVar genFC topmostResultName) (IVar _ genEmptiness)) targetType = sigResult
     | _ => failAt (getFC sigResult) "The result type of the generator function must be of type \"`Gen MaybeEmpty` of desired result\""
@@ -113,9 +117,6 @@ checkTypeIsGen checkSide sig = do
   ------------------------------------------
   -- Working with the target type familly --
   ------------------------------------------
-
-  -- normalise the target type expression, if can
-  targetType <- normaliseAsType targetType <|> pure targetType
 
   -- acquire `TypeInfo` out of the target type `TTImp` expression
   targetType <- case targetType of
