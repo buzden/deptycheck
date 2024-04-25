@@ -1,0 +1,7 @@
+package test
+
+main = CheckDistribution
+
+depends = deptycheck
+        , summary-stat
+        , uniq-list

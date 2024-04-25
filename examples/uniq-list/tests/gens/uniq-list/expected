@@ -1,0 +1,30 @@
+-----------
+list: ["f"]
+uniq: True
+-----------
+list: ["g"]
+uniq: True
+-----------
+list: ["a", "d", "c", "h"]
+uniq: True
+-----------
+list: ["c", "b"]
+uniq: True
+-----------
+list: ["b", "c", "a", "h", "g", "d", "f"]
+uniq: True
+-----------
+list: ["c", "a", "b", "f", "d"]
+uniq: True
+-----------
+list: ["b", "g", "f", "c", "a", "d", "h"]
+uniq: True
+-----------
+list: ["h", "f", "a"]
+uniq: True
+-----------
+list: ["h", "c", "a", "d", "g", "b"]
+uniq: True
+-----------
+list: ["g", "c", "b", "d"]
+uniq: True
