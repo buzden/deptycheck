@@ -11,9 +11,9 @@ StdF = [< [< Int', Int'] ==> Just Int'    -- "+"
        ,  [< Bool', Bool'] ==> Just Bool' -- "||"
        ,  [< Int' ] ==> Nothing           -- printf for ints
        ]
-Plus, LT, Inc, Or : Fun StdF
+Plus, LT, Inc, Or : IndexIn StdF
 Plus = 0; LT = 1; Inc = 2; Or = 3
-Print : Fun StdF
+Print : IndexIn StdF
 Print = 4
 
 program : Stmts StdF [<] 0 Nothing

@@ -130,27 +130,18 @@ Funs : Type
 Funs = SnocListFunSig
 
 public export
-Var : Vars -> Type
-Var = IndexIn
-
-public export
-Fun : Funs -> Type
-Fun = IndexIn
-
-public export
-data Expr : Funs -> Vars -> Ty -> Type
-public export
 data ExprsSnocList : Funs -> Vars -> SnocListTy -> Type
 
+public export
 data Expr : Funs -> Vars -> Ty -> Type where
 
   C : (x : Literal ty) -> Expr funs vars ty
 
-  V : (n : Var vars) ->
+  V : (n : IndexIn vars) ->
       AtIndex vars n ty =>
       Expr funs vars ty
 
-  F : (n : Fun funs) ->
+  F : (n : IndexIn funs) ->
       AtIndex funs n (from ==> Just to) =>
       ExprsSnocList funs vars from ->
       Expr funs vars to
@@ -176,7 +167,7 @@ data Stmts : (funs : Funs) ->
          (cont : Stmts (funs :< sig) vars (S mfd) retTy) ->
          Stmts funs vars (S mfd) retTy
 
-  (#=) : (n : Var vars) ->
+  (#=) : (n : IndexIn vars) ->
          (v : Expr funs vars $ index vars n) ->
          (cont : Stmts funs vars mfd retTy) ->
          Stmts funs vars mfd retTy
@@ -186,7 +177,7 @@ data Stmts : (funs : Funs) ->
          (cont : Stmts funs vars mfd retTy) ->
          Stmts funs vars mfd retTy
 
-  Call : (n : Fun funs) ->
+  Call : (n : IndexIn funs) ->
          AtIndex funs n (from ==> Nothing) =>
          ExprsSnocList funs vars from ->
          (cont : Stmts funs vars mfd retTy) ->
