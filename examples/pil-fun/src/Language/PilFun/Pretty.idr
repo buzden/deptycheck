@@ -2,7 +2,7 @@ module Language.PilFun.Pretty
 
 import Data.Fuel
 import Data.SnocList
-import Data.So
+import public Data.So
 import Data.Vect
 
 import Deriving.DepTyCheck.Util.Alternative
@@ -17,7 +17,9 @@ import System.Random.Pure.StdGen
 
 %default total
 
+public export
 data UniqNames : Funs -> Vars -> Type
+public export
 data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String -> Type
 
 data UniqNames : Funs -> Vars -> Type where
@@ -29,8 +31,8 @@ data UniqNames : Funs -> Vars -> Type where
 
 data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String -> Type where
   E : NameIsNew [<] [<] Empty x
-  F : (0 _ : So $ x /= s) => NameIsNew funs vars ss x -> NameIsNew (funs:<fun) vars (NewFun @{ss} x @{sub}) x
-  V : (0 _ : So $ x /= s) => NameIsNew funs vars ss x -> NameIsNew funs (vars:<var) (NewVar @{ss} x @{sub}) x
+  F : (0 _ : So $ x /= s) -> NameIsNew funs vars ss x -> NameIsNew (funs:<fun) vars (NewFun @{ss} {isInfix} s @{sub} @{infixCond}) x
+  V : (0 _ : So $ x /= s) -> NameIsNew funs vars ss x -> NameIsNew funs (vars:<var) (NewVar @{ss} s @{sub}) x
 
 genNewName : Fuel -> (Fuel -> Gen MaybeEmpty String) =>
              (funs : Funs) -> (vars : Vars) -> (names : UniqNames funs vars) ->

@@ -10,8 +10,12 @@ builddir = ".build"
 depends = deptycheck
         , prettier
 
+executable = "pil-fun"
+main = Runner
+
 modules = Language.PilFun
         , Language.PilFun.DSL
         , Language.PilFun.Gen
         , Language.PilFun.Pretty
+        , Language.PilFun.Pretty.DSL
         , Language.PilFun.Pretty.Gen
