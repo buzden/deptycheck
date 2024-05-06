@@ -3,6 +3,7 @@ module Language.PilFun.Pretty
 import Data.Fuel
 import Data.SnocList
 import Data.So
+import Data.Vect
 
 import Deriving.DepTyCheck.Util.Alternative
 
@@ -21,7 +22,9 @@ data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String
 
 data UniqNames : Funs -> Vars -> Type where
   Empty  : UniqNames [<] [<]
-  NewFun : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) => UniqNames (funs:<fun) vars
+  NewFun : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) =>
+           {default False isInfix : Bool} -> (0 infixCond : So $ not isInfix || fun.From.length >= 1) =>
+           UniqNames (funs:<fun) vars
   NewVar : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) => UniqNames funs (vars:<var)
 
 data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String -> Type where
@@ -31,17 +34,34 @@ data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String
 
 genNewName : Fuel -> (Fuel -> Gen MaybeEmpty String) =>
              (funs : Funs) -> (vars : Vars) -> (names : UniqNames funs vars) ->
-             Gen MaybeEmpty $ DPair String $ NameIsNew funs vars names
+             Gen MaybeEmpty (s ** NameIsNew funs vars names s)
 
 varName : UniqNames funs vars => IndexIn vars -> String
-varName @{(NewFun @{ss} s)} i         = varName @{ss} i
-varName @{(NewVar @{ss} s)} Here      = s
-varName @{(NewVar @{ss} s)} (There i) = varName @{ss} i
+varName @{(NewFun @{ss} _)} i         = varName @{ss} i
+varName @{(NewVar       s)} Here      = s
+varName @{(NewVar @{ss} _)} (There i) = varName @{ss} i
 
 funName : UniqNames funs vars => IndexIn funs -> String
-funName @{(NewFun @{ss} s)} Here      = s
-funName @{(NewFun @{ss} s)} (There i) = funName @{ss} i
-funName @{(NewVar @{ss} s)} i         = funName @{ss} i
+funName @{(NewFun       s)} Here      = s
+funName @{(NewFun @{ss} _)} (There i) = funName @{ss} i
+funName @{(NewVar @{ss} _)} i         = funName @{ss} i
+
+isFunInfix : UniqNames funs vars => IndexIn funs -> Bool
+isFunInfix @{(NewFun {isInfix} _)} Here  = isInfix
+isFunInfix @{(NewFun @{ss} s)} (There i) = isFunInfix @{ss} i
+isFunInfix @{(NewVar @{ss} s)} i         = isFunInfix @{ss} i
+
+-- Returned vect has a reverse order; I'd like some `SnocVect` here.
+newVars : (newNames : Gen0 String) =>
+          {funs : _} -> {vars : _} ->
+          Fuel ->
+          (extraVars : _) -> UniqNames funs vars ->
+          Gen0 (UniqNames funs (vars ++ extraVars), Vect extraVars.length (String, Ty))
+newVars _  [<]     names = pure (names, [])
+newVars fl (vs:<v) names = do
+  (names', vts) <- newVars fl vs names
+  (nm ** _) <- genNewName fl _ _ names'
+  pure (NewVar @{names'} nm, (nm, v)::vts)
 
 isNop : Stmts funs vars mfd retTy -> Bool
 isNop Nop = True
@@ -53,29 +73,38 @@ namespace Scala3
   printTy Int'  = "Int"
   printTy Bool' = "Boolean"
 
+  printMaybeTy : MaybeTy -> Doc opts
+  printMaybeTy Nothing   = "Unit"
+  printMaybeTy $ Just ty = printTy ty
+
+  getExprs : ExprsSnocList funs vars argTys -> SnocList $ Exists $ Expr funs vars
+  getExprs [<] = [<]
+  getExprs (sx:<x) = getExprs sx :< Evidence _ x
+
   printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
               (names : UniqNames funs vars) =>
               Prec -> Expr funs vars ty -> Doc opts
-  printExprs : {funs : _} -> {vars : _} -> {opts : _} ->
-               (names : UniqNames funs vars) =>
-               ExprsSnocList funs vars argTys -> SnocList $ Doc opts
   printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
                  (names : UniqNames funs vars) =>
+                 Prec ->
                  IndexIn funs -> ExprsSnocList funs vars argTys -> Doc opts
-  printFunCall n args = do
-    let lhs = line $ funName {vars} n
-    let args = tuple (toList $ printExprs args)
-    ifMultiline (lhs <+> args) (flush lhs <+> indent 2 args)
-  -- TODO to support infix operations
+  printFunCall p n args = do
+    let f = line $ funName {vars} n
+    let args = toList $ getExprs args
+    let tupledArgs = \as => tuple $ as <&> \(Evidence _ e) => printExpr Open e
+    case (isFunInfix @{names} n, args) of
+      -- Call for bitwise infix extension method
+      (True, [Evidence _ l, Evidence _ r]) => parenthesise (p >= App) $ printExpr App l <++> f <++> printExpr App r
+      -- Call for appropriate extension method with 0, 2 or more arguments
+      (True, Evidence _ head :: args) => parenthesise (p >= App) $ printExpr App head <+> "." <+> f <+> tupledArgs args
+      -- Call for normal function
+      _ => ifMultiline (f <+> tupledArgs args) (flush f <+> indent 2 (tupledArgs args))
 
   printExpr p $ C $ I k     = line $ show k
   printExpr p $ C $ B False = "false"
   printExpr p $ C $ B True  = "true"
   printExpr p $ V n         = line $ varName {funs} n
-  printExpr p $ F n args    = printFunCall n args
-
-  printExprs [<] = [<]
-  printExprs (sx:<x) = printExprs sx :< printExpr Open x
+  printExpr p $ F n args    = assert_total printFunCall p n args
 
   export
   printScala3 : {funs : _} -> {vars : _} -> {mfd : _} -> {retTy : _} -> {opts : _} ->
@@ -103,9 +132,24 @@ namespace Scala3
 
   printScala3 fl $ NewF sig body cont = do
     (nm ** _) <- genNewName fl _ _ names
-    rest <- printScala3 @{NewFun nm} fl cont
-    body <- printSubScala3 @{?subnames} fl body
-    ?printScala3_rhs_1
+    isInfix <- chooseAny
+    let (isInfix ** infixCond) : (b ** So (not b || sig.From.length >= 1)) = case decSo _ of
+                                                                               Yes condMet => (isInfix ** condMet)
+                                                                               No _        => (False ** Oh)
+    rest <- printScala3 @{NewFun {isInfix} {infixCond} nm} fl cont
+    (namesInside, funArgs) <- newVars fl _ names
+    funBody <- printSubScala3 @{namesInside} fl body
+    pure $ flip vappend rest $ do
+      let funArgs = reverse (toList funArgs) <&> \(n, ty) => line n <+> ":" <++> printTy ty
+      let defTail : List (Doc opts) -> Doc opts
+          defTail funArgs = "def" <++> line nm <+> tuple funArgs <+> ":" <++> printMaybeTy sig.To <++> "="
+      let (extPref, funSig) = case (isInfix, funArgs) of
+                     (True, head::funArgs) => (Just $ "extension" <++> parens head, defTail funArgs)
+                     _                     => (Nothing                            , defTail funArgs)
+      let mainDef = ifMultiline (funSig <++> funBody) (flush funSig <+> indent 2 funBody)
+      case extPref of
+        Nothing      => mainDef
+        Just extPref => ifMultiline (extPref <++> mainDef) (flush extPref <+> indent 2 mainDef)
 
   printScala3 fl $ (#=) n v cont = (line (varName {funs} n) <++> "=" <++> printExpr Open v `vappend`) <$> printScala3 fl cont
 
@@ -119,7 +163,7 @@ namespace Scala3
       , indent 2 !(printSubScala3 fl el)
       ]
 
-  printScala3 fl $ Call n args cont = (printFunCall n args `vappend`) <$> printScala3 fl cont
+  printScala3 fl $ Call n args cont = (printFunCall Open n args `vappend`) <$> printScala3 fl cont
 
   printScala3 fl $ Ret x = pure $ "return" <++> printExpr Open x
 

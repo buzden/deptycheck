@@ -14,3 +14,4 @@ modules = Language.PilFun
         , Language.PilFun.DSL
         , Language.PilFun.Gen
         , Language.PilFun.Pretty
+        , Language.PilFun.Pretty.Gen
