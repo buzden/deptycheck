@@ -55,6 +55,10 @@ namespace SnocListTy
   length Lin = Z
   length (sx :< _) = S $ length sx
 
+  public export %inline
+  (.length) : SnocListTy -> Nat
+  (.length) = length
+
   export
   Biinjective SnocListTy.(:<) where
     biinjective Refl = (Refl, Refl)
@@ -114,6 +118,10 @@ namespace SnocListFunSig
   length : SnocListFunSig -> Nat
   length Lin = Z
   length (sx :< _) = S $ length sx
+
+  public export %inline
+  (.length) : SnocListFunSig -> Nat
+  (.length) = length
 
   public export
   data AtIndex : (sx : SnocListFunSig) -> (idx : IndexIn sx) -> FunSig -> Type where

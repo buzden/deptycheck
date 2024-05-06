@@ -8,7 +8,9 @@ sourcedir = "src"
 builddir = ".build"
 
 depends = deptycheck
+        , prettier
 
 modules = Language.PilFun
         , Language.PilFun.DSL
         , Language.PilFun.Gen
+        , Language.PilFun.Pretty
