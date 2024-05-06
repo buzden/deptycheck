@@ -16,37 +16,32 @@ import System.Random.Pure.StdGen
 
 %default total
 
-data UniqNames : Nat -> Type
-data NameIsNew : (n : Nat) -> UniqNames n -> String -> Type
+data UniqNames : Funs -> Vars -> Type
+data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String -> Type
 
-data UniqNames : Nat -> Type where
-  Nil  : UniqNames Z
-  (::) : (s : String) -> (ss : UniqNames n) -> (0 _ : NameIsNew n ss s) => UniqNames (S n)
+data UniqNames : Funs -> Vars -> Type where
+  Empty  : UniqNames [<] [<]
+  NewFun : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) => UniqNames (funs:<fun) vars
+  NewVar : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) => UniqNames funs (vars:<var)
 
-data NameIsNew : (n : Nat) -> UniqNames n -> String -> Type where
-  N : NameIsNew Z [] x
-  S : (0 _ : So $ x /= s) => NameIsNew n ss x -> NameIsNew (S n) ((s::ss) @{sub}) x
+data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String -> Type where
+  E : NameIsNew [<] [<] Empty x
+  F : (0 _ : So $ x /= s) => NameIsNew funs vars ss x -> NameIsNew (funs:<fun) vars (NewFun @{ss} x @{sub}) x
+  V : (0 _ : So $ x /= s) => NameIsNew funs vars ss x -> NameIsNew funs (vars:<var) (NewVar @{ss} x @{sub}) x
 
-genNewName : Fuel -> (Fuel -> Gen MaybeEmpty String) => (n : Nat) -> (ss : UniqNames n) -> Gen MaybeEmpty $ DPair String $ NameIsNew n ss
+genNewName : Fuel -> (Fuel -> Gen MaybeEmpty String) =>
+             (funs : Funs) -> (vars : Vars) -> (names : UniqNames funs vars) ->
+             Gen MaybeEmpty $ DPair String $ NameIsNew funs vars names
 
--- When both functions and variables namespaces are shared
-Names : (funs : SnocListFunSig) -> (vars : SnocListTy) -> Type
-Names funs vars = UniqNames $ funs.length + vars.length
+varName : UniqNames funs vars => IndexIn vars -> String
+varName @{(NewFun @{ss} s)} i         = varName @{ss} i
+varName @{(NewVar @{ss} s)} Here      = s
+varName @{(NewVar @{ss} s)} (There i) = varName @{ss} i
 
-varName : {funs : _} -> {vars : _} -> Names funs vars => IndexIn vars -> String
-varName {funs=funs:<_} @{_::_}  i         = varName {funs} i
-varName {funs=[<]}     @{n::ns} Here      = n
-varName {funs=[<]}     @{n::ns} (There i) = varName {funs=[<]} i
-
-withNewVar : {a : _} -> (names : UniqNames (a + b)) => (s : String) -> NameIsNew (a + b) names s => UniqNames (a + S b)
-
-funName : {funs : SnocListFunSig} -> Names funs vars => IndexIn funs -> String
-funName @{n::ns} Here      = n
-funName @{n::ns} (There i) = funName @{ns} i
-
-toList : UniqNames n -> List String
-toList [] = []
-toList (s::ss) = s :: toList ss
+funName : UniqNames funs vars => IndexIn funs -> String
+funName @{(NewFun @{ss} s)} Here      = s
+funName @{(NewFun @{ss} s)} (There i) = funName @{ss} i
+funName @{(NewVar @{ss} s)} i         = funName @{ss} i
 
 isNop : Stmts funs vars mfd retTy -> Bool
 isNop Nop = True
@@ -59,13 +54,13 @@ namespace Scala3
   printTy Bool' = "Boolean"
 
   printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
-              (names : Names funs vars) =>
+              (names : UniqNames funs vars) =>
               Prec -> Expr funs vars ty -> Doc opts
   printExprs : {funs : _} -> {vars : _} -> {opts : _} ->
-               (names : Names funs vars) =>
+               (names : UniqNames funs vars) =>
                ExprsSnocList funs vars argTys -> SnocList $ Doc opts
   printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
-                 (names : Names funs vars) =>
+                 (names : UniqNames funs vars) =>
                  IndexIn funs -> ExprsSnocList funs vars argTys -> Doc opts
   printFunCall n args = do
     let lhs = line $ funName {vars} n
@@ -84,13 +79,13 @@ namespace Scala3
 
   export
   printScala3 : {funs : _} -> {vars : _} -> {mfd : _} -> {retTy : _} -> {opts : _} ->
-                (names : Names funs vars) =>
+                (names : UniqNames funs vars) =>
                 (newNames : Gen0 String) =>
                 Fuel ->
                 Stmts funs vars mfd retTy -> Gen0 $ Doc opts
 
   printSubScala3 : {funs : _} -> {vars : _} -> {mfd : _} -> {retTy : _} -> {opts : _} ->
-                   (names : Names funs vars) =>
+                   (names : UniqNames funs vars) =>
                    (newNames : Gen0 String) =>
                    Fuel ->
                    Stmts funs vars mfd retTy -> Gen0 $ Doc opts
@@ -98,8 +93,8 @@ namespace Scala3
   printSubScala3 fl ss  = printScala3 fl ss
 
   printScala3 fl $ NewV ty initial cont = do
-    (nm ** _) <- genNewName fl _ names
-    rest <- printScala3 @{withNewVar nm} fl cont
+    (nm ** _) <- genNewName fl _ _ names
+    rest <- printScala3 @{NewVar nm} fl cont
     let tyAscr = if !chooseAny then ":" <++> printTy ty else empty
     pure $ flip vappend rest $ do
       let lhs = "var" <++> line nm <++> tyAscr <++> "="
@@ -107,8 +102,8 @@ namespace Scala3
       ifMultiline (lhs <++> rhs) (flush lhs <+> indent 2 rhs)
 
   printScala3 fl $ NewF sig body cont = do
-    (nm ** _) <- genNewName fl _ names
-    rest <- printScala3 @{nm::names} fl cont
+    (nm ** _) <- genNewName fl _ _ names
+    rest <- printScala3 @{NewFun nm} fl cont
     body <- printSubScala3 @{?subnames} fl body
     ?printScala3_rhs_1
 
