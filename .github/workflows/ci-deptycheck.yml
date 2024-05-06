@@ -73,6 +73,8 @@ jobs:
         run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
 
       - run: pack install-deps deptycheck
+      - run: pack install summary-stat # for distr tests
+             # TODO to compute test dependencies when we have special mini-test libs
 
       - name: Tar the `pack` dir
         run: .github/tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"

@@ -34,6 +34,8 @@ thirdparties:build:
     - pack:prepare
   script:
     - pack install-deps deptycheck
+    - pack install summary-stat # for distr tests
+      # TODO to compute test dependencies when we have special mini-test libs
 
 deptycheck:build:
   stage: deptycheck:build
