@@ -1,6 +1,6 @@
 module Language.PilFun.Gen
 
-import Language.PilFun
+import public Language.PilFun
 
 import Deriving.DepTyCheck.Gen
 
@@ -8,10 +8,6 @@ import Deriving.DepTyCheck.Gen
 
 %logging "deptycheck.derive" 5
 
-%hint
-UsedConstructorDerivator : ConstructorDerivator
-UsedConstructorDerivator = LeastEffort {simplificationHack = True}
+%hint LE : ConstructorDerivator; LE = LeastEffort {simplificationHack = True}
 
-export
-genStmts : Fuel -> (funs : Funs) -> (vars : Vars) -> (retTy : MaybeTy) -> Gen MaybeEmpty $ Stmts funs vars retTy
-genStmts = deriveGen
+Language.PilFun.genStmts = deriveGen

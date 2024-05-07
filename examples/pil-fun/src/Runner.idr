@@ -27,12 +27,13 @@ stdFuns = do
   AddFun False "Console.println" $ [< Int'] ==> Nothing
   Enough
 
-PrettyOpts : LayoutOpts
-PrettyOpts = Opts 152
+prettyOpts : LayoutOpts
+prettyOpts = Opts 152
 
 namesGen : Gen0 String
 namesGen = pack <$> listOf {length = choose (1,10)} (choose ('a', 'z'))
 
+export
 main : IO ()
 main = do
   let modelFuel = limit 8
@@ -41,4 +42,4 @@ main = do
                genStmts modelFuel stdFuns.functions stdFuns.variables Nothing >>= printScala3 @{stdFuns.fvNames} @{namesGen} ppFuel
   Lazy.for_ vals $ \val => do
     putStrLn "///////////////////\n"
-    putStr $ render PrettyOpts val
+    putStr $ render prettyOpts val

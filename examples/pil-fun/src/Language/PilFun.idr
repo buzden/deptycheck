@@ -1,8 +1,11 @@
 module Language.PilFun
 
+import public Data.Fuel
 import public Data.Nat
 
 import Decidable.Equality
+
+import Test.DepTyCheck.Gen
 
 -- Types of this primitive imperative language
 public export
@@ -194,3 +197,6 @@ data Stmts : (funs : Funs) ->
   Ret  : Expr funs vars retTy -> Stmts funs vars $ Just retTy
 
   Nop  : Stmts funs vars Nothing
+
+export
+genStmts : Fuel -> (funs : Funs) -> (vars : Vars) -> (retTy : MaybeTy) -> Gen MaybeEmpty $ Stmts funs vars retTy
