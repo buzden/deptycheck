@@ -65,7 +65,7 @@ newVars fl (vs:<v) names = do
   (nm ** _) <- genNewName fl _ _ names'
   pure (NewVar @{names'} nm, (nm, v)::vts)
 
-isNop : Stmts funs vars mfd retTy -> Bool
+isNop : Stmts funs vars retTy -> Bool
 isNop Nop = True
 isNop _   = False
 
@@ -109,17 +109,17 @@ namespace Scala3
   printExpr p $ F n args    = assert_total printFunCall p n args
 
   export
-  printScala3 : {funs : _} -> {vars : _} -> {mfd : _} -> {retTy : _} -> {opts : _} ->
+  printScala3 : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
                 (names : UniqNames funs vars) =>
                 (newNames : Gen0 String) =>
                 Fuel ->
-                Stmts funs vars mfd retTy -> Gen0 $ Doc opts
+                Stmts funs vars retTy -> Gen0 $ Doc opts
 
-  printSubScala3 : {funs : _} -> {vars : _} -> {mfd : _} -> {retTy : _} -> {opts : _} ->
+  printSubScala3 : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
                    (names : UniqNames funs vars) =>
                    (newNames : Gen0 String) =>
                    Fuel ->
-                   Stmts funs vars mfd retTy -> Gen0 $ Doc opts
+                   Stmts funs vars retTy -> Gen0 $ Doc opts
   printSubScala3 _  Nop = pure "{}"
   printSubScala3 fl ss  = printScala3 fl ss
 

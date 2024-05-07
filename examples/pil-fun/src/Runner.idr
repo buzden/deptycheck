@@ -38,7 +38,7 @@ main = do
   let modelFuel = limit 8
   let ppFuel = limit 1000000
   let vals = unGenTryN 10 someStdGen $
-               genStmts modelFuel stdFuns.functions stdFuns.variables 4 Nothing >>= printScala3 @{stdFuns.fvNames} @{namesGen} ppFuel
+               genStmts modelFuel stdFuns.functions stdFuns.variables Nothing >>= printScala3 @{stdFuns.fvNames} @{namesGen} ppFuel
   Lazy.for_ vals $ \val => do
     putStrLn "///////////////////\n"
     putStr $ render PrettyOpts val

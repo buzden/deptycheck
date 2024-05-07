@@ -50,5 +50,5 @@ namespace SnocListFunSig.IndexIn
     _ | n' = natToIndexIn (length sx `minus` S n') @{reverseLTMinus}
 
 public export %inline
-(>>) : (Stmts f' v' mfd' rt' -> Stmts f v mfd rt) -> Stmts f' v' mfd' rt' -> Stmts f v mfd rt
+(>>) : (Stmts f' v' rt' -> Stmts f v rt) -> Stmts f' v' rt' -> Stmts f v rt
 (>>) = id

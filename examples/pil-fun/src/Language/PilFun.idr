@@ -163,35 +163,34 @@ export infix 2 #=
 public export
 data Stmts : (funs : Funs) ->
              (vars : Vars) ->
-             (maxFunDepth : Nat) ->
              (retTy : MaybeTy) -> Type where
 
   NewV : (ty : Ty) ->
          (initial : Expr funs vars ty) ->
-         (cont : Stmts funs (vars :< ty) mfd retTy) ->
-         Stmts funs vars mfd retTy
+         (cont : Stmts funs (vars :< ty) retTy) ->
+         Stmts funs vars retTy
 
   NewF : (sig : FunSig) ->
-         (body : Stmts funs (vars ++ sig.From) mfd sig.To) ->
-         (cont : Stmts (funs :< sig) vars (S mfd) retTy) ->
-         Stmts funs vars (S mfd) retTy
+         (body : Stmts funs (vars ++ sig.From) sig.To) ->
+         (cont : Stmts (funs :< sig) vars retTy) ->
+         Stmts funs vars retTy
 
   (#=) : (n : IndexIn vars) ->
          (v : Expr funs vars $ index vars n) ->
-         (cont : Stmts funs vars mfd retTy) ->
-         Stmts funs vars mfd retTy
+         (cont : Stmts funs vars retTy) ->
+         Stmts funs vars retTy
 
   If   : (cond : Expr funs vars Bool') ->
-         (th, el : Stmts funs vars mfd Nothing) -> -- we assume that we don't return from inside `if`
-         (cont : Stmts funs vars mfd retTy) ->
-         Stmts funs vars mfd retTy
+         (th, el : Stmts funs vars Nothing) -> -- we assume that we don't return from inside `if`
+         (cont : Stmts funs vars retTy) ->
+         Stmts funs vars retTy
 
   Call : (n : IndexIn funs) ->
          AtIndex funs n (from ==> Nothing) =>
          ExprsSnocList funs vars from ->
-         (cont : Stmts funs vars mfd retTy) ->
-         Stmts funs vars mfd retTy
+         (cont : Stmts funs vars retTy) ->
+         Stmts funs vars retTy
 
-  Ret  : Expr funs vars retTy -> Stmts funs vars mfd $ Just retTy
+  Ret  : Expr funs vars retTy -> Stmts funs vars $ Just retTy
 
-  Nop  : Stmts funs vars mfd Nothing
+  Nop  : Stmts funs vars Nothing

@@ -16,7 +16,7 @@ Plus = 0; LT = 1; Inc = 2; Or = 3
 Print : IndexIn StdF
 Print = 4
 
-program : Stmts StdF [<] 0 Nothing
+program : Stmts StdF [<] Nothing
 program = do
   NewV Int' {- 0 -} $ C 15
   0 #= C 5
@@ -37,7 +37,7 @@ program = do
   Nop
 
 failing -- "Mismatch between: Int' and Bool'"
-  bad : Stmts StdF [<] 0 Nothing
+  bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' {- 0 -} $ C 5
     NewV Bool' {- 1 -} $ C False
@@ -45,7 +45,7 @@ failing -- "Mismatch between: Int' and Bool'"
     Nop
 
 failing -- "Mismatch between: [<] and [<Int']"
-  bad : Stmts StdF [<] 0 Nothing
+  bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' {- 0 -} $ C 5
     NewV Int' {- 1 -} $ C False
@@ -53,7 +53,7 @@ failing -- "Mismatch between: [<] and [<Int']"
     Nop
 
 failing -- "Mismatch between: Bool' and Int'"
-  bad : Stmts StdF [<] 0 Nothing
+  bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' {- 0 -} $ C 5
     NewV Int' {- 1 -} $ C False
@@ -61,7 +61,7 @@ failing -- "Mismatch between: Bool' and Int'"
     Nop
 
 failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
-  bad : Stmts StdF [<] 0 Nothing
+  bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' {- 0 -} $ C 0
     0 #= C 5
@@ -69,7 +69,7 @@ failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
     Nop
 
 failing #"Can't find an implementation for LTE 3 (length [<Int'])"#
-  bad : Stmts StdF [<] 0 Nothing
+  bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' {- 0 -} $ C 0
     0 #= V 2
