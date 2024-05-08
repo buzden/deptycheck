@@ -1,4 +1,4 @@
-module Language.PilFun.Gen
+module Language.PilFun.Derived
 
 import public Language.PilFun
 

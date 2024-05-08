@@ -3,9 +3,9 @@ module Runner
 import Data.Fuel
 import Data.List.Lazy
 
-import Language.PilFun.Gen
+import Language.PilFun.Derived
+import Language.PilFun.Pretty.Derived
 import Language.PilFun.Pretty.DSL
-import Language.PilFun.Pretty.Gen
 
 import Test.DepTyCheck.Gen
 

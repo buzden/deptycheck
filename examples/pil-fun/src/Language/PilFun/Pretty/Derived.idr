@@ -1,4 +1,4 @@
-module Language.PilFun.Pretty.Gen
+module Language.PilFun.Pretty.Derived
 
 import public Language.PilFun.Pretty
 

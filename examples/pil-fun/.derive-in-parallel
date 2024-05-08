@@ -1,0 +1,6 @@
+#!/bin/sh
+
+LIB_FILES="$(find src/ -name '*.idr' | grep -v Runner)"
+for r in $(echo "$LIB_FILES" | grep -v Derived); do idris2 --find-ipkg --check "$r"; done
+for r in $(echo "$LIB_FILES" | grep Derived); do idris2 --find-ipkg --check "$r" & done
+wait
