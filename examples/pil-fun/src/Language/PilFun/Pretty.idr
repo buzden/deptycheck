@@ -85,27 +85,27 @@ namespace Scala3
 
   printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
               (names : UniqNames funs vars) =>
-              Prec -> Expr funs vars ty -> Doc opts
+              Prec -> Expr funs vars ty -> Gen0 $ Doc opts
   printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
                  (names : UniqNames funs vars) =>
                  Prec ->
-                 IndexIn funs -> ExprsSnocList funs vars argTys -> Doc opts
+                 IndexIn funs -> ExprsSnocList funs vars argTys -> Gen0 $ Doc opts
   printFunCall p n args = do
     let f = line $ funName {vars} n
     let args = toList $ getExprs args
-    let tupledArgs = \as => tuple $ as <&> \(Evidence _ e) => printExpr Open e
+    let tupledArgs = \as => map tuple $ for as $ \(Evidence _ e) => printExpr Open e
     case (isFunInfix @{names} n, args) of
       -- Call for bitwise infix extension method
-      (True, [Evidence _ l, Evidence _ r]) => parenthesise (p >= App) $ printExpr App l <++> f <++> printExpr App r
+      (True, [Evidence _ l, Evidence _ r]) => pure $ parenthesise (p >= App) $ !(printExpr App l) <++> f <++> !(printExpr App r)
       -- Call for appropriate extension method with 0, 2 or more arguments
-      (True, Evidence _ head :: args) => parenthesise (p >= App) $ printExpr App head <+> "." <+> f <+> tupledArgs args
+      (True, Evidence _ head :: args) => pure $ parenthesise (p >= App) $ !(printExpr App head) <+> "." <+> f <+> !(tupledArgs args)
       -- Call for normal function
-      _ => ifMultiline (f <+> tupledArgs args) (flush f <+> indent 2 (tupledArgs args))
+      _ => pure $ ifMultiline (f <+> !(tupledArgs args)) (flush f <+> indent 2 !(tupledArgs args))
 
-  printExpr p $ C $ I k     = line $ show k
-  printExpr p $ C $ B False = "false"
-  printExpr p $ C $ B True  = "true"
-  printExpr p $ V n         = line $ varName {funs} n
+  printExpr p $ C $ I k     = pure $ line $ show k
+  printExpr p $ C $ B False = pure $ "false"
+  printExpr p $ C $ B True  = pure $ "true"
+  printExpr p $ V n         = pure $ line $ varName {funs} n
   printExpr p $ F n args    = assert_total printFunCall p n args
 
   export
@@ -127,9 +127,9 @@ namespace Scala3
     (nm ** _) <- genNewName fl _ _ names
     rest <- printScala3 @{NewVar nm} fl cont
     let tyAscr = if !chooseAny then ":" <++> printTy ty else empty
+    let lhs = "var" <++> line nm <++> tyAscr <++> "="
+    rhs <- printExpr Open initial
     pure $ flip vappend rest $ do
-      let lhs = "var" <++> line nm <++> tyAscr <++> "="
-      let rhs = printExpr Open initial
       ifMultiline (lhs <++> rhs) (flush lhs <+> indent 2 rhs)
 
   printScala3 fl $ NewF sig body cont = do
@@ -153,20 +153,21 @@ namespace Scala3
         Nothing      => mainDef
         Just extPref => ifMultiline (extPref <++> mainDef) (flush extPref <+> indent 2 mainDef)
 
-  printScala3 fl $ (#=) n v cont = (line (varName {funs} n) <++> "=" <++> printExpr Open v `vappend`) <$> printScala3 fl cont
+  printScala3 fl $ (#=) n v cont = pure $ flip vappend !(printScala3 fl cont) $
+    line (varName {funs} n) <++> "=" <++> !(printExpr Open v)
 
   printScala3 fl $ If cond th el cont = do
     rest <- printScala3 fl cont
     pure $ flip vappend rest $ vsep $
-      [ "if" <++> printExpr Open cond <++> "then"
+      [ "if" <++> !(printExpr Open cond) <++> "then"
       , indent 2 !(printSubScala3 fl th)
       ] ++ whenTs (not (isNop el) || !chooseAny)
       [ "else"
       , indent 2 !(printSubScala3 fl el)
       ]
 
-  printScala3 fl $ Call n args cont = (printFunCall Open n args `vappend`) <$> printScala3 fl cont
+  printScala3 fl $ Call n args cont = [| printFunCall Open n args `vappend` printScala3 fl cont |]
 
-  printScala3 fl $ Ret x = pure $ "return" <++> printExpr Open x
+  printScala3 fl $ Ret x = ("return" <++>) <$> printExpr Open x
 
   printScala3 fl $ Nop = pure ""
