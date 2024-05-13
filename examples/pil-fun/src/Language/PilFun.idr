@@ -36,22 +36,22 @@ DecEq MaybeTy where
   decEq Nothing (Just _) = No $ \case Refl impossible
   decEq (Just _) Nothing = No $ \case Refl impossible
 
+public export
+data Mut = Mutable | Immutable
+
+export
+DecEq Mut where
+  decEq Mutable   Mutable   = Yes Refl
+  decEq Immutable Immutable = Yes Refl
+  decEq Mutable   Immutable = No $ \case Refl impossible
+  decEq Immutable Mutable   = No $ \case Refl impossible
+
 namespace SnocListTy
 
   public export
   data SnocListTy : Type where
     Lin  : SnocListTy
     (:<) : SnocListTy -> Ty -> SnocListTy
-
-  public export
-  data IndexIn : SnocListTy -> Type where
-    Here  : IndexIn $ sx :< x
-    There : IndexIn sx -> IndexIn $ sx :< x
-
-  public export
-  index : (sx : SnocListTy) -> IndexIn sx -> Ty
-  index (_ :<x) Here      = x
-  index (sx:<_) (There i) = index sx i
 
   public export
   length : SnocListTy -> Nat
@@ -73,16 +73,56 @@ namespace SnocListTy
     decEq [<] (_:<_) = No $ \case Refl impossible
     decEq (_:<_) [<] = No $ \case Refl impossible
 
-  public export
-  data AtIndex : (sx : SnocListTy) -> (idx : IndexIn sx) -> Ty -> Type where
-    [search sx idx]
-    Here'  : AtIndex (sx :< ty) Here ty
-    There' : AtIndex sx i ty -> AtIndex (sx :< x) (There i) ty
+namespace SnocListTyMut
 
   public export
-  (++) : SnocListTy -> SnocListTy -> SnocListTy
+  data SnocListTyMut : Type where
+    Lin  : SnocListTyMut
+    (:<) : SnocListTyMut -> Ty -> Mut -> SnocListTyMut
+
+  public export
+  data IndexIn : SnocListTyMut -> Type where
+    Here  : IndexIn $ (:<) sx x mut
+    There : IndexIn sx -> IndexIn $ (:<) sx x mut
+
+  public export
+  index : (sx : SnocListTyMut) -> IndexIn sx -> (Ty, Mut)
+  index ((:<) _  x m) Here      = (x, m)
+  index ((:<) sx _ _) (There i) = index sx i
+
+  public export
+  length : SnocListTyMut -> Nat
+  length Lin = Z
+  length ((:<) sx _ _) = S $ length sx
+
+  public export %inline
+  (.length) : SnocListTyMut -> Nat
+  (.length) = length
+
+  export
+  DecEq SnocListTyMut where
+    decEq [<] [<] = Yes Refl
+    decEq ((:<) sx x m) ((:<) sx' x' m') with (decEq sx sx')
+      _                                   | No nsx = No $ \case Refl => nsx Refl
+      decEq ((:<) sx x m) ((:<) sx x' m') | Yes Refl with (decEq x x')
+        _                                             | No nx = No $ \case Refl => nx Refl
+        decEq ((:<) sx x m) ((:<) sx x m') | Yes Refl | Yes Refl with (decEq m m')
+          _                                                       | No mx = No $ \case Refl => mx Refl
+          decEq ((:<) sx x m) ((:<) sx x m) | Yes Refl | Yes Refl | Yes Refl = Yes Refl
+    decEq [<] ((:<) _ _ _) = No $ \case Refl impossible
+    decEq ((:<) _ _ _) [<] = No $ \case Refl impossible
+
+  public export
+  data AtIndex : (sx : SnocListTyMut) -> (idx : IndexIn sx) -> Ty -> Mut -> Type where
+    [search sx idx]
+    Here'  : AtIndex ((:<) sx ty mut) Here ty mut
+    There' : AtIndex sx i ty mut -> AtIndex ((:<) sx x m) (There i) ty mut
+
+  ||| Add a bunch of immutable variables
+  public export
+  (++) : SnocListTyMut -> SnocListTy -> SnocListTyMut
   (++) sx Lin       = sx
-  (++) sx (sy :< y) = (sx ++ sy) :< y
+  (++) sx (sy :< y) = (:<) (sx ++ sy) y Immutable
 
 export infix 1 ==>
 
@@ -134,7 +174,7 @@ namespace SnocListFunSig
 
 public export
 Vars : Type
-Vars = SnocListTy
+Vars = SnocListTyMut
 
 public export
 Funs : Type
@@ -149,7 +189,7 @@ data Expr : Funs -> Vars -> Ty -> Type where
   C : (x : Literal ty) -> Expr funs vars ty
 
   V : (n : IndexIn vars) ->
-      AtIndex vars n ty =>
+      AtIndex vars n ty mut =>
       Expr funs vars ty
 
   F : (n : IndexIn funs) ->
@@ -169,8 +209,9 @@ data Stmts : (funs : Funs) ->
              (retTy : MaybeTy) -> Type where
 
   NewV : (ty : Ty) ->
+         (mut : Mut) ->
          (initial : Expr funs vars ty) ->
-         (cont : Stmts funs (vars :< ty) retTy) ->
+         (cont : Stmts funs ((:<) vars ty mut) retTy) ->
          Stmts funs vars retTy
 
   NewF : (sig : FunSig) ->
@@ -179,7 +220,8 @@ data Stmts : (funs : Funs) ->
          Stmts funs vars retTy
 
   (#=) : (n : IndexIn vars) ->
-         (v : Expr funs vars $ index vars n) ->
+         AtIndex vars n ty Mutable =>
+         (v : Expr funs vars ty) ->
          (cont : Stmts funs vars retTy) ->
          Stmts funs vars retTy
 

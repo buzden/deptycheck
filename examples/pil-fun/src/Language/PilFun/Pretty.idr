@@ -27,12 +27,12 @@ data UniqNames : Funs -> Vars -> Type where
   NewFun : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) =>
            {default False isInfix : Bool} -> (0 infixCond : So $ not isInfix || fun.From.length >= 1) =>
            UniqNames (funs:<fun) vars
-  NewVar : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) => UniqNames funs (vars:<var)
+  NewVar : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) => UniqNames funs ((:<) vars var mut)
 
 data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String -> Type where
   E : NameIsNew [<] [<] Empty x
   F : (0 _ : So $ x /= s) -> NameIsNew funs vars ss x -> NameIsNew (funs:<fun) vars (NewFun @{ss} {isInfix} s @{sub} @{infixCond}) x
-  V : (0 _ : So $ x /= s) -> NameIsNew funs vars ss x -> NameIsNew funs (vars:<var) (NewVar @{ss} s @{sub}) x
+  V : (0 _ : So $ x /= s) -> NameIsNew funs vars ss x -> NameIsNew funs ((:<) vars var mut) (NewVar @{ss} s @{sub}) x
 
 genNewName : Fuel -> (Fuel -> Gen MaybeEmpty String) =>
              (funs : Funs) -> (vars : Vars) -> (names : UniqNames funs vars) ->
@@ -123,11 +123,14 @@ namespace Scala3
   printSubScala3 _  Nop = pure "{}"
   printSubScala3 fl ss  = printScala3 fl ss
 
-  printScala3 fl $ NewV ty initial cont = do
+  printScala3 fl $ NewV ty mut initial cont = do
     (nm ** _) <- genNewName fl _ _ names
     rest <- printScala3 @{NewVar nm} fl cont
     let tyAscr = if !chooseAny then ":" <++> printTy ty else empty
-    let lhs = "var" <++> line nm <++> tyAscr <++> "="
+    let declPref = case mut of
+                     Mutable   => "var"
+                     Immutable => "val"
+    let lhs = declPref <++> line nm <++> tyAscr <++> "="
     rhs <- printExpr Open initial
     pure $ flip vappend rest $ do
       ifMultiline (lhs <++> rhs) (flush lhs <+> indent 2 rhs)

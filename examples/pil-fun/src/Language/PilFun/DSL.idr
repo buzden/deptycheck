@@ -25,15 +25,15 @@ namespace Utils
   reverseLTMinus {n = Z} {m=S m} = rewrite minusZeroRight m in reflexive
   reverseLTMinus {m=S m} {n=S n} @{LTESucc xx} = LTESucc $ weakenLT reverseLTMinus
 
-namespace SnocListTy.IndexIn
+namespace SnocListTyMut.IndexIn
 
   public export
-  natToIndexIn : (n : Nat) -> {sx : SnocListTy} -> n `LT` length sx => IndexIn sx
-  natToIndexIn 0     {sx=sx:<x}              = Here
-  natToIndexIn (S k) {sx=sx:<x} @{LTESucc l} = There $ natToIndexIn k
+  natToIndexIn : (n : Nat) -> {sx : SnocListTyMut} -> n `LT` length sx => IndexIn sx
+  natToIndexIn 0     {sx=(:<) sx x m}              = Here
+  natToIndexIn (S k) {sx=(:<) sx x m} @{LTESucc l} = There $ natToIndexIn k
 
   public export
-  fromInteger : {sx : SnocListTy} -> (n : Integer) -> (cast n `LT` length sx) => {- (x >= the Integer 0 = True) =>-} IndexIn sx
+  fromInteger : {sx : SnocListTyMut} -> (n : Integer) -> (cast n `LT` length sx) => {- (x >= the Integer 0 = True) =>-} IndexIn sx
   fromInteger n with (cast {to=Nat} n)
     _ | n' = natToIndexIn (length sx `minus` S n') @{reverseLTMinus}
 
