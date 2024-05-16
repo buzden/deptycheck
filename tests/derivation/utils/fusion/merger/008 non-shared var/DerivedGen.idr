@@ -17,5 +17,5 @@ data Y : Type -> Type -> Type where
 decl : List Decl
 decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{n}, `{k}]
 
-test : IO ()
-test = putPretty decl
+main : IO ()
+main = putPretty $ getFusion decl

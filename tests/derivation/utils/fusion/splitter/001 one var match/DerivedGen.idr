@@ -3,14 +3,13 @@ module DerivedGen
 import public Deriving.DepTyCheck.Util.Fusion
 import public Deriving.DepTyCheck.Gen.Core
 
-
 %default total
 
-data X : Nat -> Type where
+data X : Type -> Type where
     MkX : X n
 
-data Y : Nat -> Type where
-    MkY : Y 1 -- unexpected behaviour for 0
+data Y : Type -> Type where
+    MkY : Y n
 
 %language ElabReflection
 
@@ -18,4 +17,4 @@ decl : List Decl
 decl = %runElab runFusion `{X} [`{n}] `{Y} [`{n}]
 
 main : IO ()
-main = putPretty $ getFusion decl
+main = putPretty $ getSplit decl

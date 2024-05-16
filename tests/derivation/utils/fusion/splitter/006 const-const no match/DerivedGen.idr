@@ -7,10 +7,10 @@ import public Deriving.DepTyCheck.Gen.Core
 %default total
 
 data X : Nat -> Type where
-    MkX : X n
+    MkX : X 1
 
 data Y : Nat -> Type where
-    MkY : Y 1 -- unexpected behaviour for 0
+    MkY : Y 2
 
 %language ElabReflection
 
@@ -18,4 +18,4 @@ decl : List Decl
 decl = %runElab runFusion `{X} [`{n}] `{Y} [`{n}]
 
 main : IO ()
-main = putPretty $ getFusion decl
+main = putPretty $ getSplit decl

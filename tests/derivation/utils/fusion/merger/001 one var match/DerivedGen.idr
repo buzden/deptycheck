@@ -3,7 +3,6 @@ module DerivedGen
 import public Deriving.DepTyCheck.Util.Fusion
 import public Deriving.DepTyCheck.Gen.Core
 
-
 %default total
 
 data X : Type -> Type where
@@ -17,5 +16,5 @@ data Y : Type -> Type where
 decl : List Decl
 decl = %runElab runFusion `{X} [`{n}] `{Y} [`{n}]
 
-test : IO ()
-test = putPretty decl
+main : IO ()
+main = putPretty $ getFusion decl

@@ -18,4 +18,4 @@ decl : List Decl
 decl = %runElab runFusion `{X} [`{n}] `{Y} [`{n}]
 
 main : IO ()
-main = putPretty $ getFusion decl
+main = putPretty $ getSplit decl

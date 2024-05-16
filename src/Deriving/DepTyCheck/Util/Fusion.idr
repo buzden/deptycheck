@@ -79,16 +79,26 @@ foldConstructor : TTImp -> List TTImp -> TTImp
 foldConstructor = foldl app
 
 
-splitRhs : List TTImp -> TTImp
-splitRhs tpe = alternative (UniqueDefault $ foldConstructor (var `{Builtin.MkPair}) tpe) [foldConstructor (var `{Builtin.Pair}) tpe, foldConstructor (var `{Builtin.MkPair}) tpe]
+splitRhsDef : List TTImp -> TTImp
+splitRhsDef tpe = foldConstructor (var `{Builtin.MkPair}) tpe
+
+splitRhsClaim : List TTImp -> TTImp
+splitRhsClaim tpe = foldConstructor (var `{Builtin.Pair}) tpe
 
 
 splitClauses : TTImp -> List (Con, Con) -> List Clause
-splitClauses sc  = map (\(xc, yc) => patClause (app sc $ var $ UN $ Basic (joinBy "_" [nameStr xc.name, nameStr yc.name])) (splitRhs [var (UN $ Basic $ nameStr xc.name), var (UN $ Basic $ nameStr yc.name)]))
+splitClauses sc  = map (\(xc, yc) => patClause (app sc $ var $ UN $ Basic (joinBy "_" [nameStr xc.name, nameStr yc.name])) (splitRhsDef [var (UN $ Basic $ nameStr xc.name), var (UN $ Basic $ nameStr yc.name)]))
 
 
 splitReturnType : List Name -> List (List Name) -> List TTImp
 splitReturnType tnl anll = map (\(t, al) => foldConstructor t al) $ zip (map (var . UN . Basic . nameStr) tnl) (map (map (.bindVar)) anll)
+
+
+combinations : List (List Nat) -> List (List Nat)
+combinations l = map reverse $ combinationsInner l [[]] where
+  combinationsInner : List (List Nat) -> List (List Nat) -> List (List Nat)
+  combinationsInner (xs::xss) rss = combinationsInner xss $ join $ map (\x => map (\rs => x :: rs) rss) xs
+  combinationsInner []        rss = rss
 
 
 deriveFusion : List (TypeInfo, List Name) -> (List Decl)
@@ -108,6 +118,7 @@ deriveFusion l = do
   let correctDecl = (length uniqueArgs) == (length uniqueNames)
   let typeSignature = buildIPi uniqueArgs
   let consProduct = [ (xc, xl, yc, yl) | (xt, xl) <- l, (yt, yl) <- l, xt.name < yt.name, xc <- xt.cons, yc <- yt.cons]
+  -- all combinations from given lists (constructors)
 
   let preCons = join $ map (fuseConstrucror uniqueNames) consProduct
   let fusedCons = map (\(cn, lt) => mkTy cn (foldConstructor (var fusionTypeName) lt)) preCons
@@ -116,10 +127,10 @@ deriveFusion l = do
   let argNamesList = map (\(_, anl) => anl) l
 
   let dataDecl  = iData Export fusionTypeName typeSignature [] fusedCons
-  let claimDecl = export' splitName ((arg $ foldConstructor (var fusionTypeName) (map (.bindVar) uniqueNames)) .-> splitRhs (splitReturnType typeNames argNamesList))
+  let claimDecl = export' splitName ((arg $ foldConstructor (var fusionTypeName) (map (.bindVar) uniqueNames)) .-> splitRhsClaim (splitReturnType typeNames argNamesList))
   let defDecl   = def splitName $ splitClauses (var splitName) (map (\(cx, _, cy, _) => (cx, cy)) consProduct)
 
-  if correctDecl then [dataDecl, claimDecl, defDecl] else []
+  if correctDecl then (if (length fusedCons /= 0) then [dataDecl, claimDecl, defDecl] else [dataDecl]) else []
 
 
 buildConFromOther : TTImp -> List (Name, TTImp) -> List Name -> TTImp
@@ -132,9 +143,8 @@ buildConFromOther res la (n::ns) = do
 declareFusion : List (TypeInfo, List Name) -> Elab (List Decl)
 declareFusion l = do
   let derived = deriveFusion l
-  -- logMsg "debug" 0 $ show derived
   declare derived
-  pure $ take 1 derived
+  pure $ derived
 
 
 public export
@@ -144,6 +154,15 @@ runFusion x xArgs y yArgs = do
   yTI <- getInfo' y
   let zipped = [(xTI, xArgs), (yTI, yArgs)]
   declareFusion zipped
+
+
+public export
+getFusion : List Decl -> List Decl
+getFusion = take 1
+
+public export
+getSplit : List Decl -> List Decl
+getSplit = drop 1
 
 -- data X : Type -> Type -> Type where
 --     MkX : X m n
@@ -156,8 +175,10 @@ runFusion x xArgs y yArgs = do
 -- decl : List Decl
 -- decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{n}, `{k}]
 
+-- test : IO ()
+-- test = putPretty decl
+
 -- TODO: what happens with :doc
 -- tests for order of dependent arguments
 -- preserve order of args from left to right
--- TODO: IClaim -> Pair, IDef -> MkPair
 -- TODO: fusion for more than 2 types

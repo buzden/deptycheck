@@ -14,8 +14,10 @@ data Y : Type -> Type -> Type where
 
 %language ElabReflection
 
+
 decl : List Decl
-decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{n}, `{m}]
+decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{m}, `{n}]
 
 main : IO ()
-main = putPretty $ getFusion decl
+main = putPretty $ getSplit decl
+
