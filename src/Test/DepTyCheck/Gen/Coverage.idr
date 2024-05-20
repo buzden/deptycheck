@@ -40,7 +40,6 @@ Monoid ModelCoverage where
 MonadWriter ModelCoverage m => CanManageLabels m where
   manageLabel l x = tell (MkModelCoverage $ singleton l 1) >> x
 
-
 export
 unGenD : MonadRandom m => MonadError () m => CanManageLabels m => Gen em a -> m (ModelCoverage, a)
 unGenD = map swap . runWriterT . unGen {m = WriterT ModelCoverage $ m}
