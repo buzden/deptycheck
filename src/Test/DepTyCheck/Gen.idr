@@ -100,6 +100,10 @@ export
 chooseAny : Random a => (0 _ : IfUnsolved ne NonEmpty) => Gen ne a
 chooseAny = Raw $ MkRawGen getRandom
 
+public export %inline
+chooseAnyOf : (0 a : _) -> Random a => (0 _ : IfUnsolved ne NonEmpty) => Gen ne a
+chooseAnyOf _ = chooseAny
+
 export
 choose : Random a => (0 _ : IfUnsolved ne NonEmpty) => (a, a) -> Gen ne a
 choose bounds = Raw $ MkRawGen $ getRandomR bounds
