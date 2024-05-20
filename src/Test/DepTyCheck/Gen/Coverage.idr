@@ -47,7 +47,7 @@ unGenD = map swap . runWriterT . unGen {m = WriterT ModelCoverage $ m}
 
 export %inline
 unGenD' : MonadRandom m => CanManageLabels m => Gen em a -> m $ Maybe (ModelCoverage, a)
-unGenD' = map @{Compose} swap . runMaybeT . runWriterT . unGen {m = WriterT ModelCoverage $ MaybeT m}
+unGenD' = runMaybeT . map swap . runWriterT . unGen {m = WriterT ModelCoverage $ MaybeT m}
 
 export
 unGenTryAllD' : RandomGen g => (seed : g) -> Gen em a -> Stream (g, Maybe (ModelCoverage, a))
