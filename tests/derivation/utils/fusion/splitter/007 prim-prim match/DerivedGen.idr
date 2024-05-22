@@ -14,7 +14,7 @@ data Y : String -> Type where
 
 %language ElabReflection
 
-decl : List Decl
+decl : Maybe FusionDecl
 decl = %runElab runFusion `{X} [`{n}] `{Y} [`{n}]
 
 main : IO ()

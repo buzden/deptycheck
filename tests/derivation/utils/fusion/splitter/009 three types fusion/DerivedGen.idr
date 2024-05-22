@@ -11,10 +11,13 @@ data X : Type -> Type where
 data Y : Type -> Type where
     MkY : Y n
 
+data Z : Type -> Type where
+    MkZ : Z n
+
 %language ElabReflection
 
 decl : Maybe FusionDecl
-decl = %runElab runFusion `{X} [`{n}] `{Y} [`{n}]
+decl = %runElab runFusionThree `{X} [`{n}] `{Y} [`{n}] `{Z} [`{n}]
 
 main : IO ()
-main = putPretty $ getFusion decl
+main = putPretty $ getSplit decl

@@ -15,7 +15,7 @@ data Y : Type -> Type -> Type where
 %language ElabReflection
 
 
-decl : List Decl
+decl : Maybe FusionDecl
 decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{m}, `{n}]
 
 main : IO ()
