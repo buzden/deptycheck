@@ -6,11 +6,14 @@ import Language.Reflection.Derive
 import Language.Reflection.Pretty
 import Language.Reflection.Compat
 import Deriving.DepTyCheck.Util.Reflection
+import Data.Nat
 
 %default total
 
 matchArgs : List Arg -> List Name -> Maybe (List (Name, TTImp))
-matchArgs na la = if length na == length la then Just (zip la (map (.type) na)) else Nothing
+matchArgs na la = if length na == length la
+  then Just (zip la (map (.type) na))
+  else Nothing
 
 
 buildIPi : List (Name, TTImp) -> TTImp
@@ -39,55 +42,38 @@ bindArgs smth                    = smth
 
 
 alignArgs : List Name -> List (Name, TTImp) -> List (Name, TTImp) -> List (Name, TTImp)
-alignArgs zs xs ys = reverse $ alignArgsInner zs [] xs ys where
-  alignArgsInner : List Name -> List (Name, TTImp) -> List (Name, TTImp) -> List (Name, TTImp) -> List (Name, TTImp)
-  alignArgsInner [] res _ _ = res
-  alignArgsInner (zn::zs) res ((xn, xt)::xs) ((yn, yt)::ys) = case (xn == zn, yn == zn) of
-    (True , True ) => alignArgsInner zs ((zn, unifyArgs xt yt zn)::res) xs ys
-    (True , False) => alignArgsInner zs ((zn, processArg xt zn)::res) xs ((yn, yt)::ys)
-    (False, True ) => alignArgsInner zs ((zn, processArg yt zn)::res) ((xn, xt)::xs) ys
-    (False, False) => [(zn, var zn)]
-  alignArgsInner (zn::zs) res ((xn, xt)::xs) [] = case (xn == zn) of
-     True  => alignArgsInner zs ((zn, processArg xt zn)::res) xs []
-     False => [(zn, var zn)]
-  alignArgsInner (zn::zs) res [] ((yn, yt)::ys) = case (yn == zn) of
-     True  => alignArgsInner zs ((zn, processArg yt zn)::res) [] ys
-     False => [(zn, var zn)]
-  alignArgsInner (zn::zs) res [] [] = [(zn, var zn)]
+alignArgs zs xs ys = go zs xs ys where
+  go : List Name -> List (Name, TTImp) -> List (Name, TTImp) -> List (Name, TTImp)
+  go [] _ _ = []
+  go (zn::zs) [] [] = []
+  go (zn::zs) ((xn, xt)::xs) ((yn, yt)::ys) = case (xn == zn, yn == zn) of
+    (True , True ) => (zn, unifyArgs xt yt zn)::(go zs xs ys)
+    (True , False) => (zn, processArg xt zn)  ::(go zs xs ((yn, yt)::ys))
+    (False, True ) => (zn, processArg yt zn)  ::(go zs ((xn, xt)::xs) ys)
+    (False, False) =>                           (go zs ((xn, xt)::xs) ((yn, yt)::ys))
+  go (zn::zs) ((xn, xt)::xs) [] = case (xn == zn) of
+     True  => (zn, processArg xt zn)::(go zs xs [])
+     False =>                         (go zs xs [])
+  go (zn::zs) [] ((yn, yt)::ys) = case (yn == zn) of
+     True  => (zn, processArg yt zn)::(go zs [] ys)
+     False =>                         (go zs [] ys)
 
--- alignArgs : List (Name, TTImp) -> List (Name, TTImp) -> List Name -> List TTImp
--- alignArgs xs ys zs = reverse $ alignArgsInner [] xs ys zs where
---   alignArgsInner : List TTImp -> List (Name, TTImp) -> List (Name, TTImp) -> List Name -> List TTImp
---   alignArgsInner res _ _ [] = res
---   alignArgsInner res ((xn, xt)::xs) ((yn, yt)::ys) (zn::zs) = case (xn == zn, yn == zn) of
---     (True , True ) => alignArgsInner ((unifyArgs xt yt zn)::res) xs ys zs
---     (True , False) => alignArgsInner ((processArg xt zn)::res) xs ((yn, yt)::ys) zs
---     (False, True ) => alignArgsInner ((processArg yt zn)::res) ((xn, xt)::xs) ys zs
---     (False, False) => [var zn]
---   alignArgsInner res ((xn, xt)::xs) [] (zn::zs) = case  (xn == zn) of
---      True  => alignArgsInner ((processArg xt zn)::res) xs [] zs
---      False => [var zn]
---   alignArgsInner res [] ((yn, yt)::ys) (zn::zs) = case (yn == zn) of
---      True  => alignArgsInner ((processArg yt zn)::res) [] ys zs
---      False => [var zn]
---   alignArgsInner res [] [] (zn::zs) = [var zn]
 
---  index instead of intermediate name
--- Name (List? String), Type (TTImp), Args (List Name)
--- fuseConstrucror :  List Name -> (Con, List Name) -> (Con, List Name) -> List (Name, List TTImp)
 fuseConstrucror :  List Name -> (Name, List TTImp, List Name) -> (Name, List TTImp, List Name) -> (Name, List TTImp, List Name)
 fuseConstrucror zl (xName, xArgs, xArgNames) (yName, yArgs, yArgNames) = do
   let xyName = joinBy "_" [nameStr xName, nameStr yName]
 
-  let xArgsZipped = sortBy (\(n1, _), (n2, _) => compare n1 n2) $ zip xArgNames xArgs
-  let yArgsZipped = sortBy (\(n1, _), (n2, _) => compare n1 n2) $ zip yArgNames yArgs
+  let xArgsZipped = sortBy (comparing fst) $ zip xArgNames xArgs
+  let yArgsZipped = sortBy (comparing fst) $ zip yArgNames yArgs
 
-  let xyAligned = alignArgs zl xArgsZipped yArgsZipped
-  let xyArgNames = map (\(names, _) => names) xyAligned
-  let xyArgs = map (\(_, args) => args) xyAligned
-  let correctlyAligned = (==) Nothing $ find ((==) type) xyArgs
+  let xyAligned   = alignArgs zl xArgsZipped yArgsZipped
+  let xyArgNames  = map fst xyAligned
+  let xyArgs      = map snd xyAligned
 
-  if correctlyAligned then (UN (Basic xyName), xyArgs, xyArgNames) else (UN (Basic "fail"), [], [])
+  let Nothing = find ((==) type) xyArgs
+    | Just _ => (UN (Basic "fail"), [], [])
+
+  (UN (Basic xyName), xyArgs, xyArgNames)
 
 
 foldConstructor : TTImp -> List TTImp -> TTImp
@@ -106,33 +92,27 @@ splitRhsClaim (t::ts) = app (var `{Builtin.Pair} .$ t) (splitRhsClaim ts)
 
 
 splitClauses : TTImp -> List (List String) -> List Clause
-splitClauses sc  = map (
+splitClauses sc = map
   \cs =>
-  patClause
-  (app sc $ var $ UN $ Basic (joinBy "_" cs))
-  (splitRhsDef (map (\c => var (UN $ Basic c)) cs))
-  )
+    patClause
+      (app sc $ var $ UN $ Basic (joinBy "_" cs))
+      (splitRhsDef (map (\c => var (UN $ Basic c)) cs))
+
 
 
 splitReturnType : List Name -> List (List Name) -> List TTImp
 splitReturnType tnl anll = map
   (\(t, al) => foldConstructor t al) $
-  zip (map (var . UN . Basic . nameStr) tnl) (map (map (.bindVar)) anll)
+  zip
+    (map (var . UN . Basic . nameStr) tnl)
+    (map (map (.bindVar))             anll)
 
 
-combinations : List (List a) -> List (List a) -- Vect to precisely express number of elements in tuple
+combinations : List (List a) -> List (List a)
 combinations l = map reverse $ combinationsInner l [[]] where
   combinationsInner : List (List a) -> List (List a) -> List (List a)
   combinationsInner (xs::xss) rss = combinationsInner xss $ join $ map (\x => map (\rs => x :: rs) rss) xs
   combinationsInner []        rss = rss
-
-
--- combinations' : Vect (S $ S n) (List1 a) -> List1 (Vect (S $ S n) a) -- Vect to precisely express number of elements in tuple
--- combinations' l = map reverse $ combinationsInner l [Nil] where
---   combinationsInner : Vect m (List1 a) -> List1 (Vect k a) -> List1 (Vect (m + k) a)
---   combinationsInner (xs::xss) rss = combinationsInner xss $ join $ map (\x => map (\rs => x :: rs) rss) xs
---   combinationsInner Nil       rss = rss
-
 
 
 public export
@@ -149,7 +129,7 @@ prepareConArgs t = do
   map getExpr tApps
 
 
-deriveFusion : List (TypeInfo, List Name) -> Maybe FusionDecl
+deriveFusion : List (TypeInfo, List Name) -> Maybe FusionDecl -- rewrite to smaller functions, List1, Vect to optimize
 deriveFusion l = do
 
   let typeNames = map (\(n, _) => n.name) l
@@ -158,49 +138,50 @@ deriveFusion l = do
   let fusionTypeName = UN $ Basic joinedNames
 
   let typeArgs = map (\(ti, la) => matchArgs ti.args la) l
-  let typeArgsDefault = map (\ta => case ta of {Just x => x; _ => []}) typeArgs -- should finish with error if any is Nothing
-  let checkArgs = sortBy (\(n1, _), (n2, _) => compare n1 n2) $ join typeArgsDefault
-  let uniqueArgs = nub checkArgs -- argument types should be same in every type
-  let uniqueNames = nub $ sort $ join $ map (\(_, la) => la) l
+  let False = any isNothing typeArgs
+    | True => Nothing
 
-  let correctDecl = (length uniqueArgs) == (length uniqueNames)
+  let typeArgsDefault = catMaybes typeArgs
+  let checkArgs = sortBy (comparing fst) $ join typeArgsDefault
+  let uniqueArgs = nub checkArgs -- argument types should be same in every type
+  let uniqueNames = nub $ sort $ join $ map snd l
+
+  let True = length uniqueArgs == length uniqueNames
+    | False => Nothing
   let typeSignature = buildIPi uniqueArgs
 
   let consAll = map (\(t, args) => map (\c => (c, args)) t.cons) l
   let consComb = combinations consAll
   let consCombPrepared = map (map (\(con, args) => (con.name, prepareConArgs con.type, args))) consComb
-  let preFusedCons = map (\x => foldl (fuseConstrucror uniqueNames) (case x of {
-    [] => (UN (Basic "fail"), [], [])
-    (a::_) => a}) (drop 1 x)) consCombPrepared
-  let filteredFusedCons = filter (\(n, _, _) => n /= UN (Basic "fail")) preFusedCons
-  let fusedCons = map (\(cn, lt, _) => mkTy cn (foldConstructor (var fusionTypeName) (map bindArgs lt))) filteredFusedCons
+  let preFusedCons = consCombPrepared <&> \x => foldl (fuseConstrucror uniqueNames) (case x of
+                      [] => (UN (Basic "fail"), [], [])
+                      (a::_) => a) (drop 1 x)
+  let filteredFusedCons = filter (((/=) $ UN (Basic "fail")) . fst) preFusedCons
+  let fusedCons = map
+                    (\(cn, lt, _) => mkTy cn (foldConstructor (var fusionTypeName) (map bindArgs lt)))
+                    filteredFusedCons
 
   let splitName = UN $ Basic ("split" ++ joinedNames)
-  let argNamesList = map (\(_, anl) => anl) l
+  let argNamesList = map snd l
 
   let dataDecl  = iData Export fusionTypeName typeSignature [] fusedCons
-  let claimDecl = export' splitName ((arg $
-    foldConstructor (var fusionTypeName) (map (.bindVar) uniqueNames)) .->
-    splitRhsClaim (splitReturnType typeNames argNamesList))
+  let claimDecl = export' splitName $
+                    (arg $ foldConstructor (var fusionTypeName) (map (.bindVar) uniqueNames)) .->
+                    splitRhsClaim (splitReturnType typeNames argNamesList)
 
-  let defCases = def splitName $ splitClauses (var splitName) (map (map (\(c, _) => nameStr c.name)) consComb)
-  let defImpossible = def splitName [impossibleClause (var splitName .$ implicitTrue)]
-  let defDecl   = if (length fusedCons /= 0) then defCases else defImpossible
+  let defDecl = if (not $ null fusedCons)
+                then def splitName $ splitClauses (var splitName) (map (map (nameStr . (.name) . fst)) consComb)
+                else def splitName [impossibleClause (var splitName .$ implicitTrue)]
 
-  if correctDecl then Just (MkFusionDecl dataDecl claimDecl defDecl) else Nothing
-
-
-buildConFromOther : TTImp -> List (Name, TTImp) -> List Name -> TTImp
-buildConFromOther res _  [] = res
-buildConFromOther res la (n::ns) = do
-  let ma = find (\(na, _) => na == n) la
-  case ma of {Nothing => type; Just (_, tt) => buildConFromOther (app res tt) la ns}
+  Just (MkFusionDecl dataDecl claimDecl defDecl)
 
 
 declareFusion : List (TypeInfo, List Name) -> Elab (Maybe FusionDecl)
 declareFusion l = do
   let derived = deriveFusion l
-  case derived of {Just fd => declare [fd.dataType, fd.splitClaim, fd.splitDef]; Nothing => declare []}
+  case derived of
+    Just fd => declare [fd.dataType, fd.splitClaim, fd.splitDef]
+    Nothing => declare []
   pure $ derived
 
 
@@ -213,19 +194,11 @@ runFusion x xArgs y yArgs = do
   declareFusion zipped
 
 
--- public export
--- runFusionList : List (Name, List Name) -> ELab (Maybe FusionDecl)
--- runFusionList l = declareFusion $ map (\(n, args) => { do info <- getInfo' n; (info, args)}) l
-
-
 public export
-runFusionThree : Name -> List Name -> Name -> List Name -> Name -> List Name -> Elab (Maybe FusionDecl)
-runFusionThree x xArgs y yArgs z zArgs = do
-  xTI <- getInfo' x
-  yTI <- getInfo' y
-  zTI <- getInfo' z
-  let zipped = [(xTI, xArgs), (yTI, yArgs), (zTI, zArgs)]
-  declareFusion zipped
+runFusionList : List (Name, List Name) -> Elab (Maybe FusionDecl)
+runFusionList l = do
+  l' <- for l $ \(n, args) => (, args) <$> getInfo' n
+  declareFusion l'
 
 
 public export
@@ -240,16 +213,7 @@ getSplit Nothing   = []
 getSplit (Just fd) = [fd.splitClaim, fd.splitDef]
 
 
--- %language ElabReflection
-
--- decl : List Decl
--- decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{n}, `{k}]
-
--- test : IO ()
--- test = putPretty decl
-
 -- TODO: what happens with :doc
 -- tests for order of dependent arguments
 -- preserve order of args from left to right
--- TODO: fusion for more than 2 types
--- fold fuseConstructor on combinations
+-- TODO: List Arg -> group and filter which to fuse (argDeps)

@@ -17,7 +17,7 @@ data Z : Type -> Type where
 %language ElabReflection
 
 decl : Maybe FusionDecl
-decl = %runElab runFusionThree `{X} [`{n}] `{Y} [`{n}] `{Z} [`{n}]
+decl = %runElab runFusionList [(`{X}, [`{n}]), (`{Y}, [`{n}]), (`{Z}, [`{n}])]
 
 main : IO ()
 main = putPretty $ getSplit decl
