@@ -5,6 +5,7 @@ import Language.Reflection.TTImp
 import Language.Reflection.Derive
 import Language.Reflection.Pretty
 import Language.Reflection.Compat
+import Deriving.DepTyCheck.Util.Collections
 import Deriving.DepTyCheck.Util.Reflection
 import Data.Nat
 
@@ -93,11 +94,10 @@ splitRhsClaim (t::ts) = app (var `{Builtin.Pair} .$ t) (splitRhsClaim ts)
 
 splitClauses : TTImp -> List (List String) -> List Clause
 splitClauses sc = map
-  \cs =>
+  (\cs =>
     patClause
       (app sc $ var $ UN $ Basic (joinBy "_" cs))
-      (splitRhsDef (map (\c => var (UN $ Basic c)) cs))
-
+      (splitRhsDef (map (\c => var (UN $ Basic c)) cs)))
 
 
 splitReturnType : List Name -> List (List Name) -> List TTImp
@@ -106,13 +106,6 @@ splitReturnType tnl anll = map
   zip
     (map (var . UN . Basic . nameStr) tnl)
     (map (map (.bindVar))             anll)
-
-
-combinations : List (List a) -> List (List a)
-combinations l = map reverse $ combinationsInner l [[]] where
-  combinationsInner : List (List a) -> List (List a) -> List (List a)
-  combinationsInner (xs::xss) rss = combinationsInner xss $ join $ map (\x => map (\rs => x :: rs) rss) xs
-  combinationsInner []        rss = rss
 
 
 public export
@@ -129,40 +122,42 @@ prepareConArgs t = do
   map getExpr tApps
 
 
-deriveFusion : List (TypeInfo, List Name) -> Maybe FusionDecl -- rewrite to smaller functions, List1, Vect to optimize
-deriveFusion l = do
+fusionTypeName : List Name -> Name
+fusionTypeName = UN . Basic . (joinBy "") . (map nameStr)
 
-  let typeNames = map (\(n, _) => n.name) l
-  let typeNamesStr = map nameStr typeNames
-  let joinedNames = joinBy "" typeNamesStr
-  let fusionTypeName = UN $ Basic joinedNames
+
+deriveFusion : Vect (2 + n) (TypeInfo, List Name) -> Maybe FusionDecl
+deriveFusion l = do
+  let typeNames = toList $ map ((.name) . fst) l
+  let fusionTypeName = fusionTypeName $ typeNames
 
   let typeArgs = map (\(ti, la) => matchArgs ti.args la) l
   let False = any isNothing typeArgs
     | True => Nothing
 
-  let typeArgsDefault = catMaybes typeArgs
-  let checkArgs = sortBy (comparing fst) $ join typeArgsDefault
-  let uniqueArgs = nub checkArgs -- argument types should be same in every type
-  let uniqueNames = nub $ sort $ join $ map snd l
+  let uniqueArgs = nub $ (sortBy (comparing fst)) $ join $ catMaybes $ toList typeArgs -- arg types from type signature
+  let uniqueNames = nub $ sort $ join $ toList $ map snd l -- names from target type constructor
 
-  let True = length uniqueArgs == length uniqueNames
+  let True = length uniqueArgs == length uniqueNames  -- same parameter name could not be associated with different types
     | False => Nothing
   let typeSignature = buildIPi uniqueArgs
 
-  let consAll = map (\(t, args) => map (\c => (c, args)) t.cons) l
+  let consPre = map (\(t, args) => (t.cons, args)) l
+  let True = all (not . Prelude.null . fst) consPre
+    | False => Nothing
+  let consML1 = map (\(cons, args) => (toList1' cons, args)) consPre -- how to prove and use toList?
+  let consL1  = map (\(cons, args) => case cons of {Just x => (x, args); Nothing => ((MkCon (UN (Basic "")) [] type):::[], args)}) consML1
+  let consAll = map (\(cons, args) => map (\c => (c, args)) cons) consL1
   let consComb = combinations consAll
   let consCombPrepared = map (map (\(con, args) => (con.name, prepareConArgs con.type, args))) consComb
-  let preFusedCons = consCombPrepared <&> \x => foldl (fuseConstrucror uniqueNames) (case x of
-                      [] => (UN (Basic "fail"), [], [])
-                      (a::_) => a) (drop 1 x)
-  let filteredFusedCons = filter (((/=) $ UN (Basic "fail")) . fst) preFusedCons
+  let preFusedCons = consCombPrepared <&> \x => foldl (fuseConstrucror uniqueNames) (head x) (tail x)
+  let filteredFusedCons = filter (((/=) $ UN (Basic "fail")) . fst) $ toList preFusedCons
   let fusedCons = map
                     (\(cn, lt, _) => mkTy cn (foldConstructor (var fusionTypeName) (map bindArgs lt)))
                     filteredFusedCons
 
-  let splitName = UN $ Basic ("split" ++ joinedNames)
-  let argNamesList = map snd l
+  let splitName = UN $ Basic ("split" ++ (nameStr fusionTypeName))
+  let argNamesList = toList $ map snd l
 
   let dataDecl  = iData Export fusionTypeName typeSignature [] fusedCons
   let claimDecl = export' splitName $
@@ -170,13 +165,13 @@ deriveFusion l = do
                     splitRhsClaim (splitReturnType typeNames argNamesList)
 
   let defDecl = if (not $ null fusedCons)
-                then def splitName $ splitClauses (var splitName) (map (map (nameStr . (.name) . fst)) consComb)
+                then def splitName $ splitClauses (var splitName) $ toList (map (toList . (map (\(x, _) => nameStr x.name))) consComb)
                 else def splitName [impossibleClause (var splitName .$ implicitTrue)]
 
   Just (MkFusionDecl dataDecl claimDecl defDecl)
 
 
-declareFusion : List (TypeInfo, List Name) -> Elab (Maybe FusionDecl)
+declareFusion : Vect (2 + n) (TypeInfo, List Name) -> Elab (Maybe FusionDecl)
 declareFusion l = do
   let derived = deriveFusion l
   case derived of
@@ -190,12 +185,12 @@ runFusion : Name -> List Name -> Name -> List Name -> Elab (Maybe FusionDecl)
 runFusion x xArgs y yArgs = do
   xTI <- getInfo' x
   yTI <- getInfo' y
-  let zipped = [(xTI, xArgs), (yTI, yArgs)]
+  let zipped = (xTI, xArgs) :: (yTI, yArgs) :: Nil
   declareFusion zipped
 
 
 public export
-runFusionList : List (Name, List Name) -> Elab (Maybe FusionDecl)
+runFusionList : Vect (2 + n) (Name, List Name) -> Elab (Maybe FusionDecl)
 runFusionList l = do
   l' <- for l $ \(n, args) => (, args) <$> getInfo' n
   declareFusion l'
