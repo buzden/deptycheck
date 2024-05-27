@@ -14,6 +14,7 @@ main = goldenRunner $
   , "Derivation utils: argument dependencies" `atDir` "derivation/utils/arg-deps"
   , "Derivation utils: data types fusion" `atDir` "derivation/utils/fusion/merger"
   , "Derivation utils: fused data types split" `atDir` "derivation/utils/fusion/splitter"
+  , "Derivation utils: dependency solver for fusion" `atDir` "derivation/utils/fusion/depsolver"
   , "Reflection utils: involved types" `atDir` "derivation/utils/involved-types"
   , "Derivation: input validation" `atDir` "derivation/inputvalidation"
   , "Derivation: running harness" `atDir` "derivation/infra"

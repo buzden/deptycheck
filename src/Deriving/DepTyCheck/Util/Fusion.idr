@@ -165,7 +165,7 @@ deriveFusion l = do
                     splitRhsClaim (splitReturnType typeNames argNamesList)
 
   let defDecl = if (not $ null fusedCons)
-                then def splitName $ splitClauses (var splitName) $ toList (map (toList . (map (\(x, _) => nameStr x.name))) consComb)
+                then def splitName $ splitClauses (var splitName) $ toList (map (toList . (map (nameStr . (.name) . fst))) consComb)
                 else def splitName [impossibleClause (var splitName .$ implicitTrue)]
 
   Just (MkFusionDecl dataDecl claimDecl defDecl)
@@ -178,6 +178,26 @@ declareFusion l = do
     Just fd => declare [fd.dataType, fd.splitClaim, fd.splitDef]
     Nothing => declare []
   pure $ derived
+
+
+prepareArgsSolve : Arg -> (Name, List String)
+prepareArgsSolve a = do
+  let (xt, as) = Reflection.unAppAny a.type
+  let xn = case xt of {IVar _ n => n; _ => UN $ Basic "fail"}
+  let ts = map getExpr as
+  let ns = map (\t => case t of {IBindVar _ n => n; _ => "fail"}) ts
+  (xn, ns)
+
+
+public export
+solveDependencies : List Arg -> List (List (Name, List String))
+solveDependencies l = go l [] where
+  go : List Arg -> List (List (Name, List String)) -> List (List (Name, List String))
+  go []      acc = map reverse acc
+  go (a::as) acc = go as (merge (prepareArgsSolve a) acc) where
+    merge : (Name, List String) -> List (List (Name, List String)) -> List (List (Name, List String))
+    merge a []              = [[a]]
+    merge (m, as) (rs::rss) = if (any (not . Prelude.null . (intersect as) . snd) rs) then ((m, as)::rs)::rss else rs::(merge (m, as) rss)
 
 
 public export
