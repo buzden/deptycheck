@@ -1,0 +1,23 @@
+package pil-fun
+
+version = 0.1
+
+authors = "Denis Buzdalov"
+
+sourcedir = "src"
+builddir = ".build"
+
+prebuild = "sh .derive-in-parallel"
+
+depends = deptycheck
+        , prettier
+
+executable = "pil-fun"
+main = Runner
+
+modules = Language.PilFun
+        , Language.PilFun.Derived
+        , Language.PilFun.DSL
+        , Language.PilFun.Pretty
+        , Language.PilFun.Pretty.Derived
+        , Language.PilFun.Pretty.DSL
