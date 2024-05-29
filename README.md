@@ -16,7 +16,7 @@ import Test.DepTyCheck.Gen
 # DepTyCheck
 
 <!-- editorconfig-checker-disable -->
-[![Build and test](https://github.com/buzden/deptycheck/actions/workflows/ci-deptycheck.yml/badge.svg?branch=master)](https://github.com/buzden/deptycheck/actions/workflows/ci-deptycheck.yml)
+[![Build and test](https://github.com/buzden/deptycheck/actions/workflows/ci-deptycheck.yml/badge.svg?branch=master&event=push)](https://github.com/buzden/deptycheck/actions/workflows/ci-deptycheck.yml)
 [![Lint](https://github.com/buzden/deptycheck/actions/workflows/ci-super-linter.yml/badge.svg?branch=master)](https://github.com/buzden/deptycheck/actions/workflows/ci-super-linter.yml)
 [![Documentation Status](https://readthedocs.org/projects/deptycheck/badge/?version=latest)](https://deptycheck.readthedocs.io/en/latest/?badge=latest)
 <!-- editorconfig-checker-enable -->
@@ -359,4 +359,6 @@ For building and testing we use [`pack`](https://github.com/stefan-hoeck/idris2-
 
 The main `pack`'s collection we test the library against is the one mentioned in the last section of the library version.
 Also, we test against the latest pack collection nightly.
+Here is the status of the latest such run:
+![Nightly](https://github.com/buzden/deptycheck/actions/workflows/ci-deptycheck.yml/badge.svg?branch=master&event=schedule).
 We try to use as fresh version of the Idris 2 compiler and thirdparty libraries as possible.
