@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "DepTyCheck"
-copyright = "2021-2022, Denis Buzdalov"
+copyright = "2021-2024, Denis Buzdalov"
 author = "Denis Buzdalov"
 
 
@@ -71,6 +71,8 @@ html_theme_options = {
     "display_version": True,
     "prev_next_buttons_location": "bottom",
 }
+html_logo = "../../icons/deptycheck-lib-html-logo.png"
+html_favicon = "../../icons/deptycheck-lib.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
