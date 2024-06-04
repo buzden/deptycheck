@@ -5,6 +5,7 @@ import Language.Reflection.TTImp
 import Language.Reflection.Derive
 import Language.Reflection.Pretty
 import Language.Reflection.Compat
+import public Deriving.DepTyCheck.Gen
 import Deriving.DepTyCheck.Util.Collections
 import Deriving.DepTyCheck.Util.Reflection
 import Data.Nat
@@ -86,6 +87,7 @@ splitRhsDef []      = type
 splitRhsDef (t::[]) = t
 splitRhsDef (t::ts) = app (var `{Builtin.MkPair} .$ t) (splitRhsDef ts)
 
+
 splitRhsClaim : List TTImp -> TTImp
 splitRhsClaim []      = type
 splitRhsClaim (t::[]) = t
@@ -114,6 +116,9 @@ record FusionDecl where
   dataType    : Decl
   splitClaim  : Decl
   splitDef    : Decl
+  genFClaim   : Decl
+  genRClaim   : Decl
+  genRDef     : Decl
 
 
 prepareConArgs : TTImp -> List TTImp
@@ -122,14 +127,29 @@ prepareConArgs t = do
   map getExpr tApps
 
 
-fusionTypeName : List Name -> Name
-fusionTypeName = UN . Basic . (joinBy "") . (map nameStr)
+joinNames : List Name -> Name
+joinNames = UN . Basic . (joinBy "") . (map nameStr)
+
+
+genRMkDPair : TTImp -> List Name -> TTImp
+genRMkDPair = foldr (\n, acc => var `{MkDPair} .$ n.bindVar .$ acc)
+
+
+genFDPair : Name -> List (Name, TTImp) -> TTImp
+genFDPair n l = foldr
+  (\(n, tt), acc => var `{DPair} .$ tt .$ (MkArg MW ExplicitArg (Just n) tt `lam` acc))
+  (foldConstructor (var n) (map (var . fst) l))
+  l
+
+
+genFRhsClaim : Name -> List (Name, TTImp) -> TTImp
+genFRhsClaim n l = var `{Gen} .$ var `{MaybeEmpty} .$ genFDPair n l
 
 
 deriveFusion : Vect (2 + n) (TypeInfo, List Name) -> Maybe FusionDecl
 deriveFusion l = do
   let typeNames = toList $ map ((.name) . fst) l
-  let fusionTypeName = fusionTypeName $ typeNames
+  let fusionTypeName = joinNames $ typeNames
 
   let typeArgs = map (\(ti, la) => matchArgs ti.args la) l
   let False = any isNothing typeArgs
@@ -146,7 +166,10 @@ deriveFusion l = do
   let True = all (not . Prelude.null . fst) consPre
     | False => Nothing
   let consML1 = map (\(cons, args) => (toList1' cons, args)) consPre -- how to prove and use toList?
-  let consL1  = map (\(cons, args) => case cons of {Just x => (x, args); Nothing => ((MkCon (UN (Basic "")) [] type):::[], args)}) consML1
+  let consL1  = map (\(cons, args) => case cons of
+                  Just x => (x, args)
+                  Nothing => ((MkCon (UN (Basic "")) [] type):::[], args)
+                ) consML1
   let consAll = map (\(cons, args) => map (\c => (c, args)) cons) consL1
   let consComb = combinations consAll
   let consCombPrepared = map (map (\(con, args) => (con.name, prepareConArgs con.type, args))) consComb
@@ -165,17 +188,57 @@ deriveFusion l = do
                     splitRhsClaim (splitReturnType typeNames argNamesList)
 
   let defDecl = if (not $ null fusedCons)
-                then def splitName $ splitClauses (var splitName) $ toList (map (toList . (map (nameStr . (.name) . fst))) consComb)
+                then def splitName $ splitClauses (var splitName) $
+                  toList (map (toList . (map (nameStr . (.name) . fst))) consComb)
                 else def splitName [impossibleClause (var splitName .$ implicitTrue)]
 
-  Just (MkFusionDecl dataDecl claimDecl defDecl)
+  let stub = ILog Nothing
+  let genFName = UN $ Basic ("gen" ++ (nameStr fusionTypeName))
+  let genFClaim = export' genFName $
+                    (MkArg MW ExplicitArg Nothing (var `{Fuel})) .->
+                    (genFRhsClaim fusionTypeName uniqueArgs)
+
+  let genRClaim = export' (`{genZ_ultimate}) $
+                    (MkArg MW ExplicitArg Nothing (var `{Fuel})) .->
+                    (var `{Gen} .$ var `{MaybeEmpty} .$ var `{Z})
+
+  let fusedVarName = toLower $ nameStr fusionTypeName
+  let typeVarNames = map (toLower . nameStr) typeNames
+  let genRDef = def
+                  `{genZ_ultimate}
+                  [  var `{genZ_ultimate}
+                  .$ bindVar "fl"
+                  .= var `{(>>=)}
+                  .$ (var genFName .$ var `{fl})
+                  .$ (
+                      MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                      `lam` iCase {
+                        sc = var "{lamc:0}",
+                        ty = implicitFalse,
+                        clauses =
+                          [ genRMkDPair (bindVar fusedVarName) uniqueNames
+                          .= iCase {
+                              sc = var splitName .$ (var $ UN $ Basic fusedVarName),
+                              ty = implicitTrue,
+                              clauses =
+                                [ (splitRhsDef (map bindVar typeVarNames))
+                                .= var `{pure}
+                                .$ foldConstructor (var `{MkZ}) (map var uniqueNames ++ map (var . UN . Basic) typeVarNames)
+                                ]
+                            }
+                          ]
+                        }
+                      )
+                  ]
+
+  Just (MkFusionDecl dataDecl claimDecl defDecl genFClaim genRClaim genRDef)
 
 
 declareFusion : Vect (2 + n) (TypeInfo, List Name) -> Elab (Maybe FusionDecl)
 declareFusion l = do
   let derived = deriveFusion l
   case derived of
-    Just fd => declare [fd.dataType, fd.splitClaim, fd.splitDef]
+    Just fd => declare [fd.dataType, fd.splitClaim, fd.splitDef, fd.genFClaim, fd.genRClaim, fd.genRDef]
     Nothing => declare []
   pure $ derived
 
@@ -193,11 +256,13 @@ public export
 solveDependencies : List Arg -> List (List (Name, List String))
 solveDependencies l = go l [] where
   go : List Arg -> List (List (Name, List String)) -> List (List (Name, List String))
-  go []      acc = map reverse acc
+  go []      acc = map reverse acc -- SnocList
   go (a::as) acc = go as (merge (prepareArgsSolve a) acc) where
     merge : (Name, List String) -> List (List (Name, List String)) -> List (List (Name, List String))
     merge a []              = [[a]]
-    merge (m, as) (rs::rss) = if (any (not . Prelude.null . (intersect as) . snd) rs) then ((m, as)::rs)::rss else rs::(merge (m, as) rss)
+    merge (m, as) (rs::rss) = if (any (not . Prelude.null . (intersect as) . snd) rs)
+                              then ((m, as)::rs)::rss
+                              else rs::(merge (m, as) rss)
 
 
 public export
@@ -228,7 +293,7 @@ getSplit Nothing   = []
 getSplit (Just fd) = [fd.splitClaim, fd.splitDef]
 
 
--- TODO: what happens with :doc
--- tests for order of dependent arguments
--- preserve order of args from left to right
--- TODO: List Arg -> group and filter which to fuse (argDeps)
+public export
+getGen : Maybe FusionDecl -> List Decl
+getGen Nothing = []
+getGen (Just fd) = [fd.genFClaim, fd.genRClaim, fd.genRDef]

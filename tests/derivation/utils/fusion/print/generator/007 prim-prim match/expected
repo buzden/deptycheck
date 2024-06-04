@@ -1,0 +1,62 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+[ IClaim
+    emptyFC
+    MW
+    Export
+    []
+    (mkTy
+       { name = "genXY"
+       , type =
+               MkArg MW ExplicitArg Nothing (var "Fuel")
+           .->    var "Gen"
+               .$ var "MaybeEmpty"
+               .$ (   var "DPair"
+                   .$ primVal (PrT StringType)
+                   .$ (    MkArg
+                             MW
+                             ExplicitArg
+                             (Just "n")
+                             (primVal (PrT StringType))
+                       .=> var "XY" .$ var "n"))
+       })
+, IClaim
+    emptyFC
+    MW
+    Export
+    []
+    (mkTy
+       { name = "genZ_ultimate"
+       , type =
+               MkArg MW ExplicitArg Nothing (var "Fuel")
+           .-> var "Gen" .$ var "MaybeEmpty" .$ var "Z"
+       })
+, IDef
+    emptyFC
+    "genZ_ultimate"
+    [    var "genZ_ultimate" .$ bindVar "fl"
+      .=    var ">>="
+         .$ (var "genXY" .$ var "fl")
+         .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+             .=> iCase
+                   { sc = var "{lamc:0}"
+                   , ty = implicitFalse
+                   , clauses =
+                       [    var "MkDPair" .$ bindVar "n" .$ bindVar "xy"
+                         .= iCase
+                              { sc = var "splitXY" .$ var "xy"
+                              , ty = implicitTrue
+                              , clauses =
+                                  [       var "Builtin.MkPair"
+                                       .$ bindVar "x"
+                                       .$ bindVar "y"
+                                    .=    var "pure"
+                                       .$ (   var "MkZ"
+                                           .$ var "n"
+                                           .$ var "x"
+                                           .$ var "y")
+                                  ]
+                              }
+                       ]
+                   })
+    ]
+]
