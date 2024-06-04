@@ -237,9 +237,9 @@ deriveFusion l = do
 declareFusion : Vect (2 + n) (TypeInfo, List Name) -> Elab (Maybe FusionDecl)
 declareFusion l = do
   let derived = deriveFusion l
-  case derived of
-    Just fd => declare [fd.dataType, fd.splitClaim, fd.splitDef, fd.genFClaim, fd.genRClaim, fd.genRDef]
-    Nothing => declare []
+  -- case derived of
+  --   Just fd => declare [fd.dataType, fd.splitClaim, fd.splitDef, fd.genFClaim, fd.genRClaim, fd.genRDef]
+  --   Nothing => declare []
   pure $ derived
 
 
