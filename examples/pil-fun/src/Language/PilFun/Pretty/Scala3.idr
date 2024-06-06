@@ -32,7 +32,7 @@ wrapMain True body = vsep
   [ ""
   , "@main"
   , "def main(): Unit = {"
-  , indentE 2 body
+  , indent' 2 body
   , "}"
   ]
 
@@ -121,7 +121,7 @@ printStmts fl tl $ NewF sig body cont = do
     let br = brBody || tryLam && showResTy && not (isRet body)
     let endingTypeAsc = tryLam && showResTy
     let funBody' = parenthesise (endingTypeAsc && not br) funBody
-    let mainDef = wrapBrIf br funSig funBody' <+?+> whenTs endingTypeAsc (":" <++> printMaybeTy sig.To)
+    let mainDef = wrapBrIf br funSig funBody' <+?+> when endingTypeAsc (":" <++> printMaybeTy sig.To)
     pure $ case extPref of
       Nothing      => mainDef
       Just extPref => hangSep' 2 extPref mainDef
@@ -133,11 +133,11 @@ printStmts fl tl $ If cond th el cont = do
   rest <- printStmts fl False cont
   br <- chooseAny
   pure $ wrapMain tl $ flip vappend rest $ vsep $
-    [ "if" <++> !(printExpr Open cond) <++> "then" <+> whenTs br " {"
-    , indentE 2 !(printSubStmts fl (not br) th)
+    [ "if" <++> !(printExpr Open cond) <++> "then" <+> when br " {"
+    , indent' 2 !(printSubStmts fl (not br) th)
     ] ++ whenTs (not (isNop el) || !chooseAny)
-    [ whenTs br "} " <+> "else" <+> whenTs br " {"
-    , indentE 2 !(printSubStmts fl (not br) el)
+    [ when br "} " <+> "else" <+> when br " {"
+    , indent' 2 !(printSubStmts fl (not br) el)
     ] ++ whenTs br ["}"]
 
 printStmts fl tl $ Call n args cont = wrapMain tl <$> [| printFunCall Open n args `vappend` printStmts fl False cont |]

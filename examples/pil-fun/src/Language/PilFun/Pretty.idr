@@ -78,14 +78,6 @@ getExprs : ExprsSnocList funs vars argTys -> SnocList $ Exists $ Expr funs vars
 getExprs [<] = [<]
 getExprs (sx:<x) = getExprs sx :< Evidence _ x
 
-whenTs : Bool -> Doc opts -> Doc opts
-whenTs b = if b then id else const empty
-
-indentE : {opts : _} -> Nat -> Doc opts -> Doc opts
-indentE n x = do
-  l <- x
-  pure $ if isEmpty l then l else indent n l
-
 wrapBrIf : {opts : _} -> (indeed : Bool) -> Doc opts -> Doc opts -> Doc opts
-wrapBrIf False pre x = pre `vappend` indentE 2 x
-wrapBrIf True pre x = ifMultiline (pre <++> "{" <++> x <++> "}") (vsep [pre <++> "{", indentE 2 x, "}"])
+wrapBrIf False pre x = pre `vappend` indent' 2 x
+wrapBrIf True pre x = ifMultiline (pre <++> "{" <++> x <++> "}") (vsep [pre <++> "{", indent' 2 x, "}"])
