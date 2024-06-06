@@ -21,3 +21,4 @@ modules = Language.PilFun
         , Language.PilFun.Pretty
         , Language.PilFun.Pretty.Derived
         , Language.PilFun.Pretty.DSL
+        , Language.PilFun.Pretty.Scala3
