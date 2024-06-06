@@ -485,17 +485,17 @@ record NamesInfoInTypes where
   namesInTypes : SortedMap TypeInfo $ SortedSet Name
 
 lookupByType : NamesInfoInTypes => Name -> Maybe $ SortedSet Name
-lookupByType @{tyi} = flip lookup tyi.types >=> flip lookup tyi.namesInTypes
+lookupByType @{tyi} = lookup' tyi.types >=> lookup' tyi.namesInTypes
 
 lookupByCon : NamesInfoInTypes => Name -> Maybe $ SortedSet Name
-lookupByCon @{tyi} = concatMap @{Deep} lookupByType . SortedSet.toList . concatMap allVarNames' . conSubexprs . snd <=< flip lookup tyi.cons
+lookupByCon @{tyi} = concatMap @{Deep} lookupByType . SortedSet.toList . concatMap allVarNames' . conSubexprs . snd <=< lookup' tyi.cons
 
 typeByCon : NamesInfoInTypes => Con -> Maybe TypeInfo
-typeByCon @{tyi} = map fst . flip lookup tyi.cons . name
+typeByCon @{tyi} = map fst . lookup' tyi.cons . name
 
 export
 lookupType : NamesInfoInTypes => Name -> Maybe TypeInfo
-lookupType @{tyi} = flip lookup tyi.types
+lookupType @{tyi} = lookup' tyi.types
 
 export
 lookupCon : NamesInfoInTypes => Name -> Maybe Con
@@ -547,7 +547,7 @@ isRecursive con = case the (Maybe TypeInfo) $ containingType <|> typeByCon con o
 -- returns `Nothing` if given name is not a constructor
 export
 isRecursiveConstructor : NamesInfoInTypes => Name -> Maybe Bool
-isRecursiveConstructor @{tyi} n = flip lookup tyi.cons n <&> \(ty, con) => isRecursive {containingType=Just ty} con
+isRecursiveConstructor @{tyi} n = lookup' tyi.cons n <&> \(ty, con) => isRecursive {containingType=Just ty} con
 
 export
 getNamesInfoInTypes : Elaboration m => TypeInfo -> m NamesInfoInTypes
@@ -662,7 +662,7 @@ allInvolvedTypes : Elaboration m => (minimalRig : Count) -> TypeInfo -> m $ List
 allInvolvedTypes minimalRig ti = toList <$> go [ti] empty where
   go : (left : List TypeInfo) -> (curr : SortedMap Name TypeInfo) -> m $ SortedMap Name TypeInfo
   go left curr = do
-    let (c::left) = filter (not . isJust . flip lookup curr . name) left
+    let (c::left) = filter (not . isJust . lookup' curr . name) left
       | [] => pure curr
     let next = insert c.name c curr
     args <- atRig M0 $ join <$> for c.args typesOfArg

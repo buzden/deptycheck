@@ -116,7 +116,7 @@ analyseDeepConsApp ccdi freeNames = isD where
       typeDeterminedArgs con = do
         let conArgNames = fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
         determined <- fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
-        let determined = mapMaybe (flip lookup conArgNames) determined
+        let determined = mapMaybe (lookup' conArgNames) determined
         pure $ map cast $ presenceVect $ fromList determined
 
       reorder : {formalArgs : List Arg} -> {apps : List AnyApp} -> Vect formalArgs.length a -> Maybe $ Vect apps.length a

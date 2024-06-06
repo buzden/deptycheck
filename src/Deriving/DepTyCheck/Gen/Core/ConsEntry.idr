@@ -114,8 +114,8 @@ canonicConsBody sig name con = do
           let conArgStrNames = mapMaybe argStrName con.args
           let conNameToIdx : SortedMap _ $ Fin conArgStrNames.length := fromList $ mapI' conArgStrNames $ flip (,)
           let [AsInCon] Ord (String, String) where
-                compare (origL, renL) (origR, renR) = comparing (flip lookup conNameToIdx) origL origR <+> compare renL renR
-          SortedSet.toList . foldl (flip insert) (empty @{AsInCon})
+                compare (origL, renL) (origR, renR) = comparing (lookup' conNameToIdx) origL origR <+> compare renL renR
+          SortedSet.toList . foldl insert' (empty @{AsInCon})
           where
             argStrName : Arg -> Maybe String
             argStrName $ MkArg {name=Just $ UN (Basic n), _} = Just n

@@ -196,7 +196,7 @@ mapInMaybe f = fromList . mapMaybe f . SortedSet.toList
 
 export
 fromFoldable : Ord a => Foldable f => f a -> SortedSet a
-fromFoldable = foldl (flip insert) empty
+fromFoldable = foldl insert' empty
 
 export
 allPermutations : Ord a => SortedSet a -> List1 $ List a
