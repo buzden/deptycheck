@@ -10,4 +10,4 @@ import Deriving.DepTyCheck.Gen
 
 %hint LE : ConstructorDerivator; LE = LeastEffort {simplificationHack = True}
 
-Language.PilFun.Pretty.genNewName = deriveGen
+Language.PilFun.Pretty.rawNewName = deriveGen

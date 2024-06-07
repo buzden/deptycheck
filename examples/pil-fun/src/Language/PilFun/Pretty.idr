@@ -4,6 +4,7 @@ module Language.PilFun.Pretty
 import Data.Fuel
 import Data.SnocList
 import public Data.So
+import public Data.SortedSet
 import Data.Vect
 
 import Deriving.DepTyCheck.Util.Alternative
@@ -37,9 +38,24 @@ data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String
   F : (0 _ : So $ x /= s) -> NameIsNew funs vars ss x -> NameIsNew (funs:<fun) vars (NewFun @{ss} {isInfix} s @{sub} @{infixCond}) x
   V : (0 _ : So $ x /= s) -> NameIsNew funs vars ss x -> NameIsNew funs ((:<) vars var mut) (NewVar @{ss} s @{sub}) x
 
-genNewName : Fuel -> (Fuel -> Gen MaybeEmpty String) =>
+public export
+interface NamesRestrictions where
+  reservedKeywords : SortedSet String
+
+rawNewName : Fuel -> (Fuel -> Gen MaybeEmpty String) =>
              (funs : Funs) -> (vars : Vars) -> (names : UniqNames funs vars) ->
              Gen MaybeEmpty (s ** NameIsNew funs vars names s)
+
+export
+genNewName : Fuel -> (Fuel -> Gen MaybeEmpty String) =>
+             NamesRestrictions =>
+             (funs : Funs) -> (vars : Vars) -> (names : UniqNames funs vars) ->
+             Gen MaybeEmpty (s ** NameIsNew funs vars names s)
+genNewName fl @{genStr} funs vars names = do
+  nn@(nm ** _) <- rawNewName fl @{genStr} funs vars names
+  if reservedKeywords `contains'` nm
+    then assert_total $ genNewName fl @{genStr} funs vars names -- we could reduce fuel instead of `assert_total`
+    else pure nn
 
 varName : UniqNames funs vars => IndexIn vars -> String
 varName @{JustNew @{ss} _} i         = varName @{ss} i
@@ -61,6 +77,7 @@ isFunInfix @{NewVar @{ss} s} i         = isFunInfix @{ss} i
 
 -- Returned vect has a reverse order; I'd like some `SnocVect` here.
 newVars : (newNames : Gen0 String) =>
+          NamesRestrictions =>
           {funs : _} -> {vars : _} ->
           Fuel ->
           (extraVars : _) -> UniqNames funs vars ->

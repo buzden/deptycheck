@@ -32,6 +32,18 @@ unaryOps = ["+", "-", "!", "~"]
 isUnaryOp : String -> List arg -> Bool
 isUnaryOp str xs = elem str unaryOps && length xs == 1
 
+NamesRestrictions where
+  reservedKeywords = fromList
+    [ "abstract", "case"  , "catch"   , "class"  , "def"    , "do"       , "else"
+    , "enum"    , "export", "extends" , "false"  , "final"  , "finally"  , "for"
+    , "given"   , "if"    , "implicit", "import" , "lazy"   , "match"    , "new"
+    , "null"    , "object", "override", "package", "private", "protected", "return"
+    , "sealed"  , "super" , "then"    , "throw"  , "trait"  , "true"     , "try"
+    , "type"    , "val"   , "var"     , "while"  , "with"   , "yield"
+    , ":"       , "="     , "<-"      , "=>"     , "<:"     , ">:"       , "#"
+    , "@"       , "=>>"   , "?=>"
+    ]
+
 printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
             (names : UniqNames funs vars) =>
             Prec -> Expr funs vars ty -> Gen0 $ Doc opts
