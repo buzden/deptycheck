@@ -26,16 +26,6 @@ printMaybeTy : MaybeTy -> Doc opts
 printMaybeTy Nothing   = "Unit"
 printMaybeTy $ Just ty = printTy ty
 
-wrapMain : {opts : _} -> (indeed : Bool) -> Doc opts -> Doc opts
-wrapMain False x = x
-wrapMain True body = vsep
-  [ ""
-  , "@main"
-  , "def main(): Unit = {"
-  , indent' 2 body
-  , "}"
-  ]
-
 unaryOps : List String
 unaryOps = ["+", "-", "!", "~"]
 
@@ -74,6 +64,29 @@ printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
              Fuel ->
              (toplevel : Bool) ->
              Stmts funs vars retTy -> Gen0 $ Doc opts
+
+wrapMain : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
+           (names : UniqNames funs vars) =>
+           (newNames : Gen0 String) =>
+           (0 _ : IfUnsolved retTy Nothing) =>
+           Fuel ->
+           (indeed : Bool) ->
+           (cont : Maybe $ Stmts funs vars retTy) ->
+           Gen0 (Doc opts) -> Gen0 (Doc opts)
+wrapMain fl False Nothing x = x
+wrapMain fl False (Just cont) x = [| x `vappend` assert_total printStmts fl False cont |]
+wrapMain fl True cont body = do
+  (nm ** _) <- genNewName fl _ _ names
+  b <- body
+  cnt <- for cont $ assert_total $ printStmts @{JustNew nm} fl False
+  let b = maybe b (b `vappend`) cnt
+  pure $ vsep $
+    [ ""
+    , "@main"
+    , "def" <++> line nm <+> "(): Unit = {"
+    , indent' 2 b
+    , "}"
+    ]
 
 printSubStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
                 (names : UniqNames funs vars) =>
@@ -126,13 +139,12 @@ printStmts fl tl $ NewF sig body cont = do
       Nothing      => mainDef
       Just extPref => hangSep' 2 extPref mainDef
 
-printStmts fl tl $ (#=) n v cont = pure $ wrapMain tl $ flip vappend !(printStmts fl False cont) $
-  line (varName {funs} n) <++> "=" <++> !(printExpr Open v)
+printStmts fl tl $ (#=) n v cont = wrapMain fl tl (Just cont) $ do
+  pure $ line (varName {funs} n) <++> "=" <++> !(printExpr Open v)
 
-printStmts fl tl $ If cond th el cont = do
-  rest <- printStmts fl False cont
+printStmts fl tl $ If cond th el cont = wrapMain fl tl (Just cont) $ do
   br <- chooseAny
-  pure $ wrapMain tl $ flip vappend rest $ vsep $
+  pure $ vsep $
     [ "if" <++> !(printExpr Open cond) <++> "then" <+> when br " {"
     , indent' 2 !(printSubStmts fl (not br) th)
     ] ++ whenTs (not (isNop el) || !chooseAny)
@@ -140,11 +152,11 @@ printStmts fl tl $ If cond th el cont = do
     , indent' 2 !(printSubStmts fl (not br) el)
     ] ++ whenTs br ["}"]
 
-printStmts fl tl $ Call n args cont = wrapMain tl <$> [| printFunCall Open n args `vappend` printStmts fl False cont |]
+printStmts fl tl $ Call n args cont = wrapMain fl tl (Just cont) $ printFunCall Open n args
 
-printStmts fl tl $ Ret x = wrapMain tl <$> printExpr Open x
+printStmts fl tl $ Ret x = wrapMain {funs} {vars} fl tl Nothing $ printExpr Open x
 
-printStmts fl tl $ Nop = pure $ wrapMain tl empty
+printStmts fl tl $ Nop = wrapMain {funs} {vars} fl tl Nothing $ pure empty
 
 export
 printScala3 : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
