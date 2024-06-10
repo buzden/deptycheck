@@ -78,9 +78,9 @@ LOG gen.auto.derive.infra:0:
                                     .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (spend fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
-                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat.Pos.one" .$ (var "<<DerivedGen.X0>>" .$ var "^fuel_arg^"))
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<DerivedGen.X0>>" .$ var "^fuel_arg^"))
                                             .$ (   var "::"
-                                                .$ (var "Builtin.MkPair" .$ var "Data.Nat.Pos.one" .$ (var "<<DerivedGen.X1>>" .$ var "^fuel_arg^"))
+                                                .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<DerivedGen.X1>>" .$ var "^fuel_arg^"))
                                                 .$ (   var "::"
                                                     .$ (   var "Builtin.MkPair"
                                                         .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")

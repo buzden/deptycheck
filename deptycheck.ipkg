@@ -9,9 +9,9 @@ license = "MPL-2.0"
 sourcedir = "src"
 builddir = ".build"
 
-version = 0.0.240605
+version = 0.0.240609
 
-modules = Data.Nat.Pos
+modules = Data.Nat1
         , Data.Vect.Dependent
         , Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen

@@ -162,7 +162,7 @@ LOG gen.auto.derive.infra:0:
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
-                                                .$ var "Data.Nat.Pos.one"
+                                                .$ var "Data.Nat1.one"
                                                 .$ (   var "<<DerivedGen.VectMaybeAnyType.Here>>"
                                                     .$ var "^fuel_arg^"
                                                     .$ var "inter^<n>"
