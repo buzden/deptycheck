@@ -9,7 +9,7 @@ import public Control.Monad.State.Interface
 
 import Data.Bool
 import Data.Fuel
-import public Data.Nat.Pos
+import public Data.Nat1
 import Data.List
 import Data.List.Lazy
 import public Data.CheckedEmpty.List.Lazy
@@ -33,8 +33,8 @@ import public Test.DepTyCheck.Gen.Labels
 --- Utility functions ---
 -------------------------
 
-randomFin : MonadRandom m => (n : PosNat) -> m $ Fin $ fst n
-randomFin $ Element (S _) _ = getRandom
+randomFin : MonadRandom m => (n : Nat1) -> m $ Fin n.asNat
+randomFin $ FromNat (S _) = getRandom
 
 public export %inline
 wrapLazy : (a -> b) -> Lazy a -> Lazy b
@@ -75,9 +75,9 @@ data Gen : Emptiness -> Type -> Type where
 
 record GenAlternatives (0 mustBeNotEmpty : Bool) (em : Emptiness) (a : Type) where
   constructor MkGenAlts
-  unGenAlts : LazyLst mustBeNotEmpty (PosNat, Lazy (Gen em a))
+  unGenAlts : LazyLst mustBeNotEmpty (Nat1, Lazy (Gen em a))
 
-(.totalWeight) : GenAlternatives True em a -> PosNat
+(.totalWeight) : GenAlternatives True em a -> Nat1
 (.totalWeight) oo = foldl1 (+) (oo.unGenAlts <&> \x => fst x)
 
 public export %inline
@@ -121,7 +121,7 @@ label l g     = Labelled l g
 --- Equivalence relation ---
 ----------------------------
 
-data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, Lazy (Gen lem a)) -> Type
+data AltsEquiv : LazyLst lne (Nat1, Lazy (Gen lem a)) -> LazyLst rne (Nat1, Lazy (Gen lem a)) -> Type
 
 export
 data Equiv : Gen lem a -> Gen rem a -> Type where
@@ -131,14 +131,14 @@ data Equiv : Gen lem a -> Gen rem a -> Type where
   EO : lgs `AltsEquiv` rgs => OneOf @{lalemem} @{lalemcd} (MkGenAlts lgs) `Equiv` OneOf @{ralemem} @{ralemcd} (MkGenAlts rgs)
   EB : Bind @{lbo} x g `Equiv` Bind @{rbo} x g
 
-data AltsEquiv : LazyLst lne (PosNat, Lazy (Gen lem a)) -> LazyLst rne (PosNat, Lazy (Gen lem a)) -> Type where
+data AltsEquiv : LazyLst lne (Nat1, Lazy (Gen lem a)) -> LazyLst rne (Nat1, Lazy (Gen lem a)) -> Type where
   Nil  : [] `AltsEquiv` []
   (::) : lg `Equiv` rg -> lgs `AltsEquiv` rgs -> {0 lne, rne : _} ->
          {0 lim, rim : _} ->
          {0 lprf, rprf : _} ->
-         ((Element n lprf, Delay lg)::lgs) {ne=lne} @{lim} `AltsEquiv` ((Element n prpf, Delay rg)::rgs) {ne=rne} @{rim}
+         ((FromNat n @{lprf}, Delay lg)::lgs) {ne=lne} @{lim} `AltsEquiv` ((FromNat n @{prpf}, Delay rg)::rgs) {ne=rne} @{rim}
 
---reflAltsEquiv : (xs : LazyLst ne (PosNat, Lazy (Gen em a))) -> AltsEquiv xs xs
+--reflAltsEquiv : (xs : LazyLst ne (Nat1, Lazy (Gen em a))) -> AltsEquiv xs xs
 --reflAltsEquiv []      = []
 --reflAltsEquiv $ (::) (Element a b, Delay g) (Delay xs) {ne} =
 --    (?foo :: reflAltsEquiv xs) {lprf=b} {rprf=b} {lg=g} {rg=g} {lne=ne} {rne=ne} {lim = %search} {rim = %search}
@@ -213,7 +213,7 @@ strengthen $ Labelled l x = label l <$> strengthen x
 
 mkOneOf : alem `NoWeaker` em =>
           NotImmediatelyEmpty alem =>
-          (gens : LazyLst1 (PosNat, Lazy (Gen alem a))) ->
+          (gens : LazyLst1 (Nat1, Lazy (Gen alem a))) ->
           Gen em a
 mkOneOf gens = OneOf $ MkGenAlts gens
 -- TODO to make elimination of a single element
@@ -394,7 +394,7 @@ namespace GenAlternatives
   processAlternatives'' : (Gen em a -> GenAlternatives neb em b) -> GenAlternatives nea em a -> GenAlternatives (nea && neb) em b
   processAlternatives'' f = mapGens where
 
-    mapWeight : forall a, nea. (PosNat -> PosNat) -> GenAlternatives nea em a -> GenAlternatives nea em a
+    mapWeight : forall a, nea. (Nat1 -> Nat1) -> GenAlternatives nea em a -> GenAlternatives nea em a
     mapWeight f $ MkGenAlts xs = MkGenAlts $ xs <&> mapFst f
 
     mapGens : GenAlternatives nea em a -> GenAlternatives (nea && neb) em b
@@ -483,7 +483,7 @@ frequency : {em : _} ->
             AltsNonEmpty altsNe em =>
             (0 _ : IfUnsolved alem em) =>
             (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
-            LazyLst altsNe (PosNat, Lazy (Gen alem a)) -> Gen em a
+            LazyLst altsNe (Nat1, Lazy (Gen alem a)) -> Gen em a
 frequency = oneOf . MkGenAlts
 
 ||| Choose one of the given values uniformly.

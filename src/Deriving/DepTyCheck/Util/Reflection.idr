@@ -5,7 +5,7 @@ import public Control.Applicative.Const
 
 import public Data.Fin
 import public Data.Fuel
-import public Data.Nat.Pos
+import public Data.Nat1
 import public Data.List.Lazy
 import public Data.These
 import public Data.Vect.Dependent
@@ -169,7 +169,7 @@ liftList = foldr (\l, r => `(~l :: ~r)) `([])
 
 export
 liftWeight1 : TTImp
-liftWeight1 = `(Data.Nat.Pos.one)
+liftWeight1 = `(Data.Nat1.one)
 
 namespace CompiletimeLabel
 
@@ -216,9 +216,9 @@ callFrequency desc variants = labelGen desc $ var `{Test.DepTyCheck.Gen.frequenc
 
 -- TODO to think of better placement for this function; this anyway is intended to be called from the derived code.
 public export
-leftDepth : Fuel -> PosNat
+leftDepth : Fuel -> Nat1
 leftDepth = go 1 where
-  go : PosNat -> Fuel -> PosNat
+  go : Nat1 -> Fuel -> Nat1
   go n Dry      = n
   go n (More x) = go (succ n) x
 

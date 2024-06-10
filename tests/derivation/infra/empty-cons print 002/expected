@@ -88,7 +88,7 @@ LOG gen.auto.derive.infra:0:
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
-                                                .$ var "Data.Nat.Pos.one"
+                                                .$ var "Data.Nat1.one"
                                                 .$ (var "<<Data.Vect.Nil>>" .$ var "^fuel_arg^" .$ var "inter^<len>" .$ var "inter^<elem>"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
