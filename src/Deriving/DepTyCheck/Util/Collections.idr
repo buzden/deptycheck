@@ -68,6 +68,11 @@ filterI' (x::xs) f = let fxs = filterI' xs $ f . FS in
                      if f FZ x then x :: fxs else fxs
 
 public export
+withIndex : (xs : List a) -> List (Fin $ length xs, a)
+withIndex []      = []
+withIndex (x::xs) = (FZ, x) :: map (mapFst FS) (withIndex xs)
+
+public export
 drop' : (xs : List a) -> (count : Fin $ S xs.length) -> List a
 drop' xs      FZ     = xs
 drop' (_::xs) (FS c) = drop' xs c
@@ -171,6 +176,16 @@ export
 presenceVect : {n : _} -> SortedSet (Fin n) -> Vect n Bool
 presenceVect = tabulate . flip contains
 
+namespace Vect
+
+  export
+  fromMap : {n : _} -> SortedMap (Fin n) a -> Vect n (Maybe a)
+  fromMap = foldl (flip . uncurry $ \i => replaceAt i . Just) (replicate _ Nothing) . SortedMap.toList
+
+  export %inline
+  withIndex : Vect n a -> Vect n (Fin n, a)
+  withIndex = mapI (,)
+
 -----------------------------
 --- `SortedMap` utilities ---
 -----------------------------
@@ -210,6 +225,10 @@ allPermutations s = case fromList s.asList of
 public export
 allPermutations' : Ord a => SortedSet a -> List $ List a
 allPermutations' = forget . allPermutations
+
+public export
+reverseMapping : Ord a => Vect n a -> SortedMap a $ List1 $ Fin n
+reverseMapping = concat . mapI (\idx, x => singleton x $ singleton idx)
 
 ----------------------------------------------------------
 --- Properties of collections (most actually unproved) ---
