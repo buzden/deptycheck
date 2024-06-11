@@ -2,6 +2,7 @@ module Deriving.DepTyCheck.Util.Collections
 
 import public Control.Monad.State
 
+import public Data.Alternative
 import public Data.Fin.Minus
 import public Data.List
 import public Data.List.Lazy
@@ -12,7 +13,6 @@ import public Data.SortedSet
 import public Data.Vect
 import public Data.Vect.Dependent
 
-import public Deriving.DepTyCheck.Util.Alternative
 import public Deriving.DepTyCheck.Util.Syntax
 
 %default total

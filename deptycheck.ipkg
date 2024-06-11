@@ -11,7 +11,8 @@ builddir = ".build"
 
 version = 0.0.240613
 
-modules = Data.Fin.Lists
+modules = Data.Alternative
+        , Data.Fin.Lists
         , Data.Fin.Minus
         , Data.Fin.ToFin
         , Data.Nat1
@@ -26,7 +27,6 @@ modules = Data.Fin.Lists
         , Deriving.DepTyCheck.Gen.Core.Util
         , Deriving.DepTyCheck.Gen.Checked
         , Deriving.DepTyCheck.Util
-        , Deriving.DepTyCheck.Util.Alternative
         , Deriving.DepTyCheck.Util.Collections
         , Deriving.DepTyCheck.Util.DepPerm
         , Deriving.DepTyCheck.Util.Logging

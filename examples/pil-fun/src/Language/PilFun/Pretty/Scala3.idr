@@ -1,11 +1,10 @@
 module Language.PilFun.Pretty.Scala3
 
+import Data.Alternative
 import Data.Fuel
 import Data.SnocList
 import public Data.So
 import Data.Vect
-
-import Deriving.DepTyCheck.Util.Alternative
 
 import public Language.PilFun
 import public Language.PilFun.Pretty

@@ -1,13 +1,12 @@
 -- Common definitions for all pretty-printers
 module Language.PilFun.Pretty
 
+import Data.Alternative
 import Data.Fuel
 import Data.SnocList
 import public Data.So
 import public Data.SortedSet
 import Data.Vect
-
-import Deriving.DepTyCheck.Util.Alternative
 
 import public Language.PilFun
 

@@ -3,6 +3,8 @@ module Deriving.DepTyCheck.Util.Reflection
 
 import public Control.Applicative.Const
 
+import public Data.Alternative
+
 import public Data.Fin.Lists
 import public Data.Fin.ToFin
 import public Data.Fuel
@@ -15,7 +17,6 @@ import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
-import public Deriving.DepTyCheck.Util.Alternative
 import public Deriving.DepTyCheck.Util.Collections
 import public Deriving.DepTyCheck.Util.Logging
 import public Deriving.DepTyCheck.Util.Syntax
