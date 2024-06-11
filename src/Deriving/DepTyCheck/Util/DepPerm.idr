@@ -8,7 +8,6 @@ import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
 import public Deriving.DepTyCheck.Util.Collections
-import public Deriving.DepTyCheck.Util.Syntax
 
 export
 disjointDepSets : (rawDeps : DVect n $ SortedSet . Fin . Fin.finToNat) -> (givs : SortedSet $ Fin n) -> List $ SortedSet $ Fin n

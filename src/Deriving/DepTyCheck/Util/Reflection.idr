@@ -19,11 +19,15 @@ import public Data.SortedSet
 
 import public Deriving.DepTyCheck.Util.Collections
 import public Deriving.DepTyCheck.Util.Logging
-import public Deriving.DepTyCheck.Util.Syntax
 
 import public Language.Reflection.Compat
 import public Language.Reflection.TTImp
 import public Language.Reflection.Pretty
+
+import public Syntax.IHateParens.Function
+import public Syntax.IHateParens.List
+import public Syntax.IHateParens.SortedSet
+import public Syntax.Monad.Logic
 
 import public Text.PrettyPrint.Bernardy
 

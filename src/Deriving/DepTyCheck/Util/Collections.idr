@@ -13,7 +13,8 @@ import public Data.SortedSet
 import public Data.Vect
 import public Data.Vect.Dependent
 
-import public Deriving.DepTyCheck.Util.Syntax
+import Syntax.IHateParens
+import Syntax.Monad.Logic
 
 %default total
 

@@ -31,8 +31,15 @@ modules = Data.Alternative
         , Deriving.DepTyCheck.Util.DepPerm
         , Deriving.DepTyCheck.Util.Logging
         , Deriving.DepTyCheck.Util.Reflection
-        , Deriving.DepTyCheck.Util.Syntax
         , Language.Reflection.Compat
+        , Syntax.IHateParens
+        , Syntax.IHateParens.Function
+        , Syntax.IHateParens.List
+        , Syntax.IHateParens.SortedMap
+        , Syntax.IHateParens.SortedMap.Dependent
+        , Syntax.IHateParens.SortedSet
+        , Syntax.IHateParens.Vect
+        , Syntax.Monad.Logic
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Coverage
         , Test.DepTyCheck.Gen.Emptiness
