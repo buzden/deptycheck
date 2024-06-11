@@ -79,7 +79,7 @@ canonicConsBody sig name con = do
   let bindExprs = \alreadyMatchedRenames => bindExprs <&> \f => f alreadyMatchedRenames
 
   -- Build a map from constructor's argument name to its index
-  let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
+  let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
 
   -- Determine indices of constructor's arguments that are given
   givenConArgs <- for givenConArgs.asList $ \givenArgName => do
@@ -112,7 +112,7 @@ canonicConsBody sig name con = do
         orderLikeInCon : Foldable f => f (String, String) -> List (String, String)
         orderLikeInCon = do
           let conArgStrNames = mapMaybe argStrName con.args
-          let conNameToIdx : SortedMap _ $ Fin conArgStrNames.length := fromList $ mapI' conArgStrNames $ flip (,)
+          let conNameToIdx : SortedMap _ $ Fin conArgStrNames.length := fromList $ mapI conArgStrNames $ flip (,)
           let [AsInCon] Ord (String, String) where
                 compare (origL, renL) (origR, renR) = comparing (lookup' conNameToIdx) origL origR <+> compare renL renR
           SortedSet.toList . foldl insert' (empty @{AsInCon})

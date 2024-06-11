@@ -7,7 +7,7 @@ import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
-import public Deriving.DepTyCheck.Util
+import public Deriving.DepTyCheck.Util.Reflection
 
 %default total
 
@@ -79,7 +79,7 @@ canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel)
                             AutoImplicit  => (`autoApp` var name)
 
     generatedArgs : List (Name, TTImp)
-    generatedArgs = mapMaybeI' sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
+    generatedArgs = mapMaybeI sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
                       ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (stname name, type)
 
 -- Complementary to `canonicSig`

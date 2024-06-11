@@ -116,7 +116,7 @@ analyseDeepConsApp ccdi freeNames = isD where
       ||| Determines which constructor's arguments would be definitely determined by fully known result type.
       typeDeterminedArgs : (con : Con) -> Either String $ Vect con.args.length ConsDetermInfo
       typeDeterminedArgs con = do
-        let conArgNames = fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
+        let conArgNames = fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
         determined <- fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
         let determined = mapMaybe (lookup' conArgNames) determined
         pure $ map cast $ presenceVect $ fromList determined

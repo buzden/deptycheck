@@ -10,14 +10,15 @@ import public Data.Fin.ToFin
 import public Data.Fuel
 import public Data.Nat1
 import public Data.List.Lazy
+import public Data.List.Extra
 import public Data.These
 import public Data.Vect.Dependent
+import public Data.Vect.Extra
 
 import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
-import public Deriving.DepTyCheck.Util.Collections
 import public Deriving.DepTyCheck.Util.Logging
 
 import public Language.Reflection.Compat
@@ -330,7 +331,7 @@ argDeps args = do
   %unbound_implicits off -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2040
 
   filteredArgs : (excluded : SortedSet $ Fin args.length) -> List Arg
-  filteredArgs excluded = filterI' args $ \idx, _ => not $ contains idx excluded
+  filteredArgs excluded = filterI args $ \idx, _ => not $ contains idx excluded
 
   partialSig : (retTy : TTImp) -> (excluded : SortedSet $ Fin args.length) -> TTImp
   partialSig retTy = piAll retTy . map {piInfo := ExplicitArg} . filteredArgs

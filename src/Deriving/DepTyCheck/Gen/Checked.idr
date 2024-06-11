@@ -10,12 +10,13 @@ import public Control.Monad.RWS
 
 import public Data.DPair
 import public Data.SortedMap
+import public Data.SortedMap.Extra
 import public Data.SortedSet
 
 import public Decidable.Equality
 
 import public Deriving.DepTyCheck.Gen.Derive
-import public Deriving.DepTyCheck.Util
+import public Deriving.DepTyCheck.Util.Reflection
 
 import public Syntax.IHateParens
 
