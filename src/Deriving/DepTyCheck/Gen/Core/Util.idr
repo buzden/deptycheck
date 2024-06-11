@@ -1,5 +1,7 @@
 module Deriving.DepTyCheck.Gen.Core.Util
 
+import public Data.Fin.Split
+
 import public Decidable.Equality
 
 import public Deriving.DepTyCheck.Gen.Derive

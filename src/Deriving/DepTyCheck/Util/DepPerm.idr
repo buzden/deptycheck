@@ -1,6 +1,7 @@
 -- This module exists only to put out couple of heavily copiling functions, to speed up compilation time
 module Deriving.DepTyCheck.Util.DepPerm
 
+import public Data.Fin.ToFin
 import public Data.Vect.Dependent
 import public Data.SortedMap
 import public Data.SortedMap.Dependent

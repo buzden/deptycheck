@@ -3,7 +3,8 @@ module Deriving.DepTyCheck.Util.Reflection
 
 import public Control.Applicative.Const
 
-import public Data.Fin
+import public Data.Fin.Lists
+import public Data.Fin.ToFin
 import public Data.Fuel
 import public Data.Nat1
 import public Data.List.Lazy

@@ -9,9 +9,12 @@ license = "MPL-2.0"
 sourcedir = "src"
 builddir = ".build"
 
-version = 0.0.240609
+version = 0.0.240613
 
-modules = Data.Nat1
+modules = Data.Fin.Lists
+        , Data.Fin.Minus
+        , Data.Fin.ToFin
+        , Data.Nat1
         , Data.Vect.Dependent
         , Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
@@ -26,7 +29,6 @@ modules = Data.Nat1
         , Deriving.DepTyCheck.Util.Alternative
         , Deriving.DepTyCheck.Util.Collections
         , Deriving.DepTyCheck.Util.DepPerm
-        , Deriving.DepTyCheck.Util.Fin
         , Deriving.DepTyCheck.Util.Logging
         , Deriving.DepTyCheck.Util.Reflection
         , Deriving.DepTyCheck.Util.Syntax
