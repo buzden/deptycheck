@@ -176,6 +176,14 @@ export
 presenceVect : {n : _} -> SortedSet (Fin n) -> Vect n Bool
 presenceVect = tabulate . flip contains
 
+public export
+combinations : Vect n (List1 a) -> List1 (Vect n a)
+combinations l = map (rewrite plusZeroRightNeutral n in reverse) $ go l (Nil:::[]) where
+  go : Vect m (List1 a) -> List1 (Vect k a) -> List1 (Vect (m + k) a)
+  go           Nil       rss = rss
+  go {m = S m} (xs::xss) rss = rewrite plusSuccRightSucc m k in
+    go xss $ join $ map (\x => map (\rs => x :: rs) rss) xs
+
 namespace Vect
 
   export
