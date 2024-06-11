@@ -205,7 +205,7 @@ deriveFusion l = do
   let fusedVarName = toLower $ nameStr fusionTypeName
   let typeVarNames = map (toLower . nameStr) typeNames
   let genRDef = def
-                  `{genZ_ultimate}
+                  `{genZ_ultimate} -- to pass a name of constructor
                   [  var `{genZ_ultimate}
                   .$ bindVar "fl"
                   .= var `{(>>=)}
@@ -213,7 +213,7 @@ deriveFusion l = do
                   .$ (
                       MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
                       `lam` iCase {
-                        sc = var "{lamc:0}",
+                        sc = var "{lamc:0}", -- to use a var with meaningful name
                         ty = implicitFalse,
                         clauses =
                           [ genRMkDPair (bindVar fusedVarName) uniqueNames
@@ -237,9 +237,9 @@ deriveFusion l = do
 declareFusion : Vect (2 + n) (TypeInfo, List Name) -> Elab (Maybe FusionDecl)
 declareFusion l = do
   let derived = deriveFusion l
-  -- case derived of
-  --   Just fd => declare [fd.dataType, fd.splitClaim, fd.splitDef, fd.genFClaim, fd.genRClaim, fd.genRDef]
-  --   Nothing => declare []
+  case derived of
+    Just fd => declare [fd.dataType, fd.splitClaim, fd.splitDef, fd.genFClaim, fd.genRClaim, fd.genRDef]
+    Nothing => declare []
   pure $ derived
 
 
@@ -297,3 +297,14 @@ public export
 getGen : Maybe FusionDecl -> List Decl
 getGen Nothing = []
 getGen (Just fd) = [fd.genFClaim, fd.genRClaim, fd.genRDef]
+
+
+-- TODO: what happens with :doc
+-- tests for order of dependent arguments
+-- TODO: preserve order of args from left to right !!! IMPORTANT
+-- solveDeps should be compatible with fuse (not to group what couldn't be fused)
+-- TODO: declare fused type iff it does not exist (otherwise reuse)
+-- TODO: highlevel name conventions resolving (pure)
+-- TODO: remove declare stage from print tests (declare should be highlevel)
+-- TODO: update to last compiler version and merge main
+-- TODO: GenSignature -> Con -> genZ_ultimate(?)
