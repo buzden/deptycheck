@@ -14,6 +14,9 @@ import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
+import public Decidable.Equality
+import public Decidable.Equality.Core
+
 import public Deriving.DepTyCheck.Util.Alternative
 import public Deriving.DepTyCheck.Util.Collections
 import public Deriving.DepTyCheck.Util.Logging
@@ -655,6 +658,35 @@ namespace UpToRenaming
   export
   [UpToRenaming] Eq TTImp where
     x == y = (x == y) @{UpToSubst @{empty}}
+
+[AppUpToRenaming] Eq AnyApp where
+  (==) = (==) @{UpToRenaming} `on` getExpr
+
+export
+cutAppPrefix : {n : _} -> Vect n TTImp -> Vect n TTImp
+cutAppPrefix' : {n : _} -> Vect n AnyApp -> Vect n AnyApp
+cutAppPrefix [] = []
+cutAppPrefix {n=S k} xs@(_::_) = do
+  let unappXs = xs <&> unAppAny
+  let heads = fst <$> unappXs
+  let S Z = List.length . nub @{UpToRenaming} $ heads.asList
+    | _ => xs -- what is applied differs, to stop reduction
+  let first::unappXs = snd <$> unappXs
+  let unappXs : Maybe $ Vect k $ Vect first.length AnyApp = for unappXs $ \lst => do
+    let Yes lc = decEq first.length lst.length
+      | No _ => Nothing
+    rewrite lc
+    Just lst.asVect
+  let Just unappXs = unappXs
+    | Nothing => xs -- different count of args in apps, stop reduction
+  let unappXs = transpose $ first.asVect :: unappXs
+  let [unevenApp] = filter ((> 1) . List.length . nub @{AppUpToRenaming} . toList) unappXs.asList
+    | [] => xs <&> \expr => Implicit (getFC expr) False -- all equal, erase it
+    | _  => map (uncurry reAppAny) $ zip heads $ transpose $ assert_total cutAppPrefix' <$> unappXs
+  cutAppPrefix $ assert_smaller xs $ map getExpr $ unevenApp
+cutAppPrefix' xs = do
+  let xs' = cutAppPrefix $ getExpr <$> xs
+  xs' `zip` xs <&> uncurry (mapExpr . const)
 
 -- Returns a list without duplications
 export

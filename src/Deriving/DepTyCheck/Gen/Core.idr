@@ -15,6 +15,11 @@ import public Deriving.DepTyCheck.Util.Reflection
 data Recursiveness =
   ||| When constructor refers transitively to the type it belongs
   DirectlyRecursive |
+  ||| When constructor itself does not refer to the type it belongs,
+  ||| but its generated index either
+  ||| - refers to some constructor that is recursive, or
+  ||| - is general enough to be able to refer so some recursive constructor
+  IndexedByRecursive |
   ||| When constructor does not refer to the type it belongs,
   ||| nor to any recursive constructor in its generated indices
   NonRecursive
@@ -22,11 +27,13 @@ data Recursiveness =
 ||| Checks if the status is anyhow recursive, directly or through index
 isRec : Recursiveness -> Bool
 isRec DirectlyRecursive  = True
+isRec IndexedByRecursive = True
 isRec NonRecursive       = False
 
 ||| Check if we are able to call for this constructor on a dry fuel
 isDirectlyRec : Recursiveness -> Bool
 isDirectlyRec DirectlyRecursive  = True
+isDirectlyRec IndexedByRecursive = False
 isDirectlyRec NonRecursive       = False
 
 ||| Property is implication from the strong property to the weak one
@@ -36,6 +43,17 @@ recStrengthProp {r=DirectlyRecursive} Oh = Oh
 ----------------------------
 --- Derivation functions ---
 ----------------------------
+
+[Short] Show TTImp where
+  show expr = do
+    let (l, rs) = unAppAny expr
+    "\{l}\{concatMap (const " (...)") rs}"
+
+printMatrix : Foldable f => Foldable t => Elaboration m => (desc : String) -> f (t TTImp) -> m ()
+printMatrix desc xxs = do
+  logMsg "debug" 0 desc
+  for_ xxs $ \xs => do
+    logMsg "debug" 0 "- \{joinBy ", " $ map (show @{Short}) $ toList xs}"
 
 export
 ConstructorDerivator => DerivatorCore where
@@ -54,11 +72,32 @@ ConstructorDerivator => DerivatorCore where
     consBodies <- for sig.targetType.cons $ \con => logBounds "consBody" [sig, con] $
       canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
+    -- prepare information about generated type arguments by constructors
+    genConParams <- either (uncurry failAt) pure $ for sig.targetType.cons.asVect $ \con => do
+      let conParams = snd $ unAppAny con.type
+      let Yes lengthCorrect = decEq conParams.length sig.targetType.args.length
+        | No _ => Left (getFC con.type, "INTERNAL ERROR: wrong count of unapp of constructor \{show con.name}")
+      let genConParams = sig.generatedParams.asVect <&> \gv => getExpr $ index' conParams $ rewrite lengthCorrect in gv
+      Right genConParams
+    -- clean up prefixes of potential indices, we kinda depend here on fact that constructor expressions are already normalised
+    printMatrix "before" genConParams
+    let genConParams = transpose . map (cutAppPrefix {n=sig.targetType.cons.length}) . transpose $ genConParams
+    printMatrix "after" genConParams
+
     -- calculate which constructors are recursive and which are not
-    consRecs <- logBounds "consRec" [sig] $ pure $ sig.targetType.cons <&> \con => do
+    consRecs <- logBounds "consRec" [sig] $ for (sig.targetType.cons `zipV` genConParams) $ \(con, genConIdxs) => do
       let False = isRecursive {containingType=Just sig.targetType} con
-        | True => (con, DirectlyRecursive)
-      (con, NonRecursive)
+        | True => pure (con, DirectlyRecursive)
+      -- this constructor is not directly recursive, check if any of generated indices are indexed by a recursive constructor
+      let conArgNames = fromList $ name <$> con.args
+      let namesInGivenConParams = concatMap allVarNames' genConIdxs
+      logMsg "debug" 0 "\{show con.name}: names in givens: \{show namesInGivenConParams.asList}"
+      let externalNamesInGivenConParams = SortedSet.toList $ namesInGivenConParams `difference` conArgNames
+      logMsg "debug" 0 "\{show con.name}: extrnal names in givens: \{show externalNamesInGivenConParams}"
+      -- now we want to check if external names can refer to non-constructors and/or recursive constructors;
+      -- if yes, then this constructor is potentially indexed by recursive something
+      let rec = if any ((/= Just False) . isRecursiveConstructor) externalNamesInGivenConParams then IndexedByRecursive else NonRecursive
+      pure (con, rec)
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
