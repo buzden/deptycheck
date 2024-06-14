@@ -3,13 +3,13 @@ module Deriving.DepTyCheck.Gen.Core.ConsDerive
 
 import public Control.Monad.State
 
+import public Data.Collections.Analysis
 import public Data.Either
+import public Data.SortedSet.Extra
 
 import public Decidable.Equality
 
 import public Deriving.DepTyCheck.Gen.Derive
-
-import public Deriving.DepTyCheck.Util.DepPerm
 
 %default total
 
@@ -52,7 +52,7 @@ namespace NonObligatoryExts
       let conFC = getFC con.type
 
       -- Build a map from constructor's argument name to its index
-      let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
+      let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
 
       -- Analyse that we can do subgeneration for each constructor argument
       -- Fails using `Elaboration` if the given expression is not an application to a type constructor

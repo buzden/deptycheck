@@ -9,10 +9,19 @@ license = "MPL-2.0"
 sourcedir = "src"
 builddir = ".build"
 
-version = 0.0.240609
+version = 0.0.240613
 
-modules = Data.Nat1
+modules = Data.Alternative
+        , Data.Collections.Analysis
+        , Data.Fin.Lists
+        , Data.Fin.Minus
+        , Data.Fin.ToFin
+        , Data.List.Extra
+        , Data.Nat1
+        , Data.SortedMap.Extra
+        , Data.SortedSet.Extra
         , Data.Vect.Dependent
+        , Data.Vect.Extra
         , Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
         , Deriving.DepTyCheck.Gen.Derive
@@ -22,15 +31,17 @@ modules = Data.Nat1
         , Deriving.DepTyCheck.Gen.Core.ConsEntry
         , Deriving.DepTyCheck.Gen.Core.Util
         , Deriving.DepTyCheck.Gen.Checked
-        , Deriving.DepTyCheck.Util
-        , Deriving.DepTyCheck.Util.Alternative
-        , Deriving.DepTyCheck.Util.Collections
-        , Deriving.DepTyCheck.Util.DepPerm
-        , Deriving.DepTyCheck.Util.Fin
         , Deriving.DepTyCheck.Util.Logging
         , Deriving.DepTyCheck.Util.Reflection
-        , Deriving.DepTyCheck.Util.Syntax
         , Language.Reflection.Compat
+        , Syntax.IHateParens
+        , Syntax.IHateParens.Function
+        , Syntax.IHateParens.List
+        , Syntax.IHateParens.SortedMap
+        , Syntax.IHateParens.SortedMap.Dependent
+        , Syntax.IHateParens.SortedSet
+        , Syntax.IHateParens.Vect
+        , Syntax.Monad.Logic
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Coverage
         , Test.DepTyCheck.Gen.Emptiness

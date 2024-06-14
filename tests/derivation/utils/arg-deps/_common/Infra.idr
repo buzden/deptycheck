@@ -2,7 +2,7 @@ module Infra
 
 import DepsCheck
 
-import Deriving.DepTyCheck.Util
+import Deriving.DepTyCheck.Util.Reflection
 
 import Language.Reflection.Compat
 
