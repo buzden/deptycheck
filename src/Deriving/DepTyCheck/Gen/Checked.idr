@@ -18,8 +18,6 @@ import public Decidable.Equality
 import public Deriving.DepTyCheck.Gen.Derive
 import public Deriving.DepTyCheck.Util.Reflection
 
-import public Syntax.IHateParens
-
 %default total
 
 %ambiguity_depth 4
