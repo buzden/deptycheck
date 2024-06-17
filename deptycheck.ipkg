@@ -9,20 +9,9 @@ license = "MPL-2.0"
 sourcedir = "src"
 builddir = ".build"
 
-version = 0.0.240613
+version = 0.0.240616
 
-modules = Data.Alternative
-        , Data.Collections.Analysis
-        , Data.Fin.Lists
-        , Data.Fin.Minus
-        , Data.Fin.ToFin
-        , Data.List.Extra
-        , Data.Nat1
-        , Data.SortedMap.Extra
-        , Data.SortedSet.Extra
-        , Data.Vect.Dependent
-        , Data.Vect.Extra
-        , Deriving.DepTyCheck
+modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
         , Deriving.DepTyCheck.Gen.Derive
         , Deriving.DepTyCheck.Gen.Entry
@@ -34,23 +23,21 @@ modules = Data.Alternative
         , Deriving.DepTyCheck.Util.Logging
         , Deriving.DepTyCheck.Util.Reflection
         , Language.Reflection.Compat
-        , Syntax.IHateParens
-        , Syntax.IHateParens.Function
-        , Syntax.IHateParens.List
-        , Syntax.IHateParens.SortedMap
-        , Syntax.IHateParens.SortedMap.Dependent
-        , Syntax.IHateParens.SortedSet
-        , Syntax.IHateParens.Vect
-        , Syntax.Monad.Logic
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Coverage
         , Test.DepTyCheck.Gen.Emptiness
         , Test.DepTyCheck.Gen.Labels
 
 depends = ansi
+        , best-alternative
+        , collection-utils
+        , dependent-vect
         , elab-pretty
         , elab-util
+        , fin-lizzie
+        , i-hate-parens
         , if-unsolved-implicit
         , mtl-tuple-impls
+        , positive-nat
         , random-pure
         , typelevel-emptiness-collections
