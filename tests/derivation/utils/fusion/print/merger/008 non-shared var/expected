@@ -7,14 +7,14 @@
        emptyFC
        "XY"
        (Just
-          (    MkArg MW ExplicitArg (Just "k") type
-           .-> MkArg MW ExplicitArg (Just "m") type
+          (    MkArg MW ExplicitArg (Just "m") type
            .-> MkArg MW ExplicitArg (Just "n") type
+           .-> MkArg MW ExplicitArg (Just "k") type
            .-> type))
        []
        [ mkTy
            { name = "MkX_MkY"
-           , type = var "XY" .$ bindVar "k" .$ bindVar "m" .$ bindVar "n"
+           , type = var "XY" .$ bindVar "m" .$ bindVar "n" .$ bindVar "k"
            }
        ])
 ]

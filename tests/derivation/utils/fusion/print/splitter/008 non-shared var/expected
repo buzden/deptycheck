@@ -11,7 +11,7 @@
                  MW
                  ExplicitArg
                  Nothing
-                 (var "XY" .$ bindVar "k" .$ bindVar "m" .$ bindVar "n")
+                 (var "XY" .$ bindVar "m" .$ bindVar "n" .$ bindVar "k")
            .->    var "Builtin.Pair"
                .$ (var "X" .$ bindVar "m" .$ bindVar "n")
                .$ (var "Y" .$ bindVar "n" .$ bindVar "k")

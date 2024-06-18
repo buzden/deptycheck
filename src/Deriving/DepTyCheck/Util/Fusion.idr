@@ -118,7 +118,7 @@ record FusionDecl where
   splitDef    : Decl
   genFClaim   : Decl
   genRClaim   : Decl
-  genRDef     : Decl
+  genRDef     : Name -> Name -> Name -> Decl
 
 
 prepareConArgs : TTImp -> List TTImp
@@ -146,6 +146,17 @@ genFRhsClaim : Name -> List (Name, TTImp) -> TTImp
 genFRhsClaim n l = var `{Gen} .$ var `{MaybeEmpty} .$ genFDPair n l
 
 
+public export
+buildOrdering : Eq a => List (List a) -> List a
+buildOrdering l = go l [] where
+  go : List (List a) -> List a -> List a
+  go []     res = reverse res
+  go (h::t) res = go t (merge h res) where
+    merge : List a -> List a -> List a
+    merge []     res = res
+    merge (h::t) res = if (elem h res) then merge t res else merge t (h::res)
+
+
 deriveFusion : Vect (2 + n) (TypeInfo, List Name) -> Maybe FusionDecl
 deriveFusion l = do
   let typeNames = toList $ map ((.name) . fst) l
@@ -155,8 +166,8 @@ deriveFusion l = do
   let False = any isNothing typeArgs
     | True => Nothing
 
-  let uniqueArgs = nub $ (sortBy (comparing fst)) $ join $ catMaybes $ toList typeArgs -- arg types from type signature
-  let uniqueNames = nub $ sort $ join $ toList $ map snd l -- names from target type constructor
+  let uniqueNames = buildOrdering $ toList $ map snd l -- names from target type constructor
+  let uniqueArgs = nub $ (sortBy (comparing (\x => findIndex ((==) $ fst x) uniqueNames))) $ join $ catMaybes $ toList typeArgs -- arg types from type signature
 
   let True = length uniqueArgs == length uniqueNames  -- same parameter name could not be associated with different types
     | False => Nothing
@@ -192,7 +203,7 @@ deriveFusion l = do
                   toList (map (toList . (map (nameStr . (.name) . fst))) consComb)
                 else def splitName [impossibleClause (var splitName .$ implicitTrue)]
 
-  let stub = ILog Nothing
+  -- let stub = ILog Nothing
   let genFName = UN $ Basic ("gen" ++ (nameStr fusionTypeName))
   let genFClaim = export' genFName $
                     (MkArg MW ExplicitArg Nothing (var `{Fuel})) .->
@@ -202,18 +213,21 @@ deriveFusion l = do
                     (MkArg MW ExplicitArg Nothing (var `{Fuel})) .->
                     (var `{Gen} .$ var `{MaybeEmpty} .$ var `{Z})
 
+  let lambdaHelpName = "{lamc:0}"
+  let fuelHelpName = "fl"
+
   let fusedVarName = toLower $ nameStr fusionTypeName
   let typeVarNames = map (toLower . nameStr) typeNames
-  let genRDef = def
-                  `{genZ_ultimate} -- to pass a name of constructor
-                  [  var `{genZ_ultimate}
-                  .$ bindVar "fl"
+  let genRDef = \ultimateGenName, fusedGenName, originalConsName => def
+                  ultimateGenName
+                  [  var ultimateGenName
+                  .$ bindVar fuelHelpName
                   .= var `{(>>=)}
-                  .$ (var genFName .$ var `{fl})
+                  .$ (var fusedGenName .$ (var $ UN $ Basic fuelHelpName))
                   .$ (
-                      MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                      MkArg MW ExplicitArg (Just lambdaHelpName) implicitFalse
                       `lam` iCase {
-                        sc = var "{lamc:0}", -- to use a var with meaningful name
+                        sc = var lambdaHelpName,
                         ty = implicitFalse,
                         clauses =
                           [ genRMkDPair (bindVar fusedVarName) uniqueNames
@@ -223,7 +237,7 @@ deriveFusion l = do
                               clauses =
                                 [ (splitRhsDef (map bindVar typeVarNames))
                                 .= var `{pure}
-                                .$ foldConstructor (var `{MkZ}) (map var uniqueNames ++ map (var . UN . Basic) typeVarNames)
+                                .$ foldConstructor (var originalConsName) (map var uniqueNames ++ map (var . UN . Basic) typeVarNames)
                                 ]
                             }
                           ]
@@ -234,13 +248,22 @@ deriveFusion l = do
   Just (MkFusionDecl dataDecl claimDecl defDecl genFClaim genRClaim genRDef)
 
 
-declareFusion : Vect (2 + n) (TypeInfo, List Name) -> Elab (Maybe FusionDecl)
-declareFusion l = do
-  let derived = deriveFusion l
-  case derived of
-    Just fd => declare [fd.dataType, fd.splitClaim, fd.splitDef, fd.genFClaim, fd.genRClaim, fd.genRDef]
-    Nothing => declare []
-  pure $ derived
+-- checkDeclared : Elaboration m => List Decl -> m (List Decl)
+-- checkDeclared [] = pure []
+-- checkDeclared (x::xs) = do
+--   tail <- checkDeclared xs
+--   head <- case x of
+--     IClaim _ _ _ _ (MkTy _ _ n _) => getInfo' n
+--     IData _ _ _ (MkData _ n _ _ _) => getInfo' n
+--     IDef _ n _ => getInfo' n
+--     -- _ => pure []
+--   if null head then pure (x::tail) else pure tail
+
+
+-- declareFusion : Elaboration m => List Decl -> m ()
+-- declareFusion l = do
+--   notDeclaredYet <- checkDeclared l
+--   declare notDeclaredYet
 
 
 prepareArgsSolve : Arg -> (Name, List String)
@@ -271,14 +294,14 @@ runFusion x xArgs y yArgs = do
   xTI <- getInfo' x
   yTI <- getInfo' y
   let zipped = (xTI, xArgs) :: (yTI, yArgs) :: Nil
-  declareFusion zipped
+  pure $ deriveFusion zipped
 
 
 public export
 runFusionList : Vect (2 + n) (Name, List Name) -> Elab (Maybe FusionDecl)
 runFusionList l = do
   l' <- for l $ \(n, args) => (, args) <$> getInfo' n
-  declareFusion l'
+  pure $ deriveFusion l'
 
 
 public export
@@ -294,17 +317,14 @@ getSplit (Just fd) = [fd.splitClaim, fd.splitDef]
 
 
 public export
-getGen : Maybe FusionDecl -> List Decl
-getGen Nothing = []
-getGen (Just fd) = [fd.genFClaim, fd.genRClaim, fd.genRDef]
+getGen : Maybe FusionDecl -> Name -> Name -> Name -> List Decl
+getGen Nothing _ _ _ = []
+getGen (Just fd) n1 n2 n3 = [fd.genFClaim, fd.genRClaim, fd.genRDef n1 n2 n3]
 
 
 -- TODO: what happens with :doc
--- tests for order of dependent arguments
--- TODO: preserve order of args from left to right !!! IMPORTANT
 -- solveDeps should be compatible with fuse (not to group what couldn't be fused)
 -- TODO: declare fused type iff it does not exist (otherwise reuse)
 -- TODO: highlevel name conventions resolving (pure)
 -- TODO: remove declare stage from print tests (declare should be highlevel)
--- TODO: update to last compiler version and merge main
 -- TODO: GenSignature -> Con -> genZ_ultimate(?)

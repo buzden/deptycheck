@@ -20,4 +20,4 @@ decl : Maybe FusionDecl
 decl = %runElab runFusion `{X} [`{n}] `{Y} [`{n}]
 
 main : IO ()
-main = putPretty $ getGen decl
+main = putPretty $ getGen decl `{genZ_ultimate} `{genXY} `{MkZ}

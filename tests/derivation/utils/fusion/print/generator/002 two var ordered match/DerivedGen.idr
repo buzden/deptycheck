@@ -22,5 +22,5 @@ decl : Maybe FusionDecl
 decl = %runElab runFusion `{X} [`{m}, `{n}] `{Y} [`{m}, `{n}]
 
 main : IO ()
-main = putPretty $ getGen decl
+main = putPretty $ getGen decl `{genZ_ultimate} `{genXY} `{MkZ}
 
