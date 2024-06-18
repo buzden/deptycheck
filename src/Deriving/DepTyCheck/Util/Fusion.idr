@@ -6,7 +6,6 @@ import Language.Reflection.Derive
 import Language.Reflection.Pretty
 import Language.Reflection.Compat
 import public Deriving.DepTyCheck.Gen
-import Deriving.DepTyCheck.Util.Collections
 import Deriving.DepTyCheck.Util.Reflection
 import Data.Nat
 
