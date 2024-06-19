@@ -8,8 +8,6 @@ import DistrCheckCommon
 
 %language ElabReflection
 
-%hint DA : ConstructorDerivator; DA = LeastEffort
-
 data VectNat : Nat -> Type where
   Nil  : VectNat Z
   (::) : Nat -> VectNat n -> VectNat (S n)
