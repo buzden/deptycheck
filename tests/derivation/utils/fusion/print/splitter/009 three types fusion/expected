@@ -1,0 +1,25 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+[ IClaim
+    emptyFC
+    MW
+    Export
+    []
+    (mkTy
+       { name = "splitXYZ"
+       , type =
+               MkArg MW ExplicitArg Nothing (var "XYZ" .$ bindVar "n")
+           .->    var "Builtin.Pair"
+               .$ (var "X" .$ bindVar "n")
+               .$ (   var "Builtin.Pair"
+                   .$ (var "Y" .$ bindVar "n")
+                   .$ (var "Z" .$ bindVar "n"))
+       })
+, IDef
+    emptyFC
+    "splitXYZ"
+    [    var "splitXYZ" .$ var "MkX_MkY_MkZ"
+      .=    var "Builtin.MkPair"
+         .$ var "MkX"
+         .$ (var "Builtin.MkPair" .$ var "MkY" .$ var "MkZ")
+    ]
+]
