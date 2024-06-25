@@ -4,6 +4,7 @@ import Data.List.Lazy
 
 import public Test.DepTyCheck.Gen
 
+import public Statistics.Norm.Precise
 import public Statistics.Confidence
 
 import System.Random.Pure.StdGen
