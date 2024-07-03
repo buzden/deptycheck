@@ -23,16 +23,6 @@ export
 So (NotTTImp a) => GivesTTImp a where
   toTTImp x = quote x
 
--- `NotTTImp` does not reduce on `Type` and functions
-
-export
-GivesTTImp Type where
-  toTTImp x = quote x
-
-export
-GivesTTImp a => GivesTTImp b => GivesTTImp (a -> b) where
-  toTTImp x = quote x
-
 export
 checkEq : GivesTTImp expr1 => GivesTTImp expr2 => String -> Bool -> expr1 -> expr2 -> Elab Unit
 checkEq desc res e1 e2 = do
