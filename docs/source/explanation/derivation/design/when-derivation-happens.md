@@ -62,7 +62,9 @@ thus inapplicable directly for dependent types.
 Since, we focus on total generators for dependent types, we cannot rely on common hybrid approach.
 Considering all said above, it is decided to go the hard way and to do derivation of generators directly,
 using metaprogramming facility if Idris called *elaboration scripts*.
-% TODO to add a link to Idris documentation as soon as elaboration scripts are documented.
+<!--
+TODO to add a link to Idris documentation as soon as elaboration scripts are documented.
+-->
 
 Thus, DepTyCheck's derivation mechanism is a fully compile-time metaprogram that analyses generated datatype and
 produces generator's code which is checked for type correctness and totality right after.

@@ -298,7 +298,7 @@ genD_idx_generated @{data_Nat} @{data_String} fuel b = data_D_giv_b fuel b
 -->
 
 In this case, generation of non-recursive constructors `JJ` and `TL` is straightforward,
-the only difference is that `b` is a function argument, not a result of subgeneration.
+the only difference is that `b` is a function parameter, not a result of subgeneration.
 
 Recursive cases are not so easy.
 Surely, we can first generate value `b` using derived `data_Bool` generator (as we did before for `JJ` constructor)
