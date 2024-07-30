@@ -1,0 +1,82 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+[ IClaim
+    emptyFC
+    MW
+    Export
+    []
+    (mkTy
+       { name = "genXYW"
+       , type =
+               MkArg MW ExplicitArg Nothing (var "Fuel")
+           .->    var "Gen"
+               .$ var "MaybeEmpty"
+               .$ (   var "DPair"
+                   .$ type
+                   .$ (    MkArg MW ExplicitArg (Just "k") type
+                       .=>    var "DPair"
+                           .$ type
+                           .$ (    MkArg MW ExplicitArg (Just "m") type
+                               .=>    var "DPair"
+                                   .$ type
+                                   .$ (    MkArg
+                                             MW
+                                             ExplicitArg
+                                             (Just "n")
+                                             type
+                                       .=>    var "XYW"
+                                           .$ var "k"
+                                           .$ var "m"
+                                           .$ var "n"))))
+       })
+, IClaim
+    emptyFC
+    MW
+    Export
+    []
+    (mkTy
+       { name = "genZ_ultimate"
+       , type =
+               MkArg MW ExplicitArg Nothing (var "Fuel")
+           .-> var "Gen" .$ var "MaybeEmpty" .$ var "Z"
+       })
+, IDef
+    emptyFC
+    "genZ_ultimate"
+    [    var "genZ_ultimate" .$ bindVar "fl"
+      .=    var ">>="
+         .$ (var "genXYW" .$ var "fl")
+         .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+             .=> iCase
+                   { sc = var "{lamc:0}"
+                   , ty = implicitFalse
+                   , clauses =
+                       [       var "MkDPair"
+                            .$ bindVar "k"
+                            .$ (   var "MkDPair"
+                                .$ bindVar "m"
+                                .$ (   var "MkDPair"
+                                    .$ bindVar "n"
+                                    .$ bindVar "xyw"))
+                         .= iCase
+                              { sc = var "splitXYW" .$ var "xyw"
+                              , ty = implicitTrue
+                              , clauses =
+                                  [       var "Builtin.MkPair"
+                                       .$ bindVar "x"
+                                       .$ (   var "Builtin.MkPair"
+                                           .$ bindVar "y"
+                                           .$ bindVar "w")
+                                    .=    var "pure"
+                                       .$ (   var "MkZ"
+                                           .$ var "k"
+                                           .$ var "m"
+                                           .$ var "n"
+                                           .$ var "x"
+                                           .$ var "y"
+                                           .$ var "w")
+                                  ]
+                              }
+                       ]
+                   })
+    ]
+]
