@@ -35,7 +35,7 @@ program = do
   Call Print [< V 1]
   Nop
 
-failing -- "Mismatch between: Int' and Bool'"
+failing "Can't find an implementation for AtIndex" -- "Mismatch between: Int' and Bool'"
   bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' {- 0 -} Mutable $ C 5
@@ -43,15 +43,15 @@ failing -- "Mismatch between: Int' and Bool'"
     1 #= F Plus [< V 0, C 1]
     Nop
 
-failing -- "Mismatch between: [<] and [<Int']"
+failing "Mismatch between: [<] and [<Int']"
   bad : Stmts StdF [<] Nothing
   bad = do
-    NewV Int' {- 0 -} Mytable $ C 5
-    NewV Int' {- 1 -} Mutable $ C False
+    NewV Int' {- 0 -} Mutable $ C 5
+    NewV Int' {- 1 -} Mutable $ C 6
     1 #= F Plus [< V 0]
     Nop
 
-failing -- "Mismatch between: Bool' and Int'"
+failing "Mismatch between: Bool' and Int'"
   bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' {- 0 -} Mutable $ C 5
@@ -59,7 +59,7 @@ failing -- "Mismatch between: Bool' and Int'"
     1 #= F Plus [< C True, V 0]
     Nop
 
-failing -- "Can't find an implementation for AtIndex ... Int' Mutable"
+failing "Can't find an implementation for AtIndex"
   bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' {- 0 -} Mutable $ C 5
