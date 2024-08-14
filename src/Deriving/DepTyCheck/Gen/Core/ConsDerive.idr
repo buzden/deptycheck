@@ -17,7 +17,11 @@ record TypeApp (0 con : Con) where
   constructor MkTypeApp
   argHeadType : TypeInfo
   {auto 0 argHeadTypeGood : AllTyArgsNamed argHeadType}
+  argsDeterminedBy : SortedSet $ Fin con.args.length
   argApps : Vect argHeadType.args.length .| Either (Fin con.args.length) TTImp
+
+argsCanDetermine : TypeApp con -> SortedSet $ Fin con.args.length
+argsCanDetermine ta = fromList (lefts ta.argApps.asList) `difference` ta.argsDeterminedBy
 
 getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length $ TypeApp con
 getTypeApps con = do
@@ -42,9 +46,11 @@ getTypeApps con = do
         let Yes lengthCorrect = decEq ty.args.length args.length
           | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
         _ <- ensureTyArgsNamed ty
-        pure $ MkTypeApp ty $ rewrite lengthCorrect in args.asVect <&> \arg => case getExpr arg of
-          expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
-          expr            => Right expr
+        let as = rewrite lengthCorrect in args.asVect <&> \arg => case getExpr arg of
+                   expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
+                   expr            => Right expr
+        let determinedBy = fromList $ mapMaybe (lookup' conArgIdxs) $ rights as.asList >>= allVarNames
+        pure $ MkTypeApp ty determinedBy as
 
   for con.args.asVect $ analyseTypeApp . type
 
@@ -116,7 +122,7 @@ namespace NonObligatoryExts
           genForOrder order = map (foldr apply callCons) $ evalStateT givs $ for order $ \genedArg => do
 
             -- Get info for the `genedArg`
-            let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
+            let MkTypeApp typeOfGened _ argsOfTypeOfGened = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
 
             -- Acquire the set of arguments that are already present
             presentArguments <- get
