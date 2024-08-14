@@ -1,0 +1,6 @@
+package derive-test
+
+authors = "Denis Buzdalov"
+
+depends = deptycheck
+        , covering-seq

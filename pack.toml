@@ -30,6 +30,12 @@ path = "examples/sorted-list"
 ipkg = "sorted-list.ipkg"
 test = "tests/tests.ipkg"
 
+[custom.all.covering-seq]
+type = "local"
+path = "examples/covering-seq"
+ipkg = "covering-seq.ipkg"
+test = "tests/tests.ipkg"
+
 [custom.all.uniq-list]
 type = "local"
 path = "examples/uniq-list"
