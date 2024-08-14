@@ -65,7 +65,7 @@ namespace NonObligatoryExts
                                        maybe e pure $ lookupType lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
-              lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{lhs}"
+              lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{show lhs}"
             let Yes lengthCorrect = decEq ty.args.length args.length
               | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
             _ <- ensureTyArgsNamed ty
