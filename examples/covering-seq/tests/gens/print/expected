@@ -1,0 +1,734 @@
+1/2: Building PrintDerivation (PrintDerivation.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (bs : BitMask n) -> Gen MaybeEmpty (CoveringSequence n bs)
+LOG gen.auto.derive.infra:0: 
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ImplicitArg (Just "outer^<n>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<bs>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<Data.List.Covering.CoveringSequence>[0, 1]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.List.Covering.BitMask.BitMask" .$ var "n")
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (var "Data.List.Covering.CoveringSequence" .$ var "n" .$ var "{arg:1}")
+                 })
+          , IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<Data.List.Covering.BitMask.Index.AtIndex>[0, 1, 2, 3]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                     .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
+                     .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.List.Covering.BitMask.BitMask" .$ var "n")
+                     .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Basics.Bool")
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (var "Data.List.Covering.BitMask.Index.AtIndex" .$ var "n" .$ var "{arg:2}" .$ var "{arg:3}" .$ var "{arg:4}")
+                 })
+          , IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<Data.Fin.Fin>[0]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "Data.Fin.Fin" .$ var "n")
+                 })
+          , IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<Prelude.Types.Nat>[]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                 })
+          , IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<Data.List.Covering.BitMask.Index.AllBitsAre>[0, 1, 2]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                     .-> MkArg MW ExplicitArg (Just "{arg:5}") (var "Prelude.Basics.Bool")
+                     .-> MkArg MW ExplicitArg (Just "{arg:6}") (var "Data.List.Covering.BitMask.BitMask" .$ var "n")
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (var "Data.List.Covering.BitMask.Index.AllBitsAre" .$ var "n" .$ var "{arg:5}" .$ var "{arg:6}")
+                 })
+          , IDef
+              emptyFC
+              "<Data.List.Covering.CoveringSequence>[0, 1]"
+              [    var "<Data.List.Covering.CoveringSequence>[0, 1]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>" .$ bindVar "inter^<{arg:1}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.List.Covering.End>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.List.Covering.BitMask.BitMask" .$ var "n")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "Data.List.Covering.CoveringSequence" .$ var "n" .$ var "{arg:1}")
+                                })
+                         , IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.List.Covering.Miss>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.List.Covering.BitMask.BitMask" .$ var "n")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "Data.List.Covering.CoveringSequence" .$ var "n" .$ var "{arg:1}")
+                                })
+                         , IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.List.Covering.Hit>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.List.Covering.BitMask.BitMask" .$ var "n")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "Data.List.Covering.CoveringSequence" .$ var "n" .$ var "{arg:1}")
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.List.Covering.End>>"
+                             [    var "<<Data.List.Covering.End>>" .$ bindVar "^cons_fuel^" .$ bindVar "n" .$ bindVar "bs"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.List.Covering.End (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (   var "<Data.List.Covering.BitMask.Index.AllBitsAre>[0, 1, 2]"
+                                          .$ var "^outmost-fuel^"
+                                          .$ var "n"
+                                          .$ var "Prelude.Basics.False"
+                                          .$ var "bs")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{conArg:1}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Data.List.Covering.End" .! ("n", var "n") .! ("bs", var "bs") .@ var "^bnd^{conArg:1}")))
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.List.Covering.Miss>>"
+                             [    var "<<Data.List.Covering.Miss>>" .$ bindVar "^cons_fuel^" .$ bindVar "n" .$ bindVar "bs"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.List.Covering.Miss (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:7}") implicitFalse
+                                          .=>    var ">>="
+                                              .$ (var "<Data.List.Covering.CoveringSequence>[0, 1]" .$ var "^cons_fuel^" .$ var "n" .$ var "bs")
+                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:8}") implicitFalse
+                                                  .=>    var "Prelude.pure"
+                                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                      .$ (   var "Data.List.Covering.Miss"
+                                                          .! ("n", var "n")
+                                                          .! ("bs", var "bs")
+                                                          .$ var "^bnd^{arg:7}"
+                                                          .$ var "^bnd^{arg:8}"))))
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.List.Covering.Hit>>"
+                             [    var "<<Data.List.Covering.Hit>>" .$ bindVar "^cons_fuel^" .$ bindVar "n" .$ bindVar "bs"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.List.Covering.Hit (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.Fin.Fin>[0]" .$ var "^outmost-fuel^" .$ var "n")
+                                      .$ (    MkArg MW ExplicitArg (Just "i") implicitFalse
+                                          .=>    var ">>="
+                                              .$ (   var "<Data.List.Covering.BitMask.Index.AtIndex>[0, 1, 2, 3]"
+                                                  .$ var "^outmost-fuel^"
+                                                  .$ var "n"
+                                                  .$ var "i"
+                                                  .$ var "bs"
+                                                  .$ var "Prelude.Basics.True")
+                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{conArg:2}") implicitFalse
+                                                  .=>    var ">>="
+                                                      .$ (   var "<Data.List.Covering.CoveringSequence>[0, 1]"
+                                                          .$ var "^cons_fuel^"
+                                                          .$ var "n"
+                                                          .$ (   var "Data.List.Covering.BitMask.update"
+                                                              .! ("n", var "n")
+                                                              .$ var "i"
+                                                              .$ var "Prelude.Basics.False"
+                                                              .$ var "bs"))
+                                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                                          .=>    var "Prelude.pure"
+                                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                              .$ (   var "Data.List.Covering.Hit"
+                                                                  .! ("n", var "n")
+                                                                  .! ("bs", var "bs")
+                                                                  .$ var "i"
+                                                                  .@ var "^bnd^{conArg:2}"
+                                                                  .$ var "^bnd^{arg:9}")))))
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.List.Covering.CoveringSequence[0, 1] (dry fuel)"))
+                                    .$ (var "<<Data.List.Covering.End>>" .$ var "Data.Fuel.Dry" .$ var "inter^<n>" .$ var "inter^<{arg:1}>")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.List.Covering.CoveringSequence[0, 1] (spend fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (   var "Builtin.MkPair"
+                                                .$ var "Data.Nat1.one"
+                                                .$ (   var "<<Data.List.Covering.End>>"
+                                                    .$ var "^fuel_arg^"
+                                                    .$ var "inter^<n>"
+                                                    .$ var "inter^<{arg:1}>"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (   var "<<Data.List.Covering.Miss>>"
+                                                        .$ var "^sub^fuel_arg^"
+                                                        .$ var "inter^<n>"
+                                                        .$ var "inter^<{arg:1}>"))
+                                                .$ (   var "::"
+                                                    .$ (   var "Builtin.MkPair"
+                                                        .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                        .$ (   var "<<Data.List.Covering.Hit>>"
+                                                            .$ var "^sub^fuel_arg^"
+                                                            .$ var "inter^<n>"
+                                                            .$ var "inter^<{arg:1}>"))
+                                                    .$ var "Nil"))))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Data.List.Covering.BitMask.Index.AtIndex>[0, 1, 2, 3]"
+              [       var "<Data.List.Covering.BitMask.Index.AtIndex>[0, 1, 2, 3]"
+                   .$ bindVar "^fuel_arg^"
+                   .$ bindVar "inter^<n>"
+                   .$ bindVar "inter^<{arg:2}>"
+                   .$ bindVar "inter^<{arg:3}>"
+                   .$ bindVar "inter^<{arg:4}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.List.Covering.BitMask.Index.Here>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.List.Covering.BitMask.BitMask" .$ var "n")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Basics.Bool")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (   var "Data.List.Covering.BitMask.Index.AtIndex"
+                                            .$ var "n"
+                                            .$ var "{arg:2}"
+                                            .$ var "{arg:3}"
+                                            .$ var "{arg:4}")
+                                })
+                         , IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.List.Covering.BitMask.Index.There>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.List.Covering.BitMask.BitMask" .$ var "n")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Basics.Bool")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (   var "Data.List.Covering.BitMask.Index.AtIndex"
+                                            .$ var "n"
+                                            .$ var "{arg:2}"
+                                            .$ var "{arg:3}"
+                                            .$ var "{arg:4}")
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.List.Covering.BitMask.Index.Here>>"
+                             [ withClause
+                                 { lhs =
+                                        var "<<Data.List.Covering.BitMask.Index.Here>>"
+                                     .$ bindVar "^cons_fuel^"
+                                     .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                     .$ (var "Data.Fin.FZ" .! ("k", implicitTrue))
+                                     .$ (var "Data.List.Covering.BitMask.(::)" .! ("n", implicitTrue) .$ bindVar "b" .$ bindVar "bs")
+                                     .$ bindVar "to_be_deceqed^^b0"
+                                 , rig = MW
+                                 , wval = var "Decidable.Equality.decEq" .$ var "to_be_deceqed^^b0" .$ var "b"
+                                 , prf = Nothing
+                                 , flags = []
+                                 , clauses =
+                                     [       var "<<Data.List.Covering.BitMask.Index.Here>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                          .$ (var "Data.Fin.FZ" .! ("k", implicitTrue))
+                                          .$ (var "Data.List.Covering.BitMask.(::)" .! ("n", implicitTrue) .$ bindVar "b" .$ bindVar "bs")
+                                          .$ bindVar "b"
+                                          .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                       .=    var "Test.DepTyCheck.Gen.label"
+                                          .$ (var "fromString" .$ primVal (Str "Data.List.Covering.BitMask.Index.Here (orders)"))
+                                          .$ (   var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Data.List.Covering.BitMask.Index.Here" .! ("n", var "n") .! ("bs", var "bs") .! ("b", var "b")))
+                                     ,       var "<<Data.List.Covering.BitMask.Index.Here>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                          .$ (var "Data.Fin.FZ" .! ("k", implicitTrue))
+                                          .$ (var "Data.List.Covering.BitMask.(::)" .! ("n", implicitTrue) .$ bindVar "b" .$ bindVar "bs")
+                                          .$ bindVar "to_be_deceqed^^b0"
+                                          .$ (var "Prelude.No" .$ implicitTrue)
+                                       .= var "empty"
+                                     ]
+                                 }
+                             ,       var "<<Data.List.Covering.BitMask.Index.Here>>"
+                                  .$ implicitTrue
+                                  .$ implicitTrue
+                                  .$ implicitTrue
+                                  .$ implicitTrue
+                                  .$ implicitTrue
+                               .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.List.Covering.BitMask.Index.There>>"
+                             [       var "<<Data.List.Covering.BitMask.Index.There>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                  .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ bindVar "i")
+                                  .$ (var "Data.List.Covering.BitMask.(::)" .! ("n", implicitTrue) .$ bindVar "b" .$ bindVar "bs")
+                                  .$ bindVar "v"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.List.Covering.BitMask.Index.There (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (   var "<Data.List.Covering.BitMask.Index.AtIndex>[0, 1, 2, 3]"
+                                          .$ var "^cons_fuel^"
+                                          .$ var "n"
+                                          .$ var "i"
+                                          .$ var "bs"
+                                          .$ var "v")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:10}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "Data.List.Covering.BitMask.Index.There"
+                                                  .! ("b", var "b")
+                                                  .! ("v", var "v")
+                                                  .! ("n", var "n")
+                                                  .! ("bs", var "bs")
+                                                  .! ("i", var "i")
+                                                  .$ var "^bnd^{arg:10}")))
+                             ,       var "<<Data.List.Covering.BitMask.Index.There>>"
+                                  .$ implicitTrue
+                                  .$ implicitTrue
+                                  .$ implicitTrue
+                                  .$ implicitTrue
+                                  .$ implicitTrue
+                               .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.List.Covering.BitMask.Index.AtIndex[0, 1, 2, 3] (dry fuel)"))
+                                    .$ (   var "<<Data.List.Covering.BitMask.Index.Here>>"
+                                        .$ var "Data.Fuel.Dry"
+                                        .$ var "inter^<n>"
+                                        .$ var "inter^<{arg:2}>"
+                                        .$ var "inter^<{arg:3}>"
+                                        .$ var "inter^<{arg:4}>")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.List.Covering.BitMask.Index.AtIndex[0, 1, 2, 3] (spend fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (   var "Builtin.MkPair"
+                                                .$ var "Data.Nat1.one"
+                                                .$ (   var "<<Data.List.Covering.BitMask.Index.Here>>"
+                                                    .$ var "^fuel_arg^"
+                                                    .$ var "inter^<n>"
+                                                    .$ var "inter^<{arg:2}>"
+                                                    .$ var "inter^<{arg:3}>"
+                                                    .$ var "inter^<{arg:4}>"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (   var "<<Data.List.Covering.BitMask.Index.There>>"
+                                                        .$ var "^sub^fuel_arg^"
+                                                        .$ var "inter^<n>"
+                                                        .$ var "inter^<{arg:2}>"
+                                                        .$ var "inter^<{arg:3}>"
+                                                        .$ var "inter^<{arg:4}>"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Data.Fin.Fin>[0]"
+              [    var "<Data.Fin.Fin>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.Fin.FZ>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "Data.Fin.Fin" .$ var "n")
+                                })
+                         , IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.Fin.FS>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "Data.Fin.Fin" .$ var "n")
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.Fin.FZ>>"
+                             [    var "<<Data.Fin.FZ>>" .$ bindVar "^cons_fuel^" .$ (var "Prelude.Types.S" .$ bindVar "k")
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.Fin.FZ (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "Data.Fin.FZ" .! ("k", var "k")))
+                             , var "<<Data.Fin.FZ>>" .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.Fin.FS>>"
+                             [    var "<<Data.Fin.FS>>" .$ bindVar "^cons_fuel^" .$ (var "Prelude.Types.S" .$ bindVar "k")
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.Fin.FS (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.Fin.Fin>[0]" .$ var "^cons_fuel^" .$ var "k")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:11}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Data.Fin.FS" .! ("k", var "k") .$ var "^bnd^{arg:11}")))
+                             , var "<<Data.Fin.FS>>" .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.Fin.Fin[0] (dry fuel)"))
+                                    .$ (var "<<Data.Fin.FZ>>" .$ var "Data.Fuel.Dry" .$ var "inter^<n>")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.Fin.Fin[0] (spend fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (   var "Builtin.MkPair"
+                                                .$ var "Data.Nat1.one"
+                                                .$ (var "<<Data.Fin.FZ>>" .$ var "^fuel_arg^" .$ var "inter^<n>"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Data.Fin.FS>>" .$ var "^sub^fuel_arg^" .$ var "inter^<n>"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Prelude.Types.Nat>[]"
+              [    var "<Prelude.Types.Nat>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Prelude.Types.Z>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                                })
+                         , IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Prelude.Types.S>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Prelude.Types.Z>>"
+                             [    var "<<Prelude.Types.Z>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Prelude.Types.Z (orders)"))
+                                  .$ (var "Prelude.pure" .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue) .$ var "Prelude.Types.Z")
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Prelude.Types.S>>"
+                             [    var "<<Prelude.Types.S>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:12}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Prelude.Types.S" .$ var "^bnd^{arg:12}")))
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (dry fuel)"))
+                                    .$ (var "<<Prelude.Types.Z>>" .$ var "Data.Fuel.Dry")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (spend fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Prelude.Types.S>>" .$ var "^sub^fuel_arg^"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Data.List.Covering.BitMask.Index.AllBitsAre>[0, 1, 2]"
+              [       var "<Data.List.Covering.BitMask.Index.AllBitsAre>[0, 1, 2]"
+                   .$ bindVar "^fuel_arg^"
+                   .$ bindVar "inter^<n>"
+                   .$ bindVar "inter^<{arg:5}>"
+                   .$ bindVar "inter^<{arg:6}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.List.Covering.BitMask.Index.Finish>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:5}") (var "Prelude.Basics.Bool")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:6}") (var "Data.List.Covering.BitMask.BitMask" .$ var "n")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "Data.List.Covering.BitMask.Index.AllBitsAre" .$ var "n" .$ var "{arg:5}" .$ var "{arg:6}")
+                                })
+                         , IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Data.List.Covering.BitMask.Index.Continue>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:5}") (var "Prelude.Basics.Bool")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:6}") (var "Data.List.Covering.BitMask.BitMask" .$ var "n")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "Data.List.Covering.BitMask.Index.AllBitsAre" .$ var "n" .$ var "{arg:5}" .$ var "{arg:6}")
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.List.Covering.BitMask.Index.Finish>>"
+                             [       var "<<Data.List.Covering.BitMask.Index.Finish>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ var "Prelude.Types.Z"
+                                  .$ bindVar "b"
+                                  .$ var "Data.List.Covering.BitMask.Nil"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.List.Covering.BitMask.Index.Finish (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "Data.List.Covering.BitMask.Index.Finish" .! ("b", var "b")))
+                             ,    var "<<Data.List.Covering.BitMask.Index.Finish>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue
+                               .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.List.Covering.BitMask.Index.Continue>>"
+                             [ withClause
+                                 { lhs =
+                                        var "<<Data.List.Covering.BitMask.Index.Continue>>"
+                                     .$ bindVar "^cons_fuel^"
+                                     .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                     .$ bindVar "b"
+                                     .$ (var "Data.List.Covering.BitMask.(::)" .! ("n", implicitTrue) .$ bindVar "to_be_deceqed^^b0" .$ bindVar "bs")
+                                 , rig = MW
+                                 , wval = var "Decidable.Equality.decEq" .$ var "to_be_deceqed^^b0" .$ var "b"
+                                 , prf = Nothing
+                                 , flags = []
+                                 , clauses =
+                                     [       var "<<Data.List.Covering.BitMask.Index.Continue>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                          .$ bindVar "b"
+                                          .$ (var "Data.List.Covering.BitMask.(::)" .! ("n", implicitTrue) .$ bindVar "b" .$ bindVar "bs")
+                                          .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                       .=    var "Test.DepTyCheck.Gen.label"
+                                          .$ (var "fromString" .$ primVal (Str "Data.List.Covering.BitMask.Index.Continue (orders)"))
+                                          .$ (   var ">>="
+                                              .$ (   var "<Data.List.Covering.BitMask.Index.AllBitsAre>[0, 1, 2]"
+                                                  .$ var "^cons_fuel^"
+                                                  .$ var "n"
+                                                  .$ var "b"
+                                                  .$ var "bs")
+                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:13}") implicitFalse
+                                                  .=>    var "Prelude.pure"
+                                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                      .$ (   var "Data.List.Covering.BitMask.Index.Continue"
+                                                          .! ("n", var "n")
+                                                          .! ("bs", var "bs")
+                                                          .! ("b", var "b")
+                                                          .$ var "^bnd^{arg:13}")))
+                                     ,       var "<<Data.List.Covering.BitMask.Index.Continue>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ (var "Prelude.Types.S" .$ bindVar "n")
+                                          .$ bindVar "b"
+                                          .$ (   var "Data.List.Covering.BitMask.(::)"
+                                              .! ("n", implicitTrue)
+                                              .$ bindVar "to_be_deceqed^^b0"
+                                              .$ bindVar "bs")
+                                          .$ (var "Prelude.No" .$ implicitTrue)
+                                       .= var "empty"
+                                     ]
+                                 }
+                             ,    var "<<Data.List.Covering.BitMask.Index.Continue>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue
+                               .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.List.Covering.BitMask.Index.AllBitsAre[0, 1, 2] (dry fuel)"))
+                                    .$ (   var "<<Data.List.Covering.BitMask.Index.Finish>>"
+                                        .$ var "Data.Fuel.Dry"
+                                        .$ var "inter^<n>"
+                                        .$ var "inter^<{arg:5}>"
+                                        .$ var "inter^<{arg:6}>")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.List.Covering.BitMask.Index.AllBitsAre[0, 1, 2] (spend fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (   var "Builtin.MkPair"
+                                                .$ var "Data.Nat1.one"
+                                                .$ (   var "<<Data.List.Covering.BitMask.Index.Finish>>"
+                                                    .$ var "^fuel_arg^"
+                                                    .$ var "inter^<n>"
+                                                    .$ var "inter^<{arg:5}>"
+                                                    .$ var "inter^<{arg:6}>"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (   var "<<Data.List.Covering.BitMask.Index.Continue>>"
+                                                        .$ var "^sub^fuel_arg^"
+                                                        .$ var "inter^<n>"
+                                                        .$ var "inter^<{arg:5}>"
+                                                        .$ var "inter^<{arg:6}>"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          ]
+      , scope = var "<Data.List.Covering.CoveringSequence>[0, 1]" .$ var "^outmost-fuel^" .$ var "outer^<n>" .$ var "outer^<bs>"
+      }
+
