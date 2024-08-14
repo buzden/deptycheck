@@ -195,6 +195,10 @@ namespace NonObligatoryExts
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
       let allOrders = if simplificationHack then take 1 allOrders else allOrders
+      let allOrders = List.nub $ nub <$> allOrders
+
+      for_ allOrders $ \order =>
+        logPoint {level=10} "least-effort.order" [sig, con] "- one of used final orders: \{show order}"
 
       --------------------------
       -- Producing the result --
