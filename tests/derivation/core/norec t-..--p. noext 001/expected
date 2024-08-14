@@ -3,21 +3,21 @@
 Generated values:
 -----
 -----
-(True ** (False ** MkX True False))
+(False ** (True ** MkX False True))
 -----
 (False ** (False ** MkX False False))
 -----
-(False ** (True ** MkX False True))
+(True ** (False ** MkX True False))
 -----
 (True ** (True ** MkX True True))
 -----
 (True ** (True ** MkX True True))
------
-(False ** (True ** MkX False True))
 -----
 (True ** (False ** MkX True False))
 -----
 (False ** (True ** MkX False True))
+-----
+(True ** (False ** MkX True False))
 -----
 (False ** (False ** MkX False False))
 -----

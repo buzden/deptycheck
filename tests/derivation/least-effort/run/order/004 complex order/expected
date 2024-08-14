@@ -3,22 +3,22 @@
 Generated values:
 -----
 -----
-MkX "" 10
+MkZ 2 2 Y2
 -----
-MkX "" 0
+MkZ 0 1 Y0
 -----
-MkX "a" 0
+MkZ 0 1 Y0
 -----
-MkX "a" 10
+MkZ 2 2 Y2
 -----
-MkX "" 10
+MkZ 2 2 Y2
 -----
-MkX "a" 10
+MkZ 2 2 Y2
 -----
-MkX "" 0
+MkZ 0 1 Y0
 -----
-MkX "" 10
+MkZ 0 1 Y0
 -----
-MkX "a" 0
+MkZ 0 1 Y0
 -----
-MkX "a" 10
+MkZ 2 2 Y2

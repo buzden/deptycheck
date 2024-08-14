@@ -13,12 +13,12 @@ Generated values:
 -----
 (True ** TR "a" (FN 0 (FN 10 (TR "a" (FN 10 (TR "a" (JJ 0 10)))))))
 -----
-(True ** TR "bc" (FN 10 (TR "bc" (TR "bc" (TR "a" (FN 0 (FN 10 (FN 0 (FN 0 (JJ 10 10))))))))))
+(True ** TR "bc" (FN 10 (TR "bc" (TR "bc" (TR "a" (FN 0 (FN 10 (FN 0 (FN 0 (JJ 10 0))))))))))
 -----
 (False ** FN 0 (FN 10 (FN 0 (TR "a" (FN 10 (FN 0 (FN 10 (FN 0 (FN 0 (FN 10 (TR "a" (FN 10 (TR "a" (FN 0 (FN 10 (FN 0 (FN 10 (JJ 10 0))))))))))))))))))
 -----
 (True ** TR "a" (TR "bc" (FN 0 (FN 10 (TR "" (FN 0 (FN 10 (TR "" (TR "bc" (FN 10 (JJ 10 10)))))))))))
 -----
-(True ** TR "a" (FN 10 (TR "" (TR "bc" (TR "a" (FN 10 (FN 10 (FN 0 (FN 10 (TR "" (TR "" (FN 10 (FN 0 (JJ 10 0))))))))))))))
+(True ** TR "a" (FN 10 (TR "" (TR "bc" (TR "a" (FN 10 (FN 10 (FN 0 (FN 10 (TR "" (TR "" (FN 10 (FN 0 (JJ 10 10))))))))))))))
 -----
-(True ** TR "bc" (TR "a" (FN 0 (TR "" (JJ 0 10)))))
+(True ** TR "bc" (TR "a" (FN 0 (TR "" (JJ 0 0)))))
