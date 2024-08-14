@@ -65,7 +65,7 @@ namespace NonObligatoryExts
                                        maybe e pure $ lookupType lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
-              lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{lhs}"
+              lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{show lhs}"
             let Yes lengthCorrect = decEq ty.args.length args.length
               | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
             _ <- ensureTyArgsNamed ty
@@ -195,6 +195,10 @@ namespace NonObligatoryExts
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
       let allOrders = if simplificationHack then take 1 allOrders else allOrders
+      let allOrders = List.nub $ nub <$> allOrders
+
+      for_ allOrders $ \order =>
+        logPoint {level=10} "least-effort.order" [sig, con] "- one of used final orders: \{show order}"
 
       --------------------------
       -- Producing the result --
