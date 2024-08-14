@@ -1,0 +1,25 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Sorry, I can't find any elaboration which works. All errors:
+Possible error:
+    Error during reflection: Fields with function types are not supported in constructors
+
+    DerivedGen:8:10--8:22
+     4 | 
+     5 | %default total
+     6 | 
+     7 | data X : Type where
+     8 |   MkX : (Unit -> Unit) -> X
+                  ^^^^^^^^^^^^
+
+Possible error:
+    Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
+
+    DerivedGen:16:14--16:23
+     12 | 
+     13 | %language ElabReflection
+     14 | 
+     15 | checkedGen : Fuel -> Gen MaybeEmpty X
+     16 | checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+                       ^^^^^^^^^
+
