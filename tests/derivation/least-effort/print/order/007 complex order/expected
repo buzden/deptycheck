@@ -94,7 +94,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
                                                          .$ (    MkArg MW ExplicitArg (Just "y") implicitFalse
                                                              .=>    var "Prelude.pure"
                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                                 .$ (var "DerivedGen.MkZ" .$ var "n" .$ var "x" .$ var "y"))
+                                                                 .$ (var "DerivedGen.MkZ" .$ implicitTrue .$ implicitTrue .$ var "y"))
                                                     ]
                                                 }))
                              ]
@@ -246,7 +246,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Builtin.DPair.MkDPair"
                                                              .$ implicitTrue
-                                                             .$ (var "Data.Fin.FS" .! ("k", var "k") .$ var "^bnd^{arg:2}"))
+                                                             .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "^bnd^{arg:2}"))
                                                     ]
                                                 }))
                              ]

@@ -71,6 +71,61 @@ interface ConstructorDerivator where
 
 --- Particular tactics ---
 
+record Determination (0 con : Con) where
+  constructor MkDetermination
+  ||| Args which cannot be determined by this arg, e.g. because it is used in a non-trivial expression.
+  stronglyDeterminingArgs : SortedSet $ Fin con.args.length
+  ||| Args which this args depends on, which are not strongly determining.
+  determinableArgs : SortedSet $ Fin con.args.length
+
+mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
+mapDetermination f $ MkDetermination sda da = MkDetermination .| f sda .| f da
+
+removeDeeply : Foldable f =>
+               (toRemove : f $ Fin con.args.length) ->
+               (fromWhat : SortedMap .| Fin con.args.length .| Determination con) ->
+               SortedMap .| Fin con.args.length .| Determination con
+removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
+
+searchOrder : {con : _} ->
+              (left : SortedMap .| Fin con.args.length .| Determination con) ->
+              List $ Fin con.args.length
+searchOrder left = do
+
+  -- find all arguments that are not stongly determined by anyone
+  let nonStronglyDetermined = filter (\(_, det) => null det.stronglyDeterminingArgs) $ SortedMap.toList left
+
+  -- finish is nothing appropriate left
+  let False = null nonStronglyDetermined | True => []
+
+  -- compute arguments that are determinable by any other argument
+  let determinable = concatMap determinableArgs left
+
+  -- among them find all that are not determined even weakly, if any
+  let notDetermined = filter (not . contains' determinable . fst) nonStronglyDetermined
+
+  -- choose the group of args that can go next
+  let curr = if not $ null notDetermined then notDetermined else nonStronglyDetermined
+
+  -- choose the one from the variants
+  -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
+  -- (e.g. because of discharging of strong determination), and new alternative have more priority than current ones.
+  -- TODO to determine the best among current variants taking into account which indices are more complex (transitively!)
+  let Just curr = last' curr
+    | Nothing => []
+
+  -- compute set of arguments that will be determined by the currently chosen args
+  let determined = determinableArgs $ snd curr
+
+  -- clean up representation
+  let curr = fst curr
+
+  -- remove information about all currently chosen args
+  let next = removeDeeply .| Id curr .| removeDeeply determined left
+
+  -- `next` is smaller than `left` because `curr` must be not empty
+  curr :: searchOrder (assert_smaller left next)
+
 ||| "Non-obligatory" means that some present external generator of some type
 ||| may be ignored even if its type is really used in a generated data constructor.
 namespace NonObligatoryExts
@@ -85,9 +140,6 @@ namespace NonObligatoryExts
 
       -- Prepare local search context
       let _ : NamesInfoInTypes = %search    -- I don't why it won't be found without this
-
-      -- Log all arguments' position and their names (if they have some)
-      logPoint {level=15} "least-effort" [sig, con] "- con args: \{List.allFins con.args.length}"
 
       -------------------------------------------------------------
       -- Prepare intermediate data and functions using this data --
@@ -171,57 +223,26 @@ namespace NonObligatoryExts
             -- Chain the subgen call with a given continuation
             pure $ \cont => `(~subgenCall >>= ~(bindRHS cont))
 
-      -------------------------------------------------
-      -- Left-to-right generation phase (2nd phase) ---
-      -------------------------------------------------
+      --------------------------------------------
+      -- Compute possible orders of generation ---
+      --------------------------------------------
 
-      -- Determine which arguments need to be generated in a left-to-right manner
-      let (leftToRightArgsTypeApp, leftToRightArgs) = unzip $ filter (\(ta, _) => any isRight ta.argApps) $ toListI argsTypeApps
+      -- Compute determination map without weak determination information
+      let determ = insertFrom' empty $ mapI (\i, tya => (i, MkDetermination .| argsDeterminedBy tya .| argsCanDetermine tya)) argsTypeApps
 
-      --------------------------------------------------------------------------------
-      -- Preparation of input for the left-to-right phase (1st right-to-left phase) --
-      --------------------------------------------------------------------------------
+      logPoint {level=15} "least-effort" [sig, con] "- determ: \{determ}"
+      logPoint {level=15} "least-effort" [sig, con] "- givs: \{givs}"
 
-      -- Acquire those variables that appear in non-trivial type expressions, i.e. those which needs to be generated before the left-to-right phase
-      let preLTR = leftToRightArgsTypeApp >>= \ta => rights (toList ta.argApps) >>= allVarNames
-      let preLTR = SortedSet.fromList $ mapMaybe (lookup' conArgIdxs) preLTR
+      let theOrder = searchOrder $ removeDeeply givs determ
 
-      -- Find rightmost arguments among `preLTR`
-      let depsLTR = SortedSet.fromList $
-                      mapMaybe (\(ds, idx) => whenT .| contains idx preLTR && null ds .| idx) $
-                        toListI $ rawDeps <&> intersection preLTR . (`difference` givs)
-
-      ---------------------------------------------------------------------------------
-      -- Main right-to-left generation phase (3rd phase aka 2nd right-to-left phase) --
-      ---------------------------------------------------------------------------------
-
-      -- Arguments that no other argument depends on
-      let rightmostArgs = fromFoldable {f=Vect _} range `difference` (givs `union` dependees)
-
-      ---------------------------------------------------------------
-      -- Manage different possible variants of generation ordering --
-      ---------------------------------------------------------------
-
-      -- Prepare info about which arguments are independent and thus can be ordered arbitrarily
-      let disjDeps = disjointDepSets rawDeps' givs
-
-      -- Acquire order(s) in what we will generate arguments
-      let allOrders = do
-        leftmost  <- indepPermutations' disjDeps depsLTR
-        rightmost <- indepPermutations' disjDeps rightmostArgs
-        pure $ leftmost ++ leftToRightArgs ++ rightmost
-
-      let allOrders = if simplificationHack then take 1 allOrders else allOrders
-      let allOrders = List.nub $ nub <$> allOrders
-
-      for_ allOrders $ \order =>
-        logPoint {level=10} "least-effort" [sig, con] "- used final order: \{order}"
+      logPoint {level=10} "least-effort" [sig, con] "- used final order: \{theOrder}"
 
       --------------------------
       -- Producing the result --
       --------------------------
 
-      callOneOf "\{show con.name} (orders)".label <$> traverse genForOrder allOrders
+      with FromString.(.label)
+      labelGen "\{show con.name} (orders)".label <$> genForOrder theOrder
 
       where
 
@@ -232,6 +253,12 @@ namespace NonObligatoryExts
 
         Foldable f => Interpolation (f $ Fin con.args.length) where
           interpolate = ("[" ++) . (++ "]") . joinBy ", " . map interpolate . toList
+
+        Interpolation (Determination con) where
+          interpolate $ MkDetermination sda da = "<=\{sda} ->\{da}"
+
+        Interpolation (SortedMap .| Fin con.args.length .| Determination con) where
+          interpolate = joinBy "; " . map (\(i, d) => "\{i}: \{d}") . SortedMap.toList
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.

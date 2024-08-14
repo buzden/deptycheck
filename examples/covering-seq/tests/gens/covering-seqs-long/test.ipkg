@@ -1,0 +1,6 @@
+package a-test
+
+depends = covering-seq
+
+executable = a-test
+main = Main

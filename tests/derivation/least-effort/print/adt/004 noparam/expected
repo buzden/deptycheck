@@ -68,14 +68,14 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty X
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.R (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<DerivedGen.X>[]" .$ var "^cons_fuel^")
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
                                       .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:1}") implicitFalse
                                           .=>    var ">>="
-                                              .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                              .$ (var "<DerivedGen.X>[]" .$ var "^cons_fuel^")
                                               .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:2}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                      .$ (var "DerivedGen.R" .$ var "^bnd^{arg:1}" .$ var "^bnd^{arg:2}"))))
+                                                      .$ (var "DerivedGen.R" .$ var "^bnd^{arg:2}" .$ var "^bnd^{arg:1}"))))
                              ]
                          ]
                      , scope =

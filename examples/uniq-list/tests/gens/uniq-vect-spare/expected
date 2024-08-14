@@ -1,31 +1,31 @@
 prenty of spare strings to generate from (7 for vects of length 4)
 -----------
-vect: ["g", "f", "b", "h"]
+vect: ["g", "c", "a", "b"]
 uniq: True
 -----------
-vect: ["h", "b", "g", "f"]
+vect: ["b", "c", "g", "a"]
 uniq: True
 -----------
-vect: ["h", "a", "c", "f"]
+vect: ["b", "c", "d", "h"]
 uniq: True
 -----------
-vect: ["d", "c", "f", "a"]
+vect: ["h", "g", "d", "c"]
 uniq: True
 -----------
-vect: ["a", "b", "d", "h"]
+vect: ["a", "b", "g", "c"]
 uniq: True
 -----------
-vect: ["h", "f", "d", "a"]
+vect: ["f", "b", "h", "g"]
 uniq: True
 -----------
-vect: ["a", "c", "f", "h"]
+vect: ["g", "f", "c", "a"]
 uniq: True
 -----------
-vect: ["h", "f", "b", "c"]
+vect: ["a", "h", "d", "g"]
 uniq: True
 -----------
-vect: ["a", "d", "f", "c"]
+vect: ["a", "c", "d", "f"]
 uniq: True
 -----------
-vect: ["f", "a", "d", "b"]
+vect: ["c", "d", "f", "a"]
 uniq: True
