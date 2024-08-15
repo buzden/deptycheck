@@ -17,7 +17,7 @@ main = goldenRunner $
   , "Derivation: input validation" `atDir` "derivation/inputvalidation"
   , "Derivation: running harness" `atDir` "derivation/infra"
   , [ "Derivation: least effort (\{p}, \{w})" `atDir` "derivation/least-effort/\{p}/\{w}"
-    | p <- ["print", "run"], w <- ["adt", "gadt", "regression"]
+    | p <- ["print", "run"], w <- ["adt", "gadt", "order", "regression"]
     ]
   , "Derivation: core" `atDir` "derivation/core"
   , "Derivation: distribution" `atDir` "derivation/distribution"
