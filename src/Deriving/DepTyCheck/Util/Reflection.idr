@@ -56,6 +56,16 @@ SingleLogPosition Con where
     let fullName' = unpack fullName
     maybe fullName (pack . flip drop fullName' . S . finToNat) $ findLastIndex (== '.') fullName'
 
+export
+[WithName] {con : Con} -> Interpolation (Fin con.args.length) where
+  interpolate i = case name $ index' con.args i of
+    Just (UN n) => "#\{show i} (\{show n})"
+    _           => "#\{show i}"
+
+export
+[WithNames] {con : Con} -> Foldable f => Interpolation (f $ Fin con.args.length) where
+  interpolate = ("[" ++) . (++ "]") . joinBy ", " . map (interpolate @{WithName}) . toList
+
 ----------------------------------------------
 --- Compiler-based `TTImp` transformations ---
 ----------------------------------------------
