@@ -1,0 +1,48 @@
+1/1: Building PrintCoverage (PrintCoverage.idr)
+
+Prelude.Types.Nat not covered
+  - S: not covered
+  - Z: not covered
+
+PrintCoverage.X covered partially (2 times)
+  - X1: covered (2 times)
+  - X2: not covered
+  - X3: not covered
+
+PrintCoverage.Y covered partially (1 time)
+  - Y1: not covered
+  - Y2: not covered
+  - Y3: covered (1 time)
+
+--------
+
+Prelude.Types.Nat not covered
+  - S: not covered
+  - Z: not covered
+
+PrintCoverage.X covered partially (1 time)
+  - X1: not covered
+  - X2: not covered
+  - X3: covered (1 time)
+
+PrintCoverage.Y covered partially (1 time)
+  - Y1: not covered
+  - Y2: covered (1 time)
+  - Y3: not covered
+
+--------
+
+Prelude.Types.Nat not covered
+  - S: not covered
+  - Z: not covered
+
+PrintCoverage.X covered partially (2 times)
+  - X1: covered (1 time)
+  - X2: not covered
+  - X3: covered (1 time)
+
+PrintCoverage.Y covered partially (1 time)
+  - Y1: not covered
+  - Y2: not covered
+  - Y3: covered (1 time)
+
