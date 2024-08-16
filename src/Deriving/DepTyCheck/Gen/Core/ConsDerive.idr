@@ -42,7 +42,12 @@ namespace NonObligatoryExts
   [LeastEffort] {default False simplificationHack : Bool} -> ConstructorDerivator where
     consGenExpr sig con givs fuel = do
 
-      let niit : NamesInfoInTypes = %search    -- I don't why it won't be found without this
+      -- Prepare local search context
+      let _ : NamesInfoInTypes = %search    -- I don't why it won't be found without this
+      let _ : ({0 f : _} -> Foldable f => Interpolation $ f _) = WithNames {con}
+
+      -- Log all arguments' position and their names (if they have some)
+      logPoint {level=15} "least-effort" [sig, con] "- con args: \{List.allFins con.args.length}"
 
       -------------------------------------------------------------
       -- Prepare intermediate data and functions using this data --
@@ -199,7 +204,7 @@ namespace NonObligatoryExts
       let allOrders = List.nub $ nub <$> allOrders
 
       for_ allOrders $ \order =>
-        logPoint {level=10} "least-effort.order" [sig, con] "- one of used final orders: \{show order}"
+        logPoint {level=10} "least-effort" [sig, con] "- used final order: \{order}"
 
       --------------------------
       -- Producing the result --
