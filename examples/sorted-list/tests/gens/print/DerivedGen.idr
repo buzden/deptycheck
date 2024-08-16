@@ -8,6 +8,4 @@ import Data.List.Sorted
 
 %language ElabReflection
 
-%hint LE : ConstructorDerivator; LE = LeastEffort
-
 %runElab printDerived $ Fuel -> Gen MaybeEmpty SortedList

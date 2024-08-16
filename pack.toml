@@ -3,7 +3,7 @@
 ################
 
 [install]
-whitelist = [ "deptycheck-docs" ]
+whitelist = [ "deptycheck-docs", "pil-fun" ]
 
 ##################
 ### DepTyCheck ###
@@ -30,6 +30,12 @@ path = "examples/sorted-list"
 ipkg = "sorted-list.ipkg"
 test = "tests/tests.ipkg"
 
+[custom.all.covering-seq]
+type = "local"
+path = "examples/covering-seq"
+ipkg = "covering-seq.ipkg"
+test = "tests/tests.ipkg"
+
 [custom.all.uniq-list]
 type = "local"
 path = "examples/uniq-list"
@@ -52,4 +58,10 @@ test = "tests/tests.ipkg"
 type = "local"
 path = "examples/pil-reg"
 ipkg = "pil-reg.ipkg"
+test = "tests/tests.ipkg"
+
+[custom.all.pil-fun]
+type = "local"
+path = "examples/pil-fun"
+ipkg = "pil-fun.ipkg"
 test = "tests/tests.ipkg"

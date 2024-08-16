@@ -3,25 +3,32 @@ module Deriving.DepTyCheck.Util.Reflection
 
 import public Control.Applicative.Const
 
-import public Data.Fin
+import public Data.Alternative
+
+import public Data.Fin.Lists
+import public Data.Fin.ToFin
 import public Data.Fuel
-import public Data.Nat.Pos
+import public Data.Nat1
 import public Data.List.Lazy
+import public Data.List.Extra
 import public Data.These
 import public Data.Vect.Dependent
+import public Data.Vect.Extra
 
 import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
-import public Deriving.DepTyCheck.Util.Alternative
-import public Deriving.DepTyCheck.Util.Collections
 import public Deriving.DepTyCheck.Util.Logging
-import public Deriving.DepTyCheck.Util.Syntax
 
 import public Language.Reflection.Compat
 import public Language.Reflection.TTImp
 import public Language.Reflection.Pretty
+
+import public Syntax.IHateParens.Function
+import public Syntax.IHateParens.List
+import public Syntax.IHateParens.SortedSet
+import public Syntax.Monad.Logic
 
 import public Text.PrettyPrint.Bernardy
 
@@ -169,7 +176,7 @@ liftList = foldr (\l, r => `(~l :: ~r)) `([])
 
 export
 liftWeight1 : TTImp
-liftWeight1 = `(Data.Nat.Pos.one)
+liftWeight1 = `(Data.Nat1.one)
 
 namespace CompiletimeLabel
 
@@ -216,9 +223,9 @@ callFrequency desc variants = labelGen desc $ var `{Test.DepTyCheck.Gen.frequenc
 
 -- TODO to think of better placement for this function; this anyway is intended to be called from the derived code.
 public export
-leftDepth : Fuel -> PosNat
+leftDepth : Fuel -> Nat1
 leftDepth = go 1 where
-  go : PosNat -> Fuel -> PosNat
+  go : Nat1 -> Fuel -> Nat1
   go n Dry      = n
   go n (More x) = go (succ n) x
 
@@ -324,7 +331,7 @@ argDeps args = do
   %unbound_implicits off -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2040
 
   filteredArgs : (excluded : SortedSet $ Fin args.length) -> List Arg
-  filteredArgs excluded = filterI' args $ \idx, _ => not $ contains idx excluded
+  filteredArgs excluded = filterI args $ \idx, _ => not $ contains idx excluded
 
   partialSig : (retTy : TTImp) -> (excluded : SortedSet $ Fin args.length) -> TTImp
   partialSig retTy = piAll retTy . map {piInfo := ExplicitArg} . filteredArgs
@@ -485,17 +492,17 @@ record NamesInfoInTypes where
   namesInTypes : SortedMap TypeInfo $ SortedSet Name
 
 lookupByType : NamesInfoInTypes => Name -> Maybe $ SortedSet Name
-lookupByType @{tyi} = flip lookup tyi.types >=> flip lookup tyi.namesInTypes
+lookupByType @{tyi} = lookup' tyi.types >=> lookup' tyi.namesInTypes
 
 lookupByCon : NamesInfoInTypes => Name -> Maybe $ SortedSet Name
-lookupByCon @{tyi} = concatMap @{Deep} lookupByType . SortedSet.toList . concatMap allVarNames' . conSubexprs . snd <=< flip lookup tyi.cons
+lookupByCon @{tyi} = concatMap @{Deep} lookupByType . SortedSet.toList . concatMap allVarNames' . conSubexprs . snd <=< lookup' tyi.cons
 
 typeByCon : NamesInfoInTypes => Con -> Maybe TypeInfo
-typeByCon @{tyi} = map fst . flip lookup tyi.cons . name
+typeByCon @{tyi} = map fst . lookup' tyi.cons . name
 
 export
 lookupType : NamesInfoInTypes => Name -> Maybe TypeInfo
-lookupType @{tyi} = flip lookup tyi.types
+lookupType @{tyi} = lookup' tyi.types
 
 export
 lookupCon : NamesInfoInTypes => Name -> Maybe Con
@@ -547,7 +554,7 @@ isRecursive con = case the (Maybe TypeInfo) $ containingType <|> typeByCon con o
 -- returns `Nothing` if given name is not a constructor
 export
 isRecursiveConstructor : NamesInfoInTypes => Name -> Maybe Bool
-isRecursiveConstructor @{tyi} n = flip lookup tyi.cons n <&> \(ty, con) => isRecursive {containingType=Just ty} con
+isRecursiveConstructor @{tyi} n = lookup' tyi.cons n <&> \(ty, con) => isRecursive {containingType=Just ty} con
 
 export
 getNamesInfoInTypes : Elaboration m => TypeInfo -> m NamesInfoInTypes
@@ -662,7 +669,7 @@ allInvolvedTypes : Elaboration m => (minimalRig : Count) -> TypeInfo -> m $ List
 allInvolvedTypes minimalRig ti = toList <$> go [ti] empty where
   go : (left : List TypeInfo) -> (curr : SortedMap Name TypeInfo) -> m $ SortedMap Name TypeInfo
   go left curr = do
-    let (c::left) = filter (not . isJust . flip lookup curr . name) left
+    let (c::left) = filter (not . isJust . lookup' curr . name) left
       | [] => pure curr
     let next = insert c.name c curr
     args <- atRig M0 $ join <$> for c.args typesOfArg

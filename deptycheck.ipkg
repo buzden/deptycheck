@@ -9,11 +9,9 @@ license = "MPL-2.0"
 sourcedir = "src"
 builddir = ".build"
 
-version = 0.0.240423
+version = 0.0.240724
 
-modules = Data.Nat.Pos
-        , Data.Vect.Dependent
-        , Deriving.DepTyCheck
+modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
         , Deriving.DepTyCheck.Gen.Derive
         , Deriving.DepTyCheck.Gen.Entry
@@ -22,14 +20,8 @@ modules = Data.Nat.Pos
         , Deriving.DepTyCheck.Gen.Core.ConsEntry
         , Deriving.DepTyCheck.Gen.Core.Util
         , Deriving.DepTyCheck.Gen.Checked
-        , Deriving.DepTyCheck.Util
-        , Deriving.DepTyCheck.Util.Alternative
-        , Deriving.DepTyCheck.Util.Collections
-        , Deriving.DepTyCheck.Util.DepPerm
-        , Deriving.DepTyCheck.Util.Fin
         , Deriving.DepTyCheck.Util.Logging
         , Deriving.DepTyCheck.Util.Reflection
-        , Deriving.DepTyCheck.Util.Syntax
         , Language.Reflection.Compat
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Coverage
@@ -37,9 +29,15 @@ modules = Data.Nat.Pos
         , Test.DepTyCheck.Gen.Labels
 
 depends = ansi
+        , best-alternative
+        , collection-utils
+        , dependent-vect
         , elab-pretty
         , elab-util
+        , fin-lizzie
+        , i-hate-parens
         , if-unsolved-implicit
         , mtl-tuple-impls
+        , positive-nat
         , random-pure
         , typelevel-emptiness-collections

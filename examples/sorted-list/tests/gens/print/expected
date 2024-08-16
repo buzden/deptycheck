@@ -156,9 +156,7 @@ LOG gen.auto.derive.infra:0:
                                     .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.SortedList[] (spend fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
-                                            .$ (   var "Builtin.MkPair"
-                                                .$ var "Data.Nat.Pos.one"
-                                                .$ (var "<<Data.List.Sorted.Nil>>" .$ var "^fuel_arg^"))
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Data.List.Sorted.Nil>>" .$ var "^fuel_arg^"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
                                                     .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
@@ -284,7 +282,7 @@ LOG gen.auto.derive.infra:0:
                                     .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.FirstGT[] (spend fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
-                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat.Pos.one" .$ (var "<<Data.List.Sorted.E>>" .$ var "^fuel_arg^"))
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Data.List.Sorted.E>>" .$ var "^fuel_arg^"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
                                                     .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
@@ -397,7 +395,7 @@ LOG gen.auto.derive.infra:0:
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
-                                                .$ var "Data.Nat.Pos.one"
+                                                .$ var "Data.Nat1.one"
                                                 .$ (var "<<Data.List.Sorted.E>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
@@ -504,7 +502,7 @@ LOG gen.auto.derive.infra:0:
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
-                                                .$ var "Data.Nat.Pos.one"
+                                                .$ var "Data.Nat1.one"
                                                 .$ (var "<<Data.Nat.LTEZero>>" .$ var "^fuel_arg^" .$ var "inter^<n>"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
@@ -579,7 +577,7 @@ LOG gen.auto.derive.infra:0:
                                     .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (spend fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
-                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat.Pos.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
                                                     .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")

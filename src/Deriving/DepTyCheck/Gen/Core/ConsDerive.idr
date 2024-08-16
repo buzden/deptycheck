@@ -3,13 +3,13 @@ module Deriving.DepTyCheck.Gen.Core.ConsDerive
 
 import public Control.Monad.State
 
+import public Data.Collections.Analysis
 import public Data.Either
+import public Data.SortedSet.Extra
 
 import public Decidable.Equality
 
 import public Deriving.DepTyCheck.Gen.Derive
-
-import public Deriving.DepTyCheck.Util.DepPerm
 
 %default total
 
@@ -52,7 +52,7 @@ namespace NonObligatoryExts
       let conFC = getFC con.type
 
       -- Build a map from constructor's argument name to its index
-      let conArgIdxs = SortedMap.fromList $ mapI' con.args $ \idx, arg => (argName arg, idx)
+      let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
 
       -- Analyse that we can do subgeneration for each constructor argument
       -- Fails using `Elaboration` if the given expression is not an application to a type constructor
@@ -65,7 +65,8 @@ namespace NonObligatoryExts
                                        maybe e pure $ lookupType lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
-              lhs                => failAt (getFC lhs) "Only applications to a name is supported, given \{lhs}"
+              lhs@(IPi {})       => failAt (getFC lhs) "Fields with function types are not supported in constructors"
+              lhs                => failAt (getFC lhs) "Unsupported type of a constructor field: \{show lhs}"
             let Yes lengthCorrect = decEq ty.args.length args.length
               | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
             _ <- ensureTyArgsNamed ty
@@ -167,7 +168,7 @@ namespace NonObligatoryExts
 
       -- Acquire those variables that appear in non-trivial type expressions, i.e. those which needs to be generated before the left-to-right phase
       let preLTR = leftToRightArgsTypeApp >>= \(MkTypeApp _ as) => rights (toList as) >>= allVarNames
-      let preLTR = SortedSet.fromList $ mapMaybe (flip lookup conArgIdxs) preLTR
+      let preLTR = SortedSet.fromList $ mapMaybe (lookup' conArgIdxs) preLTR
 
       -- Find rightmost arguments among `preLTR`
       let depsLTR = SortedSet.fromList $
@@ -195,6 +196,10 @@ namespace NonObligatoryExts
         pure $ leftmost ++ leftToRightArgs ++ rightmost
 
       let allOrders = if simplificationHack then take 1 allOrders else allOrders
+      let allOrders = List.nub $ nub <$> allOrders
+
+      for_ allOrders $ \order =>
+        logPoint {level=10} "least-effort.order" [sig, con] "- one of used final orders: \{show order}"
 
       --------------------------
       -- Producing the result --

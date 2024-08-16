@@ -8,8 +8,6 @@ import DistrCheckCommon
 
 %language ElabReflection
 
-%hint DA : ConstructorDerivator; DA = LeastEffort
-
 nats : Fuel -> Gen MaybeEmpty Nat
 nats = deriveGen
 
