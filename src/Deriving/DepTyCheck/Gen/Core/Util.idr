@@ -85,7 +85,7 @@ analyseDeepConsApp ccdi freeNames = isD where
     let Just con = lookupCon lhsName
       | Nothing => Left "name `\{lhsName}` is not a constructor"
 
-    -- Aquire type-determination info, if needed
+    -- Acquire type-determination info, if needed
     typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
     let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := typeDetermInfo
 
