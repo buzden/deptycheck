@@ -41,10 +41,22 @@ MonadWriter ModelCoverage m => CanManageLabels m where
   manageLabel l x = tell (MkModelCoverage $ singleton l 1) >> x
 
 export
-unGenTryAllD : RandomGen g => (seed : g) -> Gen em a -> Stream $ Maybe (ModelCoverage, a)
-unGenTryAllD seed gen = do
+unGenD : MonadRandom m => MonadError () m => Gen em a -> m (ModelCoverage, a)
+unGenD = map swap . runWriterT . unGen {m = WriterT ModelCoverage $ m}
+
+export %inline
+unGenD' : MonadRandom m => Gen em a -> m $ Maybe (ModelCoverage, a)
+unGenD' = runMaybeT . unGenD {m = MaybeT m}
+
+export
+unGenTryAllD' : RandomGen g => (seed : g) -> Gen em a -> Stream (g, Maybe (ModelCoverage, a))
+unGenTryAllD' seed gen = do
   let (seed, sv) = runRandom seed $ runMaybeT $ runWriterT $ unGen {m=WriterT ModelCoverage $ MaybeT Rand} gen
-  map swap sv :: unGenTryAllD seed gen
+  (seed, map swap sv) :: unGenTryAllD' seed gen
+
+export
+unGenTryAllD : RandomGen g => (seed : g) -> Gen em a -> Stream $ Maybe (ModelCoverage, a)
+unGenTryAllD = map snd .: unGenTryAllD'
 
 export
 unGenTryND : RandomGen g => (n : Nat) -> g -> Gen em a -> LazyList (ModelCoverage, a)
