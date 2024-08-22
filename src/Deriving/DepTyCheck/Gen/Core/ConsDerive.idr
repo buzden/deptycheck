@@ -44,7 +44,6 @@ namespace NonObligatoryExts
 
       -- Prepare local search context
       let _ : NamesInfoInTypes = %search    -- I don't why it won't be found without this
-      let _ : ({0 f : _} -> Foldable f => Interpolation $ f _) = WithNames {con}
 
       -- Log all arguments' position and their names (if they have some)
       logPoint {level=15} "least-effort" [sig, con] "- con args: \{List.allFins con.args.length}"
@@ -213,6 +212,14 @@ namespace NonObligatoryExts
       callOneOf "\{show con.name} (orders)".label <$> traverse genForOrder allOrders
 
       where
+
+        Interpolation (Fin con.args.length) where
+          interpolate i = case name $ index' con.args i of
+            Just (UN n) => "#\{show i} (\{show n})"
+            _           => "#\{show i}"
+
+        Foldable f => Interpolation (f $ Fin con.args.length) where
+          interpolate = ("[" ++) . (++ "]") . joinBy ", " . map interpolate . toList
 
         -- TODO make this to be a `record` as soon as #2177 is fixed
         data TypeApp : Type where
