@@ -54,6 +54,11 @@ namespace SnocListTy
     (:<) : SnocListTy -> Ty -> SnocListTy
 
   public export
+  snocListTyToList : SnocListTy -> List Ty
+  snocListTyToList Lin = []
+  snocListTyToList (xs :< x) = (snocListTyToList xs) ++ [x]
+
+  public export
   length : SnocListTy -> Nat
   length Lin = Z
   length (sx :< _) = S $ length sx

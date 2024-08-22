@@ -44,10 +44,10 @@ NamesRestrictions where
     ]
 
 printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
-            (names : UniqNames funs vars) =>
+            (names : UniqNames Scala3 funs vars) =>
             Prec -> Expr funs vars ty -> Gen0 $ Doc opts
 printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
-               (names : UniqNames funs vars) =>
+               (names : UniqNames Scala3 funs vars) =>
                Prec ->
                IndexIn funs -> ExprsSnocList funs vars argTys -> Gen0 $ Doc opts
 printFunCall p n args = do
@@ -70,14 +70,14 @@ printExpr p $ V n         = pure $ line $ varName {funs} n
 printExpr p $ F n args    = assert_total printFunCall p n args
 
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-             (names : UniqNames funs vars) =>
+             (names : UniqNames Scala3 funs vars) =>
              (newNames : Gen0 String) =>
              Fuel ->
              (toplevel : Bool) ->
              Stmts funs vars retTy -> Gen0 $ Doc opts
 
 wrapMain : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-           (names : UniqNames funs vars) =>
+           (names : UniqNames Scala3 funs vars) =>
            (newNames : Gen0 String) =>
            (0 _ : IfUnsolved retTy Nothing) =>
            Fuel ->
@@ -100,7 +100,7 @@ wrapMain fl True cont body = do
     ]
 
 printSubStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-                (names : UniqNames funs vars) =>
+                (names : UniqNames Scala3 funs vars) =>
                 (newNames : Gen0 String) =>
                 Fuel ->
                 (noEmpty : Bool) ->
@@ -122,10 +122,10 @@ printStmts fl tl $ NewV ty mut initial cont = do
 printStmts fl tl $ NewF sig body cont = do
   (nm ** _) <- genNewName fl _ _ names
   isInfix <- chooseAny
-  let (isInfix ** infixCond) : (b ** So (not b || sig.From.length >= 1)) = case decSo _ of
-                                                                             Yes condMet => (isInfix ** condMet)
-                                                                             No _        => (False ** Oh)
-  rest <- printStmts @{NewFun {isInfix} {infixCond} nm} fl tl cont
+  let (isInfix ** infixCond) : (b ** ScalaCondition sig b _) = case decSo _ of
+                                                              Yes condMet => (isInfix ** MoreThanOneArg condMet)
+                                                              No _        => (False ** IsNotInfix)
+  rest <- printStmts @{NewFun {isInfix} {languageCondition = Scala3Cond infixCond} nm} fl tl cont
   (namesInside, funArgs) <- newVars fl _ names
   brBody <- chooseAny
   funBody <- if brBody
