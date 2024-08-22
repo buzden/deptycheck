@@ -1,0 +1,6 @@
+rm -rf build
+
+flock "$1" pack -q install-deps pil-fun && \
+pack run pil-fun scala3 --seed 0,3 --tests 3 --model-fuel 6
+
+rm -rf build
