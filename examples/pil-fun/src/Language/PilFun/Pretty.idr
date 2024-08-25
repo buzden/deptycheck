@@ -102,3 +102,11 @@ getExprs (sx:<x) = getExprs sx :< Evidence _ x
 wrapBrIf : {opts : _} -> (indeed : Bool) -> Doc opts -> Doc opts -> Doc opts
 wrapBrIf False pre x = pre `vappend` indent' 2 x
 wrapBrIf True pre x = ifMultiline (pre <++> "{" <++> x <++> "}") (vsep [pre <++> "{", indent' 2 x, "}"])
+
+public export
+0 PP : Type
+PP = {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
+     (names : UniqNames funs vars) =>
+     (newNames : Gen0 String) =>
+     Fuel ->
+     Stmts funs vars retTy -> Gen0 $ Doc opts
