@@ -170,9 +170,5 @@ printStmts fl tl $ Ret x = wrapMain {funs} {vars} fl tl Nothing $ printExpr Open
 printStmts fl tl $ Nop = wrapMain {funs} {vars} fl tl Nothing $ pure empty
 
 export
-printScala3 : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-              (names : UniqNames funs vars) =>
-              (newNames : Gen0 String) =>
-              Fuel ->
-              Stmts funs vars retTy -> Gen0 $ Doc opts
+printScala3 : PP
 printScala3 fl = printStmts {names} {newNames} fl True
