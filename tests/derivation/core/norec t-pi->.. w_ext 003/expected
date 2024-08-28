@@ -1,0 +1,12 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Error during reflection: Target types with implicit type parameters are not supported yet
+
+DerivedGen:25:81--25:92
+ 21 | 
+ 22 | Show (X n i1 i2) where
+ 23 |   show $ MkX i1 i2 prf = "MkX \{show i1} \{show i2} \{show prf}"
+ 24 | 
+ 25 | checkedGen : Fuel -> (Fuel -> {n : Nat} -> (i1, i2 : Fin n) -> Gen MaybeEmpty $ FinEq i1 i2) =>
+                                                                                      ^^^^^^^^^^^
+
