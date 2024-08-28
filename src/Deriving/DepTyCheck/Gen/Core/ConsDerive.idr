@@ -64,9 +64,12 @@ namespace NonObligatoryExts
           analyseTypeApp expr = do
             let (lhs, args) = unAppAny expr
             ty <- case lhs of
-              IVar _ lhsName     => do let e = failAt (getFC lhs) $ "Only applications to non-polymorphic type constructors are supported"
-                                                                 ++ " at the moment, we found `\{lhsName}`"
-                                       maybe e pure $ lookupType lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
+              IVar _ lhsName     => do let Nothing = lookupType lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
+                                         | Just found => pure found
+                                       -- we didn't found, failing, there are at least two reasons
+                                       failAt (getFC lhs) $ if isNamespaced lhsName
+                                         then "Data type `\{lhsName}` is unavailable at the site of derivation (forgotten import?)"
+                                         else "Usupported applications to a non-concrete type `\{lhsName}`"
               IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
               IType _            => pure typeInfoForTypeOfTypes
               lhs@(IPi {})       => failAt (getFC lhs) "Fields with function types are not supported in constructors"
