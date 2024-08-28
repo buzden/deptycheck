@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Only applications to non-polymorphic type constructors are supported at the moment, we found `ty`
+Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `ty`
 
 DerivedGen:17:14--17:23
  13 | XShow = %runElab derive

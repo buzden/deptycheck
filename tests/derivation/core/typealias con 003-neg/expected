@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Only applications to non-polymorphic type constructors are supported at the moment, we found `DerivedGen.NonReducibleUseTypeAlias`
+Error: While processing right hand side of checkedGen. Error during reflection: Data type `DerivedGen.NonReducibleUseTypeAlias` is unavailable at the site of derivation (forgotten import?)
 
 DerivedGen:16:22--16:46
  12 | 
