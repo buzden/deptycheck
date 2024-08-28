@@ -12,7 +12,7 @@ import RunDerivedGen
 
 data FinEq : Fin n -> Fin n -> Type where
   Here  : FinEq FZ FZ
-  These : FinEq n m -> FinEq (FS n) (FS m)
+  These : {n : Nat} -> {0 i, j : Fin n} -> FinEq i j -> FinEq (FS i) (FS j)
 
 data X : (n : Nat) -> Fin n -> Fin n -> Type where
   MkX : (i1, i2 : Fin n) -> (i1 `FinEq` i2) -> X n i1 i2
