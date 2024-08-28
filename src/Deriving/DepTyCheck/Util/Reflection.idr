@@ -261,6 +261,10 @@ allNameSuffixes nm = do
     [] => n
     ns => NS (MkNS $ reverse ns) n
 
+export
+isNamespaced : Name -> Bool
+isNamespaced = not . null . fst . unNS
+
 ---------------------------------------------------
 --- Working around primitive and special values ---
 ---------------------------------------------------
