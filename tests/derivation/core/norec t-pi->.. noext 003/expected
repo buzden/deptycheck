@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Named implicit applications (like to `Builtin.Equal`) are not supported yet
+Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `a`
 
 DerivedGen:17:14--17:23
  13 | Show (X b1 b2) where

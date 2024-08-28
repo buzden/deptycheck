@@ -108,11 +108,7 @@ checkTypeIsGen checkSide sig = do
   let (targetType, targetTypeArgs) = unAppAny targetType
 
   -- check out applications types
-  targetTypeArgs <- for targetTypeArgs $ \case
-    PosApp     arg => pure arg
-    NamedApp n arg => failAt targetTypeFC "Target types with implicit type parameters are not supported yet"
-    AutoApp    arg => failAt targetTypeFC "Target types with `auto` implicit type parameters are not supported yet"
-    WithApp    arg => failAt targetTypeFC "Unexpected `with`-application in the target type"
+  let targetTypeArgs = targetTypeArgs <&> getExpr
 
   ------------------------------------------
   -- Working with the target type familly --

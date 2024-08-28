@@ -1,12 +1,47 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Named implicit applications (like to `DerivedGen.FinEq`) are not supported yet
-
-DerivedGen:14:11--14:22
- 10 | 
- 11 | %language ElabReflection
- 12 | 
- 13 | data FinEq : Fin n -> Fin n -> Type where
- 14 |   Here  : FinEq FZ FZ
-                ^^^^^^^^^^^
-
+Generated values:
+-----
+-----
+-----
+MkX 1 1 These Here
+-----
+MkX 1 1 These Here
+-----
+MkX 1 1 These Here
+-----
+MkX 1 1 These Here
+-----
+MkX 1 1 These Here
+-----
+MkX 1 1 These Here
+-----
+MkX 1 1 These Here
+-----
+MkX 1 1 These Here
+-----
+MkX 1 1 These Here
+-----
+MkX 1 1 These Here
+-----
+-----
+-----
+MkX 2 2 These (These Here)
+-----
+MkX 2 2 These (These Here)
+-----
+MkX 2 2 These (These Here)
+-----
+MkX 2 2 These (These Here)
+-----
+MkX 2 2 These (These Here)
+-----
+MkX 2 2 These (These Here)
+-----
+MkX 2 2 These (These Here)
+-----
+MkX 2 2 These (These Here)
+-----
+MkX 2 2 These (These Here)
+-----
+MkX 2 2 These (These Here)

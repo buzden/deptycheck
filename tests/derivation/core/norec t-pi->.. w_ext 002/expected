@@ -1,12 +1,12 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Target types with implicit type parameters are not supported yet
+Error: While processing right hand side of checkedGen. Error during reflection: Target type `Builtin.(===)` is not a top-level data definition
 
-DerivedGen:9:63--9:68
+DerivedGen:9:47--9:50
  5 | %default total
  6 | 
  7 | %language ElabReflection
  8 | 
  9 | checkedGen : DecEq a => Fuel -> (x, y : a) -> Gen MaybeEmpty (x = y)
-                                                                   ^^^^^
+                                                   ^^^
 
