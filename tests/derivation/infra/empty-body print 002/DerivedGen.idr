@@ -1,7 +1,8 @@
 module DerivedGen
 
 import AlternativeCore
-import PrintDerivation
+
+import Deriving.DepTyCheck.Gen
 
 import Data.Vect
 
@@ -9,4 +10,5 @@ import Data.Vect
 
 %language ElabReflection
 
-%runElab printDerived @{EmptyBody} $ Fuel -> (n : Nat) -> (a : Type) -> Gen MaybeEmpty (Vect n a)
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter @{EmptyBody} $ Fuel -> (n : Nat) -> (a : Type) -> Gen MaybeEmpty (Vect n a)

@@ -1,7 +1,6 @@
 module DerivedGen
 
-import AlternativeCore
-import PrintDerivation
+import Deriving.DepTyCheck.Gen
 
 import Data.Fin
 
@@ -21,4 +20,5 @@ data Z : X -> X -> Type where
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (x : X) -> (x' : X) -> Gen MaybeEmpty $ Z x x'
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (x : X) -> (x' : X) -> Gen MaybeEmpty $ Z x x'

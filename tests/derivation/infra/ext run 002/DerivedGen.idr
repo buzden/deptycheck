@@ -1,6 +1,8 @@
 module DerivedGen
 
 import AlternativeCore
+
+import Deriving.DepTyCheck.Gen
 import RunDerivedGen
 
 %default total

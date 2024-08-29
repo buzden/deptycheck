@@ -1,1 +1,0 @@
-../_common/AlternativeCore.idr

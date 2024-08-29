@@ -1,29 +1,29 @@
 1/2: Building DepsCheck (DepsCheck.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.arg-deps:0: type        : (n : Nat) -> (a : Type) -> (arg : Vect n a) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [], [0, 1]]
+LOG deptycheck.arg-deps:0: type        : (n : Nat) -> (a : Type) -> (arg : Vect n a) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [], [0, 1]]
 
-LOG gen.auto.arg-deps:0: type        : (n : Nat) -> (a : Type) -> (v : Vect n a) -> (arg : length v = 5) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [], [0, 1], [0, 1, 2]]
+LOG deptycheck.arg-deps:0: type        : (n : Nat) -> (a : Type) -> (v : Vect n a) -> (arg : length v = 5) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [], [0, 1], [0, 1, 2]]
 
-LOG gen.auto.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (arg : Vect (length xs) a) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [0], [0, 1]]
+LOG deptycheck.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (arg : Vect (length xs) a) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [0], [0, 1]]
 
-LOG gen.auto.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (v : Vect (length xs) a) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [0], [0, 1]]
+LOG deptycheck.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (v : Vect (length xs) a) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [0], [0, 1]]
 
-LOG gen.auto.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (ys : List a) -> (arg : xs = ys) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [0], [0], [0, 1, 2]]
+LOG deptycheck.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (ys : List a) -> (arg : xs = ys) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [0], [0], [0, 1, 2]]
 
-LOG gen.auto.arg-deps:0: type        : (a : Type) -> (n : Nat) -> (m : Nat) -> (xs : Vect n a) -> (ys : Vect m a) -> (arg : xs = ys) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [], [], [0, 1], [0, 2], [0, 1, 2, 3, 4]]
+LOG deptycheck.arg-deps:0: type        : (a : Type) -> (n : Nat) -> (m : Nat) -> (xs : Vect n a) -> (ys : Vect m a) -> (arg : xs = ys) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [], [], [0, 1], [0, 2], [0, 1, 2, 3, 4]]
 
-LOG gen.auto.arg-deps:0: type        : (a : Type) -> (n : Nat) -> (m : Nat) -> (xs : Vect n a) -> (ys : Vect m a) -> (arg : xs = ys) -> (arg : List a) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [], [], [0, 1], [0, 2], [0, 1, 2, 3, 4], [0]]
+LOG deptycheck.arg-deps:0: type        : (a : Type) -> (n : Nat) -> (m : Nat) -> (xs : Vect n a) -> (ys : Vect m a) -> (arg : xs = ys) -> (arg : List a) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [], [], [0, 1], [0, 2], [0, 1, 2, 3, 4], [0]]
 
-LOG gen.auto.arg-deps:0: type        : (a : Type) -> (n : Nat) -> (m : Nat) -> (xs : Vect n a) -> (ys : Vect m a) -> (arg : xs = ys) -> (arg : xs = []) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [], [], [0, 1], [0, 2], [0, 1, 2, 3, 4], [0, 1, 3]]
+LOG deptycheck.arg-deps:0: type        : (a : Type) -> (n : Nat) -> (m : Nat) -> (xs : Vect n a) -> (ys : Vect m a) -> (arg : xs = ys) -> (arg : xs = []) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [], [], [0, 1], [0, 2], [0, 1, 2, 3, 4], [0, 1, 3]]
 
-LOG gen.auto.arg-deps:0: type        : (a : Type) -> (n : Nat) -> (m : Nat) -> (xs : Vect n a) -> (ys : Vect m a) -> (arg : xs = []) -> (arg : ys = []) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [], [], [0, 1], [0, 2], [0, 1, 3], [0, 2, 4]]
+LOG deptycheck.arg-deps:0: type        : (a : Type) -> (n : Nat) -> (m : Nat) -> (xs : Vect n a) -> (ys : Vect m a) -> (arg : xs = []) -> (arg : ys = []) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [], [], [0, 1], [0, 2], [0, 1, 3], [0, 2, 4]]
 

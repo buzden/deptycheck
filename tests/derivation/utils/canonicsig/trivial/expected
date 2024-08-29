@@ -1,3 +1,3 @@
 1/2: Building Infra (Infra.idr)
 2/2: Building CanonicSigCheck (CanonicSigCheck.idr)
-LOG gen.auto.canonic.check-sig:0: trivial type; no givens:	OKAY
+LOG deptycheck.canonic.check-sig:0: trivial type; no givens:	OKAY

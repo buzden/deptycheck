@@ -1,7 +1,6 @@
 module DerivedGen
 
-import AlternativeCore
-import PrintDerivation
+import Deriving.DepTyCheck.Gen
 
 %default total
 
@@ -12,4 +11,5 @@ record FinInc n where
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty (n ** FinInc n)
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty (n ** FinInc n)

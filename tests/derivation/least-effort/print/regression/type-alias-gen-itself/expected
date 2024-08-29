@@ -1,8 +1,5 @@
-1/3: Building AlternativeCore (AlternativeCore.idr)
-2/3: Building PrintDerivation (PrintDerivation.idr)
-3/3: Building DerivedGen (DerivedGen.idr)
-LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> Gen0 X
-LOG gen.auto.derive.infra:0: 
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen0 X
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> local
       { decls =

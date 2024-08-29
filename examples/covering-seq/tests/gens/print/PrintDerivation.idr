@@ -1,1 +1,0 @@
-../../../../../tests/derivation/_common/PrintDerivation.idr

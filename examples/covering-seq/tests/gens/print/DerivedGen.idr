@@ -1,11 +1,12 @@
 module DerivedGen
 
-import PrintDerivation
-
 import Data.List.Covering
+
+import Deriving.DepTyCheck.Gen
 
 %default total
 
 %language ElabReflection
 
-%runElab printDerived $ Fuel -> {n : Nat} -> (bs : BitMask n) -> Gen MaybeEmpty $ CoveringSequence n bs
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter $ Fuel -> {n : Nat} -> (bs : BitMask n) -> Gen MaybeEmpty $ CoveringSequence n bs

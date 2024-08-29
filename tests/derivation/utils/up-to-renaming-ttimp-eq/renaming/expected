@@ -1,130 +1,130 @@
 1/2: Building Infra (Infra.idr)
 2/2: Building RenamingTTImpEqCheck (RenamingTTImpEqCheck.idr)
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused e (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused e (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused e (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused e (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused e (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused e (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused e (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused e (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused q (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused q (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused q (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused q (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused q (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused q (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused q (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused q (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, diff names (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: fst, rename, same names (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, diff names (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, rename, same names (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` q (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, `_` e (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: flipped lambda, unnamed (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: snd, shadow, rename (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused e (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused e (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused e (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused e (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused e (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused e (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused e (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused e (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused q (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused q (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused q (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused q (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused q (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused q (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused q (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused q (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unnamed unused' (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' e (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: _ unused' q (wrap case) <<: OKAY

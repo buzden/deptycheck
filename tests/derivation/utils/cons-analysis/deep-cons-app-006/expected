@@ -1,64 +1,64 @@
 1/2: Building ConsApps (ConsApps.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    []
-LOG gen.auto.deep-cons-app:0: original expression: Nat
-LOG gen.auto.deep-cons-app:0: resolved expression: Nat
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   []
-LOG gen.auto.deep-cons-app:0: bind expression: Nat
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [{arg:1}]
-LOG gen.auto.deep-cons-app:0: original expression: Nat
-LOG gen.auto.deep-cons-app:0: resolved expression: Nat
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   []
-LOG gen.auto.deep-cons-app:0: bind expression: Nat
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [elem]
-LOG gen.auto.deep-cons-app:0: original expression: Vect 0 elem
-LOG gen.auto.deep-cons-app:0: resolved expression: Vect 0 elem
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [elem]
-LOG gen.auto.deep-cons-app:0: bind expression: Vect 0 elem0
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [len, elem, x, xs]
-LOG gen.auto.deep-cons-app:0: original expression: Vect (S len) elem
-LOG gen.auto.deep-cons-app:0: resolved expression: Vect (S len) elem
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [len, elem]
-LOG gen.auto.deep-cons-app:0: bind expression: Vect (S len0) elem1
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [{a:1053}]
-LOG gen.auto.deep-cons-app:0: original expression: Split []
-LOG gen.auto.deep-cons-app:0: resolved expression: Split []
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [{a:1053}, {a:1053}]
-LOG gen.auto.deep-cons-app:0: bind expression: Split []
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a, x]
-LOG gen.auto.deep-cons-app:0: original expression: Split [x]
-LOG gen.auto.deep-cons-app:0: resolved expression: Split [x]
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [a, a, x, a]
-LOG gen.auto.deep-cons-app:0: bind expression: Split [x2]
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a, x, xs, y, ys]
-LOG gen.auto.deep-cons-app:0: original expression: Split (x :: (xs ++ (y :: ys)))
-LOG gen.auto.deep-cons-app:0: resolved expression: Split (x :: (xs ++ (y :: ys)))
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: not a (deep) constructor application, reason: name `Prelude.Types.List.(++)` is not a constructor
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a, x]
-LOG gen.auto.deep-cons-app:0: original expression: x = x
-LOG gen.auto.deep-cons-app:0: resolved expression: x = x
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [a, a, x, x]
-LOG gen.auto.deep-cons-app:0: bind expression: x2 = x3
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a, x]
-LOG gen.auto.deep-cons-app:0: original expression: EqExp a a x x
-LOG gen.auto.deep-cons-app:0: resolved expression: EqExp a a x x
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [a, a, x, x]
-LOG gen.auto.deep-cons-app:0: bind expression: EqExp a0 a1 x2 x3
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    []
+LOG deptycheck.deep-cons-app:0: original expression: Nat
+LOG deptycheck.deep-cons-app:0: resolved expression: Nat
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   []
+LOG deptycheck.deep-cons-app:0: bind expression: Nat
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [{arg:1}]
+LOG deptycheck.deep-cons-app:0: original expression: Nat
+LOG deptycheck.deep-cons-app:0: resolved expression: Nat
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   []
+LOG deptycheck.deep-cons-app:0: bind expression: Nat
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [elem]
+LOG deptycheck.deep-cons-app:0: original expression: Vect 0 elem
+LOG deptycheck.deep-cons-app:0: resolved expression: Vect 0 elem
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [elem]
+LOG deptycheck.deep-cons-app:0: bind expression: Vect 0 elem0
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [len, elem, x, xs]
+LOG deptycheck.deep-cons-app:0: original expression: Vect (S len) elem
+LOG deptycheck.deep-cons-app:0: resolved expression: Vect (S len) elem
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [len, elem]
+LOG deptycheck.deep-cons-app:0: bind expression: Vect (S len0) elem1
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [{a:1053}]
+LOG deptycheck.deep-cons-app:0: original expression: Split []
+LOG deptycheck.deep-cons-app:0: resolved expression: Split []
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [{a:1053}, {a:1053}]
+LOG deptycheck.deep-cons-app:0: bind expression: Split []
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a, x]
+LOG deptycheck.deep-cons-app:0: original expression: Split [x]
+LOG deptycheck.deep-cons-app:0: resolved expression: Split [x]
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [a, a, x, a]
+LOG deptycheck.deep-cons-app:0: bind expression: Split [x2]
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a, x, xs, y, ys]
+LOG deptycheck.deep-cons-app:0: original expression: Split (x :: (xs ++ (y :: ys)))
+LOG deptycheck.deep-cons-app:0: resolved expression: Split (x :: (xs ++ (y :: ys)))
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `Prelude.Types.List.(++)` is not a constructor
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a, x]
+LOG deptycheck.deep-cons-app:0: original expression: x = x
+LOG deptycheck.deep-cons-app:0: resolved expression: x = x
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [a, a, x, x]
+LOG deptycheck.deep-cons-app:0: bind expression: x2 = x3
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a, x]
+LOG deptycheck.deep-cons-app:0: original expression: EqExp a a x x
+LOG deptycheck.deep-cons-app:0: resolved expression: EqExp a a x x
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [a, a, x, x]
+LOG deptycheck.deep-cons-app:0: bind expression: EqExp a0 a1 x2 x3
