@@ -40,7 +40,7 @@ caseVerdict (desc, given, expected) = do
 
 export
 logCheck : String -> Elab ()
-logCheck = \s => logMsg "gen.auto.canonic.check-sig" 0 s
+logCheck = \s => logMsg "deptycheck.canonic.check-sig" 0 s
 
 export
 checkAndLog : TestCaseDesc -> Elab ()

@@ -1,7 +1,8 @@
 module DerivedGen
 
 import AlternativeCore
-import PrintDerivation
+
+import Deriving.DepTyCheck.Gen
 
 %default total
 
@@ -10,4 +11,5 @@ import PrintDerivation
 data X : Nat -> Type where
   MkX : X n
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen MaybeEmpty (n : Nat ** X n)
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter @{EmptyCons} $ Fuel -> Gen MaybeEmpty (n : Nat ** X n)

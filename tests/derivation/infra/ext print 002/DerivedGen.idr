@@ -1,10 +1,12 @@
 module DerivedGen
 
 import AlternativeCore
-import PrintDerivation
+
+import Deriving.DepTyCheck.Gen
 
 %default total
 
 %language ElabReflection
 
-%runElab printDerived @{Ext_XSS} $ Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty XSS
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter @{Ext_XSS} $ Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty XSS

@@ -1,7 +1,6 @@
 module DerivedGen
 
-import AlternativeCore
-import PrintDerivation
+import Deriving.DepTyCheck.Gen
 
 %default total
 
@@ -21,4 +20,5 @@ data Z : Type where
 data W : Z -> Z -> Type where
   MkW : W (MkZ (MkX n False)) (MkZ (MkX n True))
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (a : Z) -> (b : Z) -> Gen MaybeEmpty (W a b)
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (a : Z) -> (b : Z) -> Gen MaybeEmpty (W a b)

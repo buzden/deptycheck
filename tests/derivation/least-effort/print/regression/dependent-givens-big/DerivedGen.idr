@@ -1,7 +1,6 @@
 module DerivedGen
 
-import AlternativeCore
-import PrintDerivation
+import Deriving.DepTyCheck.Gen
 
 import Data.Fin
 
@@ -63,4 +62,6 @@ namespace VectMaybeAnyType
 
 %language ElabReflection
 
-%runElab printDerived @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (n : Nat) -> (v : VectMaybeAnyType n) -> Gen MaybeEmpty (i ** t ** AtIndex n i t v)
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $
+  Fuel -> (n : Nat) -> (v : VectMaybeAnyType n) -> Gen MaybeEmpty (i ** t ** AtIndex n i t v)

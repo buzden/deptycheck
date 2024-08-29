@@ -1,11 +1,12 @@
 module DerivedGen
 
-import PrintDerivation
-
 import Data.List.Sorted
+
+import Deriving.DepTyCheck.Gen
 
 %default total
 
 %language ElabReflection
 
-%runElab printDerived $ Fuel -> Gen MaybeEmpty SortedList
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter $ Fuel -> Gen MaybeEmpty SortedList

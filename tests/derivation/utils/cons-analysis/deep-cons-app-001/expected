@@ -1,44 +1,44 @@
 1/2: Building ConsApps (ConsApps.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a]
-LOG gen.auto.deep-cons-app:0: original expression: a
-LOG gen.auto.deep-cons-app:0: resolved expression: a
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [a]
-LOG gen.auto.deep-cons-app:0: bind expression: a0
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    []
-LOG gen.auto.deep-cons-app:0: original expression: Nat
-LOG gen.auto.deep-cons-app:0: resolved expression: Nat
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   []
-LOG gen.auto.deep-cons-app:0: bind expression: Nat
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [Nat]
-LOG gen.auto.deep-cons-app:0: original expression: Nat
-LOG gen.auto.deep-cons-app:0: resolved expression: Nat
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [Nat]
-LOG gen.auto.deep-cons-app:0: bind expression: Nat0
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [n, a]
-LOG gen.auto.deep-cons-app:0: original expression: Vect n a
-LOG gen.auto.deep-cons-app:0: resolved expression: Vect n a
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [n, a]
-LOG gen.auto.deep-cons-app:0: bind expression: Vect n0 a1
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a]
-LOG gen.auto.deep-cons-app:0: original expression: Either a a
-LOG gen.auto.deep-cons-app:0: resolved expression: Either a a
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [a, a]
-LOG gen.auto.deep-cons-app:0: bind expression: Either a0 a1
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a, b]
-LOG gen.auto.deep-cons-app:0: original expression: X a a
-LOG gen.auto.deep-cons-app:0: resolved expression: X a a
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [a, a]
-LOG gen.auto.deep-cons-app:0: bind expression: X a0 a1
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a]
+LOG deptycheck.deep-cons-app:0: original expression: a
+LOG deptycheck.deep-cons-app:0: resolved expression: a
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [a]
+LOG deptycheck.deep-cons-app:0: bind expression: a0
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    []
+LOG deptycheck.deep-cons-app:0: original expression: Nat
+LOG deptycheck.deep-cons-app:0: resolved expression: Nat
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   []
+LOG deptycheck.deep-cons-app:0: bind expression: Nat
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [Nat]
+LOG deptycheck.deep-cons-app:0: original expression: Nat
+LOG deptycheck.deep-cons-app:0: resolved expression: Nat
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [Nat]
+LOG deptycheck.deep-cons-app:0: bind expression: Nat0
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [n, a]
+LOG deptycheck.deep-cons-app:0: original expression: Vect n a
+LOG deptycheck.deep-cons-app:0: resolved expression: Vect n a
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [n, a]
+LOG deptycheck.deep-cons-app:0: bind expression: Vect n0 a1
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a]
+LOG deptycheck.deep-cons-app:0: original expression: Either a a
+LOG deptycheck.deep-cons-app:0: resolved expression: Either a a
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [a, a]
+LOG deptycheck.deep-cons-app:0: bind expression: Either a0 a1
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a, b]
+LOG deptycheck.deep-cons-app:0: original expression: X a a
+LOG deptycheck.deep-cons-app:0: resolved expression: X a a
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [a, a]
+LOG deptycheck.deep-cons-app:0: bind expression: X a0 a1

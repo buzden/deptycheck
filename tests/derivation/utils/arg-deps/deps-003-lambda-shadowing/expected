@@ -1,11 +1,11 @@
 1/2: Building DepsCheck (DepsCheck.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.arg-deps:0: type        : (x : Nat) -> (arg : \{x:0} => S {x:0} = S) -> ()
-LOG gen.auto.arg-deps:0: dependencies: [[], []]
+LOG deptycheck.arg-deps:0: type        : (x : Nat) -> (arg : \{x:0} => S {x:0} = S) -> ()
+LOG deptycheck.arg-deps:0: dependencies: [[], []]
 
-LOG gen.auto.arg-deps:0: type        : (x : Nat) -> (arg : \{x:0} => \{x:1} => S {x:1} = \{x:0} => S) -> ()
-LOG gen.auto.arg-deps:0: dependencies: [[], []]
+LOG deptycheck.arg-deps:0: type        : (x : Nat) -> (arg : \{x:0} => \{x:1} => S {x:1} = \{x:0} => S) -> ()
+LOG deptycheck.arg-deps:0: dependencies: [[], []]
 
-LOG gen.auto.arg-deps:0: type        : (x : Nat) -> (arg : \y => S y = S) -> ()
-LOG gen.auto.arg-deps:0: dependencies: [[], []]
+LOG deptycheck.arg-deps:0: type        : (x : Nat) -> (arg : \y => S y = S) -> ()
+LOG deptycheck.arg-deps:0: dependencies: [[], []]
 

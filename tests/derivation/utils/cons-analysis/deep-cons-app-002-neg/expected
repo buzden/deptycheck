@@ -1,56 +1,56 @@
 1/2: Building ConsApps (ConsApps.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a]
-LOG gen.auto.deep-cons-app:0: original expression: b
-LOG gen.auto.deep-cons-app:0: resolved expression: b
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: not a (deep) constructor application, reason: name `b` is not a constructor
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    []
-LOG gen.auto.deep-cons-app:0: original expression: a
-LOG gen.auto.deep-cons-app:0: resolved expression: a
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: not a (deep) constructor application, reason: name `a` is not a constructor
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    []
-LOG gen.auto.deep-cons-app:0: original expression: X a a
-LOG gen.auto.deep-cons-app:0: resolved expression: X a a
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: not a (deep) constructor application, reason: name `a` is not a constructor
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [b]
-LOG gen.auto.deep-cons-app:0: original expression: X a a
-LOG gen.auto.deep-cons-app:0: resolved expression: X a a
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: not a (deep) constructor application, reason: name `a` is not a constructor
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a, b, X]
-LOG gen.auto.deep-cons-app:0: original expression: X a a
-LOG gen.auto.deep-cons-app:0: resolved expression: X a a
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: not a (deep) constructor application, reason: applying free name to some arguments
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    []
-LOG gen.auto.deep-cons-app:0: original expression: Y
-LOG gen.auto.deep-cons-app:0: resolved expression: Y
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: not a (deep) constructor application, reason: name `Y` is not a constructor
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a]
-LOG gen.auto.deep-cons-app:0: original expression: Y
-LOG gen.auto.deep-cons-app:0: resolved expression: Y
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: not a (deep) constructor application, reason: name `Y` is not a constructor
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a]
-LOG gen.auto.deep-cons-app:0: original expression: Y a
-LOG gen.auto.deep-cons-app:0: resolved expression: Y a
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: not a (deep) constructor application, reason: name `Y` is not a constructor
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a]
-LOG gen.auto.deep-cons-app:0: original expression: Y a b
-LOG gen.auto.deep-cons-app:0: resolved expression: Y a b
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: not a (deep) constructor application, reason: name `Y` is not a constructor
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a]
+LOG deptycheck.deep-cons-app:0: original expression: b
+LOG deptycheck.deep-cons-app:0: resolved expression: b
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `b` is not a constructor
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    []
+LOG deptycheck.deep-cons-app:0: original expression: a
+LOG deptycheck.deep-cons-app:0: resolved expression: a
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `a` is not a constructor
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    []
+LOG deptycheck.deep-cons-app:0: original expression: X a a
+LOG deptycheck.deep-cons-app:0: resolved expression: X a a
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `a` is not a constructor
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [b]
+LOG deptycheck.deep-cons-app:0: original expression: X a a
+LOG deptycheck.deep-cons-app:0: resolved expression: X a a
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `a` is not a constructor
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a, b, X]
+LOG deptycheck.deep-cons-app:0: original expression: X a a
+LOG deptycheck.deep-cons-app:0: resolved expression: X a a
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: applying free name to some arguments
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    []
+LOG deptycheck.deep-cons-app:0: original expression: Y
+LOG deptycheck.deep-cons-app:0: resolved expression: Y
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `Y` is not a constructor
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a]
+LOG deptycheck.deep-cons-app:0: original expression: Y
+LOG deptycheck.deep-cons-app:0: resolved expression: Y
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `Y` is not a constructor
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a]
+LOG deptycheck.deep-cons-app:0: original expression: Y a
+LOG deptycheck.deep-cons-app:0: resolved expression: Y a
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `Y` is not a constructor
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a]
+LOG deptycheck.deep-cons-app:0: original expression: Y a b
+LOG deptycheck.deep-cons-app:0: resolved expression: Y a b
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `Y` is not a constructor

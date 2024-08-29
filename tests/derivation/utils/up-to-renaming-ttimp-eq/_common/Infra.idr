@@ -30,7 +30,7 @@ checkEq desc res e1 e2 = do
   e2 <- toTTImp e2
   let ch1 : String -> TTImp -> TTImp -> Elab Unit
       ch1 desc l r = do
-        logMsg "gen.auto.reflection.ttimp-eq-up-to-renamings" 0 $ if (l == r) @{UpToRenaming} == res
+        logMsg "deptycheck.reflection.ttimp-eq-up-to-renamings" 0 $ if (l == r) @{UpToRenaming} == res
           then "\{desc}: OKAY"
           else """
                \{desc}: FAILED

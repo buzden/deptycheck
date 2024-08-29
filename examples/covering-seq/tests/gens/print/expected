@@ -1,7 +1,5 @@
-1/2: Building PrintDerivation (PrintDerivation.idr)
-2/2: Building DerivedGen (DerivedGen.idr)
-LOG gen.auto.derive.infra:0: type: (arg : Fuel) -> (bs : BitMask n) -> Gen MaybeEmpty (CoveringSequence n bs)
-LOG gen.auto.derive.infra:0: 
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen MaybeEmpty (CoveringSequence n bs)
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> MkArg MW ImplicitArg (Just "outer^<n>") implicitTrue
 .=> MkArg MW ExplicitArg (Just "outer^<bs>") implicitTrue
