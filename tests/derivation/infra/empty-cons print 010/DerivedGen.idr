@@ -1,7 +1,8 @@
 module DerivedGen
 
 import AlternativeCore
-import PrintDerivation
+
+import Deriving.DepTyCheck.Gen
 
 import Data.Vect
 
@@ -15,4 +16,5 @@ mutual
 
   data Y = Y0 | Y1 X
 
-%runElab printDerived @{EmptyCons} $ Fuel -> Gen MaybeEmpty X
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter @{EmptyCons} $ Fuel -> Gen MaybeEmpty X

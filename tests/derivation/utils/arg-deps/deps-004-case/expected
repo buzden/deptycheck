@@ -1,8 +1,8 @@
 1/2: Building DepsCheck (DepsCheck.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (v : List a) -> (0 arg : case block in listToCheck a xs v) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [0], [0], [0, 2]]
+LOG deptycheck.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (v : List a) -> (0 arg : case block in listToCheck a xs v) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [0], [0], [0, 2]]
 
-LOG gen.auto.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (v : List a) -> (0 arg : case block in listToCheck a xs v) -> Nat
-LOG gen.auto.arg-deps:0: dependencies: [[], [0], [0], [0, 2]]
+LOG deptycheck.arg-deps:0: type        : (a : Type) -> (xs : List a) -> (v : List a) -> (0 arg : case block in listToCheck a xs v) -> Nat
+LOG deptycheck.arg-deps:0: dependencies: [[], [0], [0], [0, 2]]
 

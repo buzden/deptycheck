@@ -1,146 +1,146 @@
 1/2: Building Infra (Infra.idr)
 2/2: Building RenamingTTImpEqCheck (RenamingTTImpEqCheck.idr)
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is zero (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is zero (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is zero (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is zero (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is zero (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is zero (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is zero (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is zero (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is not one (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is not one (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is not one (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is not one (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is not one (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is not one (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is not one (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: zero is not one (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is list (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is list (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is list (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is list (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is list (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is list (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is list (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is list (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is not vect (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is not vect (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is not vect (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is not vect (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is not vect (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is not vect (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is not vect (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: list is not vect (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is succ (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is succ (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is succ (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is succ (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is succ (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is succ (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is succ (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is succ (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (wrap case) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (plain) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (plain) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (ap z) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (ap z) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (ap cross) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (ap cross) <<: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (wrap case) >>: OKAY
-LOG gen.auto.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not its value (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is zero (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is zero (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is zero (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is zero (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is zero (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is zero (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is zero (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is zero (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is not one (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is not one (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is not one (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is not one (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is not one (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is not one (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is not one (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: zero is not one (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: one (cons) is one (nat lit) (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat one is not integer one (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is list (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is list (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is list (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is list (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is list (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is list (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is list (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is list (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is not vect (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is not vect (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is not vect (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is not vect (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is not vect (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is not vect (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is not vect (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: list is not vect (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is succ (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is succ (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is succ (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is succ (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is succ (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is succ (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is succ (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is succ (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: succ is not zero (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is unit (ttimp) (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: unit is not some other `Unit` (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is nat id (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat id is not string id (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is nat fun ty (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: nat fun ty is not string fun ty (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is itself (wrap case) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (plain) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (plain) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (ap z) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (ap z) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (ap cross) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (ap cross) <<: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (wrap case) >>: OKAY
+LOG deptycheck.reflection.ttimp-eq-up-to-renamings:0: dep ty fun is not another one (wrap case) <<: OKAY

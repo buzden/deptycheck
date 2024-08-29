@@ -1,4 +1,4 @@
 1/2: Building TypesAndInvolved (TypesAndInvolved.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.involved-types:0: given type: X
-LOG gen.auto.involved-types:0: given type: TTImp
+LOG deptycheck.involved-types:0: given type: X
+LOG deptycheck.involved-types:0: given type: TTImp

@@ -1,7 +1,6 @@
 module DerivedGen
 
-import AlternativeCore
-import PrintDerivation
+import Deriving.DepTyCheck.Gen
 
 %default total
 
@@ -15,4 +14,5 @@ data Y : (xs : X) -> (ys : X) -> Type where
   A : Y (x :: xs) (x :: xs)
   B : Y xs ys -> Y (x :: xs) (y :: ys)
 
-%runElab printDerived $ Fuel -> (xs : X) -> (ys : X) -> Gen MaybeEmpty $ Y xs ys
+%logging "deptycheck.derive.print" 5
+%runElab deriveGenPrinter $ Fuel -> (xs : X) -> (ys : X) -> Gen MaybeEmpty $ Y xs ys

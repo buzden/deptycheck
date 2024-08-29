@@ -1,6 +1,6 @@
 1/2: Building Infra (Infra.idr)
 2/2: Building CanonicSigCheck (CanonicSigCheck.idr)
-LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; all named; no givens:	OKAY
-LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; all named; 1st given:	OKAY
-LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; all named; 2nd given:	OKAY
-LOG gen.auto.canonic.check-sig:0: non-dependent type + expl params; all named; both given:	OKAY
+LOG deptycheck.canonic.check-sig:0: non-dependent type + expl params; all named; no givens:	OKAY
+LOG deptycheck.canonic.check-sig:0: non-dependent type + expl params; all named; 1st given:	OKAY
+LOG deptycheck.canonic.check-sig:0: non-dependent type + expl params; all named; 2nd given:	OKAY
+LOG deptycheck.canonic.check-sig:0: non-dependent type + expl params; all named; both given:	OKAY

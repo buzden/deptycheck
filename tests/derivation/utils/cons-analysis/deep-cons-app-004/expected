@@ -1,65 +1,65 @@
 1/2: Building ConsApps (ConsApps.idr)
 2/2: Building Infra (Infra.idr)
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    []
-LOG gen.auto.deep-cons-app:0: original expression: XX (Right Unit)
-LOG gen.auto.deep-cons-app:0: resolved expression: XX (Right ())
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   []
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Right ())
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [a]
-LOG gen.auto.deep-cons-app:0: original expression: XX (Right a)
-LOG gen.auto.deep-cons-app:0: resolved expression: XX (Right a)
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [a]
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Right a0)
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    []
-LOG gen.auto.deep-cons-app:0: original expression: XX (Right MkUnit)
-LOG gen.auto.deep-cons-app:0: resolved expression: XX (Right ())
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   []
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Right ())
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    []
-LOG gen.auto.deep-cons-app:0: original expression: XX (Right [])
-LOG gen.auto.deep-cons-app:0: resolved expression: XX (Right [])
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   []
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Right [])
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b]
-LOG gen.auto.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S Z)) `MC` MM))))
-LOG gen.auto.deep-cons-app:0: resolved expression: XX (Left (1 `MC` (2 `MC` (3 `MC` MM))))
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   []
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (1 `MC` (2 `MC` (3 `MC` MM))))
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b]
-LOG gen.auto.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S n) `MC` (S (S (S Z)) `MC` MM))))
-LOG gen.auto.deep-cons-app:0: resolved expression: XX (Left (1 `MC` (S (S n) `MC` (3 `MC` MM))))
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [n]
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (1 `MC` (S (S n0) `MC` (3 `MC` MM))))
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    []
-LOG gen.auto.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S Z)) `MC` MM))))
-LOG gen.auto.deep-cons-app:0: resolved expression: XX (Left (1 `MC` (2 `MC` (3 `MC` MM))))
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   []
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (1 `MC` (2 `MC` (3 `MC` MM))))
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b, c]
-LOG gen.auto.deep-cons-app:0: original expression: XX (Left (a `MC` (b `MC` (c `MC` MM))))
-LOG gen.auto.deep-cons-app:0: resolved expression: XX (Left (a `MC` (b `MC` (c `MC` MM))))
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [a, b, c]
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (a0 `MC` (b1 `MC` (c2 `MC` MM))))
-LOG gen.auto.deep-cons-app:0: 
-LOG gen.auto.deep-cons-app:0: given free names:    [n, a, b, c]
-LOG gen.auto.deep-cons-app:0: original expression: XX (Left (a `MC` (Z `MC` (c `MC` MM))))
-LOG gen.auto.deep-cons-app:0: resolved expression: XX (Left (a `MC` (0 `MC` (c `MC` MM))))
-LOG gen.auto.deep-cons-app:0: ------------------------
-LOG gen.auto.deep-cons-app:0: applied names:   [a, c]
-LOG gen.auto.deep-cons-app:0: bind expression: XX (Left (a0 `MC` (0 `MC` (c1 `MC` MM))))
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    []
+LOG deptycheck.deep-cons-app:0: original expression: XX (Right Unit)
+LOG deptycheck.deep-cons-app:0: resolved expression: XX (Right ())
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   []
+LOG deptycheck.deep-cons-app:0: bind expression: XX (Right ())
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [a]
+LOG deptycheck.deep-cons-app:0: original expression: XX (Right a)
+LOG deptycheck.deep-cons-app:0: resolved expression: XX (Right a)
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [a]
+LOG deptycheck.deep-cons-app:0: bind expression: XX (Right a0)
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    []
+LOG deptycheck.deep-cons-app:0: original expression: XX (Right MkUnit)
+LOG deptycheck.deep-cons-app:0: resolved expression: XX (Right ())
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   []
+LOG deptycheck.deep-cons-app:0: bind expression: XX (Right ())
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    []
+LOG deptycheck.deep-cons-app:0: original expression: XX (Right [])
+LOG deptycheck.deep-cons-app:0: resolved expression: XX (Right [])
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   []
+LOG deptycheck.deep-cons-app:0: bind expression: XX (Right [])
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [n, a, b]
+LOG deptycheck.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S Z)) `MC` MM))))
+LOG deptycheck.deep-cons-app:0: resolved expression: XX (Left (1 `MC` (2 `MC` (3 `MC` MM))))
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   []
+LOG deptycheck.deep-cons-app:0: bind expression: XX (Left (1 `MC` (2 `MC` (3 `MC` MM))))
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [n, a, b]
+LOG deptycheck.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S n) `MC` (S (S (S Z)) `MC` MM))))
+LOG deptycheck.deep-cons-app:0: resolved expression: XX (Left (1 `MC` (S (S n) `MC` (3 `MC` MM))))
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [n]
+LOG deptycheck.deep-cons-app:0: bind expression: XX (Left (1 `MC` (S (S n0) `MC` (3 `MC` MM))))
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    []
+LOG deptycheck.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S Z)) `MC` MM))))
+LOG deptycheck.deep-cons-app:0: resolved expression: XX (Left (1 `MC` (2 `MC` (3 `MC` MM))))
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   []
+LOG deptycheck.deep-cons-app:0: bind expression: XX (Left (1 `MC` (2 `MC` (3 `MC` MM))))
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [n, a, b, c]
+LOG deptycheck.deep-cons-app:0: original expression: XX (Left (a `MC` (b `MC` (c `MC` MM))))
+LOG deptycheck.deep-cons-app:0: resolved expression: XX (Left (a `MC` (b `MC` (c `MC` MM))))
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [a, b, c]
+LOG deptycheck.deep-cons-app:0: bind expression: XX (Left (a0 `MC` (b1 `MC` (c2 `MC` MM))))
+LOG deptycheck.deep-cons-app:0: 
+LOG deptycheck.deep-cons-app:0: given free names:    [n, a, b, c]
+LOG deptycheck.deep-cons-app:0: original expression: XX (Left (a `MC` (Z `MC` (c `MC` MM))))
+LOG deptycheck.deep-cons-app:0: resolved expression: XX (Left (a `MC` (0 `MC` (c `MC` MM))))
+LOG deptycheck.deep-cons-app:0: ------------------------
+LOG deptycheck.deep-cons-app:0: applied names:   [a, c]
+LOG deptycheck.deep-cons-app:0: bind expression: XX (Left (a0 `MC` (0 `MC` (c1 `MC` MM))))
