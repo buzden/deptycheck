@@ -84,7 +84,7 @@ printStmts fl $ NewF (typesFrom ==> maybeRet) body cont = do
   let processedOutputType = "IO" <++> printMaybeTy maybeRet
   let idrisTypeSignature = processedInputTypes <++> processedOutputType
   (namesInside, funArgs) <- newVars fl _ names
-  let prerparedArgs = hsep $ toList funArgs <&> \(n, t) => line n
+  let prerparedArgs = hsep $ reverse (toList funArgs) <&> \(n, t) => line n
   body <- printStmts @{namesInside} fl body <&> indent' 6
   pure $ flip vappend rest $ vsep 
     [ "let" <++> line nm <++> ":" <++> idrisTypeSignature,
