@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+(20 ** MkFinInc 16 prf)
+-----
+(27 ** MkFinInc 17 prf)
+-----
+(27 ** MkFinInc 10 prf)
+-----
+(9 ** MkFinInc 5 prf)
+-----
+(23 ** MkFinInc 12 prf)
+-----
+(23 ** MkFinInc 8 prf)
+-----
+(18 ** MkFinInc 4 prf)
+-----
+(11 ** MkFinInc 7 prf)
+-----
+(11 ** MkFinInc 10 prf)
+-----
+(35 ** MkFinInc 15 prf)
