@@ -24,6 +24,11 @@ public export
 argName : Arg -> Name
 argName = stname . (.name)
 
+cleanupNamedHoles : TTImp -> TTImp
+cleanupNamedHoles = mapTTImp $ \case
+  IHole {} => implicitFalse
+  e        => e
+
 --------------------------------------------------------------------------------
 --          General Types
 --------------------------------------------------------------------------------
@@ -40,7 +45,7 @@ record Con where
 export
 getCon : Elaboration m => Name -> m Con
 getCon n = do (n', tt) <- lookupName n
-              let (args, tpe) = unPi tt
+              let (args, tpe) = unPi $ cleanupNamedHoles tt
               pure $ MkCon n' args tpe
 
 ||| Information about a data type
@@ -64,7 +69,7 @@ export
 getInfo' : Elaboration m => Name -> m TypeInfo
 getInfo' n = do
   (n',tt)        <- lookupName n
-  let (args,IType _) = unPi tt
+  let (args,IType _) = unPi $ cleanupNamedHoles tt
     | (_,_) => fail "Type declaration does not end in IType"
   conNames       <- getCons n'
   cons           <- traverse getCon conNames
