@@ -23,10 +23,6 @@ data SupportedLanguages = Scala3
                         | Idris2
 
 public export
-ConditionType : Type
-ConditionType = FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
-
-public export
 data ScalaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
  where
   IsNotInfix : ScalaCondition funSig False b
