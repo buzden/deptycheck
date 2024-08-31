@@ -374,15 +374,16 @@ deriveGenFor a = do
 
 ||| Declares `main : IO Unit` function that prints derived generator for the given generator's signature
 export
-deriveGenPrinter : DerivatorCore => Type -> Elab Unit
+deriveGenPrinter : {default True printTTImp : Bool} -> DerivatorCore => Type -> Elab Unit
 deriveGenPrinter ty = do
   ty <- quote ty
   logSugaredTerm "deptycheck.derive.print" DefaultLogLevel "type" ty
   expr <- deriveGenExpr ty
   expr <- quote expr
+  printTTImp <- quote printTTImp
   declare `[
     main : IO Unit
     main = do
-      putStr $ interpolate ~(expr)
+      putStr $ if ~printTTImp then interpolate ~expr else show ~expr
       putStrLn ""
   ]
