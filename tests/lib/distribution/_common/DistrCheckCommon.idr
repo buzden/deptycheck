@@ -17,12 +17,12 @@ find (x::xs) = case force xs of
                  [] => Just x
                  xs => if all isOk x then Just x else assert_total $ find xs
 
-verdict : Vect n (CoverageTest a) -> Gen MaybeEmpty a -> Maybe $ Vect n SignificantBounds
+verdict : Vect n (CoverageTest a) -> Gen em a -> Maybe $ Vect n SignificantBounds
 verdict conds = find . mapMaybe sequence .
                   checkCoverageConditions conds . unGenTryN 10000000 someStdGen
 
 Show SignificantBounds where show = interpolate
 
 export
-printVerdict : HasIO m => Gen MaybeEmpty a -> Vect n (CoverageTest a) -> m ()
+printVerdict : HasIO m => Gen em a -> Vect n (CoverageTest a) -> m ()
 printVerdict = putStrLn .: show .: flip verdict

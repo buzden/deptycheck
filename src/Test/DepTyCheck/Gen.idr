@@ -507,6 +507,15 @@ elements' xs = elements $ relaxF $ fromList $ toList xs
 --- Analysis of generators ---
 ------------------------------
 
+||| Shallow alternatives of a generator.
+|||
+||| If the given generator is made by one of `oneOf`, `frequency` or `elements`,
+||| this function returns alternatives which this generators contains.
+||| Otherwise it retuns a single-element alternative list containing given generator.
+|||
+||| In a sense, this function is a reverse function of `oneOf`, i.g.
+||| `oneOf $ alternativesOf g` must be equivalent to `g` and
+||| `alternativesof $ oneOf gs` must be equivalent to `gs`.
 export
 alternativesOf : {em : _} -> Gen em a -> GenAlternatives True em a
 alternativesOf $ OneOf oo     = MkGenAlts $ unGenAlts $ mapOneOf oo relax
@@ -584,6 +593,48 @@ infix 8 `mapAlternativesOf`
 export
 {em : _} -> Monad (GenAlternatives True em) where
   xs >>= f = flip processAlternatives' xs $ alternativesOf . (>>= oneOf . f)
+
+----------------------------------------
+--- Additional composition functions ---
+----------------------------------------
+
+||| Associative composition of two generators, merging shallow alternatives of given two generators
+|||
+||| This operation being applied to arguments `a` and `b` is *not* the same as `oneOf [a, b]`.
+||| Generator ``a `withAlts` b`` has equal probabilities of all shallow alternatives of generators `a` and `b`.
+||| For example, when there are generators
+||| ```idris
+||| g1 = oneOf [elems [0, 1, 2, 3], elems [4, 5]]
+||| g2 = oneOf elemts [10, 11, 12, 13, 14, 15]
+||| ```
+||| generator ``g1 `withAlts` g2`` would be equivalent to
+||| `oneOf [elems [0, 1, 2, 3], elems [4, 5], pure 10, pure 11, pure 12, pure 13, pure 14, pure 15]`.
+|||
+||| In other words, ``a `withAlts` b`` must be equivalent to `oneOf $ alternativesOf a ++ alternativesOf b`.
+export %inline
+withAlts : {em : _} -> Gen em a -> Gen em a -> Gen em a
+a `withAlts` b = oneOf $ alternativesOf a ++ alternativesOf b
+
+-- As of `<|>`
+export
+infixr 2 `withAlts`
+
+||| Associative composition of two generators, merging deep alternatives of given two generators
+|||
+||| This operation being applied to arguments `a` and `b` is *not* the same as `oneOf [a, b]`.
+||| Generator ``a `withDeepAlts` b`` has equal probabilities of all deep alternatives of generators `a` and `b`.
+||| For example, when there are generators
+||| ```idris
+||| g1 = oneOf [elems [0, 1, 2, 3], elems [4, 5]]
+||| g2 = oneOf elemts [10, 11, 12, 13, 14, 15]
+||| ```
+||| generator ``withDeepAlts n g1 g2`` with `n >= 2` would be equivalent to
+||| `oneOf elements [0, 1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15]`.
+|||
+||| In other words, ``withDeepAlts d a b`` must be equivalent to `oneOf $ deepAlternativesOf d a ++ deepAlternativesOf d b`.
+export %inline
+withDeepAlts : {em : _} -> (depth : Nat) -> Gen em a -> Gen em a -> Gen em a
+withDeepAlts depth a b = oneOf $ deepAlternativesOf depth a ++ deepAlternativesOf depth b
 
 -----------------
 --- Filtering ---
