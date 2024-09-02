@@ -22,6 +22,8 @@ import Decidable.Equality
 
 import public Language.Implicits.IfUnsolved
 
+import Syntax.WithProof
+
 import public Test.DepTyCheck.Gen.Emptiness
 import public Test.DepTyCheck.Gen.Labels
 
@@ -670,6 +672,37 @@ suchThat_dec g f = mapMaybe d g where
 export
 suchThat_invertedEq : DecEq b => Gen em a -> (y : b) -> (f : a -> b) -> Gen0 $ Subset a $ \x => y = f x
 suchThat_invertedEq g y f = g `suchThat_dec` \x => y `decEq` f x
+
+||| More elegant version of `suchThat_withPrf` for fuelled generators.
+|||
+||| Tries to repeat generation until there is some fuel, and fallback to `suchThat_withPrf` in case there isn't.
+export
+retryUntil_withPrf : (p : a -> Bool) -> (Fuel -> Gen em a) -> Fuel -> Gen0 $ a `Subset` So . p
+retryUntil_withPrf p f Dry           = f Dry `suchThat_withPrf` p
+retryUntil_withPrf p f fl'@(More fl) = do
+  x <- relax $ f fl'
+  case @@ p x of
+    (True ** prf) => pure $ Element x $ eqToSo prf
+    (False ** _)  => retryUntil_withPrf p f fl
+
+||| More elegant version of `suchThat` for fuelled generators.
+|||
+||| Tries to repeat generation until there is some fuel, and fallback to `suchThat` in case there isn't.
+public export %inline
+retryUntil : (p : a -> Bool) -> (Fuel -> Gen em a) -> Fuel -> Gen0 a
+retryUntil p f = map fst . retryUntil_withPrf p f
+
+||| More elegant version of `suchThat_dec` for fuelled generators.
+|||
+||| Tries to repeat generation until there is some fuel, and fallback to `suchThat_dec` in case there isn't.
+export
+retryUntil_dec : (p : (x : a) -> Dec (prop x)) -> (Fuel -> Gen em a) -> Fuel -> Gen0 $ Subset a prop
+retryUntil_dec p f Dry           = f Dry `suchThat_dec` p
+retryUntil_dec p f fl'@(More fl) = do
+  x <- relax $ f fl'
+  case p x of
+    Yes p => pure $ Element x p
+    No _  => retryUntil_dec p f fl
 
 -------------------------------
 --- Variation in generation ---
