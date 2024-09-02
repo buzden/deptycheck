@@ -44,10 +44,10 @@ printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
 printFunCall n args = do
     let f_name = funName {vars} n
     let f_doc : Doc opts = line f_name
-    let ars = toList $ getExprs args
+    let arExps = toList $ getExprs args
     let preparedArgs : List (Exists (Expr funs vars)) -> Gen0 $ Doc opts = 
-        \as => map hsep $ for as $ \(Evidence _ e) => (printExpr e >>= \x => pure $ parenthesise True x)
-    pure $ parenthesise True $ hangSep' 2 f_doc !(preparedArgs ars)
+        \as => map hsep $ for as $ \(Evidence _ e) => printExpr e
+    pure $ hangSep' 2 f_doc !(preparedArgs arExps)
 
 printExpr $ C $ I k = pure $ line $ show k
 printExpr $ C $ B False = pure "False"
@@ -55,7 +55,11 @@ printExpr $ C $ B True = pure "True"
 printExpr $ V n = case index vars n of
     (_, Mutable) => pure $ "!" <+> (parenthesise True $ "readIORef" <++> line (varName {funs} n))
     (_, Immutable) => pure $ line $ varName {funs} n
-printExpr $ F n args = assert_total printFunCall n args
+printExpr @{uniqNames} $ F n args = do 
+  funCallDoc <- assert_total printFunCall n args
+  let proccesedDoc = parenthesise True funCallDoc
+  let finalDoc = if isFunPure @{uniqNames} n then proccesedDoc else ("!" <+> proccesedDoc)
+  pure finalDoc
 
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
              (names : UniqNames Idris2 funs vars) =>
@@ -121,6 +125,8 @@ printIdris2 : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
               Stmts funs vars retTy -> Gen0 $ Doc opts
 printIdris2 fl stmts = do
     pure $ vsep ["module Main", 
+                 "",
+                 "import Data.IORef",
                  "",
                  "main : IO ()",
                  "main = do",

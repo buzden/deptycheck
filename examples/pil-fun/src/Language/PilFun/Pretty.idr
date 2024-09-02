@@ -31,7 +31,7 @@ data ScalaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
 public export
 data IdrisCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
  where
-  Trivial : IdrisCondition funSig isInfix isPure
+  IsPure : (isPure : Bool) -> IdrisCondition funSig isInfix isPure
 
 public export
 data LanguageToCondition : (l : SupportedLanguages) -> FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
@@ -97,6 +97,12 @@ isFunInfix @{JustNew @{ss} _} i        = isFunInfix @{ss} i
 isFunInfix @{NewFun {isInfix} _} Here  = isInfix
 isFunInfix @{NewFun @{ss} s} (There i) = isFunInfix @{ss} i
 isFunInfix @{NewVar @{ss} s} i         = isFunInfix @{ss} i
+
+isFunPure : UniqNames l funs vars => IndexIn funs -> Bool
+isFunPure @{JustNew @{ss} _} i = isFunPure @{ss} i
+isFunPure @{NewFun {isPure} _} Here = isPure
+isFunPure @{NewFun @{ss} _} (There i) = isFunPure @{ss} i
+isFunPure @{NewVar @{ss} _} i = isFunPure @{ss} i
 
 -- Returned vect has a reverse order; I'd like some `SnocVect` here.
 newVars : (newNames : Gen0 String) =>
