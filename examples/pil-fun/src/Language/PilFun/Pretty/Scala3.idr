@@ -43,6 +43,9 @@ NamesRestrictions where
     , "@"       , "=>>"   , "?=>"
     ]
 
+namesGenScala : Gen0 String
+namesGenScala = pack <$> listOf {length = choose (1,10)} (choose ('a', 'z'))
+
 printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
             (names : UniqNames Scala3 funs vars) =>
             Prec -> Expr funs vars ty -> Gen0 $ Doc opts
@@ -87,7 +90,7 @@ wrapMain : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
 wrapMain fl False Nothing x = x
 wrapMain fl False (Just cont) x = [| x `vappend` assert_total printStmts fl False cont |]
 wrapMain fl True cont body = do
-  (nm ** _) <- genNewName fl _ _ names
+  (nm ** _) <- genNewName fl newNames _ _ names
   b <- body
   cnt <- for cont $ assert_total $ printStmts @{JustNew nm} fl False
   let b = maybe b (b `vappend`) cnt
@@ -109,7 +112,7 @@ printSubStmts _  True Nop = pure "{}"
 printSubStmts fl _    ss  = printStmts fl False ss
 
 printStmts fl tl $ NewV ty mut initial cont = do
-  (nm ** _) <- genNewName fl _ _ names
+  (nm ** _) <- genNewName fl newNames _ _ names
   rest <- printStmts @{NewVar nm} fl tl cont
   let tyAscr = if !chooseAny then ":" <++> printTy ty else empty
   let declPref = case mut of
@@ -120,13 +123,13 @@ printStmts fl tl $ NewV ty mut initial cont = do
   pure $ flip vappend rest $ hangSep' 2 lhs rhs
 
 printStmts fl tl $ NewF sig body cont = do
-  (nm ** _) <- genNewName fl _ _ names
+  (nm ** _) <- genNewName fl newNames _ _ names
   isInfix <- chooseAny
   let (isInfix ** infixCond) : (b ** ScalaCondition sig b _) = case decSo _ of
                                                               Yes condMet => (isInfix ** MoreThanOneArg condMet)
                                                               No _        => (False ** IsNotInfix)
   rest <- printStmts @{NewFun {isInfix} {languageCondition = Scala3Cond infixCond} nm} fl tl cont
-  (namesInside, funArgs) <- newVars fl _ names
+  (namesInside, funArgs) <- newVars fl newNames _ names
   brBody <- chooseAny
   funBody <- if brBody
                then printStmts @{namesInside} fl False body

@@ -25,6 +25,13 @@ NamesRestrictions where
     "let", "module", "namespace", "of", "partial", "prefix", "private", "proof", "public", "record", "rewrite",
     "then", "total", "where", "with", "main", "IO", "Int", "Bool"]
 
+alphaNames : Gen0 String
+alphaNames = pack <$> listOf {length = choose (1,10)} (choose ('a', 'z'))
+
+infixNames : Gen0 String
+infixNames = pack <$> listOf {length = choose (1,4)} (elements 
+  [':', '+', '-', '*', '\\', '/', '=', '.', '?', '|', '&', '>', '<', '!', '@', '$', '%', '^', '~', '#'])
+
 printTy : Ty -> Doc opts
 printTy Int' = "Int"
 printTy Bool' = "Bool"
@@ -63,31 +70,30 @@ printExpr @{uniqNames} $ F n args = do
 
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
              (names : UniqNames Idris2 funs vars) =>
-             (newNames : Gen0 String) =>
              Fuel ->
              Stmts funs vars retTy -> Gen0 $ Doc opts
 
 printStmts fl $ NewV ty Immutable initial cont = do
-  (nm ** _) <- genNewName fl _ _ names
+  (nm ** _) <- genNewName fl alphaNames _ _ names
   rest <- printStmts @{NewVar nm} fl cont
   let lhs = "let" <++> line nm <++> "="
   rhs <- printExpr initial
   pure $ flip vappend rest $ hangSep' 2 lhs rhs
 
 printStmts fl $ NewV ty Mutable initial cont = do
-  (nm ** _) <- genNewName fl _ _ names
+  (nm ** _) <- genNewName fl alphaNames _ _ names
   rest <- printStmts @{NewVar nm} fl cont
   let lhs = line nm <++> "<-"
   rhs <- printExpr initial
   pure $ flip vappend rest $ hangSep' 2 lhs $ "newIORef" <++> rhs
 
 printStmts fl $ NewF (typesFrom ==> maybeRet) body cont = do
-  (nm ** _) <- genNewName fl _ _ names
+  (nm ** _) <- genNewName fl alphaNames _ _ names
   rest <- printStmts @{NewFun nm} fl cont
   let processedInputTypes = hsep $ (snocListTyToList typesFrom) <&> (\ty => printTy ty <++> "->")
   let processedOutputType = "IO" <++> printMaybeTy maybeRet
   let idrisTypeSignature = processedInputTypes <++> processedOutputType
-  (namesInside, funArgs) <- newVars fl _ names
+  (namesInside, funArgs) <- newVars fl alphaNames _ names
   let prerparedArgs = hsep $ reverse (toList funArgs) <&> \(n, t) => line n
   body <- printStmts @{namesInside} fl body <&> indent' 6
   pure $ flip vappend rest $ vsep 
@@ -120,7 +126,6 @@ printStmts fl $ Nop = pure "pure ()"
 export
 printIdris2 : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
               (names : UniqNames Idris2 funs vars) =>
-              (newNames : Gen0 String) =>
               Fuel ->
               Stmts funs vars retTy -> Gen0 $ Doc opts
 printIdris2 fl stmts = do

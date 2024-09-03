@@ -70,14 +70,14 @@ rawNewName : Fuel -> (l : SupportedLanguages) -> (Fuel -> Gen MaybeEmpty String)
              Gen MaybeEmpty (s ** NameIsNew l funs vars names s)
 
 export
-genNewName : {l : SupportedLanguages} -> Fuel -> (Fuel -> Gen MaybeEmpty String) =>
+genNewName : {l : SupportedLanguages} -> Fuel -> Gen MaybeEmpty String ->
              NamesRestrictions =>
              (funs : Funs) -> (vars : Vars) -> (names : UniqNames l funs vars) ->
              Gen MaybeEmpty (s ** NameIsNew l funs vars names s)
-genNewName fl @{genStr} funs vars names = do
-  nn@(nm ** _) <- rawNewName fl l @{genStr} funs vars names
+genNewName fl genStr funs vars names = do
+  nn@(nm ** _) <- rawNewName fl l @{const genStr} funs vars names
   if reservedKeywords `contains'` nm
-    then assert_total $ genNewName fl @{genStr} funs vars names -- we could reduce fuel instead of `assert_total`
+    then assert_total $ genNewName fl genStr funs vars names -- we could reduce fuel instead of `assert_total`
     else pure nn
 
 varName : UniqNames l funs vars => IndexIn vars -> String
@@ -105,16 +105,16 @@ isFunPure @{NewFun @{ss} _} (There i) = isFunPure @{ss} i
 isFunPure @{NewVar @{ss} _} i = isFunPure @{ss} i
 
 -- Returned vect has a reverse order; I'd like some `SnocVect` here.
-newVars : (newNames : Gen0 String) =>
-          NamesRestrictions =>
+newVars : NamesRestrictions =>
           {l : _} -> {funs : _} -> {vars : _} ->
           Fuel ->
+          (newNames : Gen0 String) ->
           (extraVars : _) -> UniqNames l funs vars ->
           Gen0 (UniqNames l funs (vars ++ extraVars), Vect extraVars.length (String, Ty))
-newVars _  [<]     names = pure (names, [])
-newVars fl (vs:<v) names = do
-  (names', vts) <- newVars fl vs names
-  (nm ** _) <- genNewName {l} fl _ _ names'
+newVars _  _ [<] names = pure (names, [])
+newVars fl newNames (vs:<v) names = do
+  (names', vts) <- newVars fl newNames vs names
+  (nm ** _) <- genNewName {l} fl newNames _ _ names'
   pure (NewVar @{names'} nm, (nm, v)::vts)
 
 isNop : Stmts funs vars retTy -> Bool
