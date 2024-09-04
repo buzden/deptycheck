@@ -5,18 +5,17 @@ import public Data.So
 
 %default total
 
-public export
-data SortedList : Type
+mutual
 
-public export
-canPrepend : Nat -> SortedList -> Bool
+  public export
+  data SortedList : Type where
+    Nil  : SortedList
+    (::) : (x : Nat) -> (xs : SortedList) -> (0 _ : So $ canPrepend x xs) => SortedList
 
-data SortedList : Type where
-  Nil  : SortedList
-  (::) : (x : Nat) -> (xs : SortedList) -> (0 _ : So $ canPrepend x xs) => SortedList
-
-canPrepend _ []      = True
-canPrepend n (x::xs) = x > n
+  public export
+  canPrepend : Nat -> SortedList -> Bool
+  canPrepend _ []      = True
+  canPrepend n (x::xs) = n < x
 
 public export
 length : SortedList -> Nat
