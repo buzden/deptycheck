@@ -1,0 +1,8 @@
+package sorted-list-so-comp-tests
+
+main = Tests
+executable = runtests
+
+builddir = ".build"
+
+depends = golden-runner-helper

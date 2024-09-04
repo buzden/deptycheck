@@ -1,0 +1,6 @@
+package a-test
+
+depends = sorted-list-so-full
+
+executable = a-test
+main = Main

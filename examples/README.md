@@ -9,12 +9,15 @@ Current examples of generation can be globally divided to examples with hand-wri
 All examples have derived generators unless explicitly mentioned.
 
 All examples are separate projects, which can be build and/or tested independently.
-For example, you can run `pack build sorted-list-tl-pred` for building the sorted lists example.
+For example, you can run `pack build sorted-list-so-comp` for building one of the sorted lists examples.
 Please be aware that derivation process can take some time, up to several minutes.
 
 The examples are the following:
 
-- [sorted lists](sorted-list-tl-pred/) of natural numbers with type-level predicates
+- sorted lists of natural numbers
+  - [sorted lists](sorted-list-tl-pred/) with sortedness coded through type-level predicates
+  - [sorted lists](sorted-list-so-comp/) with sortedness coded through a type-level predicate using `So` for comparison (gives best distribution)
+  - [sorted lists](sorted-list-so-full/) with sortedness coded fully through `So` over boolean predicates
 - list and vector of strings, [both with unique elements](uniq-list/) implemented using `So` and usual `Eq` comparison
 - a sequence of [unique mentions of a given subset](covering-seq/) of elements interleaved with unrelated elements
 - naive possibly empty [sorted binary trees](sorted-tree-naive/) of natural numbers, implemented as if without dependent types
