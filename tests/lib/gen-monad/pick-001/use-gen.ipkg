@@ -1,0 +1,8 @@
+package dummy
+
+authors = "Denis Buzdalov"
+
+main = UseGen
+executable = use-gen
+
+depends = deptycheck
