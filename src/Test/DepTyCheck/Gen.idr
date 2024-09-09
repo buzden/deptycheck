@@ -8,11 +8,12 @@ import Control.Monad.State
 import public Control.Monad.State.Interface
 
 import Data.Bool
+import public Data.CheckedEmpty.List.Lazy
 import Data.Fuel
 import public Data.Nat1
 import Data.List
 import Data.List.Lazy
-import public Data.CheckedEmpty.List.Lazy
+import Data.List.Lazy.Extra
 import Data.Singleton
 import Data.SnocList
 import Data.Stream
@@ -244,6 +245,11 @@ export
 unGenAll : RandomGen g => (seed : g) -> Gen1 a -> Stream a
 unGenAll = map snd .: unGenAll'
 
+||| Picks one random value from a generator
+export
+pick1 : CanInitSeed g m => Functor m => Gen1 a -> m a
+pick1 gen = initSeed <&> \s => evalRandom s $ unGen1 gen
+
 --- Possibly empty generators ---
 
 export
@@ -272,6 +278,16 @@ unGenTryAll = map snd .: unGenTryAll'
 export
 unGenTryN : RandomGen g => (n : Nat) -> g -> Gen em a -> LazyList a
 unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
+
+||| Tries once to pick a random value from a generator
+export
+pick : CanInitSeed g m => Functor m => Gen em a -> m $ Maybe a
+pick gen = initSeed <&> \s => evalRandom s $ unGen' gen
+
+||| Tries to pick a random value from a generator, returning the number of unsuccessful attempts, if generated successfully
+export
+pickTryN : CanInitSeed g m => Functor m => (n : Nat) -> Gen em a -> m $ Maybe (Fin n, a)
+pickTryN n g = initSeed <&> \s => head' (withIndex $ unGenTryN n s g) >>= \(i, x) => natToFin i n <&> (,x)
 
 -- TODO To add config and Reader for that.
 --      This config should contain attempts count for each `unGen` (including those in combinators)
