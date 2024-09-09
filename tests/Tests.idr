@@ -7,6 +7,7 @@ main = goldenRunner $
   [ "The `Gen` monad" `atDir` "lib/gen-monad"
   , "Distribution of generators" `atDir` "lib/distribution"
   , "Model coverage" `atDir` "lib/coverage"
+  , "John Hughes-style tests" `atDir` "lib/john-hughes"
   , "The library documentation" `atDir` "docs"
   , "Derivation utils: TTImp equality up to renaming" `atDir` "derivation/utils/up-to-renaming-ttimp-eq"
   , "Derivation utils: canonic signature" `atDir` "derivation/utils/canonicsig"

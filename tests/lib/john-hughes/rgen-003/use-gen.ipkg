@@ -1,0 +1,6 @@
+package test
+
+main = UseGen
+executable = use-gen
+
+depends = deptycheck
