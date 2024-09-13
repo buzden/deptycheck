@@ -77,7 +77,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (x : X) -> (x' : X) -> Gen 
                                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkZ (orders)"))
                                                   .$ (   var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                      .$ (var "DerivedGen.MkZ" .! ("x", var "x") .$ var "prf"))
+                                                      .$ (var "DerivedGen.MkZ" .! ("x", implicitTrue) .$ var "prf"))
                                              ,       var "<<DerivedGen.MkZ>>"
                                                   .$ bindVar "^cons_fuel^"
                                                   .$ (var "DerivedGen.Cons" .$ bindVar "x" .$ bindVar "prf")

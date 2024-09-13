@@ -84,12 +84,17 @@ namespace NonObligatoryExts
       -- Compute left-to-right need of generation when there are non-trivial types at the left
       argsTypeApps <- for con.args.asVect $ analyseTypeApp . type
 
+      -- Get dependencies of constructor's arguments
+      let rawDeps' = argDeps con.args
+      let rawDeps : Vect _ $ SortedSet $ Fin con.args.length := downmap (mapIn weakenToSuper) rawDeps'
+      let dependees = concat rawDeps -- arguments which any other argument depends on
+
       -- Decide how constructor arguments would be named during generation
-      let bindNames = fromList con.args <&> bindNameRenamer . argName
+      let bindNames = withIndex (fromList con.args) <&> map (bindNameRenamer . argName)
 
       -- Form the expression of calling the current constructor
       let callCons = do
-        let constructorCall = callCon con $ bindNames <&> varStr
+        let constructorCall = callCon con $ bindNames <&> \(idx, n) => if contains idx dependees then implicitTrue else varStr n
         let wrapImpls : Nat -> TTImp
             wrapImpls Z     = constructorCall
             wrapImpls (S n) = var `{Builtin.DPair.MkDPair} .$ implicitTrue .$ wrapImpls n
@@ -140,7 +145,7 @@ namespace NonObligatoryExts
             subgenCall <- callGen subsig subfuel $ snd <$> subgivens
 
             -- Form an expression of binding the result of subgen
-            let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
+            let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . snd . flip Vect.index bindNames
             let bindSubgenResult = foldr (\l, r => var `{Builtin.DPair.MkDPair} .$ l .$ r) genedArg subgeneratedArgs
 
             -- Form an expression of the RHS of a bind; simplify lambda if subgeneration result type does not require pattern matching
@@ -150,10 +155,6 @@ namespace NonObligatoryExts
 
             -- Chain the subgen call with a given continuation
             pure $ \cont => `(~subgenCall >>= ~(bindRHS cont))
-
-      -- Get dependencies of constructor's arguments
-      let rawDeps = argDeps con.args
-      let deps = downmap ((`difference` givs) . mapIn weakenToSuper) rawDeps
 
       -------------------------------------------------
       -- Left-to-right generation phase (2nd phase) ---
@@ -173,21 +174,21 @@ namespace NonObligatoryExts
       -- Find rightmost arguments among `preLTR`
       let depsLTR = SortedSet.fromList $
                       mapMaybe (\(ds, idx) => whenT .| contains idx preLTR && null ds .| idx) $
-                        toListI $ deps <&> intersection preLTR
+                        toListI $ rawDeps <&> intersection preLTR . (`difference` givs)
 
       ---------------------------------------------------------------------------------
       -- Main right-to-left generation phase (3rd phase aka 2nd right-to-left phase) --
       ---------------------------------------------------------------------------------
 
       -- Arguments that no other argument depends on
-      let rightmostArgs = fromFoldable {f=Vect _} range `difference` (givs `union` concat deps)
+      let rightmostArgs = fromFoldable {f=Vect _} range `difference` (givs `union` dependees)
 
       ---------------------------------------------------------------
       -- Manage different possible variants of generation ordering --
       ---------------------------------------------------------------
 
       -- Prepare info about which arguments are independent and thus can be ordered arbitrarily
-      let disjDeps = disjointDepSets rawDeps givs
+      let disjDeps = disjointDepSets rawDeps' givs
 
       -- Acquire order(s) in what we will generate arguments
       let allOrders = do

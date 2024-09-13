@@ -107,9 +107,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (f : X) -> Gen MaybeEmpty (
                                                          .$ (   var "Builtin.DPair.MkDPair"
                                                              .$ implicitTrue
                                                              .$ (   var "DerivedGen.B"
-                                                                 .! ("x", var "x")
-                                                                 .! ("xs", var "xs")
-                                                                 .! ("n", var "n")
+                                                                 .! ("x", implicitTrue)
+                                                                 .! ("xs", implicitTrue)
+                                                                 .! ("n", implicitTrue)
                                                                  .$ var "^bnd^{arg:3}"
                                                                  .@ var "^bnd^{conArg:2}"))
                                                     ]

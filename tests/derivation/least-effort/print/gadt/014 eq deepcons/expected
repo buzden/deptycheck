@@ -101,7 +101,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (a : Nat) -> (b : Nat) -> G
                                       .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "DerivedGen.Step" .! ("y", var "y") .! ("x", var "x") .$ var "^bnd^{arg:3}")))
+                                              .$ (var "DerivedGen.Step" .! ("y", implicitTrue) .! ("x", implicitTrue) .$ var "^bnd^{arg:3}")))
                              , var "<<DerivedGen.Step>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

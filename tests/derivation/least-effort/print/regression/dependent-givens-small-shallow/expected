@@ -52,7 +52,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (n : Nat) -> (f : Fin n) ->
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkX (orders)"))
                                   .$ (   var "Prelude.pure"
                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                      .$ (var "DerivedGen.MkX" .$ var "n" .$ var "f"))
+                                      .$ (var "DerivedGen.MkX" .$ implicitTrue .$ var "f"))
                              , var "<<DerivedGen.MkX>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

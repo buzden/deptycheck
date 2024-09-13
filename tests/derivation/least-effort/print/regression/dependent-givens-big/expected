@@ -101,7 +101,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (n : Nat) -> (v : VectMaybe
                                           .$ implicitTrue
                                           .$ (   var "Builtin.DPair.MkDPair"
                                               .$ implicitTrue
-                                              .$ (var "DerivedGen.VectMaybeAnyType.Here" .! ("n", var "n") .! ("xs", var "xs") .! ("x", var "x")))))
+                                              .$ (   var "DerivedGen.VectMaybeAnyType.Here"
+                                                  .! ("n", implicitTrue)
+                                                  .! ("xs", var "xs")
+                                                  .! ("x", var "x")))))
                              , var "<<DerivedGen.VectMaybeAnyType.Here>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          , IDef
@@ -131,10 +134,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (n : Nat) -> (v : VectMaybe
                                                                  .$ implicitTrue
                                                                  .$ (   var "DerivedGen.VectMaybeAnyType.There"
                                                                      .! ("z", var "z")
-                                                                     .! ("n", var "n")
-                                                                     .! ("zs", var "zs")
-                                                                     .! ("x", var "x")
-                                                                     .! ("i", var "i")
+                                                                     .! ("n", implicitTrue)
+                                                                     .! ("zs", implicitTrue)
+                                                                     .! ("x", implicitTrue)
+                                                                     .! ("i", implicitTrue)
                                                                      .$ var "^bnd^{arg:4}")))
                                                     ]
                                                 }))

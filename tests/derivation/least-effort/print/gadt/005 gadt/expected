@@ -157,7 +157,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                                                  .$ (   var "Builtin.DPair.MkDPair"
                                                                      .$ implicitTrue
                                                                      .$ (   var "DerivedGen.FN"
-                                                                         .! ("b", var "b")
+                                                                         .! ("b", implicitTrue)
                                                                          .$ var "^bnd^{arg:7}"
                                                                          .$ var "^bnd^{arg:6}")))
                                                     ]
@@ -198,7 +198,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                                                  .$ (   var "Builtin.DPair.MkDPair"
                                                                      .$ implicitTrue
                                                                      .$ (   var "DerivedGen.TR"
-                                                                         .! ("b", var "b")
+                                                                         .! ("b", implicitTrue)
                                                                          .$ var "^bnd^{arg:10}"
                                                                          .$ var "^bnd^{arg:9}")))
                                                     ]
