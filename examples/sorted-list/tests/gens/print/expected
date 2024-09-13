@@ -135,7 +135,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                                          .$ (var "Builtin.DPair.MkDPair" .$ bindVar "xs" .$ bindVar "^bnd^{conArg:1}")
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                         .$ (var "Data.List.Sorted.(::)" .$ var "x" .$ var "xs" .@ var "^bnd^{conArg:1}")
+                                                         .$ (var "Data.List.Sorted.(::)" .$ implicitTrue .$ implicitTrue .@ var "^bnd^{conArg:1}")
                                                     ]
                                                 }))
                              ]
@@ -255,10 +255,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                                                                         .$ (   var "Builtin.DPair.MkDPair"
                                                                                             .$ implicitTrue
                                                                                             .$ (   var "Data.List.Sorted.NE"
-                                                                                                .! ("xs", var "xs")
-                                                                                                .! ("x", var "x")
+                                                                                                .! ("xs", implicitTrue)
+                                                                                                .! ("x", implicitTrue)
                                                                                                 .! ("prf", var "prf")
-                                                                                                .! ("n", var "n")
+                                                                                                .! ("n", implicitTrue)
                                                                                                 .$ var "^bnd^{arg:3}")))
                                                                                ]
                                                                            })
@@ -367,10 +367,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                                                             .$ (   var "Builtin.DPair.MkDPair"
                                                                                 .$ implicitTrue
                                                                                 .$ (   var "Data.List.Sorted.NE"
-                                                                                    .! ("xs", var "xs")
-                                                                                    .! ("x", var "x")
+                                                                                    .! ("xs", implicitTrue)
+                                                                                    .! ("x", implicitTrue)
                                                                                     .! ("prf", var "prf")
-                                                                                    .! ("n", var "n")
+                                                                                    .! ("n", implicitTrue)
                                                                                     .$ var "^bnd^{arg:3}"))
                                                                        ]
                                                                    })
@@ -477,8 +477,8 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                                          .$ (   var "Builtin.DPair.MkDPair"
                                                              .$ implicitTrue
                                                              .$ (   var "Data.Nat.LTESucc"
-                                                                 .! ("right", var "right")
-                                                                 .! ("left", var "left")
+                                                                 .! ("right", implicitTrue)
+                                                                 .! ("left", implicitTrue)
                                                                  .$ var "^bnd^{arg:4}"))
                                                     ]
                                                 }))

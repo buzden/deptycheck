@@ -110,8 +110,8 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                                              .$ (   var "Builtin.DPair.MkDPair"
                                                                  .$ implicitTrue
                                                                  .$ (   var "DerivedGen.Step"
-                                                                     .! ("y", var "y")
-                                                                     .! ("x", var "x")
+                                                                     .! ("y", implicitTrue)
+                                                                     .! ("x", implicitTrue)
                                                                      .$ var "^bnd^{arg:4}")))
                                                     ]
                                                 }))

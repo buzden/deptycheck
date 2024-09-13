@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+(22 ** (17 ** ItIsFS))
+-----
+(29 ** (18 ** ItIsFS))
+-----
+(29 ** (11 ** ItIsFS))
+-----
+(11 ** (6 ** ItIsFS))
+-----
+(25 ** (13 ** ItIsFS))
+-----
+(25 ** (9 ** ItIsFS))
+-----
+(20 ** (5 ** ItIsFS))
+-----
+(13 ** (8 ** ItIsFS))
+-----
+(13 ** (11 ** ItIsFS))
+-----
+(37 ** (16 ** ItIsFS))

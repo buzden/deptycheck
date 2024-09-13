@@ -96,7 +96,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty (n : Nat ** 
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Builtin.DPair.MkDPair"
                                                              .$ implicitTrue
-                                                             .$ (var "Data.Fin.FS" .! ("k", var "k") .$ var "^bnd^{arg:1}"))
+                                                             .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "^bnd^{arg:1}"))
                                                     ]
                                                 }))
                              ]
