@@ -1,0 +1,68 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (v : Fin n) -> Gen MaybeEmpty (IsFS n v)
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ImplicitArg (Just "outer^<n>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<v>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              emptyFC
+              MW
+              Export
+              []
+              (mkTy
+                 { name = "<DerivedGen.IsFS>[0, 1]"
+                 , type =
+                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                     .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fin.Fin" .$ var "n")
+                     .->    var "Test.DepTyCheck.Gen.Gen"
+                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                         .$ (var "DerivedGen.IsFS" .$ var "n" .$ var "{arg:1}")
+                 })
+          , IDef
+              emptyFC
+              "<DerivedGen.IsFS>[0, 1]"
+              [    var "<DerivedGen.IsFS>[0, 1]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>" .$ bindVar "inter^<{arg:1}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.ItIsFS>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fin.Fin" .$ var "n")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "DerivedGen.IsFS" .$ var "n" .$ var "{arg:1}")
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.ItIsFS>>"
+                             [       var "<<DerivedGen.ItIsFS>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{_:3643}")
+                                  .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ bindVar "i")
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.ItIsFS (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "DerivedGen.ItIsFS" .! ("{_:3643}", implicitTrue) .! ("i", var "i")))
+                             , var "<<DerivedGen.ItIsFS>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.IsFS[0, 1] (non-recursive)"))
+                         .$ (var "<<DerivedGen.ItIsFS>>" .$ var "^fuel_arg^" .$ var "inter^<n>" .$ var "inter^<{arg:1}>")
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.IsFS>[0, 1]" .$ var "^outmost-fuel^" .$ var "outer^<n>" .$ var "outer^<v>"
+      }
+

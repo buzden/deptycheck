@@ -106,9 +106,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                                                          .=    var "Prelude.pure"
                                                                             .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                             .$ (   var "DerivedGen.MkY"
-                                                                                .! ("k", var "k")
-                                                                                .! ("m", var "m")
-                                                                                .! ("n", var "n")
+                                                                                .! ("k", implicitTrue)
+                                                                                .! ("m", implicitTrue)
+                                                                                .! ("n", implicitTrue)
                                                                                 .$ var "^bnd^{arg:6}"
                                                                                 .$ var "^bnd^{arg:5}")
                                                                        ]

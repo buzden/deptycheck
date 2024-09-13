@@ -90,7 +90,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
                                                          .$ (var "Builtin.DPair.MkDPair" .$ bindVar "m" .$ bindVar "^bnd^{arg:3}")
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                         .$ (var "DerivedGen.MkY" .! ("m", var "m") .! ("n", var "n") .$ var "^bnd^{arg:3}")
+                                                         .$ (   var "DerivedGen.MkY"
+                                                             .! ("m", implicitTrue)
+                                                             .! ("n", implicitTrue)
+                                                             .$ var "^bnd^{arg:3}")
                                                     ]
                                                 }))
                              ]

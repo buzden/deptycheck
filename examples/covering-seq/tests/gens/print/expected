@@ -142,7 +142,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen May
                                       .$ (    MkArg MW ExplicitArg (Just "^bnd^{conArg:1}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Data.List.Covering.End" .! ("n", var "n") .! ("bs", var "bs") .@ var "^bnd^{conArg:1}")))
+                                              .$ (   var "Data.List.Covering.End"
+                                                  .! ("n", implicitTrue)
+                                                  .! ("bs", implicitTrue)
+                                                  .@ var "^bnd^{conArg:1}")))
                              ]
                          , IDef
                              emptyFC
@@ -159,8 +162,8 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen May
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "Data.List.Covering.Miss"
-                                                          .! ("n", var "n")
-                                                          .! ("bs", var "bs")
+                                                          .! ("n", implicitTrue)
+                                                          .! ("bs", implicitTrue)
                                                           .$ var "^bnd^{arg:7}"
                                                           .$ var "^bnd^{arg:8}"))))
                              ]
@@ -194,9 +197,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen May
                                                           .=>    var "Prelude.pure"
                                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                               .$ (   var "Data.List.Covering.Hit"
-                                                                  .! ("n", var "n")
-                                                                  .! ("bs", var "bs")
-                                                                  .$ var "i"
+                                                                  .! ("n", implicitTrue)
+                                                                  .! ("bs", implicitTrue)
+                                                                  .$ implicitTrue
                                                                   .@ var "^bnd^{conArg:2}"
                                                                   .$ var "^bnd^{arg:9}")))))
                              ]
@@ -320,7 +323,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen May
                                           .$ (var "fromString" .$ primVal (Str "Data.List.Covering.BitMask.Index.Here (orders)"))
                                           .$ (   var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Data.List.Covering.BitMask.Index.Here" .! ("n", var "n") .! ("bs", var "bs") .! ("b", var "b")))
+                                              .$ (   var "Data.List.Covering.BitMask.Index.Here"
+                                                  .! ("n", implicitTrue)
+                                                  .! ("bs", var "bs")
+                                                  .! ("b", var "b")))
                                      ,       var "<<Data.List.Covering.BitMask.Index.Here>>"
                                           .$ bindVar "^cons_fuel^"
                                           .$ (var "Prelude.Types.S" .$ bindVar "n")
@@ -362,10 +368,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen May
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                               .$ (   var "Data.List.Covering.BitMask.Index.There"
                                                   .! ("b", var "b")
-                                                  .! ("v", var "v")
-                                                  .! ("n", var "n")
-                                                  .! ("bs", var "bs")
-                                                  .! ("i", var "i")
+                                                  .! ("v", implicitTrue)
+                                                  .! ("n", implicitTrue)
+                                                  .! ("bs", implicitTrue)
+                                                  .! ("i", implicitTrue)
                                                   .$ var "^bnd^{arg:10}")))
                              ,       var "<<Data.List.Covering.BitMask.Index.There>>"
                                   .$ implicitTrue
@@ -473,7 +479,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen May
                                       .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:11}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Data.Fin.FS" .! ("k", var "k") .$ var "^bnd^{arg:11}")))
+                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "^bnd^{arg:11}")))
                              , var "<<Data.Fin.FS>>" .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]
@@ -668,9 +674,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen May
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "Data.List.Covering.BitMask.Index.Continue"
-                                                          .! ("n", var "n")
-                                                          .! ("bs", var "bs")
-                                                          .! ("b", var "b")
+                                                          .! ("n", implicitTrue)
+                                                          .! ("bs", implicitTrue)
+                                                          .! ("b", implicitTrue)
                                                           .$ var "^bnd^{arg:13}")))
                                      ,       var "<<Data.List.Covering.BitMask.Index.Continue>>"
                                           .$ bindVar "^cons_fuel^"

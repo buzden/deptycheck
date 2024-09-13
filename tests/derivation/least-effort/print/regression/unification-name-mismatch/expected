@@ -129,8 +129,8 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (xs : X) -> (ys : X) -> Gen
                                               .$ (   var "DerivedGen.B"
                                                   .! ("x", var "x")
                                                   .! ("y", var "y")
-                                                  .! ("ys", var "ys")
-                                                  .! ("xs", var "xs")
+                                                  .! ("ys", implicitTrue)
+                                                  .! ("xs", implicitTrue)
                                                   .$ var "^bnd^{arg:1}")))
                              , var "<<DerivedGen.B>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]

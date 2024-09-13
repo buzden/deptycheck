@@ -152,9 +152,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
                                                                          .=    var "Prelude.pure"
                                                                             .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                             .$ (   var "DerivedGen.MkY_LR"
-                                                                                .! ("k", var "k")
-                                                                                .! ("m", var "m")
-                                                                                .! ("n", var "n")
+                                                                                .! ("k", implicitTrue)
+                                                                                .! ("m", implicitTrue)
+                                                                                .! ("n", implicitTrue)
                                                                                 .$ var "^bnd^{arg:6}"
                                                                                 .$ var "^bnd^{arg:5}")
                                                                        ]
@@ -189,9 +189,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
                                                                          .=    var "Prelude.pure"
                                                                             .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                             .$ (   var "DerivedGen.MkY_RL"
-                                                                                .! ("k", var "k")
-                                                                                .! ("m", var "m")
-                                                                                .! ("n", var "n")
+                                                                                .! ("k", implicitTrue)
+                                                                                .! ("m", implicitTrue)
+                                                                                .! ("n", implicitTrue)
                                                                                 .$ var "^bnd^{arg:8}"
                                                                                 .$ var "^bnd^{arg:7}")
                                                                        ]
