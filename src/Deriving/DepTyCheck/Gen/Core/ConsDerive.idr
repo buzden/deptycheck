@@ -98,64 +98,58 @@ namespace NonObligatoryExts
 
       -- Derive constructor calling expression for given order of generation
       let genForOrder : List (Fin con.args.length) -> m TTImp
-          genForOrder order = foldr apply callCons <$> evalStateT givs (for order genForOneArg) where
+          -- ... state is the set of arguments that are already present (given or generated)
+          genForOrder order = map (foldr apply callCons) $ evalStateT givs $ for order $ \genedArg => do
 
-            -- ... state is the set of arguments that are already present (given or generated)
-            genForOneArg : forall m.
-                           CanonicGen m =>
-                           MonadState (SortedSet $ Fin con.args.length) m =>
-                           (gened : Fin con.args.length) -> m $ TTImp -> TTImp
-            genForOneArg genedArg = do
+            -- Get info for the `genedArg`
+            let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ TypeApp) argsTypeApps
 
-              -- Get info for the `genedArg`
-              let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ TypeApp) argsTypeApps
+            -- Acquire the set of arguments that are already present
+            presentArguments <- get
 
-              -- Acquire the set of arguments that are already present
-              presentArguments <- get
+            -- TODO to put the following check as up as possible as soon as it typecheks O_O
+            -- Check that those argument that we need to generate is not already present
+            let False = contains genedArg presentArguments
+              | True => pure id
 
-              -- TODO to put the following check as up as possible as soon as it typecheks O_O
-              -- Check that those argument that we need to generate is not already present
-              let False = contains genedArg presentArguments
-                | True => pure id
+            -- Filter arguments classification according to the set of arguments that are left to be generated;
+            -- Those which are `Right` are given, those which are `Left` are needs to be generated.
+            let depArgs : Vect typeOfGened.args.length (Either (Fin con.args.length) TTImp) := argsOfTypeOfGened <&> \case
+              Right expr => Right expr
+              Left i     => if contains i presentArguments then Right $ var $ argName $ index' con.args i else Left i
 
-              -- Filter arguments classification according to the set of arguments that are left to be generated;
-              -- Those which are `Right` are given, those which are `Left` are needs to be generated.
-              let depArgs : Vect typeOfGened.args.length (Either (Fin con.args.length) TTImp) := argsOfTypeOfGened <&> \case
-                Right expr => Right expr
-                Left i     => if contains i presentArguments then Right $ var $ argName $ index' con.args i else Left i
+            -- Determine which arguments will be on the left of dpair in subgen call, in correct order
+            let subgeneratedArgs = mapMaybe getLeft $ toList depArgs
 
-              -- Determine which arguments will be on the left of dpair in subgen call, in correct order
-              let subgeneratedArgs = mapMaybe getLeft $ toList depArgs
+            -- Make sure generated arguments will not be generated again
+            modify $ insert genedArg . union (fromList subgeneratedArgs)
 
-              -- Make sure generated arguments will not be generated again
-              modify $ insert genedArg . union (fromList subgeneratedArgs)
+            -- Form a task for subgen
+            let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` Fin.range
+            let subsig : GenSignature := MkGenSignature typeOfGened $ fromList $ fst <$> toList subgivens
+            let Yes Refl = decEq subsig.givenParams.size subgivensLength
+              | No _ => fail "INTERNAL ERROR: error in given params set length computation"
 
-              -- Form a task for subgen
-              let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` Fin.range
-              let subsig : GenSignature := MkGenSignature typeOfGened $ fromList $ fst <$> toList subgivens
-              let Yes Refl = decEq subsig.givenParams.size subgivensLength
-                | No _ => fail "INTERNAL ERROR: error in given params set length computation"
+            -- Check if called subgenerator can call the current one
+            let mutRec = hasNameInsideDeep sig.targetType.name $ var subsig.targetType.name
 
-              -- Check if called subgenerator can call the current one
-              let mutRec = hasNameInsideDeep sig.targetType.name $ var subsig.targetType.name
+            -- Decide whether to use local (decreasing) or outmost fuel, depending on whether we are in mutual recursion with subgen
+            let subfuel = if mutRec then fuel else var outmostFuelArg
 
-              -- Decide whether to use local (decreasing) or outmost fuel, depending on whether we are in mutual recursion with subgen
-              let subfuel = if mutRec then fuel else var outmostFuelArg
+            -- Form an expression to call the subgen
+            subgenCall <- callGen subsig subfuel $ snd <$> subgivens
 
-              -- Form an expression to call the subgen
-              subgenCall <- callGen subsig subfuel $ snd <$> subgivens
+            -- Form an expression of binding the result of subgen
+            let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
+            let bindSubgenResult = foldr (\l, r => var `{Builtin.DPair.MkDPair} .$ l .$ r) genedArg subgeneratedArgs
 
-              -- Form an expression of binding the result of subgen
-              let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
-              let bindSubgenResult = foldr (\l, r => var `{Builtin.DPair.MkDPair} .$ l .$ r) genedArg subgeneratedArgs
+            -- Form an expression of the RHS of a bind; simplify lambda if subgeneration result type does not require pattern matching
+            let bindRHS = \cont => case bindSubgenResult of
+                                     IBindVar _ n => lam (MkArg MW ExplicitArg (Just $ UN $ Basic n) implicitFalse) cont
+                                     _            => `(\ ~bindSubgenResult => ~cont)
 
-              -- Form an expression of the RHS of a bind; simplify lambda if subgeneration result type does not require pattern matching
-              let bindRHS = \cont => case bindSubgenResult of
-                                       IBindVar _ n => lam (MkArg MW ExplicitArg (Just $ UN $ Basic n) implicitFalse) cont
-                                       _            => `(\ ~bindSubgenResult => ~cont)
-
-              -- Chain the subgen call with a given continuation
-              pure $ \cont => `(~subgenCall >>= ~(bindRHS cont))
+            -- Chain the subgen call with a given continuation
+            pure $ \cont => `(~subgenCall >>= ~(bindRHS cont))
 
       -- Get dependencies of constructor's arguments
       let rawDeps = argDeps con.args
