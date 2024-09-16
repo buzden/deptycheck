@@ -85,8 +85,16 @@ namespace NonObligatoryExts
       argsTypeApps <- for con.args.asVect $ analyseTypeApp . type
 
       -- Decide how constructor arguments would be named during generation
-      let bindNames : Vect (con.args.length) String
-          bindNames = flip mapI .| fromList con.args .| \_ => bindNameRenamer . argName
+      let bindNames = fromList con.args <&> bindNameRenamer . argName
+
+      -- Form the expression of calling the current constructor
+      let callCons = do
+        let constructorCall = callCon con $ bindNames <&> varStr
+        let wrapImpls : Nat -> TTImp
+            wrapImpls Z     = constructorCall
+            wrapImpls (S n) = var `{Builtin.DPair.MkDPair} .$ implicitTrue .$ wrapImpls n
+        let consExpr = wrapImpls $ sig.targetType.args.length `minus` sig.givenParams.size
+        `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen _} ~consExpr)
 
       -- Derive constructor calling expression for given order of generation
       let genForOrder : List (Fin con.args.length) -> m TTImp
@@ -148,15 +156,6 @@ namespace NonObligatoryExts
 
               -- Chain the subgen call with a given continuation
               pure $ \cont => `(~subgenCall >>= ~(bindRHS cont))
-
-            callCons : TTImp
-            callCons = do
-              let constructorCall = callCon con $ bindNames <&> varStr
-              let wrapImpls : Nat -> TTImp
-                  wrapImpls Z     = constructorCall
-                  wrapImpls (S n) = var `{Builtin.DPair.MkDPair} .$ implicitTrue .$ wrapImpls n
-              let consExpr = wrapImpls $ sig.targetType.args.length `minus` sig.givenParams.size
-              `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen _} ~consExpr)
 
       -- Get dependencies of constructor's arguments
       let rawDeps = argDeps con.args
