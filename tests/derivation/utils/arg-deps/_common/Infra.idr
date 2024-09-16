@@ -21,7 +21,7 @@ ppTys tys = do
   let tys = unlist tys
   for_ tys $ \expr => do
     let (args, ret) = unPi expr
-    deps <- map SortedSet.toList <$> argDeps args
+    let deps = map SortedSet.toList $ argDeps args
     let expr' = piAll ret $ {piInfo := ExplicitArg} <$> args -- as if all arguments were explicit
     logSugaredTerm "deptycheck.arg-deps" 0 "type        " expr'
     logMsg         "deptycheck.arg-deps" 0 "dependencies: \{show deps}\n"
