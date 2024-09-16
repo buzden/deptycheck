@@ -66,7 +66,7 @@ canonicConsBody sig name con = do
         renamedAppliedNames <- for appliedNames.asVect $ \(name, typeDetermined) => do
           let bindName = bindNameRenamer name
           if cast typeDetermined
-            then pure $ const `(_) -- no need to match type-determined parameter by hand
+            then pure $ const implicitTrue -- no need to match type-determined parameter by hand
             else if contains name !get
             then do
               -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
