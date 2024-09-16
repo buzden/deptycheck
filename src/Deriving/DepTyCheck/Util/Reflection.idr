@@ -316,105 +316,6 @@ extractTargetTyExpr ti = var ti.name
 typeCon : TypeInfo -> Con
 typeCon ti = MkCon ti.name ti.args type
 
-----------------------------------------------
---- Analyzing dependently typed signatures ---
-----------------------------------------------
-
-export
-doesTypecheckAs : Elaboration m => (0 expected : Type) -> TTImp -> m Bool
-doesTypecheckAs expected expr = try .| check {expected} expr $> True .| pure False
-
-export
-argDeps : Elaboration m => (args : List Arg) -> m $ DVect args.length $ SortedSet . Fin . Fin.finToNat
-argDeps args = do
-  ignore $ check {expected=Type} $ fullSig defaultRet -- we can't return trustful result if given arguments do not form a nice Pi type
-  concatMap depsOfOne range
-
-  where
-
-  %unbound_implicits off -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2040
-
-  filteredArgs : (excluded : SortedSet $ Fin args.length) -> List Arg
-  filteredArgs excluded = filterI args $ \idx, _ => not $ contains idx excluded
-
-  partialSig : (retTy : TTImp) -> (excluded : SortedSet $ Fin args.length) -> TTImp
-  partialSig retTy = piAll retTy . map {piInfo := ExplicitArg} . filteredArgs
-
-  partialApp : (appliee : Name) -> (excluded : SortedSet $ Fin args.length) -> TTImp
-  partialApp n = appNames n . map argName . filteredArgs
-
-  fullSig : (retTy : TTImp) -> TTImp
-  fullSig t = partialSig t empty
-
-  fullApp : (appliee : Name) -> TTImp
-  fullApp n = partialApp n empty
-
-  defaultRet : TTImp
-  defaultRet = `(Builtin.Unit)
-
-  -- This is for check that *meaning* of types are preversed after excluding some of arguments
-  --
-  -- Example:
-  --   Consider that `args` form the following: `(n : Nat) -> (a : Type) -> (v : Vect n a) -> (x : Nat) -> ...`
-  --   Consider we have `excluded` set containing only index 3 (the `x : Nat` argument).
-  --   For this case this function would return the following type:
-  --   ```
-  --     (full : (n : Nat) -> (a : Type) -> (v : Vect n a) -> (x : Nat) -> Unit) ->
-  --     (part : (n : Nat) -> (a : Type) -> (v : Vect n a) -> Unit) ->
-  --     (n : Nat) -> (a : Type) -> (v : Vect n a) -> (x : Nat) ->
-  --     full n a v x = part n a v
-  --   ```
-  --   As soon as this expression typechecks as `Type`, we are confident that
-  --   corresponding parameters of the full and the partial signatures are compatible, i.e.
-  --   removing of the parameters from `excluded` set does not change left types too much.
-  preservationCheckSig : (excluded : SortedSet $ Fin args.length) -> TTImp
-  preservationCheckSig excluded =
-    pi (MkArg MW ExplicitArg .| Just full .| fullSig defaultRet) $
-    pi (MkArg MW ExplicitArg .| Just part .| partialSig defaultRet excluded) $
-    fullSig $
-    `(Builtin.Equal) .$ fullApp full .$ partialApp part excluded
-    where
-      full, part : Name
-      full = MN "full" 1
-      part = MN "part" 1
-
-  checkExcluded : (excluded : SortedSet $ Fin args.length) -> m Bool
-  checkExcluded excluded = doesTypecheckAs Type (partialSig defaultRet excluded)
-                        && doesTypecheckAs Type (preservationCheckSig excluded)
-
-  -- Returns a set of indices of all arguments that do depend on the given
-  depsOfOne' : (idx : Fin args.length) -> m $ SortedSet $ Fin args.length
-  depsOfOne' idx = do
-    let cands = allGreaterThan idx
-    findMinExclude cands $ fromList cands
-
-    where
-      -- tries to add candidates one by one, and leave them if typechecks without the current `idx`
-      findMinExclude : (left : List $ Fin args.length) -> (currExcl : SortedSet $ Fin args.length) -> m $ SortedSet $ Fin args.length
-      findMinExclude [] excl = pure excl
-      findMinExclude (x::xs) prevExcl = do
-        let currExcl = delete x prevExcl
-        findMinExclude xs $ if !(checkExcluded $ insert idx currExcl) then currExcl else prevExcl
-
-  depsOfOne : Fin args.length -> m $ DVect args.length $ SortedSet . Fin . Fin.finToNat
-  depsOfOne idx = do
-    whoDependsOnIdx <- depsOfOne' idx
-    sequence $ tabulateI $ \i =>
-      if contains i whoDependsOnIdx
-      then do
-        let Just dep = tryToFit idx
-          | Nothing => fail "INTERNAL ERROR: unable to fit fins during dependency calculation"
-        pure $ singleton dep
-      else pure empty
-
-  %unbound_implicits on -- this is a workaround of https://github.com/idris-lang/Idris2/issues/2039
-
-  Semigroup a => Applicative f => Semigroup (f a) where
-    a <+> b = [| a <+> b |]
-
-  Monoid a => Applicative f => Monoid (f a) where
-    neutral = pure neutral
-
 ------------------------------------
 --- Analysis of type definitions ---
 ------------------------------------
@@ -711,3 +612,15 @@ genTypeName g = do
   let (IVar _ genTy, _) = unApp genTy
     | (genTy, _) => failAt (getFC genTy) "Expected a type name"
   pure genTy
+
+----------------------------------------------
+--- Analyzing dependently typed signatures ---
+----------------------------------------------
+
+export
+argDeps : (args : List Arg) -> DVect args.length $ SortedSet . Fin . Fin.finToNat
+argDeps args = do
+  let nameToIndices = SortedMap.fromList $ mapI args $ \i, arg => (argName arg, SortedSet.singleton i)
+  let args = Vect.fromList args <&> \arg => allVarNames arg.type |> map (fromMaybe empty . lookup' nameToIndices)
+  flip upmapI args $ \i, argDeps => flip concatMap argDeps $ \candidates =>
+    maybe empty singleton $ last' $ mapMaybe tryToFit $ SortedSet.toList candidates

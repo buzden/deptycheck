@@ -159,7 +159,7 @@ namespace NonObligatoryExts
               `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen _} ~consExpr)
 
       -- Get dependencies of constructor's arguments
-      rawDeps <- argDeps con.args
+      let rawDeps = argDeps con.args
       let deps = downmap ((`difference` givs) . mapIn weakenToSuper) rawDeps
 
       -------------------------------------------------
