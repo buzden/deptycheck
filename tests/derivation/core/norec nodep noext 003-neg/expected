@@ -2,7 +2,7 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Error during reflection: No constructors found for the type `Builtin.Void`
 
-DerivedGen:16:14--16:23
+DerivedGen:1
  12 | XShow : Show X
  13 | XShow = %runElab derive
  14 | 

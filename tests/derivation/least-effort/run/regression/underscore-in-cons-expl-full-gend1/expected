@@ -2,12 +2,12 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Sorry, I can't find any elaboration which works. All errors:
 Possible error:
-    Error during reflection: While processing right hand side of {u:1837},<DerivedGen.IsFS>[0]. While processing right hand side of $resolved13823,<<DerivedGen.ItIsFS>>. {k:1755} is not accessible in this context.
+    Error during reflection: While processing right hand side of {u:1837},<DerivedGen.IsFS>[0]. While processing right hand side of $resolved1,<<DerivedGen.ItIsFS>>. {k:1755} is not accessible in this context.
 
 Possible error:
     Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
 
-    DerivedGen:17:14--17:23
+    DerivedGen:1
      13 | 
      14 | %language ElabReflection
      15 | 

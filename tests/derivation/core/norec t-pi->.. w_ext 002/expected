@@ -2,7 +2,7 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Error during reflection: Target type `Builtin.(===)` is not a top-level data definition
 
-DerivedGen:9:47--9:50
+DerivedGen:1
  5 | %default total
  6 | 
  7 | %language ElabReflection

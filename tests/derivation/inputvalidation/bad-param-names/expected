@@ -1,7 +1,7 @@
 1/1: Building ValidateInput (ValidateInput.idr)
 Error: While processing right hand side of genY_unnamed_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
 
-ValidateInput:14:50--14:53
+ValidateInput:1
  10 |   MkY : Y Int String
  11 | 
  12 | --- Not all arguments are named ---
@@ -11,7 +11,7 @@ ValidateInput:14:50--14:53
 
 Error: While processing right hand side of genY_shadowed_by_auto_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
 
-ValidateInput:19:58--19:62
+ValidateInput:2
  15 | genY_unnamed_argument = deriveGen
  16 | 
  17 | --- Arguments shadowing ---
@@ -21,7 +21,7 @@ ValidateInput:19:58--19:62
 
 Error: While processing right hand side of genY_shadowed_by_other_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
 
-ValidateInput:22:76--22:80
+ValidateInput:3
  18 | 
  19 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
  20 | genY_shadowed_by_auto_argument = deriveGen

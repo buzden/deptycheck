@@ -2,7 +2,7 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Error during reflection: All arguments of the target type must be different
 
-DerivedGen:9:68--9:70
+DerivedGen:1
  5 | %default total
  6 | 
  7 | %language ElabReflection

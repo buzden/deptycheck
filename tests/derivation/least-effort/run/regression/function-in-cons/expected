@@ -4,7 +4,7 @@ Error: While processing right hand side of checkedGen. Sorry, I can't find any e
 Possible error:
     Error during reflection: Fields with function types are not supported in constructors
 
-    DerivedGen:8:10--8:22
+    DerivedGen:1
      4 | 
      5 | %default total
      6 | 
@@ -15,7 +15,7 @@ Possible error:
 Possible error:
     Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
 
-    DerivedGen:16:14--16:23
+    DerivedGen:2
      12 | 
      13 | %language ElabReflection
      14 | 

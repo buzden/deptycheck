@@ -2,7 +2,7 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `a`
 
-DerivedGen:19:14--19:23
+DerivedGen:1
  15 |   show (X0 b1 b2 _) = "X0 \{show b1} \{show b2} Refl"
  16 |   show X1           = "X1"
  17 | 
