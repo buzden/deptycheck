@@ -1,22 +1,21 @@
 module Data.List.Sorted
 
 import public Data.Nat
+import public Data.So
 
 %default total
 
-public export
-data SortedList : Type
+mutual
 
-public export
-data FirstGT : Nat -> SortedList -> Type
+  public export
+  data SortedList : Type where
+    Nil  : SortedList
+    (::) : (x : Nat) -> (xs : SortedList) -> (0 _ : So $ canPrepend x xs) => SortedList
 
-data SortedList : Type where
-  Nil  : SortedList
-  (::) : (x : Nat) -> (xs : SortedList) -> FirstGT x xs => SortedList
-
-data FirstGT : Nat -> SortedList -> Type where
-  E  : FirstGT n []
-  NE : x `GT` n -> FirstGT n $ (x::xs) @{prf}
+  public export
+  canPrepend : Nat -> SortedList -> Bool
+  canPrepend _ []      = True
+  canPrepend n (x::xs) = n < x
 
 public export
 length : SortedList -> Nat
