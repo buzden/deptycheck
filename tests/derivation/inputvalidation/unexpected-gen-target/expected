@@ -1,7 +1,7 @@
 1/1: Building ValidateInput (ValidateInput.idr)
 Error: While processing right hand side of genOfConcreteGen. Error during reflection: Target type's argument must be a variable name
 
-ValidateInput:16:49--16:59
+ValidateInput:1
  12 |   MkY : Y Int String
  13 | 
  14 | --- Gen MaybeEmpty of strange things ---
@@ -11,7 +11,7 @@ ValidateInput:16:49--16:59
 
 Error: While processing right hand side of genOfLazies. Error during reflection: Target type is not a simple name
 
-ValidateInput:19:40--19:46
+ValidateInput:2
  15 | 
  16 | genOfConcreteGen : Fuel -> Gen MaybeEmpty $ Gen MaybeEmpty X
  17 | genOfConcreteGen = deriveGen
@@ -21,7 +21,7 @@ ValidateInput:19:40--19:46
 
 Error: While processing right hand side of genOfInfs. Error during reflection: Target type is not a simple name
 
-ValidateInput:22:38--22:43
+ValidateInput:3
  18 | 
  19 | genOfLazies : Fuel -> Gen MaybeEmpty $ Lazy X
  20 | genOfLazies = deriveGen
@@ -31,7 +31,7 @@ ValidateInput:22:38--22:43
 
 Error: While processing right hand side of genOfDPair. Error during reflection: The result type of the generator function must be of type "`Gen MaybeEmpty` of desired result"
 
-ValidateInput:25:25--25:27
+ValidateInput:4
  21 | 
  22 | genOfInfs : Fuel -> Gen MaybeEmpty $ Inf X
  23 | genOfInfs = deriveGen
@@ -41,7 +41,7 @@ ValidateInput:25:25--25:27
 
 Error: While processing right hand side of genOfPair. Error during reflection: The result type of the generator function must be of type "`Gen MaybeEmpty` of desired result"
 
-ValidateInput:28:39--28:62
+ValidateInput:5
  24 | 
  25 | genOfDPair : Fuel -> (a ** b ** Gen MaybeEmpty $ Y a b)
  26 | genOfDPair = deriveGen
@@ -51,7 +51,7 @@ ValidateInput:28:39--28:62
 
 Error: While processing right hand side of genOfPair'. Error during reflection: The result type of the generator function must be of type "`Gen MaybeEmpty` of desired result"
 
-ValidateInput:31:40--31:63
+ValidateInput:6
  27 | 
  28 | genOfPair : Fuel -> (a, b : Type) -> (Gen MaybeEmpty (Y a b), Gen MaybeEmpty (Y a b))
  29 | genOfPair = deriveGen
@@ -61,7 +61,7 @@ ValidateInput:31:40--31:63
 
 Error: While processing right hand side of genOfFuns_pur. Error during reflection: Target type is not a simple name
 
-ValidateInput:34:43--34:44
+ValidateInput:7
  30 | 
  31 | genOfPair' : Fuel -> (a, b : Type) -> (Gen MaybeEmpty (Y a b), Gen MaybeEmpty X)
  32 | genOfPair' = deriveGen
@@ -71,7 +71,7 @@ ValidateInput:34:43--34:44
 
 Error: While processing right hand side of genOfFuns_pur0s. Error during reflection: Target type is not a simple name
 
-ValidateInput:37:47--37:48
+ValidateInput:8
  33 | 
  34 | genOfFuns_pur : Fuel -> Gen MaybeEmpty $ (a : Type) -> (b : Type) -> Y a b
  35 | genOfFuns_pur = deriveGen
@@ -81,7 +81,7 @@ ValidateInput:37:47--37:48
 
 Error: While processing right hand side of genOfFuns_pur1s. Error during reflection: Target type is not a simple name
 
-ValidateInput:40:47--40:48
+ValidateInput:9
  36 | 
  37 | genOfFuns_pur0s : Fuel -> Gen MaybeEmpty $ (0 a : Type) -> (0 b : Type) -> Y a b
  38 | genOfFuns_pur0s = deriveGen
@@ -91,7 +91,7 @@ ValidateInput:40:47--40:48
 
 Error: While processing right hand side of genOfFuns_ins_pair. Error during reflection: Target type is not a simple name
 
-ValidateInput:43:53--43:54
+ValidateInput:10
  39 | 
  40 | genOfFuns_pur1s : Fuel -> Gen MaybeEmpty $ (1 a : Type) -> (1 b : Type) -> Y a b
  41 | genOfFuns_pur1s = deriveGen
@@ -101,7 +101,7 @@ ValidateInput:43:53--43:54
 
 Error: While processing right hand side of genOfFuns_ins_pair0. Error during reflection: Target type is not a simple name
 
-ValidateInput:46:56--46:57
+ValidateInput:11
  42 | 
  43 | genOfFuns_ins_pair : Fuel -> Gen MaybeEmpty (a ** ((b : Type) -> Y a b))
  44 | genOfFuns_ins_pair = deriveGen
@@ -111,7 +111,7 @@ ValidateInput:46:56--46:57
 
 Error: While processing right hand side of genOfFuns_ins_pair1. Error during reflection: Target type is not a simple name
 
-ValidateInput:49:56--49:57
+ValidateInput:12
  45 | 
  46 | genOfFuns_ins_pair0 : Fuel -> Gen MaybeEmpty (a ** ((0 b : Type) -> Y a b))
  47 | genOfFuns_ins_pair0 = deriveGen
@@ -121,7 +121,7 @@ ValidateInput:49:56--49:57
 
 Error: While processing right hand side of genOfFuns_out_pair. Error during reflection: Target type is not a simple name
 
-ValidateInput:52:48--52:49
+ValidateInput:13
  48 | 
  49 | genOfFuns_ins_pair1 : Fuel -> Gen MaybeEmpty (a ** ((1 b : Type) -> Y a b))
  50 | genOfFuns_ins_pair1 = deriveGen
@@ -131,7 +131,7 @@ ValidateInput:52:48--52:49
 
 Error: While processing right hand side of genOfFuns_out_pair0. Error during reflection: Target type is not a simple name
 
-ValidateInput:55:51--55:52
+ValidateInput:14
  51 | 
  52 | genOfFuns_out_pair : Fuel -> Gen MaybeEmpty $ (b : Type) -> (a ** Y a b)
  53 | genOfFuns_out_pair = deriveGen
@@ -141,7 +141,7 @@ ValidateInput:55:51--55:52
 
 Error: While processing right hand side of genOfFuns_out_pair1. Error during reflection: Target type is not a simple name
 
-ValidateInput:58:51--58:52
+ValidateInput:15
  54 | 
  55 | genOfFuns_out_pair0 : Fuel -> Gen MaybeEmpty $ (0 b : Type) -> (a ** Y a b)
  56 | genOfFuns_out_pair0 = deriveGen
@@ -151,7 +151,7 @@ ValidateInput:58:51--58:52
 
 Error: While processing right hand side of nonEmptyGen. Error during reflection: Only `GenBeEmptyStatic` variant of generator is supported, `Test.DepTyCheck.Gen.Emptiness.NonEmpty` is given
 
-ValidateInput:61:23--61:26
+ValidateInput:16
  57 | 
  58 | genOfFuns_out_pair1 : Fuel -> Gen MaybeEmpty $ (1 b : Type) -> (a ** Y a b)
  59 | genOfFuns_out_pair1 = deriveGen

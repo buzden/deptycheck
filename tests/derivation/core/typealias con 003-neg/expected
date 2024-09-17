@@ -2,7 +2,7 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Error during reflection: Data type `DerivedGen.NonReducibleUseTypeAlias` is unavailable at the site of derivation (forgotten import?)
 
-DerivedGen:16:22--16:46
+DerivedGen:1
  12 | 
  13 | data X : Type where
  14 |   X0 : X

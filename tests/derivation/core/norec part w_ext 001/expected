@@ -2,7 +2,7 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `ty`
 
-DerivedGen:17:14--17:23
+DerivedGen:1
  13 | XShow = %runElab derive
  14 | 
  15 | export
