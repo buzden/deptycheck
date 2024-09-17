@@ -21,37 +21,37 @@ import System.Random.Pure.StdGen
 public export
 data UniqNames : Funs -> Vars -> Type
 public export
-data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String -> Type
+data NameIsNew : UniqNames funs vars -> String -> Type
 
 data UniqNames : Funs -> Vars -> Type where
   Empty   : UniqNames [<] [<]
-  JustNew : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) => UniqNames funs vars
-  NewFun  : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) =>
+  JustNew : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew ss s) => UniqNames funs vars
+  NewFun  : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew ss s) =>
             {default False isInfix : Bool} -> (0 infixCond : So $ not isInfix || fun.From.length >= 1) =>
             UniqNames (funs:<fun) vars
-  NewVar  : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew funs vars ss s) => UniqNames funs ((:<) vars var mut)
+  NewVar  : (ss : UniqNames funs vars) => (s : String) -> (0 _ : NameIsNew ss s) => UniqNames funs ((:<) vars var mut)
 
-data NameIsNew : (funs : Funs) -> (vars : Vars) -> UniqNames funs vars -> String -> Type where
-  E : NameIsNew [<] [<] Empty x
-  J : (0 _ : So $ x /= s) -> NameIsNew funs vars ss x -> NameIsNew funs vars (JustNew @{ss} s @{sub}) x
-  F : (0 _ : So $ x /= s) -> NameIsNew funs vars ss x -> NameIsNew (funs:<fun) vars (NewFun @{ss} {isInfix} s @{sub} @{infixCond}) x
-  V : (0 _ : So $ x /= s) -> NameIsNew funs vars ss x -> NameIsNew funs ((:<) vars var mut) (NewVar @{ss} s @{sub}) x
+data NameIsNew : UniqNames funs vars -> String -> Type where
+  E : NameIsNew {funs=[<]} {vars=[<]} Empty x
+  J : (0 _ : So $ x /= s) -> NameIsNew {funs} {vars} ss x -> NameIsNew {funs} {vars} (JustNew @{ss} s @{sub}) x
+  F : (0 _ : So $ x /= s) -> NameIsNew {funs} {vars} ss x -> NameIsNew {funs=funs:<fun} {vars} (NewFun @{ss} {isInfix} s @{sub} @{infixCond}) x
+  V : (0 _ : So $ x /= s) -> NameIsNew {funs} {vars} ss x -> NameIsNew {funs} {vars=(:<) vars var mut} (NewVar @{ss} s @{sub}) x
 
 public export
 interface NamesRestrictions where
   reservedKeywords : SortedSet String
 
 rawNewName : Fuel -> (Fuel -> Gen MaybeEmpty String) =>
-             (funs : Funs) -> (vars : Vars) -> (names : UniqNames funs vars) ->
-             Gen MaybeEmpty (s ** NameIsNew funs vars names s)
+             (vars : Vars) -> (funs : Funs) -> (names : UniqNames funs vars) ->
+             Gen MaybeEmpty (s ** NameIsNew names s)
 
 export
 genNewName : Fuel -> (Fuel -> Gen MaybeEmpty String) =>
              NamesRestrictions =>
              (funs : Funs) -> (vars : Vars) -> (names : UniqNames funs vars) ->
-             Gen MaybeEmpty (s ** NameIsNew funs vars names s)
+             Gen MaybeEmpty (s ** NameIsNew names s)
 genNewName fl @{genStr} funs vars names = do
-  nn@(nm ** _) <- rawNewName fl @{genStr} funs vars names
+  nn@(nm ** _) <- rawNewName fl @{genStr} vars funs names
   if reservedKeywords `contains'` nm
     then assert_total $ genNewName fl @{genStr} funs vars names -- we could reduce fuel instead of `assert_total`
     else pure nn

@@ -113,10 +113,10 @@ namespace SnocListTyMut
     decEq ((:<) _ _ _) [<] = No $ \case Refl impossible
 
   public export
-  data AtIndex : (sx : SnocListTyMut) -> (idx : IndexIn sx) -> Ty -> Mut -> Type where
+  data AtIndex : {sx : SnocListTyMut} -> (idx : IndexIn sx) -> Ty -> Mut -> Type where
     [search sx idx]
-    Here'  : AtIndex ((:<) sx ty mut) Here ty mut
-    There' : AtIndex sx i ty mut -> AtIndex ((:<) sx x m) (There i) ty mut
+    Here'  : AtIndex {sx = (:<) sx ty mut} Here ty mut
+    There' : AtIndex {sx} i ty mut -> AtIndex {sx = (:<) sx x m} (There i) ty mut
 
   ||| Add a bunch of immutable variables
   public export
@@ -167,10 +167,10 @@ namespace SnocListFunSig
   (.length) = length
 
   public export
-  data AtIndex : (sx : SnocListFunSig) -> (idx : IndexIn sx) -> FunSig -> Type where
+  data AtIndex : {sx : SnocListFunSig} -> (idx : IndexIn sx) -> FunSig -> Type where
     [search sx idx]
-    Here'  : AtIndex (sx :< sig) Here sig
-    There' : AtIndex sx i sig -> AtIndex (sx :< x) (There i) sig
+    Here'  : AtIndex {sx = sx :< sig} Here sig
+    There' : AtIndex {sx} i sig -> AtIndex {sx = sx :< x} (There i) sig
 
 public export
 Vars : Type
@@ -189,11 +189,11 @@ data Expr : Funs -> Vars -> Ty -> Type where
   C : (x : Literal ty) -> Expr funs vars ty
 
   V : (n : IndexIn vars) ->
-      AtIndex vars n ty mut =>
+      AtIndex n ty mut =>
       Expr funs vars ty
 
   F : (n : IndexIn funs) ->
-      AtIndex funs n (from ==> Just to) =>
+      AtIndex n (from ==> Just to) =>
       ExprsSnocList funs vars from ->
       Expr funs vars to
 
@@ -220,7 +220,7 @@ data Stmts : (funs : Funs) ->
          Stmts funs vars retTy
 
   (#=) : (n : IndexIn vars) ->
-         AtIndex vars n ty Mutable =>
+         AtIndex n ty Mutable =>
          (v : Expr funs vars ty) ->
          (cont : Stmts funs vars retTy) ->
          Stmts funs vars retTy
@@ -231,7 +231,7 @@ data Stmts : (funs : Funs) ->
          Stmts funs vars retTy
 
   Call : (n : IndexIn funs) ->
-         AtIndex funs n (from ==> Nothing) =>
+         AtIndex n (from ==> Nothing) =>
          ExprsSnocList funs vars from ->
          (cont : Stmts funs vars retTy) ->
          Stmts funs vars retTy

@@ -17,7 +17,7 @@ public export %inline
 AddFun : (isInfix : Bool) -> (s : String) -> (fun : FunSig) ->
          (0 _ : So $ not isInfix || fun.From.length >= 1) =>
          (ctx : NamedCtxt) ->
-         (0 _ : NameIsNew ctx.functions ctx.variables ctx.fvNames s) =>
+         (0 _ : NameIsNew ctx.fvNames s) =>
          NamedCtxt
 AddFun isInfix s fun $ MkNamedCtxt funs vars names = MkNamedCtxt (funs:<fun) vars $ NewFun @{names} {isInfix} {fun} s
 
