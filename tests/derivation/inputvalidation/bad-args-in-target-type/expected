@@ -1,7 +1,7 @@
 1/1: Building ValidateInput (ValidateInput.idr)
 Error: While processing right hand side of genY_Int. Error during reflection: Target type's argument must be a variable name
 
-ValidateInput:14:55--14:58
+ValidateInput:1
  10 |   MkY : Y Int String
  11 | 
  12 | --- Non-variable arguments of the target type ---
@@ -11,7 +11,7 @@ ValidateInput:14:55--14:58
 
 Error: While processing right hand side of genY_same_param. Error during reflection: All arguments of the target type must be different
 
-ValidateInput:17:58--17:63
+ValidateInput:2
  13 | 
  14 | genY_Int : Fuel -> (a : Type) -> Gen MaybeEmpty $ Y a Int
  15 | genY_Int = deriveGen

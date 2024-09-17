@@ -1,7 +1,7 @@
 1/1: Building ValidateInput (ValidateInput.idr)
 Error: While processing right hand side of genY_with_unrelated. Error during reflection: Generated parameter is not used in the target type
 
-ValidateInput:14:77--14:80
+ValidateInput:1
  10 |   MkY : Y Int String
  11 | 
  12 | --- Unrelated stuff in the resulting dpair ---
@@ -11,7 +11,7 @@ ValidateInput:14:77--14:80
 
 Error: While processing right hand side of genY_with_repeating_name_equityped. Error during reflection: Argument of dependent pair under the resulting `Gen` must be named
 
-ValidateInput:17:60--17:106
+ValidateInput:2
  13 | 
  14 | genY_with_unrelated : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** n : Nat ** Y a b)
  15 | genY_with_unrelated = deriveGen
@@ -25,7 +25,7 @@ and:
     Type
 Mismatch between: Nat and Type.
 
-ValidateInput:20:105--20:106
+ValidateInput:3
  16 | 
  17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** b : Type ** Y a b)
  18 | genY_with_repeating_name_equityped = deriveGen
@@ -35,7 +35,7 @@ ValidateInput:20:105--20:106
 
 Error: No type declaration for ValidateInput.genY_with_repeating_name_difflytyped.
 
-ValidateInput:21:1--21:49
+ValidateInput:4
  17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** b : Type ** Y a b)
  18 | genY_with_repeating_name_equityped = deriveGen
  19 | 
@@ -49,7 +49,7 @@ and:
     Type
 Mismatch between: Nat and Type.
 
-ValidateInput:23:90--23:98
+ValidateInput:5
  19 | 
  20 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** b : Nat ** Y a b)
  21 | genY_with_repeating_name_difflytyped = deriveGen
@@ -59,7 +59,7 @@ ValidateInput:23:90--23:98
 
 Error: While processing right hand side of genY_unused_argument. Error during reflection: Given parameter is not used in the target type
 
-ValidateInput:28:54--28:57
+ValidateInput:6
  24 | genY_with_repeating_name_difflytyped' = deriveGen
  25 | 
  26 | --- Not all arguments are used ---

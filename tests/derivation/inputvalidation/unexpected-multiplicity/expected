@@ -1,7 +1,7 @@
 1/1: Building ValidateInput (ValidateInput.idr)
 Error: While processing right hand side of genY_given_zero_fuel. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
-ValidateInput:18:31--18:35
+ValidateInput:1
  14 |   MkY : Y Int String
  15 | 
  16 | --- Unexpected zero and linear arguments ---
@@ -11,7 +11,7 @@ ValidateInput:18:31--18:35
 
 Error: While processing right hand side of genY_given_zero_arg1. Error during reflection: Erased arguments are not supported in generator function signatures
 
-ValidateInput:21:39--21:43
+ValidateInput:2
  17 | 
  18 | genY_given_zero_fuel : (0 _ : Fuel) -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
  19 | genY_given_zero_fuel = deriveGen
@@ -21,7 +21,7 @@ ValidateInput:21:39--21:43
 
 Error: While processing right hand side of genY_given_zero_args. Error during reflection: Erased arguments are not supported in generator function signatures
 
-ValidateInput:24:42--24:46
+ValidateInput:3
  20 | 
  21 | genY_given_zero_arg1 : Fuel -> (0 a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
  22 | genY_given_zero_arg1 = deriveGen
@@ -31,7 +31,7 @@ ValidateInput:24:42--24:46
 
 Error: While processing right hand side of genY_given_lin_fuel. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
-ValidateInput:27:30--27:34
+ValidateInput:4
  23 | 
  24 | genY_given_zero_args : Fuel -> (0 a, b : Type) -> Gen MaybeEmpty $ Y a b
  25 | genY_given_zero_args = deriveGen
@@ -41,7 +41,7 @@ ValidateInput:27:30--27:34
 
 Error: While processing right hand side of genY_given_lin_arg1. Error during reflection: Linear arguments are not supported in generator function signatures
 
-ValidateInput:30:38--30:42
+ValidateInput:5
  26 | 
  27 | genY_given_lin_fuel : (1 _ : Fuel) -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
  28 | genY_given_lin_fuel = deriveGen
@@ -51,7 +51,7 @@ ValidateInput:30:38--30:42
 
 Error: While processing right hand side of genY_given_lin_args. Error during reflection: Linear arguments are not supported in generator function signatures
 
-ValidateInput:33:41--33:45
+ValidateInput:6
  29 | 
  30 | genY_given_lin_arg1 : Fuel -> (1 a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
  31 | genY_given_lin_arg1 = deriveGen
@@ -61,7 +61,7 @@ ValidateInput:33:41--33:45
 
 Error: While processing right hand side of genY_given_zero_lin_args. Error during reflection: Erased arguments are not supported in generator function signatures
 
-ValidateInput:36:43--36:47
+ValidateInput:7
  32 | 
  33 | genY_given_lin_args : Fuel -> (1 a, b : Type) -> Gen MaybeEmpty $ Y a b
  34 | genY_given_lin_args = deriveGen

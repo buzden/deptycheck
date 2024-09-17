@@ -1,7 +1,7 @@
 1/1: Building ValidateInput (ValidateInput.idr)
 Error: While processing right hand side of list. Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
 
-ValidateInput:14:8--14:16
+ValidateInput:1
  10 |   MkY : Y Int String
  11 | 
  12 | --- Non-Gen type ---
@@ -11,7 +11,7 @@ ValidateInput:14:8--14:16
 
 Error: While processing right hand side of list'. Error during reflection: The result type of the generator function must be of type "`Gen MaybeEmpty` of desired result"
 
-ValidateInput:17:17--17:25
+ValidateInput:2
  13 | 
  14 | list : List Int
  15 | list = deriveGen
@@ -21,7 +21,7 @@ ValidateInput:17:17--17:25
 
 Error: While processing right hand side of y. Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
 
-ValidateInput:20:5--20:17
+ValidateInput:3
  16 | 
  17 | list' : Fuel -> List Int
  18 | list' = deriveGen
@@ -31,7 +31,7 @@ ValidateInput:20:5--20:17
 
 Error: While processing right hand side of y'. Error during reflection: The result type of the generator function must be of type "`Gen MaybeEmpty` of desired result"
 
-ValidateInput:23:14--23:26
+ValidateInput:4
  19 | 
  20 | y : Y Int String
  21 | y = deriveGen
