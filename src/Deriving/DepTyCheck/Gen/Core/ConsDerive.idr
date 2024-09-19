@@ -5,6 +5,7 @@ import public Control.Monad.State
 
 import public Data.Collections.Analysis
 import public Data.Either
+import public Data.Fin.Map
 import public Data.SortedSet.Extra
 
 import public Decidable.Equality
@@ -83,17 +84,17 @@ mapDetermination f $ MkDetermination sda da = MkDetermination .| f sda .| f da
 
 removeDeeply : Foldable f =>
                (toRemove : f $ Fin con.args.length) ->
-               (fromWhat : SortedMap .| Fin con.args.length .| Determination con) ->
-               SortedMap .| Fin con.args.length .| Determination con
+               (fromWhat : FinMap con.args.length $ Determination con) ->
+               FinMap con.args.length $ Determination con
 removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
 searchOrder : {con : _} ->
-              (left : SortedMap .| Fin con.args.length .| Determination con) ->
+              (left : FinMap con.args.length $ Determination con) ->
               List $ Fin con.args.length
 searchOrder left = do
 
   -- find all arguments that are not stongly determined by anyone
-  let nonStronglyDetermined = filter (\(_, det) => null det.stronglyDeterminingArgs) $ SortedMap.toList left
+  let nonStronglyDetermined = filter (\(_, det) => null det.stronglyDeterminingArgs) $ kvList left
 
   -- finish is nothing appropriate left
   let False = null nonStronglyDetermined | True => []
@@ -256,9 +257,6 @@ namespace NonObligatoryExts
 
         Interpolation (Determination con) where
           interpolate $ MkDetermination sda da = "<=\{sda} ->\{da}"
-
-        Interpolation (SortedMap .| Fin con.args.length .| Determination con) where
-          interpolate = joinBy "; " . map (\(i, d) => "\{i}: \{d}") . SortedMap.toList
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.
