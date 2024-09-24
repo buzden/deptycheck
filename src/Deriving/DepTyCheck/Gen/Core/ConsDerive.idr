@@ -101,20 +101,14 @@ searchOrder determinable left = do
   -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
   -- (e.g. because of discharging of strong determination), and new alternative have more priority than current ones.
   -- TODO to determine the best among current variants taking into account which indices are more complex (transitively!)
-  let Just curr = last' notDetermined
+  let Just (curr, currDet) = last' notDetermined
     | Nothing => []
 
-  -- compute set of arguments that will be determined by the currently chosen args
-  let determined = determinableArgs $ snd curr
-
-  -- clean up representation
-  let curr = fst curr
-
   -- remove information about all currently chosen args
-  let next = removeDeeply .| Id curr .| removeDeeply determined left
+  let next = removeDeeply .| Id curr .| removeDeeply currDet.determinableArgs left
 
   -- `next` is smaller than `left` because `curr` must be not empty
-  curr :: searchOrder (determinable `difference` determined) (assert_smaller left next)
+  curr :: searchOrder (determinable `difference` currDet.determinableArgs) (assert_smaller left next)
 
 ||| "Non-obligatory" means that some present external generator of some type
 ||| may be ignored even if its type is really used in a generated data constructor.
