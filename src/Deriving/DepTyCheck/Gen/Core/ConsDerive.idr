@@ -89,12 +89,10 @@ removeDeeply : Foldable f =>
 removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
 searchOrder : {con : _} ->
+              (determinable : SortedSet $ Fin con.args.length) ->
               (left : FinMap con.args.length $ Determination con) ->
               List $ Fin con.args.length
-searchOrder left = do
-
-  -- compute arguments that are determinable by any other argument
-  let determinable = concatMap determinableArgs left
+searchOrder determinable left = do
 
   -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
   let notDetermined = filter (\(idx, det) => not (contains idx determinable) && null det.stronglyDeterminingArgs) $ kvList left
@@ -116,7 +114,7 @@ searchOrder left = do
   let next = removeDeeply .| Id curr .| removeDeeply determined left
 
   -- `next` is smaller than `left` because `curr` must be not empty
-  curr :: searchOrder (assert_smaller left next)
+  curr :: searchOrder (determinable `difference` determined) (assert_smaller left next)
 
 ||| "Non-obligatory" means that some present external generator of some type
 ||| may be ignored even if its type is really used in a generated data constructor.
@@ -225,7 +223,8 @@ namespace NonObligatoryExts
       logPoint {level=15} "least-effort" [sig, con] "- determ: \{determ}"
       logPoint {level=15} "least-effort" [sig, con] "- givs: \{givs}"
 
-      let theOrder = searchOrder $ removeDeeply givs determ
+      let nonDetermGivs = removeDeeply givs determ
+      let theOrder = searchOrder (concatMap determinableArgs nonDetermGivs) nonDetermGivs
 
       logPoint {level=10} "least-effort" [sig, con] "- used final order: \{theOrder}"
 
