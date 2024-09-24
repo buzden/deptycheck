@@ -93,26 +93,17 @@ searchOrder : {con : _} ->
               List $ Fin con.args.length
 searchOrder left = do
 
-  -- find all arguments that are not stongly determined by anyone
-  let nonStronglyDetermined = filter (\(_, det) => null det.stronglyDeterminingArgs) $ kvList left
-
-  -- finish is nothing appropriate left
-  let False = null nonStronglyDetermined | True => []
-
   -- compute arguments that are determinable by any other argument
   let determinable = concatMap determinableArgs left
 
-  -- among them find all that are not determined even weakly, if any
-  let notDetermined = filter (not . contains' determinable . fst) nonStronglyDetermined
-
-  -- choose the group of args that can go next
-  let curr = if not $ null notDetermined then notDetermined else nonStronglyDetermined
+  -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
+  let notDetermined = filter (\(idx, det) => not (contains idx determinable) && null det.stronglyDeterminingArgs) $ kvList left
 
   -- choose the one from the variants
   -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
   -- (e.g. because of discharging of strong determination), and new alternative have more priority than current ones.
   -- TODO to determine the best among current variants taking into account which indices are more complex (transitively!)
-  let Just curr = last' curr
+  let Just curr = last' notDetermined
     | Nothing => []
 
   -- compute set of arguments that will be determined by the currently chosen args
