@@ -129,16 +129,11 @@ namespace NonObligatoryExts
       -- Prepare intermediate data and functions using this data --
       -------------------------------------------------------------
 
-      -- Build a map from constructor's argument name to its index
-      let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
-
       -- Compute left-to-right need of generation when there are non-trivial types at the left
       argsTypeApps <- getTypeApps con
 
-      -- Get dependencies of constructor's arguments
-      let rawDeps' = argDeps con.args
-      let rawDeps : Vect _ $ SortedSet $ Fin con.args.length := downmap (mapIn weakenToSuper) rawDeps'
-      let dependees = concat rawDeps -- arguments which any other argument depends on
+      -- Get arguments which any other argument depends on
+      let dependees = concat $ downmap (mapIn weakenToSuper) $ argDeps con.args
 
       -- Decide how constructor arguments would be named during generation
       let bindNames = withIndex (fromList con.args) <&> map (bindNameRenamer . argName)
