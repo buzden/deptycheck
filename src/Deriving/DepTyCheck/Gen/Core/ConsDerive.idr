@@ -133,7 +133,7 @@ namespace NonObligatoryExts
       argsTypeApps <- getTypeApps con
 
       -- Get arguments which any other argument depends on
-      let dependees = concat $ downmap (mapIn weakenToSuper) $ argDeps con.args
+      let dependees = dependees con.args
 
       -- Decide how constructor arguments would be named during generation
       let bindNames = withIndex (fromList con.args) <&> map (bindNameRenamer . argName)

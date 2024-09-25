@@ -401,6 +401,13 @@ argDeps args = do
   flip upmapI args $ \i, deps => flip concatMap deps $ \candidates =>
     maybe empty singleton $ last' $ mapMaybe tryToFit $ SortedSet.toList candidates
 
+export
+dependees : (args : List Arg) -> SortedSet $ Fin $ args.length
+dependees args = do
+  let nameToIndex = SortedMap.fromList $ mapI args $ \i, arg => (argName arg, i)
+  let varsInTypes = concatMap (\arg => allVarNames' arg.type) args
+  fromList $ mapMaybe (lookup' nameToIndex) $ SortedSet.toList varsInTypes
+
 public export
 isVar : TTImp -> Bool
 isVar $ IVar {} = True
