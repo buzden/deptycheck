@@ -13,6 +13,42 @@ import public Deriving.DepTyCheck.Gen.Derive
 
 %default total
 
+data TypeApp : Con -> Type where
+  MkTypeApp :
+    (type : TypeInfo) ->
+    (0 _ : AllTyArgsNamed type) =>
+    (argTypes : Vect type.args.length .| Either (Fin con.args.length) TTImp) ->
+    TypeApp con
+
+getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length $ TypeApp con
+getTypeApps con = do
+  let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
+
+  -- Analyse that we can do subgeneration for each constructor argument
+  -- Fails using `Elaboration` if the given expression is not an application to a type constructor
+  let analyseTypeApp : TTImp -> m $ TypeApp con
+      analyseTypeApp expr = do
+        let (lhs, args) = unAppAny expr
+        ty <- case lhs of
+          IVar _ lhsName     => do let Nothing = lookupType lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
+                                     | Just found => pure found
+                                   -- we didn't found, failing, there are at least two reasons
+                                   failAt (getFC lhs) $ if isNamespaced lhsName
+                                     then "Data type `\{lhsName}` is unavailable at the site of derivation (forgotten import?)"
+                                     else "Usupported applications to a non-concrete type `\{lhsName}`"
+          IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
+          IType _            => pure typeInfoForTypeOfTypes
+          lhs@(IPi {})       => failAt (getFC lhs) "Fields with function types are not supported in constructors"
+          lhs                => failAt (getFC lhs) "Unsupported type of a constructor field: \{show lhs}"
+        let Yes lengthCorrect = decEq ty.args.length args.length
+          | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
+        _ <- ensureTyArgsNamed ty
+        pure $ MkTypeApp ty $ rewrite lengthCorrect in args.asVect <&> \arg => case getExpr arg of
+          expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
+          expr            => Right expr
+
+  for con.args.asVect $ analyseTypeApp . type
+
 -------------------------------------------------
 --- Derivation of a generator for constructor ---
 -------------------------------------------------
@@ -52,37 +88,11 @@ namespace NonObligatoryExts
       -- Prepare intermediate data and functions using this data --
       -------------------------------------------------------------
 
-      -- Get file position of the constructor definition (for better error reporting)
-      let conFC = getFC con.type
-
       -- Build a map from constructor's argument name to its index
       let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
 
-      -- Analyse that we can do subgeneration for each constructor argument
-      -- Fails using `Elaboration` if the given expression is not an application to a type constructor
-      let analyseTypeApp : TTImp -> m TypeApp
-          analyseTypeApp expr = do
-            let (lhs, args) = unAppAny expr
-            ty <- case lhs of
-              IVar _ lhsName     => do let Nothing = lookupType lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
-                                         | Just found => pure found
-                                       -- we didn't found, failing, there are at least two reasons
-                                       failAt (getFC lhs) $ if isNamespaced lhsName
-                                         then "Data type `\{lhsName}` is unavailable at the site of derivation (forgotten import?)"
-                                         else "Usupported applications to a non-concrete type `\{lhsName}`"
-              IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
-              IType _            => pure typeInfoForTypeOfTypes
-              lhs@(IPi {})       => failAt (getFC lhs) "Fields with function types are not supported in constructors"
-              lhs                => failAt (getFC lhs) "Unsupported type of a constructor field: \{show lhs}"
-            let Yes lengthCorrect = decEq ty.args.length args.length
-              | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
-            _ <- ensureTyArgsNamed ty
-            pure $ MkTypeApp ty $ rewrite lengthCorrect in args.asVect <&> \arg => case getExpr arg of
-              expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
-              expr            => Right expr
-
       -- Compute left-to-right need of generation when there are non-trivial types at the left
-      argsTypeApps <- for con.args.asVect $ analyseTypeApp . type
+      argsTypeApps <- getTypeApps con
 
       -- Get dependencies of constructor's arguments
       let rawDeps' = argDeps con.args
@@ -107,7 +117,7 @@ namespace NonObligatoryExts
           genForOrder order = map (foldr apply callCons) $ evalStateT givs $ for order $ \genedArg => do
 
             -- Get info for the `genedArg`
-            let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ TypeApp) argsTypeApps
+            let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
 
             -- Acquire the set of arguments that are already present
             presentArguments <- get
@@ -217,14 +227,6 @@ namespace NonObligatoryExts
 
         Foldable f => Interpolation (f $ Fin con.args.length) where
           interpolate = ("[" ++) . (++ "]") . joinBy ", " . map interpolate . toList
-
-        -- TODO make this to be a `record` as soon as #2177 is fixed
-        data TypeApp : Type where
-          MkTypeApp :
-            (type : TypeInfo) ->
-            (0 _ : AllTyArgsNamed type) =>
-            (argTypes : Vect type.args.length .| Either (Fin con.args.length) TTImp) ->
-            TypeApp
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.
