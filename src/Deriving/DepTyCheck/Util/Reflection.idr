@@ -389,6 +389,18 @@ export
 allVarNames : TTImp -> List Name
 allVarNames = SortedSet.toList . allVarNames'
 
+public export
+0 ArgDeps : Nat -> Type
+ArgDeps n = DVect n $ SortedSet . Fin . Fin.finToNat
+
+export
+argDeps : (args : List Arg) -> ArgDeps args.length
+argDeps args = do
+  let nameToIndices = SortedMap.fromList $ mapI args $ \i, arg => (argName arg, SortedSet.singleton i)
+  let args = Vect.fromList args <&> \arg => allVarNames arg.type |> map (fromMaybe empty . lookup' nameToIndices)
+  flip upmapI args $ \i, deps => flip concatMap deps $ \candidates =>
+    maybe empty singleton $ last' $ mapMaybe tryToFit $ SortedSet.toList candidates
+
 export
 record NamesInfoInTypes where
   constructor Names
@@ -612,15 +624,3 @@ genTypeName g = do
   let (IVar _ genTy, _) = unApp genTy
     | (genTy, _) => failAt (getFC genTy) "Expected a type name"
   pure genTy
-
-----------------------------------------------
---- Analyzing dependently typed signatures ---
-----------------------------------------------
-
-export
-argDeps : (args : List Arg) -> DVect args.length $ SortedSet . Fin . Fin.finToNat
-argDeps args = do
-  let nameToIndices = SortedMap.fromList $ mapI args $ \i, arg => (argName arg, SortedSet.singleton i)
-  let args = Vect.fromList args <&> \arg => allVarNames arg.type |> map (fromMaybe empty . lookup' nameToIndices)
-  flip upmapI args $ \i, argDeps => flip concatMap argDeps $ \candidates =>
-    maybe empty singleton $ last' $ mapMaybe tryToFit $ SortedSet.toList candidates
