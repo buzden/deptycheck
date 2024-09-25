@@ -13,12 +13,11 @@ import public Deriving.DepTyCheck.Gen.Derive
 
 %default total
 
-data TypeApp : Con -> Type where
-  MkTypeApp :
-    (type : TypeInfo) ->
-    (0 _ : AllTyArgsNamed type) =>
-    (argTypes : Vect type.args.length .| Either (Fin con.args.length) TTImp) ->
-    TypeApp con
+record TypeApp (0 con : Con) where
+  constructor MkTypeApp
+  argHeadType : TypeInfo
+  {auto 0 argHeadTypeGood : AllTyArgsNamed argHeadType}
+  argApps : Vect argHeadType.args.length .| Either (Fin con.args.length) TTImp
 
 getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length $ TypeApp con
 getTypeApps con = do
@@ -171,14 +170,14 @@ namespace NonObligatoryExts
       -------------------------------------------------
 
       -- Determine which arguments need to be generated in a left-to-right manner
-      let (leftToRightArgsTypeApp, leftToRightArgs) = unzip $ filter (\((MkTypeApp _ as), _) => any isRight as) $ toListI argsTypeApps
+      let (leftToRightArgsTypeApp, leftToRightArgs) = unzip $ filter (\(ta, _) => any isRight ta.argApps) $ toListI argsTypeApps
 
       --------------------------------------------------------------------------------
       -- Preparation of input for the left-to-right phase (1st right-to-left phase) --
       --------------------------------------------------------------------------------
 
       -- Acquire those variables that appear in non-trivial type expressions, i.e. those which needs to be generated before the left-to-right phase
-      let preLTR = leftToRightArgsTypeApp >>= \(MkTypeApp _ as) => rights (toList as) >>= allVarNames
+      let preLTR = leftToRightArgsTypeApp >>= \ta => rights (toList ta.argApps) >>= allVarNames
       let preLTR = SortedSet.fromList $ mapMaybe (lookup' conArgIdxs) preLTR
 
       -- Find rightmost arguments among `preLTR`
