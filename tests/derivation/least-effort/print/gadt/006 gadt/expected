@@ -130,7 +130,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                               .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:5}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                      .$ (var "DerivedGen.JJ" .! ("b", var "b") .$ var "^bnd^{arg:5}" .$ var "^bnd^{arg:4}"))))
+                                                      .$ (var "DerivedGen.JJ" .! ("b", var "b") .$ var "^bnd^{arg:4}" .$ var "^bnd^{arg:5}"))))
                              ]
                          , IDef
                              emptyFC
@@ -139,24 +139,24 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.FN (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<DerivedGen.D>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
-                                          .=> iCase
-                                                { sc = var "{lamc:0}"
-                                                , ty = implicitFalse
-                                                , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "b" .$ bindVar "^bnd^{arg:6}"
-                                                      .=    var ">>="
-                                                         .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                                         .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:7}") implicitFalse
-                                                             .=>    var "Prelude.pure"
+                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:6}") implicitFalse
+                                          .=>    var ">>="
+                                              .$ (var "<DerivedGen.D>[]" .$ var "^cons_fuel^")
+                                              .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                                  .=> iCase
+                                                        { sc = var "{lamc:0}"
+                                                        , ty = implicitFalse
+                                                        , clauses =
+                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "b" .$ bindVar "^bnd^{arg:7}"
+                                                              .=    var "Prelude.pure"
                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                  .$ (   var "DerivedGen.FN"
                                                                      .! ("b", implicitTrue)
-                                                                     .$ var "^bnd^{arg:7}"
-                                                                     .$ var "^bnd^{arg:6}"))
-                                                    ]
-                                                }))
+                                                                     .$ var "^bnd^{arg:6}"
+                                                                     .$ var "^bnd^{arg:7}")
+                                                            ]
+                                                        })))
                              , var "<<DerivedGen.FN>>" .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          , IDef
@@ -180,24 +180,24 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.TR (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<DerivedGen.D>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
-                                          .=> iCase
-                                                { sc = var "{lamc:0}"
-                                                , ty = implicitFalse
-                                                , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "b" .$ bindVar "^bnd^{arg:9}"
-                                                      .=    var ">>="
-                                                         .$ (var "external^<^prim^.String>[]" .$ var "^outmost-fuel^")
-                                                         .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:10}") implicitFalse
-                                                             .=>    var "Prelude.pure"
+                                      .$ (var "external^<^prim^.String>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                          .=>    var ">>="
+                                              .$ (var "<DerivedGen.D>[]" .$ var "^cons_fuel^")
+                                              .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                                  .=> iCase
+                                                        { sc = var "{lamc:0}"
+                                                        , ty = implicitFalse
+                                                        , clauses =
+                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "b" .$ bindVar "^bnd^{arg:10}"
+                                                              .=    var "Prelude.pure"
                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                  .$ (   var "DerivedGen.TR"
                                                                      .! ("b", implicitTrue)
-                                                                     .$ var "^bnd^{arg:10}"
-                                                                     .$ var "^bnd^{arg:9}"))
-                                                    ]
-                                                }))
+                                                                     .$ var "^bnd^{arg:9}"
+                                                                     .$ var "^bnd^{arg:10}")
+                                                            ]
+                                                        })))
                              , var "<<DerivedGen.TR>>" .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]
@@ -316,22 +316,22 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.JJ (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:4}") implicitFalse
+                                      .$ (var "<Prelude.Basics.Bool>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "b") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:5}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:4}") implicitFalse
                                                   .=>    var ">>="
-                                                      .$ (var "<Prelude.Basics.Bool>[]" .$ var "^outmost-fuel^")
-                                                      .$ (    MkArg MW ExplicitArg (Just "b") implicitFalse
+                                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:5}") implicitFalse
                                                           .=>    var "Prelude.pure"
                                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                               .$ (   var "Builtin.DPair.MkDPair"
                                                                   .$ implicitTrue
                                                                   .$ (   var "DerivedGen.JJ"
                                                                       .! ("b", var "b")
-                                                                      .$ var "^bnd^{arg:5}"
-                                                                      .$ var "^bnd^{arg:4}"))))))
+                                                                      .$ var "^bnd^{arg:4}"
+                                                                      .$ var "^bnd^{arg:5}"))))))
                              ]
                          , IDef
                              emptyFC
@@ -340,26 +340,26 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.FN (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<DerivedGen.D>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
-                                          .=> iCase
-                                                { sc = var "{lamc:0}"
-                                                , ty = implicitFalse
-                                                , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "b" .$ bindVar "^bnd^{arg:6}"
-                                                      .=    var ">>="
-                                                         .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                                         .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:7}") implicitFalse
-                                                             .=>    var "Prelude.pure"
+                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:6}") implicitFalse
+                                          .=>    var ">>="
+                                              .$ (var "<DerivedGen.D>[]" .$ var "^cons_fuel^")
+                                              .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                                  .=> iCase
+                                                        { sc = var "{lamc:0}"
+                                                        , ty = implicitFalse
+                                                        , clauses =
+                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "b" .$ bindVar "^bnd^{arg:7}"
+                                                              .=    var "Prelude.pure"
                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                  .$ (   var "Builtin.DPair.MkDPair"
                                                                      .$ implicitTrue
                                                                      .$ (   var "DerivedGen.FN"
                                                                          .! ("b", implicitTrue)
-                                                                         .$ var "^bnd^{arg:7}"
-                                                                         .$ var "^bnd^{arg:6}")))
-                                                    ]
-                                                }))
+                                                                         .$ var "^bnd^{arg:6}"
+                                                                         .$ var "^bnd^{arg:7}"))
+                                                            ]
+                                                        })))
                              ]
                          , IDef
                              emptyFC
@@ -381,26 +381,26 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.TR (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<DerivedGen.D>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
-                                          .=> iCase
-                                                { sc = var "{lamc:0}"
-                                                , ty = implicitFalse
-                                                , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "b" .$ bindVar "^bnd^{arg:9}"
-                                                      .=    var ">>="
-                                                         .$ (var "external^<^prim^.String>[]" .$ var "^outmost-fuel^")
-                                                         .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:10}") implicitFalse
-                                                             .=>    var "Prelude.pure"
+                                      .$ (var "external^<^prim^.String>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                          .=>    var ">>="
+                                              .$ (var "<DerivedGen.D>[]" .$ var "^cons_fuel^")
+                                              .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                                  .=> iCase
+                                                        { sc = var "{lamc:0}"
+                                                        , ty = implicitFalse
+                                                        , clauses =
+                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "b" .$ bindVar "^bnd^{arg:10}"
+                                                              .=    var "Prelude.pure"
                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                  .$ (   var "Builtin.DPair.MkDPair"
                                                                      .$ implicitTrue
                                                                      .$ (   var "DerivedGen.TR"
                                                                          .! ("b", implicitTrue)
-                                                                         .$ var "^bnd^{arg:10}"
-                                                                         .$ var "^bnd^{arg:9}")))
-                                                    ]
-                                                }))
+                                                                         .$ var "^bnd^{arg:9}"
+                                                                         .$ var "^bnd^{arg:10}"))
+                                                            ]
+                                                        })))
                              ]
                          ]
                      , scope =

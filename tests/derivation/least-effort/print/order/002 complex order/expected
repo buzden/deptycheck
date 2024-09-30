@@ -57,11 +57,11 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
               Export
               []
               (mkTy
-                 { name = "<DerivedGen.BS>[0]"
+                 { name = "<Data.Fin.Fin>[0]"
                  , type =
                          MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
                      .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "DerivedGen.BS" .$ var "n")
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "Data.Fin.Fin" .$ var "n")
                  })
           , IClaim
               emptyFC
@@ -69,11 +69,11 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
               Export
               []
               (mkTy
-                 { name = "<Data.Fin.Fin>[0]"
+                 { name = "<DerivedGen.BS>[0]"
                  , type =
                          MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
                      .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "Data.Fin.Fin" .$ var "n")
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "DerivedGen.BS" .$ var "n")
                  })
           , IDef
               emptyFC
@@ -265,13 +265,11 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.Y0 (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<Data.Fin.Fin>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z"))
-                                      .$ (    MkArg MW ExplicitArg (Just "i") implicitFalse
+                                      .$ (var "<DerivedGen.BS>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z"))
+                                      .$ (    MkArg MW ExplicitArg (Just "bs") implicitFalse
                                           .=>    var ">>="
-                                              .$ (   var "<DerivedGen.BS>[0]"
-                                                  .$ var "^outmost-fuel^"
-                                                  .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z"))
-                                              .$ (    MkArg MW ExplicitArg (Just "bs") implicitFalse
+                                              .$ (var "<Data.Fin.Fin>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z"))
+                                              .$ (    MkArg MW ExplicitArg (Just "i") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "Builtin.DPair.MkDPair"
@@ -310,43 +308,6 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
                              .$ (   var "::"
                                  .$ (var "<<DerivedGen.Y0>>" .$ var "^fuel_arg^")
                                  .$ (var "::" .$ (var "<<DerivedGen.Y2>>" .$ var "^fuel_arg^") .$ var "Nil")))
-                     }
-              ]
-          , IDef
-              emptyFC
-              "<DerivedGen.BS>[0]"
-              [    var "<DerivedGen.BS>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>"
-                .= local
-                     { decls =
-                         [ IClaim
-                             emptyFC
-                             MW
-                             Export
-                             []
-                             (mkTy
-                                { name = "<<DerivedGen.MkBS>>"
-                                , type =
-                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                    .->    var "Test.DepTyCheck.Gen.Gen"
-                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                        .$ (var "DerivedGen.BS" .$ var "n")
-                                })
-                         , IDef
-                             emptyFC
-                             "<<DerivedGen.MkBS>>"
-                             [    var "<<DerivedGen.MkBS>>" .$ bindVar "^cons_fuel^" .$ bindVar "n"
-                               .=    var "Test.DepTyCheck.Gen.label"
-                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.MkBS (orders)"))
-                                  .$ (   var "Prelude.pure"
-                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                      .$ (var "DerivedGen.MkBS" .! ("n", var "n")))
-                             ]
-                         ]
-                     , scope =
-                            var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.BS[0] (non-recursive)"))
-                         .$ (var "<<DerivedGen.MkBS>>" .$ var "^fuel_arg^" .$ var "inter^<n>")
                      }
               ]
           , IDef
@@ -433,6 +394,43 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
                                                 .$ var "Nil")))
                                ]
                            }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<DerivedGen.BS>[0]"
+              [    var "<DerivedGen.BS>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<DerivedGen.MkBS>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .->    var "Test.DepTyCheck.Gen.Gen"
+                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                        .$ (var "DerivedGen.BS" .$ var "n")
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.MkBS>>"
+                             [    var "<<DerivedGen.MkBS>>" .$ bindVar "^cons_fuel^" .$ bindVar "n"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.MkBS (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "DerivedGen.MkBS" .! ("n", var "n")))
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.BS[0] (non-recursive)"))
+                         .$ (var "<<DerivedGen.MkBS>>" .$ var "^fuel_arg^" .$ var "inter^<n>")
                      }
               ]
           ]
