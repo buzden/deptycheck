@@ -39,10 +39,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
               Export
               []
               (mkTy
-                 { name = "<Prelude.Types.Nat>[]"
+                 { name = "<Builtin.Unit>[]"
                  , type =
                          MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Builtin.Unit"
                  })
           , IClaim
               emptyFC
@@ -50,10 +50,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
               Export
               []
               (mkTy
-                 { name = "<Builtin.Unit>[]"
+                 { name = "<Prelude.Types.Nat>[]"
                  , type =
                          MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Builtin.Unit"
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
                  })
           , IDef
               emptyFC
@@ -136,11 +136,11 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkX (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<Builtin.Unit>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "m") implicitFalse
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "n") implicitFalse
                                           .=>    var ">>="
-                                              .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                              .$ (    MkArg MW ExplicitArg (Just "n") implicitFalse
+                                              .$ (var "<Builtin.Unit>[]" .$ var "^outmost-fuel^")
+                                              .$ (    MkArg MW ExplicitArg (Just "m") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "Builtin.DPair.MkDPair"
@@ -154,6 +154,38 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
                             var "Test.DepTyCheck.Gen.label"
                          .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-recursive)"))
                          .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^")
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Builtin.Unit>[]"
+              [    var "<Builtin.Unit>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             emptyFC
+                             MW
+                             Export
+                             []
+                             (mkTy
+                                { name = "<<Builtin.MkUnit>>"
+                                , type =
+                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                    .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Builtin.Unit"
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Builtin.MkUnit>>"
+                             [    var "<<Builtin.MkUnit>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Builtin.MkUnit (orders)"))
+                                  .$ (var "Prelude.pure" .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue) .$ var "Builtin.MkUnit")
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "Builtin.Unit[] (non-recursive)"))
+                         .$ (var "<<Builtin.MkUnit>>" .$ var "^fuel_arg^")
                      }
               ]
           , IDef
@@ -228,38 +260,6 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
                                                 .$ var "Nil")))
                                ]
                            }
-                     }
-              ]
-          , IDef
-              emptyFC
-              "<Builtin.Unit>[]"
-              [    var "<Builtin.Unit>[]" .$ bindVar "^fuel_arg^"
-                .= local
-                     { decls =
-                         [ IClaim
-                             emptyFC
-                             MW
-                             Export
-                             []
-                             (mkTy
-                                { name = "<<Builtin.MkUnit>>"
-                                , type =
-                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                    .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Builtin.Unit"
-                                })
-                         , IDef
-                             emptyFC
-                             "<<Builtin.MkUnit>>"
-                             [    var "<<Builtin.MkUnit>>" .$ bindVar "^cons_fuel^"
-                               .=    var "Test.DepTyCheck.Gen.label"
-                                  .$ (var "fromString" .$ primVal (Str "Builtin.MkUnit (orders)"))
-                                  .$ (var "Prelude.pure" .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue) .$ var "Builtin.MkUnit")
-                             ]
-                         ]
-                     , scope =
-                            var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Builtin.Unit[] (non-recursive)"))
-                         .$ (var "<<Builtin.MkUnit>>" .$ var "^fuel_arg^")
                      }
               ]
           ]
