@@ -126,10 +126,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkX (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "m") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "n") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                              .$ (    MkArg MW ExplicitArg (Just "n") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "m") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "Builtin.DPair.MkDPair"

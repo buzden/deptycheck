@@ -5,26 +5,26 @@ uniq: True
 list: ["g"]
 uniq: True
 -----------
-list: ["g", "b", "f"]
+list: ["b", "f", "g"]
 uniq: True
 -----------
-list: ["f", "g", "a", "d"]
+list: ["g", "a", "d", "f"]
 uniq: True
 -----------
-list: ["h", "c", "g"]
+list: ["c", "g", "h"]
 uniq: True
 -----------
-list: ["h", "g", "b", "d", "c"]
+list: ["g", "b", "d", "c", "h"]
 uniq: True
 -----------
-list: ["c", "b"]
+list: ["b", "c"]
 uniq: True
 -----------
-list: ["d", "a", "h"]
+list: ["a", "h", "d"]
 uniq: True
 -----------
-list: ["g", "a", "h", "c", "d", "b", "f"]
+list: ["a", "h", "c", "d", "b", "f", "g"]
 uniq: True
 -----------
-list: ["g", "c", "b", "h", "d", "f", "a"]
+list: ["c", "b", "h", "d", "f", "a", "g"]
 uniq: True

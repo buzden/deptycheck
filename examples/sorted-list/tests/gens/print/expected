@@ -39,32 +39,12 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
               Export
               []
               (mkTy
-                 { name = "<Data.List.Sorted.FirstGT>[0]"
-                 , type =
-                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                     .->    var "Test.DepTyCheck.Gen.Gen"
-                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                         .$ (   var "Builtin.DPair.DPair"
-                             .$ var "Data.List.Sorted.SortedList"
-                             .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.List.Sorted.SortedList")
-                                 .=> var "Data.List.Sorted.FirstGT" .$ var "{arg:1}" .$ var "{arg:2}"))
-                 })
-          , IClaim
-              emptyFC
-              MW
-              Export
-              []
-              (mkTy
-                 { name = "<Data.Nat.LTE>[0]"
+                 { name = "<Data.Nat.LTE>[0, 1]"
                  , type =
                          MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
                      .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                     .->    var "Test.DepTyCheck.Gen.Gen"
-                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                         .$ (   var "Builtin.DPair.DPair"
-                             .$ var "Prelude.Types.Nat"
-                             .$ (MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat") .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
+                     .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
+                     .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
                  })
           , IClaim
               emptyFC
@@ -230,40 +210,38 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.NE (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "n") implicitFalse
-                                          .=>    var ">>="
-                                              .$ (var "<Data.Nat.LTE>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "n"))
-                                              .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
-                                                  .=> iCase
-                                                        { sc = var "{lamc:0}"
-                                                        , ty = implicitFalse
-                                                        , clauses =
-                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:3}"
-                                                              .=    var ">>="
-                                                                 .$ (var "<Data.List.Sorted.FirstGT>[0]" .$ var "^cons_fuel^" .$ var "x")
-                                                                 .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
-                                                                     .=> iCase
-                                                                           { sc = var "{lamc:0}"
-                                                                           , ty = implicitFalse
-                                                                           , clauses =
-                                                                               [    var "Builtin.DPair.MkDPair" .$ bindVar "xs" .$ bindVar "prf"
-                                                                                 .=    var "Prelude.pure"
-                                                                                    .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                                                    .$ (   var "Builtin.DPair.MkDPair"
-                                                                                        .$ implicitTrue
-                                                                                        .$ (   var "Builtin.DPair.MkDPair"
-                                                                                            .$ implicitTrue
-                                                                                            .$ (   var "Data.List.Sorted.NE"
-                                                                                                .! ("xs", implicitTrue)
-                                                                                                .! ("x", implicitTrue)
-                                                                                                .! ("prf", var "prf")
-                                                                                                .! ("n", implicitTrue)
-                                                                                                .$ var "^bnd^{arg:3}")))
-                                                                               ]
-                                                                           })
-                                                            ]
-                                                        })))
+                                      .$ (var "<Data.List.Sorted.FirstGT>[]" .$ var "^cons_fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:0}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [       var "Builtin.DPair.MkDPair"
+                                                         .$ bindVar "x"
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "xs" .$ bindVar "prf")
+                                                      .=    var ">>="
+                                                         .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                                         .$ (    MkArg MW ExplicitArg (Just "n") implicitFalse
+                                                             .=>    var ">>="
+                                                                 .$ (   var "<Data.Nat.LTE>[0, 1]"
+                                                                     .$ var "^outmost-fuel^"
+                                                                     .$ (var "Prelude.Types.S" .$ var "n")
+                                                                     .$ var "x")
+                                                                 .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
+                                                                     .=>    var "Prelude.pure"
+                                                                         .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                                         .$ (   var "Builtin.DPair.MkDPair"
+                                                                             .$ implicitTrue
+                                                                             .$ (   var "Builtin.DPair.MkDPair"
+                                                                                 .$ implicitTrue
+                                                                                 .$ (   var "Data.List.Sorted.NE"
+                                                                                     .! ("xs", implicitTrue)
+                                                                                     .! ("x", implicitTrue)
+                                                                                     .! ("prf", var "prf")
+                                                                                     .! ("n", implicitTrue)
+                                                                                     .$ var "^bnd^{arg:3}")))))
+                                                    ]
+                                                }))
                              ]
                          ]
                      , scope =
@@ -292,122 +270,8 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
               ]
           , IDef
               emptyFC
-              "<Data.List.Sorted.FirstGT>[0]"
-              [    var "<Data.List.Sorted.FirstGT>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<{arg:1}>"
-                .= local
-                     { decls =
-                         [ IClaim
-                             emptyFC
-                             MW
-                             Export
-                             []
-                             (mkTy
-                                { name = "<<Data.List.Sorted.E>>"
-                                , type =
-                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                                    .->    var "Test.DepTyCheck.Gen.Gen"
-                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                        .$ (   var "Builtin.DPair.DPair"
-                                            .$ var "Data.List.Sorted.SortedList"
-                                            .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.List.Sorted.SortedList")
-                                                .=> var "Data.List.Sorted.FirstGT" .$ var "{arg:1}" .$ var "{arg:2}"))
-                                })
-                         , IClaim
-                             emptyFC
-                             MW
-                             Export
-                             []
-                             (mkTy
-                                { name = "<<Data.List.Sorted.NE>>"
-                                , type =
-                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                                    .->    var "Test.DepTyCheck.Gen.Gen"
-                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                        .$ (   var "Builtin.DPair.DPair"
-                                            .$ var "Data.List.Sorted.SortedList"
-                                            .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.List.Sorted.SortedList")
-                                                .=> var "Data.List.Sorted.FirstGT" .$ var "{arg:1}" .$ var "{arg:2}"))
-                                })
-                         , IDef
-                             emptyFC
-                             "<<Data.List.Sorted.E>>"
-                             [    var "<<Data.List.Sorted.E>>" .$ bindVar "^cons_fuel^" .$ bindVar "n"
-                               .=    var "Test.DepTyCheck.Gen.label"
-                                  .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.E (orders)"))
-                                  .$ (   var "Prelude.pure"
-                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                      .$ (var "Builtin.DPair.MkDPair" .$ implicitTrue .$ (var "Data.List.Sorted.E" .! ("n", var "n"))))
-                             ]
-                         , IDef
-                             emptyFC
-                             "<<Data.List.Sorted.NE>>"
-                             [    var "<<Data.List.Sorted.NE>>" .$ bindVar "^cons_fuel^" .$ bindVar "n"
-                               .=    var "Test.DepTyCheck.Gen.label"
-                                  .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.NE (orders)"))
-                                  .$ (   var ">>="
-                                      .$ (var "<Data.Nat.LTE>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "n"))
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
-                                          .=> iCase
-                                                { sc = var "{lamc:0}"
-                                                , ty = implicitFalse
-                                                , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:3}"
-                                                      .=    var ">>="
-                                                         .$ (var "<Data.List.Sorted.FirstGT>[0]" .$ var "^cons_fuel^" .$ var "x")
-                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
-                                                             .=> iCase
-                                                                   { sc = var "{lamc:0}"
-                                                                   , ty = implicitFalse
-                                                                   , clauses =
-                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "xs" .$ bindVar "prf"
-                                                                         .=    var "Prelude.pure"
-                                                                            .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                                            .$ (   var "Builtin.DPair.MkDPair"
-                                                                                .$ implicitTrue
-                                                                                .$ (   var "Data.List.Sorted.NE"
-                                                                                    .! ("xs", implicitTrue)
-                                                                                    .! ("x", implicitTrue)
-                                                                                    .! ("prf", var "prf")
-                                                                                    .! ("n", implicitTrue)
-                                                                                    .$ var "^bnd^{arg:3}"))
-                                                                       ]
-                                                                   })
-                                                    ]
-                                                }))
-                             ]
-                         ]
-                     , scope =
-                         iCase
-                           { sc = var "^fuel_arg^"
-                           , ty = var "Data.Fuel.Fuel"
-                           , clauses =
-                               [    var "Data.Fuel.Dry"
-                                 .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.FirstGT[0] (dry fuel)"))
-                                    .$ (var "<<Data.List.Sorted.E>>" .$ var "Data.Fuel.Dry" .$ var "inter^<{arg:1}>")
-                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
-                                 .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.FirstGT[0] (spend fuel)"))
-                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
-                                        .$ (   var "::"
-                                            .$ (   var "Builtin.MkPair"
-                                                .$ var "Data.Nat1.one"
-                                                .$ (var "<<Data.List.Sorted.E>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>"))
-                                            .$ (   var "::"
-                                                .$ (   var "Builtin.MkPair"
-                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
-                                                    .$ (var "<<Data.List.Sorted.NE>>" .$ var "^sub^fuel_arg^" .$ var "inter^<{arg:1}>"))
-                                                .$ var "Nil")))
-                               ]
-                           }
-                     }
-              ]
-          , IDef
-              emptyFC
-              "<Data.Nat.LTE>[0]"
-              [    var "<Data.Nat.LTE>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>"
+              "<Data.Nat.LTE>[0, 1]"
+              [    var "<Data.Nat.LTE>[0, 1]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>" .$ bindVar "inter^<m>"
                 .= local
                      { decls =
                          [ IClaim
@@ -420,12 +284,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                 , type =
                                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
                                     .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
                                     .->    var "Test.DepTyCheck.Gen.Gen"
                                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                        .$ (   var "Builtin.DPair.DPair"
-                                            .$ var "Prelude.Types.Nat"
-                                            .$ (    MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
-                                                .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
+                                        .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
                                 })
                          , IClaim
                              emptyFC
@@ -437,52 +299,41 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                 , type =
                                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
                                     .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                    .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
                                     .->    var "Test.DepTyCheck.Gen.Gen"
                                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                        .$ (   var "Builtin.DPair.DPair"
-                                            .$ var "Prelude.Types.Nat"
-                                            .$ (    MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
-                                                .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
+                                        .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
                                 })
                          , IDef
                              emptyFC
                              "<<Data.Nat.LTEZero>>"
-                             [    var "<<Data.Nat.LTEZero>>" .$ bindVar "^cons_fuel^" .$ var "Prelude.Types.Z"
+                             [    var "<<Data.Nat.LTEZero>>" .$ bindVar "^cons_fuel^" .$ var "Prelude.Types.Z" .$ bindVar "right"
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "Data.Nat.LTEZero (orders)"))
-                                  .$ (   var ">>="
-                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "right") implicitFalse
-                                          .=>    var "Prelude.pure"
-                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Builtin.DPair.MkDPair" .$ implicitTrue .$ (var "Data.Nat.LTEZero" .! ("right", var "right")))))
-                             , var "<<Data.Nat.LTEZero>>" .$ implicitTrue .$ implicitTrue .= var "empty"
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "Data.Nat.LTEZero" .! ("right", var "right")))
+                             , var "<<Data.Nat.LTEZero>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          , IDef
                              emptyFC
                              "<<Data.Nat.LTESucc>>"
-                             [    var "<<Data.Nat.LTESucc>>" .$ bindVar "^cons_fuel^" .$ (var "Prelude.Types.S" .$ bindVar "left")
+                             [       var "<<Data.Nat.LTESucc>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (var "Prelude.Types.S" .$ bindVar "left")
+                                  .$ (var "Prelude.Types.S" .$ bindVar "right")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "Data.Nat.LTESucc (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<Data.Nat.LTE>[0]" .$ var "^cons_fuel^" .$ var "left")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
-                                          .=> iCase
-                                                { sc = var "{lamc:0}"
-                                                , ty = implicitFalse
-                                                , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "right" .$ bindVar "^bnd^{arg:4}"
-                                                      .=    var "Prelude.pure"
-                                                         .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                         .$ (   var "Builtin.DPair.MkDPair"
-                                                             .$ implicitTrue
-                                                             .$ (   var "Data.Nat.LTESucc"
-                                                                 .! ("right", implicitTrue)
-                                                                 .! ("left", implicitTrue)
-                                                                 .$ var "^bnd^{arg:4}"))
-                                                    ]
-                                                }))
-                             , var "<<Data.Nat.LTESucc>>" .$ implicitTrue .$ implicitTrue .= var "empty"
+                                      .$ (var "<Data.Nat.LTE>[0, 1]" .$ var "^cons_fuel^" .$ var "left" .$ var "right")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:4}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "Data.Nat.LTESucc"
+                                                  .! ("right", implicitTrue)
+                                                  .! ("left", implicitTrue)
+                                                  .$ var "^bnd^{arg:4}")))
+                             , var "<<Data.Nat.LTESucc>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]
                      , scope =
@@ -492,20 +343,20 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                            , clauses =
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0] (dry fuel)"))
-                                    .$ (var "<<Data.Nat.LTEZero>>" .$ var "Data.Fuel.Dry" .$ var "inter^<n>")
+                                    .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0, 1] (dry fuel)"))
+                                    .$ (var "<<Data.Nat.LTEZero>>" .$ var "Data.Fuel.Dry" .$ var "inter^<n>" .$ var "inter^<m>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0, 1] (spend fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
                                                 .$ var "Data.Nat1.one"
-                                                .$ (var "<<Data.Nat.LTEZero>>" .$ var "^fuel_arg^" .$ var "inter^<n>"))
+                                                .$ (var "<<Data.Nat.LTEZero>>" .$ var "^fuel_arg^" .$ var "inter^<n>" .$ var "inter^<m>"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
                                                     .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
-                                                    .$ (var "<<Data.Nat.LTESucc>>" .$ var "^sub^fuel_arg^" .$ var "inter^<n>"))
+                                                    .$ (var "<<Data.Nat.LTESucc>>" .$ var "^sub^fuel_arg^" .$ var "inter^<n>" .$ var "inter^<m>"))
                                                 .$ var "Nil")))
                                ]
                            }

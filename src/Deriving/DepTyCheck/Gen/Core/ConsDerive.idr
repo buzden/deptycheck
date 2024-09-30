@@ -101,7 +101,7 @@ searchOrder determinable left = do
   -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
   -- (e.g. because of discharging of strong determination), and new alternative have more priority than current ones.
   -- TODO to determine the best among current variants taking into account which indices are more complex (transitively!)
-  let Just (curr, currDet) = last' notDetermined
+  let Just (curr, currDet) = head' notDetermined
     | Nothing => []
 
   -- remove information about all currently chosen args
