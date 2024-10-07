@@ -1,0 +1,30 @@
+---
+name: Non-primary OS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - main
+      - master
+
+permissions:
+  statuses: write
+
+concurrency:
+  group: ${{ github.workflow }}@${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Clone on Windows
+    runs-on: windows-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4

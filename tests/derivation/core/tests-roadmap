@@ -17,6 +17,8 @@ Independent metrics:
           - type indices (GADTs) (i)
   - use of external generators (noext, ext)
 
+`->` is replaced by `--` for compatibility with Windows file naming rules.
+
 ------------------------
 --- Particular cases ---
 ------------------------
