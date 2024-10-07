@@ -68,7 +68,6 @@ exclude_patterns: list[str] = []
 #
 html_theme = "sphinx_rtd_theme"
 html_theme_options = {
-    "display_version": True,
     "prev_next_buttons_location": "bottom",
 }
 html_logo = "../../icons/deptycheck-lib-html-logo.png"
