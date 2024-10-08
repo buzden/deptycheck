@@ -1,38 +1,38 @@
 --------------
-min: 0, max: 7, length: 5
-as list: [0, 1, 2, 3, 7]
+min: 1, max: 4, length: 2
+as list: [1, 4]
 sorted: True
 --------------
-min: 1, max: 6, length: 3
-as list: [1, 2, 6]
+min: 0, max: 4, length: 5
+as list: [0, 1, 2, 3, 4]
 sorted: True
 --------------
-min: 0, max: 7, length: 4
-as list: [0, 2, 3, 7]
+min: 0, max: 4, length: 5
+as list: [0, 1, 2, 3, 4]
 sorted: True
 --------------
-min: 0, max: 5, length: 5
-as list: [0, 1, 2, 3, 5]
+min: 4, max: 4, length: 1
+as list: [4]
 sorted: True
 --------------
-min: 1, max: 5, length: 4
-as list: [1, 2, 3, 5]
+min: 2, max: 4, length: 3
+as list: [2, 3, 4]
 sorted: True
 --------------
-min: 0, max: 8, length: 3
-as list: [0, 3, 8]
+min: 0, max: 4, length: 5
+as list: [0, 1, 2, 3, 4]
 sorted: True
 --------------
-min: 2, max: 2, length: 1
-as list: [2]
+min: 0, max: 4, length: 4
+as list: [0, 2, 3, 4]
 sorted: True
 --------------
-min: 2, max: 7, length: 3
-as list: [2, 3, 7]
+min: 2, max: 4, length: 3
+as list: [2, 3, 4]
 sorted: True
 --------------
-min: 0, max: 4, length: 3
-as list: [0, 3, 4]
+min: 2, max: 4, length: 3
+as list: [2, 3, 4]
 sorted: True
 --------------
 min: 2, max: 2, length: 1
