@@ -22,7 +22,7 @@ record TypeApp (0 con : Con) where
   argApps : Vect argHeadType.args.length .| Either (Fin con.args.length) TTImp
 
 argsCanDetermine : TypeApp con -> SortedSet $ Fin con.args.length
-argsCanDetermine ta = fromList (lefts ta.argApps.asList) `difference` ta.argsDeterminedBy
+argsCanDetermine ta = fromList (lefts ta.argApps.asList)
 
 getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length $ TypeApp con
 getTypeApps con = do
@@ -76,7 +76,7 @@ record Determination (0 con : Con) where
   constructor MkDetermination
   ||| Args which cannot be determined by this arg, e.g. because it is used in a non-trivial expression.
   stronglyDeterminingArgs : SortedSet $ Fin con.args.length
-  ||| Args which this args depends on, which are not strongly determining.
+  ||| Args which this args depends on.
   determinableArgs : SortedSet $ Fin con.args.length
 
 mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
