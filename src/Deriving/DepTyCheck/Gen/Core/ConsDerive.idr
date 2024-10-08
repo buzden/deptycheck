@@ -14,13 +14,17 @@ import public Deriving.DepTyCheck.Gen.Derive
 
 %default total
 
+record Determination (0 con : Con) where
+  constructor MkDetermination
+  stronglyDeterminingArgs : SortedSet $ Fin con.args.length
+  argsDependsOn : SortedSet $ Fin con.args.length
+
 record TypeApp (0 con : Con) where
   constructor MkTypeApp
   argHeadType : TypeInfo
   {auto 0 argHeadTypeGood : AllTyArgsNamed argHeadType}
   argApps : Vect argHeadType.args.length .| Either (Fin con.args.length) TTImp
-  stronglyDeterminingArgs : SortedSet $ Fin con.args.length
-  argsDependsOn : SortedSet $ Fin con.args.length
+  determ  : Determination con
 
 getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length $ TypeApp con
 getTypeApps con = do
@@ -50,7 +54,7 @@ getTypeApps con = do
                    expr            => Right expr
         let stronglyDeterminedBy = fromList $ mapMaybe (lookup' conArgIdxs) $ rights as.asList >>= allVarNames
         let argsDependsOn = fromList $ lefts as.asList
-        pure $ MkTypeApp ty as stronglyDeterminedBy argsDependsOn
+        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn
 
   for con.args.asVect $ analyseTypeApp . type
 
@@ -71,18 +75,18 @@ interface ConstructorDerivator where
 
 --- Particular tactics ---
 
-mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> TypeApp con -> TypeApp con
+mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
 mapDetermination f = {stronglyDeterminingArgs $= f, argsDependsOn $= f}
 
 removeDeeply : Foldable f =>
                (toRemove : f $ Fin con.args.length) ->
-               (fromWhat : FinMap con.args.length $ TypeApp con) ->
-               FinMap con.args.length $ TypeApp con
+               (fromWhat : FinMap con.args.length $ Determination con) ->
+               FinMap con.args.length $ Determination con
 removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
 searchOrder : {con : _} ->
               (determinable : SortedSet $ Fin con.args.length) ->
-              (left : FinMap con.args.length $ TypeApp con) ->
+              (left : FinMap con.args.length $ Determination con) ->
               List $ Fin con.args.length
 searchOrder determinable left = do
 
@@ -145,7 +149,7 @@ namespace NonObligatoryExts
           genForOrder order = map (foldr apply callCons) $ evalStateT givs $ for order $ \genedArg => do
 
             -- Get info for the `genedArg`
-            let MkTypeApp typeOfGened argsOfTypeOfGened _ _ = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
+            let MkTypeApp typeOfGened argsOfTypeOfGened _ = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
 
             -- Acquire the set of arguments that are already present
             presentArguments <- get
@@ -199,7 +203,7 @@ namespace NonObligatoryExts
       --------------------------------------------
 
       -- Compute determination map without weak determination information
-      let determ = insertFrom' empty $ withIndex argsTypeApps
+      let determ = insertFrom' empty $ mapI (\i, ta => (i, ta.determ)) argsTypeApps
 
       logPoint {level=15} "least-effort" [sig, con] "- determ: \{determ}"
       logPoint {level=15} "least-effort" [sig, con] "- givs: \{givs}"
@@ -226,7 +230,7 @@ namespace NonObligatoryExts
         Foldable f => Interpolation (f $ Fin con.args.length) where
           interpolate = ("[" ++) . (++ "]") . joinBy ", " . map interpolate . toList
 
-        Interpolation (TypeApp con) where
+        Interpolation (Determination con) where
           interpolate ta = "<=\{ta.stronglyDeterminingArgs} ->\{ta.argsDependsOn}"
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
