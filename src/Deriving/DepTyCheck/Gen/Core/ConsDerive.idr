@@ -16,7 +16,9 @@ import public Deriving.DepTyCheck.Gen.Derive
 
 record Determination (0 con : Con) where
   constructor MkDetermination
+  ||| Args which cannot be determined by this arg, e.g. because it is used in a non-trivial expression.
   stronglyDeterminingArgs : SortedSet $ Fin con.args.length
+  ||| Args which this args depends on, which are not strongly determining.
   argsDependsOn : SortedSet $ Fin con.args.length
 
 record TypeApp (0 con : Con) where
@@ -53,7 +55,7 @@ getTypeApps con = do
                    expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
                    expr            => Right expr
         let stronglyDeterminedBy = fromList $ mapMaybe (lookup' conArgIdxs) $ rights as.asList >>= allVarNames
-        let argsDependsOn = fromList $ lefts as.asList
+        let argsDependsOn = fromList (lefts as.asList) `difference` stronglyDeterminedBy
         pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn
 
   for con.args.asVect $ analyseTypeApp . type
