@@ -18,9 +18,9 @@ record TypeApp (0 con : Con) where
   constructor MkTypeApp
   argHeadType : TypeInfo
   {auto 0 argHeadTypeGood : AllTyArgsNamed argHeadType}
+  argApps : Vect argHeadType.args.length .| Either (Fin con.args.length) TTImp
   stronglyDeterminingArgs : SortedSet $ Fin con.args.length
   argsDependsOn : SortedSet $ Fin con.args.length
-  argApps : Vect argHeadType.args.length .| Either (Fin con.args.length) TTImp
 
 getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length $ TypeApp con
 getTypeApps con = do
@@ -50,7 +50,7 @@ getTypeApps con = do
                    expr            => Right expr
         let stronglyDeterminedBy = fromList $ mapMaybe (lookup' conArgIdxs) $ rights as.asList >>= allVarNames
         let argsDependsOn = fromList $ lefts as.asList
-        pure $ MkTypeApp ty stronglyDeterminedBy argsDependsOn as
+        pure $ MkTypeApp ty as stronglyDeterminedBy argsDependsOn
 
   for con.args.asVect $ analyseTypeApp . type
 
@@ -145,7 +145,7 @@ namespace NonObligatoryExts
           genForOrder order = map (foldr apply callCons) $ evalStateT givs $ for order $ \genedArg => do
 
             -- Get info for the `genedArg`
-            let MkTypeApp typeOfGened _ _ argsOfTypeOfGened = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
+            let MkTypeApp typeOfGened argsOfTypeOfGened _ _ = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
 
             -- Acquire the set of arguments that are already present
             presentArguments <- get
