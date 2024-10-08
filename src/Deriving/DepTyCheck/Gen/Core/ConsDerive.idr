@@ -18,11 +18,9 @@ record TypeApp (0 con : Con) where
   constructor MkTypeApp
   argHeadType : TypeInfo
   {auto 0 argHeadTypeGood : AllTyArgsNamed argHeadType}
-  argsDeterminedBy : SortedSet $ Fin con.args.length
+  stronglyDeterminingArgs : SortedSet $ Fin con.args.length
+  argsDependsOn : SortedSet $ Fin con.args.length
   argApps : Vect argHeadType.args.length .| Either (Fin con.args.length) TTImp
-
-argsCanDetermine : TypeApp con -> SortedSet $ Fin con.args.length
-argsCanDetermine ta = fromList (lefts ta.argApps.asList)
 
 getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length $ TypeApp con
 getTypeApps con = do
@@ -50,8 +48,9 @@ getTypeApps con = do
         let as = rewrite lengthCorrect in args.asVect <&> \arg => case getExpr arg of
                    expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
                    expr            => Right expr
-        let determinedBy = fromList $ mapMaybe (lookup' conArgIdxs) $ rights as.asList >>= allVarNames
-        pure $ MkTypeApp ty determinedBy as
+        let stronglyDeterminedBy = fromList $ mapMaybe (lookup' conArgIdxs) $ rights as.asList >>= allVarNames
+        let argsDependsOn = fromList $ lefts as.asList
+        pure $ MkTypeApp ty stronglyDeterminedBy argsDependsOn as
 
   for con.args.asVect $ analyseTypeApp . type
 
@@ -72,25 +71,18 @@ interface ConstructorDerivator where
 
 --- Particular tactics ---
 
-record Determination (0 con : Con) where
-  constructor MkDetermination
-  ||| Args which cannot be determined by this arg, e.g. because it is used in a non-trivial expression.
-  stronglyDeterminingArgs : SortedSet $ Fin con.args.length
-  ||| Args which this args depends on.
-  determinableArgs : SortedSet $ Fin con.args.length
-
-mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
-mapDetermination f $ MkDetermination sda da = MkDetermination .| f sda .| f da
+mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> TypeApp con -> TypeApp con
+mapDetermination f = {stronglyDeterminingArgs $= f, argsDependsOn $= f}
 
 removeDeeply : Foldable f =>
                (toRemove : f $ Fin con.args.length) ->
-               (fromWhat : FinMap con.args.length $ Determination con) ->
-               FinMap con.args.length $ Determination con
+               (fromWhat : FinMap con.args.length $ TypeApp con) ->
+               FinMap con.args.length $ TypeApp con
 removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
 searchOrder : {con : _} ->
               (determinable : SortedSet $ Fin con.args.length) ->
-              (left : FinMap con.args.length $ Determination con) ->
+              (left : FinMap con.args.length $ TypeApp con) ->
               List $ Fin con.args.length
 searchOrder determinable left = do
 
@@ -105,10 +97,10 @@ searchOrder determinable left = do
     | Nothing => []
 
   -- remove information about all currently chosen args
-  let next = removeDeeply .| Id curr .| removeDeeply currDet.determinableArgs left
+  let next = removeDeeply .| Id curr .| removeDeeply currDet.argsDependsOn left
 
   -- `next` is smaller than `left` because `curr` must be not empty
-  curr :: searchOrder (determinable `difference` currDet.determinableArgs) (assert_smaller left next)
+  curr :: searchOrder (determinable `difference` currDet.argsDependsOn) (assert_smaller left next)
 
 ||| "Non-obligatory" means that some present external generator of some type
 ||| may be ignored even if its type is really used in a generated data constructor.
@@ -153,7 +145,7 @@ namespace NonObligatoryExts
           genForOrder order = map (foldr apply callCons) $ evalStateT givs $ for order $ \genedArg => do
 
             -- Get info for the `genedArg`
-            let MkTypeApp typeOfGened _ argsOfTypeOfGened = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
+            let MkTypeApp typeOfGened _ _ argsOfTypeOfGened = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
 
             -- Acquire the set of arguments that are already present
             presentArguments <- get
@@ -207,13 +199,13 @@ namespace NonObligatoryExts
       --------------------------------------------
 
       -- Compute determination map without weak determination information
-      let determ = insertFrom' empty $ mapI (\i, tya => (i, MkDetermination .| argsDeterminedBy tya .| argsCanDetermine tya)) argsTypeApps
+      let determ = insertFrom' empty $ withIndex argsTypeApps
 
       logPoint {level=15} "least-effort" [sig, con] "- determ: \{determ}"
       logPoint {level=15} "least-effort" [sig, con] "- givs: \{givs}"
 
       let nonDetermGivs = removeDeeply givs determ
-      let theOrder = searchOrder (concatMap determinableArgs nonDetermGivs) nonDetermGivs
+      let theOrder = searchOrder (concatMap argsDependsOn nonDetermGivs) nonDetermGivs
 
       logPoint {level=10} "least-effort" [sig, con] "- used final order: \{theOrder}"
 
@@ -234,8 +226,8 @@ namespace NonObligatoryExts
         Foldable f => Interpolation (f $ Fin con.args.length) where
           interpolate = ("[" ++) . (++ "]") . joinBy ", " . map interpolate . toList
 
-        Interpolation (Determination con) where
-          interpolate $ MkDetermination sda da = "<=\{sda} ->\{da}"
+        Interpolation (TypeApp con) where
+          interpolate ta = "<=\{ta.stronglyDeterminingArgs} ->\{ta.argsDependsOn}"
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.
