@@ -5,6 +5,7 @@ import Data.Fuel
 import Data.SnocList
 import public Data.So
 import Data.Vect
+import Data.List
 
 import public Language.PilFun
 import public Language.PilFun.Pretty
@@ -39,74 +40,35 @@ NamesRestrictions where
     , "then",      "true",      "until",     "while"
     ]
 
--- printFunCall p n args = do
---   let fn = funName {vars} n
---   let f = line fn
---   let args = toList $ getExprs args
---   let tupledArgs = \as => map tuple $ for as $ \(Evidence _ e) => printExpr Open e
---   case (isFunInfix @{names} n, args, !(chooseAnyOf Bool)) of
---     -- Call for bitwise infix extension method
---     (True, [Evidence _ l, Evidence _ r], True) => pure $ parenthesise (p >= App) $ !(printExpr App l) <++> f <++> !(printExpr App r)
---     -- Call for appropriate extension method with 0, 2 or more arguments
---     (True, Evidence _ head :: args, _) => pure $ parenthesise (p >= App) $ !(printExpr App head) <+> "." <+> f <+> !(tupledArgs args)
---     -- Call for normal function
---     _ => pure $ parenthesise (p >= App && isUnaryOp fn args) $ hang' 2 f !(tupledArgs args)
+Priority : Type
+Priority = Fin 12
 
--- printExpr p $ C $ I k     = pure $ line $ show k
--- printExpr p $ C $ B False = pure $ "false"
--- printExpr p $ C $ B True  = pure $ "true"
--- printExpr p $ V n         = pure $ line $ varName {funs} n
--- printExpr p $ F n args    = assert_total printFunCall p n args
+priorities : List (String, Priority)
+priorities = [ ("or", 11)
+             , ("and", 10)
+             , ("<", 9), (">", 9), ("<=", 9), (">=", 9), ("~=", 9), ("==", 9)
+             , ("|", 8)
+             , ("~", 7)
+             , ("&", 6)
+             , ("<<", 5), (">>", 5)
+             , ("..", 4)
+             , ("+", 3), ("-", 3)
+             , ("*", 2), ("/", 2), ("//", 2), ("%", 2)
+             , ("not", 1), ("#", 1), ("-", 1), ("~", 1)
+             , ("^", 0)
+             ]
 
-
--- printSubStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
---                 (names : UniqNames funs vars) =>
---                 (newNames : Gen0 String) =>
---                 Fuel ->
---                 (noEmpty : Bool) ->
---                 Stmts funs vars retTy -> Gen0 $ Doc opts
--- printSubStmts _  True Nop = pure "{}"
--- printSubStmts fl _    ss  = printStmts fl False ss
-
--- printStmts fl tl $ NewF sig body cont = do
---   (nm ** _) <- genNewName fl _ _ names
---   isInfix <- chooseAny
---   let (isInfix ** infixCond) : (b ** So (not b || sig.From.length >= 1)) = case decSo _ of
---                                                                              Yes condMet => (isInfix ** condMet)
---                                                                              No _        => (False ** Oh)
---   rest <- printStmts @{NewFun {isInfix} {infixCond} nm} fl tl cont
---   (namesInside, funArgs) <- newVars fl _ names
---   brBody <- chooseAny
---   funBody <- if brBody
---                then printStmts @{namesInside} fl False body
---                else printSubStmts @{namesInside} fl True body
---   flip vappend rest <$> do
---     showResTy <- chooseAnyOf Bool
---     tryLam <- chooseAnyOf Bool
---     let funArgs = reverse (toList funArgs) <&> \(n, ty) => line n <+> ":" <++> printTy ty
---     let defTail : List (Doc opts) -> Doc opts
---         defTail funArgs = "def" <++> line nm <+> tuple funArgs <+> (if showResTy then ":" <++> printMaybeTy sig.To else empty) <++> "="
---     let lamTail : List (Doc opts) -> Doc opts
---         lamTail funArgs = "val" <++> line nm <++> "=" <++> tuple funArgs <++> "=>"
---     let (extPref, funSig) = case (isInfix, funArgs) of
---                    (True, head::funArgs) => (Just $ "extension" <++> parens head, defTail funArgs)
---                    _                     => (Nothing, if tryLam then lamTail funArgs else defTail funArgs)
---     let br = brBody || tryLam && showResTy && not (isRet body)
---     let endingTypeAsc = tryLam && showResTy
---     let funBody' = parenthesise (endingTypeAsc && not br) funBody
---     let mainDef = wrapBrIf br funSig funBody' <+?+> when endingTypeAsc (":" <++> printMaybeTy sig.To)
---     pure $ case extPref of
---       Nothing      => mainDef
---       Just extPref => hangSep' 2 extPref mainDef
-
--- printStmts fl tl $ Call n args cont = wrapMain fl tl (Just cont) $ printFunCall Open n args
+priority : String -> Maybe Priority
+priority func = lookup func priorities
 
 printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
             (names : UniqNames funs vars) =>
             Expr funs vars ty -> Gen0 $ Doc opts
 printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
                (names : UniqNames funs vars) =>
-               IndexIn funs -> ExprsSnocList funs vars argTys -> Gen0 $ Doc opts
+               (lastPriority : Maybe Priority) ->
+               IndexIn funs -> ExprsSnocList funs vars argTys ->
+               Gen0 $ Doc opts
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
              (names : UniqNames funs vars) =>
              (newNames : Gen0 String) =>
@@ -117,9 +79,14 @@ printExpr (C $ I x) = pure $ line $ show x
 printExpr (C $ B True) = pure $ line "true"
 printExpr (C $ B False) = pure $ line "false"
 printExpr (V n) = pure $ line $ varName {funs} n
-printExpr (F n x) = printFunCall n x
+printExpr (F n x) = printFunCall Nothing n x
 
-printFunCall _ _ = pure $ line "<call>"
+addCommas : {opts : _} -> List (Doc opts) -> List (Doc opts)
+addCommas [] = []
+addCommas [x] = [x]
+addCommas (x::xs) = (x <+> comma) :: addCommas xs
+
+printFunCall _ _ _ = pure $ line "<call>"
 
 newVarLhv : {opts : _} -> (name : String) -> (mut : Mut) -> Gen0 $ Doc opts
 newVarLhv name mut = do
@@ -128,15 +95,9 @@ newVarLhv name mut = do
                   Immutable => space <+> angles (line "const")
   pure $ line "local" <++> line name <+> attr
 
-
 withCont : {opts : _} -> (cont : Doc opts) -> (stmt : Doc opts) -> Gen0 (Doc opts)
 withCont cont stmt =
   pure $ stmt `vappend` cont
-
-addCommas : {opts : _} -> List (Doc opts) -> List (Doc opts)
-addCommas [] = []
-addCommas [x] = [x]
-addCommas (x::xs) = (x <+> comma) :: addCommas xs
 
 printStmts fuel (NewV ty mut initial cont) = do
   (name ** _) <- genNewName fuel _ _ names
@@ -157,8 +118,8 @@ printStmts fuel (NewF sig body cont) = do
                           , line ")"
                           ]
   let fnHeader = ifMultiline fnHeaderShort fnHeaderLong
-  cont' <- printStmts fuel cont
   fnBody <- printStmts @{localNames} fuel body
+  cont' <- printStmts fuel cont
   withCont cont' $ vsep [ fnHeader
                         , indent' 2 fnBody
                         , line "end"
@@ -187,7 +148,7 @@ printStmts fuel (If cond th el cont) = do
     ]
 
 printStmts fuel (Call n x cont) = do
-  call <- printFunCall n x
+  call <- printFunCall Nothing n x
   withCont !(printStmts fuel cont) call
 
 printStmts fuel (Ret res) =
