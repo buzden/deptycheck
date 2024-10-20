@@ -165,8 +165,8 @@ deriveFusion l = do
   let False = any isNothing typeArgs
     | True => Nothing
 
-  let uniqueNames = buildOrdering $ toList $ map snd l -- names from target type constructor
-  let uniqueArgs = nub $ (sortBy (comparing (\x => findIndex ((==) $ fst x) uniqueNames))) $ join $ catMaybes $ toList typeArgs -- arg types from type signature
+  let uniqueNames = buildOrdering $ toList $ map snd l -- names from target type constructor and arg types from type signature
+  let uniqueArgs = nub $ (sortBy (comparing (\x => findIndex ((==) $ fst x) uniqueNames))) $ join $ catMaybes $ toList typeArgs
 
   let True = length uniqueArgs == length uniqueNames  -- same parameter name could not be associated with different types
     | False => Nothing
@@ -231,13 +231,15 @@ deriveFusion l = do
                         clauses =
                           [ genRMkDPair (bindVar fusedVarName) uniqueNames
                           .= iCase {
-                              sc = var splitName .$ (var $ UN $ Basic fusedVarName),
-                              ty = implicitTrue,
-                              clauses =
-                                [ (splitRhsDef (map bindVar typeVarNames))
-                                .= var `{pure}
-                                .$ foldConstructor (var originalConsName) (map var uniqueNames ++ map (var . UN . Basic) typeVarNames)
-                                ]
+                            sc = var splitName .$ (var $ UN $ Basic fusedVarName),
+                            ty = implicitTrue,
+                            clauses = [
+                              (splitRhsDef (map bindVar typeVarNames))
+                              .= var `{pure}
+                              .$ foldConstructor
+                                (var originalConsName)
+                                (map var uniqueNames ++ map (var . UN . Basic) typeVarNames)
+                            ]
                             }
                           ]
                         }
@@ -301,6 +303,17 @@ runFusionList : Vect (2 + n) (Name, List Name) -> Elab (Maybe FusionDecl)
 runFusionList l = do
   l' <- for l $ \(n, args) => (, args) <$> getInfo' n
   pure $ deriveFusion l'
+
+
+public export
+createGenSignature : Name -> Elab (Maybe GenSignature)
+createGenSignature fusionName = do
+  ti <- getInfo' fusionName
+  let args = allFins ti.args.length
+  let Yes _ = areAllTyArgsNamed ti
+    | No _ => pure Nothing
+  let signature = MkGenSignature ti $ fromList args
+  pure $ Just signature
 
 
 public export

@@ -17,7 +17,7 @@ import public Deriving.DepTyCheck.Util.Reflection
 
 public export
 record GenSignature where
-  constructor MkGenSignature -- to use for genXY (later because you don't have TypeInfo before declare)
+  constructor MkGenSignature
   targetType : TypeInfo
   {auto 0 targetTypeCorrect : AllTyArgsNamed targetType}
   givenParams : SortedSet $ Fin targetType.args.length
