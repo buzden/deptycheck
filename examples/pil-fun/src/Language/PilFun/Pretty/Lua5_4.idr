@@ -96,7 +96,9 @@ printFunCall fuel lastPrior fun args = do
   case (isFunInfix @{names} fun, args) of
        (True, [<lhv, rhv]) => do
          let thisPrior = priority name
-         let addParens = thisPrior >= lastPrior
+         let addParens = !(chooseAnyOf Bool) || case lastPrior of
+                              Nothing => False
+                              _ => thisPrior >= lastPrior
          lhv' <- assert_total printExpr fuel thisPrior lhv
          rhv' <- assert_total printExpr fuel thisPrior rhv
          pure $ parenthesise addParens $ hangSep 2 (lhv' <++> line name) rhv'
