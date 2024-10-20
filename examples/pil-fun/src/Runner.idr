@@ -133,13 +133,15 @@ scala3StdFuns = do
 lua5_4StdFuns : NamedCtxt
 lua5_4StdFuns = do
   AddFun True  "+"  $ [< Int', Int'] ==> Just Int'
+  AddFun True  "*"  $ [< Int', Int'] ==> Just Int'
+  AddFun True  "~"  $ [< Int'] ==> Just Int'
   AddFun True  "<"  $ [< Int', Int'] ==> Just Bool'
-  AddFun True  "<=" $ [< Int', Int'] ==> Just Bool'
   AddFun True  "==" $ [< Int', Int'] ==> Just Bool'
   AddFun True  "and" $ [< Bool', Bool'] ==> Just Bool'
   AddFun True  "or" $ [< Bool', Bool'] ==> Just Bool'
   AddFun False "not"  $ [< Bool'] ==> Just Bool'
   AddFun False "print" $ [< Int'] ==> Nothing
+  AddFun True  "boolAndInt"  $ [< Bool', Int'] ==> Nothing
   Enough
 
 supportedLanguages : SortedMap String (NamedCtxt, PP)
