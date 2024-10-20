@@ -1,0 +1,13 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+[ IData
+    emptyFC
+    (specified Export)
+    Nothing
+    (MkData
+       emptyFC
+       "XY"
+       (Just
+          (MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat") .-> type))
+       []
+       [])
+]

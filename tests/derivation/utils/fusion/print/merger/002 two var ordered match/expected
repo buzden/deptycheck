@@ -1,0 +1,15 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+[ IData
+    emptyFC
+    (specified Export)
+    Nothing
+    (MkData
+       emptyFC
+       "XY"
+       (Just
+          (    MkArg MW ExplicitArg (Just "m") type
+           .-> MkArg MW ExplicitArg (Just "n") type
+           .-> type))
+       []
+       [mkTy {name = "MkX_MkY", type = var "XY" .$ bindVar "m" .$ bindVar "n"}])
+]
