@@ -101,13 +101,6 @@ NamesRestrictions where
 
 -- printStmts fl tl $ Call n args cont = wrapMain fl tl (Just cont) $ printFunCall Open n args
 
-withCont : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-           (names : UniqNames funs vars) =>
-           (newNames : Gen0 String) =>
-           (0 _ : IfUnsolved retTy Nothing) =>
-           Fuel ->
-           (cont : Stmts funs vars retTy) ->
-           Doc opts -> Gen0 (Doc opts)
 printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
             (names : UniqNames funs vars) =>
             Expr funs vars ty -> Gen0 $ Doc opts
@@ -115,18 +108,11 @@ printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
                (names : UniqNames funs vars) =>
                IndexIn funs -> ExprsSnocList funs vars argTys -> Gen0 $ Doc opts
 
-newVarLhv : {opts : _} -> (name : String) -> (mut : Mut) -> Gen0 $ Doc opts
-
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
              (names : UniqNames funs vars) =>
              (newNames : Gen0 String) =>
              Fuel ->
-             -- (toplevel : Bool) ->
              Stmts funs vars retTy -> Gen0 $ Doc opts
-
-withCont Dry _ _ = pure $ line "-- out of fuel --"
-withCont (More fuel) next doc =
-  pure $ doc `vappend` !(printStmts @{names} @{newNames} fuel next)
 
 printExpr (C $ I x) = pure $ line $ show x
 printExpr (C $ B True) = pure $ line "true"
@@ -136,6 +122,7 @@ printExpr (F n x) = printFunCall n x
 
 printFunCall _ _ = pure $ line "<call>"
 
+newVarLhv : {opts : _} -> (name : String) -> (mut : Mut) -> Gen0 $ Doc opts
 newVarLhv name mut = do
   let attr = case mut of
                   Mutable => empty
@@ -147,20 +134,26 @@ newVarLhv name mut = do
   pure $ local <+> line name <+> attr
 
 
+withCont : {opts : _} -> (cont : Doc opts) -> (stmt : Doc opts) -> Gen0 (Doc opts)
+withCont cont stmt =
+  pure $ stmt `vappend` cont
+
 printStmts fuel (NewV ty mut initial cont) = do
   (name ** _) <- genNewName fuel _ _ names
   lhv <- newVarLhv name mut
   rhv <- printExpr initial
-  withCont fuel cont $ hangSep' 2 (lhv <++> line "=") rhv
+  withCont !(printStmts fuel cont) $ hangSep' 2 (lhv <++> line "=") rhv
 
 printStmts fuel (NewF sig body cont) = do
+  (name ** _) <- genNewName fuel _ _ names
+  cont' <- printStmts fuel cont
   isLambda <- chooseAnyOf Bool
-  pure $ line "new func"
+  withCont cont' $ line "new func" <++> line name
 
 printStmts fuel ((#=) lhv rhv cont) = do
   let lhv' = line (varName {funs} lhv) <++> "="
   rhv' <- printExpr rhv
-  withCont fuel cont $ hangSep' 2 lhv' rhv'
+  withCont !(printStmts fuel cont) $ hangSep' 2 lhv' rhv'
 
 printStmts fuel (If cond th el cont) = do
   cond' <- printExpr cond
@@ -172,15 +165,16 @@ printStmts fuel (If cond th el cont) = do
               body <- printStmts @{names} @{newNames} fuel el
               pure $ line "else" `vappend` indent' 2 body
   let top = hangSep 0 (line "if" <++> cond') (line "then")
-  withCont fuel cont $ vsep
+  withCont !(printStmts fuel cont) $ vsep
     [ top
     , indent' 2 th'
     , el'
     , line "end"
     ]
 
-printStmts fuel (Call n x cont) =
-  pure $ line "call"
+printStmts fuel (Call n x cont) = do
+  call <- printFunCall n x
+  withCont !(printStmts fuel cont) call
 
 printStmts fuel (Ret res) =
   pure $ line "return" <++> !(printExpr res)
