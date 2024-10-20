@@ -66,12 +66,12 @@ priority func = lookup func priorities
 printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
             (names : UniqNames funs vars) =>
             Fuel ->
-            -- (lastPriority : Maybe Priority) ->
+            (lastPriority : Maybe Priority) ->
             Expr funs vars ty -> Gen0 $ Doc opts
 printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
                (names : UniqNames funs vars) =>
                Fuel ->
-               -- (lastPriority : Maybe Priority) ->
+               (lastPriority : Maybe Priority) ->
                IndexIn funs -> ExprsSnocList funs vars argTys ->
                Gen0 $ Doc opts
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
@@ -80,28 +80,28 @@ printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
              Fuel ->
              Stmts funs vars retTy -> Gen0 $ Doc opts
 
-printExpr fuel (C $ I x) = pure $ line $ show x
-printExpr fuel (C $ B True) = pure $ line "true"
-printExpr fuel (C $ B False) = pure $ line "false"
-printExpr fuel (V n) = pure $ line $ varName {funs} n
-printExpr fuel (F n x) = printFunCall fuel n x
+printExpr fuel _ (C $ I x) = pure $ line $ show x
+printExpr fuel _ (C $ B True) = pure $ line "true"
+printExpr fuel _ (C $ B False) = pure $ line "false"
+printExpr fuel _ (V n) = pure $ line $ varName {funs} n
+printExpr fuel lastPrior (F n x) = printFunCall fuel lastPrior n x
 
 addCommas : {opts : _} -> List (Doc opts) -> List (Doc opts)
 addCommas [] = []
 addCommas [x] = [x]
 addCommas (x::xs) = (x <+> comma) :: addCommas xs
 
-printFunCall fuel fun args = do
+printFunCall fuel lastPrior fun args = do
   let name = funName {vars} fun
   case (isFunInfix @{names} fun, args) of
        (True, [<lhv, rhv]) => do
          let thisPrior = priority name
-         -- let addParens = thisPrior < lastPrior
-         lhv' <- assert_total printExpr fuel {- thisPrior -} lhv
-         rhv' <- assert_total printExpr fuel {- thisPrior -} rhv
-         pure $ parenthesise {- addParens -} True $ hangSep 2 (lhv' <++> line name) rhv'
+         let addParens = thisPrior >= lastPrior
+         lhv' <- assert_total printExpr fuel thisPrior lhv
+         rhv' <- assert_total printExpr fuel thisPrior rhv
+         pure $ parenthesise addParens $ hangSep 2 (lhv' <++> line name) rhv'
        _ => (do
-            args' <- for (toList $ getExprs args) (\(Evidence _ e) => assert_total printExpr fuel {- Nothing -} e)
+            args' <- for (toList $ getExprs args) (\(Evidence _ e) => assert_total printExpr fuel Nothing e)
             let argsWithCommas = sep' $ addCommas args'
             let addParens = not (isUnaryOp name args) || !(chooseAnyOf Bool)
             let name' = if name == "not" then line name <+> space
@@ -130,7 +130,7 @@ printStmts Dry _ = pure $ line "-- out of fuel"
 printStmts fuel (NewV ty mut initial cont) = do
   (name ** _) <- genNewName fuel _ _ names
   lhv <- newVarLhv name mut
-  rhv <- printExpr fuel {- Nothing -} initial
+  rhv <- printExpr fuel Nothing initial
   withCont !(printStmts fuel cont) $ hangSep' 2 (lhv <++> line "=") rhv
 
 printStmts fuel (NewF sig body cont) = do
@@ -155,11 +155,11 @@ printStmts fuel (NewF sig body cont) = do
 
 printStmts fuel ((#=) lhv rhv cont) = do
   let lhv' = line (varName {funs} lhv) <++> "="
-  rhv' <- printExpr fuel {- Nothing -} rhv
+  rhv' <- printExpr fuel Nothing rhv
   withCont !(printStmts fuel cont) $ hangSep' 2 lhv' rhv'
 
 printStmts fuel (If cond th el cont) = do
-  cond' <- printExpr fuel {- Nothing -} cond
+  cond' <- printExpr fuel Nothing cond
   th' <- printStmts fuel th
   let skipElse = isNop el && !(chooseAnyOf Bool)
   el' <- if skipElse
@@ -176,11 +176,11 @@ printStmts fuel (If cond th el cont) = do
     ]
 
 printStmts fuel (Call n x cont) = do
-  call <- printFunCall fuel {- Nothing -} n x
+  call <- printFunCall fuel Nothing n x
   withCont !(printStmts fuel cont) call
 
 printStmts fuel (Ret res) =
-  pure $ line "return" <++> !(printExpr fuel {- Nothing -} res)
+  pure $ line "return" <++> !(printExpr fuel Nothing res)
 
 printStmts fuel Nop = do
   useSemicolon <- chooseAnyOf Bool

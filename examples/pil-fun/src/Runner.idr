@@ -141,7 +141,6 @@ lua5_4StdFuns = do
   AddFun True  "or" $ [< Bool', Bool'] ==> Just Bool'
   AddFun False "not"  $ [< Bool'] ==> Just Bool'
   AddFun False "print" $ [< Int'] ==> Nothing
-  AddFun True  "boolAndInt"  $ [< Bool', Int'] ==> Nothing
   Enough
 
 supportedLanguages : SortedMap String (NamedCtxt, PP)
