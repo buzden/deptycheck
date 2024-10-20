@@ -107,7 +107,6 @@ printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
 printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
                (names : UniqNames funs vars) =>
                IndexIn funs -> ExprsSnocList funs vars argTys -> Gen0 $ Doc opts
-
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
              (names : UniqNames funs vars) =>
              (newNames : Gen0 String) =>
@@ -127,16 +126,17 @@ newVarLhv name mut = do
   let attr = case mut of
                   Mutable => empty
                   Immutable => space <+> angles (line "const")
-  addLocal <- case mut of
-                   Mutable => chooseAnyOf Bool
-                   Immutable => pure $ True
-  let local = if addLocal then line "local" <+> space else empty
-  pure $ local <+> line name <+> attr
+  pure $ line "local" <++> line name <+> attr
 
 
 withCont : {opts : _} -> (cont : Doc opts) -> (stmt : Doc opts) -> Gen0 (Doc opts)
 withCont cont stmt =
   pure $ stmt `vappend` cont
+
+addCommas : {opts : _} -> List (Doc opts) -> List (Doc opts)
+addCommas [] = []
+addCommas [x] = [x]
+addCommas (x::xs) = (x <+> comma) :: addCommas xs
 
 printStmts fuel (NewV ty mut initial cont) = do
   (name ** _) <- genNewName fuel _ _ names
@@ -146,9 +146,23 @@ printStmts fuel (NewV ty mut initial cont) = do
 
 printStmts fuel (NewF sig body cont) = do
   (name ** _) <- genNewName fuel _ _ names
+  (localNames, funArgs) <- newVars fuel _ names
+  let argNames = reverse (toList funArgs) <&>
+                 \(name, _) => the (Doc opts) (line name)
+  let argList = sep' $ addCommas argNames
+  let fnHeaderShort = line "function" <++> (line name) <+>
+                      line "(" <+> argList <+> line ")"
+  let fnHeaderLong = vsep [ line "function" <++> (line name) <+> line "("
+                          , indent 2 argList
+                          , line ")"
+                          ]
+  let fnHeader = ifMultiline fnHeaderShort fnHeaderLong
   cont' <- printStmts fuel cont
-  isLambda <- chooseAnyOf Bool
-  withCont cont' $ line "new func" <++> line name
+  fnBody <- printStmts @{localNames} fuel body
+  withCont cont' $ vsep [ fnHeader
+                        , indent' 2 fnBody
+                        , line "end"
+                        ]
 
 printStmts fuel ((#=) lhv rhv cont) = do
   let lhv' = line (varName {funs} lhv) <++> "="
