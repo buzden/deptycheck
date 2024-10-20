@@ -10,6 +10,7 @@ import Language.PilFun.Derived
 import Language.PilFun.Pretty.Derived
 import Language.PilFun.Pretty.DSL
 import Language.PilFun.Pretty.Scala3
+import Language.PilFun.Pretty.Lua5_4
 
 import Test.DepTyCheck.Gen
 
@@ -129,9 +130,22 @@ scala3StdFuns = do
   AddFun False "Console.println" $ [< Int'] ==> Nothing
   Enough
 
+lua5_4StdFuns : NamedCtxt
+lua5_4StdFuns = do
+  AddFun True  "+"  $ [< Int', Int'] ==> Just Int'
+  AddFun True  "<"  $ [< Int', Int'] ==> Just Bool'
+  AddFun True  "<=" $ [< Int', Int'] ==> Just Bool'
+  AddFun True  "==" $ [< Int', Int'] ==> Just Bool'
+  AddFun True  "and" $ [< Bool', Bool'] ==> Just Bool'
+  AddFun True  "or" $ [< Bool', Bool'] ==> Just Bool'
+  AddFun False "not"  $ [< Bool'] ==> Just Bool'
+  AddFun False "print" $ [< Int'] ==> Nothing
+  Enough
+
 supportedLanguages : SortedMap String (NamedCtxt, PP)
 supportedLanguages = fromList
   [ ("scala3", scala3StdFuns, printScala3)
+  , ("lua5.4", lua5_4StdFuns, printLua5_4)
   ]
 
 ---------------
