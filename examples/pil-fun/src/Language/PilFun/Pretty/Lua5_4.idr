@@ -115,9 +115,7 @@ printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
                (names : UniqNames funs vars) =>
                IndexIn funs -> ExprsSnocList funs vars argTys -> Gen0 $ Doc opts
 
-newVarLhv : {opts : _} ->
-            (name : String) -> (mut : Mut) ->
-            (initial : Doc opts) -> Gen0 $ Doc opts
+newVarLhv : {opts : _} -> (name : String) -> (mut : Mut) -> Gen0 $ Doc opts
 
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
              (names : UniqNames funs vars) =>
@@ -138,7 +136,7 @@ printExpr (F n x) = printFunCall n x
 
 printFunCall _ _ = pure $ line "<call>"
 
-newVarLhv name mut initial = do
+newVarLhv name mut = do
   let attr = case mut of
                   Mutable => empty
                   Immutable => space <+> angles (line "const")
@@ -150,25 +148,19 @@ newVarLhv name mut initial = do
 
 
 printStmts fuel (NewV ty mut initial cont) = do
-  let attr = case mut of
-                  Mutable => empty
-                  Immutable => space <+> angles (line "const")
-  addLocal <- case mut of
-                   Mutable => chooseAnyOf Bool
-                   Immutable => pure $ True
-  let local = if addLocal then line "local" <+> space else empty
   (name ** _) <- genNewName fuel _ _ names
-  let lhv = local <+> line name <+> attr <++> "="
+  lhv <- newVarLhv name mut
   rhv <- printExpr initial
-  withCont fuel cont $ hangSep' 2 lhv rhv
+  withCont fuel cont $ hangSep' 2 (lhv <++> line "=") rhv
 
 printStmts fuel (NewF sig body cont) = do
   isLambda <- chooseAnyOf Bool
   pure $ line "new func"
 
-printStmts fuel ((#=) lhv rhv cont) =
-  withCont fuel cont $
-    line (varName {funs} lhv) <++> "=" <++> !(printExpr rhv)
+printStmts fuel ((#=) lhv rhv cont) = do
+  let lhv' = line (varName {funs} lhv) <++> "="
+  rhv' <- printExpr rhv
+  withCont fuel cont $ hangSep' 2 lhv' rhv'
 
 printStmts fuel (If cond th el cont) = do
   cond' <- printExpr cond
