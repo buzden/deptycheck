@@ -102,19 +102,18 @@ printFunCall fuel lastPrior fun args = do
          lhv' <- assert_total printExpr fuel thisPrior lhv
          rhv' <- assert_total printExpr fuel thisPrior rhv
          pure $ parenthesise addParens $ hangSep 2 (lhv' <++> line name) rhv'
-       _ => (do
-            args' <- for (toList $ getExprs args) (\(Evidence _ e) => assert_total printExpr fuel Nothing e)
-            let argsWithCommas = sep' $ addCommas args'
-            let addParens = not (isUnaryOp name args) || !(chooseAnyOf Bool)
-            let name' = if name == "not" then line name <+> space
-                                         else line name
-            let applyShort = name' <+> parenthesise addParens argsWithCommas
-            let applyLong = vsep [ name' <+> when addParens (line "(")
-                             , indent 2 argsWithCommas
-                             , when addParens (line ")")
-                             ]
-            pure $ ifMultiline applyShort applyLong
-            )
+       _ => do
+         args' <- for (toList $ getExprs args) (\(Evidence _ e) => assert_total printExpr fuel Nothing e)
+         let argsWithCommas = sep' $ addCommas args'
+         let addParens = not (isUnaryOp name args) || !(chooseAnyOf Bool)
+         let name' = if name == "not" then line name <+> space
+                                      else line name
+         let applyShort = name' <+> parenthesise addParens argsWithCommas
+         let applyLong = vsep [ name' <+> when addParens (line "(")
+                          , indent 2 argsWithCommas
+                          , when addParens (line ")")
+                          ]
+         pure $ ifMultiline applyShort applyLong
 
 newVarLhv : {opts : _} -> (name : String) -> (mut : Mut) -> Gen0 $ Doc opts
 newVarLhv name mut = do
