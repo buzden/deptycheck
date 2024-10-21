@@ -1,11 +1,10 @@
 module Language.PilFun.Pretty.Lua5_4
 
-import Data.Alternative
 import Data.Fuel
-import Data.SnocList
-import public Data.So
-import Data.Vect
 import Data.List
+import Data.Maybe
+import Data.SnocList
+import Data.Vect
 
 import public Language.PilFun
 import public Language.PilFun.Pretty
@@ -13,8 +12,6 @@ import public Language.PilFun.Pretty
 import Test.DepTyCheck.Gen
 
 import public Text.PrettyPrint.Bernardy
-
-import System.Random.Pure.StdGen
 
 %default total
 
@@ -31,8 +28,8 @@ unaryOps = ["-", "#", "~", "not"]
 
 isUnaryOp : String -> ExprsSnocList funs vars argTys -> Bool
 isUnaryOp str args = case getExprs args of
-                          [< _ ] => elem str unaryOps
-                          _ => False
+                       [< _ ] => elem str unaryOps
+                       _ => False
 
 NamesRestrictions where
   reservedKeywords = fromList
@@ -96,9 +93,7 @@ printFunCall fuel lastPrior fun args = do
   case (isFunInfix @{names} fun, args) of
        (True, [<lhv, rhv]) => do
          let thisPrior = priority name
-         let addParens = !(chooseAnyOf Bool) || case lastPrior of
-                              Nothing => False
-                              _ => thisPrior >= lastPrior
+         let addParens = !(chooseAnyOf Bool) || isJust lastPrior && thisPrior >= lastPrior
          lhv' <- assert_total printExpr fuel thisPrior lhv
          rhv' <- assert_total printExpr fuel thisPrior rhv
          pure $ parenthesise addParens $ hangSep 2 (lhv' <++> line name) rhv'
@@ -106,27 +101,26 @@ printFunCall fuel lastPrior fun args = do
          args' <- for (toList $ getExprs args) (\(Evidence _ e) => assert_total printExpr fuel Nothing e)
          let argsWithCommas = sep' $ addCommas args'
          let addParens = not (isUnaryOp name args) || !(chooseAnyOf Bool)
-         let name' = if name == "not" then line name <+> space
-                                      else line name
+         let name' = if name == "not"
+                       then line name <+> space
+                       else line name
          let applyShort = name' <+> parenthesise addParens argsWithCommas
          let applyLong = vsep [ name' <+> when addParens (line "(")
-                          , indent 2 argsWithCommas
-                          , when addParens (line ")")
-                          ]
+                              , indent 2 argsWithCommas
+                              , when addParens (line ")")
+                              ]
          pure $ ifMultiline applyShort applyLong
 
 newVarLhv : {opts : _} -> (name : String) -> (mut : Mut) -> Gen0 $ Doc opts
 newVarLhv name mut = do
   let attr = case mut of
-                  Mutable => empty
-                  Immutable => space <+> angles (line "const")
+               Mutable => empty
+               Immutable => space <+> angles (line "const")
   pure $ line "local" <++> line name <+> attr
 
 withCont : {opts : _} -> (cont : Doc opts) -> (stmt : Doc opts) -> Gen0 (Doc opts)
 withCont cont stmt =
   pure $ stmt `vappend` cont
-
-printStmts Dry _ = pure $ line "-- out of fuel"
 
 printStmts fuel (NewV ty mut initial cont) = do
   (name ** _) <- genNewName fuel _ _ names
@@ -164,10 +158,10 @@ printStmts fuel (If cond th el cont) = do
   th' <- printStmts fuel th
   let skipElse = isNop el && !(chooseAnyOf Bool)
   el' <- if skipElse
-            then pure empty
-            else do
-              body <- printStmts @{names} @{newNames} fuel el
-              pure $ line "else" `vappend` indent' 2 body
+           then pure empty
+           else do
+             body <- printStmts @{names} @{newNames} fuel el
+             pure $ line "else" `vappend` indent' 2 body
   let top = hangSep 0 (line "if" <++> cond') (line "then")
   withCont !(printStmts fuel cont) $ vsep
     [ top
@@ -185,8 +179,9 @@ printStmts fuel (Ret res) =
 
 printStmts fuel Nop = do
   useSemicolon <- chooseAnyOf Bool
-  if useSemicolon then pure $ line ";"
-                  else pure empty
+  if useSemicolon
+    then pure $ line ";"
+    else pure empty
 
 export
 printLua5_4 : PP
