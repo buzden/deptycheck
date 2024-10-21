@@ -121,6 +121,8 @@ run conf ctxt pp = do
 scala3StdFuns : NamedCtxt
 scala3StdFuns = do
   AddFun True  "+"  $ [< Int', Int'] ==> Just Int'
+  AddFun True  "*"  $ [< Int', Int'] ==> Just Int'
+  AddFun False "-"  $ [< Int'] ==> Just Int'
   AddFun True  "<"  $ [< Int', Int'] ==> Just Bool'
   AddFun True  "<=" $ [< Int', Int'] ==> Just Bool'
   AddFun True  "==" $ [< Int', Int'] ==> Just Bool'
@@ -134,11 +136,12 @@ lua5_4StdFuns : NamedCtxt
 lua5_4StdFuns = do
   AddFun True  "+"  $ [< Int', Int'] ==> Just Int'
   AddFun True  "*"  $ [< Int', Int'] ==> Just Int'
-  AddFun True  "~"  $ [< Int'] ==> Just Int'
+  AddFun False "-"  $ [< Int'] ==> Just Int'
   AddFun True  "<"  $ [< Int', Int'] ==> Just Bool'
+  AddFun True  "<=" $ [< Int', Int'] ==> Just Bool'
   AddFun True  "==" $ [< Int', Int'] ==> Just Bool'
-  AddFun True  "and" $ [< Bool', Bool'] ==> Just Bool'
   AddFun True  "or" $ [< Bool', Bool'] ==> Just Bool'
+  AddFun True  "and" $ [< Bool', Bool'] ==> Just Bool'
   AddFun False "not"  $ [< Bool'] ==> Just Bool'
   AddFun False "print" $ [< Int'] ==> Nothing
   Enough
