@@ -19,10 +19,6 @@ printTy : Ty -> Doc opts
 printTy Int'  = "number"
 printTy Bool' = "boolean"
 
-printMaybeTy : MaybeTy -> Doc opts
-printMaybeTy Nothing   = "nil"
-printMaybeTy $ Just ty = printTy ty
-
 unaryOps : List String
 unaryOps = ["-", "#", "~", "not"]
 
@@ -78,8 +74,8 @@ printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
              Stmts funs vars retTy -> Gen0 $ Doc opts
 
 printExpr fuel _ (C $ I x) = pure $ line $ show x
-printExpr fuel _ (C $ B True) = pure $ line "true"
-printExpr fuel _ (C $ B False) = pure $ line "false"
+printExpr fuel _ (C $ B True) = pure "true"
+printExpr fuel _ (C $ B False) = pure "false"
 printExpr fuel _ (V n) = pure $ line $ varName {funs} n
 printExpr fuel lastPrior (F n x) = printFunCall fuel lastPrior n x
 
@@ -105,9 +101,9 @@ printFunCall fuel lastPrior fun args = do
                        then line name <+> space
                        else line name
          let applyShort = name' <+> parenthesise addParens argsWithCommas
-         let applyLong = vsep [ name' <+> when addParens (line "(")
+         let applyLong = vsep [ name' <+> when addParens "("
                               , indent 2 argsWithCommas
-                              , when addParens (line ")")
+                              , when addParens ")"
                               ]
          pure $ ifMultiline applyShort applyLong
 
@@ -115,8 +111,8 @@ newVarLhv : {opts : _} -> (name : String) -> (mut : Mut) -> Gen0 $ Doc opts
 newVarLhv name mut = do
   let attr = case mut of
                Mutable => empty
-               Immutable => space <+> angles (line "const")
-  pure $ line "local" <++> line name <+> attr
+               Immutable => space <+> angles "const"
+  pure $ "local" <++> line name <+> attr
 
 withCont : {opts : _} -> (cont : Doc opts) -> (stmt : Doc opts) -> Gen0 (Doc opts)
 withCont cont stmt =
@@ -126,26 +122,32 @@ printStmts fuel (NewV ty mut initial cont) = do
   (name ** _) <- genNewName fuel _ _ names
   lhv <- newVarLhv name mut
   rhv <- printExpr fuel Nothing initial
-  withCont !(printStmts fuel cont) $ hangSep' 2 (lhv <++> line "=") rhv
+  withCont !(printStmts fuel cont) $ hangSep' 2 (lhv <++> "=") rhv
 
 printStmts fuel (NewF sig body cont) = do
   (name ** _) <- genNewName fuel _ _ names
   (localNames, funArgs) <- newVars fuel _ names
-  let argNames = reverse (toList funArgs) <&>
-                 \(name, _) => the (Doc opts) (line name)
+  let funArgs' = reverse (toList funArgs)
+  let argHints = funArgs' <&> \(name, ty) =>
+                 the (Doc opts) "---@param" <++> line name <++> printTy ty
+  let hints = vsep $ case sig.To of
+                Just retTy => argHints ++ ["---@return" <++> printTy retTy]
+                Nothing => argHints
+  let argNames = funArgs' <&> \(name, _) => the (Doc opts) (line name)
   let argList = sep' $ addCommas argNames
-  let fnHeaderShort = line "function" <++> (line name) <+>
-                      line "(" <+> argList <+> line ")"
-  let fnHeaderLong = vsep [ line "function" <++> (line name) <+> line "("
+  let fnHeaderShort = "local" <++> "function" <++> (line name) <+>
+                      "(" <+> argList <+> ")"
+  let fnHeaderLong = vsep [ "function" <++> (line name) <+> "("
                           , indent 2 argList
-                          , line ")"
+                          , ")"
                           ]
   let fnHeader = ifMultiline fnHeaderShort fnHeaderLong
   fnBody <- printStmts @{localNames} fuel body
   cont' <- printStmts fuel cont
-  withCont cont' $ vsep [ fnHeader
+  withCont cont' $ vsep [ hints
+                        , fnHeader
                         , indent' 2 fnBody
-                        , line "end"
+                        , "end"
                         ]
 
 printStmts fuel ((#=) lhv rhv cont) = do
@@ -161,13 +163,13 @@ printStmts fuel (If cond th el cont) = do
            then pure empty
            else do
              body <- printStmts @{names} @{newNames} fuel el
-             pure $ line "else" `vappend` indent' 2 body
-  let top = hangSep 0 (line "if" <++> cond') (line "then")
+             pure $ "else" `vappend` indent' 2 body
+  let top = hangSep 0 ("if" <++> cond') "then"
   withCont !(printStmts fuel cont) $ vsep
     [ top
     , indent' 2 th'
     , el'
-    , line "end"
+    , "end"
     ]
 
 printStmts fuel (Call n x cont) = do
@@ -175,12 +177,12 @@ printStmts fuel (Call n x cont) = do
   withCont !(printStmts fuel cont) call
 
 printStmts fuel (Ret res) =
-  pure $ line "return" <++> !(printExpr fuel Nothing res)
+  pure $ "return" <++> !(printExpr fuel Nothing res)
 
 printStmts fuel Nop = do
   useSemicolon <- chooseAnyOf Bool
   if useSemicolon
-    then pure $ line ";"
+    then pure ";"
     else pure empty
 
 export
