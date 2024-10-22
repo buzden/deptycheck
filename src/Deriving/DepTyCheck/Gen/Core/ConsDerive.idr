@@ -110,18 +110,34 @@ findFirstMax ((x, y, pri)::xs) = Just $ go (x, y) pri xs where
   go curr _       []                = curr
   go curr currPri ((x, y, pri)::xs) = if pri > currPri then go (x, y) pri xs else go curr currPri xs
 
+data PriorityOrigin = Original | Propagated
+
+Eq PriorityOrigin where
+  Original   == Original   = True
+  Propagated == Propagated = True
+  _ == _ = False
+
+Ord PriorityOrigin where
+  compare Original   Original   = EQ
+  compare Original   Propagated = GT
+  compare Propagated Original   = LT
+  compare Propagated Propagated = EQ
+
+-- compute the priority
+-- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
+propagatePri' : FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin)
+propagatePri' dets = do
+  let origPri = dets <&> \det => (det,) $ det.typeArgs `minus` det.argsDependsOn.size
+  map snd origPri `zip` propagatePri origPri <&> \(origPri, det, newPri) => (det, newPri, if origPri == newPri then Original else Propagated)
+
 searchOrder : {con : _} ->
               (determinable : SortedSet $ Fin con.args.length) ->
               (left : FinMap con.args.length $ Determination con) ->
               List $ Fin con.args.length
 searchOrder determinable left = do
 
-  -- compute the priority
-  -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
-  let leftWithPri = propagatePri $ left <&> \det => (det,) $ det.typeArgs `minus` det.argsDependsOn.size
-
   -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
-  let notDetermined = filter (\(idx, det, _) => not (contains idx determinable) && null det.stronglyDeterminingArgs) $ kvList leftWithPri
+  let notDetermined = filter (\(idx, det, _) => not (contains idx determinable) && null det.stronglyDeterminingArgs) $ kvList $ propagatePri' left
 
   -- choose the one from the variants
   -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
