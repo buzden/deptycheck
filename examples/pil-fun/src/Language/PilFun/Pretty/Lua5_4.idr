@@ -19,14 +19,6 @@ printTy : Ty -> Doc opts
 printTy Int'  = "number"
 printTy Bool' = "boolean"
 
-unaryOps : List String
-unaryOps = ["-", "#", "~", "not"]
-
-isUnaryOp : String -> ExprsSnocList funs vars argTys -> Bool
-isUnaryOp str args = case getExprs args of
-                       [< _ ] => elem str unaryOps
-                       _ => False
-
 NamesRestrictions where
   reservedKeywords = fromList
     [ "and",       "break",     "do",        "else",      "elseif",    "end"
@@ -86,26 +78,26 @@ addCommas (x::xs) = (x <+> comma) :: addCommas xs
 
 printFunCall fuel lastPrior fun args = do
   let name = funName {vars} fun
-  case (isFunInfix @{names} fun, args) of
-       (True, [<lhv, rhv]) => do
-         let thisPrior = priority name
-         let addParens = !(chooseAnyOf Bool) || isJust lastPrior && thisPrior >= lastPrior
-         lhv' <- assert_total printExpr fuel thisPrior lhv
-         rhv' <- assert_total printExpr fuel thisPrior rhv
-         pure $ parenthesise addParens $ hangSep 2 (lhv' <++> line name) rhv'
-       _ => do
-         args' <- for (toList $ getExprs args) (\(Evidence _ e) => assert_total printExpr fuel Nothing e)
-         let argsWithCommas = sep' $ addCommas args'
-         let addParens = not (isUnaryOp name args) || !(chooseAnyOf Bool)
-         let name' = if name == "not"
-                       then line name <+> space
-                       else line name
-         let applyShort = name' <+> parenthesise addParens argsWithCommas
-         let applyLong = vsep [ name' <+> when addParens "("
-                              , indent 2 argsWithCommas
-                              , when addParens ")"
-                              ]
-         pure $ ifMultiline applyShort applyLong
+  let thisPrior = priority name
+  let addParens = !(chooseAnyOf Bool)
+                   || isJust lastPrior && thisPrior >= lastPrior
+  args' <- for (toList $ getExprs args) (\(Evidence _ e) => assert_total printExpr fuel Nothing e)
+  case (isFunInfix @{names} fun, args') of
+    (True, [lhv, rhv]) => do
+       pure $ parenthesise addParens $ hangSep 2 (lhv <++> line name) rhv
+    (_, [x]) => do
+       -- note: two minus signs may be interpreted as a comment
+       pure $ parenthesise addParens $ line name
+         <+> when (name == "not" || name == "-") space
+         <+> x
+    (_, _) => do
+      let argsWithCommas = sep' $ addCommas args'
+      let applyShort = line name <+> "(" <+> argsWithCommas <+> ")"
+      let applyLong = vsep [ line name <+> "("
+                           , indent 2 argsWithCommas
+                           , ")"
+                           ]
+      pure $ ifMultiline applyShort applyLong
 
 newVarLhv : {opts : _} -> (name : String) -> (mut : Mut) -> Gen0 $ Doc opts
 newVarLhv name mut = do
