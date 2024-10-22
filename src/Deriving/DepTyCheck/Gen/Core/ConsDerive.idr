@@ -20,6 +20,8 @@ record Determination (0 con : Con) where
   stronglyDeterminingArgs : SortedSet $ Fin con.args.length
   ||| Args which this args depends on, which are not strongly determining.
   argsDependsOn : SortedSet $ Fin con.args.length
+  ||| Count of type arguments of the type of this arguments
+  typeArgs : Nat
 
 record TypeApp (0 con : Con) where
   constructor MkTypeApp
@@ -56,7 +58,7 @@ getTypeApps con = do
                    expr            => Right expr
         let stronglyDeterminedBy = fromList $ mapMaybe (lookup' conArgIdxs) $ rights as.asList >>= allVarNames
         let argsDependsOn = fromList (lefts as.asList) `difference` stronglyDeterminedBy
-        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn
+        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn ty.args.length
 
   for con.args.asVect $ analyseTypeApp . type
 
@@ -86,20 +88,46 @@ removeDeeply : Foldable f =>
                FinMap con.args.length $ Determination con
 removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
+propagatePriOnce : Ord p => FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
+propagatePriOnce =
+  -- propagate back along dependencies
+  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
+  .
+  -- propagate back along strong determinations
+  (\dets => foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets)
+
+propagatePri : Ord p => FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
+propagatePri dets = do
+  let next = propagatePriOnce dets
+  if ((==) `on` map snd) dets next
+    then dets
+    else assert_total propagatePri next
+
+findFirstMax : Ord p => List (a, b, p) -> Maybe (a, b)
+findFirstMax [] = Nothing
+findFirstMax ((x, y, pri)::xs) = Just $ go (x, y) pri xs where
+  go : (a, b) -> p -> List (a, b, p) -> (a, b)
+  go curr _       []                = curr
+  go curr currPri ((x, y, pri)::xs) = if pri > currPri then go (x, y) pri xs else go curr currPri xs
+
 searchOrder : {con : _} ->
               (determinable : SortedSet $ Fin con.args.length) ->
               (left : FinMap con.args.length $ Determination con) ->
               List $ Fin con.args.length
 searchOrder determinable left = do
 
+  -- compute the priority
+  -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
+  let leftWithPri = propagatePri $ left <&> \det => (det,) $ det.typeArgs `minus` det.argsDependsOn.size
+
   -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
-  let notDetermined = filter (\(idx, det) => not (contains idx determinable) && null det.stronglyDeterminingArgs) $ kvList left
+  let notDetermined = filter (\(idx, det, _) => not (contains idx determinable) && null det.stronglyDeterminingArgs) $ kvList leftWithPri
 
   -- choose the one from the variants
   -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
   -- (e.g. because of discharging of strong determination), and new alternative have more priority than current ones.
   -- TODO to determine the best among current variants taking into account which indices are more complex (transitively!)
-  let Just (curr, currDet) = head' notDetermined
+  let Just (curr, currDet) = findFirstMax notDetermined
     | Nothing => []
 
   -- remove information about all currently chosen args
