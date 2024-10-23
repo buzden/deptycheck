@@ -57,10 +57,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.R (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "a") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "b") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                              .$ (    MkArg MW ExplicitArg (Just "b") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "a") implicitFalse
                                                   .=>    var ">>="
                                                       .$ (var "<Data.So.So>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.equalNat" .$ var "a" .$ var "b"))
                                                       .$ (    MkArg MW ExplicitArg (Just "ab") implicitFalse
@@ -72,47 +72,46 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                                                       .$ (    MkArg MW ExplicitArg (Just "bc") implicitFalse
                                                                           .=>    var ">>="
                                                                               .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                                                              .$ (    MkArg MW ExplicitArg (Just "d") implicitFalse
+                                                                              .$ (    MkArg MW ExplicitArg (Just "f") implicitFalse
                                                                                   .=>    var ">>="
                                                                                       .$ (   var "<Data.So.So>[0]"
                                                                                           .$ var "^outmost-fuel^"
-                                                                                          .$ (var "Prelude.Types.equalNat" .$ var "c" .$ var "d"))
-                                                                                      .$ (    MkArg MW ExplicitArg (Just "cd") implicitFalse
+                                                                                          .$ (var "Prelude.Types.equalNat" .$ var "a" .$ var "f"))
+                                                                                      .$ (    MkArg MW ExplicitArg (Just "af") implicitFalse
                                                                                           .=>    var ">>="
-                                                                                              .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                                                                              .$ (    MkArg MW ExplicitArg (Just "e") implicitFalse
+                                                                                              .$ (   var "<Data.So.So>[0]"
+                                                                                                  .$ var "^outmost-fuel^"
+                                                                                                  .$ (   var "Prelude.Types.equalNat"
+                                                                                                      .$ var "f"
+                                                                                                      .$ (   var "Prelude.Types.S"
+                                                                                                          .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z"))))
+                                                                                              .$ (    MkArg MW ExplicitArg (Just "f2") implicitFalse
                                                                                                   .=>    var ">>="
-                                                                                                      .$ (   var "<Data.So.So>[0]"
-                                                                                                          .$ var "^outmost-fuel^"
-                                                                                                          .$ (var "Prelude.Types.equalNat" .$ var "b" .$ var "e"))
-                                                                                                      .$ (    MkArg MW ExplicitArg (Just "be") implicitFalse
+                                                                                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                                                                                      .$ (    MkArg MW ExplicitArg (Just "d") implicitFalse
                                                                                                           .=>    var ">>="
-                                                                                                              .$ (   var "external^<Prelude.Types.Nat>[]"
-                                                                                                                  .$ var "^outmost-fuel^")
-                                                                                                              .$ (    MkArg MW ExplicitArg (Just "f") implicitFalse
+                                                                                                              .$ (   var "<Data.So.So>[0]"
+                                                                                                                  .$ var "^outmost-fuel^"
+                                                                                                                  .$ (var "Prelude.Types.equalNat" .$ var "c" .$ var "d"))
+                                                                                                              .$ (    MkArg MW ExplicitArg (Just "cd") implicitFalse
                                                                                                                   .=>    var ">>="
-                                                                                                                      .$ (   var "<Data.So.So>[0]"
-                                                                                                                          .$ var "^outmost-fuel^"
-                                                                                                                          .$ (   var "Prelude.Types.equalNat"
-                                                                                                                              .$ var "a"
-                                                                                                                              .$ var "f"))
+                                                                                                                      .$ (   var "external^<Prelude.Types.Nat>[]"
+                                                                                                                          .$ var "^outmost-fuel^")
                                                                                                                       .$ (    MkArg
                                                                                                                                 MW
                                                                                                                                 ExplicitArg
-                                                                                                                                (Just "af")
+                                                                                                                                (Just "e")
                                                                                                                                 implicitFalse
                                                                                                                           .=>    var ">>="
                                                                                                                               .$ (   var "<Data.So.So>[0]"
                                                                                                                                   .$ var "^outmost-fuel^"
                                                                                                                                   .$ (   var "Prelude.Types.equalNat"
-                                                                                                                                      .$ var "f"
-                                                                                                                                      .$ (   var "Prelude.Types.S"
-                                                                                                                                          .$ (   var "Prelude.Types.S"
-                                                                                                                                              .$ var "Prelude.Types.Z"))))
+                                                                                                                                      .$ var "b"
+                                                                                                                                      .$ var "e"))
                                                                                                                               .$ (    MkArg
                                                                                                                                         MW
                                                                                                                                         ExplicitArg
-                                                                                                                                        (Just "f2")
+                                                                                                                                        (Just "be")
                                                                                                                                         implicitFalse
                                                                                                                                   .=>    var "Prelude.pure"
                                                                                                                                       .! ( "f"
