@@ -3,22 +3,22 @@
 Generated values:
 -----
 -----
-(False ** FN 0 (TL ""))
+(False ** FN 10 (FN 10 (TR "bc" (FN 10 (FN 0 (TR "a" (FN 10 (TR "bc" (FN 10 (FN 0 (TR "" (FN 0 (TR "a" (TR "a" (FN 0 (TR "" (TL "")))))))))))))))))
 -----
-(False ** FN 10 (FN 10 (TR "a" (FN 0 (FN 10 (TR "a" (FN 0 (FN 0 (FN 10 (TR "" (TR "bc" (FN 0 (TL "a")))))))))))))
+(False ** FN 10 (TR "a" (FN 0 (FN 0 (TR "a" (TR "" (FN 0 (FN 10 (FN 0 (FN 10 (FN 0 (TR "a" (TR "bc" (TR "bc" (TR "" (TL "bc"))))))))))))))))
 -----
-(True ** TR "bc" (FN 10 (TR "" (FN 10 (TR "bc" (FN 0 (FN 0 (FN 0 (TR "bc" (TR "a" (TR "" (TR "bc" (TR "a" (FN 10 (TR "bc" (FN 0 (TR "a" (FN 0 (TL "a")))))))))))))))))))
+(True ** JJ 10 10)
 -----
-(True ** TR "" (FN 10 (TR "" (FN 10 (FN 0 (TR "a" (TR "a" (TR "a" (FN 10 (FN 10 (TR "a" (TR "bc" (JJ 0 10)))))))))))))
+(True ** TR "bc" (FN 0 (TR "a" (FN 10 (FN 10 (FN 10 (FN 0 (FN 10 (TR "" (FN 0 (TR "a" (TR "a" (TL "")))))))))))))
 -----
-(False ** FN 10 (FN 0 (TR "" (FN 0 (TR "bc" (TR "" (TL "")))))))
+(True ** TR "a" (FN 0 (FN 10 (TR "a" (FN 10 (TR "a" (JJ 0 10)))))))
 -----
-(True ** TL "a")
+(True ** TR "bc" (FN 10 (TR "bc" (TR "bc" (TR "a" (FN 0 (FN 10 (FN 0 (FN 0 (JJ 10 10))))))))))
 -----
-(False ** FN 10 (TR "bc" (FN 10 (TR "bc" (TR "bc" (FN 10 (FN 0 (JJ 10 10))))))))
+(False ** FN 0 (FN 10 (FN 0 (TR "a" (FN 10 (FN 0 (FN 10 (FN 0 (FN 0 (FN 10 (TR "a" (FN 10 (TR "a" (FN 0 (FN 10 (FN 0 (FN 10 (JJ 10 0))))))))))))))))))
 -----
-(True ** TR "" (FN 10 (FN 0 (FN 0 (FN 0 (FN 0 (FN 0 (TR "bc" (TR "" (TR "bc" (FN 0 (FN 10 (FN 0 (FN 0 (TR "" (FN 0 (TR "bc" (TR "bc" (TR "a" (TL "a"))))))))))))))))))))
+(True ** TR "a" (TR "bc" (FN 0 (FN 10 (TR "" (FN 0 (FN 10 (TR "" (TR "bc" (FN 10 (JJ 10 10)))))))))))
 -----
-(True ** TR "" (TR "" (TL "a")))
+(True ** TR "a" (FN 10 (TR "" (TR "bc" (TR "a" (FN 10 (FN 10 (FN 0 (FN 10 (TR "" (TR "" (FN 10 (FN 0 (JJ 10 0))))))))))))))
 -----
-(True ** TR "a" (TR "a" (FN 0 (TR "a" (TR "bc" (FN 0 (FN 10 (FN 10 (FN 10 (TR "a" (FN 0 (FN 10 (JJ 0 0)))))))))))))
+(True ** TR "bc" (TR "a" (FN 0 (TR "" (JJ 0 10)))))

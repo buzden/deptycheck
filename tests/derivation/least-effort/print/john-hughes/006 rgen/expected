@@ -57,10 +57,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.R (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "a") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "b") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                              .$ (    MkArg MW ExplicitArg (Just "b") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "a") implicitFalse
                                                   .=>    var ">>="
                                                       .$ (var "<Data.So.So>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.equalNat" .$ var "a" .$ var "b"))
                                                       .$ (    MkArg MW ExplicitArg (Just "ab") implicitFalse

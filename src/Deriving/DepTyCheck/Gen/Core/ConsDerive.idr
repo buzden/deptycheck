@@ -125,10 +125,15 @@ Ord PriorityOrigin where
 
 -- compute the priority
 -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
-propagatePri' : FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin)
+-- additionally we take into account the number of outgoing strong determinations and count of dependent arguments
+propagatePri' : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat, Nat)
 propagatePri' dets = do
+  let invStrongDetPwr = do
+    let _ : Monoid Nat = Additive
+    flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
   let origPri = dets <&> \det => (det,) $ det.typeArgs `minus` det.argsDependsOn.size
-  map snd origPri `zip` propagatePri origPri <&> \(origPri, det, newPri) => (det, newPri, if origPri == newPri then Original else Propagated)
+  flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
+    (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 $ Fin.Map.lookup idx invStrongDetPwr, det.argsDependsOn.size)
 
 searchOrder : {con : _} ->
               (determinable : SortedSet $ Fin con.args.length) ->
