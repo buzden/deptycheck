@@ -20,8 +20,8 @@ record Determination (0 con : Con) where
   stronglyDeterminingArgs : SortedSet $ Fin con.args.length
   ||| Args which this args depends on, which are not strongly determining.
   argsDependsOn : SortedSet $ Fin con.args.length
-  ||| Count of type arguments of the type of this arguments
-  typeArgs : Nat
+  ||| Count of influencing arguments
+  influencingArgs : Nat
 
 record TypeApp (0 con : Con) where
   constructor MkTypeApp
@@ -58,7 +58,7 @@ getTypeApps con = do
                    expr            => Right expr
         let stronglyDeterminedBy = fromList $ mapMaybe (lookup' conArgIdxs) $ rights as.asList >>= allVarNames
         let argsDependsOn = fromList (lefts as.asList) `difference` stronglyDeterminedBy
-        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn ty.args.length
+        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn $ argsDependsOn.size + stronglyDeterminedBy.size
 
   for con.args.asVect $ analyseTypeApp . type
 
@@ -131,7 +131,8 @@ propagatePri' dets = do
   let invStrongDetPwr = do
     let _ : Monoid Nat = Additive
     flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
-  let origPri = dets <&> \det => (det,) $ det.typeArgs `minus` det.argsDependsOn.size
+  -- the original priority is the count of already determined given arguments for each argument
+  let origPri = dets <&> \det => (det,) $ det.influencingArgs `minus` det.argsDependsOn.size
   flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
     (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 $ Fin.Map.lookup idx invStrongDetPwr, det.argsDependsOn.size)
 
