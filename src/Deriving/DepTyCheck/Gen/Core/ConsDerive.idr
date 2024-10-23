@@ -2,6 +2,7 @@
 module Deriving.DepTyCheck.Gen.Core.ConsDerive
 
 import public Control.Monad.State
+import public Control.Monad.State.Tuple
 
 import public Data.Collections.Analysis
 import public Data.Either
@@ -123,6 +124,38 @@ Ord PriorityOrigin where
   compare Propagated Original   = LT
   compare Propagated Propagated = EQ
 
+-- adds base priorities of args which we depend on transitively
+refineBasePri : Num p => {con : _} -> FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
+refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps) $ traverse_ go $ List.allFins _ where
+  go : (visited : MonadState (SortedSet $ Fin con.args.length) m) =>
+       (pris : MonadState (FinMap con.args.length (Determination con, p)) m) =>
+       Monad m =>
+       Fin con.args.length ->
+       m ()
+  go curr = do
+
+    visited <- get
+    -- if we already managed the current item, then exit
+    let False = contains curr visited | True => pure ()
+    -- remember that we are in charge of the current item
+    let visited = insert curr visited
+    put visited
+
+    let Just (det, currPri) = lookup curr !(get @{pris}) | Nothing => pure ()
+
+    let unvisitedDeps = (det.argsDependsOn `union` det.stronglyDeterminingArgs) `difference` visited
+
+    -- run this for all dependences
+    for_ unvisitedDeps $ assert_total go
+
+    -- compute what needs to be added to the current priority
+    ps <- get @{pris}
+    let addition = mapMaybe (map snd . lookup' ps) (SortedSet.toList unvisitedDeps)
+    let newPri = foldl (+) currPri addition
+
+    -- update the priority of the currenly managed argument
+    modify $ Fin.Map.updateExisting (mapSnd $ const newPri) curr
+
 -- compute the priority
 -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
 -- additionally we take into account the number of outgoing strong determinations and count of dependent arguments
@@ -132,7 +165,7 @@ propagatePri' dets = do
     let _ : Monoid Nat = Additive
     flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
   -- the original priority is the count of already determined given arguments for each argument
-  let origPri = dets <&> \det => (det,) $ det.influencingArgs `minus` det.argsDependsOn.size
+  let origPri = refineBasePri $ dets <&> \det => (det,) $ det.influencingArgs `minus` det.argsDependsOn.size
   flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
     (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 $ Fin.Map.lookup idx invStrongDetPwr, det.argsDependsOn.size)
 
