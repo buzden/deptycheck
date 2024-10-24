@@ -57,9 +57,11 @@ getTypeApps con = do
         let as = rewrite lengthCorrect in args.asVect <&> \arg => case getExpr arg of
                    expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
                    expr            => Right expr
-        let stronglyDeterminedBy = fromList $ mapMaybe (lookup' conArgIdxs) $ rights as.asList >>= allVarNames
+        let strongDetermination = rights as.asList <&> mapMaybe (lookup' conArgIdxs) . allVarNames
+        let strongDeterminationWeight = concatMap @{Additive} (max 1 . length) strongDetermination -- we add 1 for constant givens
+        let stronglyDeterminedBy = fromList $ join strongDetermination
         let argsDependsOn = fromList (lefts as.asList) `difference` stronglyDeterminedBy
-        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn $ argsDependsOn.size + stronglyDeterminedBy.size + count isRight as
+        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn $ argsDependsOn.size + strongDeterminationWeight
 
   for con.args.asVect $ analyseTypeApp . type
 
