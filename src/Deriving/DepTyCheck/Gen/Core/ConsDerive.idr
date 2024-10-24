@@ -59,7 +59,7 @@ getTypeApps con = do
                    expr            => Right expr
         let stronglyDeterminedBy = fromList $ mapMaybe (lookup' conArgIdxs) $ rights as.asList >>= allVarNames
         let argsDependsOn = fromList (lefts as.asList) `difference` stronglyDeterminedBy
-        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn $ argsDependsOn.size + stronglyDeterminedBy.size
+        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn $ argsDependsOn.size + stronglyDeterminedBy.size + count isRight as
 
   for con.args.asVect $ analyseTypeApp . type
 
