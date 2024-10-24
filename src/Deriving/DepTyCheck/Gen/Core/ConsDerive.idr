@@ -145,18 +145,17 @@ refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps)
 
     let Just (det, currPri) = lookup curr !(get @{pris}) | Nothing => pure ()
 
-    let unvisitedDeps = (det.argsDependsOn `union` det.stronglyDeterminingArgs) `difference` visited
+    let unvisitedDeps = det.argsDependsOn `union` det.stronglyDeterminingArgs
 
     -- run this for all dependences
-    for_ unvisitedDeps $ assert_total go
+    for_ (unvisitedDeps `difference` visited) $ assert_total go
 
     -- compute what needs to be added to the current priority
-    ps <- get @{pris}
-    let addition = mapMaybe (map snd . lookup' ps) (SortedSet.toList unvisitedDeps)
+    let addition = mapMaybe (map snd . lookup' !(get @{pris})) (SortedSet.toList unvisitedDeps)
     let newPri = foldl (+) currPri addition
 
     -- update the priority of the currenly managed argument
-    modify $ Fin.Map.updateExisting (mapSnd $ const newPri) curr
+    modify $ updateExisting (mapSnd $ const newPri) curr
 
 -- compute the priority
 -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
