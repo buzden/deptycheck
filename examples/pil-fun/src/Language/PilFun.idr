@@ -198,7 +198,9 @@ data Expr : Funs -> Vars -> Ty -> Type where
       Expr funs vars ty
 
   F : (n : IndexIn funs) ->
-      AtIndex n (from ==> Just to) =>
+      {from : _} ->
+      {to : _} ->
+      AtIndex funs n (from ==> Just to) =>
       ExprsSnocList funs vars from ->
       Expr funs vars to
 
@@ -236,7 +238,8 @@ data Stmts : (funs : Funs) ->
          Stmts funs vars retTy
 
   Call : (n : IndexIn funs) ->
-         AtIndex n (from ==> Nothing) =>
+         {from : _} ->
+         AtIndex funs n (from ==> Nothing) =>
          ExprsSnocList funs vars from ->
          (cont : Stmts funs vars retTy) ->
          Stmts funs vars retTy

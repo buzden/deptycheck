@@ -15,16 +15,16 @@ record NamedCtxt (l : SupportedLanguages) where
 
 public export %inline
 AddFun : {0 l : SupportedLanguages} -> (isInfix : Bool) -> (isPure : Bool) -> (s : String) -> (fun : FunSig) ->
+         (lCond : LanguageToCondition l fun isInfix isPure) =>
          (ctx : NamedCtxt l) ->
-         (0 _ : LanguageToCondition l fun isInfix isPure) =>
          (0 _ : NameIsNew l ctx.functions ctx.variables ctx.fvNames s) =>
          NamedCtxt l
-AddFun isInfix isPure s fun $ MkNamedCtxt funs vars names = MkNamedCtxt (funs:<fun) vars $ NewFun @{names} {isInfix} {isPure} {fun} s
+AddFun isInfix isPure s fun $ MkNamedCtxt funs vars names = MkNamedCtxt (funs:<fun) vars $ NewFun @{names} {isInfix} {isPure} {fun} {languageCondition = lCond} s
 
 public export %inline
-(>>) : {0 arg : NamedCtxt l -> Type} -> {0 arg' : NamedCtxt l -> Type} -> 
-       ((ctx : NamedCtxt l) -> (0 _ : arg ctx) => (0 _ : arg' ctx) => NamedCtxt l) -> 
-       (ctx : NamedCtxt l) -> (0 _ : arg ctx) => (0 _ : arg' ctx) => NamedCtxt l
+(>>) : {0 arg : NamedCtxt l -> Type}  -> 
+       ((ctx : NamedCtxt l) -> (0 _ : arg ctx) => NamedCtxt l) -> 
+       (ctx : NamedCtxt l) -> (0 _ : arg ctx) => NamedCtxt l
 (>>) f x = f x
 
 public export %inline

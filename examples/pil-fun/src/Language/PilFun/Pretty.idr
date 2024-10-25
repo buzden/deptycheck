@@ -31,7 +31,8 @@ data ScalaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
 public export
 data IdrisCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
  where
-  IsPure : (isPure : Bool) -> IdrisCondition funSig isInfix isPure
+  IsInfix : (a : Ty ** b : Ty ** to : MaybeTy ** funSig === ([<a, b] ==> to)) -> (isPure : Bool) -> IdrisCondition funSig True isPure
+  NotInfix : (isPure : Bool) -> IdrisCondition funSig False isPure
 
 public export
 data LanguageToCondition : (l : SupportedLanguages) -> FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
@@ -51,7 +52,7 @@ data UniqNames : (l : SupportedLanguages) -> (funs : Funs) -> (vars : Vars) -> T
   JustNew : (ss : UniqNames l funs vars) => (s : String) -> (0 _ : NameIsNew l funs vars ss s) => UniqNames l funs vars
   NewFun  : (ss : UniqNames l funs vars) => (s : String) -> (0 _ : NameIsNew l funs vars ss s) =>
             {default False isInfix : Bool} -> {default False isPure : Bool} ->
-            (0 languageCondition : LanguageToCondition l fun isInfix isPure) =>
+            (languageCondition : LanguageToCondition l fun isInfix isPure) =>
             UniqNames l (funs:<fun) vars
   NewVar  : (ss : UniqNames l funs vars) => (s : String) -> (0 _ : NameIsNew l funs vars ss s) => UniqNames l funs ((:<) vars var mut)
 
@@ -98,11 +99,11 @@ isFunInfix @{NewFun {isInfix} _} Here  = isInfix
 isFunInfix @{NewFun @{ss} s} (There i) = isFunInfix @{ss} i
 isFunInfix @{NewVar @{ss} s} i         = isFunInfix @{ss} i
 
-isFunPure : UniqNames l funs vars => IndexIn funs -> Bool
-isFunPure @{JustNew @{ss} _} i = isFunPure @{ss} i
-isFunPure @{NewFun {isPure} _} Here = isPure
-isFunPure @{NewFun @{ss} _} (There i) = isFunPure @{ss} i
-isFunPure @{NewVar @{ss} _} i = isFunPure @{ss} i
+isFunPure : UniqNames l funs vars -> IndexIn funs -> Bool
+isFunPure (JustNew @{ss} _) i = isFunPure ss i
+isFunPure (NewFun {isPure} _) Here = isPure
+isFunPure (NewFun @{ss} _) (There i) = isFunPure ss i
+isFunPure (NewVar @{ss} _) i = isFunPure ss i
 
 -- Returned vect has a reverse order; I'd like some `SnocVect` here.
 newVars : NamesRestrictions =>
