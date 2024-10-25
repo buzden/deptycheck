@@ -19,8 +19,8 @@ import System.Random.Pure.StdGen
 %default total
 
 public export
-data SupportedLanguages = Scala3
-                        | Idris2
+data SupportedLanguage = Scala3
+                       | Idris2
 
 public export
 data ScalaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
@@ -35,18 +35,18 @@ data IdrisCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
   NotInfix : (isPure : Bool) -> IdrisCondition funSig False isPure
 
 public export
-data LanguageToCondition : (l : SupportedLanguages) -> FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
+data LanguageToCondition : (l : SupportedLanguage) -> FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
  where
   [search l]
   Scala3Cond : ScalaCondition funSig isInfix isPure -> LanguageToCondition Scala3 funSig isInfix isPure
   Idris2Cond : IdrisCondition funSig isInfix isPure -> LanguageToCondition Idris2 funSig isInfix isPure
 
 public export
-data UniqNames : (l : SupportedLanguages) -> (funs : Funs) -> (vars : Vars) -> Type
+data UniqNames : (l : SupportedLanguage) -> (funs : Funs) -> (vars : Vars) -> Type
 public export
-data NameIsNew : (l : SupportedLanguages) -> (funs : Funs) -> (vars : Vars) -> UniqNames l funs vars -> String -> Type
+data NameIsNew : (l : SupportedLanguage) -> (funs : Funs) -> (vars : Vars) -> UniqNames l funs vars -> String -> Type
 
-data UniqNames : (l : SupportedLanguages) -> (funs : Funs) -> (vars : Vars) -> Type where
+data UniqNames : (l : SupportedLanguage) -> (funs : Funs) -> (vars : Vars) -> Type where
   [search funs vars]
   Empty   : UniqNames l [<] [<]
   JustNew : (ss : UniqNames l funs vars) => (s : String) -> (0 _ : NameIsNew l funs vars ss s) => UniqNames l funs vars
@@ -56,7 +56,7 @@ data UniqNames : (l : SupportedLanguages) -> (funs : Funs) -> (vars : Vars) -> T
             UniqNames l (funs:<fun) vars
   NewVar  : (ss : UniqNames l funs vars) => (s : String) -> (0 _ : NameIsNew l funs vars ss s) => UniqNames l funs ((:<) vars var mut)
 
-data NameIsNew : (l : SupportedLanguages) -> (funs : Funs) -> (vars : Vars) -> UniqNames l funs vars -> String -> Type where
+data NameIsNew : (l : SupportedLanguage) -> (funs : Funs) -> (vars : Vars) -> UniqNames l funs vars -> String -> Type where
   E : NameIsNew l [<] [<] Empty x
   J : (0 _ : So $ x /= s) -> NameIsNew l funs vars ss x -> NameIsNew l funs vars (JustNew @{ss} s @{sub}) x
   F : (0 _ : So $ x /= s) -> NameIsNew l funs vars ss x -> NameIsNew l (funs:<fun) vars (NewFun @{ss} {isInfix} {isPure} s @{sub} @{infixCond}) x
@@ -66,12 +66,12 @@ public export
 interface NamesRestrictions where
   reservedKeywords : SortedSet String
 
-rawNewName : Fuel -> (l : SupportedLanguages) -> (Fuel -> Gen MaybeEmpty String) =>
+rawNewName : Fuel -> (l : SupportedLanguage) -> (Fuel -> Gen MaybeEmpty String) =>
              (funs : Funs) -> (vars : Vars) -> (names : UniqNames l funs vars) ->
              Gen MaybeEmpty (s ** NameIsNew l funs vars names s)
 
 export
-genNewName : {l : SupportedLanguages} -> Fuel -> Gen MaybeEmpty String ->
+genNewName : {l : SupportedLanguage} -> Fuel -> Gen MaybeEmpty String ->
              NamesRestrictions =>
              (funs : Funs) -> (vars : Vars) -> (names : UniqNames l funs vars) ->
              Gen MaybeEmpty (s ** NameIsNew l funs vars names s)
