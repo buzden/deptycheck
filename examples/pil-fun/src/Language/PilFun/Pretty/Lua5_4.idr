@@ -15,6 +15,9 @@ import public Text.PrettyPrint.Bernardy
 
 %default total
 
+luaNamesGen : Gen0 String
+luaNamesGen = pack <$> listOf {length = choose (1,10)} (choose ('a', 'z'))
+
 printTy : Ty -> Doc opts
 printTy Int'  = "number"
 printTy Bool' = "boolean"
@@ -49,18 +52,18 @@ priority : String -> Maybe Priority
 priority func = lookup func priorities
 
 printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
-            (names : UniqNames funs vars) =>
+            (names : UniqNames Lua5_4 funs vars) =>
             Fuel ->
             (lastPriority : Maybe Priority) ->
             Expr funs vars ty -> Gen0 $ Doc opts
 printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
-               (names : UniqNames funs vars) =>
+               (names : UniqNames Lua5_4 funs vars) =>
                Fuel ->
                (lastPriority : Maybe Priority) ->
                IndexIn funs -> ExprsSnocList funs vars argTys ->
                Gen0 $ Doc opts
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-             (names : UniqNames funs vars) =>
+             (names : UniqNames Lua5_4 funs vars) =>
              (newNames : Gen0 String) =>
              Fuel ->
              Stmts funs vars retTy -> Gen0 $ Doc opts
@@ -111,14 +114,14 @@ withCont cont stmt =
   pure $ stmt `vappend` cont
 
 printStmts fuel (NewV ty mut initial cont) = do
-  (name ** _) <- genNewName fuel _ _ names
+  (name ** _) <- genNewName fuel newNames _ _ names
   lhv <- newVarLhv name mut
   rhv <- printExpr fuel Nothing initial
   withCont !(printStmts fuel cont) $ hangSep' 2 (lhv <++> "=") rhv
 
 printStmts fuel (NewF sig body cont) = do
-  (name ** _) <- genNewName fuel _ _ names
-  (localNames, funArgs) <- newVars fuel _ names
+  (name ** _) <- genNewName fuel newNames _ _ names
+  (localNames, funArgs) <- newVars fuel newNames _ names
   let funArgs' = reverse (toList funArgs)
   let argHints = funArgs' <&> \(name, ty) =>
                  the (Doc opts) "---@param" <++> line name <++> printTy ty
@@ -178,5 +181,5 @@ printStmts fuel Nop = do
     else pure empty
 
 export
-printLua5_4 : PP
-printLua5_4 fl = printStmts {names} {newNames} fl
+printLua5_4 : PP Lua5_4
+printLua5_4 fl = printStmts {names} {newNames = luaNamesGen} fl

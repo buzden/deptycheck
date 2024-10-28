@@ -173,5 +173,5 @@ printStmts fl tl $ Ret x = wrapMain {funs} {vars} fl tl Nothing $ printExpr Open
 printStmts fl tl $ Nop = wrapMain {funs} {vars} fl tl Nothing $ pure empty
 
 export
-printScala3 : PP
-printScala3 fl = printStmts {names} {newNames} fl True
+printScala3 : PP Scala3
+printScala3 fl = printStmts {names} {newNames = namesGenScala} fl True

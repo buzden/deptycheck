@@ -21,6 +21,7 @@ import System.Random.Pure.StdGen
 public export
 data SupportedLanguage = Scala3
                        | Idris2
+                       | Lua5_4
 
 public export
 data ScalaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
@@ -35,11 +36,17 @@ data IdrisCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
   NotInfix : (isPure : Bool) -> IdrisCondition funSig False isPure
 
 public export
+data LuaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
+  where
+    TrivialLuaCondition : LuaCondition funSig isInfix isPure
+
+public export
 data LanguageToCondition : (l : SupportedLanguage) -> FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
  where
   [search l]
   Scala3Cond : ScalaCondition funSig isInfix isPure -> LanguageToCondition Scala3 funSig isInfix isPure
   Idris2Cond : IdrisCondition funSig isInfix isPure -> LanguageToCondition Idris2 funSig isInfix isPure
+  Lua5_4Cond : LuaCondition funSig isInfix isPure -> LanguageToCondition Lua5_4 funSig isInfix isPure
 
 public export
 data UniqNames : (l : SupportedLanguage) -> (funs : Funs) -> (vars : Vars) -> Type
@@ -135,9 +142,8 @@ wrapBrIf False pre x = pre `vappend` indent' 2 x
 wrapBrIf True pre x = ifMultiline (pre <++> "{" <++> x <++> "}") (vsep [pre <++> "{", indent' 2 x, "}"])
 
 public export
-0 PP : Type
-PP = {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-     (names : UniqNames funs vars) =>
-     (newNames : Gen0 String) =>
-     Fuel ->
-     Stmts funs vars retTy -> Gen0 $ Doc opts
+0 PP : SupportedLanguage -> Type
+PP language = {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
+              (names : UniqNames language funs vars) =>
+              Fuel ->
+              Stmts funs vars retTy -> Gen0 $ Doc opts

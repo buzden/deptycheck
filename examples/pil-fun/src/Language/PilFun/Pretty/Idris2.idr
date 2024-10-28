@@ -48,7 +48,7 @@ printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
 printFunCall : {funs : _} -> {vars : _} -> {from : _} -> {to : _} -> {opts : _} ->
                (names : UniqNames Idris2 funs vars) =>
                (n : IndexIn funs) -> 
-               (ati : AtIndex funs n (from ==> to)) => 
+               (ati : AtIndex n (from ==> to)) => 
                ExprsSnocList funs vars from -> Gen0 $ Doc opts
 
 data ArgStruct : LayoutOpts -> Type where
@@ -64,7 +64,7 @@ getArgs : {from' : SnocListTy} ->
           {vs : Vars} ->
           (nms : UniqNames Idris2 fs vs) -> 
           (i : IndexIn fs) ->
-          (ati : AtIndex fs i (from' ==> to')) ->
+          (ati : AtIndex i (from' ==> to')) ->
           {opts : _} ->
           Gen0 (ArgStruct opts)
 
@@ -215,10 +215,7 @@ printStmts fl $ Ret expr = do
 printStmts fl $ Nop = pure "pure ()"
 
 export
-printIdris2 : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-              (names : UniqNames Idris2 funs vars) =>
-              Fuel ->
-              Stmts funs vars retTy -> Gen0 $ Doc opts
+printIdris2 : PP Idris2
 printIdris2 fl stmts = do
     pure $ vsep ["module Main", 
                  "",
