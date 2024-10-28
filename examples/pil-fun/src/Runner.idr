@@ -119,6 +119,7 @@ run conf ctxt pp = do
 
 scala3StdFuns : NamedCtxt Scala3
 scala3StdFuns = do
+  AddFun False False "Console.println" $ [< Int'] ==> Nothing
   AddFun True  True "+"                $ [< Int', Int'] ==> Just Int'
   AddFun True  True "*"                $ [< Int', Int'] ==> Just Int'
   AddFun False True "-"                $ [< Int'] ==> Just Int'
@@ -128,11 +129,11 @@ scala3StdFuns = do
   AddFun True  True "||"               $ [< Bool', Bool'] ==> Just Bool'
   AddFun True  True "&&"               $ [< Bool', Bool'] ==> Just Bool'
   AddFun False True "!"                $ [< Bool'] ==> Just Bool'
-  AddFun False False "Console.println" $ [< Int'] ==> Nothing
   Enough
 
 lua5_4StdFuns : NamedCtxt Lua5_4
 lua5_4StdFuns = do
+  AddFun False False "print" $ [< Int'] ==> Nothing
   AddFun True  True  "+"     $ [< Int', Int'] ==> Just Int'
   AddFun True  True  "*"     $ [< Int', Int'] ==> Just Int'
   AddFun False True  "-"     $ [< Int'] ==> Just Int'
@@ -142,21 +143,20 @@ lua5_4StdFuns = do
   AddFun True  True  "or"    $ [< Bool', Bool'] ==> Just Bool'
   AddFun True  True  "and"   $ [< Bool', Bool'] ==> Just Bool'
   AddFun False True  "not"   $ [< Bool'] ==> Just Bool'
-  AddFun False False "print" $ [< Int'] ==> Nothing
   Enough
 
 idris2StdFuns : NamedCtxt Idris2
 idris2StdFuns = do
+  AddFun False False "printLn" ([< Int'] ==> Nothing)
   AddFun True  True  "+"       ([< Int', Int'] ==> Just Int')    {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}
   AddFun True  True  "*"       ([< Int', Int'] ==> Just Int')    {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}
-  AddFun False True  "-"       ([< Int'] ==> Just Int')          
+  AddFun True  True  "-"       ([< Int', Int'] ==> Just Int')    {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}      
   AddFun True  True  "<"       ([< Int', Int'] ==> Just Bool')   {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
   AddFun True  True  "<="      ([< Int', Int'] ==> Just Bool')   {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
   AddFun True  True  "=="      ([< Int', Int'] ==> Just Bool')   {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
   AddFun True  True  "||"      ([< Bool', Bool'] ==> Just Bool') {lCond = Idris2Cond (IsInfix (Bool' ** Bool' ** Just Bool' ** Refl) True)}
   AddFun True  True  "&&"      ([< Bool', Bool'] ==> Just Bool') {lCond = Idris2Cond (IsInfix (Bool' ** Bool' ** Just Bool' ** Refl) True)}
-  AddFun False True  "not"     ([< Bool'] ==> Just Bool')        
-  AddFun False False "printLn" ([< Int'] ==> Nothing)            
+  AddFun False True  "not"     ([< Bool'] ==> Just Bool')                    
   Enough
 
 supportedLanguages : SortedMap String (l : SupportedLanguage ** (NamedCtxt l, PP l))

@@ -20,7 +20,7 @@ import System.Random.Pure.StdGen
 
 NamesRestrictions where
   reservedKeywords = fromList [
-    "**", ",", "->", ".", "..", ".[|", ":", "; _", ";", "<-", "=", "=>", "%", "=", "===", "!", "&",
+    "**", ",", "->", ".", "..", ".[|", ":", "; _", ";", "<-", "=", "=>", "%", "=", "===", "!", "&", "|",
     "@", "[|", "\\", "_", "{", "|]", "}", "$=", "as", "auto", "case", "covering", "data", "default", "Delay",
     "do", "else", "export", "forall", "Force", "if", "import", "impossible", "in", "infix", "infixl", "infixr",
     "let", "module", "namespace", "of", "partial", "prefix", "private", "proof", "public", "record", "rewrite",
@@ -132,14 +132,14 @@ printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
 printStmts fl $ NewV ty Immutable initial cont = do
   (nm ** _) <- genNewName fl alphaNames _ _ names
   rest <- printStmts @{NewVar nm} fl cont
-  let lhs = "let" <++> line nm <++> "="
+  let lhs = "let" <++> line nm <++> ":" <++> printTy ty <++> "="
   rhs <- printExpr initial
-  pure $ flip vappend rest $ hangSep' 2 lhs rhs
+  pure $ flip vappend rest $ hangSep' 4 lhs rhs
 
 printStmts fl $ NewV ty Mutable initial cont = do
   (nm ** _) <- genNewName fl alphaNames _ _ names
   rest <- printStmts @{NewVar nm} fl cont
-  let lhs = line nm <++> "<-"
+  let lhs = line nm <++> ":" <++> "IORef" <++> printTy ty <++> "<-"
   rhs <- printExpr initial
   pure $ flip vappend rest $ hangSep' 2 lhs $ "newIORef" <++> rhs
 
