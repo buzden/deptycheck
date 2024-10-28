@@ -11,6 +11,7 @@ import Language.PilFun.Pretty.Derived
 import Language.PilFun.Pretty.DSL
 import Language.PilFun.Pretty.Scala3
 import Language.PilFun.Pretty.Lua5_4
+import Language.PilFun.Pretty.Idris2
 
 import Test.DepTyCheck.Gen
 
@@ -144,10 +145,25 @@ lua5_4StdFuns = do
   AddFun False False "print" $ [< Int'] ==> Nothing
   Enough
 
+idris2StdFuns : NamedCtxt Idris2
+idris2StdFuns = do
+  AddFun True  True  "+"       ([< Int', Int'] ==> Just Int')    {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}
+  AddFun True  True  "*"       ([< Int', Int'] ==> Just Int')    {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}
+  AddFun False True  "-"       ([< Int'] ==> Just Int')          
+  AddFun True  True  "<"       ([< Int', Int'] ==> Just Bool')   {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
+  AddFun True  True  "<="      ([< Int', Int'] ==> Just Bool')   {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
+  AddFun True  True  "=="      ([< Int', Int'] ==> Just Bool')   {lCond = Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
+  AddFun True  True  "||"      ([< Bool', Bool'] ==> Just Bool') {lCond = Idris2Cond (IsInfix (Bool' ** Bool' ** Just Bool' ** Refl) True)}
+  AddFun True  True  "&&"      ([< Bool', Bool'] ==> Just Bool') {lCond = Idris2Cond (IsInfix (Bool' ** Bool' ** Just Bool' ** Refl) True)}
+  AddFun False True  "not"     ([< Bool'] ==> Just Bool')        
+  AddFun False False "printLn" ([< Int'] ==> Nothing)            
+  Enough
+
 supportedLanguages : SortedMap String (l : SupportedLanguage ** (NamedCtxt l, PP l))
 supportedLanguages = fromList
   [ ("scala3", (Scala3 ** (scala3StdFuns, printScala3)))
   , ("lua5.4", (Lua5_4 ** (lua5_4StdFuns, printLua5_4)))
+  , ("idris2", (Idris2 ** (idris2StdFuns, printIdris2)))
   ]
 
 ---------------
