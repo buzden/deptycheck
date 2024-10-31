@@ -66,8 +66,8 @@ data Gen : Emptiness -> Type -> Type where
 
   Raw   : RawGen a -> Gen em a
 
-  OneOf : alem `NoWeaker` em =>
-          NotImmediatelyEmpty alem =>
+  OneOf : (0 _ : alem `NoWeaker` em) =>
+          (0 _ : NotImmediatelyEmpty alem) =>
           GenAlternatives True alem a -> Gen em a
 
   Bind  : {biem : _} ->
@@ -156,6 +156,9 @@ mapTaggedLazy = map . mapSnd . wrapLazy
 mapOneOf : GenAlternatives ne iem a -> (Gen iem a -> Gen em b) -> GenAlternatives ne em b
 mapOneOf (MkGenAlts gs) f = MkGenAlts $ mapTaggedLazy f gs
 
+mapMaybeTaggedLazy : (a -> Maybe b) -> LazyLst ne (Nat1, Lazy a) -> LazyLst0 (Nat1, Lazy b)
+mapMaybeTaggedLazy f = mapMaybe $ traverse $ map delay . f . force
+
 traverseMaybe : (a -> Maybe b) -> LazyLst ne a -> Maybe $ LazyLst ne b
 traverseMaybe f []      = Just []
 traverseMaybe f (x::xs) = case f x of
@@ -178,8 +181,8 @@ trMOneOf (MkGenAlts gs) f = MkGenAlts <$> trMTaggedLazy f gs
 --relax' : {em : _} -> iem `NoWeaker` em => (original : Gen iem a) -> (relaxed : Gen em a ** relaxed `Equiv` original)
 
 export
-relax : iem `NoWeaker` em => Gen iem a -> Gen em a
-relax @{AS} Empty      = Empty
+relax : (0 _ : iem `NoWeaker` em) => Gen iem a -> Gen em a
+relax @{nw} Empty      = rewrite maybeEmptyIsMinimal nw in Empty
 relax $ Pure x         = Pure x
 relax $ Raw x          = Raw x
 relax $ OneOf @{wo} x  = OneOf @{transitive' wo %search} x
@@ -214,8 +217,8 @@ strengthen $ Labelled l x = label l <$> strengthen x
 --- More utility ---
 --------------------
 
-mkOneOf : alem `NoWeaker` em =>
-          NotImmediatelyEmpty alem =>
+mkOneOf : (0 _ : alem `NoWeaker` em) =>
+          (0 _ : NotImmediatelyEmpty alem) =>
           (gens : LazyLst1 (Nat1, Lazy (Gen alem a))) ->
           Gen em a
 mkOneOf gens = OneOf $ MkGenAlts gens
@@ -231,7 +234,8 @@ export
 unGen1 : MonadRandom m => CanManageLabels m => Gen1 a -> m a
 unGen1 $ Pure x         = pure x
 unGen1 $ Raw sf         = sf.unRawGen
-unGen1 $ OneOf @{NN} oo = assert_total unGen1 . force . pickWeighted oo.unGenAlts . finToNat =<< randomFin oo.totalWeight
+unGen1 $ OneOf @{nw} oo = randomFin oo.totalWeight >>=
+  \g => assert_total unGen1 $ rewrite sym $ nonEmptyIsMaximal nw in pickWeighted oo.unGenAlts $ finToNat g
 unGen1 $ Bind @{bo} x f = case extractNE bo of Refl => x.unRawGen >>= unGen1 . f
 unGen1 $ Labelled l x   = manageLabel l $ unGen1 x
 
@@ -316,8 +320,18 @@ Functor (Gen em) where
   map f $ Pure x       = Pure $ f x
   map f $ Raw sf       = Raw $ f <$> sf
   map f $ OneOf oo     = OneOf $ mapOneOf oo $ assert_total $ map f
-  map f $ Bind x g     = Bind x $ assert_total map f . g
+  map f $ Bind x g     = Bind x $ map f . g
   map f $ Labelled l x = label l $ map f x
+
+namespace GenAlternatives
+
+  export %inline
+  strengthen : GenAlternatives ne em a -> Maybe $ GenAlternatives True em a
+  strengthen $ MkGenAlts xs = MkGenAlts <$> strengthen xs
+
+  export %inline
+  mapMaybe : (Gen iem a -> Maybe (Gen em b)) -> GenAlternatives ne iem a -> GenAlternatives False em b
+  mapMaybe f (MkGenAlts gs) = MkGenAlts $ mapMaybeTaggedLazy f gs
 
 export
 {em : _} -> Applicative (Gen em) where
@@ -347,20 +361,20 @@ export
 
   Bind {biem=bl} @{lbo} x f <*> Bind {biem=br} @{rbo} y g = case order {rel=NoWeaker} bl br of
     Left  _ => Bind {biem=br} [| (x, y) |] $ \(l, r) => assert_total $ relax (f l) <*> g r
-    Right _ => Bind {biem=bl} [| (x, y) |] $ \(l, r) => assert_total $ f l <*> relax (g r)
+    Right _ => Bind {biem=bl} [| (x, y) |] $ \(l, r) => f l <*> relax (g r)
 
 export
 {em : _} -> Monad (Gen em) where
   Empty    >>= _  = Empty
   Pure x   >>= nf = nf x
-  Raw g    >>= nf = Bind @{reflexive} g nf
-  (OneOf @{ao} oo >>= nf) {em=NonEmpty} with (ao) _ | NN = OneOf $ mapOneOf oo $ assert_total (>>= nf)
+  Raw g    >>= nf = Bind g nf
+  (OneOf @{ao} oo >>= nf) {em=NonEmpty} = OneOf $ mapOneOf oo $ assert_total $ rewrite nonEmptyIsMaximal ao in (>>= nf)
   (OneOf @{ao} oo >>= nf) {em=MaybeEmptyDeep} = OneOf $ mapOneOf oo $ assert_total (>>= nf) . relax @{ao}
-  (OneOf {alem} (MkGenAlts gs) >>= nf) {em=MaybeEmpty} = maybe Empty (mkOneOf {alem=MaybeEmptyDeep}) $
-    strengthen $ flip mapMaybe gs $ traverse $ map delay . strengthen . assert_total (>>= nf) . relax . force
+  (OneOf {alem} oo >>= nf) {em=MaybeEmpty} = maybe Empty (OneOf {alem=MaybeEmptyDeep}) $
+    strengthen $ flip mapMaybe oo $ strengthen . assert_total (>>= nf) . relax
   Bind {biem} x f >>= nf with (order {rel=NoWeaker} biem em)
     _ | Left _  = Bind x $ \x => assert_total $ relax (f x) >>= nf
-    _ | Right _ = Bind {biem} x $ \x => assert_total $ relax (f x) >>= relax . nf
+    _ | Right _ = Bind x $ \x => f x >>= relax . nf
   Labelled l x >>= nf = label l $ x >>= nf
 
 -----------------------------------------
@@ -374,9 +388,8 @@ namespace GenAlternatives
   Nil = MkGenAlts []
 
   export %inline
-  (::) : {em : _} ->
-         lem `NoWeaker` em =>
-         rem `NoWeaker` em =>
+  (::) : (0 _ : lem `NoWeaker` em) =>
+         (0 _ : rem `NoWeaker` em) =>
          (0 _ : IfUnsolved e True) =>
          (0 _ : IfUnsolved em NonEmpty) =>
          (0 _ : IfUnsolved lem em) =>
@@ -386,9 +399,8 @@ namespace GenAlternatives
 
   -- This concatenation breaks relative proportions in frequences of given alternative lists
   public export %inline
-  (++) : {em : _} ->
-         lem `NoWeaker` em =>
-         rem `NoWeaker` em =>
+  (++) : (0 _ : lem `NoWeaker` em) =>
+         (0 _ : rem `NoWeaker` em) =>
          (0 _ : IfUnsolved lem em) =>
          (0 _ : IfUnsolved rem em) =>
          (0 _ : IfUnsolved nel False) =>
@@ -425,10 +437,6 @@ namespace GenAlternatives
   export %inline
   relax : GenAlternatives True em a -> GenAlternatives ne em a
   relax $ MkGenAlts alts = MkGenAlts $ relaxT alts
-
-  export %inline
-  strengthen : GenAlternatives ne em a -> Maybe $ GenAlternatives True em a
-  strengthen $ MkGenAlts xs = MkGenAlts <$> strengthen xs
 
   export
   Functor (GenAlternatives ne em) where
@@ -478,16 +486,14 @@ namespace OneOf
 ||| In this example case, generator `oneOf [a, b]` and generator `c` will have the same probability in the resulting generator.
 export
 oneOf : {em : _} ->
-        alem `NoWeaker` em =>
-        AltsNonEmpty altsNe em =>
+        (0 _ : alem `NoWeaker` em) =>
+        (0 _ : AltsNonEmpty altsNe em) =>
         (0 _ : IfUnsolved alem em) =>
         (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
         GenAlternatives altsNe alem a -> Gen em a
-oneOf {em=NonEmpty} @{NN} @{NT} $ MkGenAlts xs = mkOneOf xs
-oneOf {em=MaybeEmptyDeep} @{_} @{DT} x = case x of MkGenAlts xs => mkOneOf xs
-oneOf {em=MaybeEmpty} x = case x of MkGenAlts xs => do
-  maybe Empty mkOneOf $ strengthen $ flip mapMaybe xs $
-    \wg => (fst wg,) . delay <$> Gen.strengthen {em=MaybeEmptyDeep} (snd wg)
+oneOf {em=NonEmpty} @{nw} @{NT} $ MkGenAlts xs = mkOneOf @{%search} @{transitive nw %search} xs
+oneOf {em=MaybeEmptyDeep} @{_} @{DT} $ MkGenAlts xs = mkOneOf xs
+oneOf {em=MaybeEmpty} oo = maybe Empty (OneOf {alem=MaybeEmptyDeep}) $ strengthen $ mapMaybe strengthen oo
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -497,8 +503,8 @@ oneOf {em=MaybeEmpty} x = case x of MkGenAlts xs => do
 ||| more frequently than `g2` in the resulting generator (in case when `g1` and `g2` always generate some value).
 export
 frequency : {em : _} ->
-            alem `NoWeaker` em =>
-            AltsNonEmpty altsNe em =>
+            (0 _ : alem `NoWeaker` em) =>
+            (0 _ : AltsNonEmpty altsNe em) =>
             (0 _ : IfUnsolved alem em) =>
             (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
             LazyLst altsNe (Nat1, Lazy (Gen alem a)) -> Gen em a
@@ -509,7 +515,7 @@ frequency = oneOf . MkGenAlts
 ||| This function is equivalent to `oneOf` applied to list of `pure` generators per each value.
 export
 elements : {em : _} ->
-           AltsNonEmpty altsNe em =>
+           (0 _ : AltsNonEmpty altsNe em) =>
            (0 _ : IfUnsolved em NonEmpty) =>
            (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
            LazyLst altsNe a -> Gen em a
@@ -535,7 +541,7 @@ elements' xs = elements $ relaxF $ fromList $ toList xs
 ||| `oneOf $ alternativesOf g` must be equivalent to `g` and
 ||| `alternativesof $ oneOf gs` must be equivalent to `gs`.
 export
-alternativesOf : {em : _} -> Gen em a -> GenAlternatives True em a
+alternativesOf : Gen em a -> GenAlternatives True em a
 alternativesOf $ OneOf oo     = MkGenAlts $ unGenAlts $ mapOneOf oo relax
 alternativesOf $ Labelled l x = processAlternatives (label l) $ alternativesOf x
 alternativesOf g              = [g]
@@ -546,7 +552,7 @@ alternativesOf g              = [g]
 ||| alternatives of depth `1` are those returned by the `alternativesOf` function,
 ||| alternatives of depth `n+1` are alternatives of all alternatives of depth `n` being flattened into a single alternatives list.
 export
-deepAlternativesOf : {em : _} -> (depth : Nat) -> Gen em a -> GenAlternatives True em a
+deepAlternativesOf : (depth : Nat) -> Gen em a -> GenAlternatives True em a
 deepAlternativesOf 0     gen = [ gen ]
 deepAlternativesOf 1     gen = alternativesOf gen
 deepAlternativesOf (S k) gen = processAlternatives' alternativesOf $ deepAlternativesOf k gen
@@ -591,15 +597,15 @@ forgetStructure g with (canBeEmpty em)
   _ | Left Refl = Raw $ MkRawGen $ unGen1 g
 
 public export
-processAlternatives : {em : _} -> (Gen em a -> Gen em b) -> Gen em a -> GenAlternatives True em b
+processAlternatives : (Gen em a -> Gen em b) -> Gen em a -> GenAlternatives True em b
 processAlternatives f = processAlternatives f . alternativesOf
 
 public export
-mapAlternativesOf : {em : _} -> (a -> b) -> Gen em a -> GenAlternatives True em b
+mapAlternativesOf : (a -> b) -> Gen em a -> GenAlternatives True em b
 mapAlternativesOf = processAlternatives . map
 
 public export %inline
-mapAlternativesWith : {em : _} -> Gen em a -> (a -> b) -> GenAlternatives True em b
+mapAlternativesWith : Gen em a -> (a -> b) -> GenAlternatives True em b
 mapAlternativesWith = flip mapAlternativesOf
 
 -- Priority is chosen to be able to use these operators without parenthesis

@@ -158,6 +158,14 @@ nonEmptyIsStrongest {em = NonEmpty}       = NN
 nonEmptyIsStrongest {em = MaybeEmptyDeep} = ND
 nonEmptyIsStrongest {em = MaybeEmpty}     = AS
 
+export
+maybeEmptyIsMinimal : MaybeEmpty `NoWeaker` x -> x === MaybeEmpty
+maybeEmptyIsMinimal AS = Refl
+
+export
+nonEmptyIsMaximal : x `NoWeaker` NonEmpty -> x === NonEmpty
+nonEmptyIsMaximal NN = Refl
+
 export %hint
 nonEmptyReflexive : {em : _} -> em `NoWeaker` em
 nonEmptyReflexive = reflexive
