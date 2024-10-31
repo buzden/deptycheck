@@ -15,6 +15,9 @@ import public Text.PrettyPrint.Bernardy
 
 %default total
 
+luaNamesGen : Gen0 String
+luaNamesGen = pack <$> listOf {length = choose (1,10)} (choose ('a', 'z'))
+
 printTy : Ty -> Doc opts
 printTy Int'  = "number"
 printTy Bool' = "boolean"
@@ -49,18 +52,18 @@ priority : String -> Maybe Priority
 priority func = lookup func priorities
 
 printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
-            (names : UniqNames funs vars) =>
+            (names : UniqNames Lua5_4 funs vars) =>
             Fuel ->
             (lastPriority : Maybe Priority) ->
             Expr funs vars ty -> Gen0 $ Doc opts
 printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
-               (names : UniqNames funs vars) =>
+               (names : UniqNames Lua5_4 funs vars) =>
                Fuel ->
                (lastPriority : Maybe Priority) ->
                IndexIn funs -> ExprsSnocList funs vars argTys ->
                Gen0 $ Doc opts
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-             (names : UniqNames funs vars) =>
+             (names : UniqNames Lua5_4 funs vars) =>
              (newNames : Gen0 String) =>
              Fuel ->
              Stmts funs vars retTy -> Gen0 $ Doc opts
@@ -68,7 +71,7 @@ printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
 printExpr fuel _ (C $ I x) = pure $ line $ show x
 printExpr fuel _ (C $ B True) = pure "true"
 printExpr fuel _ (C $ B False) = pure "false"
-printExpr fuel _ (V n) = pure $ line $ varName {funs} n
+printExpr fuel _ (V n) = pure $ line $ varName names n
 printExpr fuel lastPrior (F n x) = printFunCall fuel lastPrior n x
 
 addCommas : {opts : _} -> List (Doc opts) -> List (Doc opts)
@@ -77,12 +80,12 @@ addCommas [x] = [x]
 addCommas (x::xs) = (x <+> comma) :: addCommas xs
 
 printFunCall fuel lastPrior fun args = do
-  let name = funName {vars} fun
+  let name = funName names fun
   let thisPrior = priority name
   let addParens = !(chooseAnyOf Bool)
                    || isJust lastPrior && thisPrior >= lastPrior
   args' <- for (toList $ getExprs args) (\(Evidence _ e) => assert_total printExpr fuel Nothing e)
-  case (isFunInfix @{names} fun, args') of
+  case (isFunInfix names fun, args') of
     (True, [lhv, rhv]) => do
        pure $ parenthesise addParens $ hangSep 2 (lhv <++> line name) rhv
     (_, [x]) => do
@@ -111,14 +114,14 @@ withCont cont stmt =
   pure $ stmt `vappend` cont
 
 printStmts fuel (NewV ty mut initial cont) = do
-  (name ** _) <- genNewName fuel _ _ names
+  (name ** _) <- genNewName fuel newNames _ _ names
   lhv <- newVarLhv name mut
   rhv <- printExpr fuel Nothing initial
   withCont !(printStmts fuel cont) $ hangSep' 2 (lhv <++> "=") rhv
 
 printStmts fuel (NewF sig body cont) = do
-  (name ** _) <- genNewName fuel _ _ names
-  (localNames, funArgs) <- newVars fuel _ names
+  (name ** _) <- genNewName fuel newNames _ _ names
+  (localNames, funArgs) <- newVars fuel newNames _ names
   let funArgs' = reverse (toList funArgs)
   let argHints = funArgs' <&> \(name, ty) =>
                  the (Doc opts) "---@param" <++> line name <++> printTy ty
@@ -143,7 +146,7 @@ printStmts fuel (NewF sig body cont) = do
                         ]
 
 printStmts fuel ((#=) lhv rhv cont) = do
-  let lhv' = line (varName {funs} lhv) <++> "="
+  let lhv' = line (varName names lhv) <++> "="
   rhv' <- printExpr fuel Nothing rhv
   withCont !(printStmts fuel cont) $ hangSep' 2 lhv' rhv'
 
@@ -178,5 +181,5 @@ printStmts fuel Nop = do
     else pure empty
 
 export
-printLua5_4 : PP
-printLua5_4 fl = printStmts {names} {newNames} fl
+printLua5_4 : PP Lua5_4
+printLua5_4 fl = printStmts {names} {newNames = luaNamesGen} fl

@@ -7,24 +7,27 @@ import public Language.PilFun.Pretty
 %default total
 
 public export
-record NamedCtxt where
+record NamedCtxt (l : SupportedLanguage) where
   constructor MkNamedCtxt
   functions : Funs
   variables : Vars
-  fvNames   : UniqNames functions variables
+  fvNames   : UniqNames l functions variables
 
 public export %inline
-AddFun : (isInfix : Bool) -> (s : String) -> (fun : FunSig) ->
-         (0 _ : So $ not isInfix || fun.From.length >= 1) =>
-         (ctx : NamedCtxt) ->
-         (0 _ : NameIsNew ctx.fvNames s) =>
-         NamedCtxt
-AddFun isInfix s fun $ MkNamedCtxt funs vars names = MkNamedCtxt (funs:<fun) vars $ NewFun @{names} {isInfix} {fun} s
+AddFun : {0 l : SupportedLanguage} -> (isInfix : Bool) -> (isPure : Bool) -> (s : String) -> (fun : FunSig) ->
+         (lCond : LanguageToCondition l fun isInfix isPure) =>
+         (ctx : NamedCtxt l) ->
+         (0 _ : NameIsNew l ctx.functions ctx.variables ctx.fvNames s) =>
+         NamedCtxt l
+AddFun isInfix isPure s fun $ MkNamedCtxt funs vars names =
+  MkNamedCtxt (funs:<fun) vars $ NewFun @{names} {isInfix} {isPure} {fun} {languageCondition = lCond} s
 
 public export %inline
-(>>) : {0 arg : NamedCtxt -> Type} -> ((ctx : NamedCtxt) -> (0 _ : arg ctx) => NamedCtxt) -> (ctx : NamedCtxt) -> (0 _ : arg ctx) => NamedCtxt
+(>>) : {0 arg : NamedCtxt l -> Type}  ->
+       ((ctx : NamedCtxt l) -> (0 _ : arg ctx) => NamedCtxt l) ->
+       (ctx : NamedCtxt l) -> (0 _ : arg ctx) => NamedCtxt l
 (>>) f x = f x
 
 public export %inline
-Enough : NamedCtxt
+Enough : NamedCtxt l
 Enough = MkNamedCtxt [<] [<] Empty

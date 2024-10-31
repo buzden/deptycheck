@@ -43,19 +43,22 @@ NamesRestrictions where
     , "@"       , "=>>"   , "?=>"
     ]
 
+namesGenScala : Gen0 String
+namesGenScala = pack <$> listOf {length = choose (1,10)} (choose ('a', 'z'))
+
 printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
-            (names : UniqNames funs vars) =>
+            (names : UniqNames Scala3 funs vars) =>
             Prec -> Expr funs vars ty -> Gen0 $ Doc opts
 printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
-               (names : UniqNames funs vars) =>
+               (names : UniqNames Scala3 funs vars) =>
                Prec ->
                IndexIn funs -> ExprsSnocList funs vars argTys -> Gen0 $ Doc opts
 printFunCall p n args = do
-  let fn = funName {vars} n
+  let fn = funName names n
   let f = line fn
   let args = toList $ getExprs args
   let tupledArgs = \as => map tuple $ for as $ \(Evidence _ e) => printExpr Open e
-  case (isFunInfix @{names} n, args, !(chooseAnyOf Bool)) of
+  case (isFunInfix names n, args, !(chooseAnyOf Bool)) of
     -- Call for bitwise infix extension method
     (True, [Evidence _ l, Evidence _ r], True) => pure $ parenthesise (p >= App) $ !(printExpr App l) <++> f <++> !(printExpr App r)
     -- Call for appropriate extension method with 0, 2 or more arguments
@@ -66,18 +69,18 @@ printFunCall p n args = do
 printExpr p $ C $ I k     = pure $ line $ show k
 printExpr p $ C $ B False = pure $ "false"
 printExpr p $ C $ B True  = pure $ "true"
-printExpr p $ V n         = pure $ line $ varName {funs} n
+printExpr p $ V n         = pure $ line $ varName names n
 printExpr p $ F n args    = assert_total printFunCall p n args
 
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-             (names : UniqNames funs vars) =>
+             (names : UniqNames Scala3 funs vars) =>
              (newNames : Gen0 String) =>
              Fuel ->
              (toplevel : Bool) ->
              Stmts funs vars retTy -> Gen0 $ Doc opts
 
 wrapMain : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-           (names : UniqNames funs vars) =>
+           (names : UniqNames Scala3 funs vars) =>
            (newNames : Gen0 String) =>
            (0 _ : IfUnsolved retTy Nothing) =>
            Fuel ->
@@ -87,7 +90,7 @@ wrapMain : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
 wrapMain fl False Nothing x = x
 wrapMain fl False (Just cont) x = [| x `vappend` assert_total printStmts fl False cont |]
 wrapMain fl True cont body = do
-  (nm ** _) <- genNewName fl _ _ names
+  (nm ** _) <- genNewName fl newNames _ _ names
   b <- body
   cnt <- for cont $ assert_total $ printStmts @{JustNew nm} fl False
   let b = maybe b (b `vappend`) cnt
@@ -100,7 +103,7 @@ wrapMain fl True cont body = do
     ]
 
 printSubStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
-                (names : UniqNames funs vars) =>
+                (names : UniqNames Scala3 funs vars) =>
                 (newNames : Gen0 String) =>
                 Fuel ->
                 (noEmpty : Bool) ->
@@ -109,7 +112,7 @@ printSubStmts _  True Nop = pure "{}"
 printSubStmts fl _    ss  = printStmts fl False ss
 
 printStmts fl tl $ NewV ty mut initial cont = do
-  (nm ** _) <- genNewName fl _ _ names
+  (nm ** _) <- genNewName fl newNames _ _ names
   rest <- printStmts @{NewVar nm} fl tl cont
   let tyAscr = if !chooseAny then ":" <++> printTy ty else empty
   let declPref = case mut of
@@ -120,13 +123,13 @@ printStmts fl tl $ NewV ty mut initial cont = do
   pure $ flip vappend rest $ hangSep' 2 lhs rhs
 
 printStmts fl tl $ NewF sig body cont = do
-  (nm ** _) <- genNewName fl _ _ names
+  (nm ** _) <- genNewName fl newNames _ _ names
   isInfix <- chooseAny
-  let (isInfix ** infixCond) : (b ** So (not b || sig.From.length >= 1)) = case decSo _ of
-                                                                             Yes condMet => (isInfix ** condMet)
-                                                                             No _        => (False ** Oh)
-  rest <- printStmts @{NewFun {isInfix} {infixCond} nm} fl tl cont
-  (namesInside, funArgs) <- newVars fl _ names
+  let (isInfix ** infixCond) : (b ** ScalaCondition sig b _) = case decSo _ of
+                                                              Yes condMet => (isInfix ** MoreThanOneArg condMet)
+                                                              No _        => (False ** IsNotInfix)
+  rest <- printStmts @{NewFun {isInfix} {languageCondition = Scala3Cond infixCond} nm} fl tl cont
+  (namesInside, funArgs) <- newVars fl newNames _ names
   brBody <- chooseAny
   funBody <- if brBody
                then printStmts @{namesInside} fl False body
@@ -151,7 +154,7 @@ printStmts fl tl $ NewF sig body cont = do
       Just extPref => hangSep' 2 extPref mainDef
 
 printStmts fl tl $ (#=) n v cont = wrapMain fl tl (Just cont) $ do
-  pure $ line (varName {funs} n) <++> "=" <++> !(printExpr Open v)
+  pure $ line (varName names n) <++> "=" <++> !(printExpr Open v)
 
 printStmts fl tl $ If cond th el cont = wrapMain fl tl (Just cont) $ do
   br <- chooseAny
@@ -170,5 +173,5 @@ printStmts fl tl $ Ret x = wrapMain {funs} {vars} fl tl Nothing $ printExpr Open
 printStmts fl tl $ Nop = wrapMain {funs} {vars} fl tl Nothing $ pure empty
 
 export
-printScala3 : PP
-printScala3 fl = printStmts {names} {newNames} fl True
+printScala3 : PP Scala3
+printScala3 fl = printStmts {names} {newNames = namesGenScala} fl True

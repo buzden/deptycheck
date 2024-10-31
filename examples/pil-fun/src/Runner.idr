@@ -11,6 +11,7 @@ import Language.PilFun.Pretty.Derived
 import Language.PilFun.Pretty.DSL
 import Language.PilFun.Pretty.Scala3
 import Language.PilFun.Pretty.Lua5_4
+import Language.PilFun.Pretty.Idris2
 
 import Test.DepTyCheck.Gen
 
@@ -98,18 +99,16 @@ cliOpts =
 --- Running ---
 ---------------
 
-namesGen : Gen0 String
-namesGen = pack <$> listOf {length = choose (1,10)} (choose ('a', 'z'))
-
 run : Config ->
-      NamedCtxt ->
-      (pp : PP) ->
+      {0 language : SupportedLanguage} ->
+      NamedCtxt language ->
+      (pp : PP language) ->
       IO ()
 run conf ctxt pp = do
   seed <- conf.usedSeed
   let vals = unGenTryN conf.testsCnt seed $
                genStmts conf.modelFuel ctxt.functions ctxt.variables Nothing >>=
-                 pp @{ctxt.fvNames} @{namesGen} conf.ppFuel
+                 pp @{ctxt.fvNames} conf.ppFuel
   Lazy.for_ vals $ \val => do
     putStrLn "-------------------\n"
     putStr $ render conf.layoutOpts val
@@ -118,38 +117,53 @@ run conf ctxt pp = do
 --- Language config ---
 -----------------------
 
-scala3StdFuns : NamedCtxt
+scala3StdFuns : NamedCtxt Scala3
 scala3StdFuns = do
-  AddFun True  "+"  $ [< Int', Int'] ==> Just Int'
-  AddFun True  "*"  $ [< Int', Int'] ==> Just Int'
-  AddFun False "-"  $ [< Int'] ==> Just Int'
-  AddFun True  "<"  $ [< Int', Int'] ==> Just Bool'
-  AddFun True  "<=" $ [< Int', Int'] ==> Just Bool'
-  AddFun True  "==" $ [< Int', Int'] ==> Just Bool'
-  AddFun True  "||" $ [< Bool', Bool'] ==> Just Bool'
-  AddFun True  "&&" $ [< Bool', Bool'] ==> Just Bool'
-  AddFun False "!"  $ [< Bool'] ==> Just Bool'
-  AddFun False "Console.println" $ [< Int'] ==> Nothing
+  AddFun False False "Console.println" $ [< Int'] ==> Nothing
+  AddFun True  True "+"                $ [< Int', Int'] ==> Just Int'
+  AddFun True  True "*"                $ [< Int', Int'] ==> Just Int'
+  AddFun False True "-"                $ [< Int'] ==> Just Int'
+  AddFun True  True "<"                $ [< Int', Int'] ==> Just Bool'
+  AddFun True  True "<="               $ [< Int', Int'] ==> Just Bool'
+  AddFun True  True "=="               $ [< Int', Int'] ==> Just Bool'
+  AddFun True  True "||"               $ [< Bool', Bool'] ==> Just Bool'
+  AddFun True  True "&&"               $ [< Bool', Bool'] ==> Just Bool'
+  AddFun False True "!"                $ [< Bool'] ==> Just Bool'
   Enough
 
-lua5_4StdFuns : NamedCtxt
+lua5_4StdFuns : NamedCtxt Lua5_4
 lua5_4StdFuns = do
-  AddFun True  "+"  $ [< Int', Int'] ==> Just Int'
-  AddFun True  "*"  $ [< Int', Int'] ==> Just Int'
-  AddFun False "-"  $ [< Int'] ==> Just Int'
-  AddFun True  "<"  $ [< Int', Int'] ==> Just Bool'
-  AddFun True  "<=" $ [< Int', Int'] ==> Just Bool'
-  AddFun True  "==" $ [< Int', Int'] ==> Just Bool'
-  AddFun True  "or" $ [< Bool', Bool'] ==> Just Bool'
-  AddFun True  "and" $ [< Bool', Bool'] ==> Just Bool'
-  AddFun False "not"  $ [< Bool'] ==> Just Bool'
-  AddFun False "print" $ [< Int'] ==> Nothing
+  AddFun False False "print" $ [< Int'] ==> Nothing
+  AddFun True  True  "+"     $ [< Int', Int'] ==> Just Int'
+  AddFun True  True  "*"     $ [< Int', Int'] ==> Just Int'
+  AddFun False True  "-"     $ [< Int'] ==> Just Int'
+  AddFun True  True  "<"     $ [< Int', Int'] ==> Just Bool'
+  AddFun True  True  "<="    $ [< Int', Int'] ==> Just Bool'
+  AddFun True  True  "=="    $ [< Int', Int'] ==> Just Bool'
+  AddFun True  True  "or"    $ [< Bool', Bool'] ==> Just Bool'
+  AddFun True  True  "and"   $ [< Bool', Bool'] ==> Just Bool'
+  AddFun False True  "not"   $ [< Bool'] ==> Just Bool'
   Enough
 
-supportedLanguages : SortedMap String (NamedCtxt, PP)
+idris2StdFuns : NamedCtxt Idris2
+idris2StdFuns = do
+  AddFun False False "printLn" ([< Int'] ==> Nothing)
+  AddFun True  True  "+"       ([< Int', Int'] ==> Just Int')    @{Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}
+  AddFun True  True  "*"       ([< Int', Int'] ==> Just Int')    @{Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}
+  AddFun True  True  "-"       ([< Int', Int'] ==> Just Int')    @{Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}
+  AddFun True  True  "<"       ([< Int', Int'] ==> Just Bool')   @{Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
+  AddFun True  True  "<="      ([< Int', Int'] ==> Just Bool')   @{Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
+  AddFun True  True  "=="      ([< Int', Int'] ==> Just Bool')   @{Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
+  AddFun True  True  "||"      ([< Bool', Bool'] ==> Just Bool') @{Idris2Cond (IsInfix (Bool' ** Bool' ** Just Bool' ** Refl) True)}
+  AddFun True  True  "&&"      ([< Bool', Bool'] ==> Just Bool') @{Idris2Cond (IsInfix (Bool' ** Bool' ** Just Bool' ** Refl) True)}
+  AddFun False True  "not"     ([< Bool'] ==> Just Bool')
+  Enough
+
+supportedLanguages : SortedMap String (l : SupportedLanguage ** (NamedCtxt l, PP l))
 supportedLanguages = fromList
-  [ ("scala3", scala3StdFuns, printScala3)
-  , ("lua5.4", lua5_4StdFuns, printLua5_4)
+  [ ("scala3", (Scala3 ** (scala3StdFuns, printScala3)))
+  , ("lua5.4", (Lua5_4 ** (lua5_4StdFuns, printLua5_4)))
+  , ("idris2", (Idris2 ** (idris2StdFuns, printIdris2)))
   ]
 
 ---------------
@@ -170,7 +184,7 @@ main = do
   let [lang] = nonOptions
     | []   => die "no language is given, supported languages: \{langs}\n\{usage}"
     | many => die "too many languages are given\n\{usage}"
-  let Just (ctxt, pp) = lookup lang supportedLanguages
+  let Just (_ ** (ctxt, pp)) = lookup lang supportedLanguages
     | Nothing => die "unknown language \{lang}, supported languages \{langs}\n\{usage}"
 
   let config = foldl (flip apply) defaultConfig options

@@ -54,6 +54,11 @@ namespace SnocListTy
     (:<) : SnocListTy -> Ty -> SnocListTy
 
   public export
+  snocListTyToList : SnocListTy -> List Ty
+  snocListTyToList Lin = []
+  snocListTyToList (xs :< x) = (snocListTyToList xs) ++ [x]
+
+  public export
   length : SnocListTy -> Nat
   length Lin = Z
   length (sx :< _) = S $ length sx
@@ -193,6 +198,8 @@ data Expr : Funs -> Vars -> Ty -> Type where
       Expr funs vars ty
 
   F : (n : IndexIn funs) ->
+      {from : _} ->
+      {to : _} ->
       AtIndex n (from ==> Just to) =>
       ExprsSnocList funs vars from ->
       Expr funs vars to
@@ -231,6 +238,7 @@ data Stmts : (funs : Funs) ->
          Stmts funs vars retTy
 
   Call : (n : IndexIn funs) ->
+         {from : _} ->
          AtIndex n (from ==> Nothing) =>
          ExprsSnocList funs vars from ->
          (cont : Stmts funs vars retTy) ->
