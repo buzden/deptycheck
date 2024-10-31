@@ -75,8 +75,9 @@ rawNewName : Fuel ->
              Gen MaybeEmpty (s ** NameIsNew l funs vars names s)
 
 export
-genNewName : {l : SupportedLanguage} -> Fuel -> Gen MaybeEmpty String ->
+genNewName : Fuel -> Gen MaybeEmpty String ->
              NamesRestrictions =>
+             {l : SupportedLanguage} ->
              (funs : Funs) -> (vars : Vars) -> (names : UniqNames l funs vars) ->
              Gen MaybeEmpty (s ** NameIsNew l funs vars names s)
 genNewName fl genStr funs vars names = do
