@@ -20,12 +20,12 @@ import System.Random.Pure.StdGen
 
 NamesRestrictions where
   reservedKeywords = fromList [
-    "**", ",", "->", ".", "..", ".[|", ":", "; _", ";", "<-", "=", "=>", "%", "=", "!", "&", "|",
-    "@", "[|", "\\", "_", "{", "|]", "}", "$=", "as", "auto", "case", "covering", "data", "default", "Delay",
-    "do", "else", "export", "forall", "Force", "if", "import", "impossible", "in", "infix", "infixl", "infixr",
+    "**", ",", "->", ".", "..", ":", ";", "<-", "=", "=>", "%", "=", "!", "&", "|",
+    "@", "[|", "\\", "_", "{", "|]", "}", "$=", "as", "auto", "case", "covering", "data", "default",
+    "do", "else", "export", "forall", "if", "import", "impossible", "in", "infix", "infixl", "infixr",
     "let", "module", "namespace", "of", "partial", "prefix", "private", "proof", "public", "record", "rewrite",
-    "then", "total", "where", "with", "main", "IO", "Int", "Int8", "Int16", "Int32", "Int64", "Bits8", "Bits16",
-    "Bits32", "Bits64", "Bool", "Integer", "Chat", "String", "%World", "Lazy", "Delay", "Force" ]
+    "then", "total", "where", "with", "main", "Int", "Int8", "Int16", "Int32", "Int64", "Bits8", "Bits16",
+    "Bits32", "Bits64", "Integer", "Double", "Chat", "String", "%World", "Lazy", "Delay", "Force" ]
 
 alphaNames : Gen0 String
 alphaNames = pack <$> listOf {length = choose (1,10)} (choose ('a', 'z'))
