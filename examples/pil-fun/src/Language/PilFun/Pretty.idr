@@ -86,29 +86,29 @@ genNewName fl genStr funs vars names = do
     then assert_total $ genNewName fl genStr funs vars names -- we could reduce fuel instead of `assert_total`
     else pure nn
 
-varName : UniqNames l funs vars => IndexIn vars -> String
-varName @{JustNew @{ss} _} i         = varName @{ss} i
-varName @{NewFun @{ss} _}  i         = varName @{ss} i
-varName @{NewVar       s}  Here      = s
-varName @{NewVar @{ss} _}  (There i) = varName @{ss} i
+varName : UniqNames l funs vars -> IndexIn vars -> String
+varName (JustNew @{ss} _) i         = varName ss i
+varName (NewFun @{ss} _)  i         = varName ss i
+varName (NewVar s)        Here      = s
+varName (NewVar @{ss} _)  (There i) = varName ss i
 
-funName : UniqNames l funs vars => IndexIn funs -> String
-funName @{JustNew @{ss} _} i         = funName @{ss} i
-funName @{NewFun       s}  Here      = s
-funName @{NewFun @{ss} _}  (There i) = funName @{ss} i
-funName @{NewVar @{ss} _}  i         = funName @{ss} i
+funName : UniqNames l funs vars -> IndexIn funs -> String
+funName (JustNew @{ss} _) i         = funName ss i
+funName (NewFun s)        Here      = s
+funName (NewFun @{ss} _)  (There i) = funName ss i
+funName (NewVar @{ss} _)  i         = funName ss i
 
-isFunInfix : UniqNames l funs vars => IndexIn funs -> Bool
-isFunInfix @{JustNew @{ss} _} i        = isFunInfix @{ss} i
-isFunInfix @{NewFun {isInfix} _} Here  = isInfix
-isFunInfix @{NewFun @{ss} s} (There i) = isFunInfix @{ss} i
-isFunInfix @{NewVar @{ss} s} i         = isFunInfix @{ss} i
+isFunInfix : UniqNames l funs vars -> IndexIn funs -> Bool
+isFunInfix (JustNew @{ss} _)    i         = isFunInfix ss i
+isFunInfix (NewFun {isInfix} _) Here      = isInfix
+isFunInfix (NewFun @{ss} s)     (There i) = isFunInfix ss i
+isFunInfix (NewVar @{ss} s)     i         = isFunInfix ss i
 
 isFunPure : UniqNames l funs vars -> IndexIn funs -> Bool
-isFunPure (JustNew @{ss} _) i = isFunPure ss i
-isFunPure (NewFun {isPure} _) Here = isPure
-isFunPure (NewFun @{ss} _) (There i) = isFunPure ss i
-isFunPure (NewVar @{ss} _) i = isFunPure ss i
+isFunPure (JustNew @{ss} _)   i         = isFunPure ss i
+isFunPure (NewFun {isPure} _) Here      = isPure
+isFunPure (NewFun @{ss} _)    (There i) = isFunPure ss i
+isFunPure (NewVar @{ss} _)    i         = isFunPure ss i
 
 -- Returned vect has a reverse order; I'd like some `SnocVect` here.
 newVars : NamesRestrictions =>

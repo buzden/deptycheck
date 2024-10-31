@@ -54,11 +54,11 @@ printFunCall : {funs : _} -> {vars : _} -> {opts : _} ->
                Prec ->
                IndexIn funs -> ExprsSnocList funs vars argTys -> Gen0 $ Doc opts
 printFunCall p n args = do
-  let fn = funName {vars} n
+  let fn = funName names n
   let f = line fn
   let args = toList $ getExprs args
   let tupledArgs = \as => map tuple $ for as $ \(Evidence _ e) => printExpr Open e
-  case (isFunInfix @{names} n, args, !(chooseAnyOf Bool)) of
+  case (isFunInfix names n, args, !(chooseAnyOf Bool)) of
     -- Call for bitwise infix extension method
     (True, [Evidence _ l, Evidence _ r], True) => pure $ parenthesise (p >= App) $ !(printExpr App l) <++> f <++> !(printExpr App r)
     -- Call for appropriate extension method with 0, 2 or more arguments
@@ -69,7 +69,7 @@ printFunCall p n args = do
 printExpr p $ C $ I k     = pure $ line $ show k
 printExpr p $ C $ B False = pure $ "false"
 printExpr p $ C $ B True  = pure $ "true"
-printExpr p $ V n         = pure $ line $ varName {funs} n
+printExpr p $ V n         = pure $ line $ varName names n
 printExpr p $ F n args    = assert_total printFunCall p n args
 
 printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
@@ -154,7 +154,7 @@ printStmts fl tl $ NewF sig body cont = do
       Just extPref => hangSep' 2 extPref mainDef
 
 printStmts fl tl $ (#=) n v cont = wrapMain fl tl (Just cont) $ do
-  pure $ line (varName {funs} n) <++> "=" <++> !(printExpr Open v)
+  pure $ line (varName names n) <++> "=" <++> !(printExpr Open v)
 
 printStmts fl tl $ If cond th el cont = wrapMain fl tl (Just cont) $ do
   br <- chooseAny

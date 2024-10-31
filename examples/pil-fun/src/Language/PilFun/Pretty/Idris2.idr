@@ -98,7 +98,7 @@ getArgs {from'} argedLst (NewFun _ {languageCondition}) Here Here' with (languag
 
 printFunCall n args = do
   wantInfix <- chooseAnyOf Bool
-  let f_name = funName {vars} n
+  let f_name = funName names n
   let f_doc : Doc opts = line f_name
   processedArgs <- getArgs (funs ** vars ** names ** args) names n ati
   case (wantInfix, processedArgs) of
@@ -113,8 +113,8 @@ printExpr $ C $ I k = pure $ line $ show k
 printExpr $ C $ B False = pure "False"
 printExpr $ C $ B True = pure "True"
 printExpr $ V n = case index vars n of
-  (_, Mutable) => pure $ "!" <+> (parenthesise True $ "readIORef" <++> line (varName {funs} n))
-  (_, Immutable) => pure $ line $ varName {funs} n
+  (_, Mutable) => pure $ "!" <+> (parenthesise True $ "readIORef" <++> line (varName names n))
+  (_, Immutable) => pure $ line $ varName names n
 printExpr @{uniqNames} $ F {from = [<]} n args = do 
   funCallDoc <- assert_total printFunCall n args
   let finalDoc = if isFunPure uniqNames n then funCallDoc else ("!" <+> funCallDoc)
@@ -196,7 +196,7 @@ printStmts fl $ NewF (typesFrom ==> maybeRet) body cont = do
 printStmts fl $ (#=) n v cont = do
     v_doc <- printExpr v
     rest <- printStmts fl cont
-    pure $ flip vappend rest $ line "writeIORef" <++> line (varName {funs} n) <++> v_doc
+    pure $ flip vappend rest $ line "writeIORef" <++> line (varName names n) <++> v_doc
 
 printStmts fl $ If cond th el cont = do
     rest <- printStmts fl cont

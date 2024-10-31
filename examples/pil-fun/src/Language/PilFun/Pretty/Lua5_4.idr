@@ -71,7 +71,7 @@ printStmts : {funs : _} -> {vars : _} -> {retTy : _} -> {opts : _} ->
 printExpr fuel _ (C $ I x) = pure $ line $ show x
 printExpr fuel _ (C $ B True) = pure "true"
 printExpr fuel _ (C $ B False) = pure "false"
-printExpr fuel _ (V n) = pure $ line $ varName {funs} n
+printExpr fuel _ (V n) = pure $ line $ varName names n
 printExpr fuel lastPrior (F n x) = printFunCall fuel lastPrior n x
 
 addCommas : {opts : _} -> List (Doc opts) -> List (Doc opts)
@@ -80,12 +80,12 @@ addCommas [x] = [x]
 addCommas (x::xs) = (x <+> comma) :: addCommas xs
 
 printFunCall fuel lastPrior fun args = do
-  let name = funName {vars} fun
+  let name = funName names fun
   let thisPrior = priority name
   let addParens = !(chooseAnyOf Bool)
                    || isJust lastPrior && thisPrior >= lastPrior
   args' <- for (toList $ getExprs args) (\(Evidence _ e) => assert_total printExpr fuel Nothing e)
-  case (isFunInfix @{names} fun, args') of
+  case (isFunInfix names fun, args') of
     (True, [lhv, rhv]) => do
        pure $ parenthesise addParens $ hangSep 2 (lhv <++> line name) rhv
     (_, [x]) => do
@@ -146,7 +146,7 @@ printStmts fuel (NewF sig body cont) = do
                         ]
 
 printStmts fuel ((#=) lhv rhv cont) = do
-  let lhv' = line (varName {funs} lhv) <++> "="
+  let lhv' = line (varName names lhv) <++> "="
   rhv' <- printExpr fuel Nothing rhv
   withCont !(printStmts fuel cont) $ hangSep' 2 lhv' rhv'
 
