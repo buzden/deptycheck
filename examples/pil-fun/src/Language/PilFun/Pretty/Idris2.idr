@@ -31,7 +31,7 @@ alphaNames : Gen0 String
 alphaNames = pack <$> listOf {length = choose (1,10)} (choose ('a', 'z'))
 
 infixNames : Gen0 String
-infixNames = flip suchThat (not . isPrefixOf "--") $ pack <$> listOf {length = choose (1,4)} (elements 
+infixNames = flip suchThat (not . isPrefixOf "--") $ pack <$> listOf {length = choose (1,4)} (elements
   [':', '+', '-', '*', '\\', '/', '=', '.', '?', '|', '&', '>', '<', '!', '@', '$', '%', '^', '~', '#'])
 
 printTy : Ty -> Doc opts
@@ -48,8 +48,8 @@ printExpr : {funs : _} -> {vars : _} -> {opts : _} ->
 
 printFunCall : {funs : _} -> {vars : _} -> {from : _} -> {to : _} -> {opts : _} ->
                (names : UniqNames Idris2 funs vars) =>
-               (n : IndexIn funs) -> 
-               (ati : AtIndex n (from ==> to)) => 
+               (n : IndexIn funs) ->
+               (ati : AtIndex n (from ==> to)) =>
                ExprsSnocList funs vars from -> Gen0 $ Doc opts
 
 data ArgStruct : LayoutOpts -> Type where
@@ -63,7 +63,7 @@ getArgs : {from' : SnocListTy} ->
           (argFs : Funs ** argVs : Vars ** argNms : UniqNames Idris2 argFs argVs ** ExprsSnocList argFs argVs from') ->
           {fs : Funs} ->
           {vs : Vars} ->
-          (nms : UniqNames Idris2 fs vs) -> 
+          (nms : UniqNames Idris2 fs vs) ->
           (i : IndexIn fs) ->
           (ati : AtIndex i (from' ==> to')) ->
           {opts : _} ->
@@ -79,10 +79,11 @@ getArgs argedLst (NewFun _ {ss}) (There i) (There' i') = getArgs argedLst ss i i
 getArgs {from'} argedLst (NewFun _ {languageCondition}) Here Here' with (languageCondition)
 
   getArgs {from'} argedLst (NewFun _ {languageCondition}) Here Here' | Idris2Cond (IsInfix (a ** b ** to ** rst) isPure) with (rst)
-    getArgs {from' = [< a, b ]} (argFs ** argVs ** argNms ** [< a', b' ]) (NewFun _ {languageCondition}) Here Here' | Idris2Cond (IsInfix (a ** b ** to ** Refl) isPure) | Refl = do 
-      aDoc <- printExpr a'
-      bDoc <- printExpr b'
-      pure $ InfixTwoArgs aDoc bDoc
+    getArgs {from' = [< a, b ]} (argFs ** argVs ** argNms ** [< a', b' ]) (NewFun _ {languageCondition}) Here Here'
+        | Idris2Cond (IsInfix (a ** b ** to ** Refl) isPure) | Refl = do
+          aDoc <- printExpr a'
+          bDoc <- printExpr b'
+          pure $ InfixTwoArgs aDoc bDoc
 
   getArgs {from'} argedLst (NewFun _ {languageCondition}) Here Here' | Idris2Cond (NotInfix isPure) with (from')
     _ | [< a, b ] with (argedLst)
@@ -108,18 +109,18 @@ printFunCall n args = do
     (False, PrefixTwoArgs a b) => pure $ f_doc <++> a <++> b
     (_, ManyArgs argsDocs) => pure $ f_doc <++> hsep argsDocs
     (_, NoArgs)=> pure f_doc
-      
+
 printExpr $ C $ I k = pure $ line $ show k
 printExpr $ C $ B False = pure "False"
 printExpr $ C $ B True = pure "True"
 printExpr $ V n = case index vars n of
   (_, Mutable) => pure $ "!" <+> (parenthesise True $ "readIORef" <++> line (varName names n))
   (_, Immutable) => pure $ line $ varName names n
-printExpr @{uniqNames} $ F {from = [<]} n args = do 
+printExpr @{uniqNames} $ F {from = [<]} n args = do
   funCallDoc <- assert_total printFunCall n args
   let finalDoc = if isFunPure uniqNames n then funCallDoc else ("!" <+> funCallDoc)
   pure finalDoc
-printExpr @{uniqNames} $ F {from} n args = do 
+printExpr @{uniqNames} $ F {from} n args = do
   funCallDoc <- assert_total printFunCall n args
   let proccesedDoc = parenthesise True funCallDoc
   let finalDoc = if isFunPure uniqNames n then proccesedDoc else ("!" <+> proccesedDoc)
@@ -151,15 +152,15 @@ printStmts fl $ NewF ([<] ==> maybeRet) body cont = do
   let funName = line nm
   let processedOutputType = "IO" <++> printMaybeTy maybeRet
   printedBody <- printStmts fl body <&> indent' 6
-  pure $ flip vappend rest $ vsep 
+  pure $ flip vappend rest $ vsep
     [ "let" <++> funName <++> ":" <++> processedOutputType,
-      indent 4 $ funName <++> "=" <++> "do", 
+      indent 4 $ funName <++> "=" <++> "do",
       printedBody ]
 
 printStmts fl $ NewF ([< a, b ] ==> maybeRet) body cont = do
   wantInfix <- chooseAnyOf Bool
-  let (isInfix ** infixCond) : (inf ** IdrisCondition ([< a, b ] ==> maybeRet) inf False) = case wantInfix of 
-        True => (True ** IsInfix (a ** b ** maybeRet ** Refl) False) 
+  let (isInfix ** infixCond) : (inf ** IdrisCondition ([< a, b ] ==> maybeRet) inf False) = case wantInfix of
+        True => (True ** IsInfix (a ** b ** maybeRet ** Refl) False)
         False => (False ** NotInfix False)
   let nameGen = if isInfix then infixNames else alphaNames
   (nm ** _) <- genNewName fl nameGen _ _ names
@@ -172,7 +173,7 @@ printStmts fl $ NewF ([< a, b ] ==> maybeRet) body cont = do
   let prerparedArgs = hsep $ reverse (toList funArgs) <&> \(n, t) => line n
   printedBody <- printStmts @{namesInside} fl body <&> indent' 6
   let declAndDefintion = [ "let" <++> infixAwareName <++> ":" <++> idrisTypeSignature,
-                            indent 4 $ infixAwareName <++> prerparedArgs <++> "=" <++> "do", 
+                            indent 4 $ infixAwareName <++> prerparedArgs <++> "=" <++> "do",
                             printedBody ]
   let final = if isInfix then ("let infix 1" <++> line nm) :: declAndDefintion else declAndDefintion
   pure $ flip vappend rest $ vsep final
@@ -189,7 +190,7 @@ printStmts fl $ NewF (typesFrom ==> maybeRet) body cont = do
   let prerparedArgs = hsep $ reverse (toList funArgs) <&> \(n, t) => line n
   printedBody <- printStmts @{namesInside} fl body <&> indent' 6
   let declAndDefintion = vsep [ "let" <++> funName <++> ":" <++> idrisTypeSignature,
-                                indent 4 $ funName <++> prerparedArgs <++> "=" <++> "do", 
+                                indent 4 $ funName <++> prerparedArgs <++> "=" <++> "do",
                                 printedBody ]
   pure $ vappend declAndDefintion rest
 
@@ -218,7 +219,7 @@ printStmts fl $ Nop = pure "pure ()"
 export
 printIdris2 : PP Idris2
 printIdris2 fl stmts = do
-    pure $ vsep ["module Main", 
+    pure $ vsep ["module Main",
                  "",
                  "import Data.IORef",
                  "",

@@ -69,7 +69,7 @@ public export
 interface NamesRestrictions where
   reservedKeywords : SortedSet String
 
-rawNewName : Fuel -> 
+rawNewName : Fuel ->
              (Fuel -> Gen MaybeEmpty String) =>
              (l : SupportedLanguage) -> (funs : Funs) -> (vars : Vars) -> (names : UniqNames l funs vars) ->
              Gen MaybeEmpty (s ** NameIsNew l funs vars names s)

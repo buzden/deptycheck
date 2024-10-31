@@ -100,7 +100,7 @@ cliOpts =
 ---------------
 
 run : Config ->
-      {0 language : SupportedLanguage} -> 
+      {0 language : SupportedLanguage} ->
       NamedCtxt language ->
       (pp : PP language) ->
       IO ()
@@ -150,13 +150,13 @@ idris2StdFuns = do
   AddFun False False "printLn" ([< Int'] ==> Nothing)
   AddFun True  True  "+"       ([< Int', Int'] ==> Just Int')    @{Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}
   AddFun True  True  "*"       ([< Int', Int'] ==> Just Int')    @{Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}
-  AddFun True  True  "-"       ([< Int', Int'] ==> Just Int')    @{Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}      
+  AddFun True  True  "-"       ([< Int', Int'] ==> Just Int')    @{Idris2Cond (IsInfix (Int' ** Int' ** Just Int' ** Refl) True)}
   AddFun True  True  "<"       ([< Int', Int'] ==> Just Bool')   @{Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
   AddFun True  True  "<="      ([< Int', Int'] ==> Just Bool')   @{Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
   AddFun True  True  "=="      ([< Int', Int'] ==> Just Bool')   @{Idris2Cond (IsInfix (Int' ** Int' ** Just Bool' ** Refl) True)}
   AddFun True  True  "||"      ([< Bool', Bool'] ==> Just Bool') @{Idris2Cond (IsInfix (Bool' ** Bool' ** Just Bool' ** Refl) True)}
   AddFun True  True  "&&"      ([< Bool', Bool'] ==> Just Bool') @{Idris2Cond (IsInfix (Bool' ** Bool' ** Just Bool' ** Refl) True)}
-  AddFun False True  "not"     ([< Bool'] ==> Just Bool')                    
+  AddFun False True  "not"     ([< Bool'] ==> Just Bool')
   Enough
 
 supportedLanguages : SortedMap String (l : SupportedLanguage ** (NamedCtxt l, PP l))
