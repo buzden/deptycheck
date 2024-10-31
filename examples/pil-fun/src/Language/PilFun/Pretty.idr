@@ -24,25 +24,21 @@ data SupportedLanguage = Scala3
                        | Lua5_4
 
 public export
-data ScalaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
- where
+data ScalaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type where
   IsNotInfix : ScalaCondition funSig False b
   MoreThanOneArg : So (funSig.From.length >= 1) -> ScalaCondition funSig isInfix b
 
 public export
-data IdrisCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
- where
+data IdrisCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type where
   IsInfix : (a : Ty ** b : Ty ** to : MaybeTy ** funSig === ([<a, b] ==> to)) -> (isPure : Bool) -> IdrisCondition funSig True isPure
   NotInfix : (isPure : Bool) -> IdrisCondition funSig False isPure
 
 public export
-data LuaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
-  where
-    TrivialLuaCondition : LuaCondition funSig isInfix isPure
+data LuaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type where
+  TrivialLuaCondition : LuaCondition funSig isInfix isPure
 
 public export
-data LanguageToCondition : (l : SupportedLanguage) -> FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type
- where
+data LanguageToCondition : (l : SupportedLanguage) -> FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type where
   [search l]
   Scala3Cond : ScalaCondition funSig isInfix isPure -> LanguageToCondition Scala3 funSig isInfix isPure
   Idris2Cond : IdrisCondition funSig isInfix isPure -> LanguageToCondition Idris2 funSig isInfix isPure
