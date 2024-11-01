@@ -5,8 +5,6 @@ Generated values:
 -----
 MkZ 3 2 MkBS X2 Y2
 -----
-MkZ 1 0 MkBS X0 Y0
------
 MkZ 3 2 MkBS X2 Y2
 -----
 MkZ 3 2 MkBS X2 Y2
@@ -15,9 +13,11 @@ MkZ 3 2 MkBS X2 Y2
 -----
 MkZ 3 2 MkBS X2 Y2
 -----
-MkZ 1 0 MkBS X0 Y0
+MkZ 3 2 MkBS X2 Y2
 -----
-MkZ 1 0 MkBS X0 Y0
+MkZ 3 2 MkBS X2 Y2
+-----
+MkZ 3 2 MkBS X2 Y2
 -----
 MkZ 3 2 MkBS X2 Y2
 -----

@@ -94,8 +94,8 @@ removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermin
 propagatePriOnce : Ord p => FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
 propagatePriOnce =
   -- propagate back along dependencies
-  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
-  .
+--  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
+--  .
   -- propagate back along strong determinations
   (\dets => foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets)
 
@@ -177,7 +177,7 @@ searchOrder : {con : _} ->
 searchOrder determinable left = do
 
   -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
-  let notDetermined = filter (\(idx, det, _) => not (contains idx determinable) && null det.stronglyDeterminingArgs) $ kvList $ propagatePri' left
+  let notDetermined = filter (\(idx, det, _) => null det.stronglyDeterminingArgs) $ kvList $ propagatePri' left
 
   -- choose the one from the variants
   -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
