@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+MkZ 3 2 X2 Y2
+-----
+MkZ 1 0 X0 Y0
+-----
+MkZ 3 2 X2 Y2
+-----
+MkZ 3 2 X2 Y2
+-----
+MkZ 3 2 X2 Y2
+-----
+MkZ 3 2 X2 Y2
+-----
+MkZ 1 0 X0 Y0
+-----
+MkZ 1 0 X0 Y0
+-----
+MkZ 3 2 X2 Y2
+-----
+MkZ 3 2 X2 Y2
