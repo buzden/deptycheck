@@ -91,15 +91,15 @@ removeDeeply : Foldable f =>
                FinMap con.args.length $ Determination con
 removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
-propagatePriOnce : Ord p => Num p => FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
+propagatePriOnce : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
 propagatePriOnce =
-  -- propagate back along dependencies, if they are not dependent on anything else
-  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x ((\cp => if cp == 0 then x else cp) . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
+  -- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
+  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x (max x . (`minus` x) . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
   .
   -- propagate back along strong determinations
   (\dets => foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets)
 
-propagatePri : Ord p => Num p => FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
+propagatePri : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
 propagatePri dets = do
   let next = propagatePriOnce dets
   if ((==) `on` map snd) dets next
