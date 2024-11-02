@@ -160,7 +160,7 @@ refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps)
 -- compute the priority
 -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
 -- additionally we take into account the number of outgoing strong determinations and count of dependent arguments
-propagatePri' : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat, Nat)
+propagatePri' : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat)
 propagatePri' dets = do
   let invStrongDetPwr = do
     let _ : Monoid Nat = Additive
@@ -168,7 +168,7 @@ propagatePri' dets = do
   -- the original priority is the count of already determined given arguments for each argument
   let origPri = refineBasePri $ dets <&> \det => (det,) $ det.influencingArgs `minus` det.argsDependsOn.size
   flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
-    (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 $ Fin.Map.lookup idx invStrongDetPwr, det.argsDependsOn.size)
+    (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 (Fin.Map.lookup idx invStrongDetPwr) + det.argsDependsOn.size)
 
 searchOrder : {con : _} ->
               (determinable : SortedSet $ Fin con.args.length) ->
