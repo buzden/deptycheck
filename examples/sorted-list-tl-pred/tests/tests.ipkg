@@ -1,4 +1,4 @@
-package sorted-list-tests
+package sorted-list-tl-pred-tests
 
 main = Tests
 executable = runtests

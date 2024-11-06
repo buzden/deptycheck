@@ -24,10 +24,10 @@ ipkg = "docs.ipkg"
 ### Examples ###
 ################
 
-[custom.all.sorted-list]
+[custom.all.sorted-list-tl-pred]
 type = "local"
-path = "examples/sorted-list"
-ipkg = "sorted-list.ipkg"
+path = "examples/sorted-list-tl-pred"
+ipkg = "sorted-list-tl-pred.ipkg"
 test = "tests/tests.ipkg"
 
 [custom.all.covering-seq]

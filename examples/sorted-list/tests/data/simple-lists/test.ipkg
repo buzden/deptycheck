@@ -1,3 +1,0 @@
-package a-test
-
-depends = sorted-list

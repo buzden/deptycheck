@@ -1,6 +1,6 @@
 package a-test
 
-depends = sorted-list
+depends = sorted-list-tl-pred
 
 executable = a-test
 main = Main
