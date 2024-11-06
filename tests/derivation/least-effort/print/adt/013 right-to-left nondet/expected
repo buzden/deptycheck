@@ -93,7 +93,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"
                                                          .$ bindVar "n"
-                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "k" .$ bindVar "^bnd^{arg:3}")
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "m" .$ bindVar "^bnd^{arg:3}")
                                                       .=    var ">>="
                                                          .$ (var "<DerivedGen.X>[0]" .$ var "^outmost-fuel^" .$ var "n")
                                                          .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
@@ -101,15 +101,15 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Y
                                                                    { sc = var "{lamc:0}"
                                                                    , ty = implicitFalse
                                                                    , clauses =
-                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "m" .$ bindVar "^bnd^{arg:4}"
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "k" .$ bindVar "^bnd^{arg:4}"
                                                                          .=    var "Prelude.pure"
                                                                             .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                             .$ (   var "DerivedGen.MkY"
                                                                                 .! ("k", implicitTrue)
                                                                                 .! ("m", implicitTrue)
                                                                                 .! ("n", implicitTrue)
-                                                                                .$ var "^bnd^{arg:4}"
-                                                                                .$ var "^bnd^{arg:3}")
+                                                                                .$ var "^bnd^{arg:3}"
+                                                                                .$ var "^bnd^{arg:4}")
                                                                        ]
                                                                    })
                                                     ]

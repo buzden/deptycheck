@@ -2,9 +2,11 @@
 module Deriving.DepTyCheck.Gen.Core.ConsDerive
 
 import public Control.Monad.State
+import public Control.Monad.State.Tuple
 
 import public Data.Collections.Analysis
 import public Data.Either
+import public Data.Fin.Map
 import public Data.SortedSet.Extra
 
 import public Decidable.Equality
@@ -13,11 +15,21 @@ import public Deriving.DepTyCheck.Gen.Derive
 
 %default total
 
+record Determination (0 con : Con) where
+  constructor MkDetermination
+  ||| Args which cannot be determined by this arg, e.g. because it is used in a non-trivial expression.
+  stronglyDeterminingArgs : SortedSet $ Fin con.args.length
+  ||| Args which this args depends on, which are not strongly determining.
+  argsDependsOn : SortedSet $ Fin con.args.length
+  ||| Count of influencing arguments
+  influencingArgs : Nat
+
 record TypeApp (0 con : Con) where
   constructor MkTypeApp
   argHeadType : TypeInfo
   {auto 0 argHeadTypeGood : AllTyArgsNamed argHeadType}
   argApps : Vect argHeadType.args.length .| Either (Fin con.args.length) TTImp
+  determ  : Determination con
 
 getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length $ TypeApp con
 getTypeApps con = do
@@ -42,9 +54,14 @@ getTypeApps con = do
         let Yes lengthCorrect = decEq ty.args.length args.length
           | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
         _ <- ensureTyArgsNamed ty
-        pure $ MkTypeApp ty $ rewrite lengthCorrect in args.asVect <&> \arg => case getExpr arg of
-          expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
-          expr            => Right expr
+        let as = rewrite lengthCorrect in args.asVect <&> \arg => case getExpr arg of
+                   expr@(IVar _ n) => mirror . maybeToEither expr $ lookup n conArgIdxs
+                   expr            => Right expr
+        let strongDetermination = rights as.asList <&> mapMaybe (lookup' conArgIdxs) . allVarNames
+        let strongDeterminationWeight = concatMap @{Additive} (max 1 . length) strongDetermination -- we add 1 for constant givens
+        let stronglyDeterminedBy = fromList $ join strongDetermination
+        let argsDependsOn = fromList (lefts as.asList) `difference` stronglyDeterminedBy
+        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn $ argsDependsOn.size + strongDeterminationWeight
 
   for con.args.asVect $ analyseTypeApp . type
 
@@ -65,6 +82,116 @@ interface ConstructorDerivator where
 
 --- Particular tactics ---
 
+mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
+mapDetermination f = {stronglyDeterminingArgs $= f, argsDependsOn $= f}
+
+removeDeeply : Foldable f =>
+               (toRemove : f $ Fin con.args.length) ->
+               (fromWhat : FinMap con.args.length $ Determination con) ->
+               FinMap con.args.length $ Determination con
+removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
+
+propagatePriOnce : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
+propagatePriOnce =
+  -- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
+  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x (max x . (`minus` x) . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
+  .
+  -- propagate back along strong determinations
+  (\dets => foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets)
+
+propagatePri : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
+propagatePri dets = do
+  let next = propagatePriOnce dets
+  if ((==) `on` map snd) dets next
+    then dets
+    else assert_total propagatePri next
+
+findFirstMax : Ord p => List (a, b, p) -> Maybe (a, b)
+findFirstMax [] = Nothing
+findFirstMax ((x, y, pri)::xs) = Just $ go (x, y) pri xs where
+  go : (a, b) -> p -> List (a, b, p) -> (a, b)
+  go curr _       []                = curr
+  go curr currPri ((x, y, pri)::xs) = if pri > currPri then go (x, y) pri xs else go curr currPri xs
+
+data PriorityOrigin = Original | Propagated
+
+Eq PriorityOrigin where
+  Original   == Original   = True
+  Propagated == Propagated = True
+  _ == _ = False
+
+Ord PriorityOrigin where
+  compare Original   Original   = EQ
+  compare Original   Propagated = GT
+  compare Propagated Original   = LT
+  compare Propagated Propagated = EQ
+
+-- adds base priorities of args which we depend on transitively
+refineBasePri : Num p => {con : _} -> FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
+refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps) $ traverse_ go $ List.allFins _ where
+  go : (visited : MonadState (SortedSet $ Fin con.args.length) m) =>
+       (pris : MonadState (FinMap con.args.length (Determination con, p)) m) =>
+       Monad m =>
+       Fin con.args.length ->
+       m ()
+  go curr = do
+
+    visited <- get
+    -- if we already managed the current item, then exit
+    let False = contains curr visited | True => pure ()
+    -- remember that we are in charge of the current item
+    let visited = insert curr visited
+    put visited
+
+    let Just (det, currPri) = lookup curr !(get @{pris}) | Nothing => pure ()
+
+    let unvisitedDeps = det.argsDependsOn `union` det.stronglyDeterminingArgs
+
+    -- run this for all dependences
+    for_ (unvisitedDeps `difference` visited) $ assert_total go
+
+    -- compute what needs to be added to the current priority
+    let addition = mapMaybe (map snd . lookup' !(get @{pris})) (SortedSet.toList unvisitedDeps)
+    let newPri = foldl (+) currPri addition
+
+    -- update the priority of the currenly managed argument
+    modify $ updateExisting (mapSnd $ const newPri) curr
+
+-- compute the priority
+-- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
+-- additionally we take into account the number of outgoing strong determinations and count of dependent arguments
+propagatePri' : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat)
+propagatePri' dets = do
+  let invStrongDetPwr = do
+    let _ : Monoid Nat = Additive
+    flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
+  -- the original priority is the count of already determined given arguments for each argument
+  let origPri = refineBasePri $ dets <&> \det => (det,) $ det.influencingArgs `minus` det.argsDependsOn.size
+  flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
+    (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 (Fin.Map.lookup idx invStrongDetPwr) + det.argsDependsOn.size)
+
+searchOrder : {con : _} ->
+              (determinable : SortedSet $ Fin con.args.length) ->
+              (left : FinMap con.args.length $ Determination con) ->
+              List $ Fin con.args.length
+searchOrder determinable left = do
+
+  -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
+  let notDetermined = filter (\(idx, det, _) => null det.stronglyDeterminingArgs) $ kvList $ propagatePri' left
+
+  -- choose the one from the variants
+  -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
+  -- (e.g. because of discharging of strong determination), and new alternative have more priority than current ones.
+  -- TODO to determine the best among current variants taking into account which indices are more complex (transitively!)
+  let Just (curr, currDet) = findFirstMax notDetermined
+    | Nothing => []
+
+  -- remove information about all currently chosen args
+  let next = removeDeeply .| Id curr .| removeDeeply currDet.argsDependsOn left
+
+  -- `next` is smaller than `left` because `curr` must be not empty
+  curr :: searchOrder (determinable `difference` currDet.argsDependsOn) (assert_smaller left next)
+
 ||| "Non-obligatory" means that some present external generator of some type
 ||| may be ignored even if its type is really used in a generated data constructor.
 namespace NonObligatoryExts
@@ -80,23 +207,15 @@ namespace NonObligatoryExts
       -- Prepare local search context
       let _ : NamesInfoInTypes = %search    -- I don't why it won't be found without this
 
-      -- Log all arguments' position and their names (if they have some)
-      logPoint {level=15} "least-effort" [sig, con] "- con args: \{List.allFins con.args.length}"
-
       -------------------------------------------------------------
       -- Prepare intermediate data and functions using this data --
       -------------------------------------------------------------
 
-      -- Build a map from constructor's argument name to its index
-      let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
-
       -- Compute left-to-right need of generation when there are non-trivial types at the left
       argsTypeApps <- getTypeApps con
 
-      -- Get dependencies of constructor's arguments
-      let rawDeps' = argDeps con.args
-      let rawDeps : Vect _ $ SortedSet $ Fin con.args.length := downmap (mapIn weakenToSuper) rawDeps'
-      let dependees = concat rawDeps -- arguments which any other argument depends on
+      -- Get arguments which any other argument depends on
+      let dependees = dependees con.args
 
       -- Decide how constructor arguments would be named during generation
       let bindNames = withIndex (fromList con.args) <&> map (bindNameRenamer . argName)
@@ -116,7 +235,7 @@ namespace NonObligatoryExts
           genForOrder order = map (foldr apply callCons) $ evalStateT givs $ for order $ \genedArg => do
 
             -- Get info for the `genedArg`
-            let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
+            let MkTypeApp typeOfGened argsOfTypeOfGened _ = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
 
             -- Acquire the set of arguments that are already present
             presentArguments <- get
@@ -165,57 +284,27 @@ namespace NonObligatoryExts
             -- Chain the subgen call with a given continuation
             pure $ \cont => `(~subgenCall >>= ~(bindRHS cont))
 
-      -------------------------------------------------
-      -- Left-to-right generation phase (2nd phase) ---
-      -------------------------------------------------
+      --------------------------------------------
+      -- Compute possible orders of generation ---
+      --------------------------------------------
 
-      -- Determine which arguments need to be generated in a left-to-right manner
-      let (leftToRightArgsTypeApp, leftToRightArgs) = unzip $ filter (\(ta, _) => any isRight ta.argApps) $ toListI argsTypeApps
+      -- Compute determination map without weak determination information
+      let determ = insertFrom' empty $ mapI (\i, ta => (i, ta.determ)) argsTypeApps
 
-      --------------------------------------------------------------------------------
-      -- Preparation of input for the left-to-right phase (1st right-to-left phase) --
-      --------------------------------------------------------------------------------
+      logPoint {level=15} "least-effort" [sig, con] "- determ: \{determ}"
+      logPoint {level=15} "least-effort" [sig, con] "- givs: \{givs}"
 
-      -- Acquire those variables that appear in non-trivial type expressions, i.e. those which needs to be generated before the left-to-right phase
-      let preLTR = leftToRightArgsTypeApp >>= \ta => rights (toList ta.argApps) >>= allVarNames
-      let preLTR = SortedSet.fromList $ mapMaybe (lookup' conArgIdxs) preLTR
+      let nonDetermGivs = removeDeeply givs determ
+      let theOrder = searchOrder (concatMap argsDependsOn nonDetermGivs) nonDetermGivs
 
-      -- Find rightmost arguments among `preLTR`
-      let depsLTR = SortedSet.fromList $
-                      mapMaybe (\(ds, idx) => whenT .| contains idx preLTR && null ds .| idx) $
-                        toListI $ rawDeps <&> intersection preLTR . (`difference` givs)
-
-      ---------------------------------------------------------------------------------
-      -- Main right-to-left generation phase (3rd phase aka 2nd right-to-left phase) --
-      ---------------------------------------------------------------------------------
-
-      -- Arguments that no other argument depends on
-      let rightmostArgs = fromFoldable {f=Vect _} range `difference` (givs `union` dependees)
-
-      ---------------------------------------------------------------
-      -- Manage different possible variants of generation ordering --
-      ---------------------------------------------------------------
-
-      -- Prepare info about which arguments are independent and thus can be ordered arbitrarily
-      let disjDeps = disjointDepSets rawDeps' givs
-
-      -- Acquire order(s) in what we will generate arguments
-      let allOrders = do
-        leftmost  <- indepPermutations' disjDeps depsLTR
-        rightmost <- indepPermutations' disjDeps rightmostArgs
-        pure $ leftmost ++ leftToRightArgs ++ rightmost
-
-      let allOrders = if simplificationHack then take 1 allOrders else allOrders
-      let allOrders = List.nub $ nub <$> allOrders
-
-      for_ allOrders $ \order =>
-        logPoint {level=10} "least-effort" [sig, con] "- used final order: \{order}"
+      logPoint {level=10} "least-effort" [sig, con] "- used final order: \{theOrder}"
 
       --------------------------
       -- Producing the result --
       --------------------------
 
-      callOneOf "\{show con.name} (orders)".label <$> traverse genForOrder allOrders
+      with FromString.(.label)
+      labelGen "\{show con.name} (orders)".label <$> genForOrder theOrder
 
       where
 
@@ -226,6 +315,9 @@ namespace NonObligatoryExts
 
         Foldable f => Interpolation (f $ Fin con.args.length) where
           interpolate = ("[" ++) . (++ "]") . joinBy ", " . map interpolate . toList
+
+        Interpolation (Determination con) where
+          interpolate ta = "<=\{ta.stronglyDeterminingArgs} ->\{ta.argsDependsOn}"
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
   ||| but discards some there is a conflict between them.
