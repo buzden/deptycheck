@@ -1,4 +1,4 @@
-package pil-fun-tests
+package sorted-list-so-full-tests
 
 main = Tests
 executable = runtests

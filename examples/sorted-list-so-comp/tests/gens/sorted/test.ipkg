@@ -1,6 +1,6 @@
 package a-test
 
-depends = sorted-list
+depends = sorted-list-so-comp
 
 executable = a-test
 main = Main

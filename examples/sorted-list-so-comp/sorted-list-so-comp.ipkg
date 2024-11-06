@@ -1,0 +1,13 @@
+package sorted-list-so-comp
+
+version = 0.1
+
+authors = "Denis Buzdalov"
+
+sourcedir = "src"
+builddir = ".build"
+
+depends = deptycheck
+
+modules = Data.List.Sorted
+        , Data.List.Sorted.Gen

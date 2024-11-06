@@ -3,4 +3,4 @@ package derive-test
 authors = "Denis Buzdalov"
 
 depends = deptycheck
-        , sorted-list
+        , sorted-list-so-full
