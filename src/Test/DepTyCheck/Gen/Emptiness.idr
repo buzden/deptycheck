@@ -36,20 +36,29 @@ data NoWeaker : (from, to : Emptiness) -> Type where
 
 export infix 6 `NoWeaker`
 
+Uninhabited (MaybeEmpty `NoWeaker` MaybeEmptyDeep) where
+  uninhabited _ impossible
+
+Uninhabited (MaybeEmpty `NoWeaker` NonEmpty) where
+  uninhabited _ impossible
+
+Uninhabited (MaybeEmptyDeep `NoWeaker` NonEmpty) where
+  uninhabited _ impossible
+
 noWeaker : (from, to : Emptiness) -> Dec $ from `NoWeaker` to
 noWeaker NonEmpty       NonEmpty       = Yes %search
-noWeaker MaybeEmptyDeep NonEmpty       = No $ \case _ impossible
-noWeaker MaybeEmpty     NonEmpty       = No $ \case _ impossible
+noWeaker MaybeEmptyDeep NonEmpty       = No uninhabited
+noWeaker MaybeEmpty     NonEmpty       = No uninhabited
 noWeaker NonEmpty       MaybeEmptyDeep = Yes %search
 noWeaker MaybeEmptyDeep MaybeEmptyDeep = Yes %search
-noWeaker MaybeEmpty     MaybeEmptyDeep = No $ \case _ impossible
+noWeaker MaybeEmpty     MaybeEmptyDeep = No uninhabited
 noWeaker _              MaybeEmpty     = Yes %search
 
 export
 Reflexive _ NoWeaker where
-  reflexive {x = NonEmpty}       = %search
-  reflexive {x = MaybeEmptyDeep} = %search
-  reflexive {x = MaybeEmpty}     = %search
+  reflexive {x=NonEmpty}       = %search
+  reflexive {x=MaybeEmptyDeep} = %search
+  reflexive {x=MaybeEmpty}     = %search
 
 export
 transitive' : x `NoWeaker` y -> y `NoWeaker` z -> x `NoWeaker` z
@@ -80,32 +89,32 @@ PartialOrder _ NoWeaker where
 
 export
 Connex _ NoWeaker where
-  connex {x = NonEmpty}       {y = NonEmpty}       nxy = void $ nxy Refl
-  connex {x = MaybeEmpty}     {y = MaybeEmpty}     nxy = void $ nxy Refl
-  connex {x = MaybeEmptyDeep} {y = MaybeEmptyDeep} nxy = void $ nxy Refl
+  connex {x=NonEmpty}       {y=NonEmpty}       = %search
+  connex {x=MaybeEmpty}     {y=MaybeEmpty}     = %search
+  connex {x=MaybeEmptyDeep} {y=MaybeEmptyDeep} = %search
 
-  connex {x = NonEmpty}       {y = MaybeEmpty}     nxy = %search
-  connex {x = NonEmpty}       {y = MaybeEmptyDeep} nxy = %search
-  connex {x = MaybeEmpty}     {y = NonEmpty}       nxy = %search
-  connex {x = MaybeEmptyDeep} {y = NonEmpty}       nxy = %search
+  connex {x=NonEmpty}       {y=MaybeEmpty}     = %search
+  connex {x=NonEmpty}       {y=MaybeEmptyDeep} = %search
+  connex {x=MaybeEmpty}     {y=NonEmpty}       = %search
+  connex {x=MaybeEmptyDeep} {y=NonEmpty}       = %search
 
-  connex {x = MaybeEmpty}     {y = MaybeEmptyDeep} nxy = %search
-  connex {x = MaybeEmptyDeep} {y = MaybeEmpty}     nxy = %search
+  connex {x=MaybeEmpty}     {y=MaybeEmptyDeep} = %search
+  connex {x=MaybeEmptyDeep} {y=MaybeEmpty}     = %search
 
 export
 LinearOrder _ NoWeaker where
 
 export
 StronglyConnex _ NoWeaker where
-  order NonEmpty         NonEmpty         = %search
-  order NonEmpty         (MaybeEmptyDeep) = %search
-  order NonEmpty         (MaybeEmpty)     = %search
-  order (MaybeEmptyDeep) NonEmpty         = %search
-  order (MaybeEmpty)     NonEmpty         = %search
-  order (MaybeEmpty)     (MaybeEmpty)     = %search
-  order (MaybeEmpty)     (MaybeEmptyDeep) = %search
-  order (MaybeEmptyDeep) (MaybeEmpty)     = %search
-  order (MaybeEmptyDeep) (MaybeEmptyDeep) = %search
+  order NonEmpty       NonEmpty       = %search
+  order NonEmpty       MaybeEmptyDeep = %search
+  order NonEmpty       MaybeEmpty     = %search
+  order MaybeEmptyDeep NonEmpty       = %search
+  order MaybeEmpty     NonEmpty       = %search
+  order MaybeEmpty     MaybeEmpty     = %search
+  order MaybeEmpty     MaybeEmptyDeep = %search
+  order MaybeEmptyDeep MaybeEmpty     = %search
+  order MaybeEmptyDeep MaybeEmptyDeep = %search
 
 public export
 CanBeEmpty : Emptiness -> Type
@@ -121,9 +130,9 @@ namespace NonEmpty
   extractNE : (0 _ : Not $ CanBeEmpty em) -> em = NonEmpty
   extractNE ncbe = irrelevantEq $ extractNE' ncbe where
     extractNE' : {em : _} -> Not (CanBeEmpty em) -> em = NonEmpty
-    extractNE' {em = NonEmpty      } _ = Refl
-    extractNE' {em = MaybeEmptyDeep} f = absurd $ f %search
-    extractNE' {em = MaybeEmpty    } f = absurd $ f %search
+    extractNE' {em=NonEmpty      } _ = Refl
+    extractNE' {em=MaybeEmptyDeep} f = absurd %search
+    extractNE' {em=MaybeEmpty    } f = absurd %search
 
 export
 canBeEmpty : (em : _) -> Either (em = NonEmpty) (CanBeEmpty em)
@@ -143,10 +152,7 @@ canBeNotImmediatelyEmpty MaybeEmpty     = %search
 
 export
 relaxAnyCanBeEmpty : CanBeEmpty cbe => em `NoWeaker` MaybeEmptyDeep -> em `NoWeaker` cbe
-relaxAnyCanBeEmpty @{DD} ND = %search
-relaxAnyCanBeEmpty @{DD} DD = %search
-relaxAnyCanBeEmpty @{AS} ND = %search
-relaxAnyCanBeEmpty @{AS} DD = %search
+relaxAnyCanBeEmpty @{cbe} = flip transitive' cbe
 
 export %hint
 rev : {a, b : _} -> Not (a `NoWeaker` b) -> b `NoWeaker` a
@@ -154,17 +160,21 @@ rev f = either (absurd . f) id $ order a b
 
 export %hint
 nonEmptyIsStrongest : {em : _} -> NonEmpty `NoWeaker` em
-nonEmptyIsStrongest {em = NonEmpty}       = NN
-nonEmptyIsStrongest {em = MaybeEmptyDeep} = ND
-nonEmptyIsStrongest {em = MaybeEmpty}     = AS
+nonEmptyIsStrongest {em=NonEmpty}       = NN
+nonEmptyIsStrongest {em=MaybeEmptyDeep} = ND
+nonEmptyIsStrongest {em=MaybeEmpty}     = AS
 
 export
-maybeEmptyIsMinimal : MaybeEmpty `NoWeaker` x -> x === MaybeEmpty
-maybeEmptyIsMinimal AS = Refl
+maybeEmptyIsMinimal : (0 _ : MaybeEmpty `NoWeaker` x) -> x = MaybeEmpty
+maybeEmptyIsMinimal nw = irrelevantEq $ maybeEmptyIsMinimal' nw where
+  maybeEmptyIsMinimal' : forall x. MaybeEmpty `NoWeaker` x -> x = MaybeEmpty
+  maybeEmptyIsMinimal' AS = Refl
 
 export
-nonEmptyIsMaximal : x `NoWeaker` NonEmpty -> x === NonEmpty
-nonEmptyIsMaximal NN = Refl
+nonEmptyIsMaximal : (0 _ : x `NoWeaker` NonEmpty) -> x = NonEmpty
+nonEmptyIsMaximal nw = irrelevantEq $ nonEmptyIsMaximal' nw where
+  nonEmptyIsMaximal' : forall x. x `NoWeaker` NonEmpty -> x = NonEmpty
+  nonEmptyIsMaximal' NN = Refl
 
 export %hint
 nonEmptyReflexive : {em : _} -> em `NoWeaker` em
@@ -189,8 +199,8 @@ namespace BindToOuter
   extractNE bto = irrelevantEq $ extractNE' bto where
     extractNE' : {em : _} -> BindToOuter em NonEmpty -> em = NonEmpty
     extractNE' {em=NonEmpty      } _       = Refl
-    extractNE' {em=MaybeEmptyDeep} $ BTO f = case f %search of _ impossible
-    extractNE' {em=MaybeEmpty    } $ BTO f = case f %search of _ impossible
+    extractNE' {em=MaybeEmptyDeep} $ BTO f = absurd %search
+    extractNE' {em=MaybeEmpty    } $ BTO f = absurd %search
 
 export %hint
 btoRefl : BindToOuter em em
