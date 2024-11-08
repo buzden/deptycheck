@@ -133,11 +133,8 @@ traverseMaybe f (x::xs) = case f x of
   Nothing => Nothing
   Just y  => (y ::) <$> traverseMaybe f xs
 
-trMTaggedLazy : (a -> Maybe b) -> LazyLst ne (tag, Lazy a) -> Maybe $ LazyLst ne (tag, Lazy b)
-trMTaggedLazy = traverseMaybe . wrapMaybeTaggedLazy
-
 trMOneOf : GenAlternatives ne iem a -> (Gen iem a -> Maybe $ Gen em b) -> Maybe $ GenAlternatives ne em b
-trMOneOf oo f = MkGenAlts <$> trMTaggedLazy f oo.unGenAlts
+trMOneOf oo = map MkGenAlts . flip traverseMaybe oo.unGenAlts . wrapMaybeTaggedLazy
 
 -----------------------------
 --- Emptiness tweakenings ---
@@ -532,6 +529,8 @@ forgetAlternatives g@(OneOf {}) = case canBeNotImmediatelyEmpty em of
   where
     %inline single : (0 _ : iem `NoWeaker` MaybeEmptyDeep) => (0 _ : iem `NoWeaker` em) => Gen iem a -> Gen em a
     single g = label "forgetAlternatives" $ OneOf $ MkGenAlts [(1, g)]
+    -- `mkOneOf` is not used here intentionally, since mkOneOf can potentially change the shape of produced tree, but we
+    -- still want precisely this shape here.
 forgetAlternatives (Labelled l x) = label l $ forgetAlternatives x
 forgetAlternatives g = g
 
