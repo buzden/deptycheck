@@ -1,7 +1,5 @@
 package deptycheck-usage
 
-authors = "Denis Buzdalov"
-
 sourcedir = "src"
 
 depends = deptycheck
