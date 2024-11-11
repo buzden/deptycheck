@@ -1,6 +1,4 @@
 --- outmost gen ---
-pure 6
-list with pure 4 and 5
-pure 4
 pure 5
-[6, 4, 4, 6, 6, 6, 6, 6, 5, 6]
+pure 6
+[5, 6, 6, 6, 6, 5, 5, 5, 5, 5]

@@ -11,7 +11,6 @@ import System.Random.Pure.StdGen
 g : Gen1 Nat
 g = trace "--- outmost gen ---" $ oneOf
   [ pure $ trace "pure 6" 6
-  , pure $ trace "pure 5" 5
   ]
 
 main : IO Unit
