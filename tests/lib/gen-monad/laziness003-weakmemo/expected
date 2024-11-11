@@ -1,7 +1,11 @@
--- list with pure 4, 5, 6 --
+-- list with pure 4, 5 --
 pure 4
 --- outmost gen ---
 pure 7
 pure 5
-pure 6
+- inner actually empty list -
+1st empty
+2nd empty
+3rd empty
+4th empty
 [7, 4, 4, 7, 7, 7, 7, 7, 5, 7]

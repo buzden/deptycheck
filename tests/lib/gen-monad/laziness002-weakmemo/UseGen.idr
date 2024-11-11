@@ -14,8 +14,12 @@ import System.Random.Pure.StdGen
 
 g : Gen MaybeEmpty Nat
 g = trace "--- outmost gen ---" $ oneOf
-  [ pure $ trace "pure 6" 6
-  , pure $ trace "pure 5" 5
+  [ oneOf $ trace "-- list with pure 4, 5, 6 --"
+      [ pure $ trace "pure 4" 4
+      , pure $ trace "pure 5" 5
+      , pure $ trace "pure 6" 6
+      ]
+  , pure $ trace "pure 7" 7
   ]
 
 main : IO Unit
