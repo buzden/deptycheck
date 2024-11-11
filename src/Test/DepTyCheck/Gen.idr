@@ -165,6 +165,7 @@ export %inline
 empty : Gen0 a
 empty = Empty
 
+export
 label : Label -> Gen em a -> Gen em a
 label l g with (decIsEmpty g)
   label _ Empty | Element True  _ = Empty
