@@ -40,5 +40,6 @@ depends = ansi
         , if-unsolved-implicit
         , mtl-tuple-impls
         , positive-nat
+        , proof-utils
         , random-pure
         , typelevel-emptiness-collections
