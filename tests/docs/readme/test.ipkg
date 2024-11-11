@@ -1,5 +1,3 @@
 package test
 
-authors = "Denis Buzdalov"
-
 depends = deptycheck

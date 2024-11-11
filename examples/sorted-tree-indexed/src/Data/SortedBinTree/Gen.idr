@@ -9,10 +9,6 @@ import Deriving.DepTyCheck.Gen
 
 %logging "deptycheck.derive" 5
 
-%hint
-UsedConstructorDerivator : ConstructorDerivator
-UsedConstructorDerivator = LeastEffort {simplificationHack = True}
-
 export
 genSortedBinTree1 : Fuel -> Gen MaybeEmpty (mi ** ma ** SortedBinTree1 mi ma)
 genSortedBinTree1 = deriveGen

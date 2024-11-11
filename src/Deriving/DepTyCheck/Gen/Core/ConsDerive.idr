@@ -201,7 +201,7 @@ namespace NonObligatoryExts
   ||| It is seemingly most simple to implement, maybe the fastest and
   ||| fits well when external generators are provided for non-dependent types.
   export
-  [LeastEffort] {default False simplificationHack : Bool} -> ConstructorDerivator where
+  [LeastEffort] ConstructorDerivator where
     consGenExpr sig con givs fuel = do
 
       -- Prepare local search context
