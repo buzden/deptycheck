@@ -9,8 +9,4 @@ import Deriving.DepTyCheck.Gen
 
 %logging "deptycheck.derive" 5
 
-%hint
-UsedConstructorDerivator : ConstructorDerivator
-UsedConstructorDerivator = LeastEffort {simplificationHack = True}
-
 Data.List.Uniq.genUniqStrList = deriveGen

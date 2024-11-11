@@ -8,6 +8,4 @@ import Deriving.DepTyCheck.Gen
 
 %logging "deptycheck.derive" 5
 
-%hint LE : ConstructorDerivator; LE = LeastEffort {simplificationHack = True}
-
 Language.PilFun.genStmts = deriveGen
