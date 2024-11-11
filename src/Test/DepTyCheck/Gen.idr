@@ -32,7 +32,6 @@ import public Test.DepTyCheck.Gen.Labels
 %hide Control.Foldable.Elem.Elem
 %hide Control.Foldable.Elem.elemMap
 %hide Control.Foldable.Quantifiers.All
-%hide Control.Foldable.Quantifiers.allMap
 
 %default total
 
@@ -185,7 +184,7 @@ mapOneOf $ MkGenAlts gs = MkGenAlts . flip mapTaggedLazy gs
                      {0 f : a -> b} -> {xs : t (tag, Lazy a)} ->
                      ({x : a} -> (0 _ : Elem x $ unpackTaggedLazy xs) -> p $ f x) ->
                      All p $ unpackTaggedLazy $ mapTaggedLazy f xs
-allMapTaggedLazy h = allMap $ allMapForall {t} $ \e => h $ elemMap _ e
+allMapTaggedLazy h = allMap {t=List} $ allMapForall {t} $ \e => h $ elemMap _ e
 
 0 allMapOneOf : {0 f : Gen iem a -> Gen em b} ->
                 {gs : GenAlternatives ne iem a} ->
@@ -218,7 +217,7 @@ allMapElem {xs=x :: xs} h = h Here :: allMapElem (\e => h $ There e)
                          {0 f : (x : a) -> (0 _ : Elem x $ unpackTaggedLazy xs) -> b} ->
                          ({x : a} -> (0 e : Elem x $ unpackTaggedLazy xs) -> p $ f x e) ->
                          All p $ unpackTaggedLazy $ mapTaggedLazyElem xs f
-allMapTaggedLazyElem h = allMap $ allMapElem $ \e => h $ elemMap _ e
+allMapTaggedLazyElem h = allMap {t=List} $ allMapElem $ \e => h $ elemMap _ e
 
 0 allMapOneOfElem : {gs : GenAlternatives ne iem a} ->
                     {0 f : (g : Gen iem a) -> (0 _ : Elem g gs) -> Gen em b} ->
@@ -269,18 +268,6 @@ mkOneOfMaybeEmpty : (xs : LazyLst altsNe (Nat1, Lazy (Gen alem a))) ->
 mkOneOfMaybeEmpty []        = Empty
 mkOneOfMaybeEmpty (x :: xs) = OneOf $ MkGenAlts $ x :: xs
 
--- Temporary solution to preserve laziness
-filterTaggedLazy : (a -> Bool) -> LazyLst ne (tag, Lazy a) -> LazyLst0 (tag, Lazy a)
-filterTaggedLazy _ []                     = []
-filterTaggedLazy f ((tag, Delay x) :: xs) = if f x then (tag, x) :: filterTaggedLazy f xs else filterTaggedLazy f xs
-
-allFilterTaggedLazy : {f : a -> Bool} -> {xs : LazyLst ne (tag, Lazy a)} ->
-                      All (So . f . Builtin.force . Builtin.snd) $ toList $ filterTaggedLazy f xs
-allFilterTaggedLazy {xs=[]}      = []
-allFilterTaggedLazy {xs=(_, Delay x) :: xs} = case @@@ f x of
-  Element b prf => rewrite prf in if b
-                                  then eqToSo' prf :: allFilterTaggedLazy
-                                  else allFilterTaggedLazy
 mkOneOf : {em : _} ->
           (0 _ : alem `NoWeaker` em) =>
           (0 _ : AltsNonEmpty altsNe em) =>
@@ -289,8 +276,10 @@ mkOneOf : {em : _} ->
 mkOneOf {em=NonEmpty} @{nw} @{NT} xs with 0 (nonEmptyIsMaximal nw)
   _ | Refl = OneOf @{allTrue isNonEmptyGen1} $ MkGenAlts xs
 -- TODO: filter has problem with laziness
--- mkOneOf {em=MaybeEmpty} xs = mkOneOfMaybeEmpty @{allMap filterElem} $ filter (isNonEmpty . force . snd) xs
-mkOneOf {em=MaybeEmpty} xs = mkOneOfMaybeEmpty @{allMap allFilterTaggedLazy} $ filterTaggedLazy isNonEmpty xs
+-- mkOneOf {em=MaybeEmpty} xs = mkOneOfMaybeEmpty @{allMap {t=List} filterElem} $ filter (isNonEmpty . force . snd) xs
+-- Not using mapSnd, because it's less reducible.
+mkOneOf {em=MaybeEmpty} xs = mkOneOfMaybeEmpty @{allMap {t=List} $ allMap {t=LazyLst False} $ filterElem} $
+  map (\x => (fst x, delay $ snd x)) $ filter (isNonEmpty . snd) $ map (\x => (fst x, force $ snd x)) xs
 
 --------------------------
 --- Running generators ---
