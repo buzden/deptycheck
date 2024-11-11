@@ -269,6 +269,18 @@ mkOneOfMaybeEmpty : (xs : LazyLst altsNe (Nat1, Lazy (Gen alem a))) ->
 mkOneOfMaybeEmpty []        = Empty
 mkOneOfMaybeEmpty (x :: xs) = OneOf $ MkGenAlts $ x :: xs
 
+-- Temporary solution to preserve laziness
+filterTaggedLazy : (a -> Bool) -> LazyLst ne (tag, Lazy a) -> LazyLst0 (tag, Lazy a)
+filterTaggedLazy _ []                     = []
+filterTaggedLazy f ((tag, Delay x) :: xs) = if f x then (tag, x) :: filterTaggedLazy f xs else filterTaggedLazy f xs
+
+allFilterTaggedLazy : {f : a -> Bool} -> {xs : LazyLst ne (tag, Lazy a)} ->
+                      All (So . f . Builtin.force . Builtin.snd) $ toList $ filterTaggedLazy f xs
+allFilterTaggedLazy {xs=[]}      = []
+allFilterTaggedLazy {xs=(_, Delay x) :: xs} = case @@@ f x of
+  Element b prf => rewrite prf in if b
+                                  then eqToSo' prf :: allFilterTaggedLazy
+                                  else allFilterTaggedLazy
 mkOneOf : {em : _} ->
           (0 _ : alem `NoWeaker` em) =>
           (0 _ : AltsNonEmpty altsNe em) =>
@@ -276,7 +288,9 @@ mkOneOf : {em : _} ->
           Gen em a
 mkOneOf {em=NonEmpty} @{nw} @{NT} xs with 0 (nonEmptyIsMaximal nw)
   _ | Refl = OneOf @{allTrue isNonEmptyGen1} $ MkGenAlts xs
-mkOneOf {em=MaybeEmpty} xs = mkOneOfMaybeEmpty @{allMap filterElem} $ filter (isNonEmpty . force . snd) xs
+-- TODO: filter has problem with laziness
+-- mkOneOf {em=MaybeEmpty} xs = mkOneOfMaybeEmpty @{allMap filterElem} $ filter (isNonEmpty . force . snd) xs
+mkOneOf {em=MaybeEmpty} xs = mkOneOfMaybeEmpty @{allMap allFilterTaggedLazy} $ filterTaggedLazy isNonEmpty xs
 
 --------------------------
 --- Running generators ---
