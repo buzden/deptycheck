@@ -1,0 +1,15 @@
+package pil-dyn
+
+version = 0.1
+
+authors = "Denis Buzdalov"
+
+sourcedir = "src"
+builddir = ".build"
+
+depends = deptycheck
+
+--executable = "pil-dyn"
+--main = Runner
+
+modules = Language.PilDyn

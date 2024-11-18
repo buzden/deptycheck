@@ -77,3 +77,9 @@ type = "local"
 path = "examples/pil-fun"
 ipkg = "pil-fun.ipkg"
 test = "tests/tests.ipkg"
+
+[custom.all.pil-dyn]
+type = "local"
+path = "examples/pil-dyn"
+ipkg = "pil-dyn.ipkg"
+test = "tests/tests.ipkg"

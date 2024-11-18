@@ -27,3 +27,5 @@ The examples are the following:
 - primitive imperative languages
   - [`pil-reg`](pil-reg/), a primitive imperative language with scoped typed variables and typed registers (hand-written generators)
   - [`pil-fun`](pil-fun/), a primitive statically-typed imperative language with mutable and immutable variables and nested functions
+  - [`pil-dyn`](pil-dyn/), a primitive imperative language with dynamically-typed mutable registers being able to have generators with
+    either initial or final state being given

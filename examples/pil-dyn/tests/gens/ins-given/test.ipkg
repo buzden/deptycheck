@@ -1,0 +1,6 @@
+package a-test
+
+depends = pil-dyn
+
+executable = test
+main = Test
