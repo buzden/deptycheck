@@ -250,11 +250,11 @@ namespace NonObligatoryExts
       let dependees = dependees con.args
 
       -- Decide how constructor arguments would be named during generation
-      let bindNames = withIndex (fromList con.args) <&> map (bindNameRenamer . argName)
+      let bindNames = bindNameRenamer . argName <$> fromList con.args
 
       -- Form the expression of calling the current constructor
       let callCons = do
-        let constructorCall = callCon con $ bindNames <&> \(idx, n) => if contains idx dependees then implicitTrue else varStr n
+        let constructorCall = callCon con $ bindNames.withIdx <&> \(idx, n) => if contains idx dependees then implicitTrue else varStr n
         let wrapImpls : Nat -> TTImp
             wrapImpls Z     = constructorCall
             wrapImpls (S n) = var `{Builtin.DPair.MkDPair} .$ implicitTrue .$ wrapImpls n
@@ -305,7 +305,7 @@ namespace NonObligatoryExts
             subgenCall <- callGen subsig subfuel $ snd <$> subgivens
 
             -- Form an expression of binding the result of subgen
-            let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . snd . flip Vect.index bindNames
+            let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
             let bindSubgenResult = foldr (\l, r => var `{Builtin.DPair.MkDPair} .$ l .$ r) genedArg subgeneratedArgs
 
             -- Form an expression of the RHS of a bind; simplify lambda if subgeneration result type does not require pattern matching
