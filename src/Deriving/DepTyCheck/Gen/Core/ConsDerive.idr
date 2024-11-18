@@ -281,7 +281,7 @@ namespace NonObligatoryExts
             -- Those which are `Right` are given, those which are `Left` are needs to be generated.
             let depArgs : Vect typeOfGened.args.length (Either (Fin con.args.length) TTImp) := argsOfTypeOfGened <&> \case
               Right expr => Right expr
-              Left i     => if contains i presentArguments then Right $ var $ argName $ index' con.args i else Left i
+              Left i     => if contains i presentArguments then Right $ varStr $ index i bindNames else Left i
 
             -- Determine which arguments will be on the left of dpair in subgen call, in correct order
             let subgeneratedArgs = mapMaybe getLeft $ toList depArgs
