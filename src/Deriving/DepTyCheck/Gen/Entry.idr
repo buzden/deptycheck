@@ -378,6 +378,7 @@ deriveGenPrinter ty = do
   expr <- quote expr
   printTTImp <- quote printTTImp
   declare `[
+    export
     main : IO Unit
     main = do
       putStr $ if ~printTTImp then interpolate ~expr else show ~expr
