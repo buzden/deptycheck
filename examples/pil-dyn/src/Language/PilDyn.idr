@@ -35,11 +35,6 @@ DecEq MaybeTy where
   decEq Nothing (Just _) = No $ \Refl impossible
   decEq (Just _) Nothing = No $ \Refl impossible
 
-public export
-data Literal : Ty -> Type where
-  IntVal  : Int32 -> Literal I
-  BoolVal : Bool -> Literal B
-
 namespace Regs
   public export
   data Regs : Nat -> Type where
@@ -70,6 +65,12 @@ data RegIsType : Fin r -> Ty -> Regs r -> Type where
 -------------------
 
 public export
+data SimpleExpr : Regs r -> Ty -> Type where
+  IntVal  : Int32 -> SimpleExpr regs I
+  BoolVal : Bool -> SimpleExpr regs B
+  Read    : (idx : Fin r) -> RegIsType idx t regs => SimpleExpr regs t
+
+public export
 data BinOp : Ty -> Ty -> Ty -> Type where
   Add : BinOp I I I
   Mul : BinOp I I I
@@ -77,42 +78,14 @@ data BinOp : Ty -> Ty -> Ty -> Type where
   Eq  : BinOp a a B
 
   LT  : BinOp I I B
-  LTE : BinOp I I B
 
   And : BinOp B B B
   Or  : BinOp B B B
-  Xor : BinOp B B B
-
-precBin : BinOp l r t -> Prec
-precBin Add = User 8
-precBin Mul = User 9
-precBin Eq  = User 6
-precBin LT  = User 6
-precBin LTE = User 6
-precBin And = User 5
-precBin Or  = User 4
-precBin Xor = User 6
 
 public export
-data UnOp : Ty -> Ty -> Type where
-  Minus : UnOp I I
-
-  Not : UnOp B B
-
-precUn : UnOp r t -> Prec
-precUn Minus = PrefixMinus
-precUn Not   = User 7
-
-public export
-data Expr : (maxDepth : Nat) -> Regs r -> Ty -> Type where
-
-  Lit : Literal t -> Expr _ regs t
-
-  Read : (idx : Fin r) -> RegIsType idx t regs => Expr _ regs t
-
-  Binary : Expr d regs l -> BinOp l r t -> Expr d regs r -> Expr (S d) regs t
-
-  Unary : UnOp r t -> Expr d regs r -> Expr (S d) regs t
+data Expr : Regs r -> Ty -> Type where
+  Simple : SimpleExpr regs t -> Expr regs t
+  Binary : SimpleExpr regs l -> BinOp l r t -> SimpleExpr regs r -> Expr regs t
 
 ---------------------
 --- Linear blocks ---
@@ -130,7 +103,7 @@ data LinBlock : (ins, outs : Regs r) -> Type where
   End : ReducesTo ins outs => LinBlock ins outs
 
   Assign : (target : Fin r) ->
-           (expr : Expr 2 ins t) ->
+           (expr : Expr ins t) ->
            (cont : LinBlock (update target (Just t) ins) outs) ->
            LinBlock ins outs
 
@@ -138,7 +111,7 @@ data LinBlock : (ins, outs : Regs r) -> Type where
 
 public export
 data Assignment : (target : _) -> (ins : _) -> (t : _) -> Type where
-  (#=) : (target : Fin r) -> Expr 2 ins t -> Assignment target ins t
+  (#=) : (target : Fin r) -> Expr ins t -> Assignment target ins t
 
 export infix 2 #=
 
@@ -147,13 +120,13 @@ public export %inline
 target #= expr >> cont = Assign target expr cont
 
 export
-fromInteger : (x : Integer) -> Expr d regs I
-fromInteger = Lit . IntVal . cast
+fromInteger : (x : Integer) -> SimpleExpr regs I
+fromInteger = IntVal . cast
 
 export
-True, False : Expr d regs B
-True  = Lit $ BoolVal True
-False = Lit $ BoolVal False
+True, False : SimpleExpr regs B
+True  = BoolVal True
+False = BoolVal False
 
 -----------------------
 --- Pretty-printing ---
@@ -177,39 +150,32 @@ Interpolation (Regs r) where
     toList (x::xs) = interpolate x :: toList xs
 
 export
-Interpolation (Literal t) where
-  interpolate $ IntVal i = show i
-  interpolate $ BoolVal True  = "T"
-  interpolate $ BoolVal False = "F"
-
-export
 Interpolation (BinOp l r t) where
   interpolate Add = "+"
   interpolate Mul = "*"
   interpolate Eq  = "=="
   interpolate LT  = "<"
-  interpolate LTE = "<="
   interpolate And = "&&"
   interpolate Or  = "||"
-  interpolate Xor = "^"
-
-export
-Interpolation (UnOp r t) where
-  interpolate Minus = "-"
-  interpolate Not   = "!"
 
 Interpolation (Fin n) where
   interpolate idx = "[\{show idx}]"
 
-Show (Expr d regs ty) where
-  showPrec _ $ Lit l    = "\{l}"
-  showPrec _ $ Read idx = "\{idx}"
-  showPrec d $ Binary l op r = let d' = precBin op in showParens (d >= d') "\{showPrec d' l} \{op} \{showPrec d' r}"
-  showPrec d $ Unary op e = let d' = precUn op in showParens (d >= d') "\{op}\{showPrec d' e}"
+export
+Interpolation (SimpleExpr regs ty) where
+  interpolate $ IntVal i = show i
+  interpolate $ BoolVal True  = "T"
+  interpolate $ BoolVal False = "F"
+  interpolate $ Read idx = "\{idx}"
 
 export
-Interpolation (Expr d regs ty) where
-  interpolate = show
+Interpolation (Expr regs ty) where
+  interpolate $ Simple e = "\{e}"
+  interpolate $ Binary (IntVal (-1)) Mul r = "-\{r}"
+  interpolate $ Binary l Mul (IntVal (-1)) = "-\{l}"
+  interpolate $ Binary (BoolVal False) Eq r = "!\{r}"
+  interpolate $ Binary l Eq (BoolVal False) = "!\{l}"
+  interpolate $ Binary l op r = "\{l} \{op} \{r}"
 
 export
 Interpolation (LinBlock ins outs) where
