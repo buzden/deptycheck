@@ -70,22 +70,37 @@ data SimpleExpr : Regs r -> Ty -> Type where
   BoolVal : Bool -> SimpleExpr regs B
   Read    : (idx : Fin r) -> RegIsType idx t regs => SimpleExpr regs t
 
-public export
-data BinOp : Ty -> Ty -> Ty -> Type where
-  Add : BinOp I I I
-  Mul : BinOp I I I
+namespace BinOp
 
-  Eq  : BinOp a a B
+  public export
+  data BinOp : (resTy : Ty) -> Type where
+    Add : BinOp I
+    Mul : BinOp I
+    EqI : BinOp B
+    LT  : BinOp B
+    EqB : BinOp B
+    And : BinOp B
+    Or  : BinOp B
 
-  LT  : BinOp I I B
+  public export
+  record TyTy where
+    constructor MkTyTy
+    leftTy, rightTy : Ty
 
-  And : BinOp B B B
-  Or  : BinOp B B B
+  public export
+  (.binOpType) : BinOp resTy -> TyTy
+  (.binOpType) Add = MkTyTy I I
+  (.binOpType) Mul = MkTyTy I I
+  (.binOpType) EqI = MkTyTy I I
+  (.binOpType) LT  = MkTyTy I I
+  (.binOpType) EqB = MkTyTy B B
+  (.binOpType) And = MkTyTy B B
+  (.binOpType) Or  = MkTyTy B B
 
 public export
 data Expr : Regs r -> Ty -> Type where
   Simple : SimpleExpr regs t -> Expr regs t
-  Binary : SimpleExpr regs l -> BinOp l r t -> SimpleExpr regs r -> Expr regs t
+  Binary : (op : BinOp t) -> SimpleExpr regs op.binOpType.leftTy -> SimpleExpr regs op.binOpType.rightTy -> Expr regs t
 
 ---------------------
 --- Linear blocks ---
@@ -150,11 +165,12 @@ Interpolation (Regs r) where
     toList (x::xs) = interpolate x :: toList xs
 
 export
-Interpolation (BinOp l r t) where
+Interpolation (BinOp t) where
   interpolate Add = "+"
   interpolate Mul = "*"
-  interpolate Eq  = "=="
+  interpolate EqI = "=="
   interpolate LT  = "<"
+  interpolate EqB = "=="
   interpolate And = "&&"
   interpolate Or  = "||"
 
@@ -171,11 +187,11 @@ Interpolation (SimpleExpr regs ty) where
 export
 Interpolation (Expr regs ty) where
   interpolate $ Simple e = "\{e}"
-  interpolate $ Binary (IntVal (-1)) Mul r = "-\{r}"
-  interpolate $ Binary l Mul (IntVal (-1)) = "-\{l}"
-  interpolate $ Binary (BoolVal False) Eq r = "!\{r}"
-  interpolate $ Binary l Eq (BoolVal False) = "!\{l}"
-  interpolate $ Binary l op r = "\{l} \{op} \{r}"
+  interpolate $ Binary Mul (IntVal (-1)) r = "-\{r}"
+  interpolate $ Binary Mul l (IntVal (-1)) = "-\{l}"
+  interpolate $ Binary EqB (BoolVal False) r = "!\{r}"
+  interpolate $ Binary EqB l (BoolVal False) = "!\{l}"
+  interpolate $ Binary op l r = "\{l} \{op} \{r}"
 
 export
 Interpolation (LinBlock ins outs) where

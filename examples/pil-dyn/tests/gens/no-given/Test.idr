@@ -10,7 +10,7 @@ import System.Random.Pure.StdGen
 
 %hint
 ints : Gen MaybeEmpty Int32
-ints = elements [0..99]
+ints = elements [-40..40]
 
 genLinBlock'' : Fuel -> (Fuel -> Gen MaybeEmpty Int32) => (r : _) -> Gen MaybeEmpty (ins : Regs r ** outs : Regs r ** LinBlock ins outs)
 genLinBlock'' = deriveGen
