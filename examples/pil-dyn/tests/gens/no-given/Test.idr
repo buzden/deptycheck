@@ -1,19 +1,10 @@
 module Test
 
-import Language.PilDyn
-
-import Deriving.DepTyCheck.Gen
+import Language.PilDyn.Derived.NoGiven
 
 import System.Random.Pure.StdGen
 
 %default total
-
-%hint
-ints : Gen MaybeEmpty Int32
-ints = elements [-40..40]
-
-genLinBlock'' : Fuel -> (Fuel -> Gen MaybeEmpty Int32) => (r : _) -> Gen MaybeEmpty (ins : Regs r ** outs : Regs r ** LinBlock ins outs)
-genLinBlock'' = deriveGen
 
 main : IO ()
 main = do

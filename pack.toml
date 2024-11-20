@@ -3,7 +3,7 @@
 ################
 
 [install]
-whitelist = [ "deptycheck-docs", "pil-fun" ]
+whitelist = [ "deptycheck-docs", "pil-fun", "pil-dyn" ]
 
 ##################
 ### DepTyCheck ###

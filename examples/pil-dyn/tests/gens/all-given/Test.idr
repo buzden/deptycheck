@@ -1,23 +1,14 @@
 module Test
 
-import Language.PilDyn
-
-import Deriving.DepTyCheck.Gen
+import Language.PilDyn.Derived.AllGiven
 
 import System.Random.Pure.StdGen
 
 %default total
 
-%hint
-ints : Gen MaybeEmpty Int32
-ints = elements [-40..40]
-
-genLinBlock__ : Fuel -> (Fuel -> Gen MaybeEmpty Int32) => {r : _} -> (ins, outs : Regs r) -> Gen MaybeEmpty $ LinBlock ins outs
-genLinBlock__ = deriveGen
-
 main : IO ()
 main = do
-  putStrLn "No register state is given"
+  putStrLn "Both inputs and outputs are given"
   let vals = unGenTryN 10 someStdGen $ genLinBlock__ (limit 6) [Just I, Nothing, Just B, Just I] [Just B, Just I, Just B, Just B]
   Lazy.for_ vals $ \lb => putStr """
     -------------------------

@@ -222,9 +222,3 @@ Interpolation (ins ** outs ** LinBlock ins outs) where
     -- outputs: \{outs}
     \{lb}
     """
-
--- For `pick`ing
-export
-Interpolation a => Interpolation (Maybe a) where
-  interpolate Nothing = "<nothing>"
-  interpolate (Just x) = interpolate x

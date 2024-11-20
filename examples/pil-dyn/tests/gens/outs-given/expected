@@ -1,6 +1,6 @@
 1/1: Building Test (Test.idr)
 Now compiling the executable: test
-No register state is given
+Output register state is given
 -------------------------
 -- inputs: ?, B, I, B
 [1] := 9 + -39

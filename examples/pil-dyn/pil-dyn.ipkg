@@ -7,9 +7,16 @@ authors = "Denis Buzdalov"
 sourcedir = "src"
 builddir = ".build"
 
+prebuild = "sh .derive-in-parallel"
+
 depends = deptycheck
 
 --executable = "pil-dyn"
 --main = Runner
 
 modules = Language.PilDyn
+        , Language.PilDyn.Derived.AllGiven
+        , Language.PilDyn.Derived.InsGiven
+        , Language.PilDyn.Derived.NoGiven
+        , Language.PilDyn.Derived.OutsGiven
+        , Language.PilDyn.Utils

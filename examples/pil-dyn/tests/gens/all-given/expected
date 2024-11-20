@@ -1,6 +1,6 @@
 1/1: Building Test (Test.idr)
 Now compiling the executable: test
-No register state is given
+Both inputs and outputs are given
 -------------------------
 [2] := 37
 [1] := F
