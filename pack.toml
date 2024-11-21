@@ -3,7 +3,7 @@
 ################
 
 [install]
-whitelist = [ "deptycheck-docs", "pil-fun" ]
+whitelist = [ "deptycheck-docs", "pil-fun", "pil-dyn" ]
 
 ##################
 ### DepTyCheck ###
@@ -76,4 +76,10 @@ test = "tests/tests.ipkg"
 type = "local"
 path = "examples/pil-fun"
 ipkg = "pil-fun.ipkg"
+test = "tests/tests.ipkg"
+
+[custom.all.pil-dyn]
+type = "local"
+path = "examples/pil-dyn"
+ipkg = "pil-dyn.ipkg"
 test = "tests/tests.ipkg"

@@ -1,0 +1,8 @@
+package pil-fun-tests
+
+main = Tests
+executable = runtests
+
+builddir = ".build"
+
+depends = golden-runner-helper

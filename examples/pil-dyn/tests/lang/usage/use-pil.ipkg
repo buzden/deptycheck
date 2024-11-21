@@ -1,0 +1,5 @@
+package use-pil
+
+depends = pil-dyn
+
+modules = UsePil
