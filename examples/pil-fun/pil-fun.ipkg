@@ -23,4 +23,5 @@ modules = Language.PilFun
         , Language.PilFun.Pretty.Derived
         , Language.PilFun.Pretty.DSL
         , Language.PilFun.Pretty.Idris2
+        , Language.PilFun.Pretty.Lua5_4
         , Language.PilFun.Pretty.Scala3
