@@ -60,7 +60,7 @@ CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
 
 export
 canonicSig : GenSignature -> TTImp
-canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> SortedSet.toList sig.givenParams) where
+canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> Prelude.toList sig.givenParams) where
   -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
 
   arg : Fin sig.targetType.args.length -> Arg

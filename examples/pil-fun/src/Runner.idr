@@ -175,7 +175,7 @@ main : IO ()
 main = do
   args <- getArgs
   let usage : Lazy String := usageInfo "Usage: \{fromMaybe "pil-fun" $ head' args} [options] <language>" cliOpts
-  let langs : Lazy String := joinBy ", " $ SortedSet.toList $ keySet supportedLanguages
+  let langs : Lazy String := joinBy ", " $ Prelude.toList $ keySet supportedLanguages
   let MkResult options nonOptions [] [] = getOpt Permute cliOpts $ drop 1 args
     | MkResult {unrecognized=unrecOpts@(_::_), _} => if "help" `elem` unrecOpts
                                                        then putStrLn usage
