@@ -183,7 +183,7 @@ refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps)
     for_ (unvisitedDeps `difference` visited) $ assert_total go
 
     -- compute what needs to be added to the current priority
-    let addition = mapMaybe (map snd . lookup' !(get @{pris})) (SortedSet.toList unvisitedDeps)
+    let addition = mapMaybe (map snd . lookup' !(get @{pris})) (Prelude.toList unvisitedDeps)
     let newPri = foldl (+) currPri addition
 
     -- update the priority of the currenly managed argument
@@ -363,7 +363,7 @@ namespace NonObligatoryExts
           let Yes conLen = decEq (isConstructor @{impl}).fst.conInfo.args.length con.args.length
             | No _ => fail "INTERNAL ERROR: con args length of found gen order tuning is wrong"
           -- TODO to get rid of `believe_me` below
-          let df = believe_me $ deriveFirst @{impl} (rewrite tyLen in SortedSet.toList sig.givenParams) (rewrite conLen in SortedSet.toList givs)
+          let df = believe_me $ deriveFirst @{impl} (rewrite tyLen in Prelude.toList sig.givenParams) (rewrite conLen in Prelude.toList givs)
           let userImposed = filter (not . contains' givs) $ nub $ conArgIdx <$> df
           logPoint {level=10} "least-effort" [sig, con] "- user-imposed: \{userImposed}"
           pure userImposed
