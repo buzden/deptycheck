@@ -16,6 +16,11 @@ toList (Leaf x)          = [x]
 toList (Node left right) = toList left ++ toList right
 
 export
+weight : SortedBinTree1 mi ma -> Nat
+weight $ Leaf x = 1
+weight $ Node l r = 1 + weight l + weight r
+
+export
 Interpolation (SortedBinTree1 mi ma) where
   interpolate $ Leaf x = "\{show x}"
   interpolate $ Node l r = """
