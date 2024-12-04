@@ -7,19 +7,21 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (v : Fin n) -> Gen MaybeEmp
 .=> local
       { decls =
           [ IClaim
-              emptyFC
-              MW
-              Export
-              []
-              (mkTy
-                 { name = "<DerivedGen.IsFS>[0, 1]"
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
                  , type =
-                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                     .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fin.Fin" .$ var "n")
-                     .->    var "Test.DepTyCheck.Gen.Gen"
-                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                         .$ (var "DerivedGen.IsFS" .$ var "n" .$ var "{arg:1}")
+                     mkTy
+                       { name = "<DerivedGen.IsFS>[0, 1]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fin.Fin" .$ var "n")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "DerivedGen.IsFS" .$ var "n" .$ var "{arg:1}")
+                       }
                  })
           , IDef
               emptyFC
@@ -28,19 +30,21 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (v : Fin n) -> Gen MaybeEmp
                 .= local
                      { decls =
                          [ IClaim
-                             emptyFC
-                             MW
-                             Export
-                             []
-                             (mkTy
-                                { name = "<<DerivedGen.ItIsFS>>"
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
                                 , type =
-                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fin.Fin" .$ var "n")
-                                    .->    var "Test.DepTyCheck.Gen.Gen"
-                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                        .$ (var "DerivedGen.IsFS" .$ var "n" .$ var "{arg:1}")
+                                    mkTy
+                                      { name = "<<DerivedGen.ItIsFS>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fin.Fin" .$ var "n")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.IsFS" .$ var "n" .$ var "{arg:1}")
+                                      }
                                 })
                          , IDef
                              emptyFC

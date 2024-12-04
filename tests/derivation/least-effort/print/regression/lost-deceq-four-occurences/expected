@@ -8,21 +8,23 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (x1 : Nat) -> (x2 : Nat) ->
 .=> local
       { decls =
           [ IClaim
-              emptyFC
-              MW
-              Export
-              []
-              (mkTy
-                 { name = "<DerivedGen.X>[0, 1, 2, 3]"
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
                  , type =
-                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                     .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
-                     .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                     .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
-                     .->    var "Test.DepTyCheck.Gen.Gen"
-                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                         .$ (var "DerivedGen.X" .$ var "{arg:1}" .$ var "{arg:2}" .$ var "{arg:3}" .$ var "{arg:4}")
+                     mkTy
+                       { name = "<DerivedGen.X>[0, 1, 2, 3]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "DerivedGen.X" .$ var "{arg:1}" .$ var "{arg:2}" .$ var "{arg:3}" .$ var "{arg:4}")
+                       }
                  })
           , IDef
               emptyFC
@@ -36,21 +38,23 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (x1 : Nat) -> (x2 : Nat) ->
                 .= local
                      { decls =
                          [ IClaim
-                             emptyFC
-                             MW
-                             Export
-                             []
-                             (mkTy
-                                { name = "<<DerivedGen.MkX>>"
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
                                 , type =
-                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
-                                    .->    var "Test.DepTyCheck.Gen.Gen"
-                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                        .$ (var "DerivedGen.X" .$ var "{arg:1}" .$ var "{arg:2}" .$ var "{arg:3}" .$ var "{arg:4}")
+                                    mkTy
+                                      { name = "<<DerivedGen.MkX>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.X" .$ var "{arg:1}" .$ var "{arg:2}" .$ var "{arg:3}" .$ var "{arg:4}")
+                                      }
                                 })
                          , IDef
                              emptyFC

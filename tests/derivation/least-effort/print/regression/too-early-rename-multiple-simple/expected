@@ -6,19 +6,21 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (a : Z) -> (b : Z) -> Gen M
 .=> local
       { decls =
           [ IClaim
-              emptyFC
-              MW
-              Export
-              []
-              (mkTy
-                 { name = "<DerivedGen.W>[0, 1]"
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
                  , type =
-                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Z")
-                     .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Z")
-                     .->    var "Test.DepTyCheck.Gen.Gen"
-                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                         .$ (var "DerivedGen.W" .$ var "{arg:1}" .$ var "{arg:2}")
+                     mkTy
+                       { name = "<DerivedGen.W>[0, 1]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Z")
+                           .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Z")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "DerivedGen.W" .$ var "{arg:1}" .$ var "{arg:2}")
+                       }
                  })
           , IDef
               emptyFC
@@ -27,19 +29,21 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (a : Z) -> (b : Z) -> Gen M
                 .= local
                      { decls =
                          [ IClaim
-                             emptyFC
-                             MW
-                             Export
-                             []
-                             (mkTy
-                                { name = "<<DerivedGen.MkW>>"
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
                                 , type =
-                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Z")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Z")
-                                    .->    var "Test.DepTyCheck.Gen.Gen"
-                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                        .$ (var "DerivedGen.W" .$ var "{arg:1}" .$ var "{arg:2}")
+                                    mkTy
+                                      { name = "<<DerivedGen.MkW>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Z")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Z")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.W" .$ var "{arg:1}" .$ var "{arg:2}")
+                                      }
                                 })
                          , IDef
                              emptyFC
