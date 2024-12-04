@@ -6,29 +6,31 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (n : Nat) -> (v : VectMaybe
 .=> local
       { decls =
           [ IClaim
-              emptyFC
-              MW
-              Export
-              []
-              (mkTy
-                 { name = "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]"
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
                  , type =
-                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                     .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                     .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.VectMaybeAnyType.VectMaybeAnyType" .$ var "n")
-                     .->    var "Test.DepTyCheck.Gen.Gen"
-                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                         .$ (   var "Builtin.DPair.DPair"
-                             .$ (var "Data.Fin.Fin" .$ var "n")
-                             .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
-                                 .=>    var "Builtin.DPair.DPair"
-                                     .$ var "DerivedGen.MaybeAnyType.MaybeAnyType"
-                                     .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.MaybeAnyType.MaybeAnyType")
-                                         .=>    var "DerivedGen.VectMaybeAnyType.AtIndex"
-                                             .$ var "n"
-                                             .$ var "{arg:2}"
-                                             .$ var "{arg:3}"
-                                             .$ var "{arg:1}")))
+                     mkTy
+                       { name = "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.VectMaybeAnyType.VectMaybeAnyType" .$ var "n")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (   var "Builtin.DPair.DPair"
+                                   .$ (var "Data.Fin.Fin" .$ var "n")
+                                   .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
+                                       .=>    var "Builtin.DPair.DPair"
+                                           .$ var "DerivedGen.MaybeAnyType.MaybeAnyType"
+                                           .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.MaybeAnyType.MaybeAnyType")
+                                               .=>    var "DerivedGen.VectMaybeAnyType.AtIndex"
+                                                   .$ var "n"
+                                                   .$ var "{arg:2}"
+                                                   .$ var "{arg:3}"
+                                                   .$ var "{arg:1}")))
+                       }
                  })
           , IDef
               emptyFC
@@ -37,54 +39,66 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (n : Nat) -> (v : VectMaybe
                 .= local
                      { decls =
                          [ IClaim
-                             emptyFC
-                             MW
-                             Export
-                             []
-                             (mkTy
-                                { name = "<<DerivedGen.VectMaybeAnyType.Here>>"
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
                                 , type =
-                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.VectMaybeAnyType.VectMaybeAnyType" .$ var "n")
-                                    .->    var "Test.DepTyCheck.Gen.Gen"
-                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                        .$ (   var "Builtin.DPair.DPair"
-                                            .$ (var "Data.Fin.Fin" .$ var "n")
-                                            .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
-                                                .=>    var "Builtin.DPair.DPair"
-                                                    .$ var "DerivedGen.MaybeAnyType.MaybeAnyType"
-                                                    .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.MaybeAnyType.MaybeAnyType")
-                                                        .=>    var "DerivedGen.VectMaybeAnyType.AtIndex"
-                                                            .$ var "n"
-                                                            .$ var "{arg:2}"
-                                                            .$ var "{arg:3}"
-                                                            .$ var "{arg:1}")))
+                                    mkTy
+                                      { name = "<<DerivedGen.VectMaybeAnyType.Here>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.VectMaybeAnyType.VectMaybeAnyType" .$ var "n")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ (var "Data.Fin.Fin" .$ var "n")
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
+                                                      .=>    var "Builtin.DPair.DPair"
+                                                          .$ var "DerivedGen.MaybeAnyType.MaybeAnyType"
+                                                          .$ (    MkArg
+                                                                    MW
+                                                                    ExplicitArg
+                                                                    (Just "{arg:3}")
+                                                                    (var "DerivedGen.MaybeAnyType.MaybeAnyType")
+                                                              .=>    var "DerivedGen.VectMaybeAnyType.AtIndex"
+                                                                  .$ var "n"
+                                                                  .$ var "{arg:2}"
+                                                                  .$ var "{arg:3}"
+                                                                  .$ var "{arg:1}")))
+                                      }
                                 })
                          , IClaim
-                             emptyFC
-                             MW
-                             Export
-                             []
-                             (mkTy
-                                { name = "<<DerivedGen.VectMaybeAnyType.There>>"
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
                                 , type =
-                                        MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                    .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                    .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.VectMaybeAnyType.VectMaybeAnyType" .$ var "n")
-                                    .->    var "Test.DepTyCheck.Gen.Gen"
-                                        .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                        .$ (   var "Builtin.DPair.DPair"
-                                            .$ (var "Data.Fin.Fin" .$ var "n")
-                                            .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
-                                                .=>    var "Builtin.DPair.DPair"
-                                                    .$ var "DerivedGen.MaybeAnyType.MaybeAnyType"
-                                                    .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.MaybeAnyType.MaybeAnyType")
-                                                        .=>    var "DerivedGen.VectMaybeAnyType.AtIndex"
-                                                            .$ var "n"
-                                                            .$ var "{arg:2}"
-                                                            .$ var "{arg:3}"
-                                                            .$ var "{arg:1}")))
+                                    mkTy
+                                      { name = "<<DerivedGen.VectMaybeAnyType.There>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.VectMaybeAnyType.VectMaybeAnyType" .$ var "n")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ (var "Data.Fin.Fin" .$ var "n")
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
+                                                      .=>    var "Builtin.DPair.DPair"
+                                                          .$ var "DerivedGen.MaybeAnyType.MaybeAnyType"
+                                                          .$ (    MkArg
+                                                                    MW
+                                                                    ExplicitArg
+                                                                    (Just "{arg:3}")
+                                                                    (var "DerivedGen.MaybeAnyType.MaybeAnyType")
+                                                              .=>    var "DerivedGen.VectMaybeAnyType.AtIndex"
+                                                                  .$ var "n"
+                                                                  .$ var "{arg:2}"
+                                                                  .$ var "{arg:3}"
+                                                                  .$ var "{arg:1}")))
+                                      }
                                 })
                          , IDef
                              emptyFC

@@ -6,20 +6,23 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (a : Type) -> Gen MaybeEmpt
 .=> local
       { decls =
           [ IClaim
-              emptyFC
-              MW
-              Export
-              []
-              (mkTy
-                 { name = "<Data.Vect.Vect>[1]"
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
                  , type =
-                         MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                     .-> MkArg MW ExplicitArg (Just "elem") type
-                     .->    var "Test.DepTyCheck.Gen.Gen"
-                         .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                         .$ (   var "Builtin.DPair.DPair"
-                             .$ var "Prelude.Types.Nat"
-                             .$ (MkArg MW ExplicitArg (Just "len") (var "Prelude.Types.Nat") .=> var "Data.Vect.Vect" .$ var "len" .$ var "elem"))
+                     mkTy
+                       { name = "<Data.Vect.Vect>[1]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "elem") type
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (   var "Builtin.DPair.DPair"
+                                   .$ var "Prelude.Types.Nat"
+                                   .$ (    MkArg MW ExplicitArg (Just "len") (var "Prelude.Types.Nat")
+                                       .=> var "Data.Vect.Vect" .$ var "len" .$ var "elem"))
+                       }
                  })
           , IDef emptyFC "<Data.Vect.Vect>[1]" [var "<Data.Vect.Vect>[1]" .$ implicitTrue .$ implicitTrue .= var "empty"]
           ]
