@@ -54,6 +54,12 @@ path = "examples/uniq-list"
 ipkg = "uniq-list.ipkg"
 test = "tests/tests.ipkg"
 
+[custom.all.deep-wide-tree]
+type = "local"
+path = "examples/deep-wide-tree"
+ipkg = "deep-wide-tree.ipkg"
+test = "tests/tests.ipkg"
+
 [custom.all.sorted-tree-naive]
 type = "local"
 path = "examples/sorted-tree-naive"
