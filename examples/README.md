@@ -20,6 +20,7 @@ The examples are the following:
   - [sorted lists](sorted-list-so-full/) with sortedness coded fully through `So` over boolean predicates
 - list and vector of strings, [both with unique elements](uniq-list/) implemented using `So` and usual `Eq` comparison
 - a sequence of [unique mentions of a given subset](covering-seq/) of elements interleaved with unrelated elements
+- [deep and wide trees](deep-wide-tree/) with given depth and constant width (hand-written generators, several kinds)
 - sorted binary trees
   - naive possibly empty [sorted binary trees](sorted-tree-naive/) of natural numbers, implemented as if without dependent types
     with added limitations on sortedness
