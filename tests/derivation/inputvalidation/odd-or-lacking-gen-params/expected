@@ -3,19 +3,19 @@ Error: While processing right hand side of genY_with_unrelated. Error during ref
 
 ValidateInput:1
  10 |   MkY : Y Int String
- 11 | 
+ 11 |
  12 | --- Unrelated stuff in the resulting dpair ---
- 13 | 
+ 13 |
  14 | genY_with_unrelated : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** n : Nat ** Y a b)
                                                                                   ^^^
 
 Error: While processing right hand side of genY_with_repeating_name_equityped. Error during reflection: Argument of dependent pair under the resulting `Gen` must be named
 
 ValidateInput:2
- 13 | 
+ 13 |
  14 | genY_with_unrelated : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** n : Nat ** Y a b)
  15 | genY_with_unrelated = deriveGen
- 16 | 
+ 16 |
  17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** b : Type ** Y a b)
                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -26,10 +26,10 @@ and:
 Mismatch between: Nat and Type.
 
 ValidateInput:3
- 16 | 
+ 16 |
  17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** b : Type ** Y a b)
  18 | genY_with_repeating_name_equityped = deriveGen
- 19 | 
+ 19 |
  20 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** b : Nat ** Y a b)
                                                                                                               ^
 
@@ -38,7 +38,7 @@ Error: No type declaration for ValidateInput.genY_with_repeating_name_difflytype
 ValidateInput:4
  17 | genY_with_repeating_name_equityped : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** b : Type ** Y a b)
  18 | genY_with_repeating_name_equityped = deriveGen
- 19 | 
+ 19 |
  20 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** b : Nat ** Y a b)
  21 | genY_with_repeating_name_difflytyped = deriveGen
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -50,10 +50,10 @@ and:
 Mismatch between: Nat and Type.
 
 ValidateInput:5
- 19 | 
+ 19 |
  20 | genY_with_repeating_name_difflytyped : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Type ** b : Nat ** Y a b)
  21 | genY_with_repeating_name_difflytyped = deriveGen
- 22 | 
+ 22 |
  23 | genY_with_repeating_name_difflytyped' : Fuel -> (a : Type) -> Gen MaybeEmpty (b : Nat ** b : Type ** Y a b)
                                                                                                ^^^^^^^^
 
@@ -61,9 +61,19 @@ Error: While processing right hand side of genY_unused_argument. Error during re
 
 ValidateInput:6
  24 | genY_with_repeating_name_difflytyped' = deriveGen
- 25 | 
+ 25 |
  26 | --- Not all arguments are used ---
- 27 | 
+ 27 |
  28 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen MaybeEmpty $ Y a b
                                                            ^^^
+
+Error: While processing right hand side of gen_unused_function_argument. Error during reflection: Given parameter is not used in the target type
+
+ValidateInput:7
+ 27 |
+ 28 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen MaybeEmpty $ Y a b
+ 29 | genY_unused_argument = deriveGen
+ 30 |
+ 31 | gen_unused_function_argument : Fuel -> (d : (a : Nat) -> Nat) -> Gen MaybeEmpty Nat
+                                                  ^^^^^^^^^^^^^^^^
 

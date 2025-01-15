@@ -14,6 +14,9 @@ data Y : Type -> Type -> Type where
 genY_unnamed_argument : Fuel -> (a, b : Type) -> Nat -> Gen MaybeEmpty $ Y a b
 genY_unnamed_argument = deriveGen
 
+gen_unnamed_fun : Fuel -> ((a : Nat) -> Nat) -> Gen MaybeEmpty Nat
+gen_unnamed_fun = deriveGen
+
 --- Arguments shadowing ---
 
 genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
