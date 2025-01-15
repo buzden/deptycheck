@@ -9,23 +9,33 @@ ValidateInput:1
  14 | genY_unnamed_argument : Fuel -> (a, b : Type) -> Nat -> Gen MaybeEmpty $ Y a b
                                                        ^^^
 
-Error: While processing right hand side of genY_shadowed_by_auto_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
+Error: While processing right hand side of gen_unnamed_fun. Error during reflection: Explicit argument must be named and must not shadow any other name
 
 ValidateInput:2
+ 13 | 
+ 14 | genY_unnamed_argument : Fuel -> (a, b : Type) -> Nat -> Gen MaybeEmpty $ Y a b
  15 | genY_unnamed_argument = deriveGen
  16 | 
- 17 | --- Arguments shadowing ---
- 18 | 
- 19 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
+ 17 | gen_unnamed_fun : Fuel -> ((a : Nat) -> Nat) -> Gen MaybeEmpty Nat
+                                 ^^^^^^^^^^^^^^^^
+
+Error: While processing right hand side of genY_shadowed_by_auto_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
+
+ValidateInput:3
+ 18 | gen_unnamed_fun = deriveGen
+ 19 | 
+ 20 | --- Arguments shadowing ---
+ 21 | 
+ 22 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
                                                                ^^^^
 
 Error: While processing right hand side of genY_shadowed_by_other_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
 
-ValidateInput:3
- 18 | 
- 19 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
- 20 | genY_shadowed_by_auto_argument = deriveGen
+ValidateInput:4
  21 | 
- 22 | genY_shadowed_by_other_argument : Fuel -> (a : Type) -> (b : Type) -> (a : Type) -> Gen MaybeEmpty $ Y a b
+ 22 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
+ 23 | genY_shadowed_by_auto_argument = deriveGen
+ 24 | 
+ 25 | genY_shadowed_by_other_argument : Fuel -> (a : Type) -> (b : Type) -> (a : Type) -> Gen MaybeEmpty $ Y a b
                                                                                  ^^^^
 

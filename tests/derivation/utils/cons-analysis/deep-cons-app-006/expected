@@ -29,11 +29,11 @@ LOG deptycheck.deep-cons-app:0: ------------------------
 LOG deptycheck.deep-cons-app:0: applied names:   [len, elem]
 LOG deptycheck.deep-cons-app:0: bind expression: Vect (S len0) elem1
 LOG deptycheck.deep-cons-app:0: 
-LOG deptycheck.deep-cons-app:0: given free names:    [{a:1053}]
+LOG deptycheck.deep-cons-app:0: given free names:    [{a:1048}]
 LOG deptycheck.deep-cons-app:0: original expression: Split []
 LOG deptycheck.deep-cons-app:0: resolved expression: Split []
 LOG deptycheck.deep-cons-app:0: ------------------------
-LOG deptycheck.deep-cons-app:0: applied names:   [{a:1053}, {a:1053}]
+LOG deptycheck.deep-cons-app:0: applied names:   [{a:1048}, {a:1048}]
 LOG deptycheck.deep-cons-app:0: bind expression: Split []
 LOG deptycheck.deep-cons-app:0: 
 LOG deptycheck.deep-cons-app:0: given free names:    [a, x]

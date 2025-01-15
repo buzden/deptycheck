@@ -67,3 +67,13 @@ ValidateInput:6
  28 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen MaybeEmpty $ Y a b
                                                            ^^^
 
+Error: While processing right hand side of gen_unused_function_argument. Error during reflection: Given parameter is not used in the target type
+
+ValidateInput:7
+ 27 | 
+ 28 | genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen MaybeEmpty $ Y a b
+ 29 | genY_unused_argument = deriveGen
+ 30 | 
+ 31 | gen_unused_function_argument : Fuel -> (d : (a : Nat) -> Nat) -> Gen MaybeEmpty Nat
+                                                  ^^^^^^^^^^^^^^^^
+

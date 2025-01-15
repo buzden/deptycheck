@@ -237,7 +237,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"
                                                          .$ bindVar "x"
-                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "xs" .$ bindVar "^bnd^{_:1584}")
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "xs" .$ bindVar "^bnd^{_:1579}")
                                                       .=    var ">>="
                                                          .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
                                                          .$ (    MkArg MW ExplicitArg (Just "n") implicitFalse
@@ -257,7 +257,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                                                                  .$ (   var "Data.List.Sorted.SomeHead"
                                                                                      .! ("xs", implicitTrue)
                                                                                      .! ("x", implicitTrue)
-                                                                                     .! ("{_:1584}", var "^bnd^{_:1584}")
+                                                                                     .! ("{_:1579}", var "^bnd^{_:1579}")
                                                                                      .! ("n", implicitTrue)
                                                                                      .$ var "^bnd^{arg:4}")))))
                                                     ]

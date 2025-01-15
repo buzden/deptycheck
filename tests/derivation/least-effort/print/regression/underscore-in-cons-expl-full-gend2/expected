@@ -94,14 +94,14 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty (n : Nat ** 
                                                 { sc = var "{lamc:0}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "^bnd^{k:3643}" .$ bindVar "i"
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "^bnd^{k:3638}" .$ bindVar "i"
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Builtin.DPair.MkDPair"
                                                              .$ implicitTrue
                                                              .$ (   var "Builtin.DPair.MkDPair"
                                                                  .$ implicitTrue
-                                                                 .$ (var "DerivedGen.ItIsFS" .! ("{k:3643}", implicitTrue) .! ("i", var "i"))))
+                                                                 .$ (var "DerivedGen.ItIsFS" .! ("{k:3638}", implicitTrue) .! ("i", var "i"))))
                                                     ]
                                                 }))
                              ]

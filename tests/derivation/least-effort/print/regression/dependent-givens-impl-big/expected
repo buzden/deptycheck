@@ -105,7 +105,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (v : VectMaybeAnyType n) ->
                              "<<DerivedGen.VectMaybeAnyType.Here>>"
                              [       var "<<DerivedGen.VectMaybeAnyType.Here>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{n:4022}")
+                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{n:4017}")
                                   .$ (var "DerivedGen.VectMaybeAnyType.(::)" .! ("n", implicitTrue) .$ bindVar "x" .$ bindVar "xs")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.Here (orders)"))
@@ -116,7 +116,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (v : VectMaybeAnyType n) ->
                                           .$ (   var "Builtin.DPair.MkDPair"
                                               .$ implicitTrue
                                               .$ (   var "DerivedGen.VectMaybeAnyType.Here"
-                                                  .! ("{n:4022}", implicitTrue)
+                                                  .! ("{n:4017}", implicitTrue)
                                                   .! ("xs", var "xs")
                                                   .! ("x", var "x")))))
                              , var "<<DerivedGen.VectMaybeAnyType.Here>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
