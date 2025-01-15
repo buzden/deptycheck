@@ -27,3 +27,6 @@ genY_with_repeating_name_difflytyped' = deriveGen
 
 genY_unused_argument : Fuel -> (a, b : Type) -> (c : Nat) -> Gen MaybeEmpty $ Y a b
 genY_unused_argument = deriveGen
+
+gen_unused_function_argument : Fuel -> (d : (a : Nat) -> Nat) -> Gen MaybeEmpty Nat
+gen_unused_function_argument = deriveGen
