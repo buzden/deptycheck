@@ -4,6 +4,7 @@ module Deriving.DepTyCheck.Util.Reflection
 import public Control.Applicative.Const
 
 import public Data.Alternative
+import public Data.Cozippable
 
 import public Data.Fin.Lists
 import public Data.Fin.ToFin
@@ -74,7 +75,7 @@ normaliseCon orig@(MkCon n args ty) = do
     | Nothing => pure orig -- didn't manage to normalise, e.g. due to private stuff
   let (args', ty) = unPi whole
   -- `quote` may corrupt names, workaround it:
-  let args = args `zip` args' <&> \(pre, normd) => {name := pre.name} normd
+  let args = cozipWith (these id id $ \pre => {name := pre.name}) args args'
   pure $ MkCon n args ty
 
 normaliseCons : Elaboration m => TypeInfo -> m TypeInfo
