@@ -31,6 +31,7 @@ modules = Deriving.DepTyCheck
 depends = ansi
         , best-alternative
         , collection-utils
+        , cozippable
         , dependent-vect
         , elab-pretty
         , elab-util
