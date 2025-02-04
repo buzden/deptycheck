@@ -131,6 +131,30 @@ checkTypeIsGen checkSide sig = do
   -- check that target type has all unnamed arguments resolved with machine-generated names
   _ <- ensureTyArgsNamed targetType
 
+  ------------------------------------------------------------
+  -- Parse `Reflect` structures to what's needed to further --
+  ------------------------------------------------------------
+
+  -- check that all parameters of `DPair` are as expected
+  paramsToBeGenerated <- for paramsToBeGenerated $ \case
+    MkArg MW ExplicitArg (Just $ UN nm) t => pure (nm, t)
+    _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
+
+  -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
+  (givenParams, autoImplArgs, givenParamsPositions) <- map partitionEithersPos $ Prelude.for sigArgs.asVect $ \case
+    MkArg MW ImplicitArg (Just $ UN name) type => pure $ Left (Checked.ImplicitArg, name, type)
+    MkArg MW ExplicitArg (Just $ UN name) type => pure $ Left (Checked.ExplicitArg, name, type)
+    MkArg MW AutoImplicit (Just $ MN _ _) type => pure $ Right type
+    MkArg MW AutoImplicit Nothing         type => pure $ Right type
+
+    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
+    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
+    MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit argument must be unnamed"
+
+    MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
+    MkArg M1 _               _ ty => failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
+    MkArg MW (DefImplicit _) _ ty => failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
+
   --------------------------------------------------
   -- Target type family's arguments' first checks --
   --------------------------------------------------
@@ -147,30 +171,6 @@ checkTypeIsGen checkSide sig = do
   -- check the given type info corresponds to the given type application, and convert a `List` to an appropriate `Vect`
   let Yes targetTypeArgsLengthCorrect = targetType.tyArgs.length `decEq` targetTypeArgs.length
     | No _ => fail "INTERNAL ERROR: unequal argument lists lengths: \{show targetTypeArgs.length} and \{show targetType.args.length}"
-
-  ------------------------------------------------------------
-  -- Parse `Reflect` structures to what's needed to further --
-  ------------------------------------------------------------
-
-  -- check that all parameters of `DPair` are as expected
-  paramsToBeGenerated <- for paramsToBeGenerated $ \case
-    MkArg MW ExplicitArg (Just $ UN nm) t => pure (nm, t)
-    _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
-
-  -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
-  (givenParams, autoImplArgs, givenParamsPositions) <- map partitionEithersPos $ for sigArgs.asVect $ \case
-    MkArg MW ImplicitArg (Just $ UN name) type => pure $ Left (Checked.ImplicitArg, name, type)
-    MkArg MW ExplicitArg (Just $ UN name) type => pure $ Left (Checked.ExplicitArg, name, type)
-    MkArg MW AutoImplicit (Just $ MN _ _) type => pure $ Right type
-    MkArg MW AutoImplicit Nothing         type => pure $ Right type
-
-    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
-    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
-    MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit argument must be unnamed"
-
-    MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
-    MkArg M1 _               _ ty => failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
-    MkArg MW (DefImplicit _) _ ty => failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
 
   ----------------------------------------------------------------------
   -- Check that generated and given parameter lists are actually sets --
