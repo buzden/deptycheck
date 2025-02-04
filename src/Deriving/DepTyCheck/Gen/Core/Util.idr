@@ -71,7 +71,7 @@ analyseDeepConsApp ccdi freeNames = isD where
 
     -- Treat given expression as a function application to some name
     let (IVar _ lhsName, args) = unAppAny e
-      | _ => Left "not an application for some variable"
+      | _ => Left "not an application to a variable"
 
     -- Check if this is a free name
     let False = contains lhsName freeNames

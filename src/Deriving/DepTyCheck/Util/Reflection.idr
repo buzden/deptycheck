@@ -75,7 +75,7 @@ normaliseCon orig@(MkCon n args ty) = do
     | Nothing => pure orig -- didn't manage to normalise, e.g. due to private stuff
   let (args', ty) = unPi whole
   -- `quote` may corrupt names, workaround it:
-  let args = cozipWith (these id id $ \pre => {name := pre.name}) args args'
+  let args = comergeWith (\pre => {name := pre.name}) args args'
   pure $ MkCon n args ty
 
 normaliseCons : Elaboration m => TypeInfo -> m TypeInfo
