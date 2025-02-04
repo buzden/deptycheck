@@ -158,24 +158,19 @@ checkTypeIsGen checkSide sig = do
     _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
-  (givenParams, autoImplArgs, givenParamsPositions) <- do
-    let
-      classifyArg : forall m. Elaboration m =>
-                    Arg -> m $ Either (ArgExplicitness, UserName, TTImp) TTImp
-      classifyArg $ MkArg MW ImplicitArg (Just $ UN name) type = pure $ Left (Checked.ImplicitArg, name, type)
-      classifyArg $ MkArg MW ExplicitArg (Just $ UN name) type = pure $ Left (Checked.ExplicitArg, name, type)
-      classifyArg $ MkArg MW AutoImplicit (Just $ MN _ _) type = pure $ Right type
-      classifyArg $ MkArg MW AutoImplicit Nothing         type = pure $ Right type
+  (givenParams, autoImplArgs, givenParamsPositions) <- map partitionEithersPos $ for sigArgs.asVect $ \case
+    MkArg MW ImplicitArg (Just $ UN name) type => pure $ Left (Checked.ImplicitArg, name, type)
+    MkArg MW ExplicitArg (Just $ UN name) type => pure $ Left (Checked.ExplicitArg, name, type)
+    MkArg MW AutoImplicit (Just $ MN _ _) type => pure $ Right type
+    MkArg MW AutoImplicit Nothing         type => pure $ Right type
 
-      classifyArg $ MkArg MW ImplicitArg     _ ty = failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
-      classifyArg $ MkArg MW ExplicitArg     _ ty = failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
-      classifyArg $ MkArg MW AutoImplicit    _ ty = failAt (getFC ty) "Auto-implicit argument must be unnamed"
+    MkArg MW ImplicitArg     _ ty => failAt (getFC ty) "Implicit argument must be named and must not shadow any other name"
+    MkArg MW ExplicitArg     _ ty => failAt (getFC ty) "Explicit argument must be named and must not shadow any other name"
+    MkArg MW AutoImplicit    _ ty => failAt (getFC ty) "Auto-implicit argument must be unnamed"
 
-      classifyArg $ MkArg M0 _               _ ty = failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
-      classifyArg $ MkArg M1 _               _ ty = failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
-      classifyArg $ MkArg MW (DefImplicit _) _ ty = failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
-
-    map partitionEithersPos $ for sigArgs.asVect classifyArg
+    MkArg M0 _               _ ty => failAt (getFC ty) "Erased arguments are not supported in generator function signatures"
+    MkArg M1 _               _ ty => failAt (getFC ty) "Linear arguments are not supported in generator function signatures"
+    MkArg MW (DefImplicit _) _ ty => failAt (getFC ty) "Default implicit arguments are not supported in generator function signatures"
 
   ----------------------------------------------------------------------
   -- Check that generated and given parameter lists are actually sets --
@@ -198,7 +193,7 @@ checkTypeIsGen checkSide sig = do
     Just found => pure (ty, rewrite targetTypeArgsLengthCorrect in found)
     Nothing => failAt (getFC ty) "Generated parameter is not used in the target type"
 
-  -- check that all target type's parameters classied as "given" are present in the given params list
+  -- check that all target type's parameters classified as "given" are present in the given params list
   givenParams <- for {b=(_, Fin targetType.args.length, _)} givenParams $ \(explicitness, name, ty) => case findIndex (== name) targetTypeArgs of
     Just found => pure (ty, rewrite targetTypeArgsLengthCorrect in found, explicitness, UN name)
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
