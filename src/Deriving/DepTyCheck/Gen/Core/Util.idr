@@ -71,7 +71,9 @@ analyseDeepConsApp ccdi freeNames = isD where
 
     -- Treat given expression as a function application to some name
     let (IVar _ lhsName, args) = unAppAny e
+      | (IType {}, _) => pure ([] ** const e)
       | _ => Left "not an application to a variable"
+      -- TODO do we need to treat `IPrimVal` here?
 
     -- Check if this is a free name
     let False = contains lhsName freeNames
