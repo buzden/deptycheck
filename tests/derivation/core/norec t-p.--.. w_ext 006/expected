@@ -1,12 +1,12 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Target type `a` is not a top-level data definition
+Error: While processing right hand side of checkedGen. Error during reflection: Name `a` is used in target's type, but is not a generated or given parameter (goes after the fuel argument); did you forget to add one?
 
 DerivedGen:1
- 10 | 
  11 | Show a => Show b => Show (X a b) where
  12 |   show (MkX m) = "MkX \{show m}"
  13 | 
  14 | checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty a) => (Fuel -> Gen MaybeEmpty b) => Gen MaybeEmpty (X a b)
-                                    ^^^
+ 15 | checkedGen = deriveGen
+      ^^^^^^^^^^^^^^^^^^^^^^
 

@@ -159,10 +159,16 @@ checkTypeIsGen checkSide sig = do
   -- Target type family's arguments' first checks --
   --------------------------------------------------
 
-  -- check all the arguments of the target type are variable names, not complex expressions
-  targetTypeArgs <- for targetTypeArgs $ \case
-    IVar _ (UN argName) => pure argName
-    nonVarArg => failAt (getFC nonVarArg) "Target type's argument must be a variable name"
+  -- check all the arguments of the target type are correct variable names, not complex expressions
+  targetTypeArgs <- do
+    let inGivenOrGenerated : UserName -> Bool
+        inGivenOrGenerated n = any (\(_, n', _) => n == n') givenParams || any (\(n', _) => n == n') paramsToBeGenerated
+    let err : Name -> String -> String
+        err n suffix = "Name `\{show n}` is used in target's type, but is not a generated or given parameter (goes after the fuel argument); \{suffix}"
+    for targetTypeArgs $ \case
+      IVar fc un@(UN argName) => if inGivenOrGenerated argName then pure argName else failAt fc $ err un "did you forget to add one?"
+      IVar fc mn@(MN {}) => failAt fc $ err mn "looks like it is an implicit parameter of some underdeclared type; specify types with more precision"
+      nonVarArg => failAt (getFC nonVarArg) "Target type's argument must be a variable name, got `\{show nonVarArg}`"
 
   -- check that all arguments names are unique
   let [] = findDiffPairWhich (==) targetTypeArgs
