@@ -1,5 +1,5 @@
 1/1: Building ValidateInput (ValidateInput.idr)
-Error: While processing right hand side of genOfConcreteGen. Error during reflection: Target type's argument must be a variable name
+Error: While processing right hand side of genOfConcreteGen. Error during reflection: Target type's argument must be a variable name, got `Test.DepTyCheck.Gen.Emptiness.MaybeEmpty`
 
 ValidateInput:1
  12 |   MkY : Y Int String

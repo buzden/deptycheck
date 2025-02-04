@@ -1,5 +1,5 @@
 1/1: Building ValidateInput (ValidateInput.idr)
-Error: While processing right hand side of genY_Int. Error during reflection: Target type's argument must be a variable name
+Error: While processing right hand side of genY_Int. Error during reflection: Target type's argument must be a variable name, got `Int`
 
 ValidateInput:1
  10 |   MkY : Y Int String

@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Target type's argument must be a variable name
+Error: While processing right hand side of checkedGen. Error during reflection: Target type's argument must be a variable name, got `String`
 
 DerivedGen:1
  06 | 

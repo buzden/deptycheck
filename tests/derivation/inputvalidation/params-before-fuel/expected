@@ -1,0 +1,47 @@
+1/1: Building ValidateInput (ValidateInput.idr)
+Error: While processing right hand side of n_is_fully_out. Sorry, I can't find any elaboration which works. All errors:
+Possible error:
+    Error during reflection: Name `{n:3660}` is used in target's type, but is not a generated or given parameter (goes after the fuel argument); looks like it is an implicit parameter of some underdeclared type; specify types with more precision
+
+    ValidateInput:1
+     09 | data X : Fin n -> Fin n -> Type where
+     10 |   MkX : X {n=10} 5 6
+     11 | 
+     12 | n_is_fully_out : Fuel -> (a, b : _) -> Gen MaybeEmpty $ X a b
+     13 | n_is_fully_out = deriveGen @{MainCoreDerivator @{LeastEffort}}
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Possible error:
+    Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
+
+    ValidateInput:2
+     09 | data X : Fin n -> Fin n -> Type where
+     10 |   MkX : X {n=10} 5 6
+     11 | 
+     12 | n_is_fully_out : Fuel -> (a, b : _) -> Gen MaybeEmpty $ X a b
+     13 | n_is_fully_out = deriveGen @{MainCoreDerivator @{LeastEffort}}
+                           ^^^^^^^^^
+
+Error: While processing right hand side of n_mentioned_in_wrong_place. Sorry, I can't find any elaboration which works. All errors:
+Possible error:
+    Error during reflection: Name `n` is used in target's type, but is not a generated or given parameter (goes after the fuel argument); did you forget to add one?
+
+    ValidateInput:3
+     12 | n_is_fully_out : Fuel -> (a, b : _) -> Gen MaybeEmpty $ X a b
+     13 | n_is_fully_out = deriveGen @{MainCoreDerivator @{LeastEffort}}
+     14 | 
+     15 | n_mentioned_in_wrong_place : Fuel -> (a, b : Fin n) -> Gen MaybeEmpty $ X a b
+     16 | n_mentioned_in_wrong_place = deriveGen @{MainCoreDerivator @{LeastEffort}}
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Possible error:
+    Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
+
+    ValidateInput:4
+     12 | n_is_fully_out : Fuel -> (a, b : _) -> Gen MaybeEmpty $ X a b
+     13 | n_is_fully_out = deriveGen @{MainCoreDerivator @{LeastEffort}}
+     14 | 
+     15 | n_mentioned_in_wrong_place : Fuel -> (a, b : Fin n) -> Gen MaybeEmpty $ X a b
+     16 | n_mentioned_in_wrong_place = deriveGen @{MainCoreDerivator @{LeastEffort}}
+                                       ^^^^^^^^^
+
