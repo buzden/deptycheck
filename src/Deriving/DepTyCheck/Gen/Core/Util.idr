@@ -49,7 +49,7 @@ MaybeConsDetermInfo : Bool -> Type
 MaybeConsDetermInfo True  = ConsDetermInfo
 MaybeConsDetermInfo False = Unit
 
-||| Analyses whether the given expression can be an expression of free variables applies (maybe deeply) to a number of data constructors.
+||| Analyses whether the given expression can be an expression of free variables applied (maybe deeply) to a number of data constructors.
 |||
 ||| Returns which of given free names are actually used in the given expression, in order of appearance in the expression.
 ||| Notice that applied free names may repeat as soon as one name is used several times in the given expression.

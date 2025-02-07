@@ -38,5 +38,9 @@ checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO ()
 main = runGs
-  [ G $ \fl => checkedGen fl [()] [()]
+  [ G $ \fl => checkedGen fl [] []
+  , G $ \fl => checkedGen fl [()] [()]
+  , G $ \fl => checkedGen fl [()] [(), ()]
+  , G $ \fl => checkedGen fl [(), ()] [()]
+  , G $ \fl => checkedGen fl [(), ()] [(), ()]
   ]
