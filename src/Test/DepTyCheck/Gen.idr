@@ -91,7 +91,7 @@ isEmpty _     = False
 isNonEmpty : Gen em a -> Bool
 isNonEmpty = not . isEmpty
 
-IsNonEmpty = So . isNonEmpty
+IsNonEmpty g = isEmpty g === False
 
 record GenAlternatives (0 mustBeNotEmpty : Bool) (0 em : Emptiness) (a : Type) where
   constructor MkGenAlts
@@ -122,11 +122,11 @@ Gen0 = Gen MaybeEmpty
 
 %hint
 0 isNonEmptyGen1 : {g : Gen1 a} -> IsNonEmpty g
-isNonEmptyGen1 {g=Pure _}       = Oh
-isNonEmptyGen1 {g=Raw _}        = Oh
-isNonEmptyGen1 {g=OneOf _}      = Oh
-isNonEmptyGen1 {g=Bind _ _}     = Oh
-isNonEmptyGen1 {g=Labelled _ _} = Oh
+isNonEmptyGen1 {g=Pure _}       = Refl
+isNonEmptyGen1 {g=Raw _}        = Refl
+isNonEmptyGen1 {g=OneOf _}      = Refl
+isNonEmptyGen1 {g=Bind _ _}     = Refl
+isNonEmptyGen1 {g=Labelled _ _} = Refl
 
 -----------------------------
 --- Very basic generators ---
@@ -148,29 +148,11 @@ export %inline
 empty : Gen0 a
 empty = Empty
 
-------------------------------
-BoolWithProof : Bool -> Bool -> Type
-BoolWithProof b True  = So b
-BoolWithProof b False = So $ not b
-
-Reflexive Bool BoolWithProof where
-  reflexive = if x then Oh else Oh
-
-boolWithProof : (b : Bool) -> Subset Bool $ BoolWithProof b
-boolWithProof b = Element b $ reflexive {rel=BoolWithProof}
-------------------------------
-
-0 DecIsEmpty : Gen em a -> Type
-DecIsEmpty = Subset Bool . BoolWithProof . isEmpty
-
-decIsEmpty : (g : Gen em a) -> DecIsEmpty g
-decIsEmpty g = boolWithProof $ isEmpty g
-
 export
 label : Label -> Gen em a -> Gen em a
-label l g with (decIsEmpty g)
-  label _ Empty | Element True  _ = Empty
-  label l g     | Element False _ = Labelled l g
+label l g with (isEmpty g) proof 0 prf
+  label _ Empty | True  = Empty
+  label l g     | False = Labelled l g
 
 ------------------------------------------------
 --- Technical stuff for mapping alternatives ---
@@ -241,11 +223,11 @@ relax $ OneOf @{ne} @{nw} x = OneOf @{ne} @{transitive' nw %search} x
 relax $ Bind @{nw} x f      = Bind @{transitive' nw %search} x f
 relax $ Labelled l x        = Labelled @{relaxNonEmpty} l $ relax x
 
-relaxNonEmpty {g=Pure _}       = Oh
-relaxNonEmpty {g=Raw _}        = Oh
-relaxNonEmpty {g=OneOf _}      = Oh
-relaxNonEmpty {g=Bind _ _}     = Oh
-relaxNonEmpty {g=Labelled _ _} = Oh
+relaxNonEmpty {g=Pure _}       = Refl
+relaxNonEmpty {g=Raw _}        = Refl
+relaxNonEmpty {g=OneOf _}      = Refl
+relaxNonEmpty {g=Bind _ _}     = Refl
+relaxNonEmpty {g=Labelled _ _} = Refl
 
 --------------------
 --- More utility ---
@@ -257,11 +239,11 @@ strengthen x     = Just x
 
 0 strengthenNonEmpty : {g : Gen em a} -> IsJust (strengthen g) =>
                        IsNonEmpty $ fromJust $ strengthen g
-strengthenNonEmpty {g=Pure _}       = Oh
-strengthenNonEmpty {g=Raw _}        = Oh
-strengthenNonEmpty {g=OneOf _}      = Oh
-strengthenNonEmpty {g=Bind _ _}     = Oh
-strengthenNonEmpty {g=Labelled _ _} = Oh
+strengthenNonEmpty {g=Pure _}       = Refl
+strengthenNonEmpty {g=Raw _}        = Refl
+strengthenNonEmpty {g=OneOf _}      = Refl
+strengthenNonEmpty {g=Bind _ _}     = Refl
+strengthenNonEmpty {g=Labelled _ _} = Refl
 
 mapMaybeTaggedLazy : (a -> Maybe b) -> LazyLst ne (tag, Lazy a) -> LazyLst0 (tag, Lazy b)
 mapMaybeTaggedLazy = mapMaybe . wrapMaybeTaggedLazy
@@ -414,11 +396,11 @@ Functor (Gen em) where
   map f $ Bind x g       = Bind x $ map f . g
   map f $ Labelled l x   = Labelled @{mapNonEmpty} l $ map f x
 
-mapNonEmpty {g=Pure _}       = Oh
-mapNonEmpty {g=Raw _}        = Oh
-mapNonEmpty {g=OneOf _}      = Oh
-mapNonEmpty {g=Bind _ _}     = Oh
-mapNonEmpty {g=Labelled _ _} = Oh
+mapNonEmpty {g=Pure _}       = Refl
+mapNonEmpty {g=Raw _}        = Refl
+mapNonEmpty {g=OneOf _}      = Refl
+mapNonEmpty {g=Bind _ _}     = Refl
+mapNonEmpty {g=Labelled _ _} = Refl
 
 export
 Applicative (Gen em)
@@ -428,7 +410,7 @@ Applicative (Gen em) where
 
   pure = Pure
 
-  g <*> h with (decIsEmpty g) | (decIsEmpty h)
+  g <*> h with (isEmpty g) proof 0 prfLeft | (isEmpty h) proof 0 prfRight
     Empty <*> _ | _ | _ = Empty
     _ <*> Empty | _ | _ = Empty
 
@@ -437,13 +419,13 @@ Applicative (Gen em) where
 
     Raw sfl <*> Raw sfr | _ | _ = Raw $ sfl <*> sfr
 
-    Labelled l x <*> y | _ | Element False _ = Labelled @{apNonEmpty} l $ x <*> y
-    x <*> Labelled l y | Element False _ | _ = Labelled @{apNonEmpty} l $ x <*> y
+    Labelled l x <*> y | _     | False = Labelled @{apNonEmpty} l $ x <*> y
+    x <*> Labelled l y | False | _     = Labelled @{apNonEmpty} l $ x <*> y
 
-    OneOf @{ne} oo <*> g | _ | Element False _ =
+    OneOf @{ne} oo <*> g | _ | False =
       OneOf @{allMapOneOf $ \e => apNonEmpty @{relaxNonEmpty @{indexAll e ne}}} $
         mapOneOf oo $ \x => assert_total $ relax x <*> g
-    g <*> OneOf @{ne} oo | Element False _ | _ =
+    g <*> OneOf @{ne} oo | False | _ =
       OneOf @{allMapOneOf $ \e => apNonEmpty @{%search} @{relaxNonEmpty @{indexAll e ne}}} $
         mapOneOf oo $ \x => assert_total $ g <*> relax x
 
@@ -454,42 +436,45 @@ Applicative (Gen em) where
       Left  _ => Bind [| (x, y) |] $ \(l, r) => assert_total $ relax (f l) <*> g r
       Right _ => Bind [| (x, y) |] $ \(l, r) => f l <*> relax (g r)
 
-apNonEmpty with (decIsEmpty g) | (decIsEmpty h)
-  apNonEmpty {g=Pure _}       {h=Pure _}       | _ | _ = Oh
-  apNonEmpty {g=Pure _}       {h=Raw _}        | _ | _ = Oh
-  apNonEmpty {g=Pure _}       {h=OneOf _}      | _ | _ = Oh
-  apNonEmpty {g=Pure _}       {h=Bind _ _}     | _ | _ = Oh
-  apNonEmpty {g=Pure _}       {h=Labelled _ _} | _ | _ = Oh
+apNonEmpty with (isEmpty g) proof 0 prfLeft | (isEmpty h) proof 0 prfRight
+  apNonEmpty {g=Empty}        {h}              | True  | _     impossible
+  apNonEmpty {g}              {h=Empty}        | _     | True  impossible
 
-  apNonEmpty {g=Raw _}        {h=Pure _}       | _ | _ = Oh
-  apNonEmpty {g=OneOf _}      {h=Pure _}       | _ | _ = Oh
-  apNonEmpty {g=Bind _ _}     {h=Pure _}       | _ | _ = Oh
-  apNonEmpty {g=Labelled _ _} {h=Pure _}       | _ | _ = Oh
+  apNonEmpty {g=Pure _}       {h=Pure _}       | _     | _     = Refl
+  apNonEmpty {g=Pure _}       {h=Raw _}        | _     | _     = Refl
+  apNonEmpty {g=Pure _}       {h=OneOf _}      | _     | _     = Refl
+  apNonEmpty {g=Pure _}       {h=Bind _ _}     | _     | _     = Refl
+  apNonEmpty {g=Pure _}       {h=Labelled _ _} | _     | _     = Refl
 
-  apNonEmpty {g=Raw _}        {h=Raw _}        | _ | _ = Oh
+  apNonEmpty {g=Raw _}        {h=Pure _}       | _     | _     = Refl
+  apNonEmpty {g=OneOf _}      {h=Pure _}       | _     | _     = Refl
+  apNonEmpty {g=Bind _ _}     {h=Pure _}       | _     | _     = Refl
+  apNonEmpty {g=Labelled _ _} {h=Pure _}       | _     | _     = Refl
 
-  apNonEmpty {g=Labelled _ _} {h=Raw _}        | _ | Element False _ = Oh
-  apNonEmpty {g=Labelled _ _} {h=OneOf _}      | _ | Element False _ = Oh
-  apNonEmpty {g=Labelled _ _} {h=Bind _ _}     | _ | Element False _ = Oh
-  apNonEmpty {g=Labelled _ _} {h=Labelled _ _} | _ | Element False _ = Oh
+  apNonEmpty {g=Raw _}        {h=Raw _}        | _     | _     = Refl
 
-  apNonEmpty {g=Raw _}        {h=Labelled _ _} | Element False _ | Element False _ = Oh
-  apNonEmpty {g=OneOf _}      {h=Labelled _ _} | Element False _ | Element False _ = Oh
-  apNonEmpty {g=Bind _ _}     {h=Labelled _ _} | Element False _ | Element False _ = Oh
+  apNonEmpty {g=Labelled _ _} {h=Raw _}        | _     | False = Refl
+  apNonEmpty {g=Labelled _ _} {h=OneOf _}      | _     | False = Refl
+  apNonEmpty {g=Labelled _ _} {h=Bind _ _}     | _     | False = Refl
+  apNonEmpty {g=Labelled _ _} {h=Labelled _ _} | _     | False = Refl
 
-  apNonEmpty {g=OneOf _}      {h=Raw _}        | Element False _ | Element False _ = Oh
-  apNonEmpty {g=OneOf _}      {h=OneOf _}      | Element False _ | Element False _ = Oh
-  apNonEmpty {g=OneOf _}      {h=Bind _ _}     | Element False _ | Element False _ = Oh
+  apNonEmpty {g=Raw _}        {h=Labelled _ _} | False | False = Refl
+  apNonEmpty {g=OneOf _}      {h=Labelled _ _} | False | False = Refl
+  apNonEmpty {g=Bind _ _}     {h=Labelled _ _} | False | False = Refl
 
-  apNonEmpty {g=Bind _ _}     {h=OneOf _}      | Element False _ | Element False _ = Oh
-  apNonEmpty {g=Raw _}        {h=OneOf _}      | Element False _ | Element False _ = Oh
+  apNonEmpty {g=OneOf _}      {h=Raw _}        | False | False = Refl
+  apNonEmpty {g=OneOf _}      {h=OneOf _}      | False | False = Refl
+  apNonEmpty {g=OneOf _}      {h=Bind _ _}     | False | False = Refl
 
-  apNonEmpty {g=Raw _}        {h=Bind _ _}     | _ | Element False _ = Oh
-  apNonEmpty {g=Bind _ _}     {h=Raw _}        | _ | Element False _ = Oh
+  apNonEmpty {g=Bind _ _}     {h=OneOf _}      | False | False = Refl
+  apNonEmpty {g=Raw _}        {h=OneOf _}      | False | False = Refl
 
-  apNonEmpty {g=Bind {biem=bl} _ _} {h=Bind {biem=br} _ _} | _ | Element False _ with (order {rel=NoWeaker} bl br)
-    _ | Left  _ = Oh
-    _ | Right _ = Oh
+  apNonEmpty {g=Raw _}        {h=Bind _ _}     | _     | False = Refl
+  apNonEmpty {g=Bind _ _}     {h=Raw _}        | _     | False = Refl
+
+  apNonEmpty {g=Bind {biem=bl} _ _} {h=Bind {biem=br} _ _} | _ | False with (order {rel=NoWeaker} bl br)
+    _ | Left  _ = Refl
+    _ | Right _ = Refl
 
 export
 {em : _} -> Monad (Gen em) where
@@ -663,11 +648,11 @@ alternativesOf $ OneOf oo     = mapOneOf oo relax
 alternativesOf $ Labelled l x = mapOneOfElem (alternativesOf x) $ \g, e => Labelled l g @{indexAll e alternativesOfNonEmpty}
 alternativesOf g              = [g]
 
-alternativesOfNonEmpty {g=Pure _}        = [Oh]
-alternativesOfNonEmpty {g=Raw _}         = [Oh]
+alternativesOfNonEmpty {g=Pure _}        = [Refl]
+alternativesOfNonEmpty {g=Raw _}         = [Refl]
 alternativesOfNonEmpty {g=OneOf @{ne} _} = allMapOneOf $ \e => relaxNonEmpty @{indexAll e ne}
-alternativesOfNonEmpty {g=Bind _ _}      = [Oh]
-alternativesOfNonEmpty {g=Labelled _ _}  = allMapOneOfElem $ \_ => Oh
+alternativesOfNonEmpty {g=Bind _ _}      = [Refl]
+alternativesOfNonEmpty {g=Labelled _ _}  = allMapOneOfElem $ \_ => Refl
 
 ||| Any depth alternatives fetching.
 |||
@@ -690,15 +675,15 @@ export
 forgetAlternatives : Gen em a -> Gen em a
 0 forgetAlternativesNonEmpty : {g : Gen iem a} -> IsNonEmpty g => IsNonEmpty $ forgetAlternatives g
 
-forgetAlternatives g@(OneOf {})   = Labelled "forgetAlternatives" $ OneOf @{[Oh]} $ MkGenAlts [(1, g)]
+forgetAlternatives g@(OneOf {})   = Labelled "forgetAlternatives" $ OneOf @{[Refl]} $ MkGenAlts [(1, g)]
 forgetAlternatives $ Labelled l x = Labelled @{forgetAlternativesNonEmpty} l $ forgetAlternatives x
 forgetAlternatives g              = g
 
-forgetAlternativesNonEmpty {g=Pure _}       = Oh
-forgetAlternativesNonEmpty {g=Raw _}        = Oh
-forgetAlternativesNonEmpty {g=OneOf _}      = Oh
-forgetAlternativesNonEmpty {g=Bind _ _}     = Oh
-forgetAlternativesNonEmpty {g=Labelled _ _} = Oh
+forgetAlternativesNonEmpty {g=Pure _}       = Refl
+forgetAlternativesNonEmpty {g=Raw _}        = Refl
+forgetAlternativesNonEmpty {g=OneOf _}      = Refl
+forgetAlternativesNonEmpty {g=Bind _ _}     = Refl
+forgetAlternativesNonEmpty {g=Labelled _ _} = Refl
 
 ||| Returns generator with internal structure hidden to anything, including combinators,
 ||| except for an empty generator, which would still be returned as an empty generator.
