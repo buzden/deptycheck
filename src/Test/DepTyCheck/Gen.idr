@@ -7,31 +7,24 @@ import public Control.Monad.Random.Interface
 
 import Data.Bool
 import public Data.CheckedEmpty.List.Lazy
+import Data.CheckedEmpty.List.Lazy.Elem
+import Data.CheckedEmpty.List.Lazy.Quantifiers
 import Data.CheckedEmpty.List.Lazy.Properties
-import Control.Foldable.Quantifiers
 import Data.Fuel
 import public Data.Nat1
 import Data.List
-import Data.List.Elem
-import Data.List.Properties
-import Data.List.Quantifiers.Properties
 import Data.List.Lazy
 import Data.List.Lazy.Extra
-import Data.So.Utils
 import Data.Vect
 
 import Decidable.Equality
 
 import public Language.Implicits.IfUnsolved
 
-import Syntax.WithProof.Extra
+import Syntax.WithProof
 
 import public Test.DepTyCheck.Gen.Emptiness
 import public Test.DepTyCheck.Gen.Labels
-
-%hide Control.Foldable.Elem.Elem
-%hide Control.Foldable.Elem.elemMap
-%hide Control.Foldable.Quantifiers.All
 
 %default total
 
@@ -50,8 +43,8 @@ wrapLazy f = delay . f . force
 wrapMaybeTaggedLazy : (a -> Maybe b) -> (tag, Lazy a) -> Maybe (tag, Lazy b)
 wrapMaybeTaggedLazy f = traverse $ map delay . f . force
 
-0 unpackTaggedLazy : Foldable f => f (tag, Lazy a) -> List a
-unpackTaggedLazy = map (force . snd) . toList
+0 unpackTaggedLazy : Functor f => f (tag, Lazy a) -> f a
+unpackTaggedLazy = map $ force . snd
 
 -------------------------------
 --- Definition of the `Gen` ---
@@ -100,26 +93,17 @@ isNonEmpty = not . isEmpty
 
 IsNonEmpty = So . isNonEmpty
 
-IsEmpty : Gen em a -> Type
-IsEmpty = So . isEmpty
-
 record GenAlternatives (0 mustBeNotEmpty : Bool) (0 em : Emptiness) (a : Type) where
   constructor MkGenAlts
   unGenAlts : LazyLst mustBeNotEmpty (Nat1, Lazy (Gen em a))
 
-0 listOfAlts : GenAlternatives ne em a -> List $ Gen em a
+0 listOfAlts : GenAlternatives ne em a -> LazyLst ne $ Gen em a
 listOfAlts $ MkGenAlts gs = unpackTaggedLazy gs
 
 All p = All p . listOfAlts
 
 0 Elem : Gen em a -> GenAlternatives ne em a -> Type
 Elem g = Elem g . listOfAlts
-
-0 DecIsEmpty : (g : Gen em a) -> Type
-DecIsEmpty = Subset Bool . BoolWithProof . isEmpty
-
-decIsEmpty : (g : Gen em a) -> DecIsEmpty g
-decIsEmpty g = boolWithProof $ isEmpty g
 
 (.totalWeight) : GenAlternatives True em a -> Nat1
 (.totalWeight) = foldl1 (+) . map fst . unGenAlts
@@ -164,6 +148,24 @@ export %inline
 empty : Gen0 a
 empty = Empty
 
+------------------------------
+BoolWithProof : Bool -> Bool -> Type
+BoolWithProof b True  = So b
+BoolWithProof b False = So $ not b
+
+Reflexive Bool BoolWithProof where
+  reflexive = if x then Oh else Oh
+
+boolWithProof : (b : Bool) -> Subset Bool $ BoolWithProof b
+boolWithProof b = Element b $ reflexive {rel=BoolWithProof}
+------------------------------
+
+0 DecIsEmpty : Gen em a -> Type
+DecIsEmpty = Subset Bool . BoolWithProof . isEmpty
+
+decIsEmpty : (g : Gen em a) -> DecIsEmpty g
+decIsEmpty g = boolWithProof $ isEmpty g
+
 export
 label : Label -> Gen em a -> Gen em a
 label l g with (decIsEmpty g)
@@ -180,19 +182,18 @@ mapTaggedLazy f = map $ \x => (fst x, wrapLazy f $ snd x)
 mapOneOf : GenAlternatives ne iem a -> (Gen iem a -> Gen em b) -> GenAlternatives ne em b
 mapOneOf $ MkGenAlts gs = MkGenAlts . flip mapTaggedLazy gs
 
-0 allMapTaggedLazy : (0 _ : Functor t) => Foldable t => LawfulFoldableFunctor t =>
-                     {0 f : a -> b} -> {xs : t (tag, Lazy a)} ->
+0 allMapTaggedLazy : {0 f : a -> b} -> {xs : LazyLst ne (tag, Lazy a)} ->
                      ({x : a} -> (0 _ : Elem x $ unpackTaggedLazy xs) -> p $ f x) ->
                      All p $ unpackTaggedLazy $ mapTaggedLazy f xs
-allMapTaggedLazy h = allMap {t=List} $ allMapForall {t} $ \e => h $ elemMap _ e
+allMapTaggedLazy h = allMap $ allMapForall $ \e => h $ elemMap _ e
 
 0 allMapOneOf : {0 f : Gen iem a -> Gen em b} ->
                 {gs : GenAlternatives ne iem a} ->
                 ({x : Gen iem a} -> (0 _ : Elem x gs) -> p $ f x) ->
                 All p $ mapOneOf gs f
-allMapOneOf {gs=MkGenAlts _} = allMapTaggedLazy {t=LazyLst ne}
+allMapOneOf {gs=MkGenAlts _} = allMapTaggedLazy
 
-mapElem : (xs : LazyLst ne a) -> ((x : a) -> (0 _ : Elem x $ toList xs) -> b) -> LazyLst ne b
+mapElem : (xs : LazyLst ne a) -> ((x : a) -> (0 _ : Elem x xs) -> b) -> LazyLst ne b
 mapElem []        _ = []
 mapElem (x :: xs) f = f x Here :: mapElem xs (\y, e => f y $ There e)
 
@@ -207,9 +208,9 @@ mapOneOfElem : (gs : GenAlternatives ne iem a) ->
 mapOneOfElem $ MkGenAlts gs = MkGenAlts . mapTaggedLazyElem gs
 
 0 allMapElem : {xs : LazyLst ne a} ->
-               {0 f : (x : a) -> (0 _ : Elem x $ toList xs) -> b} ->
-               ({x : a} -> (0 e : Elem x $ toList xs) -> p $ f x e) ->
-               All p $ toList $ mapElem xs f
+               {0 f : (x : a) -> (0 _ : Elem x xs) -> b} ->
+               ({x : a} -> (0 e : Elem x xs) -> p $ f x e) ->
+               All p $ mapElem xs f
 allMapElem {xs=[]}      _ = []
 allMapElem {xs=x :: xs} h = h Here :: allMapElem (\e => h $ There e)
 
@@ -217,7 +218,7 @@ allMapElem {xs=x :: xs} h = h Here :: allMapElem (\e => h $ There e)
                          {0 f : (x : a) -> (0 _ : Elem x $ unpackTaggedLazy xs) -> b} ->
                          ({x : a} -> (0 e : Elem x $ unpackTaggedLazy xs) -> p $ f x e) ->
                          All p $ unpackTaggedLazy $ mapTaggedLazyElem xs f
-allMapTaggedLazyElem h = allMap {t=List} $ allMapElem $ \e => h $ elemMap _ e
+allMapTaggedLazyElem h = allMap $ allMapElem $ \e => h $ elemMap _ e
 
 0 allMapOneOfElem : {gs : GenAlternatives ne iem a} ->
                     {0 f : (g : Gen iem a) -> (0 _ : Elem g gs) -> Gen em b} ->
@@ -250,6 +251,38 @@ relaxNonEmpty {g=Labelled _ _} = Oh
 --- More utility ---
 --------------------
 
+strengthen : Gen em a -> Maybe $ Gen em a
+strengthen Empty = Nothing
+strengthen x     = Just x
+
+0 strengthenNonEmpty : {g : Gen em a} -> IsJust (strengthen g) =>
+                       IsNonEmpty $ fromJust $ strengthen g
+strengthenNonEmpty {g=Pure _}       = Oh
+strengthenNonEmpty {g=Raw _}        = Oh
+strengthenNonEmpty {g=OneOf _}      = Oh
+strengthenNonEmpty {g=Bind _ _}     = Oh
+strengthenNonEmpty {g=Labelled _ _} = Oh
+
+mapMaybeTaggedLazy : (a -> Maybe b) -> LazyLst ne (tag, Lazy a) -> LazyLst0 (tag, Lazy b)
+mapMaybeTaggedLazy = mapMaybe . wrapMaybeTaggedLazy
+
+0 allMapMaybeJustTaggedLazy : {f : a -> Maybe b} ->
+                              {xs : LazyLst ne (tag, Lazy a)} ->
+                              ((x : a) ->
+                               (0 _ : IsJust $ f x) ->
+                               p $ fromJust $ f x) ->
+                              All p $ unpackTaggedLazy $ mapMaybeTaggedLazy f xs
+allMapMaybeJustTaggedLazy h = allMap $ allMapMaybeJust $ helper
+  where
+    helper : (x : (tag, Lazy a)) ->
+             {0 _ : IsJust $ wrapMaybeTaggedLazy f x} ->
+             p $ force $ snd $ fromJust $ wrapMaybeTaggedLazy f x
+    helper (w, x) with (f x) proof 0 prf
+      helper (w, x) | Just y = do
+        let yIsJust : IsJust (f x) = rewrite prf in ItIsJust
+        let Refl : y === fromJust (f x) = rewrite prf in Refl
+        h x yIsJust
+
 namespace OneOf
 
   public export
@@ -265,8 +298,8 @@ namespace OneOf
 mkOneOfMaybeEmpty : (xs : LazyLst altsNe (Nat1, Lazy (Gen alem a))) ->
                     (0 _ : All IsNonEmpty $ unpackTaggedLazy xs) =>
                     Gen0 a
-mkOneOfMaybeEmpty []        = Empty
-mkOneOfMaybeEmpty (x :: xs) = OneOf $ MkGenAlts $ x :: xs
+mkOneOfMaybeEmpty []                  = Empty
+mkOneOfMaybeEmpty (x :: xs) @{_ :: _} = OneOf $ MkGenAlts $ x :: xs
 
 mkOneOf : {em : _} ->
           (0 _ : alem `NoWeaker` em) =>
@@ -275,11 +308,9 @@ mkOneOf : {em : _} ->
           Gen em a
 mkOneOf {em=NonEmpty} @{nw} @{NT} xs with 0 (nonEmptyIsMaximal nw)
   _ | Refl = OneOf @{allTrue isNonEmptyGen1} $ MkGenAlts xs
--- TODO: filter has problem with laziness
--- mkOneOf {em=MaybeEmpty} xs = mkOneOfMaybeEmpty @{allMap {t=List} filterElem} $ filter (isNonEmpty . force . snd) xs
--- Not using mapSnd, because it's less reducible.
-mkOneOf {em=MaybeEmpty} xs = mkOneOfMaybeEmpty @{allMap {t=List} $ allMap {t=LazyLst False} $ filterElem} $
-  map (\x => (fst x, delay $ snd x)) $ filter (isNonEmpty . snd) $ map (\x => (fst x, force $ snd x)) xs
+mkOneOf {em=MaybeEmpty} xs =
+  mkOneOfMaybeEmpty (mapMaybeTaggedLazy strengthen xs)
+    @{allMapMaybeJustTaggedLazy {f=strengthen} $ \_, _ => strengthenNonEmpty}
 
 --------------------------
 --- Running generators ---
@@ -424,39 +455,39 @@ Applicative (Gen em) where
       Right _ => Bind [| (x, y) |] $ \(l, r) => f l <*> relax (g r)
 
 apNonEmpty with (decIsEmpty g) | (decIsEmpty h)
-  apNonEmpty {g=Pure _}       {h=Pure _}       | _               | _               = Oh
-  apNonEmpty {g=Pure _}       {h=Raw _}        | _               | _               = Oh
-  apNonEmpty {g=Pure _}       {h=OneOf _}      | _               | _               = Oh
-  apNonEmpty {g=Pure _}       {h=Bind _ _}     | _               | _               = Oh
-  apNonEmpty {g=Pure _}       {h=Labelled _ _} | _               | _               = Oh
+  apNonEmpty {g=Pure _}       {h=Pure _}       | _ | _ = Oh
+  apNonEmpty {g=Pure _}       {h=Raw _}        | _ | _ = Oh
+  apNonEmpty {g=Pure _}       {h=OneOf _}      | _ | _ = Oh
+  apNonEmpty {g=Pure _}       {h=Bind _ _}     | _ | _ = Oh
+  apNonEmpty {g=Pure _}       {h=Labelled _ _} | _ | _ = Oh
 
-  apNonEmpty {g=Raw _}        {h=Pure _}       | _               | _               = Oh
-  apNonEmpty {g=OneOf _}      {h=Pure _}       | _               | _               = Oh
-  apNonEmpty {g=Bind _ _}     {h=Pure _}       | _               | _               = Oh
-  apNonEmpty {g=Labelled _ _} {h=Pure _}       | _               | _               = Oh
+  apNonEmpty {g=Raw _}        {h=Pure _}       | _ | _ = Oh
+  apNonEmpty {g=OneOf _}      {h=Pure _}       | _ | _ = Oh
+  apNonEmpty {g=Bind _ _}     {h=Pure _}       | _ | _ = Oh
+  apNonEmpty {g=Labelled _ _} {h=Pure _}       | _ | _ = Oh
 
-  apNonEmpty {g=Raw _}        {h=Raw _}        | _               | _               = Oh
+  apNonEmpty {g=Raw _}        {h=Raw _}        | _ | _ = Oh
 
-  apNonEmpty {g=Labelled _ _} {h=Raw _}        | _               | Element False _ = Oh
-  apNonEmpty {g=Labelled _ _} {h=OneOf _}      | _               | Element False _ = Oh
-  apNonEmpty {g=Labelled _ _} {h=Bind _ _}     | _               | Element False _ = Oh
-  apNonEmpty {g=Labelled _ _} {h=Labelled _ _} | _               | Element False _ = Oh
+  apNonEmpty {g=Labelled _ _} {h=Raw _}        | _ | Element False _ = Oh
+  apNonEmpty {g=Labelled _ _} {h=OneOf _}      | _ | Element False _ = Oh
+  apNonEmpty {g=Labelled _ _} {h=Bind _ _}     | _ | Element False _ = Oh
+  apNonEmpty {g=Labelled _ _} {h=Labelled _ _} | _ | Element False _ = Oh
 
   apNonEmpty {g=Raw _}        {h=Labelled _ _} | Element False _ | Element False _ = Oh
   apNonEmpty {g=OneOf _}      {h=Labelled _ _} | Element False _ | Element False _ = Oh
   apNonEmpty {g=Bind _ _}     {h=Labelled _ _} | Element False _ | Element False _ = Oh
 
-  apNonEmpty {g=OneOf _}      {h=Raw _}        | _       False   | Element False _ = Oh
-  apNonEmpty {g=OneOf _}      {h=OneOf _}      | _       False   | Element False _ = Oh
-  apNonEmpty {g=OneOf _}      {h=Bind _ _}     | _       False   | Element False _ = Oh
+  apNonEmpty {g=OneOf _}      {h=Raw _}        | Element False _ | Element False _ = Oh
+  apNonEmpty {g=OneOf _}      {h=OneOf _}      | Element False _ | Element False _ = Oh
+  apNonEmpty {g=OneOf _}      {h=Bind _ _}     | Element False _ | Element False _ = Oh
 
   apNonEmpty {g=Bind _ _}     {h=OneOf _}      | Element False _ | Element False _ = Oh
   apNonEmpty {g=Raw _}        {h=OneOf _}      | Element False _ | Element False _ = Oh
 
-  apNonEmpty {g=Raw _}        {h=Bind _ _}     | _               | Element False _ = Oh
-  apNonEmpty {g=Bind _ _}     {h=Raw _}        | _               | Element False _ = Oh
+  apNonEmpty {g=Raw _}        {h=Bind _ _}     | _ | Element False _ = Oh
+  apNonEmpty {g=Bind _ _}     {h=Raw _}        | _ | Element False _ = Oh
 
-  apNonEmpty {g=Bind {biem=bl} _ _} {h=Bind {biem=br} _ _} | _   | Element False _ with (order {rel=NoWeaker} bl br)
+  apNonEmpty {g=Bind {biem=bl} _ _} {h=Bind {biem=br} _ _} | _ | Element False _ with (order {rel=NoWeaker} bl br)
     _ | Left  _ = Oh
     _ | Right _ = Oh
 
@@ -653,7 +684,7 @@ export
 forgetAlternatives : Gen em a -> Gen em a
 0 forgetAlternativesNonEmpty : {g : Gen iem a} -> IsNonEmpty g => IsNonEmpty $ forgetAlternatives g
 
-forgetAlternatives g@(OneOf {})   = Labelled "forgetAlternatives" $ OneOf $ MkGenAlts [(1, g)]
+forgetAlternatives g@(OneOf {})   = Labelled "forgetAlternatives" $ OneOf @{[Oh]} $ MkGenAlts [(1, g)]
 forgetAlternatives $ Labelled l x = Labelled @{forgetAlternativesNonEmpty} l $ forgetAlternatives x
 forgetAlternatives g              = g
 
@@ -758,9 +789,9 @@ export
 suchThat_withPrf : Gen em a -> (p : a -> Bool) -> Gen0 $ a `Subset` So . p
 suchThat_withPrf g p = mapMaybe lp g where
   lp : a -> Maybe $ a `Subset` So . p
-  lp x with (@@@ p x)
-    _ | Element True prf = Just $ Element x $ eqToSo prf
-    _ | Element False _  = Nothing
+  lp x with (p x) proof 0 prf
+    _ | True  = Just $ Element x $ eqToSo prf
+    _ | False = Nothing
 
 export infixl 4 `suchThat`
 
@@ -789,9 +820,9 @@ retryUntil_withPrf : (p : a -> Bool) -> (Fuel -> Gen em a) -> Fuel -> Gen0 $ a `
 retryUntil_withPrf p f Dry           = f Dry `suchThat_withPrf` p
 retryUntil_withPrf p f fl'@(More fl) = do
   x <- relax $ f fl'
-  case @@@ p x of
-    Element True prf => pure $ Element x $ eqToSo prf
-    Element False _  => retryUntil_withPrf p f fl
+  case @@ p x of
+    (True ** prf) => pure $ Element x $ eqToSo prf
+    (False ** _)  => retryUntil_withPrf p f fl
 
 ||| More elegant version of `suchThat` for fuelled generators.
 |||
