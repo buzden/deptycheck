@@ -496,6 +496,12 @@ export
   Empty        >>= _  = Empty
   Pure x       >>= nf = nf x
   Raw g        >>= nf = Bind g nf
+  -- Inlining `mkOneOf` for manual fusion
+  (OneOf oo >>= nf) {em=MaybeEmpty} =
+    mkOneOfMaybeEmpty
+      (mapMaybeTaggedLazy (strengthen . assert_total (>>= nf) . relax) oo.unGenAlts)
+      @{allMapMaybeJustTaggedLazy {f=strengthen . assert_total (>>= nf) . relax} $
+          \_, _ => strengthenNonEmpty}
   OneOf oo     >>= nf = mkOneOf $ flip mapTaggedLazy oo.unGenAlts $ assert_total (>>= nf) . relax
   Bind x f     >>= nf = Bind x $ assert_total (>>= nf) . relax . f
   Labelled l x >>= nf = label l $ x >>= nf
