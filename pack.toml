@@ -20,6 +20,16 @@ type = "local"
 path = "docs"
 ipkg = "docs.ipkg"
 
+###################
+### Proof utils ###
+###################
+
+[custom.all.proof-utils]
+type   = "git"
+url    = "https://github.com/spcfox/idris2-proof-utils.git"
+commit = "1e7e63b147fcdab9a2e9247646e7494485f6ca15"
+ipkg   = "proof-utils.ipkg"
+
 ################
 ### Examples ###
 ################
