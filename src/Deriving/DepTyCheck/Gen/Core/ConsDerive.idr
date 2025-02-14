@@ -246,11 +246,17 @@ namespace NonObligatoryExts
       -- Compute left-to-right need of generation when there are non-trivial types at the left
       argsTypeApps <- getTypeApps con
 
-      -- Get arguments which any other argument depends on
-      let dependees = dependees con.args
-
       -- Decide how constructor arguments would be named during generation
       let bindNames = bindNameRenamer . argName <$> fromList con.args
+      let argsTypeApps = do
+        let conArgNames : SortedSet Name = fromList $ argName <$> con.args
+        let intExprMapper : TTImp -> TTImp
+            intExprMapper $ IVar fc n = IVar fc $ if conArgNames `contains'` n then UN $ Basic $ bindNameRenamer n else n
+            intExprMapper x = x
+        argsTypeApps <&> {argApps $= map @{Compose} $ mapTTImp intExprMapper}
+
+      -- Get arguments which any other argument depends on
+      let dependees = dependees con.args
 
       -- Form the expression of calling the current constructor
       let callCons = do
