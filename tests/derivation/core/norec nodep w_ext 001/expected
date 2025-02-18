@@ -1,5 +1,10 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.type:2: DerivedGen.X[] ___ start ___
+LOG deptycheck.derive.consBody:2: DerivedGen.X[] MkX __ start __
+LOG deptycheck.derive.clojuring.external:5: String[] is used as an external generator
+LOG deptycheck.derive.consBody:2: DerivedGen.X[] MkX ^^  end  ^^
+LOG deptycheck.derive.type:2: DerivedGen.X[] ^^^  end  ^^^
 Generated values:
 -----
 -----
