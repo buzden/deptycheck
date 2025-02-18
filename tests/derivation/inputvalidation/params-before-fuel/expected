@@ -1,7 +1,7 @@
 1/1: Building ValidateInput (ValidateInput.idr)
 Error: While processing right hand side of n_is_fully_out. Sorry, I can't find any elaboration which works. All errors:
 Possible error:
-    Error during reflection: Name `{n:3660}` is used in target's type, but is not a generated or given parameter (goes after the fuel argument); looks like it is an implicit parameter of some underdeclared type; specify types with more precision
+    Error during reflection: Name `{n:1}` is used in target's type, but is not a generated or given parameter (goes after the fuel argument); looks like it is an implicit parameter of some underdeclared type; specify types with more precision
 
     ValidateInput:1
      09 | data X : Fin n -> Fin n -> Type where

@@ -132,9 +132,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (n : Nat) -> (v : VectMaybe
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.There (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]" .$ var "^cons_fuel^" .$ var "n" .$ var "zs")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"

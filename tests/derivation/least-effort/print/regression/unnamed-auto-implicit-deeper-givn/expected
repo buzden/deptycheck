@@ -81,35 +81,35 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (b : Bool) -> (y : Y b) -> 
                          , IDef
                              emptyFC
                              "<<DerivedGen.Start>>"
-                             [    var "<<DerivedGen.Start>>" .$ bindVar "^cons_fuel^" .$ bindVar "^bnd^{b:3657}" .$ bindVar "y"
+                             [    var "<<DerivedGen.Start>>" .$ bindVar "^cons_fuel^" .$ bindVar "^bnd^{b:1}" .$ bindVar "y"
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.Start (orders)"))
                                   .$ (   var "Prelude.pure"
                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                      .$ (var "DerivedGen.Start" .! ("{b:3657}", implicitTrue) .! ("y", var "y")))
+                                      .$ (var "DerivedGen.Start" .! ("{b:1}", implicitTrue) .! ("y", var "y")))
                              ]
                          , IDef
                              emptyFC
                              "<<DerivedGen.Go>>"
                              [       var "<<DerivedGen.Go>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ bindVar "^bnd^{b:3667}"
+                                  .$ bindVar "^bnd^{b:2}"
                                   .$ (var "DerivedGen.MkY" .! ("b", implicitTrue) .$ bindVar "x" .$ bindVar "x2")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.Go (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<DerivedGen.X>[0]" .$ var "^outmost-fuel^" .$ var "^bnd^{b:3667}")
+                                      .$ (var "<DerivedGen.X>[0]" .$ var "^outmost-fuel^" .$ var "^bnd^{b:2}")
                                       .$ (    MkArg MW ExplicitArg (Just "x1") implicitFalse
                                           .=>    var ">>="
                                               .$ (   var "<DerivedGen.Z>[0, 1]"
                                                   .$ var "^cons_fuel^"
-                                                  .$ var "^bnd^{b:3667}"
-                                                  .$ (var "DerivedGen.MkY" .! ("b", var "^bnd^{b:3667}") .$ var "x" .$ var "x1"))
+                                                  .$ var "^bnd^{b:2}"
+                                                  .$ (var "DerivedGen.MkY" .! ("b", var "^bnd^{b:2}") .$ var "x" .$ var "x1"))
                                               .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "DerivedGen.Go"
-                                                          .! ("{b:3667}", implicitTrue)
+                                                          .! ("{b:2}", implicitTrue)
                                                           .! ("x2", var "x2")
                                                           .! ("x1", implicitTrue)
                                                           .! ("x", implicitTrue)

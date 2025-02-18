@@ -88,9 +88,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (b : Nat) -> Gen MaybeEmpty
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.Step (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.LT2>[1]" .$ var "^cons_fuel^" .$ var "y")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:3}"

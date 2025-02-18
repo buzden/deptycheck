@@ -105,7 +105,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (v : VectMaybeAnyType n) ->
                              "<<DerivedGen.VectMaybeAnyType.Here>>"
                              [       var "<<DerivedGen.VectMaybeAnyType.Here>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{n:4017}")
+                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{n:1}")
                                   .$ (var "DerivedGen.VectMaybeAnyType.(::)" .! ("n", implicitTrue) .$ bindVar "x" .$ bindVar "xs")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.Here (orders)"))
@@ -116,7 +116,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (v : VectMaybeAnyType n) ->
                                           .$ (   var "Builtin.DPair.MkDPair"
                                               .$ implicitTrue
                                               .$ (   var "DerivedGen.VectMaybeAnyType.Here"
-                                                  .! ("{n:4017}", implicitTrue)
+                                                  .! ("{n:1}", implicitTrue)
                                                   .! ("xs", var "xs")
                                                   .! ("x", var "x")))))
                              , var "<<DerivedGen.VectMaybeAnyType.Here>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
@@ -132,9 +132,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (v : VectMaybeAnyType n) ->
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.There (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]" .$ var "^cons_fuel^" .$ var "n" .$ var "zs")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"

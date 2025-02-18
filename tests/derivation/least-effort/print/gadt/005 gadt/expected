@@ -156,9 +156,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.FN (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.D>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [    var "Builtin.DPair.MkDPair" .$ bindVar "b" .$ bindVar "^bnd^{arg:6}"
@@ -197,9 +197,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.TR (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.D>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [    var "Builtin.DPair.MkDPair" .$ bindVar "b" .$ bindVar "^bnd^{arg:9}"

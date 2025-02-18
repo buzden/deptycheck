@@ -139,9 +139,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                   .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.(::) (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.List.Sorted.FirstGT>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"
@@ -252,17 +252,17 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                       .$ (    MkArg MW ExplicitArg (Just "n") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "<Data.Nat.LTE>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "n"))
-                                              .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                                   .=> iCase
-                                                        { sc = var "{lamc:0}"
+                                                        { sc = var "{lamc:1}"
                                                         , ty = implicitFalse
                                                         , clauses =
                                                             [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:3}"
                                                               .=    var ">>="
                                                                  .$ (var "<Data.List.Sorted.FirstGT>[0]" .$ var "^cons_fuel^" .$ var "x")
-                                                                 .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                                                 .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                                                      .=> iCase
-                                                                           { sc = var "{lamc:0}"
+                                                                           { sc = var "{lamc:1}"
                                                                            , ty = implicitFalse
                                                                            , clauses =
                                                                                [    var "Builtin.DPair.MkDPair" .$ bindVar "xs" .$ bindVar "prf"
@@ -370,17 +370,17 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                   .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.NE (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Nat.LTE>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "n"))
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:3}"
                                                       .=    var ">>="
                                                          .$ (var "<Data.List.Sorted.FirstGT>[0]" .$ var "^cons_fuel^" .$ var "x")
-                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                                              .=> iCase
-                                                                   { sc = var "{lamc:0}"
+                                                                   { sc = var "{lamc:1}"
                                                                    , ty = implicitFalse
                                                                    , clauses =
                                                                        [    var "Builtin.DPair.MkDPair" .$ bindVar "xs" .$ bindVar "prf"
@@ -492,9 +492,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                   .$ (var "fromString" .$ primVal (Str "Data.Nat.LTESucc (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Nat.LTE>[0]" .$ var "^cons_fuel^" .$ var "left")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [    var "Builtin.DPair.MkDPair" .$ bindVar "right" .$ bindVar "^bnd^{arg:4}"
