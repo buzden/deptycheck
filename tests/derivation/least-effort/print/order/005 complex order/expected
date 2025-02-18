@@ -96,9 +96,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
                                                   .$ (   var "Prelude.Types.plus"
                                                       .$ var "n"
                                                       .$ (var "Prelude.Types.S" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z"))))
-                                              .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                                   .=> iCase
-                                                        { sc = var "{lamc:0}"
+                                                        { sc = var "{lamc:1}"
                                                         , ty = implicitFalse
                                                         , clauses =
                                                             [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "y"

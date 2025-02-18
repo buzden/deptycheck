@@ -88,9 +88,9 @@
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkX (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.BoolP>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [    var "Builtin.DPair.MkDPair" .$ bindVar "u" .$ bindVar "x"

@@ -187,9 +187,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen May
                                           .$ var "n"
                                           .$ var "bs"
                                           .$ var "Prelude.Basics.True")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [    var "Builtin.DPair.MkDPair" .$ bindVar "i" .$ bindVar "^bnd^{conArg:2}"
@@ -373,9 +373,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen May
                                           .$ var "n"
                                           .$ var "bs"
                                           .$ var "v")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [    var "Builtin.DPair.MkDPair" .$ bindVar "i" .$ bindVar "^bnd^{arg:10}"

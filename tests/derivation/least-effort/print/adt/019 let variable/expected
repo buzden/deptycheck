@@ -98,9 +98,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkY (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.X>[1]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "m"))
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [    var "Builtin.DPair.MkDPair" .$ bindVar "n" .$ bindVar "^bnd^{arg:6}"

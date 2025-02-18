@@ -94,9 +94,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkZ (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.Y>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"

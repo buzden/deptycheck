@@ -95,9 +95,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkY (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.X>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
-                                                { sc = var "{lamc:0}"
+                                                { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"
@@ -105,9 +105,9 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                                          .$ (var "Builtin.DPair.MkDPair" .$ bindVar "m" .$ bindVar "^bnd^{arg:5}")
                                                       .=    var ">>="
                                                          .$ (var "<DerivedGen.X>[0]" .$ var "^outmost-fuel^" .$ var "n")
-                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:0}") implicitFalse
+                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                                              .=> iCase
-                                                                   { sc = var "{lamc:0}"
+                                                                   { sc = var "{lamc:1}"
                                                                    , ty = implicitFalse
                                                                    , clauses =
                                                                        [    var "Builtin.DPair.MkDPair" .$ bindVar "k" .$ bindVar "^bnd^{arg:6}"
