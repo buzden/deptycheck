@@ -154,7 +154,7 @@ namespace ClojuringCanonicImpl
         deriveOne (sig, name) = do
 
           -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
-          (genFunClaim, genFunBody) <- logBounds "type" [sig] $ assert_total $ deriveCanonical sig name
+          (genFunClaim, genFunBody) <- logBounds {level=Info} "type" [sig] $ assert_total $ deriveCanonical sig name
 
           -- remember the derived stuff
           tell ([genFunClaim], [genFunBody])
