@@ -117,7 +117,9 @@ namespace ClojuringCanonicImpl
 
       -- look for external gens, and call it if exists
       let Nothing = lookupLengthChecked sig !ask
-        | Just (name, Element extSig lenEq) => pure $ callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values
+        | Just (name, Element extSig lenEq) => do
+            logPoint {level=Details} "clojuring.external" [sig] "is used as an external generator"
+            pure $ callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values
 
       -- get the name of internal gen, derive if necessary
       internalGenName <- do
@@ -146,6 +148,7 @@ namespace ClojuringCanonicImpl
         put True
 
       -- call the internal gen
+      logPoint {level=DetailedDebug} "clojuring.internal" [sig] "is used as an internal generator"
       pure $ callCanonic sig internalGenName fuel values
 
       where
@@ -154,7 +157,7 @@ namespace ClojuringCanonicImpl
         deriveOne (sig, name) = do
 
           -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
-          (genFunClaim, genFunBody) <- logBounds "type" [sig] $ assert_total $ deriveCanonical sig name
+          (genFunClaim, genFunBody) <- logBounds {level=Info} "type" [sig] $ assert_total $ deriveCanonical sig name
 
           -- remember the derived stuff
           tell ([genFunClaim], [genFunBody])

@@ -301,7 +301,7 @@ deriveGenExpr signature = do
   checkResult@(signature ** externals ** _) <- checkTypeIsGen DerivationTask signature
   let externalsSigToName = fromList $ externals.externals <&> \(sig, _) => (sig, nameForGen sig)
   let fuelArg = outmostFuelArg
-  niit <- logBounds "namesInfo" [] $ getNamesInfoInTypes signature.targetType
+  niit <- logBounds {level=Trace} "namesInfo" [] $ getNamesInfoInTypes signature.targetType
   (callExpr, locals) <- runCanonic externalsSigToName $ callMainDerivedGen signature fuelArg
   wrapFuel fuelArg <$> internalGenCallingLambda checkResult (local locals callExpr)
 
@@ -374,7 +374,7 @@ export
 deriveGenPrinter : {default True printTTImp : Bool} -> DerivatorCore => Type -> Elab Unit
 deriveGenPrinter ty = do
   ty <- quote ty
-  logSugaredTerm "deptycheck.derive.print" DefaultLogLevel "type" ty
+  logSugaredTerm "deptycheck.derive.print" Details "type" ty
   expr <- deriveGenExpr ty
   expr <- quote expr
   printTTImp <- quote printTTImp

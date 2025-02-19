@@ -12,6 +12,8 @@ data X = MkX String
 XShow : Show X
 XShow = %runElab derive
 
+%logging "deptycheck.derive" 5
+
 checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty X
 checkedGen = deriveGen
 

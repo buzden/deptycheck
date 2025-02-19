@@ -329,8 +329,8 @@ namespace NonObligatoryExts
       -- Compute determination map without weak determination information
       let determ = insertFrom' empty $ mapI (\i, ta => (i, ta.determ)) argsTypeApps
 
-      logPoint {level=15} "least-effort" [sig, con] "- determ: \{determ}"
-      logPoint {level=15} "least-effort" [sig, con] "- givs: \{givs}"
+      logPoint {level=Debug} "least-effort" [sig, con] "- determ: \{determ}"
+      logPoint {level=Debug} "least-effort" [sig, con] "- givs: \{givs}"
 
       -- Find user-imposed tuning of the order
       userImposed <- findUserImposedDeriveFirst
@@ -339,7 +339,7 @@ namespace NonObligatoryExts
       let nonDetermGivs = removeDeeply userImposed $ removeDeeply givs determ
       let theOrder = userImposed ++ searchOrder (concatMap argsDependsOn nonDetermGivs) nonDetermGivs
 
-      logPoint {level=10} "least-effort" [sig, con] "- used final order: \{theOrder}"
+      logPoint {level=DeepDetails} "least-effort" [sig, con] "- used final order: \{theOrder}"
 
       --------------------------
       -- Producing the result --
@@ -371,7 +371,7 @@ namespace NonObligatoryExts
           -- TODO to get rid of `believe_me` below
           let df = believe_me $ deriveFirst @{impl} (rewrite tyLen in Prelude.toList sig.givenParams) (rewrite conLen in Prelude.toList givs)
           let userImposed = filter (not . contains' givs) $ nub $ conArgIdx <$> df
-          logPoint {level=10} "least-effort" [sig, con] "- user-imposed: \{userImposed}"
+          logPoint {level=DeepDetails} "least-effort" [sig, con] "- user-imposed: \{userImposed}"
           pure userImposed
 
   ||| Best effort non-obligatory tactic tries to use as much external generators as possible
