@@ -119,9 +119,9 @@ jobs:
           name: built-deptycheck
           path: ${{ env.pack_dir_file }}
 
-  #######$###################
+  ###########################
   # Build DepTyCheck's docs #
-  ########$##################
+  ###########################
 
   deptycheck-build-docs:
     name: Build the docs
