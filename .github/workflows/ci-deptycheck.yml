@@ -34,12 +34,26 @@ env:
 
 jobs:
 
+  ##############
+  # Validation #
+  ##############
+
+  validate_trigger:
+    name: Validate trigger
+    # Disable scheduled running on forks
+    if: github.event_name != 'schedule' || github.repository_owner == 'buzden'
+    runs-on: ubuntu-latest
+    steps:
+      - name: No-op step
+        run: echo "This job exists only for validation."
+
   ################
   # Preparations #
   ################
 
   prepare-pack:
     name: Prepare `pack`
+    needs: validate_trigger
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
@@ -123,6 +137,7 @@ jobs:
 
   deptycheck-build-docs:
     name: Build the docs
+    needs: validate_trigger
     runs-on: ubuntu-latest
     container: sphinxdoc/sphinx:latest
     steps:
