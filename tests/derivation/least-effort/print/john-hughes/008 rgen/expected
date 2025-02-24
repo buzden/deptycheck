@@ -1,6 +1,6 @@
 1/1: Building DerivedGen (DerivedGen.idr)
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty Nat)} -> Gen MaybeEmpty R
-LOG deptycheck.derive.least-effort:7: DerivedGen.R[] R - used final order: [#0 (a), #1 (b), #10 (ab), #2 (c), #9 (bc), #3 (d), #6 (cd), #4 (e), #7 (be), #5 (f), #8 (af), #11 (a_)]
+LOG deptycheck.derive.least-effort:7: DerivedGen.R[] R - used final order: [#0 (a), #11 (a_), #1 (b), #10 (ab), #2 (c), #9 (bc), #3 (d), #6 (cd), #4 (e), #7 (be), #5 (f), #8 (af)]
 LOG deptycheck.derive.least-effort:7: Data.So.So[0] Oh - used final order: []
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> MkArg
@@ -67,40 +67,30 @@ LOG deptycheck.derive.least-effort:7: Data.So.So[0] Oh - used final order: []
                                       .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
                                       .$ (    MkArg MW ExplicitArg (Just "a") implicitFalse
                                           .=>    var ">>="
-                                              .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                              .$ (    MkArg MW ExplicitArg (Just "b") implicitFalse
-                                                  .=>    var ">>="
-                                                      .$ (var "<Data.So.So>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.equalNat" .$ var "a" .$ var "b"))
-                                                      .$ (    MkArg MW ExplicitArg (Just "ab") implicitFalse
-                                                          .=>    var ">>="
-                                                              .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                                              .$ (    MkArg MW ExplicitArg (Just "c") implicitFalse
-                                                                  .=>    var ">>="
-                                                                      .$ (var "<Data.So.So>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.equalNat" .$ var "b" .$ var "c"))
-                                                                      .$ (    MkArg MW ExplicitArg (Just "bc") implicitFalse
-                                                                          .=>    var ">>="
-                                                                              .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                                                              .$ (    MkArg MW ExplicitArg (Just "d") implicitFalse
-                                                                                  .=>    var ">>="
-                                                                                      .$ (var "<Data.So.So>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.equalNat" .$ var "c" .$ var "d"))
-                                                                                      .$ (    MkArg MW ExplicitArg (Just "cd") implicitFalse
-                                                                                          .=>    var ">>="
-                                                                                              .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                                                                              .$ (    MkArg MW ExplicitArg (Just "e") implicitFalse
-                                                                                                  .=>    var ">>="
-                                                                                                      .$ (var "<Data.So.So>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.equalNat" .$ var "b" .$ var "e"))
-                                                                                                      .$ (    MkArg MW ExplicitArg (Just "be") implicitFalse
-                                                                                                          .=>    var ">>="
-                                                                                                              .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                                                                                              .$ (    MkArg MW ExplicitArg (Just "f") implicitFalse
-                                                                                                                  .=>    var ">>="
-                                                                                                                      .$ (var "<Data.So.So>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.equalNat" .$ var "a" .$ var "f"))
-                                                                                                                      .$ (    MkArg MW ExplicitArg (Just "af") implicitFalse
-                                                                                                                          .=>    var ">>="
-                                                                                                                              .$ (   var "<Data.So.So>[0]"
-                                                                                                                                  .$ var "^outmost-fuel^"
-                                                                                                                                  .$ (   var "Prelude.Types.equalNat"
-                                                                                                                                      .$ var "a"
+                                              .$ (   var "<Data.So.So>[0]"
+                                                  .$ var "^outmost-fuel^"
+                                                  .$ (   var "Prelude.Types.equalNat"
+                                                      .$ var "a"
+                                                      .$ (   var "Prelude.Types.S"
+                                                          .$ (   var "Prelude.Types.S"
+                                                              .$ (   var "Prelude.Types.S"
+                                                                  .$ (   var "Prelude.Types.S"
+                                                                      .$ (   var "Prelude.Types.S"
+                                                                          .$ (   var "Prelude.Types.S"
+                                                                              .$ (   var "Prelude.Types.S"
+                                                                                  .$ (   var "Prelude.Types.S"
+                                                                                      .$ (   var "Prelude.Types.S"
+                                                                                          .$ (   var "Prelude.Types.S"
+                                                                                              .$ (   var "Prelude.Types.S"
+                                                                                                  .$ (   var "Prelude.Types.S"
+                                                                                                      .$ (   var "Prelude.Types.S"
+                                                                                                          .$ (   var "Prelude.Types.S"
+                                                                                                              .$ (   var "Prelude.Types.S"
+                                                                                                                  .$ (   var "Prelude.Types.S"
+                                                                                                                      .$ (   var "Prelude.Types.S"
+                                                                                                                          .$ (   var "Prelude.Types.S"
+                                                                                                                              .$ (   var "Prelude.Types.S"
+                                                                                                                                  .$ (   var "Prelude.Types.S"
                                                                                                                                       .$ (   var "Prelude.Types.S"
                                                                                                                                           .$ (   var "Prelude.Types.S"
                                                                                                                                               .$ (   var "Prelude.Types.S"
@@ -122,31 +112,47 @@ LOG deptycheck.derive.least-effort:7: Data.So.So[0] Oh - used final order: []
                                                                                                                                                                                                               .$ (   var "Prelude.Types.S"
                                                                                                                                                                                                                   .$ (   var "Prelude.Types.S"
                                                                                                                                                                                                                       .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                          .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                              .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                  .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                      .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                          .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                              .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                  .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                      .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                          .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                              .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                  .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                      .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                          .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                              .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                                  .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                                      .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                                          .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                                              .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                                                  .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                                                      .$ (   var "Prelude.Types.S"
-                                                                                                                                                                                                                                                                                                          .$ (   var
-                                                                                                                                                                                                                                                                                                                   "Prelude.Types.S"
-                                                                                                                                                                                                                                                                                                              .$ var
-                                                                                                                                                                                                                                                                                                                   "Prelude.Types.Z"))))))))))))))))))))))))))))))))))))))))))))
-                                                                                                                              .$ (    MkArg MW ExplicitArg (Just "a_") implicitFalse
+                                                                                                                                                                                                                          .$ (   var
+                                                                                                                                                                                                                                   "Prelude.Types.S"
+                                                                                                                                                                                                                              .$ var
+                                                                                                                                                                                                                                   "Prelude.Types.Z"))))))))))))))))))))))))))))))))))))))))))))
+                                              .$ (    MkArg MW ExplicitArg (Just "a_") implicitFalse
+                                                  .=>    var ">>="
+                                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                                      .$ (    MkArg MW ExplicitArg (Just "b") implicitFalse
+                                                          .=>    var ">>="
+                                                              .$ (var "<Data.So.So>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.equalNat" .$ var "a" .$ var "b"))
+                                                              .$ (    MkArg MW ExplicitArg (Just "ab") implicitFalse
+                                                                  .=>    var ">>="
+                                                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                                                      .$ (    MkArg MW ExplicitArg (Just "c") implicitFalse
+                                                                          .=>    var ">>="
+                                                                              .$ (var "<Data.So.So>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.equalNat" .$ var "b" .$ var "c"))
+                                                                              .$ (    MkArg MW ExplicitArg (Just "bc") implicitFalse
+                                                                                  .=>    var ">>="
+                                                                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                                                                      .$ (    MkArg MW ExplicitArg (Just "d") implicitFalse
+                                                                                          .=>    var ">>="
+                                                                                              .$ (   var "<Data.So.So>[0]"
+                                                                                                  .$ var "^outmost-fuel^"
+                                                                                                  .$ (var "Prelude.Types.equalNat" .$ var "c" .$ var "d"))
+                                                                                              .$ (    MkArg MW ExplicitArg (Just "cd") implicitFalse
+                                                                                                  .=>    var ">>="
+                                                                                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                                                                                      .$ (    MkArg MW ExplicitArg (Just "e") implicitFalse
+                                                                                                          .=>    var ">>="
+                                                                                                              .$ (   var "<Data.So.So>[0]"
+                                                                                                                  .$ var "^outmost-fuel^"
+                                                                                                                  .$ (var "Prelude.Types.equalNat" .$ var "b" .$ var "e"))
+                                                                                                              .$ (    MkArg MW ExplicitArg (Just "be") implicitFalse
+                                                                                                                  .=>    var ">>="
+                                                                                                                      .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                                                                                                      .$ (    MkArg MW ExplicitArg (Just "f") implicitFalse
+                                                                                                                          .=>    var ">>="
+                                                                                                                              .$ (   var "<Data.So.So>[0]"
+                                                                                                                                  .$ var "^outmost-fuel^"
+                                                                                                                                  .$ (var "Prelude.Types.equalNat" .$ var "a" .$ var "f"))
+                                                                                                                              .$ (    MkArg MW ExplicitArg (Just "af") implicitFalse
                                                                                                                                   .=>    var "Prelude.pure"
                                                                                                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                                                                                       .$ (   var "DerivedGen.R"
