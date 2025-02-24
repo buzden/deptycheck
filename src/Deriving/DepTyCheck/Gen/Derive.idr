@@ -1,4 +1,4 @@
-||| Interfaces for using a derivator
+||| Interfaces for using a one type derivator
 module Deriving.DepTyCheck.Gen.Derive
 
 import public Control.Monad.Error.Interface

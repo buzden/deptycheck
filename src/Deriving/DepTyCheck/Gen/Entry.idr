@@ -5,8 +5,8 @@ import public Data.Fuel
 
 import public Decidable.Equality
 
-import public Deriving.DepTyCheck.Gen.Checked
 import public Deriving.DepTyCheck.Gen.Core
+import public Deriving.DepTyCheck.Gen.ForAllNeededTypes
 
 import public Test.DepTyCheck.Gen -- for `Gen` data type
 
@@ -150,8 +150,8 @@ checkTypeIsGen checkSide sig = do
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   (givenParams, autoImplArgs, givenParamsPositions) <- map partitionEithersPos $ Prelude.for sigArgs.asVect $ \case
-    MkArg MW ImplicitArg (Just $ UN name) type => pure $ Left (Checked.ImplicitArg, name, type)
-    MkArg MW ExplicitArg (Just $ UN name) type => pure $ Left (Checked.ExplicitArg, name, type)
+    MkArg MW ImplicitArg (Just $ UN name) type => pure $ Left (ForAllNeededTypes.ImplicitArg, name, type)
+    MkArg MW ExplicitArg (Just $ UN name) type => pure $ Left (ForAllNeededTypes.ExplicitArg, name, type)
     MkArg MW AutoImplicit (Just $ MN _ _) type => pure $ Right type
     MkArg MW AutoImplicit Nothing         type => pure $ Right type
 

@@ -60,7 +60,7 @@ getTypeApps con = do
         ty <- case lhs of
           IVar _ lhsName     => do let Nothing = lookupType lhsName -- TODO to support `lhsName` to be a type parameter of type `Type`
                                      | Just found => pure found
-                                   -- we didn't found, failing, there are at least two reasons
+                                   -- we haven't found, failing, there are at least two reasons
                                    failAt (getFC lhs) $ if isNamespaced lhsName
                                      then "Data type `\{lhsName}` is unavailable at the site of derivation (forgotten import?)"
                                      else "Usupported applications to a non-concrete type `\{lhsName}` in \{show con.name}"
