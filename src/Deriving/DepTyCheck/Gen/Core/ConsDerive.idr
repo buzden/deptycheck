@@ -126,7 +126,7 @@ removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermin
 propagatePriOnce : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
 propagatePriOnce =
   -- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
-  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x (max x . (`minus` x) . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
+  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
   .
   -- propagate back along strong determinations
   (\dets => foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets)
