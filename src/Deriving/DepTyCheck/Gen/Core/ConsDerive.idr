@@ -192,8 +192,8 @@ refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps)
 -- compute the priority
 -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
 -- additionally we take into account the number of outgoing strong determinations and count of dependent arguments
-propagatePri' : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat)
-propagatePri' dets = do
+assignPriorities : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat)
+assignPriorities dets = do
   let invStrongDetPwr = do
     let _ : Monoid Nat = Additive
     flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
@@ -209,7 +209,7 @@ searchOrder : {con : _} ->
 searchOrder determinable left = do
 
   -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
-  let notDetermined = filter (\(idx, det, _) => null det.stronglyDeterminingArgs) $ kvList $ propagatePri' left
+  let notDetermined = filter (\(idx, det, _) => null det.stronglyDeterminingArgs) $ kvList $ assignPriorities left
 
   -- choose the one from the variants
   -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
