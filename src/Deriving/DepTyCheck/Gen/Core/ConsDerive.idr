@@ -161,24 +161,32 @@ refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps)
     -- update the priority of the currenly managed argument
     modify $ updateExisting (mapSnd $ const newPri) curr
 
-data PriorityOrigin = Original | Propagated
+record PropagatedPriority where
+  constructor ExtPri
+  ||| Originally calculated base priority, before the propagation
+  basePri : Nat
+  ||| Flag if this priority was not propagated along strong determination
+  -- TODO to think, maybe this field should go as the `depHops` one, but influence in the opposite direction (the smaller is the greater priority)?
+  original : Bool
+  ||| Count of hops of back propagation along dependencies
+  depHops : Nat
+  ||| Number of outgoing strong determinations and count of dependent arguments
+  outDetsAndDeps : Nat
 
-Eq PriorityOrigin where
-  Original   == Original   = True
-  Propagated == Propagated = True
-  _ == _ = False
+Eq PropagatedPriority where
+  ExtPri ba or de ou == ExtPri ba' or' de' ou' = ba == ba' && or == or' && de == de' && ou == ou'
 
-Ord PriorityOrigin where
-  compare Original   Original   = EQ
-  compare Original   Propagated = GT
-  compare Propagated Original   = LT
-  compare Propagated Propagated = EQ
+Ord PropagatedPriority where
+  ExtPri ba or de ou `compare` ExtPri ba' or' de' ou' = compare ba ba' <+> compare or or' <+> compare de de' <+> compare ou ou'
 
-propagateStrongDet, propagateDep : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
+propagateStrongDet, propagateDep :
+  FinMap con.args.length (Determination con, PropagatedPriority) -> FinMap con.args.length (Determination con, PropagatedPriority)
 -- propagate back along dependencies
-propagateDep dets = dets <&> \(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn
+propagateDep dets = dets <&> \(det, pri) => (det,) $
+  foldl (\currPri => maybe currPri (max currPri . {depHops $= S} . snd) . lookup' dets) pri $ det.argsDependsOn
 -- propagate back along strong determinations
-propagateStrongDet dets = foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets
+propagateStrongDet dets =
+  foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri . {original := False}) dets det.stronglyDeterminingArgs) dets dets
 
 propagatePriOnce : FinMap con.args.length (Determination con, ?) -> FinMap con.args.length (Determination con, ?)
 propagatePriOnce = propagateDep . propagateStrongDet
@@ -193,15 +201,16 @@ propagatePri dets = do
 -- compute the priority
 -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
 -- additionally we take into account the number of outgoing strong determinations and count of dependent arguments
-assignPriorities : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat)
+assignPriorities : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, PropagatedPriority)
 assignPriorities dets = do
   let invStrongDetPwr = do
     let _ : Monoid Nat = Additive
-    flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
+    flip concatMap dets $ \det => Fin.Map.fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
   -- the original priority is the count of already determined given arguments for each argument
   let origPri = refineBasePri $ dets <&> \det => (det,) $ det.influencingArgs `minus` det.argsDependsOn.size
-  flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
-    (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 (Fin.Map.lookup idx invStrongDetPwr) + det.argsDependsOn.size)
+  let unpropagatedPri = flip mapWithKey origPri $ \idx, (det, base) => (det,) $
+                          ExtPri base True 0 $ fromMaybe 0 (Fin.Map.lookup idx invStrongDetPwr) + det.argsDependsOn.size
+  propagatePri unpropagatedPri
 
 searchOrder : {con : _} ->
               (determinable : SortedSet $ Fin con.args.length) ->
