@@ -123,40 +123,12 @@ removeDeeply : Foldable f =>
                FinMap con.args.length $ Determination con
 removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
-propagatePriOnce : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
-propagatePriOnce =
-  -- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
-  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
-  .
-  -- propagate back along strong determinations
-  (\dets => foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets)
-
-propagatePri : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
-propagatePri dets = do
-  let next = propagatePriOnce dets
-  if ((==) `on` map snd) dets next
-    then dets
-    else assert_total propagatePri next
-
 findFirstMax : Ord p => List (a, b, p) -> Maybe (a, b)
 findFirstMax [] = Nothing
 findFirstMax ((x, y, pri)::xs) = Just $ go (x, y) pri xs where
   go : (a, b) -> p -> List (a, b, p) -> (a, b)
   go curr _       []                = curr
   go curr currPri ((x, y, pri)::xs) = if pri > currPri then go (x, y) pri xs else go curr currPri xs
-
-data PriorityOrigin = Original | Propagated
-
-Eq PriorityOrigin where
-  Original   == Original   = True
-  Propagated == Propagated = True
-  _ == _ = False
-
-Ord PriorityOrigin where
-  compare Original   Original   = EQ
-  compare Original   Propagated = GT
-  compare Propagated Original   = LT
-  compare Propagated Propagated = EQ
 
 -- adds base priorities of args which we depend on transitively
 refineBasePri : Num p => {con : _} -> FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
@@ -188,6 +160,35 @@ refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps)
 
     -- update the priority of the currenly managed argument
     modify $ updateExisting (mapSnd $ const newPri) curr
+
+data PriorityOrigin = Original | Propagated
+
+Eq PriorityOrigin where
+  Original   == Original   = True
+  Propagated == Propagated = True
+  _ == _ = False
+
+Ord PriorityOrigin where
+  compare Original   Original   = EQ
+  compare Original   Propagated = GT
+  compare Propagated Original   = LT
+  compare Propagated Propagated = EQ
+
+propagateStrongDet, propagateDep : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
+-- propagate back along dependencies
+propagateDep dets = dets <&> \(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn
+-- propagate back along strong determinations
+propagateStrongDet dets = foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets
+
+propagatePriOnce : FinMap con.args.length (Determination con, ?) -> FinMap con.args.length (Determination con, ?)
+propagatePriOnce = propagateDep . propagateStrongDet
+
+propagatePri : FinMap con.args.length (Determination con, ?) -> FinMap con.args.length (Determination con, ?)
+propagatePri dets = do
+  let next = propagatePriOnce dets
+  if ((==) `on` map snd) dets next
+    then dets
+    else assert_total propagatePri next
 
 -- compute the priority
 -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
