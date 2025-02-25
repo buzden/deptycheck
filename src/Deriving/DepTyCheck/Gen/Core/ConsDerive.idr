@@ -179,19 +179,23 @@ Eq PropagatedPriority where
 Ord PropagatedPriority where
   ExtPri ba or de ou `compare` ExtPri ba' or' de' ou' = compare ba ba' <+> compare or or' <+> compare de de' <+> compare ou ou'
 
-propagateStrongDet, propagateDep :
-  FinMap con.args.length (Determination con, PropagatedPriority) -> FinMap con.args.length (Determination con, PropagatedPriority)
+propagateStrongDet, propagateDep : {con : _} ->
+                                   FinMap con.args.length (Determination con, PropagatedPriority) ->
+                                   FinMap con.args.length (Determination con, PropagatedPriority)
 -- propagate back along dependencies
 propagateDep dets = dets <&> \(det, pri) => (det,) $
   foldl max pri $ flip List.mapMaybe (Prelude.toList det.argsDependsOn) $ map ({depHops $= S} . snd) . lookup' dets
 -- propagate back along strong determinations
-propagateStrongDet dets =
-  foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri . {original := False}) dets det.stronglyDeterminingArgs) dets dets
+propagateStrongDet dets = do
+  let updates = dets <&> \(det, pri) => Fin.Map.fromList $
+    flip List.mapMaybe (Prelude.toList det.stronglyDeterminingArgs) $
+      \ca => map ((ca,) . map {original := False}) $ lookup ca dets
+  foldl (mergeWith $ \(det, lp), (_, rp) => (det, lp `max` rp)) dets updates
 
-propagatePriOnce : FinMap con.args.length (Determination con, ?) -> FinMap con.args.length (Determination con, ?)
+propagatePriOnce : {con : _} -> FinMap con.args.length (Determination con, ?) -> FinMap con.args.length (Determination con, ?)
 propagatePriOnce = propagateDep . propagateStrongDet
 
-propagatePri : FinMap con.args.length (Determination con, ?) -> FinMap con.args.length (Determination con, ?)
+propagatePri : {con : _} -> FinMap con.args.length (Determination con, ?) -> FinMap con.args.length (Determination con, ?)
 propagatePri dets = do
   let next = propagatePriOnce dets
   if ((==) `on` map snd) dets next
