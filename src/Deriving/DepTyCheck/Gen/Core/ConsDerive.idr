@@ -183,7 +183,7 @@ propagateStrongDet, propagateDep :
   FinMap con.args.length (Determination con, PropagatedPriority) -> FinMap con.args.length (Determination con, PropagatedPriority)
 -- propagate back along dependencies
 propagateDep dets = dets <&> \(det, pri) => (det,) $
-  foldl (\currPri => maybe currPri (max currPri . {depHops $= S} . snd) . lookup' dets) pri $ det.argsDependsOn
+  foldl max pri $ flip List.mapMaybe (Prelude.toList det.argsDependsOn) $ map ({depHops $= S} . snd) . lookup' dets
 -- propagate back along strong determinations
 propagateStrongDet dets =
   foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri . {original := False}) dets det.stronglyDeterminingArgs) dets dets
