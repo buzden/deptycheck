@@ -123,20 +123,23 @@ removeDeeply : Foldable f =>
                FinMap con.args.length $ Determination con
 removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
-propagatePriOnce : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
-propagatePriOnce =
-  -- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
-  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x (max x . (`minus` x) . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
-  .
-  -- propagate back along strong determinations
-  (\dets => foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets)
+propagateStrongDet, propagateDep : {con : _} -> FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
+-- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
+propagateDep dets = dets <&> \(det, pri) => (det,) $ foldl (\x => maybe x (max x . (`minus` x) . snd) . lookup' dets) pri $ det.argsDependsOn
+-- propagate back along strong determinations
+propagateStrongDet dets = do
+  let updates = dets <&> \(det, pri) => Fin.Map.fromList $
+    flip List.mapMaybe (Prelude.toList det.stronglyDeterminingArgs) $ \ca => (ca,) <$> lookup ca dets
+  foldl (mergeWith $ \(det, lp), (_, rp) => (det, lp `max` rp)) dets updates
 
-propagatePri : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
+propagatePri : {con : _} -> FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
 propagatePri dets = do
   let next = propagatePriOnce dets
   if ((==) `on` map snd) dets next
     then dets
     else assert_total propagatePri next
+  where
+    propagatePriOnce = propagateDep . propagateStrongDet
 
 findFirstMax : Ord p => List (a, b, p) -> Maybe (a, b)
 findFirstMax [] = Nothing
