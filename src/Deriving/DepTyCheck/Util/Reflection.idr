@@ -94,6 +94,15 @@ isImplicit (DefImplicit x) = True
 isImplicit AutoImplicit    = True
 isImplicit ExplicitArg     = False
 
+-- Apply syntactically, optimise if LHS is `ILam`.
+-- This implementation does not take shadowing into account.
+-- Also, currently, the type of lambda argument is not used in the final expression, this can break typechecking in complex cases.
+public export
+applySyn : TTImp -> TTImp -> TTImp
+applySyn (ILam _ _ _ Nothing  _ lamExpr) _ = lamExpr
+applySyn (ILam _ _ _ (Just n) _ lamExpr) rhs = mapTTImp (\case orig@(IVar _ n') => if n == n' then rhs else orig; e => e) lamExpr
+applySyn lhs rhs = lhs `app` rhs
+
 --- `DPair` type parsing and rebuilding stuff ---
 
 public export
