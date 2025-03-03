@@ -124,15 +124,13 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty X
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
                                                 .$ (var "fromInteger" .$ primVal (BI 2))
-                                                .$ (var "<<DerivedGen.B>>" .$ var "Data.Fuel.Dry"))
+                                                .$ (var "<<DerivedGen.B>>" .$ var "^fuel_arg^"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
                                                     .$ (var "fromInteger" .$ primVal (BI 4))
-                                                    .$ (var "<<DerivedGen.C>>" .$ var "Data.Fuel.Dry"))
+                                                    .$ (var "<<DerivedGen.C>>" .$ var "^fuel_arg^"))
                                                 .$ (   var "::"
-                                                    .$ (   var "Builtin.MkPair"
-                                                        .$ var "Data.Nat1.one"
-                                                        .$ (var "<<DerivedGen.D>>" .$ var "Data.Fuel.Dry"))
+                                                    .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<DerivedGen.D>>" .$ var "^fuel_arg^"))
                                                     .$ var "Nil"))))
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"

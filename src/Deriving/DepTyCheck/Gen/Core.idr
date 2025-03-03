@@ -113,8 +113,7 @@ ConstructorDerivator => DerivatorCore where
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
           let nonRecCons = mapMaybe (\(con, w) => (con,) <$> getLeft w.weight) consRecs in
-          let dry = var `{Data.Fuel.Dry} in dry       .= callConstFreqs "\{logPosition sig} (dry fuel)".label dry nonRecCons
-                                                                       -- TODO to think why not `fuelAr` here ^^^ if we check non-rec here
+          var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonRecCons
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend

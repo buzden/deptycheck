@@ -383,7 +383,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Data.Fin.Fin[] (dry fuel)"))
-                                    .$ (var "<<Data.Fin.FZ>>" .$ var "Data.Fuel.Dry")
+                                    .$ (var "<<Data.Fin.FZ>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Data.Fin.Fin[] (spend fuel)"))
@@ -465,7 +465,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (dry fuel)"))
-                                    .$ (var "<<Prelude.Types.Z>>" .$ var "Data.Fuel.Dry")
+                                    .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (spend fuel)"))
