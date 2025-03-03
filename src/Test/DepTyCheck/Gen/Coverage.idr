@@ -70,6 +70,10 @@ record CoverageGenInfo (0 g : k) where
   constructors : SortedMap String (TypeInfo, Con)
   coverageInfo : SortedMap TypeInfo (Nat, SortedMap Con Nat)
 
+mergeCovGenInfos : CoverageGenInfo g -> CoverageGenInfo g' -> CoverageGenInfo g''
+mergeCovGenInfos (MkCoverageGenInfo ts cns cis) (MkCoverageGenInfo ts' cns' cis') =
+  MkCoverageGenInfo (mergeLeft ts ts') (mergeLeft cns cns') (let _ : Semigroup Nat := Additive in cis <+> cis')
+
 coverageGenInfo : Name -> Elab $ CoverageGenInfo x
 coverageGenInfo genTy = do
   involvedTypes <- allInvolvedTypes MW =<< getInfo' genTy
@@ -94,6 +98,14 @@ coverageGenInfo genTy = do
 export %macro
 initCoverageInfo' : (n : Name) -> Elab $ CoverageGenInfo n
 initCoverageInfo' n = coverageGenInfo n
+
+export %macro
+initCoverageInfo'' : (ns : List Name) -> Elab $ CoverageGenInfo ns
+initCoverageInfo'' = go where
+  go : (ns : List Name) -> Elab $ CoverageGenInfo ns
+  go [] = fail "At least one name must be given"
+  go [n] = coverageGenInfo n
+  go (n::ns) = [| mergeCovGenInfos {g=n} (coverageGenInfo n) (go ns) |]
 
 export %macro
 initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
