@@ -250,7 +250,7 @@
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Decls.RegIsType[0, 2, 3] (dry fuel)"))
                                     .$ (   var "<<Decls.Here>>"
-                                        .$ var "Data.Fuel.Dry"
+                                        .$ var "^fuel_arg^"
                                         .$ var "inter^<r>"
                                         .$ var "inter^<{arg:3}>"
                                         .$ var "inter^<{arg:4}>")

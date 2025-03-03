@@ -229,8 +229,8 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                     .$ (   var "Test.DepTyCheck.Gen.oneOf"
                                         .! ("em", var "MaybeEmpty")
                                         .$ (   var "::"
-                                            .$ (var "<<DerivedGen.JJ>>" .$ var "Data.Fuel.Dry" .$ var "inter^<{arg:3}>")
-                                            .$ (var "::" .$ (var "<<DerivedGen.TL>>" .$ var "Data.Fuel.Dry" .$ var "inter^<{arg:3}>") .$ var "Nil")))
+                                            .$ (var "<<DerivedGen.JJ>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:3}>")
+                                            .$ (var "::" .$ (var "<<DerivedGen.TL>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:3}>") .$ var "Nil")))
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "DerivedGen.D[0] (spend fuel)"))
@@ -439,8 +439,8 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                                     .$ (   var "Test.DepTyCheck.Gen.oneOf"
                                         .! ("em", var "MaybeEmpty")
                                         .$ (   var "::"
-                                            .$ (var "<<DerivedGen.JJ>>" .$ var "Data.Fuel.Dry")
-                                            .$ (var "::" .$ (var "<<DerivedGen.TL>>" .$ var "Data.Fuel.Dry") .$ var "Nil")))
+                                            .$ (var "<<DerivedGen.JJ>>" .$ var "^fuel_arg^")
+                                            .$ (var "::" .$ (var "<<DerivedGen.TL>>" .$ var "^fuel_arg^") .$ var "Nil")))
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "DerivedGen.D[] (spend fuel)"))

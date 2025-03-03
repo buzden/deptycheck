@@ -6,36 +6,40 @@ import public Deriving.DepTyCheck.Util.Reflection
 
 %default total
 
+-------------------------------
+--- Tuning of probabilities ---
+-------------------------------
+
+public export
+interface ProbabilityTuning (0 n : Name) where
+  0 isConstructor : (con : IsConstructor n ** GenuineProof con)
+  tuneWeight : Nat1 -> Nat1
+
 -----------------------------------------
 --- Utility functions and definitions ---
 -----------------------------------------
 
 --- Ancillary data structures ---
 
-data Recursiveness =
-  ||| When constructor refers transitively to the type it belongs
-  DirectlyRecursive |
-  ||| When constructor does not refer to the type it belongs,
-  ||| nor to any recursive constructor in its generated indices
-  NonRecursive
+record ConWeightInfo where
+  constructor MkConWeightInfo
+  ||| Either constant (for non-recursive) or an expression (be a lambda taking the left fuel, or some other expression; for recursive)
+  weight : Either Nat1 TTImp
 
-||| Checks if the status is anyhow recursive, directly or through index
-isRec : Recursiveness -> Bool
-isRec DirectlyRecursive  = True
-isRec NonRecursive       = False
-
-||| Check if we are able to call for this constructor on a dry fuel
-isDirectlyRec : Recursiveness -> Bool
-isDirectlyRec DirectlyRecursive  = True
-isDirectlyRec NonRecursive       = False
-
-||| Property is implication from the strong property to the weak one
-0 recStrengthProp : So (isDirectlyRec r) -> So (isRec r)
-recStrengthProp {r=DirectlyRecursive} Oh = Oh
+%inline
+recursive : ConWeightInfo -> Bool
+recursive = isRight . weight
 
 ----------------------------
 --- Derivation functions ---
 ----------------------------
+
+-- This is a workaround of some bad and not yet understood behaviour, leading to both compile- and runtime errors
+removeNamedApps, workaroundFromNat : TTImp -> TTImp
+removeNamedApps = mapTTImp $ \case INamedApp _ lhs _ _ => lhs; e => e
+workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1.FromNat} => removeNamedApps e; _ => e
+
+%ambiguity_depth 4
 
 export
 ConstructorDerivator => DerivatorCore where
@@ -55,10 +59,18 @@ ConstructorDerivator => DerivatorCore where
       canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
     -- calculate which constructors are recursive and which are not
-    consRecs <- logBounds {level=Trace} "consRec" [sig] $ pure $ sig.targetType.cons <&> \con => do
-      let False = isRecursive {containingType=Just sig.targetType} con
-        | True => (con, DirectlyRecursive)
-      (con, NonRecursive)
+    consRecs <- logBounds {level=Trace} "consRec" [sig] $ Prelude.for sig.targetType.cons $ \con => do
+      let rec = isRecursive {containingType=Just sig.targetType} con
+      tuneImpl <- search $ ProbabilityTuning $ Con.name con
+      let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
+      let someStrangeName = "^some_strange_name^"
+      w <- case rec of
+        False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
+        True  => Right <$> case tuneImpl of
+          Nothing   => pure $ lam (lambdaArg $ UN $ Basic someStrangeName) $ baseForRec someStrangeName
+          Just impl => quote (tuneWeight @{impl}) <&> \wm =>
+            lam (lambdaArg $ UN $ Basic someStrangeName) $ workaroundFromNat $ wm `applySyn` baseForRec someStrangeName
+      Prelude.pure (con, MkConWeightInfo w)
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
@@ -79,26 +91,34 @@ ConstructorDerivator => DerivatorCore where
     namesWrapper : String -> String
     namesWrapper s = "inter^<\{s}>"
 
-    fuelDecisionExpr : (fuelArg : String) -> List (Con, Recursiveness) -> TTImp
+    fuelDecisionExpr : (fuelArg : String) -> List (Con, ConWeightInfo) -> TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
+      let reflectNat1 : Nat1 -> TTImp
+          reflectNat1 $ FromNat 1 = liftWeight1
+          reflectNat1 $ FromNat n = `(fromInteger ~(primVal $ BI $ cast n))
+
+      let callConstFreqs : CTLabel -> (fuel : TTImp) -> List (Con, Nat1) -> TTImp
+          callConstFreqs l fuel cons = if isJust $ find ((/=) 1 . toNat . snd) cons
+            then callFrequency l $ cons <&> bimap reflectNat1 (callConsGen fuel) . swap
+            else callOneOf l $ cons <&> callConsGen fuel . fst
+
       -- check if there are any non-recursive constructors
-      let True = isJust $ find (isRec . snd) consRecs
-        | False =>
-            -- no recursive constructors, thus just call all without spending fuel
-            callOneOf "\{logPosition sig} (non-recursive)".label (consRecs <&> callConsGen (varStr fuelAr) . fst)
+      let Nothing = for consRecs $ \(con, w) => (con,) <$> getLeft w.weight
+          -- only constantly weighted constructors (usually, non-recusrive), thus just call all without spending fuel
+        | Just consRecs => callConstFreqs "\{logPosition sig} (non-recursive)".label (varStr fuelAr) consRecs
 
       -- pattern match on the fuel argument
       iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
-          let nonRecCons = fst <$> filter (not . isDirectlyRec . snd) consRecs in
-          let dry = var `{Data.Fuel.Dry} in dry       .= callOneOf "\{logPosition sig} (dry fuel)".label (nonRecCons <&> callConsGen dry)
+          let nonRecCons = mapMaybe (\(con, w) => (con,) <$> getLeft w.weight) consRecs in
+          var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonRecCons
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-          let selectFuel = \r => varStr $ if isDirectlyRec r then subFuelArg else fuelAr
-          let weight = \r => if isRec r then var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg else liftWeight1
+          let selectFuel = \r => varStr $ if recursive r then subFuelArg else fuelAr
+          let weight = either reflectNat1 (`applySyn` varStr subFuelArg) . weight
           var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
                                                            (consRecs <&> \(con, rec) => (weight rec, callConsGen (selectFuel rec) con))
         ]

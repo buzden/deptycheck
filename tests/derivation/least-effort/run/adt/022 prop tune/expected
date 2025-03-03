@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+A (A (A (B (A (A (A (A (A (A (A (A (A (B (A (A (A (A (B (B C)))))))))))))))))))
+-----
+A (A (A (B (A (A (A (B (A (A (B (A (A (A (A (B (A (A (A C))))))))))))))))))
+-----
+A (A (A (A (B (A (A (A (A (A (A (A (B (B (A (A (A (A (B (B C)))))))))))))))))))
+-----
+A (A (B (A (A (A (A (B (A (A (B (A (A (B (A (A C)))))))))))))))
+-----
+B (A (A (A (A (A (A (A (A (B (A (A (A (A (A (A (A (B (A (B C)))))))))))))))))))
+-----
+A (A (A (B (A (A (A C))))))
+-----
+A (A (A (A (A C))))
+-----
+A (B (A (A (A (A (A (A (A (A (A (A (A (A (A (A (A (A (A (A C)))))))))))))))))))
+-----
+A (A (A (A (A (B (A (A (A (A (A (B (B (A (A (A (A (A (A (B C)))))))))))))))))))
+-----
+A (A (A (A (A (A (A (A (B (A (A (A (A (A (A (A (B (A (A (B C)))))))))))))))))))

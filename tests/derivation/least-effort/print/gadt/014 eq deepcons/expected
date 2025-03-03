@@ -119,7 +119,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (a : Nat) -> (b : Nat) -> G
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "DerivedGen.LT2[0, 1] (dry fuel)"))
-                                    .$ (var "<<DerivedGen.Base>>" .$ var "Data.Fuel.Dry" .$ var "inter^<{arg:1}>" .$ var "inter^<{arg:2}>")
+                                    .$ (var "<<DerivedGen.Base>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>" .$ var "inter^<{arg:2}>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "DerivedGen.LT2[0, 1] (spend fuel)"))
