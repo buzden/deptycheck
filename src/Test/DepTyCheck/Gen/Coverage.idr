@@ -120,7 +120,7 @@ withCoverage : {em : _} -> (gen : Gen em a) -> Elab $ Gen em a
 withCoverage gen = do
   tyExpr <- quote a
   let (dpairLefts, tyRExpr) = unDPair tyExpr
-  let (IVar _ tyName, _) = unApp tyRExpr
+  let (IVar _ tyName, _) = unAppAny tyRExpr
     | (genTy, _) => failAt (getFC genTy) "Expected a normal type name"
   tyInfo <- getInfo' tyName
   let matchDPair = \expr => foldr (\_, r => var "Builtin.DPair.MkDPair" .$ implicitTrue .$ r) expr dpairLefts
