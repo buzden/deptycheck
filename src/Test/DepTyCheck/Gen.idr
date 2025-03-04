@@ -233,17 +233,17 @@ relaxNonEmpty {g=Labelled _ _} = Refl
 --- More utility ---
 --------------------
 
-strengthen : Gen em a -> Maybe $ Gen em a
-strengthen Empty = Nothing
-strengthen x     = Just x
+nonEmpty : Gen em a -> Maybe $ Gen em a
+nonEmpty Empty = Nothing
+nonEmpty x     = Just x
 
-0 strengthenNonEmpty : {g : Gen em a} -> IsJust (strengthen g) =>
-                       IsNonEmpty $ fromJust $ strengthen g
-strengthenNonEmpty {g=Pure _}       = Refl
-strengthenNonEmpty {g=Raw _}        = Refl
-strengthenNonEmpty {g=OneOf _}      = Refl
-strengthenNonEmpty {g=Bind _ _}     = Refl
-strengthenNonEmpty {g=Labelled _ _} = Refl
+0 nonEmptyNonEmpty : {g : Gen em a} -> IsJust (nonEmpty g) =>
+                     IsNonEmpty $ fromJust $ nonEmpty g
+nonEmptyNonEmpty {g=Pure _}       = Refl
+nonEmptyNonEmpty {g=Raw _}        = Refl
+nonEmptyNonEmpty {g=OneOf _}      = Refl
+nonEmptyNonEmpty {g=Bind _ _}     = Refl
+nonEmptyNonEmpty {g=Labelled _ _} = Refl
 
 mapMaybeTaggedLazy : (a -> Maybe b) -> LazyLst ne (tag, Lazy a) -> LazyLst0 (tag, Lazy b)
 mapMaybeTaggedLazy = mapMaybe . wrapMaybeTaggedLazy
@@ -254,7 +254,7 @@ mapMaybeTaggedLazy = mapMaybe . wrapMaybeTaggedLazy
                                (0 _ : IsJust $ f x) ->
                                p $ fromJust $ f x) ->
                               All p $ unpackTaggedLazy $ mapMaybeTaggedLazy f xs
-allMapMaybeJustTaggedLazy h = allMap $ allMapMaybeJust $ helper
+allMapMaybeJustTaggedLazy h = allMap $ allMapMaybeJust helper
   where
     helper : (x : (tag, Lazy a)) ->
              {0 _ : IsJust $ wrapMaybeTaggedLazy f x} ->
@@ -291,8 +291,8 @@ mkOneOf : {em : _} ->
 mkOneOf {em=NonEmpty} @{nw} @{NT} xs with 0 (nonEmptyIsMaximal nw)
   _ | Refl = OneOf @{allTrue isNonEmptyGen1} $ MkGenAlts xs
 mkOneOf {em=MaybeEmpty} xs =
-  mkOneOfMaybeEmpty (mapMaybeTaggedLazy strengthen xs)
-    @{allMapMaybeJustTaggedLazy {f=strengthen} $ \_, _ => strengthenNonEmpty}
+  mkOneOfMaybeEmpty (mapMaybeTaggedLazy nonEmpty xs)
+    @{allMapMaybeJustTaggedLazy {f=nonEmpty} $ \_, _ => nonEmptyNonEmpty}
 
 --------------------------
 --- Running generators ---
@@ -484,9 +484,9 @@ export
   -- Inlining `mkOneOf` for manual fusion
   (OneOf oo >>= nf) {em=MaybeEmpty} =
     mkOneOfMaybeEmpty
-      (mapMaybeTaggedLazy (strengthen . assert_total (>>= nf) . relax) oo.unGenAlts)
-      @{allMapMaybeJustTaggedLazy {f=strengthen . assert_total (>>= nf) . relax} $
-          \_, _ => strengthenNonEmpty}
+      (mapMaybeTaggedLazy (nonEmpty . assert_total (>>= nf) . relax) oo.unGenAlts)
+      @{allMapMaybeJustTaggedLazy {f=nonEmpty . assert_total (>>= nf) . relax} $
+          \_, _ => nonEmptyNonEmpty}
   OneOf oo     >>= nf = mkOneOf $ flip mapTaggedLazy oo.unGenAlts $ assert_total (>>= nf) . relax
   Bind x f     >>= nf = Bind x $ assert_total (>>= nf) . relax . f
   Labelled l x >>= nf = label l $ x >>= nf
