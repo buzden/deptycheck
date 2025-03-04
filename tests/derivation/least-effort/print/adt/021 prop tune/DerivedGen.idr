@@ -16,5 +16,4 @@ ProbabilityTuning "B".dataCon where
   isConstructor = itIsConstructor
   tuneWeight _ = 4
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty X

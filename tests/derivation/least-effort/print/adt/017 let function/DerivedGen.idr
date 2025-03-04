@@ -12,6 +12,5 @@ data X : String -> Nat -> Type where
 data Y : Nat -> Type where
   MkY : (u : Nat) -> forall n, m, k. X n (S m) -> X n (S k) -> let xx : Nat -> Nat; xx = S in Y (xx u)
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $
   Fuel -> (Fuel -> Gen MaybeEmpty String) => (Fuel -> Gen MaybeEmpty Nat) => (n : Nat) -> Gen MaybeEmpty $ Y n

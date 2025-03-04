@@ -16,5 +16,4 @@ data Z : Y b -> Type where
   Start : Z y
   Go    : Z (MkY x x1) -> Z (MkY x x2)
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter $ Fuel -> (b : Bool) -> (y : Y b) -> Gen MaybeEmpty $ Z y

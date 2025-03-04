@@ -10,5 +10,4 @@ import Data.Vect
 
 %language ElabReflection
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{EmptyBody} $ Fuel -> (a : Type) -> Gen MaybeEmpty (n : Nat ** Vect n a)

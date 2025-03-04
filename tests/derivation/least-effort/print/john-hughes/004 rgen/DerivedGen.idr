@@ -18,5 +18,4 @@ record R where
   {auto af : So $ a == f}
   {auto bc : So $ b == c}
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty R

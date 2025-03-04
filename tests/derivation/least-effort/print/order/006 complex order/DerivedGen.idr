@@ -19,5 +19,4 @@ data Y : (n : Nat) -> Fin (f n) -> Type where
 data Z : Type where
   MkZ : (n : Nat) -> (x : Fin (f n)) -> (y : Y n (g x)) -> Z
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty Z

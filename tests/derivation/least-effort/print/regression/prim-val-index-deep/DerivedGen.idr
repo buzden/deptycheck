@@ -14,5 +14,4 @@ data Y : X -> Type where
 
 %language ElabReflection
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (x : _) -> Gen MaybeEmpty (Y x)

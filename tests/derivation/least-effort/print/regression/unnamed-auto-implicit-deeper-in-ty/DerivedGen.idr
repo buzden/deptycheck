@@ -17,5 +17,4 @@ data Y : X b -> X b -> Type where
 data Z : X b -> Type where
   MkZ : Y x MkX0 => Z x
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter $ Fuel -> (b : _) -> (x : X b) -> Gen MaybeEmpty (Z x)

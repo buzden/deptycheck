@@ -10,5 +10,4 @@ import Data.Vect
 
 %language ElabReflection
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{CallSelf} $ Fuel -> (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty Bool

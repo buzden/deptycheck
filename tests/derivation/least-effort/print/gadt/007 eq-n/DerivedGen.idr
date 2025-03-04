@@ -9,5 +9,4 @@ import Deriving.DepTyCheck.Gen
 data EqualN : Nat -> Nat -> Type where
   ReflN : EqualN x x
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty (a ** b ** EqualN a b)

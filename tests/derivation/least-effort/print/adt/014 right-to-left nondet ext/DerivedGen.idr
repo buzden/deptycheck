@@ -12,6 +12,5 @@ data X : String -> Nat -> Type where
 data Y : Type where
   MkY : X n m -> X n k -> Y
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $
   Fuel -> (Fuel -> Gen MaybeEmpty String) => (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty Y
