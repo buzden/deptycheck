@@ -11,6 +11,5 @@ data IsFS : Fin n -> Type where
 
 %language ElabReflection
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $
   Fuel -> {n : Nat} -> (v : Fin n) -> Gen MaybeEmpty $ IsFS v

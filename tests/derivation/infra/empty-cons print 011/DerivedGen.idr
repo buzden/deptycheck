@@ -19,5 +19,4 @@ mutual
 
   data Y = Y0 | Y1 (X Nat)
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{EmptyCons} $ Fuel -> Gen MaybeEmpty (a ** X a)

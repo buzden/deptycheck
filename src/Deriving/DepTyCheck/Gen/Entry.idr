@@ -371,15 +371,20 @@ deriveGenFor a = do
   check tt
 
 ||| Declares `main : IO Unit` function that prints derived generator for the given generator's signature
+|||
+||| Caution! When `logDerivation` is set to `True`, this function would change the global logging state
+||| and wouldn't turn it back.
 export
-deriveGenPrinter : {default True printTTImp : Bool} -> DerivatorCore => Type -> Elab Unit
+deriveGenPrinter : {default True printTTImp : _} -> {default True logDerivation : _} -> DerivatorCore => Type -> Elab Unit
 deriveGenPrinter ty = do
   ty <- quote ty
+  when logDerivation $ declare `[%logging "deptycheck.derive.print" 5]
   logSugaredTerm "deptycheck.derive.print" Details "type" ty
   expr <- deriveGenExpr ty
   expr <- quote expr
   printTTImp <- quote printTTImp
   declare `[
+    %logging "deptycheck.derive.print" 5
     export
     main : IO Unit
     main = do

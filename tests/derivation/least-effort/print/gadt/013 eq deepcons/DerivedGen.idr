@@ -10,5 +10,4 @@ data LT2 : Nat -> Nat -> Type where
   Base : x `LT2` S (S x)
   Step : x `LT2` y -> x `LT2` S y
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (b : Nat) -> Gen MaybeEmpty (a ** LT2 a b)

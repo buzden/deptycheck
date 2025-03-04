@@ -16,5 +16,4 @@ record R where
   {auto cd : So $ c == d}
   {auto be : So $ b == e}
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty R

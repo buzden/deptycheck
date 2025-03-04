@@ -13,6 +13,5 @@ import Data.Vect
 data IsFS : (n : _) -> Fin n -> Type where
   ItIsFS : IsFS _ (FS i)
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{EmptyCons} $
   Fuel -> {n : Nat} -> (v : Fin n) -> Gen MaybeEmpty $ IsFS n v

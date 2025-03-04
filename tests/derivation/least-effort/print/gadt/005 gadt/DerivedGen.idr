@@ -12,6 +12,5 @@ data D : Bool -> Type where
   TL : String ->        D True
   TR : String -> D b -> D True
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $
   Fuel -> (Fuel -> Gen MaybeEmpty Nat) => (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (b ** D b)

@@ -22,5 +22,4 @@ mutual
 
 %language ElabReflection
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (f : _) -> Gen MaybeEmpty (u ** Y u f)

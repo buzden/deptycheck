@@ -12,5 +12,4 @@ data X : Nat -> Type where
 data Y : Type where
   MkY : {n : _} -> X (n * 2) -> Y
 
-%logging "deptycheck.derive.print" 5
 %runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty Y
