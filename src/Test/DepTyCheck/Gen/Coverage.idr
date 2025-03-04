@@ -70,6 +70,10 @@ record CoverageGenInfo (0 g : k) where
   constructors : SortedMap String (TypeInfo, Con)
   coverageInfo : SortedMap TypeInfo (Nat, SortedMap Con Nat)
 
+mergeCovGenInfos : CoverageGenInfo g -> CoverageGenInfo g' -> CoverageGenInfo g''
+mergeCovGenInfos (MkCoverageGenInfo ts cns cis) (MkCoverageGenInfo ts' cns' cis') =
+  MkCoverageGenInfo (mergeLeft ts ts') (mergeLeft cns cns') (let _ : Semigroup Nat := Additive in cis <+> cis')
+
 coverageGenInfo : Name -> Elab $ CoverageGenInfo x
 coverageGenInfo genTy = do
   involvedTypes <- allInvolvedTypes MW =<< getInfo' genTy
@@ -96,6 +100,14 @@ initCoverageInfo' : (n : Name) -> Elab $ CoverageGenInfo n
 initCoverageInfo' n = coverageGenInfo n
 
 export %macro
+initCoverageInfo'' : (ns : List Name) -> Elab $ CoverageGenInfo ns
+initCoverageInfo'' = go where
+  go : (ns : List Name) -> Elab $ CoverageGenInfo ns
+  go [] = fail "At least one name must be given"
+  go [n] = coverageGenInfo n
+  go (n::ns) = [| mergeCovGenInfos {g=n} (coverageGenInfo n) (go ns) |]
+
+export %macro
 initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
 initCoverageInfo _ = genTypeName g >>= coverageGenInfo
 
@@ -108,7 +120,7 @@ withCoverage : {em : _} -> (gen : Gen em a) -> Elab $ Gen em a
 withCoverage gen = do
   tyExpr <- quote a
   let (dpairLefts, tyRExpr) = unDPair tyExpr
-  let (IVar _ tyName, _) = unApp tyRExpr
+  let (IVar _ tyName, _) = unAppAny tyRExpr
     | (genTy, _) => failAt (getFC genTy) "Expected a normal type name"
   tyInfo <- getInfo' tyName
   let matchDPair = \expr => foldr (\_, r => var "Builtin.DPair.MkDPair" .$ implicitTrue .$ r) expr dpairLefts

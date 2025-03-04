@@ -162,7 +162,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.SortedList[] (dry fuel)"))
-                                    .$ (var "<<Data.List.Sorted.Nil>>" .$ var "Data.Fuel.Dry")
+                                    .$ (var "<<Data.List.Sorted.Nil>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.SortedList[] (spend fuel)"))
@@ -292,7 +292,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.FirstGT[] (dry fuel)"))
-                                    .$ (var "<<Data.List.Sorted.E>>" .$ var "Data.Fuel.Dry")
+                                    .$ (var "<<Data.List.Sorted.E>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.FirstGT[] (spend fuel)"))
@@ -408,7 +408,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.FirstGT[0] (dry fuel)"))
-                                    .$ (var "<<Data.List.Sorted.E>>" .$ var "Data.Fuel.Dry" .$ var "inter^<{arg:1}>")
+                                    .$ (var "<<Data.List.Sorted.E>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.FirstGT[0] (spend fuel)"))
@@ -519,7 +519,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0] (dry fuel)"))
-                                    .$ (var "<<Data.Nat.LTEZero>>" .$ var "Data.Fuel.Dry" .$ var "inter^<n>")
+                                    .$ (var "<<Data.Nat.LTEZero>>" .$ var "^fuel_arg^" .$ var "inter^<n>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0] (spend fuel)"))
@@ -603,7 +603,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedList
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (dry fuel)"))
-                                    .$ (var "<<Prelude.Types.Z>>" .$ var "Data.Fuel.Dry")
+                                    .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (spend fuel)"))

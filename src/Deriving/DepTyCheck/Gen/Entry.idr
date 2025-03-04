@@ -138,7 +138,8 @@ checkTypeIsGen checkSide sig = do
   -- check that all parameters of `DPair` are as expected
   paramsToBeGenerated <- for paramsToBeGenerated $ \case
     MkArg MW ExplicitArg (Just $ UN nm) t => pure (nm, t)
-    _                                     => failAt (getFC sigResult) "Argument of dependent pair under the resulting `Gen` must be named"
+    MkArg MW ExplicitArg (Just $ MN {}) t => failAt (getFC t) "Argument of dependent pair under the resulting `Gen` seems to be repeated or badly typed"
+    MkArg _  _           _              t => failAt (getFC t) "Argument of dependent pair under the resulting `Gen` must be named"
 
   -- check that all arguments are omega, not erased or linear; and that all arguments are properly named
   (givenParams, autoImplArgs, givenParamsPositions) <- map partitionEithersPos $ Prelude.for sigArgs.asVect $ \case
