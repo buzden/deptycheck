@@ -1,5 +1,7 @@
 1/1: Building DerivedGen (DerivedGen.idr)
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty Nat)} -> Gen MaybeEmpty R
+LOG deptycheck.derive.least-effort:7: DerivedGen.R[] R - used final order: [#0 (a), #1 (b), #9 (ab), #2 (c), #3 (d), #6 (cd), #4 (e), #7 (be), #5 (f), #8 (af)]
+LOG deptycheck.derive.least-effort:7: Data.So.So[0] Oh - used final order: []
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> MkArg
       MW

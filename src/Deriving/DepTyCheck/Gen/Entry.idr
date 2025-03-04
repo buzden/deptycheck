@@ -378,7 +378,7 @@ export
 deriveGenPrinter : {default True printTTImp : _} -> {default True logDerivation : _} -> DerivatorCore => Type -> Elab Unit
 deriveGenPrinter ty = do
   ty <- quote ty
-  when logDerivation $ declare `[%logging "deptycheck.derive.print" 5]
+  when logDerivation $ declare `[%logging "deptycheck.derive.print" 5; %logging "deptycheck.derive.least-effort" 7]
   logSugaredTerm "deptycheck.derive.print" Details "type" ty
   expr <- deriveGenExpr ty
   expr <- quote expr

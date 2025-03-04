@@ -1,5 +1,9 @@
 1/2: Building Decls (Decls.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (rs : Regs r) -> (t : Ty) -> Gen MaybeEmpty (Expr rs t)
+LOG deptycheck.derive.least-effort:7: Decls.Expr[0, 1, 2] Read - used final order: [#4]
+LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0, 2, 3] Here - used final order: []
+LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0, 2, 3] There - used final order: [#5]
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> MkArg MW ImplicitArg (Just "outer^<r>") implicitTrue
 .=> MkArg MW ExplicitArg (Just "outer^<rs>") implicitTrue

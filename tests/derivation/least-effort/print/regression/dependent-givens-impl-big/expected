@@ -1,5 +1,7 @@
 1/1: Building DerivedGen (DerivedGen.idr)
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (v : VectMaybeAnyType n) -> Gen MaybeEmpty (i : Fin n ** (t : MaybeAnyType ** AtIndex i t v))
+LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0, 3] Here - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0, 3] There - used final order: [#5]
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> MkArg MW ImplicitArg (Just "outer^<n>") implicitTrue
 .=> MkArg MW ExplicitArg (Just "outer^<v>") implicitTrue
