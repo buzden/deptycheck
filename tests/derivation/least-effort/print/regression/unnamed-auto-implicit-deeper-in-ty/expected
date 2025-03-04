@@ -1,5 +1,12 @@
 1/1: Building DerivedGen (DerivedGen.idr)
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (b : Bool) -> (x : X b) -> Gen MaybeEmpty (Z x)
+LOG deptycheck.derive.least-effort:7: DerivedGen.Z[0, 1] MkZ - used final order: [#2]
+LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0, 1, 2] MkY0 - used final order: [#0, #4]
+LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0, 1, 2] MkY1 - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0, 2] MkY0 - used final order: [#0, #4]
+LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0, 2] MkY1 - used final order: []
+LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] False - used final order: []
+LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final order: []
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> MkArg MW ExplicitArg (Just "outer^<b>") implicitTrue
 .=> MkArg MW ExplicitArg (Just "outer^<x>") implicitTrue

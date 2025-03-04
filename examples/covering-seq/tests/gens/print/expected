@@ -1,5 +1,14 @@
 1/1: Building DerivedGen (DerivedGen.idr)
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (bs : BitMask n) -> Gen MaybeEmpty (CoveringSequence n bs)
+LOG deptycheck.derive.least-effort:7: Data.List.Covering.CoveringSequence[0, 1] End - used final order: [#2]
+LOG deptycheck.derive.least-effort:7: Data.List.Covering.CoveringSequence[0, 1] Miss - used final order: [#3, #2]
+LOG deptycheck.derive.least-effort:7: Data.List.Covering.CoveringSequence[0, 1] Hit - used final order: [#3, #4]
+LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AtIndex[0, 2, 3] Here - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AtIndex[0, 2, 3] There - used final order: [#5]
+LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] Z - used final order: []
+LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: [#0]
+LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAre[0, 1, 2] Finish - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAre[0, 1, 2] Continue - used final order: [#3]
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> MkArg MW ImplicitArg (Just "outer^<n>") implicitTrue
 .=> MkArg MW ExplicitArg (Just "outer^<bs>") implicitTrue
