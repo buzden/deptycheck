@@ -7,6 +7,9 @@ import public Control.Monad.Random.Interface
 
 import Data.Bool
 import public Data.CheckedEmpty.List.Lazy
+import Data.CheckedEmpty.List.Lazy.Elem
+import Data.CheckedEmpty.List.Lazy.Quantifiers
+import Data.CheckedEmpty.List.Lazy.Properties
 import Data.Fuel
 import public Data.Nat1
 import Data.List
@@ -40,6 +43,9 @@ wrapLazy f = delay . f . force
 wrapMaybeTaggedLazy : (a -> Maybe b) -> (tag, Lazy a) -> Maybe (tag, Lazy b)
 wrapMaybeTaggedLazy f = traverse $ map delay . f . force
 
+0 unpackTaggedLazy : Functor f => f (tag, Lazy a) -> f a
+unpackTaggedLazy = map $ force . snd
+
 -------------------------------
 --- Definition of the `Gen` ---
 -------------------------------
@@ -49,9 +55,15 @@ record RawGen a where
   unRawGen : forall m. MonadRandom m => CanManageLabels m => m a
 
 export
-record GenAlternatives (0 mustBeNotEmpty : Bool) (0 em : Emptiness) (a : Type)
+data Gen : Emptiness -> Type -> Type
+
+0 IsNonEmpty : Gen em a -> Type
 
 export
+record GenAlternatives (0 mustBeNotEmpty : Bool) (0 em : Emptiness) (a : Type)
+
+0 All : (Gen em a -> Type) -> GenAlternatives ne em a -> Type
+
 data Gen : Emptiness -> Type -> Type where
 
   Empty : Gen MaybeEmpty a
@@ -60,19 +72,38 @@ data Gen : Emptiness -> Type -> Type where
 
   Raw   : RawGen a -> Gen em a
 
-  OneOf : (0 _ : alem `NoWeaker` em) =>
-          (0 _ : NotImmediatelyEmpty alem) =>
-          GenAlternatives True alem a -> Gen em a
+  OneOf : (gs : GenAlternatives True alem a) ->
+          (0 _ : All IsNonEmpty gs) =>
+          (0 _ : alem `NoWeaker` em) =>
+          Gen em a
 
   Bind  : {biem : _} ->
-          (0 _ : BindToOuter biem em) =>
+          (0 _ : biem `NoWeaker` em) =>
           RawGen c -> (c -> Gen biem a) -> Gen em a
 
-  Labelled : Label -> Gen em a -> Gen em a
+  Labelled : Label -> (g : Gen em a) -> (0 _ : IsNonEmpty g) => Gen em a
+
+isEmpty : Gen em a -> Bool
+isEmpty Empty = True
+isEmpty _     = False
+
+%inline
+isNonEmpty : Gen em a -> Bool
+isNonEmpty = not . isEmpty
+
+IsNonEmpty g = isEmpty g === False
 
 record GenAlternatives (0 mustBeNotEmpty : Bool) (0 em : Emptiness) (a : Type) where
   constructor MkGenAlts
   unGenAlts : LazyLst mustBeNotEmpty (Nat1, Lazy (Gen em a))
+
+0 listOfAlts : GenAlternatives ne em a -> LazyLst ne $ Gen em a
+listOfAlts $ MkGenAlts gs = unpackTaggedLazy gs
+
+All p = All p . listOfAlts
+
+0 Elem : Gen em a -> GenAlternatives ne em a -> Type
+Elem g = Elem g . listOfAlts
 
 (.totalWeight) : GenAlternatives True em a -> Nat1
 (.totalWeight) = foldl1 (+) . map fst . unGenAlts
@@ -88,6 +119,14 @@ Gen1 = Gen NonEmpty
 public export %inline
 Gen0 : Type -> Type
 Gen0 = Gen MaybeEmpty
+
+%hint
+0 isNonEmptyGen1 : {g : Gen1 a} -> IsNonEmpty g
+isNonEmptyGen1 {g=Pure _}       = Refl
+isNonEmptyGen1 {g=Raw _}        = Refl
+isNonEmptyGen1 {g=OneOf _}      = Refl
+isNonEmptyGen1 {g=Bind _ _}     = Refl
+isNonEmptyGen1 {g=Labelled _ _} = Refl
 
 -----------------------------
 --- Very basic generators ---
@@ -111,30 +150,63 @@ empty = Empty
 
 export
 label : Label -> Gen em a -> Gen em a
-label _ Empty = Empty
-label l g     = Labelled l g
+label l g with (isEmpty g) proof 0 prf
+  label _ Empty | True  = Empty
+  label l g     | False = Labelled l g
 
 ------------------------------------------------
 --- Technical stuff for mapping alternatives ---
 ------------------------------------------------
 
 mapTaggedLazy : Functor f => (a -> b) -> f (tag, Lazy a) -> f (tag, Lazy b)
-mapTaggedLazy = map . mapSnd . wrapLazy
+mapTaggedLazy f = map $ \x => (fst x, wrapLazy f $ snd x)
 
 mapOneOf : GenAlternatives ne iem a -> (Gen iem a -> Gen em b) -> GenAlternatives ne em b
-mapOneOf oo f = MkGenAlts $ mapTaggedLazy f oo.unGenAlts
+mapOneOf $ MkGenAlts gs = MkGenAlts . flip mapTaggedLazy gs
 
-mapMaybeTaggedLazy : (a -> Maybe b) -> LazyLst ne (Nat1, Lazy a) -> LazyLst0 (Nat1, Lazy b)
-mapMaybeTaggedLazy = mapMaybe . wrapMaybeTaggedLazy
+0 allMapTaggedLazy : {0 f : a -> b} -> {xs : LazyLst ne (tag, Lazy a)} ->
+                     ({x : a} -> (0 _ : Elem x $ unpackTaggedLazy xs) -> p $ f x) ->
+                     All p $ unpackTaggedLazy $ mapTaggedLazy f xs
+allMapTaggedLazy h = allMap $ allMapForall $ \e => h $ elemMap _ e
 
-traverseMaybe : (a -> Maybe b) -> LazyLst ne a -> Maybe $ LazyLst ne b
-traverseMaybe f []      = Just []
-traverseMaybe f (x::xs) = case f x of
-  Nothing => Nothing
-  Just y  => (y ::) <$> traverseMaybe f xs
+0 allMapOneOf : {0 f : Gen iem a -> Gen em b} ->
+                {gs : GenAlternatives ne iem a} ->
+                ({x : Gen iem a} -> (0 _ : Elem x gs) -> p $ f x) ->
+                All p $ mapOneOf gs f
+allMapOneOf {gs=MkGenAlts _} = allMapTaggedLazy
 
-trMOneOf : GenAlternatives ne iem a -> (Gen iem a -> Maybe $ Gen em b) -> Maybe $ GenAlternatives ne em b
-trMOneOf oo = map MkGenAlts . flip traverseMaybe oo.unGenAlts . wrapMaybeTaggedLazy
+mapElem : (xs : LazyLst ne a) -> ((x : a) -> (0 _ : Elem x xs) -> b) -> LazyLst ne b
+mapElem []        _ = []
+mapElem (x :: xs) f = f x Here :: mapElem xs (\y, e => f y $ There e)
+
+mapTaggedLazyElem : (xs : LazyLst ne (tag, Lazy a)) ->
+                    ((x : a) -> (0 _ : Elem x $ unpackTaggedLazy xs) -> b) ->
+                    LazyLst ne (tag, Lazy b)
+mapTaggedLazyElem xs f = mapElem xs $ \x, e => (fst x, delay $ f (snd x) $ elemMap _ e)
+
+mapOneOfElem : (gs : GenAlternatives ne iem a) ->
+               ((g : Gen iem a) -> (0 _ : Elem g gs) -> Gen em b) ->
+               GenAlternatives ne em b
+mapOneOfElem $ MkGenAlts gs = MkGenAlts . mapTaggedLazyElem gs
+
+0 allMapElem : {xs : LazyLst ne a} ->
+               {0 f : (x : a) -> (0 _ : Elem x xs) -> b} ->
+               ({x : a} -> (0 e : Elem x xs) -> p $ f x e) ->
+               All p $ mapElem xs f
+allMapElem {xs=[]}      _ = []
+allMapElem {xs=x :: xs} h = h Here :: allMapElem (\e => h $ There e)
+
+0 allMapTaggedLazyElem : {xs : LazyLst ne (tag, Lazy a)} ->
+                         {0 f : (x : a) -> (0 _ : Elem x $ unpackTaggedLazy xs) -> b} ->
+                         ({x : a} -> (0 e : Elem x $ unpackTaggedLazy xs) -> p $ f x e) ->
+                         All p $ unpackTaggedLazy $ mapTaggedLazyElem xs f
+allMapTaggedLazyElem h = allMap $ allMapElem $ \e => h $ elemMap _ e
+
+0 allMapOneOfElem : {gs : GenAlternatives ne iem a} ->
+                    {0 f : (g : Gen iem a) -> (0 _ : Elem g gs) -> Gen em b} ->
+                    ({g : Gen iem a} -> (0 e : Elem g gs) -> p $ f g e) ->
+                    All p $ mapOneOfElem gs f
+allMapOneOfElem {gs=MkGenAlts _} = allMapTaggedLazyElem
 
 -----------------------------
 --- Emptiness tweakenings ---
@@ -142,43 +214,85 @@ trMOneOf oo = map MkGenAlts . flip traverseMaybe oo.unGenAlts . wrapMaybeTaggedL
 
 export
 relax : (0 _ : iem `NoWeaker` em) => Gen iem a -> Gen em a
-relax @{nw} Empty      = rewrite maybeEmptyIsMinimal nw in Empty
-relax $ Pure x         = Pure x
-relax $ Raw x          = Raw x
-relax $ OneOf @{wo} x  = OneOf @{transitive' wo %search} x
-relax $ Bind @{bo} x f = Bind @{bindToOuterRelax bo %search} x f
-relax $ Labelled l x   = label l $ relax x
+0 relaxNonEmpty : {g : Gen iem a} -> IsNonEmpty g => IsNonEmpty $ relax @{nw} g
 
-export
-strengthen : {em : _} -> Gen iem a -> Maybe $ Gen em a
+relax @{nw} Empty           = rewrite maybeEmptyIsMinimal nw in Empty
+relax $ Pure x              = Pure x
+relax $ Raw x               = Raw x
+relax $ OneOf @{ne} @{nw} x = OneOf @{ne} @{transitive' nw %search} x
+relax $ Bind @{nw} x f      = Bind @{transitive' nw %search} x f
+relax $ Labelled l x        = Labelled @{relaxNonEmpty} l $ relax x
 
-strengthen {em=MaybeEmpty} Empty = Just Empty
-strengthen {em=_}          Empty = Nothing
-
-strengthen $ Pure x = Just $ Pure x
-strengthen $ Raw x  = Just $ Raw x
-
-strengthen $ OneOf @{_} @{au} x with (decCanBeEmpty em)
-  _ | Yes _ = Just $ OneOf @{relaxAnyCanBeEmpty au} @{au} x
-  _ | No  _ = map OneOf $ trMOneOf x $ assert_total $ strengthen {em=NonEmpty}
-
-strengthen $ Bind {biem} x f with (decCanBeEmpty em)
-  _ | Yes _ = Just $ Bind x f
-  _ | No  _ = case biem of
-    NonEmpty => Just $ Bind x f
-    _        => Nothing
-
-strengthen $ Labelled l x = label l <$> strengthen x
+relaxNonEmpty {g=Pure _}       = Refl
+relaxNonEmpty {g=Raw _}        = Refl
+relaxNonEmpty {g=OneOf _}      = Refl
+relaxNonEmpty {g=Bind _ _}     = Refl
+relaxNonEmpty {g=Labelled _ _} = Refl
 
 --------------------
 --- More utility ---
 --------------------
 
-mkOneOf : (0 _ : alem `NoWeaker` em) =>
-          (0 _ : NotImmediatelyEmpty alem) =>
-          (gens : LazyLst1 (Nat1, Lazy (Gen alem a))) ->
+nonEmpty : Gen em a -> Maybe $ Gen em a
+nonEmpty Empty = Nothing
+nonEmpty x     = Just x
+
+0 nonEmptyNonEmpty : {g : Gen em a} -> IsJust (nonEmpty g) =>
+                     IsNonEmpty $ fromJust $ nonEmpty g
+nonEmptyNonEmpty {g=Pure _}       = Refl
+nonEmptyNonEmpty {g=Raw _}        = Refl
+nonEmptyNonEmpty {g=OneOf _}      = Refl
+nonEmptyNonEmpty {g=Bind _ _}     = Refl
+nonEmptyNonEmpty {g=Labelled _ _} = Refl
+
+mapMaybeTaggedLazy : (a -> Maybe b) -> LazyLst ne (tag, Lazy a) -> LazyLst0 (tag, Lazy b)
+mapMaybeTaggedLazy = mapMaybe . wrapMaybeTaggedLazy
+
+0 allMapMaybeJustTaggedLazy : {f : a -> Maybe b} ->
+                              {xs : LazyLst ne (tag, Lazy a)} ->
+                              ((x : a) ->
+                               (0 _ : IsJust $ f x) ->
+                               p $ fromJust $ f x) ->
+                              All p $ unpackTaggedLazy $ mapMaybeTaggedLazy f xs
+allMapMaybeJustTaggedLazy h = allMap $ allMapMaybeJust helper
+  where
+    helper : (x : (tag, Lazy a)) ->
+             {0 _ : IsJust $ wrapMaybeTaggedLazy f x} ->
+             p $ force $ snd $ fromJust $ wrapMaybeTaggedLazy f x
+    helper (w, x) with (f x) proof 0 prf
+      helper (w, x) | Just y = do
+        let yIsJust : IsJust (f x) = rewrite prf in ItIsJust
+        let Refl : y === fromJust (f x) = rewrite prf in Refl
+        h x yIsJust
+
+namespace OneOf
+
+  public export
+  data AltsNonEmpty : Bool -> Emptiness -> Type where
+    NT : AltsNonEmpty True   NonEmpty
+    Sx : AltsNonEmpty altsNe MaybeEmpty
+
+  export %defaulthint
+  altsNonEmptyTrue : {em : _} -> AltsNonEmpty True em
+  altsNonEmptyTrue {em=NonEmpty}   = NT
+  altsNonEmptyTrue {em=MaybeEmpty} = Sx
+
+mkOneOfMaybeEmpty : (xs : LazyLst altsNe (Nat1, Lazy (Gen alem a))) ->
+                    (0 _ : All IsNonEmpty $ unpackTaggedLazy xs) =>
+                    Gen0 a
+mkOneOfMaybeEmpty []                  = Empty
+mkOneOfMaybeEmpty (x :: xs) @{_ :: _} = OneOf $ MkGenAlts $ x :: xs
+
+mkOneOf : {em : _} ->
+          (0 _ : alem `NoWeaker` em) =>
+          (0 _ : AltsNonEmpty altsNe em) =>
+          LazyLst altsNe (Nat1, Lazy (Gen alem a)) ->
           Gen em a
-mkOneOf gens = OneOf $ MkGenAlts gens
+mkOneOf {em=NonEmpty} @{nw} @{NT} xs with 0 (nonEmptyIsMaximal nw)
+  _ | Refl = OneOf @{allTrue isNonEmptyGen1} $ MkGenAlts xs
+mkOneOf {em=MaybeEmpty} xs =
+  mkOneOfMaybeEmpty (mapMaybeTaggedLazy nonEmpty xs)
+    @{allMapMaybeJustTaggedLazy {f=nonEmpty} $ \_, _ => nonEmptyNonEmpty}
 
 --------------------------
 --- Running generators ---
@@ -190,9 +304,9 @@ export
 unGen1 : MonadRandom m => CanManageLabels m => Gen1 a -> m a
 unGen1 $ Pure x         = pure x
 unGen1 $ Raw sf         = sf.unRawGen
-unGen1 $ OneOf @{nw} oo with 0 (nonEmptyIsMaximal nw)
+unGen1 $ OneOf @{_} @{nw} oo with 0 (nonEmptyIsMaximal nw)
   _ | Refl = assert_total unGen1 . force . pickWeighted oo.unGenAlts . finToNat =<< randomFin oo.totalWeight
-unGen1 $ Bind @{bo} x f with 0 (extractNE bo)
+unGen1 $ Bind @{nw} x f with 0 (nonEmptyIsMaximal nw)
   _ | Refl = x.unRawGen >>= unGen1 . f
 unGen1 $ Labelled l x   = manageLabel l $ unGen1 x
 
@@ -243,7 +357,7 @@ unGenTryN n = mapMaybe id .: take (limit n) .: unGenTryAll
 ||| Tries once to pick a random value from a generator
 export
 pick : CanInitSeed g m => Functor m => Gen em a -> m $ Maybe a
-pick gen = initSeed <&> \s => evalRandom s $ unGen' gen
+pick gen = initSeed <&> flip evalRandom (unGen' gen)
 
 ||| Tries to pick a random value from a generator, returning the number of unsuccessful attempts, if generated successfully
 export
@@ -270,69 +384,111 @@ Applicative RawGen where
   MkRawGen x <*> MkRawGen y = MkRawGen $ x <*> y
 
 --- `Gen` ---
-
 export
+Functor (Gen em)
+0 mapNonEmpty : {g : Gen iem a} -> IsNonEmpty g => IsNonEmpty $ f <$> g
+
 Functor (Gen em) where
-  map f $ Empty        = Empty
-  map f $ Pure x       = Pure $ f x
-  map f $ Raw sf       = Raw $ f <$> sf
-  map f $ OneOf oo     = OneOf $ mapOneOf oo $ assert_total $ map f
-  map f $ Bind x g     = Bind x $ map f . g
-  map f $ Labelled l x = label l $ map f x
+  map f $ Empty          = Empty
+  map f $ Pure x         = Pure $ f x
+  map f $ Raw sf         = Raw $ f <$> sf
+  map f $ OneOf @{ne} oo = OneOf @{allMapOneOf $ \e => mapNonEmpty @{indexAll e ne}} $ mapOneOf oo $ assert_total $ map f
+  map f $ Bind x g       = Bind x $ map f . g
+  map f $ Labelled l x   = Labelled @{mapNonEmpty} l $ map f x
 
-namespace GenAlternatives
-
-  export %inline
-  strengthen : GenAlternatives ne em a -> Maybe $ GenAlternatives True em a
-  strengthen = map MkGenAlts . strengthen . unGenAlts
-
-  export %inline
-  mapMaybe : (Gen iem a -> Maybe (Gen em b)) -> GenAlternatives ne iem a -> GenAlternatives False em b
-  mapMaybe f = MkGenAlts . mapMaybeTaggedLazy f . unGenAlts
+mapNonEmpty {g=Pure _}       = Refl
+mapNonEmpty {g=Raw _}        = Refl
+mapNonEmpty {g=OneOf _}      = Refl
+mapNonEmpty {g=Bind _ _}     = Refl
+mapNonEmpty {g=Labelled _ _} = Refl
 
 export
-{em : _} -> Applicative (Gen em) where
+Applicative (Gen em)
+0 apNonEmpty : {g : Gen em $ a -> b} -> {h : Gen em a} -> IsNonEmpty g => IsNonEmpty h => IsNonEmpty $ g <*> h
+
+Applicative (Gen em) where
 
   pure = Pure
 
-  Empty <*> _ = Empty
-  _ <*> Empty = Empty
+  g <*> h with (isEmpty g) proof 0 prfLeft | (isEmpty h) proof 0 prfRight
+    Empty <*> _ | _ | _ = Empty
+    _ <*> Empty | _ | _ = Empty
 
-  Pure f <*> g = f <$> g
-  g <*> Pure x = g <&> \f => f x
+    Pure f <*> g | _ | _ = f <$> g
+    g <*> Pure x | _ | _ = g <&> \f => f x
 
-  Raw sfl <*> Raw sfr = Raw $ sfl <*> sfr
+    Raw sfl <*> Raw sfr | _ | _ = Raw $ sfl <*> sfr
 
-  Labelled l x <*> y = label l $ x <*> y
-  x <*> Labelled l y = label l $ x <*> y
+    Labelled l x <*> y | _     | False = Labelled @{apNonEmpty} l $ x <*> y
+    x <*> Labelled l y | False | _     = Labelled @{apNonEmpty} l $ x <*> y
 
-  OneOf oo <*> g = case canBeNotImmediatelyEmpty em of
-    Right _   => OneOf $ mapOneOf oo $ \x => assert_total $ relax x <*> g
-    Left Refl => maybe Empty (\g => OneOf $ mapOneOf oo $ \x => assert_total $ relax x <*> g) $ strengthen {em=MaybeEmptyDeep} g
-  g <*> OneOf oo = case canBeNotImmediatelyEmpty em of
-    Right _   => OneOf $ mapOneOf oo $ \x => assert_total $ g <*> relax x
-    Left Refl => maybe Empty (\g => OneOf $ mapOneOf oo $ \x => assert_total $ g <*> relax x) $ strengthen {em=MaybeEmptyDeep} g
+    OneOf @{ne} oo <*> g | _ | False =
+      OneOf @{allMapOneOf $ \e => apNonEmpty @{relaxNonEmpty @{indexAll e ne}}} $
+        mapOneOf oo $ \x => assert_total $ relax x <*> g
+    g <*> OneOf @{ne} oo | False | _ =
+      OneOf @{allMapOneOf $ \e => apNonEmpty @{%search} @{relaxNonEmpty @{indexAll e ne}}} $
+        mapOneOf oo $ \x => assert_total $ g <*> relax x
 
-  Bind x f <*> Raw y = Bind x $ \c => f c <*> Raw y
-  Raw y <*> Bind x f = Bind x $ \c => assert_total $ Raw y <*> f c
+    Bind x f <*> Raw y | _ | _ = Bind x $ \c => f c <*> Raw y
+    Raw y <*> Bind x f | _ | _ = Bind x $ \c => assert_total $ Raw y <*> f c
 
-  Bind {biem=bl} x f <*> Bind {biem=br} y g = case order {rel=NoWeaker} bl br of
-    Left  _ => Bind [| (x, y) |] $ \(l, r) => assert_total $ relax (f l) <*> g r
-    Right _ => Bind [| (x, y) |] $ \(l, r) => f l <*> relax (g r)
+    Bind {biem=bl} x f <*> Bind {biem=br} y g | _ | _ = case order {rel=NoWeaker} bl br of
+      Left  _ => Bind [| (x, y) |] $ \(l, r) => assert_total $ relax (f l) <*> g r
+      Right _ => Bind [| (x, y) |] $ \(l, r) => f l <*> relax (g r)
+
+apNonEmpty with (isEmpty g) proof 0 prfLeft | (isEmpty h) proof 0 prfRight
+  apNonEmpty {g=Empty}        {h}              | True  | _     impossible
+  apNonEmpty {g}              {h=Empty}        | _     | True  impossible
+
+  apNonEmpty {g=Pure _}       {h=Pure _}       | _     | _     = Refl
+  apNonEmpty {g=Pure _}       {h=Raw _}        | _     | _     = Refl
+  apNonEmpty {g=Pure _}       {h=OneOf _}      | _     | _     = Refl
+  apNonEmpty {g=Pure _}       {h=Bind _ _}     | _     | _     = Refl
+  apNonEmpty {g=Pure _}       {h=Labelled _ _} | _     | _     = Refl
+
+  apNonEmpty {g=Raw _}        {h=Pure _}       | _     | _     = Refl
+  apNonEmpty {g=OneOf _}      {h=Pure _}       | _     | _     = Refl
+  apNonEmpty {g=Bind _ _}     {h=Pure _}       | _     | _     = Refl
+  apNonEmpty {g=Labelled _ _} {h=Pure _}       | _     | _     = Refl
+
+  apNonEmpty {g=Raw _}        {h=Raw _}        | _     | _     = Refl
+
+  apNonEmpty {g=Labelled _ _} {h=Raw _}        | _     | False = Refl
+  apNonEmpty {g=Labelled _ _} {h=OneOf _}      | _     | False = Refl
+  apNonEmpty {g=Labelled _ _} {h=Bind _ _}     | _     | False = Refl
+  apNonEmpty {g=Labelled _ _} {h=Labelled _ _} | _     | False = Refl
+
+  apNonEmpty {g=Raw _}        {h=Labelled _ _} | False | False = Refl
+  apNonEmpty {g=OneOf _}      {h=Labelled _ _} | False | False = Refl
+  apNonEmpty {g=Bind _ _}     {h=Labelled _ _} | False | False = Refl
+
+  apNonEmpty {g=OneOf _}      {h=Raw _}        | False | False = Refl
+  apNonEmpty {g=OneOf _}      {h=OneOf _}      | False | False = Refl
+  apNonEmpty {g=OneOf _}      {h=Bind _ _}     | False | False = Refl
+
+  apNonEmpty {g=Bind _ _}     {h=OneOf _}      | False | False = Refl
+  apNonEmpty {g=Raw _}        {h=OneOf _}      | False | False = Refl
+
+  apNonEmpty {g=Raw _}        {h=Bind _ _}     | _     | False = Refl
+  apNonEmpty {g=Bind _ _}     {h=Raw _}        | _     | False = Refl
+
+  apNonEmpty {g=Bind {biem=bl} _ _} {h=Bind {biem=br} _ _} | _ | False with (order {rel=NoWeaker} bl br)
+    _ | Left  _ = Refl
+    _ | Right _ = Refl
 
 export
 {em : _} -> Monad (Gen em) where
-  Empty    >>= _  = Empty
-  Pure x   >>= nf = nf x
-  Raw g    >>= nf = Bind g nf
-  (OneOf @{ao} oo >>= nf) {em=NonEmpty} with 0 (nonEmptyIsMaximal ao)
-    _ | Refl = OneOf $ mapOneOf oo $ assert_total $ (>>= nf)
-  (OneOf @{ao} oo >>= nf) {em=MaybeEmptyDeep} = OneOf $ mapOneOf oo $ assert_total (>>= nf) . relax @{ao}
-  (OneOf {alem} oo >>= nf) {em=MaybeEmpty} = maybe Empty (OneOf {alem=MaybeEmptyDeep}) $
-    strengthen $ flip mapMaybe oo $ strengthen . assert_total (>>= nf) . relax
-  Bind {biem} x f >>= nf with (order {rel=NoWeaker} biem em)
-    _ | Left _  = Bind x $ \x => assert_total $ relax (f x) >>= nf
-    _ | Right _ = Bind x $ \x => f x >>= relax . nf
+  Empty        >>= _  = Empty
+  Pure x       >>= nf = nf x
+  Raw g        >>= nf = Bind g nf
+  -- Inlining `mkOneOf` for manual fusion
+  (OneOf oo >>= nf) {em=MaybeEmpty} =
+    mkOneOfMaybeEmpty
+      (mapMaybeTaggedLazy (nonEmpty . assert_total (>>= nf) . relax) oo.unGenAlts)
+      @{allMapMaybeJustTaggedLazy {f=nonEmpty . assert_total (>>= nf) . relax} $
+          \_, _ => nonEmptyNonEmpty}
+  OneOf oo     >>= nf = mkOneOf $ flip mapTaggedLazy oo.unGenAlts $ assert_total (>>= nf) . relax
+  Bind x f     >>= nf = Bind x $ assert_total (>>= nf) . relax . f
   Labelled l x >>= nf = label l $ x >>= nf
 
 -----------------------------------------
@@ -396,47 +552,37 @@ namespace GenAlternatives
   relax : GenAlternatives True em a -> GenAlternatives ne em a
   relax = MkGenAlts . relaxT . unGenAlts
 
+  export %inline
+  strengthen : GenAlternatives ne em a -> Maybe $ GenAlternatives True em a
+  strengthen = map MkGenAlts . strengthen . unGenAlts
+
   export
   Functor (GenAlternatives ne em) where
     map = processAlternatives . map
 
   export
-  {em : _} -> Applicative (GenAlternatives ne em) where
+  Applicative (GenAlternatives ne em) where
     pure x = [ pure x ]
     xs <*> ys = flip processAlternatives' xs $ flip processAlternatives ys . (<*>)
 
   export
-  {em : _} -> Alternative (GenAlternatives False em) where
+  Alternative (GenAlternatives False em) where
     empty = []
     xs <|> ys = MkGenAlts $ xs.unGenAlts <|> ys.unGenAlts
 
   -- implementation for `Monad` is below --
 
 export
-{em : _} -> Cast (LazyLst ne a) (GenAlternatives ne em a) where
+Cast (LazyLst ne a) (GenAlternatives ne em a) where
   cast = MkGenAlts . map (\x => (1, pure x))
 
 public export %inline
-altsFromList : {em : _} -> LazyLst ne a -> GenAlternatives ne em a
+altsFromList : LazyLst ne a -> GenAlternatives ne em a
 altsFromList = cast
 
 ----------------------------------
 --- Creation of new generators ---
 ----------------------------------
-
-namespace OneOf
-
-  public export
-  data AltsNonEmpty : Bool -> Emptiness -> Type where
-    NT : AltsNonEmpty True   NonEmpty
-    DT : AltsNonEmpty True   MaybeEmptyDeep
-    Sx : AltsNonEmpty altsNe MaybeEmpty
-
-  export %defaulthint
-  altsNonEmptyTrue : {em : _} -> AltsNonEmpty True em
-  altsNonEmptyTrue {em=NonEmpty}       = NT
-  altsNonEmptyTrue {em=MaybeEmptyDeep} = DT
-  altsNonEmptyTrue {em=MaybeEmpty}     = Sx
 
 ||| Choose one of the given generators uniformly.
 |||
@@ -449,9 +595,7 @@ oneOf : {em : _} ->
         (0 _ : IfUnsolved alem em) =>
         (0 _ : IfUnsolved altsNe $ em /= MaybeEmpty) =>
         GenAlternatives altsNe alem a -> Gen em a
-oneOf {em=NonEmpty} @{nw} @{NT} = mkOneOf @{%search} @{transitive nw %search} . unGenAlts
-oneOf {em=MaybeEmptyDeep} @{_} @{DT} = mkOneOf . unGenAlts
-oneOf {em=MaybeEmpty} = maybe Empty (OneOf {alem=MaybeEmptyDeep}) . strengthen . mapMaybe strengthen
+oneOf = mkOneOf . unGenAlts
 
 ||| Choose one of the given generators with probability proportional to the given value, treating all source generators independently.
 |||
@@ -480,9 +624,7 @@ elements : {em : _} ->
 elements = oneOf {alem=NonEmpty} . altsFromList
 
 export %inline
-elements' : Foldable f =>
-            (0 _ : IfUnsolved f List) =>
-            f a -> Gen0 a
+elements' : Foldable f => (0 _ : IfUnsolved f List) => f a -> Gen0 a
 elements' xs = elements $ fromList $ toList xs
 
 ------------------------------
@@ -500,9 +642,17 @@ elements' xs = elements $ fromList $ toList xs
 ||| `alternativesof $ oneOf gs` must be equivalent to `gs`.
 export
 alternativesOf : Gen em a -> GenAlternatives True em a
+0 alternativesOfNonEmpty : {g : Gen em a} -> IsNonEmpty g => All IsNonEmpty $ alternativesOf g
+
 alternativesOf $ OneOf oo     = mapOneOf oo relax
-alternativesOf $ Labelled l x = processAlternatives (label l) $ alternativesOf x
+alternativesOf $ Labelled l x = mapOneOfElem (alternativesOf x) $ \g, e => Labelled l g @{indexAll e alternativesOfNonEmpty}
 alternativesOf g              = [g]
+
+alternativesOfNonEmpty {g=Pure _}        = [Refl]
+alternativesOfNonEmpty {g=Raw _}         = [Refl]
+alternativesOfNonEmpty {g=OneOf @{ne} _} = allMapOneOf $ \e => relaxNonEmpty @{indexAll e ne}
+alternativesOfNonEmpty {g=Bind _ _}      = [Refl]
+alternativesOfNonEmpty {g=Labelled _ _}  = allMapOneOfElem $ \_ => Refl
 
 ||| Any depth alternatives fetching.
 |||
@@ -522,17 +672,18 @@ deepAlternativesOf (S k) gen = processAlternatives' alternativesOf $ deepAlterna
 |||
 ||| Please notice that this function does NOT influence to the result of `deepAlternativesOf`, if depth is increased by 1.
 export
-forgetAlternatives : {em : _} -> Gen em a -> Gen em a
-forgetAlternatives g@(OneOf {}) = case canBeNotImmediatelyEmpty em of
-  Right _   => single g
-  Left Refl => maybe Empty single $ strengthen {em=MaybeEmptyDeep} g
-  where
-    %inline single : (0 _ : iem `NoWeaker` MaybeEmptyDeep) => (0 _ : iem `NoWeaker` em) => Gen iem a -> Gen em a
-    single g = label "forgetAlternatives" $ OneOf $ MkGenAlts [(1, g)]
-    -- `mkOneOf` is not used here intentionally, since mkOneOf can potentially change the shape of produced tree, but we
-    -- still want precisely this shape here.
-forgetAlternatives (Labelled l x) = label l $ forgetAlternatives x
-forgetAlternatives g = g
+forgetAlternatives : Gen em a -> Gen em a
+0 forgetAlternativesNonEmpty : {g : Gen iem a} -> IsNonEmpty g => IsNonEmpty $ forgetAlternatives g
+
+forgetAlternatives g@(OneOf {})   = Labelled "forgetAlternatives" $ OneOf @{[Refl]} $ MkGenAlts [(1, g)]
+forgetAlternatives $ Labelled l x = Labelled @{forgetAlternativesNonEmpty} l $ forgetAlternatives x
+forgetAlternatives g              = g
+
+forgetAlternativesNonEmpty {g=Pure _}       = Refl
+forgetAlternativesNonEmpty {g=Raw _}        = Refl
+forgetAlternativesNonEmpty {g=OneOf _}      = Refl
+forgetAlternativesNonEmpty {g=Bind _ _}     = Refl
+forgetAlternativesNonEmpty {g=Labelled _ _} = Refl
 
 ||| Returns generator with internal structure hidden to anything, including combinators,
 ||| except for an empty generator, which would still be returned as an empty generator.
@@ -548,11 +699,10 @@ forgetAlternatives g = g
 ||| being applied to the result of this function.
 export
 forgetStructure : {em : _} -> Gen em a -> Gen em a
-forgetStructure Empty     = Empty
-forgetStructure g@(Raw _) = g
-forgetStructure g with (canBeEmpty em)
-  _ | Right _   = MkRawGen (unGen' g) `Bind` maybe Empty Pure
-  _ | Left Refl = Raw $ MkRawGen $ unGen1 g
+forgetStructure Empty             = Empty
+forgetStructure g@(Raw _)         = g
+forgetStructure g {em=NonEmpty}   = Raw $ MkRawGen $ unGen1 g
+forgetStructure g {em=MaybeEmpty} = MkRawGen (unGen' g) `Bind` maybe Empty Pure
 
 public export
 processAlternatives : (Gen em a -> Gen em b) -> Gen em a -> GenAlternatives True em b
@@ -630,7 +780,7 @@ export
 suchThat_withPrf : Gen em a -> (p : a -> Bool) -> Gen0 $ a `Subset` So . p
 suchThat_withPrf g p = mapMaybe lp g where
   lp : a -> Maybe $ a `Subset` So . p
-  lp x with (p x) proof prf
+  lp x with (p x) proof 0 prf
     _ | True  = Just $ Element x $ eqToSo prf
     _ | False = Nothing
 
@@ -695,11 +845,10 @@ iterate (S n) f = iterate n f . f
 -- TODO to reimplement `variant` to ensure that preserves the structure as far as it can.
 export
 variant : {em : _} -> Nat -> Gen em a -> Gen em a
-variant _ Empty = Empty
-variant Z gen   = gen
-variant n gen with (canBeEmpty em)
-  _ | Right _   = MkRawGen (iterate n independent $ unGen' gen) `Bind` maybe Empty Pure
-  _ | Left Refl = Raw $ MkRawGen $ iterate n independent $ unGen1 gen
+variant _ Empty               = Empty
+variant Z gen                 = gen
+variant n gen {em=NonEmpty}   = Raw $ MkRawGen $ iterate n independent $ unGen1 gen
+variant n gen {em=MaybeEmpty} = MkRawGen (iterate n independent $ unGen' gen) `Bind` maybe Empty Pure
 
 -----------------------------
 --- Particular generators ---
