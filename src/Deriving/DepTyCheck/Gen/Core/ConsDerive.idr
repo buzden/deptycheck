@@ -149,20 +149,21 @@ refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps)
     -- update the priority of the currenly managed argument
     modify $ updateExisting (mapSnd $ const newPri) curr
 
-propagateStrongDet, propagateDep : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
+propagateStrongDet, propagateDep : Ord a => FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
 -- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
 propagateDep dets = dets <&> \(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn
 -- propagate back along strong determinations
 propagateStrongDet dets =
   foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets
 
-propagatePri : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
+propagatePri : Ord a => FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
 propagatePri dets = do
   let next = propagatePriOnce dets
   if ((==) `on` map snd) dets next
     then dets
     else assert_total propagatePri next
   where
+    propagatePriOnce : FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
     propagatePriOnce = propagateDep . propagateStrongDet
 
 data PriorityOrigin = Original | Propagated
