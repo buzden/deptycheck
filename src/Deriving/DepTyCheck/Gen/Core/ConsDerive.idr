@@ -15,6 +15,10 @@ import public Deriving.DepTyCheck.Gen.Derive
 
 %default total
 
+-------------------------------------------------------------------
+--- Data types characterising constructors for particular tasks ---
+-------------------------------------------------------------------
+
 record Determination (0 con : Con) where
   constructor MkDetermination
   ||| Args which cannot be determined by this arg, e.g. because it is used in a non-trivial expression.
@@ -23,6 +27,15 @@ record Determination (0 con : Con) where
   argsDependsOn : SortedSet $ Fin con.args.length
   ||| Count of influencing arguments
   influencingArgs : Nat
+
+mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
+mapDetermination f = {stronglyDeterminingArgs $= f, argsDependsOn $= f}
+
+removeDeeply : Foldable f =>
+               (toRemove : f $ Fin con.args.length) ->
+               (fromWhat : FinMap con.args.length $ Determination con) ->
+               FinMap con.args.length $ Determination con
+removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
 record TypeApp (0 con : Con) where
   constructor MkTypeApp
@@ -65,6 +78,10 @@ getTypeApps con = do
 
   for con.args.asVect $ analyseTypeApp . type
 
+------------------------------------------
+--- Facilities for manual order tuning ---
+------------------------------------------
+
 ||| A magic interface for tuning the order of generation in derived generators
 |||
 ||| This interface defines a function `isConstructor` which can be implemented only by calling a macro `itIsConstructor`.
@@ -97,67 +114,9 @@ interface GenOrderTuning (0 n : Name) where
                 (givenConArgs : List $ Fin isConstructor.fst.conInfo.args.length) ->
                 List $ ConArg isConstructor.fst.conInfo
 
--------------------------------------------------
---- Derivation of a generator for constructor ---
--------------------------------------------------
-
---- Interface ---
-
-public export
-interface ConstructorDerivator where
-  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
-
-  ||| Workarond of inability to put an arbitrary name under `IBindVar`
-  bindNameRenamer : Name -> String
-  bindNameRenamer $ UN $ Basic n = n
-  bindNameRenamer n = "^bnd^" ++ show n
-
---- Particular tactics ---
-
-mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
-mapDetermination f = {stronglyDeterminingArgs $= f, argsDependsOn $= f}
-
-removeDeeply : Foldable f =>
-               (toRemove : f $ Fin con.args.length) ->
-               (fromWhat : FinMap con.args.length $ Determination con) ->
-               FinMap con.args.length $ Determination con
-removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
-
-propagateStrongDet, propagateDep : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
--- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
-propagateDep dets = dets <&> \(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn
--- propagate back along strong determinations
-propagateStrongDet dets =
-  foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets
-
-propagatePri : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
-propagatePri dets = do
-  let next = propagatePriOnce dets
-  if ((==) `on` map snd) dets next
-    then dets
-    else assert_total propagatePri next
-  where
-    propagatePriOnce = propagateDep . propagateStrongDet
-
-findFirstMax : Ord p => List (a, b, p) -> Maybe (a, b)
-findFirstMax [] = Nothing
-findFirstMax ((x, y, pri)::xs) = Just $ go (x, y) pri xs where
-  go : (a, b) -> p -> List (a, b, p) -> (a, b)
-  go curr _       []                = curr
-  go curr currPri ((x, y, pri)::xs) = if pri > currPri then go (x, y) pri xs else go curr currPri xs
-
-data PriorityOrigin = Original | Propagated
-
-Eq PriorityOrigin where
-  Original   == Original   = True
-  Propagated == Propagated = True
-  _ == _ = False
-
-Ord PriorityOrigin where
-  compare Original   Original   = EQ
-  compare Original   Propagated = GT
-  compare Propagated Original   = LT
-  compare Propagated Propagated = EQ
+----------------------------------------------------------------
+--- Facilities for automatic search of good generation order ---
+----------------------------------------------------------------
 
 -- adds base priorities of args which we depend on transitively
 refineBasePri : Num p => {con : _} -> FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
@@ -190,6 +149,35 @@ refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps)
     -- update the priority of the currenly managed argument
     modify $ updateExisting (mapSnd $ const newPri) curr
 
+propagateStrongDet, propagateDep : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
+-- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
+propagateDep dets = dets <&> \(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn
+-- propagate back along strong determinations
+propagateStrongDet dets =
+  foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets
+
+propagatePri : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
+propagatePri dets = do
+  let next = propagatePriOnce dets
+  if ((==) `on` map snd) dets next
+    then dets
+    else assert_total propagatePri next
+  where
+    propagatePriOnce = propagateDep . propagateStrongDet
+
+data PriorityOrigin = Original | Propagated
+
+Eq PriorityOrigin where
+  Original   == Original   = True
+  Propagated == Propagated = True
+  _ == _ = False
+
+Ord PriorityOrigin where
+  compare Original   Original   = EQ
+  compare Original   Propagated = GT
+  compare Propagated Original   = LT
+  compare Propagated Propagated = EQ
+
 -- compute the priority
 -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
 -- additionally we take into account the number of outgoing strong determinations and count of dependent arguments
@@ -202,6 +190,13 @@ assignPriorities dets = do
   let origPri = refineBasePri $ dets <&> \det => (det,) $ det.influencingArgs `minus` det.argsDependsOn.size
   flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
     (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 (Fin.Map.lookup idx invStrongDetPwr) + det.argsDependsOn.size)
+
+findFirstMax : Ord p => List (a, b, p) -> Maybe (a, b)
+findFirstMax [] = Nothing
+findFirstMax ((x, y, pri)::xs) = Just $ go (x, y) pri xs where
+  go : (a, b) -> p -> List (a, b, p) -> (a, b)
+  go curr _       []                = curr
+  go curr currPri ((x, y, pri)::xs) = if pri > currPri then go (x, y) pri xs else go curr currPri xs
 
 searchOrder : {con : _} ->
               (determinable : SortedSet $ Fin con.args.length) ->
@@ -224,6 +219,23 @@ searchOrder determinable left = do
 
   -- `next` is smaller than `left` because `curr` must be not empty
   curr :: searchOrder (determinable `difference` currDet.argsDependsOn) (assert_smaller left next)
+
+-------------------------------------------------
+--- Derivation of a generator for constructor ---
+-------------------------------------------------
+
+--- Interface ---
+
+public export
+interface ConstructorDerivator where
+  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
+
+  ||| Workarond of inability to put an arbitrary name under `IBindVar`
+  bindNameRenamer : Name -> String
+  bindNameRenamer $ UN $ Basic n = n
+  bindNameRenamer n = "^bnd^" ++ show n
+
+--- Particular tactics ---
 
 ||| "Non-obligatory" means that some present external generator of some type
 ||| may be ignored even if its type is really used in a generated data constructor.
