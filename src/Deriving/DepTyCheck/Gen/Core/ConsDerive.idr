@@ -15,6 +15,10 @@ import public Deriving.DepTyCheck.Gen.Derive
 
 %default total
 
+-------------------------------------------------------------------
+--- Data types characterising constructors for particular tasks ---
+-------------------------------------------------------------------
+
 record Determination (0 con : Con) where
   constructor MkDetermination
   ||| Args which cannot be determined by this arg, e.g. because it is used in a non-trivial expression.
@@ -23,6 +27,15 @@ record Determination (0 con : Con) where
   argsDependsOn : SortedSet $ Fin con.args.length
   ||| Count of influencing arguments
   influencingArgs : Nat
+
+mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
+mapDetermination f = {stronglyDeterminingArgs $= f, argsDependsOn $= f}
+
+removeDeeply : Foldable f =>
+               (toRemove : f $ Fin con.args.length) ->
+               (fromWhat : FinMap con.args.length $ Determination con) ->
+               FinMap con.args.length $ Determination con
+removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
 record TypeApp (0 con : Con) where
   constructor MkTypeApp
@@ -65,6 +78,10 @@ getTypeApps con = do
 
   for con.args.asVect $ analyseTypeApp . type
 
+------------------------------------------
+--- Facilities for manual order tuning ---
+------------------------------------------
+
 ||| A magic interface for tuning the order of generation in derived generators
 |||
 ||| This interface defines a function `isConstructor` which can be implemented only by calling a macro `itIsConstructor`.
@@ -97,66 +114,9 @@ interface GenOrderTuning (0 n : Name) where
                 (givenConArgs : List $ Fin isConstructor.fst.conInfo.args.length) ->
                 List $ ConArg isConstructor.fst.conInfo
 
--------------------------------------------------
---- Derivation of a generator for constructor ---
--------------------------------------------------
-
---- Interface ---
-
-public export
-interface ConstructorDerivator where
-  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
-
-  ||| Workarond of inability to put an arbitrary name under `IBindVar`
-  bindNameRenamer : Name -> String
-  bindNameRenamer $ UN $ Basic n = n
-  bindNameRenamer n = "^bnd^" ++ show n
-
---- Particular tactics ---
-
-mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
-mapDetermination f = {stronglyDeterminingArgs $= f, argsDependsOn $= f}
-
-removeDeeply : Foldable f =>
-               (toRemove : f $ Fin con.args.length) ->
-               (fromWhat : FinMap con.args.length $ Determination con) ->
-               FinMap con.args.length $ Determination con
-removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
-
-propagatePriOnce : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
-propagatePriOnce =
-  -- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
-  (\dets => map (\(det, pri) => (det,) $ foldl (\x => maybe x (max x . (`minus` x) . snd) . lookup' dets) pri $ det.argsDependsOn) dets)
-  .
-  -- propagate back along strong determinations
-  (\dets => foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets)
-
-propagatePri : FinMap con.args.length (Determination con, Nat) -> FinMap con.args.length (Determination con, Nat)
-propagatePri dets = do
-  let next = propagatePriOnce dets
-  if ((==) `on` map snd) dets next
-    then dets
-    else assert_total propagatePri next
-
-findFirstMax : Ord p => List (a, b, p) -> Maybe (a, b)
-findFirstMax [] = Nothing
-findFirstMax ((x, y, pri)::xs) = Just $ go (x, y) pri xs where
-  go : (a, b) -> p -> List (a, b, p) -> (a, b)
-  go curr _       []                = curr
-  go curr currPri ((x, y, pri)::xs) = if pri > currPri then go (x, y) pri xs else go curr currPri xs
-
-data PriorityOrigin = Original | Propagated
-
-Eq PriorityOrigin where
-  Original   == Original   = True
-  Propagated == Propagated = True
-  _ == _ = False
-
-Ord PriorityOrigin where
-  compare Original   Original   = EQ
-  compare Original   Propagated = GT
-  compare Propagated Original   = LT
-  compare Propagated Propagated = EQ
+----------------------------------------------------------------
+--- Facilities for automatic search of good generation order ---
+----------------------------------------------------------------
 
 -- adds base priorities of args which we depend on transitively
 refineBasePri : Num p => {con : _} -> FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
@@ -189,11 +149,41 @@ refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps)
     -- update the priority of the currenly managed argument
     modify $ updateExisting (mapSnd $ const newPri) curr
 
+propagateStrongDet, propagateDep : Ord a => FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
+-- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
+propagateDep dets = dets <&> \(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn
+-- propagate back along strong determinations
+propagateStrongDet dets =
+  foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets
+
+propagatePri : Ord a => FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
+propagatePri dets = do
+  let next = propagatePriOnce dets
+  if ((==) `on` map snd) dets next
+    then dets
+    else assert_total propagatePri next
+  where
+    propagatePriOnce : FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
+    propagatePriOnce = propagateDep . propagateStrongDet
+
+data PriorityOrigin = Original | Propagated
+
+Eq PriorityOrigin where
+  Original   == Original   = True
+  Propagated == Propagated = True
+  _ == _ = False
+
+Ord PriorityOrigin where
+  compare Original   Original   = EQ
+  compare Original   Propagated = GT
+  compare Propagated Original   = LT
+  compare Propagated Propagated = EQ
+
 -- compute the priority
 -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
 -- additionally we take into account the number of outgoing strong determinations and count of dependent arguments
-propagatePri' : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat)
-propagatePri' dets = do
+assignPriorities : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat)
+assignPriorities dets = do
   let invStrongDetPwr = do
     let _ : Monoid Nat = Additive
     flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
@@ -202,14 +192,20 @@ propagatePri' dets = do
   flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
     (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 (Fin.Map.lookup idx invStrongDetPwr) + det.argsDependsOn.size)
 
+findFirstMax : Ord p => List (a, b, p) -> Maybe (a, b)
+findFirstMax [] = Nothing
+findFirstMax ((x, y, pri)::xs) = Just $ go (x, y) pri xs where
+  go : (a, b) -> p -> List (a, b, p) -> (a, b)
+  go curr _       []                = curr
+  go curr currPri ((x, y, pri)::xs) = if pri > currPri then go (x, y) pri xs else go curr currPri xs
+
 searchOrder : {con : _} ->
-              (determinable : SortedSet $ Fin con.args.length) ->
               (left : FinMap con.args.length $ Determination con) ->
               List $ Fin con.args.length
-searchOrder determinable left = do
+searchOrder left = do
 
   -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
-  let notDetermined = filter (\(idx, det, _) => null det.stronglyDeterminingArgs) $ kvList $ propagatePri' left
+  let notDetermined = filter (\(idx, det, _) => null det.stronglyDeterminingArgs) $ kvList $ assignPriorities left
 
   -- choose the one from the variants
   -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
@@ -222,7 +218,24 @@ searchOrder determinable left = do
   let next = removeDeeply .| Id curr .| removeDeeply currDet.argsDependsOn left
 
   -- `next` is smaller than `left` because `curr` must be not empty
-  curr :: searchOrder (determinable `difference` currDet.argsDependsOn) (assert_smaller left next)
+  curr :: searchOrder (assert_smaller left next)
+
+-------------------------------------------------
+--- Derivation of a generator for constructor ---
+-------------------------------------------------
+
+--- Interface ---
+
+public export
+interface ConstructorDerivator where
+  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
+
+  ||| Workarond of inability to put an arbitrary name under `IBindVar`
+  bindNameRenamer : Name -> String
+  bindNameRenamer $ UN $ Basic n = n
+  bindNameRenamer n = "^bnd^" ++ show n
+
+--- Particular tactics ---
 
 ||| "Non-obligatory" means that some present external generator of some type
 ||| may be ignored even if its type is really used in a generated data constructor.
@@ -337,7 +350,7 @@ namespace NonObligatoryExts
 
       -- Compute the order
       let nonDetermGivs = removeDeeply userImposed $ removeDeeply givs determ
-      let theOrder = userImposed ++ searchOrder (concatMap argsDependsOn nonDetermGivs) nonDetermGivs
+      let theOrder = userImposed ++ searchOrder nonDetermGivs
 
       logPoint {level=DeepDetails} "least-effort" [sig, con] "- used final order: \{theOrder}"
 
