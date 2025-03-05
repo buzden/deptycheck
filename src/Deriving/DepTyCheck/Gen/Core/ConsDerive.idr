@@ -29,7 +29,10 @@ record Determination (0 con : Con) where
   influencingArgs : Nat
 
 mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
-mapDetermination f = {stronglyDeterminingArgs $= f, argsDependsOn $= f}
+mapDetermination f oldDet = do
+  let newDet : Determination con := {stronglyDeterminingArgs $= f, argsDependsOn $= f} oldDet
+  let patchInfl = if null (newDet.stronglyDeterminingArgs) && not (null oldDet.stronglyDeterminingArgs) then S else id
+  ({influencingArgs $= patchInfl} newDet)
 
 removeDeeply : Foldable f =>
                (toRemove : f $ Fin con.args.length) ->
