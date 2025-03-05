@@ -179,16 +179,23 @@ Ord PriorityOrigin where
   compare Propagated Original   = LT
   compare Propagated Propagated = EQ
 
+invStrongDetPwr : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length Nat
+invStrongDetPwr dets = do
+  let _ : Monoid Nat = Additive
+  flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
+
 -- compute the priority
 -- priority is a count of given arguments, and it propagates back using `max` on strongly determining arguments and on arguments that depend on this
 -- additionally we take into account the number of outgoing strong determinations and count of dependent arguments
-assignPriorities : {con : _} -> FinMap con.args.length (Determination con) -> FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat)
-assignPriorities dets = do
-  let invStrongDetPwr = do
-    let _ : Monoid Nat = Additive
-    flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
-  -- the original priority is the count of already determined given arguments for each argument
-  let origPri = refineBasePri $ dets <&> \det => (det,) $ det.influencingArgs `minus` det.argsDependsOn.size
+assignPriorities : {con : _} ->
+                   (addWeight : FinMap con.args.length Nat) ->
+                   FinMap con.args.length (Determination con) ->
+                   FinMap con.args.length (Determination con, Nat, PriorityOrigin, Nat)
+assignPriorities addWeight dets = do
+  let invStrongDetPwr = invStrongDetPwr dets
+  -- the original priority is the count of already determined given arguments for each argument plus external addition
+  let origPri = refineBasePri $ flip mapWithKey dets $ \idx, det => (det,) $
+                  (det.influencingArgs `minus` det.argsDependsOn.size) + fromMaybe 0 (lookup idx addWeight)
   flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
     (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 (Fin.Map.lookup idx invStrongDetPwr) + det.argsDependsOn.size)
 
@@ -200,12 +207,13 @@ findFirstMax ((x, y, pri)::xs) = Just $ go (x, y) pri xs where
   go curr currPri ((x, y, pri)::xs) = if pri > currPri then go (x, y) pri xs else go curr currPri xs
 
 searchOrder : {con : _} ->
+              (addWeight : FinMap con.args.length Nat) ->
               (left : FinMap con.args.length $ Determination con) ->
               List $ Fin con.args.length
-searchOrder left = do
+searchOrder addWeight left = do
 
   -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
-  let notDetermined = filter (\(idx, det, _) => null det.stronglyDeterminingArgs) $ kvList $ assignPriorities left
+  let notDetermined = filter (\(idx, det, _) => null det.stronglyDeterminingArgs) $ kvList $ assignPriorities addWeight left
 
   -- choose the one from the variants
   -- It's important to do so, since after discharging one of the selected variable, set of available variants can extend
@@ -218,7 +226,7 @@ searchOrder left = do
   let next = removeDeeply .| Id curr .| removeDeeply currDet.argsDependsOn left
 
   -- `next` is smaller than `left` because `curr` must be not empty
-  curr :: searchOrder (assert_smaller left next)
+  curr :: searchOrder addWeight (assert_smaller left next)
 
 -------------------------------------------------
 --- Derivation of a generator for constructor ---
@@ -240,6 +248,8 @@ interface ConstructorDerivator where
 ||| "Non-obligatory" means that some present external generator of some type
 ||| may be ignored even if its type is really used in a generated data constructor.
 namespace NonObligatoryExts
+
+  %ambiguity_depth 4
 
   ||| Least-effort non-obligatory tactic is one which *does not use externals* during taking a decision on the order.
   ||| It uses externals if decided order happens to be given by an external generator, but is not obliged to use any.
@@ -350,7 +360,11 @@ namespace NonObligatoryExts
 
       -- Compute the order
       let nonDetermGivs = removeDeeply userImposed $ removeDeeply givs determ
-      let theOrder = userImposed ++ searchOrder nonDetermGivs
+      let incomingStrongDetWeight = do
+        let inv = invStrongDetPwr determ
+        let _ : Monoid Nat = Additive
+        determ <&> \det => foldMap (fromMaybe 0 . lookup' inv) det.stronglyDeterminingArgs
+      let theOrder = userImposed ++ searchOrder incomingStrongDetWeight nonDetermGivs
 
       logPoint {level=DeepDetails} "least-effort" [sig, con] "- used final order: \{theOrder}"
 
