@@ -200,10 +200,9 @@ findFirstMax ((x, y, pri)::xs) = Just $ go (x, y) pri xs where
   go curr currPri ((x, y, pri)::xs) = if pri > currPri then go (x, y) pri xs else go curr currPri xs
 
 searchOrder : {con : _} ->
-              (determinable : SortedSet $ Fin con.args.length) ->
               (left : FinMap con.args.length $ Determination con) ->
               List $ Fin con.args.length
-searchOrder determinable left = do
+searchOrder left = do
 
   -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
   let notDetermined = filter (\(idx, det, _) => null det.stronglyDeterminingArgs) $ kvList $ assignPriorities left
@@ -219,7 +218,7 @@ searchOrder determinable left = do
   let next = removeDeeply .| Id curr .| removeDeeply currDet.argsDependsOn left
 
   -- `next` is smaller than `left` because `curr` must be not empty
-  curr :: searchOrder (determinable `difference` currDet.argsDependsOn) (assert_smaller left next)
+  curr :: searchOrder (assert_smaller left next)
 
 -------------------------------------------------
 --- Derivation of a generator for constructor ---
@@ -351,7 +350,7 @@ namespace NonObligatoryExts
 
       -- Compute the order
       let nonDetermGivs = removeDeeply userImposed $ removeDeeply givs determ
-      let theOrder = userImposed ++ searchOrder (concatMap argsDependsOn nonDetermGivs) nonDetermGivs
+      let theOrder = userImposed ++ searchOrder nonDetermGivs
 
       logPoint {level=DeepDetails} "least-effort" [sig, con] "- used final order: \{theOrder}"
 
