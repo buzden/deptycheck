@@ -29,7 +29,10 @@ record Determination (0 con : Con) where
   influencingArgs : Nat
 
 mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
-mapDetermination f = {stronglyDeterminingArgs $= f, argsDependsOn $= f}
+mapDetermination f oldDet = do
+  let newDet : Determination con := {stronglyDeterminingArgs $= f, argsDependsOn $= f} oldDet
+  let patchInfl = if null (newDet.stronglyDeterminingArgs) && not (null oldDet.stronglyDeterminingArgs) then S else id
+  ({influencingArgs $= patchInfl} newDet)
 
 removeDeeply : Foldable f =>
                (toRemove : f $ Fin con.args.length) ->
@@ -189,7 +192,7 @@ assignPriorities dets = do
     flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
   -- the original priority is the count of already determined given arguments for each argument
   let origPri = refineBasePri $ dets <&> \det => (det,) $ det.influencingArgs `minus` det.argsDependsOn.size
-  flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
+  mapWithKey' .| map snd origPri `zip` propagatePri origPri .| \idx, (origPri, det, newPri) =>
     (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 (Fin.Map.lookup idx invStrongDetPwr) + det.argsDependsOn.size)
 
 findFirstMax : Ord p => List (a, b, p) -> Maybe (a, b)

@@ -8,6 +8,7 @@ import Deriving.DepTyCheck.Gen
 %default total
 
 %logging "deptycheck.derive" 5
+%logging "deptycheck.derive.least-effort" 7
 
 export
 genSortedBinTree1 : Fuel -> Gen MaybeEmpty (mi ** ma ** SortedBinTree1 mi ma)
