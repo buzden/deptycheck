@@ -49,7 +49,7 @@ Ord GenSignature where
 ----------------------
 
 public export
-interface Elaboration m => NamesInfoInTypes => CanonicGen m where
+interface Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m TTImp
 
 export

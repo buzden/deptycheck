@@ -645,6 +645,18 @@ getNamesInfoInTypes' expr = do
   tys <- map (mapMaybe id) $ for (Prelude.toList varsSecondOrder) $ catch . getInfo'
   concat <$> Prelude.for tys getNamesInfoInTypes
 
+----------------------------------
+--- Constructors recursiveness ---
+----------------------------------
+
+export
+record ConsRecs where
+  constructor MkConsRecs
+
+export
+getConsRecs : Elaboration m => NamesInfoInTypes => m ConsRecs
+getConsRecs = pure MkConsRecs -- TODO to implement
+
 --------------------------------------
 --- Compile-time constructors info ---
 --------------------------------------

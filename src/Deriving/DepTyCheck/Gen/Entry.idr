@@ -302,7 +302,8 @@ deriveGenExpr signature = do
   checkResult@(signature ** externals ** _) <- checkTypeIsGen DerivationTask signature
   let externalsSigToName = fromList $ externals.externals <&> \(sig, _) => (sig, nameForGen sig)
   let fuelArg = outmostFuelArg
-  niit <- logBounds {level=Trace} "namesInfo" [] $ getNamesInfoInTypes signature.targetType
+  _ <- logBounds {level=Trace} "namesInfo" [] $ getNamesInfoInTypes signature.targetType
+  _ <- logBounds {level=Trace} "consRec" [] getConsRecs
   (callExpr, locals) <- runCanonic externalsSigToName $ callMainDerivedGen signature fuelArg
   wrapFuel fuelArg <$> internalGenCallingLambda checkResult (local locals callExpr)
 

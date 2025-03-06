@@ -107,7 +107,7 @@ namespace ClojuringCanonicImpl
                                       Yes prf => Just $ Element extSig prf
                                       No _    => Nothing
 
-  DerivatorCore => ClojuringContext m => Elaboration m => NamesInfoInTypes => CanonicGen m where
+  DerivatorCore => ClojuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
     callGen sig fuel values = do
 
       -- check if we are the first, then we need to start the loop
@@ -172,7 +172,8 @@ namespace ClojuringCanonicImpl
   --- Canonic-dischagring function ---
 
   export
-  runCanonic : DerivatorCore => NamesInfoInTypes => SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
+  runCanonic : DerivatorCore => NamesInfoInTypes => ConsRecs =>
+               SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
     (x, defs, bodies) <- evalRWST exts (empty, empty, True) calc {s=(SortedMap GenSignature Name, List (GenSignature, Name), _)} {w=(_, _)}
