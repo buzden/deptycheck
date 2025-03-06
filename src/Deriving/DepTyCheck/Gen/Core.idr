@@ -23,8 +23,8 @@ interface ProbabilityTuning (0 n : Name) where
 
 record ConWeightInfo where
   constructor MkConWeightInfo
-  ||| Either constant (for non-recursive) or an expression (be a lambda taking the left fuel, or some other expression; for recursive)
-  weight : Either Nat1 TTImp
+  ||| Either a constant (for non-recursive) or a function returning weight expression being given left fuel var (for recursive)
+  weight : Either Nat1 (String -> TTImp)
 
 %inline
 recursive : ConWeightInfo -> Bool
@@ -63,13 +63,11 @@ ConstructorDerivator => DerivatorCore where
       let rec = isRecursive {containingType=Just sig.targetType} con
       tuneImpl <- search $ ProbabilityTuning $ Con.name con
       let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
-      let someStrangeName = "^some_strange_name^"
       w <- case rec of
         False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
         True  => Right <$> case tuneImpl of
-          Nothing   => pure $ lam (lambdaArg $ UN $ Basic someStrangeName) $ baseForRec someStrangeName
-          Just impl => quote (tuneWeight @{impl}) <&> \wm =>
-            lam (lambdaArg $ UN $ Basic someStrangeName) $ workaroundFromNat $ wm `applySyn` baseForRec someStrangeName
+          Nothing   => pure $ \fl => baseForRec fl
+          Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
       Prelude.pure (con, MkConWeightInfo w)
 
     -- decide how to name a fuel argument on the LHS
@@ -118,7 +116,7 @@ ConstructorDerivator => DerivatorCore where
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
           let selectFuel = \r => varStr $ if recursive r then subFuelArg else fuelAr
-          let weight = either reflectNat1 (`applySyn` varStr subFuelArg) . weight
+          let weight = either reflectNat1 (`apply` subFuelArg) . weight
           var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
                                                            (consRecs <&> \(con, rec) => (weight rec, callConsGen (selectFuel rec) con))
         ]
