@@ -192,7 +192,7 @@ assignPriorities dets = do
     flip concatMap dets $ \det => fromList $ (,1) <$> det.stronglyDeterminingArgs.asList
   -- the original priority is the count of already determined given arguments for each argument
   let origPri = refineBasePri $ dets <&> \det => (det,) $ det.influencingArgs `minus` det.argsDependsOn.size
-  flip mapWithKey (map snd origPri `zip` propagatePri origPri) $ \idx, (origPri, det, newPri) =>
+  mapWithKey' .| map snd origPri `zip` propagatePri origPri .| \idx, (origPri, det, newPri) =>
     (det, newPri, if origPri == newPri then Original else Propagated, fromMaybe 0 (Fin.Map.lookup idx invStrongDetPwr) + det.argsDependsOn.size)
 
 findFirstMax : Ord p => List (a, b, p) -> Maybe (a, b)
