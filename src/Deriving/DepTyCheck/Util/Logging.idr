@@ -28,30 +28,46 @@ length : LogPosition -> Nat
 length []      = Z
 length (_::xs) = S $ length xs
 
-public export %inline
-Info, Details, DeepDetails, Trace, Debug, DetailedDebug : Nat
-Info = 2; Details = 5; DeepDetails = 7; Trace = 10; Debug = 15; DetailedDebug = 20
+public export
+data LogLevel
+  = Info
+  | Details
+  | DeepDetails
+  | Trace
+  | DetailedTrace
+  | Debug
+  | DetailedDebug
+
+public export
+toNatLevel : LogLevel -> Nat
+toNatLevel Info          = 2
+toNatLevel Details       = 5
+toNatLevel DeepDetails   = 7
+toNatLevel Trace         = 10
+toNatLevel DetailedTrace = 12
+toNatLevel Debug         = 15
+toNatLevel DetailedDebug = 20
 
 public export %inline
-DefaultLogLevel : Nat
+DefaultLogLevel : LogLevel
 DefaultLogLevel = Trace
 
 export
 logPoint :
   Elaboration m =>
-  {default DefaultLogLevel level : Nat} ->
+  {default DefaultLogLevel level : LogLevel} ->
   (subTopic : String) -> So (subTopic /= "") =>
   (position : LogPosition) ->
   (mark : String) ->
   m ()
 logPoint subTopic position mark = do
   let topic = "deptycheck.derive.\{subTopic}"
-  logMsg topic level "\{position}\{mark}"
+  logMsg topic (toNatLevel level) "\{position}\{mark}"
 
 export
 logBounds :
   Elaboration m =>
-  {default DefaultLogLevel level : Nat} ->
+  {default DefaultLogLevel level : LogLevel} ->
   (subTopic : String) -> So (subTopic /= "") =>
   (position : LogPosition) ->
   m a ->

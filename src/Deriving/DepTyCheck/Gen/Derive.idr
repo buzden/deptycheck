@@ -34,7 +34,7 @@ sig.generatedParams = fromList (allFins sig.targetType.args.length) `difference`
 
 export
 SingleLogPosition GenSignature where
-  logPosition sig = "\{show $ extractTargetTyExpr sig.targetType}\{show sig.givenParams.asList}"
+  logPosition sig = "\{logPosition sig.targetType}\{show sig.givenParams.asList}"
 
 public export
 Eq GenSignature where
@@ -49,7 +49,7 @@ Ord GenSignature where
 ----------------------
 
 public export
-interface Elaboration m => NamesInfoInTypes => CanonicGen m where
+interface Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m TTImp
 
 export

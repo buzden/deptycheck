@@ -6,6 +6,7 @@ import public Control.Applicative.Const
 import public Data.Alternative
 import public Data.Cozippable
 
+import public Data.Either
 import public Data.Fin.Lists
 import public Data.Fin.ToFin
 import public Data.Fuel
@@ -36,6 +37,57 @@ import public Text.PrettyPrint.Bernardy
 
 %default total
 
+---------------------------------------------------
+--- Working around primitive and special values ---
+---------------------------------------------------
+
+primTypeInfo : String -> TypeInfo
+primTypeInfo s = MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic s) [] []
+
+export
+typeInfoForPrimType : PrimType -> TypeInfo
+typeInfoForPrimType IntType     = primTypeInfo "Int"
+typeInfoForPrimType IntegerType = primTypeInfo "Integer"
+typeInfoForPrimType Int8Type    = primTypeInfo "Int8"
+typeInfoForPrimType Int16Type   = primTypeInfo "Int16"
+typeInfoForPrimType Int32Type   = primTypeInfo "Int32"
+typeInfoForPrimType Int64Type   = primTypeInfo "Int64"
+typeInfoForPrimType Bits8Type   = primTypeInfo "Bits8"
+typeInfoForPrimType Bits16Type  = primTypeInfo "Bits16"
+typeInfoForPrimType Bits32Type  = primTypeInfo "Bits32"
+typeInfoForPrimType Bits64Type  = primTypeInfo "Bits64"
+typeInfoForPrimType StringType  = primTypeInfo "String"
+typeInfoForPrimType CharType    = primTypeInfo "Char"
+typeInfoForPrimType DoubleType  = primTypeInfo "Double"
+typeInfoForPrimType WorldType   = primTypeInfo "%World"
+
+export
+typeInfoForTypeOfTypes : TypeInfo
+typeInfoForTypeOfTypes = primTypeInfo "Type"
+
+export
+extractTargetTyExpr : TypeInfo -> TTImp
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Int"    ) [] [] = primVal $ PrT IntType
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Integer") [] [] = primVal $ PrT IntegerType
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Int8"   ) [] [] = primVal $ PrT Int8Type
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Int16"  ) [] [] = primVal $ PrT Int16Type
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Int32"  ) [] [] = primVal $ PrT Int32Type
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Int64"  ) [] [] = primVal $ PrT Int64Type
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Bits8"  ) [] [] = primVal $ PrT Bits8Type
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Bits16" ) [] [] = primVal $ PrT Bits16Type
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Bits32" ) [] [] = primVal $ PrT Bits32Type
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Bits64" ) [] [] = primVal $ PrT Bits64Type
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "String" ) [] [] = primVal $ PrT StringType
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Char"   ) [] [] = primVal $ PrT CharType
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Double" ) [] [] = primVal $ PrT DoubleType
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "%World" ) [] [] = primVal $ PrT WorldType
+extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Type"   ) [] [] = type
+extractTargetTyExpr ti = var ti.name
+
+||| Returns a type constructor as `Con` by given type
+typeCon : TypeInfo -> Con
+typeCon ti = MkCon ti.name ti.args type
+
 -----------------------
 --- Pretty-printing ---
 -----------------------
@@ -57,6 +109,10 @@ SingleLogPosition Con where
     let fullName = show con.name
     let fullName' = unpack fullName
     maybe fullName (pack . flip drop fullName' . S . finToNat) $ findLastIndex (== '.') fullName'
+
+export
+SingleLogPosition TypeInfo where
+  logPosition ti = "\{show $ extractTargetTyExpr ti}"
 
 ----------------------------------------------
 --- Compiler-based `TTImp` transformations ---
@@ -275,57 +331,6 @@ allNameSuffixes nm = do
 export
 isNamespaced : Name -> Bool
 isNamespaced = not . null . fst . unNS
-
----------------------------------------------------
---- Working around primitive and special values ---
----------------------------------------------------
-
-primTypeInfo : String -> TypeInfo
-primTypeInfo s = MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic s) [] []
-
-export
-typeInfoForPrimType : PrimType -> TypeInfo
-typeInfoForPrimType IntType     = primTypeInfo "Int"
-typeInfoForPrimType IntegerType = primTypeInfo "Integer"
-typeInfoForPrimType Int8Type    = primTypeInfo "Int8"
-typeInfoForPrimType Int16Type   = primTypeInfo "Int16"
-typeInfoForPrimType Int32Type   = primTypeInfo "Int32"
-typeInfoForPrimType Int64Type   = primTypeInfo "Int64"
-typeInfoForPrimType Bits8Type   = primTypeInfo "Bits8"
-typeInfoForPrimType Bits16Type  = primTypeInfo "Bits16"
-typeInfoForPrimType Bits32Type  = primTypeInfo "Bits32"
-typeInfoForPrimType Bits64Type  = primTypeInfo "Bits64"
-typeInfoForPrimType StringType  = primTypeInfo "String"
-typeInfoForPrimType CharType    = primTypeInfo "Char"
-typeInfoForPrimType DoubleType  = primTypeInfo "Double"
-typeInfoForPrimType WorldType   = primTypeInfo "%World"
-
-export
-typeInfoForTypeOfTypes : TypeInfo
-typeInfoForTypeOfTypes = primTypeInfo "Type"
-
-export
-extractTargetTyExpr : TypeInfo -> TTImp
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Int"    ) [] [] = primVal $ PrT IntType
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Integer") [] [] = primVal $ PrT IntegerType
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Int8"   ) [] [] = primVal $ PrT Int8Type
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Int16"  ) [] [] = primVal $ PrT Int16Type
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Int32"  ) [] [] = primVal $ PrT Int32Type
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Int64"  ) [] [] = primVal $ PrT Int64Type
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Bits8"  ) [] [] = primVal $ PrT Bits8Type
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Bits16" ) [] [] = primVal $ PrT Bits16Type
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Bits32" ) [] [] = primVal $ PrT Bits32Type
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Bits64" ) [] [] = primVal $ PrT Bits64Type
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "String" ) [] [] = primVal $ PrT StringType
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Char"   ) [] [] = primVal $ PrT CharType
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Double" ) [] [] = primVal $ PrT DoubleType
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "%World" ) [] [] = primVal $ PrT WorldType
-extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Type"   ) [] [] = type
-extractTargetTyExpr ti = var ti.name
-
-||| Returns a type constructor as `Con` by given type
-typeCon : TypeInfo -> Con
-typeCon ti = MkCon ti.name ti.args type
 
 ------------------------------------
 --- Analysis of type definitions ---
@@ -615,26 +620,25 @@ isRecursiveConstructor @{tyi} n = lookup' tyi.cons n <&> \(ty, con) => isRecursi
 
 export
 getNamesInfoInTypes : Elaboration m => TypeInfo -> m NamesInfoInTypes
-getNamesInfoInTypes ty = go neutral [ty]
-  where
+getNamesInfoInTypes ty = go neutral [ty] where
 
-    subexprs : TypeInfo -> List TTImp
-    subexprs ty = map type ty.args ++ (ty.cons >>= conSubexprs)
+  subexprs : TypeInfo -> List TTImp
+  subexprs ty = map type ty.args ++ (ty.cons >>= conSubexprs)
 
-    go : NamesInfoInTypes -> List TypeInfo -> m NamesInfoInTypes
-    go tyi []         = pure tyi
-    go tyi (ti::rest) = do
-      ti <- normaliseCons ti
-      let subes = concatMap allVarNames' $ subexprs ti
-      new <- map join $ for (Prelude.toList subes) $ \n =>
-               if isNothing $ lookupByType n
-                 then map toList $ catch $ getInfo' n
-                 else pure []
-      let next = { types $= insert ti.name ti
-                 , namesInTypes $= insert ti subes
-                 , cons $= mergeLeft $ fromList $ ti.cons <&> \con => (con.name, ti, con)
-                 } tyi
-      assert_total $ go next (new ++ rest)
+  go : NamesInfoInTypes -> List TypeInfo -> m NamesInfoInTypes
+  go tyi []         = pure tyi
+  go tyi (ti::rest) = do
+    ti <- normaliseCons ti
+    let subes = concatMap allVarNames' $ subexprs ti
+    new <- map join $ for (Prelude.toList subes) $ \n =>
+             if isNothing $ lookupByType n
+               then map toList $ catch $ getInfo' n
+               else pure []
+    let next = { types $= insert ti.name ti
+               , namesInTypes $= insert ti subes
+               , cons $= mergeLeft $ fromList $ ti.cons <&> \con => (con.name, ti, con)
+               } tyi
+    assert_total $ go next (new ++ rest)
 
 export
 getNamesInfoInTypes' : Elaboration m => TTImp -> m NamesInfoInTypes
@@ -717,3 +721,60 @@ itIsConstructor = do
     | (lhs, _) => fail "Can't get type name: \{show lhs}"
   ty <- getInfo' ty
   pure (ItIsCon ty con ** ItIsGenuine)
+
+-------------------------------
+--- Tuning of probabilities ---
+-------------------------------
+
+public export
+interface ProbabilityTuning (0 n : Name) where
+  0 isConstructor : (con : IsConstructor n ** GenuineProof con)
+  tuneWeight : Nat1 -> Nat1
+
+----------------------------------
+--- Constructors recursiveness ---
+----------------------------------
+
+public export
+record ConWeightInfo where
+  constructor MkConWeightInfo
+  ||| Either a constant (for non-recursive) or a function returning weight expression being given left fuel var (for recursive)
+  weight : Either Nat1 (String -> TTImp)
+
+public export %inline
+mustSpendFuel : ConWeightInfo -> Bool
+mustSpendFuel = isRight . weight
+
+export
+record ConsRecs where
+  constructor MkConsRecs
+  ||| Map from a type name to a list of its constructors with their weight info
+  conWeights : SortedMap Name $ List (Con, ConWeightInfo)
+
+-- This is a workaround of some bad and not yet understood behaviour, leading to both compile- and runtime errors
+removeNamedApps, workaroundFromNat : TTImp -> TTImp
+removeNamedApps = mapTTImp $ \case INamedApp _ lhs _ _ => lhs; e => e
+workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1.FromNat} => removeNamedApps e; _ => e
+
+%ambiguity_depth 4
+
+export
+getConsRecs : Elaboration m => (niit : NamesInfoInTypes) => m ConsRecs
+getConsRecs = do
+  consRecs <- for niit.types $ \targetType =>
+    logBounds {level=DetailedTrace} "consRec" [targetType] $ Prelude.for targetType.cons $ \con => do
+      let rec = isRecursive {containingType=Just targetType} con
+      tuneImpl <- search $ ProbabilityTuning $ Con.name con
+      let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
+      w <- case rec of
+        False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
+        True  => Right <$> case tuneImpl of
+          Nothing   => pure $ \fl => baseForRec fl
+          Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
+      Prelude.pure (con, MkConWeightInfo w)
+
+  pure $ MkConsRecs consRecs
+
+export
+lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, ConWeightInfo)
+lookupConsWithWeight @{crs} = lookup' crs.conWeights . name
