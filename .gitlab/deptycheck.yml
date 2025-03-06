@@ -21,6 +21,7 @@ pack:prepare:
   script:
     - pack update-db
     - pack switch "$( if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then echo HEAD; else ./.pack-collection; fi )"
+    - ./.patch-chez-gc-handler idris2
 
 stages:
   - deptycheck:build
