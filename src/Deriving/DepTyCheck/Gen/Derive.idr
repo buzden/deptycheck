@@ -34,7 +34,7 @@ sig.generatedParams = fromList (allFins sig.targetType.args.length) `difference`
 
 export
 SingleLogPosition GenSignature where
-  logPosition sig = "\{show $ extractTargetTyExpr sig.targetType}\{show sig.givenParams.asList}"
+  logPosition sig = "\{logPosition sig.targetType}\{show sig.givenParams.asList}"
 
 public export
 Eq GenSignature where

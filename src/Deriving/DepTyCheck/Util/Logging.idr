@@ -29,8 +29,8 @@ length []      = Z
 length (_::xs) = S $ length xs
 
 public export %inline
-Info, Details, DeepDetails, Trace, Debug, DetailedDebug : Nat
-Info = 2; Details = 5; DeepDetails = 7; Trace = 10; Debug = 15; DetailedDebug = 20
+Info, Details, DeepDetails, Trace, DetailedTrace, Debug, DetailedDebug : Nat
+Info = 2; Details = 5; DeepDetails = 7; Trace = 10; DetailedTrace = 12; Debug = 15; DetailedDebug = 20
 
 public export %inline
 DefaultLogLevel : Nat

@@ -6,40 +6,9 @@ import public Deriving.DepTyCheck.Util.Reflection
 
 %default total
 
--------------------------------
---- Tuning of probabilities ---
--------------------------------
-
-public export
-interface ProbabilityTuning (0 n : Name) where
-  0 isConstructor : (con : IsConstructor n ** GenuineProof con)
-  tuneWeight : Nat1 -> Nat1
-
------------------------------------------
---- Utility functions and definitions ---
------------------------------------------
-
---- Ancillary data structures ---
-
-record ConWeightInfo where
-  constructor MkConWeightInfo
-  ||| Either a constant (for non-recursive) or a function returning weight expression being given left fuel var (for recursive)
-  weight : Either Nat1 (String -> TTImp)
-
-%inline
-recursive : ConWeightInfo -> Bool
-recursive = isRight . weight
-
 ----------------------------
 --- Derivation functions ---
 ----------------------------
-
--- This is a workaround of some bad and not yet understood behaviour, leading to both compile- and runtime errors
-removeNamedApps, workaroundFromNat : TTImp -> TTImp
-removeNamedApps = mapTTImp $ \case INamedApp _ lhs _ _ => lhs; e => e
-workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1.FromNat} => removeNamedApps e; _ => e
-
-%ambiguity_depth 4
 
 export
 ConstructorDerivator => DerivatorCore where
@@ -59,16 +28,8 @@ ConstructorDerivator => DerivatorCore where
       canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
     -- calculate which constructors are recursive and which are not
-    consRecs <- logBounds {level=Trace} "consRec" [sig] $ Prelude.for sig.targetType.cons $ \con => do
-      let rec = isRecursive {containingType=Just sig.targetType} con
-      tuneImpl <- search $ ProbabilityTuning $ Con.name con
-      let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
-      w <- case rec of
-        False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
-        True  => Right <$> case tuneImpl of
-          Nothing   => pure $ \fl => baseForRec fl
-          Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
-      Prelude.pure (con, MkConWeightInfo w)
+    let Just consRecs = lookupConsWithWeight sig.targetType
+      | Nothing => fail "INTERNAL ERROR: unknown type for consRecs: \{show sig.targetType.name}"
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
@@ -115,7 +76,7 @@ ConstructorDerivator => DerivatorCore where
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-          let selectFuel = \r => varStr $ if recursive r then subFuelArg else fuelAr
+          let selectFuel = \r => varStr $ if mustSpendFuel r then subFuelArg else fuelAr
           let weight = either reflectNat1 (`apply` subFuelArg) . weight
           var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
                                                            (consRecs <&> \(con, rec) => (weight rec, callConsGen (selectFuel rec) con))
