@@ -615,26 +615,25 @@ isRecursiveConstructor @{tyi} n = lookup' tyi.cons n <&> \(ty, con) => isRecursi
 
 export
 getNamesInfoInTypes : Elaboration m => TypeInfo -> m NamesInfoInTypes
-getNamesInfoInTypes ty = go neutral [ty]
-  where
+getNamesInfoInTypes ty = go neutral [ty] where
 
-    subexprs : TypeInfo -> List TTImp
-    subexprs ty = map type ty.args ++ (ty.cons >>= conSubexprs)
+  subexprs : TypeInfo -> List TTImp
+  subexprs ty = map type ty.args ++ (ty.cons >>= conSubexprs)
 
-    go : NamesInfoInTypes -> List TypeInfo -> m NamesInfoInTypes
-    go tyi []         = pure tyi
-    go tyi (ti::rest) = do
-      ti <- normaliseCons ti
-      let subes = concatMap allVarNames' $ subexprs ti
-      new <- map join $ for (Prelude.toList subes) $ \n =>
-               if isNothing $ lookupByType n
-                 then map toList $ catch $ getInfo' n
-                 else pure []
-      let next = { types $= insert ti.name ti
-                 , namesInTypes $= insert ti subes
-                 , cons $= mergeLeft $ fromList $ ti.cons <&> \con => (con.name, ti, con)
-                 } tyi
-      assert_total $ go next (new ++ rest)
+  go : NamesInfoInTypes -> List TypeInfo -> m NamesInfoInTypes
+  go tyi []         = pure tyi
+  go tyi (ti::rest) = do
+    ti <- normaliseCons ti
+    let subes = concatMap allVarNames' $ subexprs ti
+    new <- map join $ for (Prelude.toList subes) $ \n =>
+             if isNothing $ lookupByType n
+               then map toList $ catch $ getInfo' n
+               else pure []
+    let next = { types $= insert ti.name ti
+               , namesInTypes $= insert ti subes
+               , cons $= mergeLeft $ fromList $ ti.cons <&> \con => (con.name, ti, con)
+               } tyi
+    assert_total $ go next (new ++ rest)
 
 export
 getNamesInfoInTypes' : Elaboration m => TTImp -> m NamesInfoInTypes
