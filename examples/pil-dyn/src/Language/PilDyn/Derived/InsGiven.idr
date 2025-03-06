@@ -7,6 +7,8 @@ import public Deriving.DepTyCheck.Gen
 
 %default total
 
+%logging "deptycheck.derive.least-effort" 7
+
 export
 genLinBlock_' : Fuel -> (Fuel -> Gen MaybeEmpty Int32) => {r : _} -> (ins : Regs r) -> Gen MaybeEmpty (outs : Regs r ** LinBlock ins outs)
 genLinBlock_' = deriveGen
