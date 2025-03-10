@@ -774,14 +774,15 @@ getConsRecs = do
       let rec = isRecursive {containingType=Just targetType} con
       tuneImpl <- search $ ProbabilityTuning $ Con.name con
       let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
-      w <- case rec of
+      w : Either Nat1 (String -> TTImp) <- case rec of
         False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
-        True  => Right . MkRecWeightInfo <$> case tuneImpl of
+        True  => Right <$> case tuneImpl of
           Nothing   => pure $ \fl => baseForRec fl
           Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
-      Prelude.pure (con, MkConWeightInfo w)
+      Prelude.pure (con, w)
 
-  pure $ MkConsRecs consRecs
+  pure $ MkConsRecs $ flip (map @{Compose @{Compose}}) consRecs $
+    MkConWeightInfo . map MkRecWeightInfo
 
 export
 lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, ConWeightInfo)
