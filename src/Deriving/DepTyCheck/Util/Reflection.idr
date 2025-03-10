@@ -770,17 +770,16 @@ workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1
 export
 getConsRecs : Elaboration m => (niit : NamesInfoInTypes) => m ConsRecs
 getConsRecs = do
-  consRecs <- for niit.types $ \targetType =>
-    logBounds {level=DetailedTrace} "consRec" [targetType] $ Prelude.for targetType.cons $ \con => do
-      let rec = isRecursive {containingType=Just targetType} con
-      tuneImpl <- search $ ProbabilityTuning $ Con.name con
-      let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
-      w : Either Nat1 (String -> TTImp) <- case rec of
-        False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
-        True  => Right <$> case tuneImpl of
-          Nothing   => pure $ \fl => baseForRec fl
-          Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
-      Prelude.pure (con, w)
+  consRecs <- for niit.types $ \targetType => logBounds {level=DetailedTrace} "consRec" [targetType] $ Prelude.for targetType.cons $ \con => do
+    let rec = isRecursive {containingType=Just targetType} con
+    tuneImpl <- search $ ProbabilityTuning $ Con.name con
+    let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
+    w : Either Nat1 (String -> TTImp) <- case rec of
+      False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
+      True  => Right <$> case tuneImpl of
+        Nothing   => pure $ \fl => baseForRec fl
+        Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
+    Prelude.pure (con, w)
 
   pure $ MkConsRecs $ flip (map @{Compose @{Compose}}) consRecs $
     MkConWeightInfo . map (MkRecWeightInfo True)
