@@ -37,6 +37,7 @@ import public Syntax.Monad.Logic
 import public Text.PrettyPrint.Bernardy
 
 %default total
+%hide Text.PrettyPrint.Bernardy.Core.Doc.(>>=)
 
 ---------------------------------------------------
 --- Working around primitive and special values ---
@@ -645,7 +646,7 @@ export
 getNamesInfoInTypes' : Elaboration m => TTImp -> m NamesInfoInTypes
 getNamesInfoInTypes' expr = do
   let varsFirstOrder = allVarNames expr
-  varsSecondOrder <- map concat $ Prelude.for varsFirstOrder $ \n => do
+  varsSecondOrder <- map concat $ for varsFirstOrder $ \n => do
                        ns <- getType n
                        pure $ SortedSet.insert n $ flip concatMap ns $ \(n', ty) => insert n' $ allVarNames' ty
   tys <- map (mapMaybe id) $ for (Prelude.toList varsSecondOrder) $ catch . getInfo'
@@ -765,14 +766,12 @@ removeNamedApps, workaroundFromNat : TTImp -> TTImp
 removeNamedApps = mapTTImp $ \case INamedApp _ lhs _ _ => lhs; e => e
 workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1.FromNat} => removeNamedApps e; _ => e
 
-%ambiguity_depth 4
-
 export
 getConsRecs : Elaboration m => (niit : NamesInfoInTypes) => m ConsRecs
 getConsRecs = do
-  consRecs <- for niit.types $ \targetType => logBounds {level=DetailedTrace} "consRec" [targetType] $ Prelude.for targetType.cons $ \con => do
+  consRecs <- for niit.types $ \targetType => logBounds {level=DetailedTrace} "consRec" [targetType] $ for targetType.cons $ \con => do
     let rec = isRecursive {containingType=Just targetType} con
-    tuneImpl <- search $ ProbabilityTuning $ Con.name con
+    tuneImpl <- search $ ProbabilityTuning con.name
     let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
     w : Either Nat1 (String -> TTImp) <- case rec of
       False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
@@ -781,7 +780,7 @@ getConsRecs = do
           Nothing   => pure $ \fl => baseForRec fl
           Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
         pure fuelWeightExpr
-    Prelude.pure (con, w)
+    pure (con, w)
 
   pure $ MkConsRecs $ flip (map @{Compose @{Compose}}) consRecs $
     MkConWeightInfo . map (MkRecWeightInfo True)
