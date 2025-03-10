@@ -736,11 +736,18 @@ interface ProbabilityTuning (0 n : Name) where
 --- Constructors recursiveness ---
 ----------------------------------
 
+||| Weight info of recursive constructors
+public export
+record RecWeightInfo where
+  constructor MkRecWeightInfo
+  ||| A function returning weight expression being given left fuel variable
+  fuelWeightExpr : String -> TTImp
+
 public export
 record ConWeightInfo where
   constructor MkConWeightInfo
-  ||| Either a constant (for non-recursive) or a function returning weight expression being given left fuel var (for recursive)
-  weight : Either Nat1 (String -> TTImp)
+  ||| Either a constant (for non-recursive) or a function returning weight info (for recursive)
+  weight : Either Nat1 RecWeightInfo
 
 public export %inline
 mustSpendFuel : ConWeightInfo -> Bool
@@ -769,7 +776,7 @@ getConsRecs = do
       let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
       w <- case rec of
         False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
-        True  => Right <$> case tuneImpl of
+        True  => Right . MkRecWeightInfo <$> case tuneImpl of
           Nothing   => pure $ \fl => baseForRec fl
           Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
       Prelude.pure (con, MkConWeightInfo w)
