@@ -776,9 +776,11 @@ getConsRecs = do
     let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
     w : Either Nat1 (String -> TTImp) <- case rec of
       False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
-      True  => Right <$> case tuneImpl of
-        Nothing   => pure $ \fl => baseForRec fl
-        Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
+      True  => Right <$> do
+        fuelWeightExpr <- case tuneImpl of
+          Nothing   => pure $ \fl => baseForRec fl
+          Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
+        pure fuelWeightExpr
     Prelude.pure (con, w)
 
   pure $ MkConsRecs $ flip (map @{Compose @{Compose}}) consRecs $
