@@ -740,6 +740,7 @@ interface ProbabilityTuning (0 n : Name) where
 public export
 record RecWeightInfo where
   constructor MkRecWeightInfo
+  mustSpendFuel : Bool
   ||| A function returning weight expression being given left fuel variable
   fuelWeightExpr : String -> TTImp
 
@@ -751,7 +752,7 @@ record ConWeightInfo where
 
 public export %inline
 mustSpendFuel : ConWeightInfo -> Bool
-mustSpendFuel = isRight . weight
+mustSpendFuel = either (const False) mustSpendFuel . weight
 
 export
 record ConsRecs where
@@ -782,7 +783,7 @@ getConsRecs = do
       Prelude.pure (con, w)
 
   pure $ MkConsRecs $ flip (map @{Compose @{Compose}}) consRecs $
-    MkConWeightInfo . map MkRecWeightInfo
+    MkConWeightInfo . map (MkRecWeightInfo True)
 
 export
 lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, ConWeightInfo)
