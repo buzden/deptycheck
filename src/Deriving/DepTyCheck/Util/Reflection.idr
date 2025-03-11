@@ -790,13 +790,15 @@ getConsRecs = do
               _         => if hasNameInsideDeep targetType.name arg.type then Nothing else Just $ Just idx
           pure (fuelWeightExpr, directlyRec)
       pure (con ** w)
-    pure crsForTy
-  let 0 _ : SortedMap Name $ List (con : Con ** Either Nat1 (String -> TTImp, Maybe $ SortedSet $ Fin con.args.length)) := consRecs
+    -- determine if this type is a nat-or-list-like data, i.e. one which we can measure for the probability
+    let weightable = flip all crsForTy $ \case (_ ** Right (_, Nothing)) => False; _ => True
+    -- TODO to derive weight/length/depth function for this type, if it is weightable
+    pure (weightable, crsForTy)
+  let 0 _ : SortedMap Name (Bool, List (con : Con ** Either Nat1 (String -> TTImp, Maybe $ SortedSet $ Fin con.args.length))) := consRecs
 
-  pure $ MkConsRecs $ flip (map @{Compose}) consRecs $ \(con ** e) => (con,) $
+  pure $ MkConsRecs $ flip Prelude.map consRecs $ \(_, cons) => cons <&> \(con ** e) => (con,) $
     MkConWeightInfo $ map (MkRecWeightInfo True . fst) e
-
-  -- TODO to think how to apply found tuning to the alternative probability for constructors with structurally decreasing indices
+    -- TODO to think how to apply found tuning to the alternative probability for constructors with structurally decreasing indices
 
 export
 lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, ConWeightInfo)
