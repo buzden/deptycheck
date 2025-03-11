@@ -82,12 +82,12 @@ callExternalGen sig topmost fuel values = foldl (flip apply) (appFuel topmost fu
   ((_, ExplicitArg, _   ), value) => (.$ value)
   ((_, ImplicitArg, name), value) => \f => namedApp f name value
 
---- Particular implementations producing the-core-derivation-function clojure ---
+--- Particular implementations producing the-core-derivation-function closure ---
 
-namespace ClojuringCanonicImpl
+namespace ClosuringCanonicImpl
 
-  ClojuringContext : (Type -> Type) -> Type
-  ClojuringContext m =
+  ClosuringContext : (Type -> Type) -> Type
+  ClosuringContext m =
     ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
     , MonadState  (SortedMap GenSignature Name) m                         -- gens already asked to be derived
     , MonadState  (List (GenSignature, Name)) m                           -- queue of gens to be derived
@@ -107,7 +107,7 @@ namespace ClojuringCanonicImpl
                                       Yes prf => Just $ Element extSig prf
                                       No _    => Nothing
 
-  DerivatorCore => ClojuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
+  DerivatorCore => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
     callGen sig fuel values = do
 
       -- check if we are the first, then we need to start the loop
@@ -118,7 +118,7 @@ namespace ClojuringCanonicImpl
       -- look for external gens, and call it if exists
       let Nothing = lookupLengthChecked sig !ask
         | Just (name, Element extSig lenEq) => do
-            logPoint {level=Details} "clojuring.external" [sig] "is used as an external generator"
+            logPoint {level=Details} "closuring.external" [sig] "is used as an external generator"
             pure $ callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values
 
       -- get the name of internal gen, derive if necessary
@@ -148,7 +148,7 @@ namespace ClojuringCanonicImpl
         put True
 
       -- call the internal gen
-      logPoint {level=DetailedDebug} "clojuring.internal" [sig] "is used as an internal generator"
+      logPoint {level=DetailedDebug} "closuring.internal" [sig] "is used as an internal generator"
       pure $ callCanonic sig internalGenName fuel values
 
       where
