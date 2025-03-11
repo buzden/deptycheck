@@ -773,17 +773,28 @@ getConsRecs = do
     let rec = isRecursive {containingType=Just targetType} con
     tuneImpl <- search $ ProbabilityTuning con.name
     let baseForRec = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
-    w : Either Nat1 (String -> TTImp) <- case rec of
+    w : Either Nat1 (String -> TTImp, Maybe $ SortedSet $ Fin con.args.length) <- case rec of
+      --                              ^^^^^   ^^^^^^^^^^^^^^^ <- set of directly recursive constructor arguments
+      --                                \-- `Just` in this `Maybe` means that this constructor only contains direct recursion (not mutual one)
       False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
       True  => Right <$> do
         fuelWeightExpr <- case tuneImpl of
           Nothing   => pure $ \fl => baseForRec fl
           Just impl => quote (tuneWeight @{impl}) <&> \wm, fl => workaroundFromNat $ wm `applySyn` baseForRec fl
-        pure fuelWeightExpr
-    pure (con, w)
+        let getAppVar : TTImp -> Maybe Name
+            getAppVar e = case fst $ unAppAny e of IVar _ n => Just n; _ => Nothing
+        let directlyRec = map (fromList . mapMaybe id) $ for con.args.withIdx $ \(idx, arg) => do
+          case (== targetType.name) <$> getAppVar arg.type of
+            Just True => Just Nothing
+            _         => if hasNameInsideDeep targetType.name arg.type then Nothing else Just $ Just idx
+        pure (fuelWeightExpr, directlyRec)
+    pure (con ** w)
+  let 0 _ : SortedMap Name $ List (con : Con ** Either Nat1 (String -> TTImp, Maybe $ SortedSet $ Fin con.args.length)) := consRecs
 
-  pure $ MkConsRecs $ flip (map @{Compose @{Compose}}) consRecs $
-    MkConWeightInfo . map (MkRecWeightInfo True)
+  pure $ MkConsRecs $ flip (map @{Compose}) consRecs $ \(con ** e) => (con,) $
+    MkConWeightInfo $ map (MkRecWeightInfo True . fst) e
+
+  -- TODO to think how to apply found tuning to the alternative probability for constructors with structurally decreasing indices
 
 export
 lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, ConWeightInfo)
