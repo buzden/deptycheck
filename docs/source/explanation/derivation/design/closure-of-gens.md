@@ -24,7 +24,7 @@ mutual
 ```
 
 <!-- idris
-namespace GenCloj_DerivTask {
+namespace GenClos_DerivTask {
 -->
 ```idris
 genX : Fuel -> Gen MaybeEmpty X
@@ -37,7 +37,7 @@ genX = deriveGen
 In this case, derived generator function would have the following structure.
 
 <!-- idris
-namespace GenCloj {
+namespace GenClos {
 -->
 ```idris
 genX : Fuel -> Gen MaybeEmpty X
