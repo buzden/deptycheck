@@ -786,8 +786,8 @@ getConsRecs = do
               getAppVar e = case fst $ unAppAny e of IVar _ n => Just n; _ => Nothing
           let directlyRec = map (fromList . mapMaybe id) $ for con.args.withIdx $ \(idx, arg) => do
             case (== targetType.name) <$> getAppVar arg.type of
-              Just True => Just Nothing
-              _         => if hasNameInsideDeep targetType.name arg.type then Nothing else Just $ Just idx
+              Just True => Just $ Just idx
+              _         => if hasNameInsideDeep targetType.name arg.type then Nothing else Just Nothing
           pure (fuelWeightExpr, directlyRec)
       pure (con ** w)
     -- determine if this type is a nat-or-list-like data, i.e. one which we can measure for the probability
