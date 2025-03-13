@@ -820,25 +820,25 @@ getConsRecs = do
       -- default behaviour, spend fuel, weight proportional to fuel
       let weightThruFuel = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
       let noStructuralDecr = MkRecWeightInfo True $ wMod . weightThruFuel
+      fromMaybe noStructuralDecr $ do
       -- fail-fast if no direct args in this constructor
-      let Just _ = directRecConArgs | _ => noStructuralDecr
+      guard $ isJust directRecConArgs
       -- work only with given args
       let wTyArgs = wTyArgs `intersectionMap` givenTyArgs
-      let False = null wTyArgs      | _ => noStructuralDecr
+      -- fail-fast if no given weightable args
+      guard $ not $ null wTyArgs
       -- If for any weightable type argument (in `wTyArgs`) there exists a directly recursive constructor arg (in `directRecConArgs`) that has
       -- this type argument strictly decreasing, we consider this constructor to be non-fuel-spending.
       let (_, conRetTyArgs) = unAppAny con.type
       let conArgs = con.args
       let conArgNames = SortedSet.fromList $ mapMaybe name conArgs
-      let Just weightExpr = foldAlt' wTyArgs.asList $ \(wTyArg, weightFunName) => do
-        let Just conRetTyArg = getExpr <$> getAt wTyArg conRetTyArgs | _ => Nothing
-        let IVar _ toWhat = fst $ unAppAny conRetTyArg               | _ => Nothing
-        let Just _ = lookupCon toWhat                                | _ => Nothing
+      weightExpr <- foldAlt' wTyArgs.asList $ \(wTyArg, weightFunName) => do
+        conRetTyArg <- getExpr <$> getAt wTyArg conRetTyArgs
+        guard $ isJust $ lookupCon =<< getAppVar conRetTyArg
         let freeNamesLessThanOrig = allVarNames' conRetTyArg `intersection` conArgNames
         foldAlt' conArgs $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => whenTs (getAppVar conArgTy == Just tyName) $ do
           getAt wTyArg conRetTyArgs >>= getAppVar . getExpr >>= \arg => whenT .| contains arg freeNamesLessThanOrig .| var weightFunName .$ var arg
-        | _ => noStructuralDecr
-      MkRecWeightInfo False $ const $ wMod weightExpr
+      pure $ MkRecWeightInfo False $ const $ wMod weightExpr
 
   -- TODO to collect all types which need a weighting function to be derived and return those along with `ConsRecs`
 
