@@ -76,10 +76,11 @@ ConstructorDerivator => DerivatorCore where
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
+          let givens = mapIn finToNat sig.givenParams
           let selectFuel = \r => varStr $ if mustSpendFuel r then subFuelArg else fuelAr
-          let weight = either reflectNat1 ((`apply` subFuelArg) . fuelWeightExpr) . weight
+          let weightAndFuel = either ((varStr fuelAr,) . reflectNat1) (\cr => let r = cr givens in (selectFuel r, r.fuelWeightExpr subFuelArg)) . weight
           var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
-                                                           (consRecs <&> \(con, rec) => (weight rec, callConsGen (selectFuel rec) con))
+                                                           (consRecs <&> \(con, rec) => let (f, w) = weightAndFuel rec in (w, callConsGen f con))
         ]
 
       where

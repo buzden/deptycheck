@@ -14,6 +14,7 @@ import public Data.Nat1
 import public Data.List.Lazy
 import public Data.List.Elem
 import public Data.List.Extra
+import public Data.SortedSet.Extra
 import public Data.These
 import public Data.Vect.Dependent
 import public Data.Vect.Extra
@@ -431,6 +432,9 @@ isVar : TTImp -> Bool
 isVar $ IVar {} = True
 isVar _         = False
 
+getAppVar : TTImp -> Maybe Name
+getAppVar e = case fst $ unAppAny e of IVar _ n => Just n; _ => Nothing
+
 namespace UpToRenaming
 
   mutual
@@ -743,17 +747,13 @@ record RecWeightInfo where
   constructor MkRecWeightInfo
   mustSpendFuel : Bool
   ||| A function returning weight expression being given left fuel variable
-  fuelWeightExpr : String -> TTImp
+  fuelWeightExpr : (leftFuelVarName : String) -> TTImp
 
 public export
 record ConWeightInfo where
   constructor MkConWeightInfo
   ||| Either a constant (for non-recursive) or a function returning weight info (for recursive)
-  weight : Either Nat1 RecWeightInfo
-
-public export %inline
-mustSpendFuel : ConWeightInfo -> Bool
-mustSpendFuel = either (const False) mustSpendFuel . weight
+  weight : Either Nat1 ((givenTyArgs : SortedSet Nat) -> RecWeightInfo)
 
 export
 record ConsRecs where
@@ -765,6 +765,20 @@ record ConsRecs where
 removeNamedApps, workaroundFromNat : TTImp -> TTImp
 removeNamedApps = mapTTImp $ \case INamedApp _ lhs _ _ => lhs; e => e
 workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1.FromNat} => removeNamedApps e; _ => e
+
+-- TODO to remove as soon as a pack collection 250312 or later is released
+mapWithKey : Ord k => (k -> a -> b) -> SortedMap k a -> SortedMap k b
+mapWithKey f = fromList . map (\(k, x) => (k, f k x)) . SortedMap.toList
+mapWithKey' : Ord k => SortedMap k a -> (k -> a -> b) -> SortedMap k b
+mapWithKey' = flip mapWithKey
+
+-- TODO to remove as soon as a pack collection 250313 or later is released
+foldAlt : Alternative f => (a -> f b) -> List a -> f b
+foldAlt _ []      = empty
+foldAlt f (x::xs) = f x <|> foldAlt f xs
+%inline
+foldAlt' : Alternative f => List a -> (a -> f b) -> f b
+foldAlt' = flip foldAlt
 
 export
 getConsRecs : Elaboration m => (niit : NamesInfoInTypes) => m ConsRecs
@@ -782,9 +796,7 @@ getConsRecs = do
           fuelWeightExpr <- case tuneImpl of
             Nothing   => pure id
             Just impl => quote (tuneWeight @{impl}) <&> \wm, expr => workaroundFromNat $ wm `applySyn` expr
-          let getAppVar : TTImp -> Maybe Name
-              getAppVar e = case fst $ unAppAny e of IVar _ n => Just n; _ => Nothing
-          let directlyRec = map (fromList . mapMaybe id) $ for con.args.withIdx $ \(idx, arg) => do
+          let directlyRec = filter (not . null) $ map (fromList . mapMaybe id) $ for con.args.withIdx $ \(idx, arg) => do
             case (== targetType.name) <$> getAppVar arg.type of
               Just True => Just $ Just idx
               _         => if hasNameInsideDeep targetType.name arg.type then Nothing else Just Nothing
@@ -792,14 +804,42 @@ getConsRecs = do
       pure (con ** w)
     -- determine if this type is a nat-or-list-like data, i.e. one which we can measure for the probability
     let weightable = flip all crsForTy $ \case (_ ** Right (_, Nothing)) => False; _ => True
-    -- TODO to derive weight/length/depth function for this type, if it is weightable
-    pure (weightable, crsForTy)
-  let 0 _ : SortedMap Name (Bool, List (con : Con ** Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length))) := consRecs
+    pure (whenT weightable $ fromString "\{show targetType.name}^weight", crsForTy)
+  let 0 _ : SortedMap Name (Maybe Name, List (con : Con ** Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length))) := consRecs
 
-  let weightThruFuel = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
-  pure $ MkConsRecs $ flip Prelude.map consRecs $ \(_, cons) => cons <&> \(con ** e) => (con,) $
-    MkConWeightInfo $ map (MkRecWeightInfo True . (. weightThruFuel) . fst) e
-    -- TODO to apply found tuning to the alternative probability for constructors with structurally decreasing indices
+  let weightableTyArgs : (ars : List Arg) -> SortedMap Nat Name -- <- a map from Fin ars.length to a name of weighting function
+      weightableTyArgs ars = fromList $ flip List.mapMaybe ars.withIdx $ \(idx, ar) =>
+                               getAppVar ar.type >>= lookup' consRecs <&> fst >>= map (finToNat idx,)
+
+  let finalConsRecs = mapWithKey' consRecs $ \tyName, (_, cons) => do
+    let wTyArgs = maybe SortedMap.empty .| weightableTyArgs . args .| lookupType tyName
+    cons <&> \(con ** e) => (con,) $ MkConWeightInfo $ e <&> \(wMod, directRecConArgs), givenTyArgs => do
+      -- default behaviour, spend fuel, weight proportional to fuel
+      let weightThruFuel = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
+      let noStructuralDecr = MkRecWeightInfo True $ wMod . weightThruFuel
+      -- fail-fast if no direct args in this constructor
+      let Just _ = directRecConArgs | _ => noStructuralDecr
+      -- work only with given args
+      let wTyArgs = wTyArgs `intersectionMap` givenTyArgs
+      let False = null wTyArgs      | _ => noStructuralDecr
+      -- If for any weightable type argument (in `wTyArgs`) there exists a directly recursive constructor arg (in `directRecConArgs`) that has
+      -- this type argument strictly decreasing, we consider this constructor to be non-fuel-spending.
+      let (_, conRetTyArgs) = unAppAny con.type
+      let conArgs = con.args
+      let conArgNames = SortedSet.fromList $ mapMaybe name conArgs
+      let Just weightExpr = foldAlt' wTyArgs.asList $ \(wTyArg, weightFunName) => do
+        let Just conRetTyArg = getExpr <$> getAt wTyArg conRetTyArgs | _ => Nothing
+        let IVar _ toWhat = fst $ unAppAny conRetTyArg               | _ => Nothing
+        let Just _ = lookupCon toWhat                                | _ => Nothing
+        let freeNamesLessThanOrig = allVarNames' conRetTyArg `intersection` conArgNames
+        foldAlt' conArgs $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => whenTs (getAppVar conArgTy == Just tyName) $ do
+          getAt wTyArg conRetTyArgs >>= getAppVar . getExpr >>= \arg => whenT .| contains arg freeNamesLessThanOrig .| var weightFunName .$ var arg
+        | _ => noStructuralDecr
+      MkRecWeightInfo False $ const $ wMod weightExpr
+
+  -- TODO to collect all types which need a weighting function to be derived and return those along with `ConsRecs`
+
+  pure $ MkConsRecs finalConsRecs
 
 export
 lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, ConWeightInfo)
