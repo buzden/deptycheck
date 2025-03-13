@@ -818,9 +818,7 @@ getConsRecs = do
     let wTyArgs = maybe SortedMap.empty .| weightableTyArgs . args .| lookupType tyName
     cons <&> \(con ** e) => (con,) $ MkConWeightInfo $ e <&> \(wMod, directRecConArgs), givenTyArgs => do
       -- default behaviour, spend fuel, weight proportional to fuel
-      let weightThruFuel = \subFuelArg => var `{Deriving.DepTyCheck.Util.Reflection.leftDepth} .$ varStr subFuelArg
-      let noStructuralDecr = MkRecWeightInfo True $ wMod . weightThruFuel
-      fromMaybe noStructuralDecr $ do
+      fromMaybe (MkRecWeightInfo True $ wMod . app `(Deriving.DepTyCheck.Util.Reflection.leftDepth) . varStr) $ do
       -- fail-fast if no direct args in this constructor
       guard $ isJust directRecConArgs
       -- work only with given args
