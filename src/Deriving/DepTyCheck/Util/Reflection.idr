@@ -800,6 +800,9 @@ getConsRecs = do
             case (== targetType.name) <$> getAppVar arg.type of
               Just True => Just $ Just idx
               _         => if hasNameInsideDeep targetType.name arg.type then Nothing else Just Nothing
+          let logDirectRec = \ars => logPoint {level=DetailedTrace} "consRec" [targetType, con]
+                               "Constructor is detected as a directly recursive with recursive args \{show $ finToNat <$> ars.asList}"
+          maybe (pure ()) logDirectRec directlyRec
           pure (fuelWeightExpr, directlyRec)
       pure (con ** w)
     -- determine if this type is a nat-or-list-like data, i.e. one which we can measure for the probability
