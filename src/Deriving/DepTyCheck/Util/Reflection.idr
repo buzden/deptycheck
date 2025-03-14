@@ -14,7 +14,7 @@ import public Data.Nat1
 import public Data.List.Lazy
 import public Data.List.Elem
 import public Data.List.Extra
-import public Data.SortedSet.Extra
+import public Data.SortedMap.Extra
 import public Data.These
 import public Data.Vect.Dependent
 import public Data.Vect.Extra
@@ -765,20 +765,6 @@ record ConsRecs where
 removeNamedApps, workaroundFromNat : TTImp -> TTImp
 removeNamedApps = mapTTImp $ \case INamedApp _ lhs _ _ => lhs; e => e
 workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1.FromNat} => removeNamedApps e; _ => e
-
--- TODO to remove as soon as a pack collection 250312 or later is released
-mapWithKey : Ord k => (k -> a -> b) -> SortedMap k a -> SortedMap k b
-mapWithKey f = fromList . map (\(k, x) => (k, f k x)) . SortedMap.toList
-mapWithKey' : Ord k => SortedMap k a -> (k -> a -> b) -> SortedMap k b
-mapWithKey' = flip mapWithKey
-
--- TODO to remove as soon as a pack collection 250313 or later is released
-foldAlt : Alternative f => (a -> f b) -> List a -> f b
-foldAlt _ []      = empty
-foldAlt f (x::xs) = f x <|> foldAlt f xs
-%inline
-foldAlt' : Alternative f => List a -> (a -> f b) -> f b
-foldAlt' = flip foldAlt
 
 export
 getConsRecs : Elaboration m => (niit : NamesInfoInTypes) => m ConsRecs
