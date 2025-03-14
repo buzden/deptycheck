@@ -745,9 +745,14 @@ interface ProbabilityTuning (0 n : Name) where
 public export
 record RecWeightInfo where
   constructor MkRecWeightInfo
-  mustSpendFuel : Bool
+  ||| Name of a type which structural decreasing of use for not spending fuel, if present
+  decrTy : Maybe Name
   ||| A function returning weight expression being given left fuel variable
   fuelWeightExpr : (leftFuelVarName : String) -> TTImp
+
+public export %inline
+mustSpendFuel : RecWeightInfo -> Bool
+mustSpendFuel = isNothing . decrTy
 
 public export
 record ConWeightInfo where
@@ -765,6 +770,9 @@ record ConsRecs where
 removeNamedApps, workaroundFromNat : TTImp -> TTImp
 removeNamedApps = mapTTImp $ \case INamedApp _ lhs _ _ => lhs; e => e
 workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1.FromNat} => removeNamedApps e; _ => e
+
+weightFunName : Name -> Name
+weightFunName n = fromString "weight^\{show n}"
 
 export
 getConsRecs : Elaboration m => (niit : NamesInfoInTypes) => m ConsRecs
@@ -793,10 +801,10 @@ getConsRecs = do
       pure (con ** w)
     -- determine if this type is a nat-or-list-like data, i.e. one which we can measure for the probability
     let weightable = flip all crsForTy $ \case (_ ** Right (_, Nothing)) => False; _ => True
-    pure (whenT weightable $ fromString "\{show targetType.name}^weight", crsForTy)
+    pure (whenT weightable targetType.name, crsForTy)
   let 0 _ : SortedMap Name (Maybe Name, List (con : Con ** Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length))) := consRecs
 
-  let weightableTyArgs : (ars : List Arg) -> SortedMap Nat Name -- <- a map from Fin ars.length to a name of weighting function
+  let weightableTyArgs : (ars : List Arg) -> SortedMap Nat Name -- <- a map from Fin ars.length to a weightable type name
       weightableTyArgs ars = fromList $ flip List.mapMaybe ars.withIdx $ \(idx, ar) =>
                                getAppVar ar.type >>= lookup' consRecs <&> fst >>= map (finToNat idx,)
 
@@ -804,7 +812,7 @@ getConsRecs = do
     let wTyArgs = maybe SortedMap.empty .| weightableTyArgs . args .| lookupType tyName
     cons <&> \(con ** e) => (con,) $ MkConWeightInfo $ e <&> \(wMod, directRecConArgs), givenTyArgs => do
       -- default behaviour, spend fuel, weight proportional to fuel
-      fromMaybe (MkRecWeightInfo True $ wMod . app `(Deriving.DepTyCheck.Util.Reflection.leftDepth) . varStr) $ do
+      fromMaybe (MkRecWeightInfo Nothing $ wMod . app `(Deriving.DepTyCheck.Util.Reflection.leftDepth) . varStr) $ do
       -- fail-fast if no direct args in this constructor
       guard $ isJust directRecConArgs
       -- work only with given args
@@ -813,16 +821,17 @@ getConsRecs = do
       guard $ not $ null wTyArgs
       -- If for any weightable type argument (in `wTyArgs`) there exists a directly recursive constructor arg (in `directRecConArgs`) that has
       -- this type argument strictly decreasing, we consider this constructor to be non-fuel-spending.
-      let (_, conRetTyArgs) = unAppAny con.type
+      let conRetTyArgs = snd $ unAppAny con.type
       let conArgs = con.args
       let conArgNames = SortedSet.fromList $ mapMaybe name conArgs
-      weightExpr <- foldAlt' wTyArgs.asList $ \(wTyArg, weightFunName) => do
+      (decrTy, weightExpr) <- foldAlt' wTyArgs.asList $ \(wTyArg, weightTyName) => map (weightTyName,) $ do
         conRetTyArg <- getExpr <$> getAt wTyArg conRetTyArgs
         guard $ isJust $ lookupCon =<< getAppVar conRetTyArg
         let freeNamesLessThanOrig = allVarNames' conRetTyArg `intersection` conArgNames
         foldAlt' conArgs $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => whenTs (getAppVar conArgTy == Just tyName) $ do
-          getAt wTyArg conArgArgs >>= getAppVar . getExpr >>= \arg => whenT .| contains arg freeNamesLessThanOrig .| var weightFunName .$ var arg
-      pure $ MkRecWeightInfo False $ const $ wMod weightExpr
+          getAt wTyArg conArgArgs >>= getAppVar . getExpr >>= \arg => whenT .| contains arg freeNamesLessThanOrig .|
+            var (weightFunName weightTyName) .$ var arg
+      pure $ MkRecWeightInfo (Just decrTy) $ const $ wMod weightExpr
 
   -- TODO to collect all types which need a weighting function to be derived and return those along with `ConsRecs`
 
