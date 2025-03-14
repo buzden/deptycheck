@@ -835,7 +835,7 @@ getConsRecs = do
         guard $ isJust $ lookupCon =<< getAppVar conRetTyArg
         let freeNamesLessThanOrig = allVarNames' conRetTyArg `intersection` conArgNames
         foldAlt' conArgs $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => whenTs (getAppVar conArgTy == Just tyName) $ do
-          getAt wTyArg conRetTyArgs >>= getAppVar . getExpr >>= \arg => whenT .| contains arg freeNamesLessThanOrig .| var weightFunName .$ var arg
+          getAt wTyArg conArgArgs >>= getAppVar . getExpr >>= \arg => whenT .| contains arg freeNamesLessThanOrig .| var weightFunName .$ var arg
       pure $ MkRecWeightInfo False $ const $ wMod weightExpr
 
   -- TODO to collect all types which need a weighting function to be derived and return those along with `ConsRecs`
