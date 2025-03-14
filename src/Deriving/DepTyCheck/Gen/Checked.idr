@@ -115,6 +115,7 @@ namespace ClosuringCanonicImpl
                                       No _    => Nothing
 
   DerivatorCore => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
+    registerAuxFun sig body = tell ([sig], [body])
     callGen sig fuel values = do
 
       -- check if we are the first, then we need to start the loop

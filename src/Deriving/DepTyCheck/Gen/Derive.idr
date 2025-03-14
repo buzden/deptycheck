@@ -55,6 +55,7 @@ Ord GenSignature where
 
 public export
 interface Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
+  registerAuxFun : (sig, body : Decl) -> m ()
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m (TTImp, Maybe (gend ** Vect gend $ Fin gend))
   --                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   --                                                                   this is a permutation of generated arguments --/
@@ -62,6 +63,7 @@ interface Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
 
 export
 CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
+  registerAuxFun = lift .: registerAuxFun
   callGen sig fuel params = lift $ callGen sig fuel params
 
 --- Low-level derivation interface ---
