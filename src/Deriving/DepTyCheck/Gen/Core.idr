@@ -33,13 +33,16 @@ ConstructorDerivator => DerivatorCore where
     let Just consRecs = lookupConsWithWeight sig.targetType
       | Nothing => fail "INTERNAL ERROR: unknown type for consRecs: \{show sig.targetType.name}"
     let givens = mapIn finToNat sig.givenParams
-    let consRecs = map @{Compose} (weightExpr . (`apply` givens)) consRecs
+    let consRecs = map @{Compose} (`apply` givens) consRecs
+
+    -- ask to derive all needed weigthing functions, if any
+    traverse_ needWeightFun $ mapMaybe (usedWeightFun . snd) consRecs
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
 
     -- generate the case expression deciding whether will we go into recursive constructors or not
-    outmostRHS <- fuelDecisionExpr fuelArg consRecs
+    let outmostRHS = fuelDecisionExpr fuelArg $ map @{Compose} weightExpr consRecs
 
     -- return function definition
     pure [ canonicDefaultLHS' interimNamesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
@@ -50,7 +53,7 @@ ConstructorDerivator => DerivatorCore where
     consGenName con = UN $ Basic $ "<<\{show con.name}>>"
     -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend
 
-    fuelDecisionExpr : (fuelArg : String) -> List (Con, Either TTImp (String -> TTImp)) -> m TTImp
+    fuelDecisionExpr : (fuelArg : String) -> List (Con, Either TTImp (String -> TTImp)) -> TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
       let callConstFreqs : CTLabel -> (fuel : TTImp) -> List (Con, TTImp) -> TTImp
@@ -61,19 +64,19 @@ ConstructorDerivator => DerivatorCore where
       -- check if there are any non-recursive constructors
       let Nothing = for consRecs $ \(con, w) => (con,) <$> getLeft w
           -- only constantly weighted constructors (usually, non-recusrive), thus just call all without spending fuel
-        | Just consRecs => pure $ callConstFreqs "\{logPosition sig} (non-spending)".label (varStr fuelAr) consRecs
+        | Just consRecs => callConstFreqs "\{logPosition sig} (non-spending)".label (varStr fuelAr) consRecs
 
       -- pattern match on the fuel argument
-      map (iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel}) $ Prelude.sequence $
+      iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
           let nonSpendCons = mapMaybe (\(con, w) => (con,) <$> getLeft w) consRecs in
-          pure $ var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonSpendCons
+          var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonSpendCons
 
         , do -- if fuel is `More`, call spending constructors on the rest and other on the original fuel
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
           let weightAndFuel = either ((varStr fuelAr,)) (\f => (varStr subFuelArg, f subFuelArg))
-          pure $ var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (non-dry fuel)".label
+          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (non-dry fuel)".label
             (consRecs <&> \(con, rec) => let (f, w) = weightAndFuel rec in (w, callConsGen f con))
         ]
 

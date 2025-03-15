@@ -19,7 +19,7 @@ import public Deriving.DepTyCheck.Gen.Derive
 import public Deriving.DepTyCheck.Util.Reflection
 
 %default total
-
+%hide Text.PrettyPrint.Bernardy.Core.Doc.(>>=)
 %ambiguity_depth 4
 
 -----------------------------------------------------
@@ -98,7 +98,8 @@ namespace ClosuringCanonicImpl
     ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
     , MonadState  (SortedMap GenSignature Name) m                         -- gens already asked to be derived
     , MonadState  (List (GenSignature, Name)) m                           -- queue of gens to be derived
-    , MonadState  Bool m                                                  -- flat that there is a need to start derivation loop
+    , MonadState  Bool m                                                  -- flag that there is a need to start derivation loop
+    , MonadState  (SortedSet Name) m                                      -- a set of type names what were asked to weighting function
     , MonadWriter (List Decl, List Decl) m                                -- function declarations and bodies
     )
 
@@ -115,7 +116,11 @@ namespace ClosuringCanonicImpl
                                       No _    => Nothing
 
   DerivatorCore => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
-    registerAuxFun sig body = tell ([sig], [body])
+
+    needWeightFun tyName = when (not !(gets $ contains tyName)) $ do
+      modify $ insert tyName
+      whenJust (deriveWeightingFun tyName) $ tell . mapHom singleton
+
     callGen sig fuel values = do
 
       -- check if we are the first, then we need to start the loop
@@ -184,5 +189,10 @@ namespace ClosuringCanonicImpl
                SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
-    (x, defs, bodies) <- evalRWST exts (empty, empty, True) calc {s=(SortedMap GenSignature Name, List (GenSignature, Name), _)} {w=(_, _)}
+    (x, defs, bodies) <- evalRWST
+                           exts
+                           (empty, empty, empty, True)
+                           calc
+                           {s=(SortedMap GenSignature Name, List (GenSignature, Name), SortedSet Name, _)}
+                           {w=(_, _)}
     pure (x, defs ++ bodies)
