@@ -781,6 +781,11 @@ workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1
 weightFunName : Name -> Name
 weightFunName n = fromString "weight^\{show n}"
 
+-- this is a workarond for Idris compiler bug #2983
+export
+interimNamesWrapper : Name -> String
+interimNamesWrapper n = "inter^<\{show n}>"
+
 export
 getConsRecs : Elaboration m => (niit : NamesInfoInTypes) => m ConsRecs
 getConsRecs = do
@@ -811,9 +816,9 @@ getConsRecs = do
     pure (whenT weightable targetType.name, crsForTy)
   let 0 _ : SortedMap Name (Maybe Name, List (con : Con ** Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length))) := consRecs
 
-  let weightableTyArgs : (ars : List Arg) -> SortedMap Nat Name -- <- a map from Fin ars.length to a weightable type name
+  let weightableTyArgs : (ars : List Arg) -> SortedMap Nat (Name, Name) -- <- a map from Fin ars.length to a weightable type name and its argument name
       weightableTyArgs ars = fromList $ flip List.mapMaybe ars.withIdx $ \(idx, ar) =>
-                               getAppVar ar.type >>= lookup' consRecs <&> fst >>= map (finToNat idx,)
+                               getAppVar ar.type >>= lookup' consRecs <&> fst >>= \tyN => [| (finToNat idx,,) tyN ar.name |]
 
   let finalConsRecs = mapWithKey' consRecs $ \tyName, (_, cons) => do
     let wTyArgs = maybe SortedMap.empty .| weightableTyArgs . args .| lookupType tyName
@@ -831,13 +836,13 @@ getConsRecs = do
       let conRetTyArgs = snd $ unAppAny con.type
       let conArgs = con.args
       let conArgNames = SortedSet.fromList $ mapMaybe name conArgs
-      (decrTy, weightExpr) <- foldAlt' wTyArgs.asList $ \(wTyArg, weightTyName) => map (weightTyName,) $ do
+      (decrTy, weightExpr) <- foldAlt' wTyArgs.asList $ \(wTyArg, weightTyName, weightArgName) => map (weightTyName,) $ do
         conRetTyArg <- getExpr <$> getAt wTyArg conRetTyArgs
         guard $ isJust $ lookupCon =<< getAppVar conRetTyArg
         let freeNamesLessThanOrig = allVarNames' conRetTyArg `intersection` conArgNames
         foldAlt' conArgs $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => whenTs (getAppVar conArgTy == Just tyName) $ do
           getAt wTyArg conArgArgs >>= getAppVar . getExpr >>= \arg => whenT .| contains arg freeNamesLessThanOrig .|
-            var (weightFunName weightTyName) .$ var arg
+            var (weightFunName weightTyName) .$ varStr (interimNamesWrapper weightArgName)
       pure $ StructurallyDecreasing decrTy $ wMod weightExpr
 
   let deriveWeightingFun = \tyName => Nothing -- TODO to implement

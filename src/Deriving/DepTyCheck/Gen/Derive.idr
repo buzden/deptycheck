@@ -108,24 +108,24 @@ interface DerivatorCore where
 
 --- Expressions generation utils ---
 
-defArgNames : {sig : GenSignature} -> Vect sig.givenParams.size String
-defArgNames = sig.givenParams.asVect <&> show . argName . index' sig.targetType.args
+defArgNames : {sig : GenSignature} -> Vect sig.givenParams.size Name
+defArgNames = sig.givenParams.asVect <&> argName . index' sig.targetType.args
 
 export %inline
-canonicDefaultLHS' : (namesFun : String -> String) -> GenSignature -> Name -> (fuel : String) -> TTImp
+canonicDefaultLHS' : (namesFun : Name -> String) -> GenSignature -> Name -> (fuel : String) -> TTImp
 canonicDefaultLHS' nmf sig n fuel = callCanonic sig n .| bindVar fuel .| bindVar . nmf <$> defArgNames
 
 export %inline
-canonicDefaultRHS' : (namesFun : String -> String) -> GenSignature -> Name -> (fuel : TTImp) -> TTImp
+canonicDefaultRHS' : (namesFun : Name -> String) -> GenSignature -> Name -> (fuel : TTImp) -> TTImp
 canonicDefaultRHS' nmf sig n fuel = callCanonic sig n fuel .| varStr . nmf <$> defArgNames
 
 export %inline
 canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
-canonicDefaultLHS = canonicDefaultLHS' id
+canonicDefaultLHS = canonicDefaultLHS' show
 
 export %inline
 canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
-canonicDefaultRHS = canonicDefaultRHS' id
+canonicDefaultRHS = canonicDefaultRHS' show
 
 ---------------------------------
 --- External-facing functions ---
