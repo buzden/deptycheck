@@ -27,9 +27,11 @@ ConstructorDerivator => DerivatorCore where
     consBodies <- for sig.targetType.cons $ \con => logBounds {level=Info} "consBody" [sig, con] $
       canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
-    -- calculate which constructors are recursive and which are not
+    -- calculate which constructors are recursive and spend fuel, and which are not
     let Just consRecs = lookupConsWithWeight sig.targetType
       | Nothing => fail "INTERNAL ERROR: unknown type for consRecs: \{show sig.targetType.name}"
+    let givens = mapIn finToNat sig.givenParams
+    let consRecs = map @{Compose} (`apply` givens)
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
@@ -74,9 +76,8 @@ ConstructorDerivator => DerivatorCore where
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-          let givens = mapIn finToNat sig.givenParams
           let selectFuel = \r => varStr $ if mustSpendFuel r then subFuelArg else fuelAr
-          let weightAndFuel = either ((varStr fuelAr,) . reflectNat1) (\cr => let r = cr givens in (selectFuel r, r.fuelWeightExpr subFuelArg)) . weight
+          let weightAndFuel = either ((varStr fuelAr,) . reflectNat1) (\r => (selectFuel r, r.fuelWeightExpr subFuelArg)) . weight
           pure $ var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
                                                            (consRecs <&> \(con, rec) => let (f, w) = weightAndFuel rec in (w, callConsGen f con))
         ]

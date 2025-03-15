@@ -761,13 +761,14 @@ public export
 record ConWeightInfo where
   constructor MkConWeightInfo
   ||| Either a constant (for non-recursive) or a function returning weight info (for recursive)
-  weight : Either Nat1 ((givenTyArgs : SortedSet Nat) -> RecWeightInfo)
+  weight : Either Nat1 RecWeightInfo
 
 export
 record ConsRecs where
   constructor MkConsRecs
   ||| Map from a type name to a list of its constructors with their weight info
-  conWeights : SortedMap Name $ List (Con, ConWeightInfo)
+  -- TODO to change `SortedSet Nat` to `GenSignature`, but this requires moving all this to a module that can import `*/Derive.idr`
+  conWeights : SortedMap Name $ List (Con, (givenTyArgs : SortedSet Nat) -> ConWeightInfo)
   ||| Derive a function for weighting weightable type, if given type is weightable
   deriveWeightingFun : (weightableType : Name) -> Maybe (Decl, Decl)
 
@@ -815,7 +816,7 @@ getConsRecs = do
 
   let finalConsRecs = mapWithKey' consRecs $ \tyName, (_, cons) => do
     let wTyArgs = maybe SortedMap.empty .| weightableTyArgs . args .| lookupType tyName
-    cons <&> \(con ** e) => (con,) $ MkConWeightInfo $ e <&> \(wMod, directRecConArgs), givenTyArgs => do
+    cons <&> \(con ** e) => (con,) $ \givenTyArgs => MkConWeightInfo $ e <&> \(wMod, directRecConArgs) => do
       -- default behaviour, spend fuel, weight proportional to fuel
       fromMaybe (SpendingFuel $ wMod . app `(Deriving.DepTyCheck.Util.Reflection.leftDepth) . varStr) $ do
       -- fail-fast if no direct args in this constructor
@@ -843,7 +844,7 @@ getConsRecs = do
   pure $ MkConsRecs finalConsRecs deriveWeightingFun
 
 export
-lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, ConWeightInfo)
+lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, (givenTyArgs : SortedSet Nat) -> ConWeightInfo)
 lookupConsWithWeight @{crs} = lookup' crs.conWeights . name
 
 --------------------------------
