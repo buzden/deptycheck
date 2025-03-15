@@ -42,17 +42,13 @@ ConstructorDerivator => DerivatorCore where
     outmostRHS <- fuelDecisionExpr fuelArg consRecs
 
     -- return function definition
-    pure [ canonicDefaultLHS' namesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
+    pure [ canonicDefaultLHS' interimNamesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
 
   where
 
     consGenName : Con -> Name
     consGenName con = UN $ Basic $ "<<\{show con.name}>>"
     -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend
-
-    -- this is a workarond for Idris compiler bug #2983
-    namesWrapper : String -> String
-    namesWrapper s = "inter^<\{s}>"
 
     fuelDecisionExpr : (fuelArg : String) -> List (Con, Either TTImp (String -> TTImp)) -> m TTImp
     fuelDecisionExpr fuelAr consRecs = do
@@ -84,7 +80,7 @@ ConstructorDerivator => DerivatorCore where
       where
 
         callConsGen : (fuel : TTImp) -> Con -> TTImp
-        callConsGen fuel con = canonicDefaultRHS' namesWrapper sig .| consGenName con .| fuel
+        callConsGen fuel con = canonicDefaultRHS' interimNamesWrapper sig .| consGenName con .| fuel
 
 export
 MainCoreDerivator : ConstructorDerivator => DerivatorCore
