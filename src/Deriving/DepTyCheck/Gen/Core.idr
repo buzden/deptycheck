@@ -6,6 +6,8 @@ import public Deriving.DepTyCheck.Util.Reflection
 
 %default total
 
+%hide Text.PrettyPrint.Bernardy.Core.Doc.(>>=)
+
 ----------------------------
 --- Derivation functions ---
 ----------------------------
@@ -31,7 +33,7 @@ ConstructorDerivator => DerivatorCore where
     let Just consRecs = lookupConsWithWeight sig.targetType
       | Nothing => fail "INTERNAL ERROR: unknown type for consRecs: \{show sig.targetType.name}"
     let givens = mapIn finToNat sig.givenParams
-    let consRecs = map @{Compose} (`apply` givens)
+    let consRecs = map @{Compose} (weightExpr . (`apply` givens)) consRecs
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
@@ -52,34 +54,31 @@ ConstructorDerivator => DerivatorCore where
     namesWrapper : String -> String
     namesWrapper s = "inter^<\{s}>"
 
-    fuelDecisionExpr : (fuelArg : String) -> List (Con, ConWeightInfo) -> m TTImp
+    fuelDecisionExpr : (fuelArg : String) -> List (Con, Either TTImp (String -> TTImp)) -> m TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
-      let callConstFreqs : CTLabel -> (fuel : TTImp) -> List (Con, Nat1) -> TTImp
-          callConstFreqs l fuel cons = if isJust $ find ((/=) 1 . toNat . snd) cons
-            then callFrequency l $ cons <&> bimap reflectNat1 (callConsGen fuel) . swap
+      let callConstFreqs : CTLabel -> (fuel : TTImp) -> List (Con, TTImp) -> TTImp
+          callConstFreqs l fuel cons = if isJust $ find (((/=) liftWeight1) . snd) cons
+            then callFrequency l $ cons <&> map (callConsGen fuel) . swap
             else callOneOf l $ cons <&> callConsGen fuel . fst
 
       -- check if there are any non-recursive constructors
-      let Nothing = for consRecs $ \(con, w) => (con,) <$> getLeft w.weight
+      let Nothing = for consRecs $ \(con, w) => (con,) <$> getLeft w
           -- only constantly weighted constructors (usually, non-recusrive), thus just call all without spending fuel
-        | Just consRecs => pure $ callConstFreqs "\{logPosition sig} (non-recursive)".label (varStr fuelAr) consRecs
+        | Just consRecs => pure $ callConstFreqs "\{logPosition sig} (non-spending)".label (varStr fuelAr) consRecs
 
       -- pattern match on the fuel argument
       map (iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel}) $ Prelude.sequence $
 
-        -- todo to chenge `getLeft` to the special function returning `String -> TTImp`
-
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
-          let nonRecCons = mapMaybe (\(con, w) => (con,) <$> getLeft w.weight) consRecs in
-          pure $ var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonRecCons
+          let nonSpendCons = mapMaybe (\(con, w) => (con,) <$> getLeft w) consRecs in
+          pure $ var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonSpendCons
 
-        , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
+        , do -- if fuel is `More`, call spending constructors on the rest and other on the original fuel
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-          let selectFuel = \r => varStr $ if mustSpendFuel r then subFuelArg else fuelAr
-          let weightAndFuel = either ((varStr fuelAr,) . reflectNat1) (\r => (selectFuel r, r.fuelWeightExpr subFuelArg)) . weight
-          pure $ var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
-                                                           (consRecs <&> \(con, rec) => let (f, w) = weightAndFuel rec in (w, callConsGen f con))
+          let weightAndFuel = either ((varStr fuelAr,)) (\f => (varStr subFuelArg, f subFuelArg))
+          pure $ var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (non-dry fuel)".label
+            (consRecs <&> \(con, rec) => let (f, w) = weightAndFuel rec in (w, callConsGen f con))
         ]
 
       where
