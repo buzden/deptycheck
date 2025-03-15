@@ -764,12 +764,18 @@ weightExpr $ MkConWeightInfo $ Right $ StructurallyDecreasing {wExpr, _} = Left 
 weightExpr $ MkConWeightInfo $ Right $ SpendingFuel e = Right e
 
 export
+usedWeightFun : ConWeightInfo -> Maybe Name
+usedWeightFun $ MkConWeightInfo $ Right $ StructurallyDecreasing {decrTy, _} = Just decrTy
+usedWeightFun $ MkConWeightInfo $ Right $ SpendingFuel _ = Nothing
+usedWeightFun $ MkConWeightInfo $ Left _ = Nothing
+
+export
 record ConsRecs where
   constructor MkConsRecs
   ||| Map from a type name to a list of its constructors with their weight info
   -- TODO to change `SortedSet Nat` to `GenSignature`, but this requires moving all this to a module that can import `*/Derive.idr`
   conWeights : SortedMap Name $ List (Con, (givenTyArgs : SortedSet Nat) -> ConWeightInfo)
-  ||| Derive a function for weighting weightable type, if given type is weightable
+  ||| Derive a function for weighting weightable type, if given type is weightable and needs a special function
   deriveWeightingFun : (weightableType : Name) -> Maybe (Decl, Decl)
 
 -- This is a workaround of some bad and not yet understood behaviour, leading to both compile- and runtime errors
@@ -851,3 +857,7 @@ getConsRecs = do
 export
 lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, (givenTyArgs : SortedSet Nat) -> ConWeightInfo)
 lookupConsWithWeight @{crs} = lookup' crs.conWeights . name
+
+export
+deriveWeightingFun : ConsRecs => (weightableType : Name) -> Maybe (Decl, Decl)
+deriveWeightingFun @{crs} n = crs.deriveWeightingFun n
