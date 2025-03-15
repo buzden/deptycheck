@@ -765,6 +765,8 @@ record ConsRecs where
   constructor MkConsRecs
   ||| Map from a type name to a list of its constructors with their weight info
   conWeights : SortedMap Name $ List (Con, ConWeightInfo)
+  ||| Derive a function for weighting weightable type, if given type is weightable
+  deriveWeightingFun : (weightableType : Name) -> Maybe (Decl, Decl)
 
 -- This is a workaround of some bad and not yet understood behaviour, leading to both compile- and runtime errors
 removeNamedApps, workaroundFromNat : TTImp -> TTImp
@@ -833,9 +835,9 @@ getConsRecs = do
             var (weightFunName weightTyName) .$ var arg
       pure $ MkRecWeightInfo (Just decrTy) $ const $ wMod weightExpr
 
-  -- TODO to collect all types which need a weighting function to be derived and return those along with `ConsRecs`
+  let deriveWeightingFun = \tyName => Nothing -- TODO to implement
 
-  pure $ MkConsRecs finalConsRecs
+  pure $ MkConsRecs finalConsRecs deriveWeightingFun
 
 export
 lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, ConWeightInfo)
