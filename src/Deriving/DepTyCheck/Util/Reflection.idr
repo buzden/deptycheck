@@ -248,6 +248,11 @@ export
 liftWeight1 : TTImp
 liftWeight1 = `(Data.Nat1.one)
 
+export
+reflectNat1 : Nat1 -> TTImp
+reflectNat1 $ FromNat 1 = liftWeight1
+reflectNat1 $ FromNat n = `(fromInteger ~(primVal $ BI $ cast n))
+
 namespace CompiletimeLabel
 
   public export

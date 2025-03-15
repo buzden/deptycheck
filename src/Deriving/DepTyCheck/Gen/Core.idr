@@ -53,10 +53,6 @@ ConstructorDerivator => DerivatorCore where
     fuelDecisionExpr : (fuelArg : String) -> List (Con, ConWeightInfo) -> m TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
-      let reflectNat1 : Nat1 -> TTImp
-          reflectNat1 $ FromNat 1 = liftWeight1
-          reflectNat1 $ FromNat n = `(fromInteger ~(primVal $ BI $ cast n))
-
       let callConstFreqs : CTLabel -> (fuel : TTImp) -> List (Con, Nat1) -> TTImp
           callConstFreqs l fuel cons = if isJust $ find ((/=) 1 . toNat . snd) cons
             then callFrequency l $ cons <&> bimap reflectNat1 (callConsGen fuel) . swap
