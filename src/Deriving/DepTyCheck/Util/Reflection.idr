@@ -743,16 +743,14 @@ interface ProbabilityTuning (0 n : Name) where
 
 ||| Weight info of recursive constructors
 public export
-record RecWeightInfo where
-  constructor MkRecWeightInfo
-  ||| Name of a type which structural decreasing of use for not spending fuel, if present
-  decrTy : Maybe Name
-  ||| A function returning weight expression being given left fuel variable
-  fuelWeightExpr : (leftFuelVarName : String) -> TTImp
+data RecWeightInfo : Type where
+  SpendingFuel : ((leftFuelVarName : String) -> TTImp) -> RecWeightInfo
+  StructurallyDecreasing : (decrTy : Name) -> (weightExpr : TTImp) -> RecWeightInfo
 
 public export %inline
 mustSpendFuel : RecWeightInfo -> Bool
-mustSpendFuel = isNothing . decrTy
+mustSpendFuel $ SpendingFuel {} = True
+mustSpendFuel $ StructurallyDecreasing {} = False
 
 public export
 record ConWeightInfo where
@@ -814,7 +812,7 @@ getConsRecs = do
     let wTyArgs = maybe SortedMap.empty .| weightableTyArgs . args .| lookupType tyName
     cons <&> \(con ** e) => (con,) $ MkConWeightInfo $ e <&> \(wMod, directRecConArgs), givenTyArgs => do
       -- default behaviour, spend fuel, weight proportional to fuel
-      fromMaybe (MkRecWeightInfo Nothing $ wMod . app `(Deriving.DepTyCheck.Util.Reflection.leftDepth) . varStr) $ do
+      fromMaybe (SpendingFuel $ wMod . app `(Deriving.DepTyCheck.Util.Reflection.leftDepth) . varStr) $ do
       -- fail-fast if no direct args in this constructor
       guard $ isJust directRecConArgs
       -- work only with given args
@@ -833,7 +831,7 @@ getConsRecs = do
         foldAlt' conArgs $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => whenTs (getAppVar conArgTy == Just tyName) $ do
           getAt wTyArg conArgArgs >>= getAppVar . getExpr >>= \arg => whenT .| contains arg freeNamesLessThanOrig .|
             var (weightFunName weightTyName) .$ var arg
-      pure $ MkRecWeightInfo (Just decrTy) $ const $ wMod weightExpr
+      pure $ StructurallyDecreasing decrTy $ wMod weightExpr
 
   let deriveWeightingFun = \tyName => Nothing -- TODO to implement
 
