@@ -750,18 +750,19 @@ interface ProbabilityTuning (0 n : Name) where
 public export
 data RecWeightInfo : Type where
   SpendingFuel : ((leftFuelVarName : String) -> TTImp) -> RecWeightInfo
-  StructurallyDecreasing : (decrTy : Name) -> (weightExpr : TTImp) -> RecWeightInfo
-
-public export %inline
-mustSpendFuel : RecWeightInfo -> Bool
-mustSpendFuel $ SpendingFuel {} = True
-mustSpendFuel $ StructurallyDecreasing {} = False
+  StructurallyDecreasing : (decrTy : Name) -> (wExpr : TTImp) -> RecWeightInfo
 
 public export
 record ConWeightInfo where
   constructor MkConWeightInfo
   ||| Either a constant (for non-recursive) or a function returning weight info (for recursive)
   weight : Either Nat1 RecWeightInfo
+
+public export
+weightExpr : ConWeightInfo -> Either TTImp ((leftFuelVarName : String) -> TTImp)
+weightExpr $ MkConWeightInfo $ Left n = Left $ reflectNat1 n
+weightExpr $ MkConWeightInfo $ Right $ StructurallyDecreasing {wExpr, _} = Left wExpr
+weightExpr $ MkConWeightInfo $ Right $ SpendingFuel e = Right e
 
 export
 record ConsRecs where
