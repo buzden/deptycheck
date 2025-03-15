@@ -35,7 +35,7 @@ ConstructorDerivator => DerivatorCore where
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
 
     -- generate the case expression deciding whether will we go into recursive constructors or not
-    let outmostRHS = fuelDecisionExpr fuelArg consRecs
+    outmostRHS <- fuelDecisionExpr fuelArg consRecs
 
     -- return function definition
     pure [ canonicDefaultLHS' namesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
@@ -50,7 +50,7 @@ ConstructorDerivator => DerivatorCore where
     namesWrapper : String -> String
     namesWrapper s = "inter^<\{s}>"
 
-    fuelDecisionExpr : (fuelArg : String) -> List (Con, ConWeightInfo) -> TTImp
+    fuelDecisionExpr : (fuelArg : String) -> List (Con, ConWeightInfo) -> m TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
       let reflectNat1 : Nat1 -> TTImp
@@ -65,21 +65,23 @@ ConstructorDerivator => DerivatorCore where
       -- check if there are any non-recursive constructors
       let Nothing = for consRecs $ \(con, w) => (con,) <$> getLeft w.weight
           -- only constantly weighted constructors (usually, non-recusrive), thus just call all without spending fuel
-        | Just consRecs => callConstFreqs "\{logPosition sig} (non-recursive)".label (varStr fuelAr) consRecs
+        | Just consRecs => pure $ callConstFreqs "\{logPosition sig} (non-recursive)".label (varStr fuelAr) consRecs
 
       -- pattern match on the fuel argument
-      iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
+      map (iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel}) $ Prelude.sequence $
+
+        -- todo to chenge `getLeft` to the special function returning `String -> TTImp`
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
           let nonRecCons = mapMaybe (\(con, w) => (con,) <$> getLeft w.weight) consRecs in
-          var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonRecCons
+          pure $ var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonRecCons
 
         , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
           let givens = mapIn finToNat sig.givenParams
           let selectFuel = \r => varStr $ if mustSpendFuel r then subFuelArg else fuelAr
           let weightAndFuel = either ((varStr fuelAr,) . reflectNat1) (\cr => let r = cr givens in (selectFuel r, r.fuelWeightExpr subFuelArg)) . weight
-          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
+          pure $ var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
                                                            (consRecs <&> \(con, rec) => let (f, w) = weightAndFuel rec in (w, callConsGen f con))
         ]
 
