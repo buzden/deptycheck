@@ -31,10 +31,12 @@ export infix 6 `NoWeaker`
 Uninhabited (MaybeEmpty `NoWeaker` NonEmpty) where
   uninhabited _ impossible
 
-noWeaker : (from, to : Emptiness) -> Dec $ from `NoWeaker` to
-noWeaker NonEmpty   NonEmpty   = Yes %search
-noWeaker MaybeEmpty NonEmpty   = No uninhabited
-noWeaker _          MaybeEmpty = Yes %search
+||| Smaller is the value that gives less guarantees
+export
+Ord Emptiness where
+  compare MaybeEmpty NonEmpty   = LT
+  compare NonEmpty   MaybeEmpty = GT
+  compare _          _          = EQ
 
 export
 Reflexive _ NoWeaker where
@@ -89,17 +91,69 @@ nonEmptyIsStrongest {em=NonEmpty}   = NN
 nonEmptyIsStrongest {em=MaybeEmpty} = AS
 
 export
-maybeEmptyIsMinimal : (0 _ : MaybeEmpty `NoWeaker` x) -> x = MaybeEmpty
-maybeEmptyIsMinimal nw = irrelevantEq $ maybeEmptyIsMinimal' nw where
-  maybeEmptyIsMinimal' : forall x. MaybeEmpty `NoWeaker` x -> x = MaybeEmpty
-  maybeEmptyIsMinimal' AS = Refl
+maybeEmptyIsMinimal : (0 _ : MaybeEmpty `NoWeaker` em) -> em = MaybeEmpty
+maybeEmptyIsMinimal nw = irrelevantEq $ case nw of AS => Refl
 
 export
-nonEmptyIsMaximal : (0 _ : x `NoWeaker` NonEmpty) -> x = NonEmpty
-nonEmptyIsMaximal nw = irrelevantEq $ nonEmptyIsMaximal' nw where
-  nonEmptyIsMaximal' : forall x. x `NoWeaker` NonEmpty -> x = NonEmpty
-  nonEmptyIsMaximal' NN = Refl
+nonEmptyIsMaximal : (0 _ : em `NoWeaker` NonEmpty) -> em = NonEmpty
+nonEmptyIsMaximal nw = irrelevantEq $ case nw of NN => Refl
+
+export
+minMaybeEmptyLeft : (0 em : Emptiness) -> min MaybeEmpty em = MaybeEmpty
+minMaybeEmptyLeft em = irrelevantEq $ case em of
+  NonEmpty   => Refl
+  MaybeEmpty => Refl
+
+export
+minMaybeEmptyRight : (0 em : Emptiness) -> min em MaybeEmpty = MaybeEmpty
+minMaybeEmptyRight em = irrelevantEq $ case em of
+  NonEmpty   => Refl
+  MaybeEmpty => Refl
+
+export
+minNonEmptyLeft : (0 em : Emptiness) -> min NonEmpty em = em
+minNonEmptyLeft em = irrelevantEq $ case em of
+  NonEmpty   => Refl
+  MaybeEmpty => Refl
+
+export
+minNonEmptyRight : (0 em : Emptiness) -> min em NonEmpty = em
+minNonEmptyRight em = irrelevantEq $ case em of
+  NonEmpty   => Refl
+  MaybeEmpty => Refl
+
+export
+minSame : (0 em : Emptiness) -> min em em = em
+minSame em = irrelevantEq $ case em of
+  NonEmpty   => Refl
+  MaybeEmpty => Refl
+
+export
+minNoWeaker : a1 `NoWeaker` a2 -> b1 `NoWeaker` b2 ->
+              min a1 b1 `NoWeaker` min a2 b2
+minNoWeaker NN nw = rewrite minNonEmptyLeft b1 in
+                    rewrite minNonEmptyLeft b2 in
+                    nw
+minNoWeaker AS _ = rewrite minMaybeEmptyLeft b2 in AS
+
+export
+minNoWeakerLeft : {c : _} -> a `NoWeaker` b -> min a c `NoWeaker` min b c
+minNoWeakerLeft nw = minNoWeaker nw reflexive
+
+export
+minNoWeakerRight : {c : _} -> a `NoWeaker` b -> min c a `NoWeaker` min c b
+minNoWeakerRight nw = minNoWeaker reflexive nw
+
+export
+leftNoWeakerMin : {a, b : _} -> a `NoWeaker` min a b
+leftNoWeakerMin {a=NonEmpty}   = nonEmptyIsStrongest
+leftNoWeakerMin {a=MaybeEmpty} = rewrite minMaybeEmptyLeft b in reflexive
+
+export
+rightNoWeakerMin : {a, b : _} -> b `NoWeaker` min a b
+rightNoWeakerMin {b=NonEmpty}   = nonEmptyIsStrongest
+rightNoWeakerMin {b=MaybeEmpty} = rewrite minMaybeEmptyRight a in reflexive
 
 export %hint
-nonEmptyReflexive : {em : _} -> em `NoWeaker` em
-nonEmptyReflexive = reflexive
+noWeakerReflexive : {em : _} -> em `NoWeaker` em
+noWeakerReflexive = reflexive
