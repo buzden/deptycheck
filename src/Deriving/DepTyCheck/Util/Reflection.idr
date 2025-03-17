@@ -850,7 +850,33 @@ getConsRecs = do
             var (weightFunName weightTy) .$ varStr (interimNamesWrapper weightArgName)
       pure $ StructurallyDecreasing decrTy $ wMod weightExpr
 
-  let deriveWeightingFun = \tyName => Nothing -- TODO to implement
+  let deriveWeightingFun = \ty => do
+    (decrArg, cons) <- lookup ty.tyName consRecs
+    guard $ isJust decrArg -- continue only when this type has structurally decreasing argument
+    let weightFunName = weightFunName ty
+
+    let inTyArg = arg $ foldl (\f, n => namedApp f n $ var n) .| var ty.name .| mapMaybe name ty.args
+    let funSig = export' weightFunName $ piAll `(Data.Nat1.Nat1) $ map {piInfo := ImplicitArg} ty.args ++ [inTyArg]
+
+    let cons : List (con : Con ** _) := cons <&> \(con ** e) => (con ** either (const Nothing) snd e)
+    let wClauses = cons <&> \case
+      (con ** Nothing) => do
+        let consMatch = con.name `appAll` replicate (length $ filter ((== ExplicitArg) . piInfo) con.args) implicitTrue
+        patClause .| var weightFunName .$ consMatch .| liftWeight1
+      (con ** Just wArgs) => do
+        let lhsArgs : List (_, _) = mapI con.args $ \idx, arg => appArg arg <$> if contains idx wArgs
+                                      then let bindName = "arg^\{show idx}" in (Just bindName, bindVar bindName)
+                                      else (Nothing, implicitTrue)
+        let rhsArgs = mapMaybe (map (UN . Basic) . fst) lhsArgs
+        let callSelfOn : Name -> TTImp
+            callSelfOn n = var weightFunName .$ var n
+        let rhs : List Name -> TTImp
+            rhs [] = liftWeight1
+            rhs [x] = `(succ ~(callSelfOn x))
+            rhs xs  = `(succ $ foldMap @{%search} @{Maximal} ~(liftList $ xs <&> callSelfOn))
+        patClause (var weightFunName .$ (reAppAny .| var con.name .| snd <$> lhsArgs)) (rhs rhsArgs)
+
+    pure (funSig, def weightFunName wClauses)
 
   pure $ MkConsRecs finalConsRecs deriveWeightingFun
 
