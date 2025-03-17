@@ -117,9 +117,9 @@ namespace ClosuringCanonicImpl
 
   DerivatorCore => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
 
-    needWeightFun tyName = when (not !(gets $ contains tyName)) $ do
-      modify $ insert tyName
-      whenJust (deriveWeightingFun tyName) $ tell . mapHom singleton
+    needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
+      modify $ insert ty.name
+      whenJust (deriveWeightingFun ty) $ tell . mapHom singleton
 
     callGen sig fuel values = do
 

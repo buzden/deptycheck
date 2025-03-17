@@ -5,7 +5,6 @@ import public Control.Applicative.Const
 
 import public Data.Alternative
 import public Data.Cozippable
-
 import public Data.Either
 import public Data.Fin.Lists
 import public Data.Fin.ToFin
@@ -750,7 +749,7 @@ interface ProbabilityTuning (0 n : Name) where
 public export
 data RecWeightInfo : Type where
   SpendingFuel : ((leftFuelVarName : String) -> TTImp) -> RecWeightInfo
-  StructurallyDecreasing : (decrTy : Name) -> (wExpr : TTImp) -> RecWeightInfo
+  StructurallyDecreasing : (decrTy : TypeInfo) -> (wExpr : TTImp) -> RecWeightInfo
 
 public export
 record ConWeightInfo where
@@ -765,7 +764,7 @@ weightExpr $ MkConWeightInfo $ Right $ StructurallyDecreasing {wExpr, _} = Left 
 weightExpr $ MkConWeightInfo $ Right $ SpendingFuel e = Right e
 
 export
-usedWeightFun : ConWeightInfo -> Maybe Name
+usedWeightFun : ConWeightInfo -> Maybe TypeInfo
 usedWeightFun $ MkConWeightInfo $ Right $ StructurallyDecreasing {decrTy, _} = Just decrTy
 usedWeightFun $ MkConWeightInfo $ Right $ SpendingFuel _ = Nothing
 usedWeightFun $ MkConWeightInfo $ Left _ = Nothing
@@ -776,16 +775,16 @@ record ConsRecs where
   ||| Map from a type name to a list of its constructors with their weight info
   -- TODO to change `SortedSet Nat` to `GenSignature`, but this requires moving all this to a module that can import `*/Derive.idr`
   conWeights : SortedMap Name $ List (Con, (givenTyArgs : SortedSet Nat) -> ConWeightInfo)
-  ||| Derive a function for weighting weightable type, if given type is weightable and needs a special function
-  deriveWeightingFun : (weightableType : Name) -> Maybe (Decl, Decl)
+  ||| Derive a function for weighting type, if given type is weightable and needs a special function
+  deriveWeightingFun : TypeInfo -> Maybe (Decl, Decl)
 
 -- This is a workaround of some bad and not yet understood behaviour, leading to both compile- and runtime errors
 removeNamedApps, workaroundFromNat : TTImp -> TTImp
 removeNamedApps = mapTTImp $ \case INamedApp _ lhs _ _ => lhs; e => e
 workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1.FromNat} => removeNamedApps e; _ => e
 
-weightFunName : Name -> Name
-weightFunName n = fromString "weight^\{show n}"
+weightFunName : TypeInfo -> Name
+weightFunName ty = fromString "weight^\{show ty.name}"
 
 -- this is a workarond for Idris compiler bug #2983
 export
@@ -819,10 +818,10 @@ getConsRecs = do
       pure (con ** w)
     -- determine if this type is a nat-or-list-like data, i.e. one which we can measure for the probability
     let weightable = flip all crsForTy $ \case (_ ** Right (_, Nothing)) => False; _ => True
-    pure (whenT weightable targetType.name, crsForTy)
-  let 0 _ : SortedMap Name (Maybe Name, List (con : Con ** Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length))) := consRecs
+    pure (whenT weightable targetType, crsForTy)
+  let 0 _ : SortedMap Name (Maybe TypeInfo, List (con : Con ** Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length))) := consRecs
 
-  let weightableTyArgs : (ars : List Arg) -> SortedMap Nat (Name, Name) -- <- a map from Fin ars.length to a weightable type name and its argument name
+  let weightableTyArgs : (ars : List Arg) -> SortedMap Nat (TypeInfo, Name) -- <- a map from Fin ars.length to a weightable type and its argument name
       weightableTyArgs ars = fromList $ flip List.mapMaybe ars.withIdx $ \(idx, ar) =>
                                getAppVar ar.type >>= lookup' consRecs <&> fst >>= \tyN => [| (finToNat idx,,) tyN ar.name |]
 
@@ -842,13 +841,13 @@ getConsRecs = do
       let conRetTyArgs = snd $ unAppAny con.type
       let conArgs = con.args
       let conArgNames = SortedSet.fromList $ mapMaybe name conArgs
-      (decrTy, weightExpr) <- foldAlt' wTyArgs.asList $ \(wTyArg, weightTyName, weightArgName) => map (weightTyName,) $ do
+      (decrTy, weightExpr) <- foldAlt' wTyArgs.asList $ \(wTyArg, weightTy, weightArgName) => map (weightTy,) $ do
         conRetTyArg <- getExpr <$> getAt wTyArg conRetTyArgs
         guard $ isJust $ lookupCon =<< getAppVar conRetTyArg
         let freeNamesLessThanOrig = allVarNames' conRetTyArg `intersection` conArgNames
         foldAlt' conArgs $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => whenTs (getAppVar conArgTy == Just tyName) $ do
           getAt wTyArg conArgArgs >>= getAppVar . getExpr >>= \arg => whenT .| contains arg freeNamesLessThanOrig .|
-            var (weightFunName weightTyName) .$ varStr (interimNamesWrapper weightArgName)
+            var (weightFunName weightTy) .$ varStr (interimNamesWrapper weightArgName)
       pure $ StructurallyDecreasing decrTy $ wMod weightExpr
 
   let deriveWeightingFun = \tyName => Nothing -- TODO to implement
@@ -860,7 +859,7 @@ lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, (givenTyArgs :
 lookupConsWithWeight @{crs} = lookup' crs.conWeights . name
 
 export
-deriveWeightingFun : ConsRecs => (weightableType : Name) -> Maybe (Decl, Decl)
+deriveWeightingFun : ConsRecs => TypeInfo -> Maybe (Decl, Decl)
 deriveWeightingFun @{crs} n = crs.deriveWeightingFun n
 
 --------------------------------

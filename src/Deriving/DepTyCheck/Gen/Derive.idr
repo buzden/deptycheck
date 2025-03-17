@@ -55,7 +55,7 @@ Ord GenSignature where
 
 public export
 interface Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
-  needWeightFun : (tyName : Name) -> m ()
+  needWeightFun : TypeInfo -> m ()
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m (TTImp, Maybe (gend ** Vect gend $ Fin gend))
   --                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   --                                                                   this is a permutation of generated arguments --/
