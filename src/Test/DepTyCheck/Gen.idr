@@ -77,8 +77,7 @@ data Gen : Emptiness -> Type -> Type where
           (0 _ : alem `NoWeaker` em) =>
           Gen em a
 
-  Bind  : {biem : _} ->
-          (0 _ : biem `NoWeaker` em) =>
+  Bind  : (0 _ : biem `NoWeaker` em) =>
           RawGen c -> (c -> Gen biem a) -> Gen em a
 
   Labelled : Label -> (g : Gen em a) -> (0 _ : IsNonEmpty g) => Gen em a
@@ -153,6 +152,14 @@ label : Label -> Gen em a -> Gen em a
 label l g with (isEmpty g) proof 0 prf
   label _ Empty | True  = Empty
   label l g     | False = Labelled l g
+
+total
+0 labelNonEmpty : {g : Gen em a} -> IsNonEmpty g => IsNonEmpty $ label l g
+labelNonEmpty {g=Pure _}       = Refl
+labelNonEmpty {g=Raw _}        = Refl
+labelNonEmpty {g=OneOf _}      = Refl
+labelNonEmpty {g=Bind _ _}     = Refl
+labelNonEmpty {g=Labelled _ _} = Refl
 
 ------------------------------------------------
 --- Technical stuff for mapping alternatives ---
@@ -402,39 +409,39 @@ mapNonEmpty {g=OneOf _}      = Refl
 mapNonEmpty {g=Bind _ _}     = Refl
 mapNonEmpty {g=Labelled _ _} = Refl
 
-export
-Applicative (Gen em)
-0 apNonEmpty : {g : Gen em $ a -> b} -> {h : Gen em a} -> IsNonEmpty g => IsNonEmpty h => IsNonEmpty $ g <*> h
+private infixl 3 <**>
 
-Applicative (Gen em) where
+(<**>) : (g : Gen lem $ a -> b) -> (h : Gen rem a) -> Gen (min lem rem) b
+0 apNonEmpty : {g, h : _} -> IsNonEmpty g => IsNonEmpty h => IsNonEmpty $ g <**> h
 
-  pure = Pure
+g <**> h with (isEmpty g) proof 0 prfLeft | (isEmpty h) proof 0 prfRight
+  Empty <**> _ | _ | _ = rewrite minMaybeEmptyLeft rem in Empty
+  _ <**> Empty | _ | _ = rewrite minMaybeEmptyRight lem in Empty
 
-  g <*> h with (isEmpty g) proof 0 prfLeft | (isEmpty h) proof 0 prfRight
-    Empty <*> _ | _ | _ = Empty
-    _ <*> Empty | _ | _ = Empty
+  Pure f <**> g | _ | _ = f <$> relax @{rightNoWeakerMin} g
+  g <**> Pure x | _ | _ = relax @{leftNoWeakerMin} g <&> \f => f x
 
-    Pure f <*> g | _ | _ = f <$> g
-    g <*> Pure x | _ | _ = g <&> \f => f x
+  Raw sfl <**> Raw sfr | _ | _ = Raw $ sfl <*> sfr
 
-    Raw sfl <*> Raw sfr | _ | _ = Raw $ sfl <*> sfr
+  Labelled l x <**> y | _     | False = Labelled @{apNonEmpty} l $ x <**> y
+  x <**> Labelled l y | False | _     = Labelled @{apNonEmpty} l $ x <**> y
 
-    Labelled l x <*> y | _     | False = Labelled @{apNonEmpty} l $ x <*> y
-    x <*> Labelled l y | False | _     = Labelled @{apNonEmpty} l $ x <*> y
+  OneOf @{ne} @{nw} oo <**> g | _ | False =
+      OneOf @{allMapOneOf $ \e => apNonEmpty @{indexAll e ne}}
+            @{minNoWeakerLeft nw} $
+        mapOneOf oo $ \x => assert_total $ x <**> g
+  g <**> OneOf @{ne} @{nw} oo | False | _ =
+    OneOf @{allMapOneOf $ \e => apNonEmpty @{%search} @{indexAll e ne}}
+          @{minNoWeakerRight nw} $
+      mapOneOf oo $ \x => assert_total $ g <**> x
 
-    OneOf @{ne} oo <*> g | _ | False =
-      OneOf @{allMapOneOf $ \e => apNonEmpty @{relaxNonEmpty @{indexAll e ne}}} $
-        mapOneOf oo $ \x => assert_total $ relax x <*> g
-    g <*> OneOf @{ne} oo | False | _ =
-      OneOf @{allMapOneOf $ \e => apNonEmpty @{%search} @{relaxNonEmpty @{indexAll e ne}}} $
-        mapOneOf oo $ \x => assert_total $ g <*> relax x
+  Bind @{nw} x f <**> Raw y | _ | _ =
+    Bind @{minNoWeakerLeft nw}  x $ \c => f c <**> Raw y
+  Raw y <**> Bind @{nw} x f | _ | _ =
+    Bind @{minNoWeakerRight nw} x $ \c => Raw y <**> f c
 
-    Bind x f <*> Raw y | _ | _ = Bind x $ \c => f c <*> Raw y
-    Raw y <*> Bind x f | _ | _ = Bind x $ \c => assert_total $ Raw y <*> f c
-
-    Bind {biem=bl} x f <*> Bind {biem=br} y g | _ | _ = case order {rel=NoWeaker} bl br of
-      Left  _ => Bind [| (x, y) |] $ \(l, r) => assert_total $ relax (f l) <*> g r
-      Right _ => Bind [| (x, y) |] $ \(l, r) => f l <*> relax (g r)
+  Bind @{lnw} x f <**> Bind @{rnw} y g | _ | _ =
+    Bind @{minNoWeaker lnw rnw} [| (x, y) |] $ \(l, r) => f l <**> g r
 
 apNonEmpty with (isEmpty g) proof 0 prfLeft | (isEmpty h) proof 0 prfRight
   apNonEmpty {g=Empty}        {h}              | True  | _     impossible
@@ -472,24 +479,45 @@ apNonEmpty with (isEmpty g) proof 0 prfLeft | (isEmpty h) proof 0 prfRight
   apNonEmpty {g=Raw _}        {h=Bind _ _}     | _     | False = Refl
   apNonEmpty {g=Bind _ _}     {h=Raw _}        | _     | False = Refl
 
-  apNonEmpty {g=Bind {biem=bl} _ _} {h=Bind {biem=br} _ _} | _ | False with (order {rel=NoWeaker} bl br)
-    _ | Left  _ = Refl
-    _ | Right _ = Refl
+  apNonEmpty {g=Bind _ _}     {h=Bind _ _}     | _     | False = Refl
+
+export
+Applicative (Gen em) where
+  pure = Pure
+  g <*> h = rewrite sym $ minSame em in g <**> h
+
+private infixl 1 >>==
+
+(>>==) : {rem : _} -> Gen lem a -> (a -> Gen rem b) -> Gen (min lem rem) b
+0 bindNonEmpty : {f : a -> Gen1 b} -> IsNonEmpty g => IsNonEmpty $ g >>== f
+
+Empty          >>== _  = rewrite minMaybeEmptyLeft rem in Empty
+Pure x         >>== nf = relax @{rightNoWeakerMin} $ nf x
+Raw g          >>== nf = Bind @{rightNoWeakerMin} g nf
+Bind @{nw} x f >>== nf = Bind @{minNoWeakerLeft nw} x $ (>>== nf) . f
+Labelled l x   >>== nf = label l $ x >>== nf
+
+(OneOf @{ne} @{nw} (MkGenAlts gs) >>== nf) {rem=NonEmpty} =
+  OneOf @{allMapTaggedLazy {f=assert_total (>>== nf)} $ \e => bindNonEmpty @{indexAll e ne}}
+        @{minNoWeakerLeft nw} $
+        MkGenAlts $ flip mapTaggedLazy gs $ assert_total (>>== nf)
+
+-- Inlining `mkOneOf` for manual fusion
+(OneOf oo >>== nf) {rem=MaybeEmpty} = do
+  rewrite minMaybeEmptyRight lem
+  mkOneOfMaybeEmpty
+    (mapMaybeTaggedLazy (nonEmpty . assert_total (>>== nf)) oo.unGenAlts)
+    @{allMapMaybeJustTaggedLazy {f=nonEmpty . assert_total (>>== nf)} $ \_, _ => nonEmptyNonEmpty}
+
+bindNonEmpty {g=Pure _}              = relaxNonEmpty @{isNonEmptyGen1}
+bindNonEmpty {g=Raw _}               = Refl
+bindNonEmpty {g=Bind _ _}            = Refl
+bindNonEmpty {g=Labelled _ _}        = labelNonEmpty @{bindNonEmpty}
+bindNonEmpty {g=OneOf $ MkGenAlts _} = Refl
 
 export
 {em : _} -> Monad (Gen em) where
-  Empty        >>= _  = Empty
-  Pure x       >>= nf = nf x
-  Raw g        >>= nf = Bind g nf
-  -- Inlining `mkOneOf` for manual fusion
-  (OneOf oo >>= nf) {em=MaybeEmpty} =
-    mkOneOfMaybeEmpty
-      (mapMaybeTaggedLazy (nonEmpty . assert_total (>>= nf) . relax) oo.unGenAlts)
-      @{allMapMaybeJustTaggedLazy {f=nonEmpty . assert_total (>>= nf) . relax} $
-          \_, _ => nonEmptyNonEmpty}
-  OneOf oo     >>= nf = mkOneOf $ flip mapTaggedLazy oo.unGenAlts $ assert_total (>>= nf) . relax
-  Bind x f     >>= nf = Bind x $ assert_total (>>= nf) . relax . f
-  Labelled l x >>= nf = label l $ x >>= nf
+  g >>= h = rewrite sym $ minSame em in g >>== h
 
 -----------------------------------------
 --- Detour: special list of lazy gens ---
