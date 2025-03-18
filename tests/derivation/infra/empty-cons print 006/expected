@@ -82,7 +82,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (a : Type) -> Gen MaybeEmpt
                                     .$ (var "<<Data.Vect.Nil>>" .$ var "^fuel_arg^" .$ var "inter^<elem>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Data.Vect.Vect[1(elem)] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Data.Vect.Vect[1(elem)] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"

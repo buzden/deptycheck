@@ -49,7 +49,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty (n : Nat ** 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-spending)"))
                          .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^")
                      }
               ]

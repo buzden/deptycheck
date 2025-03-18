@@ -91,7 +91,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] C - used final order: []
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-spending)"))
                          .$ (   var "Test.DepTyCheck.Gen.frequency"
                              .$ (   var "::"
                                  .$ (var "Builtin.MkPair" .$ (var "fromInteger" .$ primVal (BI 2)) .$ (var "<<DerivedGen.A>>" .$ var "^fuel_arg^"))

@@ -59,7 +59,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0] MkY - used final order: []
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0] (non-spending)"))
                          .$ (var "<<DerivedGen.MkY>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>")
                      }
               ]
