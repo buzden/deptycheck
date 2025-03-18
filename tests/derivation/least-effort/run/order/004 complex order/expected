@@ -5,9 +5,13 @@ Generated values:
 -----
 MkZ 2 2 Y2
 -----
-MkZ 0 1 Y0
+MkZ 0 0 Y0
 -----
-MkZ 0 1 Y0
+MkZ 0 0 Y0
+-----
+MkZ 2 2 Y2
+-----
+MkZ 2 2 Y2
 -----
 MkZ 2 2 Y2
 -----
@@ -17,8 +21,4 @@ MkZ 2 2 Y2
 -----
 MkZ 0 1 Y0
 -----
-MkZ 0 1 Y0
------
-MkZ 0 1 Y0
------
-MkZ 2 2 Y2
+MkZ 0 0 Y0

@@ -138,7 +138,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] D - used final order: []
                                                     .$ var "Nil"))))
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
