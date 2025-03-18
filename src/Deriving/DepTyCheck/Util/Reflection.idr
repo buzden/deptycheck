@@ -830,8 +830,6 @@ getConsRecs = do
     cons <&> \(con ** e) => (con,) $ \givenTyArgs => MkConWeightInfo $ e <&> \(wMod, directRecConArgs) => do
       -- default behaviour, spend fuel, weight proportional to fuel
       fromMaybe (SpendingFuel $ wMod . app `(Deriving.DepTyCheck.Util.Reflection.leftDepth) . varStr) $ do
-      -- fail-fast if no direct args in this constructor
-      guard $ isJust directRecConArgs
       -- work only with given args
       let wTyArgs = wTyArgs `intersectionMap` givenTyArgs
       -- fail-fast if no given weightable args
