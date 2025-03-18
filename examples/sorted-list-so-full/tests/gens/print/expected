@@ -130,7 +130,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                     .$ (var "<<Data.List.Sorted.Nil>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.SortedList[] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Data.List.Sorted.SortedList[] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Data.List.Sorted.Nil>>" .$ var "^fuel_arg^"))
@@ -177,7 +177,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Data.So.So[0] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "Data.So.So[0] (non-spending)"))
                          .$ (var "<<Data.So.Oh>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>")
                      }
               ]
@@ -250,7 +250,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                     .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))

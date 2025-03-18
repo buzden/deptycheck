@@ -4,9 +4,7 @@ Generated values:
 -----
 -----
 -----
-(2 ** (bool ** indeed))
------
-(2 ** (bool ** indeed))
+(1 ** (int ** indeed))
 -----
 (2 ** (bool ** indeed))
 -----
@@ -18,6 +16,8 @@ Generated values:
 -----
 (2 ** (bool ** indeed))
 -----
+(1 ** (int ** indeed))
+-----
 (2 ** (bool ** indeed))
 -----
 (2 ** (bool ** indeed))
@@ -27,9 +27,11 @@ Generated values:
 -----
 (3 ** (int ** indeed))
 -----
-(3 ** (int ** indeed))
+(0 ** (bool ** indeed))
 -----
 (3 ** (int ** indeed))
+-----
+(0 ** (bool ** indeed))
 -----
 (3 ** (int ** indeed))
 -----
@@ -41,6 +43,4 @@ Generated values:
 -----
 (3 ** (int ** indeed))
 -----
-(3 ** (int ** indeed))
------
-(3 ** (int ** indeed))
+(0 ** (bool ** indeed))

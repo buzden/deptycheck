@@ -13,6 +13,14 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 
                  , vis = Export
                  , opts = []
                  , type =
+                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
                      mkTy
                        { name = "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]"
                        , type =
@@ -34,6 +42,13 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 
                                                    .$ var "{arg:1}")))
                        }
                  })
+          , IDef
+              emptyFC
+              "weight^Prelude.Types.Nat"
+              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
+              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
+                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
+              ]
           , IDef
               emptyFC
               "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]"
@@ -161,35 +176,24 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 
                              ]
                          ]
                      , scope =
-                         iCase
-                           { sc = var "^fuel_arg^"
-                           , ty = var "Data.Fuel.Fuel"
-                           , clauses =
-                               [    var "Data.Fuel.Dry"
-                                 .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.AtIndex[0(n), 3] (dry fuel)"))
-                                    .$ (var "<<DerivedGen.VectMaybeAnyType.Here>>" .$ var "^fuel_arg^" .$ var "inter^<n>" .$ var "inter^<{arg:1}>")
-                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
-                                 .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.AtIndex[0(n), 3] (spend fuel)"))
-                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
-                                        .$ (   var "::"
-                                            .$ (   var "Builtin.MkPair"
-                                                .$ var "Data.Nat1.one"
-                                                .$ (   var "<<DerivedGen.VectMaybeAnyType.Here>>"
-                                                    .$ var "^fuel_arg^"
-                                                    .$ var "inter^<n>"
-                                                    .$ var "inter^<{arg:1}>"))
-                                            .$ (   var "::"
-                                                .$ (   var "Builtin.MkPair"
-                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
-                                                    .$ (   var "<<DerivedGen.VectMaybeAnyType.There>>"
-                                                        .$ var "^sub^fuel_arg^"
-                                                        .$ var "inter^<n>"
-                                                        .$ var "inter^<{arg:1}>"))
-                                                .$ var "Nil")))
-                               ]
-                           }
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.AtIndex[0(n), 3] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.frequency"
+                             .$ (   var "::"
+                                 .$ (   var "Builtin.MkPair"
+                                     .$ var "Data.Nat1.one"
+                                     .$ (   var "<<DerivedGen.VectMaybeAnyType.Here>>"
+                                         .$ var "^fuel_arg^"
+                                         .$ var "inter^<n>"
+                                         .$ var "inter^<{arg:1}>"))
+                                 .$ (   var "::"
+                                     .$ (   var "Builtin.MkPair"
+                                         .$ (var "weight^Prelude.Types.Nat" .$ var "inter^<n>")
+                                         .$ (   var "<<DerivedGen.VectMaybeAnyType.There>>"
+                                             .$ var "^fuel_arg^"
+                                             .$ var "inter^<n>"
+                                             .$ var "inter^<{arg:1}>"))
+                                     .$ var "Nil")))
                      }
               ]
           ]
