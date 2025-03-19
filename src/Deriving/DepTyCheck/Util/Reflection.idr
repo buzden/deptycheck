@@ -773,8 +773,7 @@ export
 record ConsRecs where
   constructor MkConsRecs
   ||| Map from a type name to a list of its constructors with their weight info
-  -- TODO to change `SortedSet Nat` to `GenSignature`, but this requires moving all this to a module that can import `*/Derive.idr`
-  conWeights : SortedMap Name $ List (Con, (givenTyArgs : SortedSet Nat) -> ConWeightInfo)
+  conWeights : SortedMap Name $ (givenTyArgs : SortedSet Nat) -> List (Con, ConWeightInfo)
   ||| Derive a function for weighting type, if given type is weightable and needs a special function
   deriveWeightingFun : TypeInfo -> Maybe (Decl, Decl)
 
@@ -796,9 +795,8 @@ getConsRecs : Elaboration m => (niit : NamesInfoInTypes) => m ConsRecs
 getConsRecs = do
   consRecs <- for niit.types $ \targetType => logBounds {level=DetailedTrace} "consRec" [targetType] $ do
     crsForTy <- for targetType.cons $ \con => do
-      let rec = isRecursive {containingType=Just targetType} con
       tuneImpl <- search $ ProbabilityTuning con.name
-      w : Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length) <- case rec of
+      w : Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length) <- case isRecursive {containingType=Just targetType} con of
         --             ^^^^^^^^^^^^^^  ^^^^^   ^^^^^^^^^^^^^^^ <- set of directly recursive constructor arguments
         --                   |           \-- `Just` in this `Maybe` means that this constructor only contains direct recursion (not mutual one)
         --                    \------ Modifier of the standard weight expression
@@ -811,40 +809,39 @@ getConsRecs = do
             case (== targetType.name) <$> getAppVar arg.type of
               Just True => Just $ Just idx
               _         => if hasNameInsideDeep targetType.name arg.type then Nothing else Just Nothing
-          let logDirectRec = \ars => logPoint {level=DetailedTrace} "consRec" [targetType, con]
-                               "- directly recursive, rec args: \{show $ finToNat <$> ars.asList}"
-          maybe (pure ()) logDirectRec directlyRec
+          whenJust directlyRec $ \ars =>
+            logPoint {level=DetailedTrace} "consRec" [targetType, con] "- directly recursive, rec args: \{show $ finToNat <$> ars.asList}"
           pure (fuelWeightExpr, directlyRec)
       pure (con ** w)
     -- determine if this type is a nat-or-list-like data, i.e. one which we can measure for the probability
     let weightable = flip all crsForTy $ \case (_ ** Right (_, Nothing)) => False; _ => True
-    pure (whenT weightable targetType, crsForTy)
+    pure (toMaybe weightable targetType, crsForTy)
   let 0 _ : SortedMap Name (Maybe TypeInfo, List (con : Con ** Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length))) := consRecs
 
   let weightableTyArgs : (ars : List Arg) -> SortedMap Nat (TypeInfo, Name) -- <- a map from Fin ars.length to a weightable type and its argument name
       weightableTyArgs ars = fromList $ flip List.mapMaybe ars.withIdx $ \(idx, ar) =>
                                getAppVar ar.type >>= lookup' consRecs <&> fst >>= \tyN => [| (finToNat idx,,) tyN ar.name |]
 
-  let finalConsRecs = mapWithKey' consRecs $ \tyName, (_, cons) => do
-    let wTyArgs = maybe SortedMap.empty .| weightableTyArgs . args .| lookupType tyName
-    cons <&> \(con ** e) => (con,) $ \givenTyArgs => MkConWeightInfo $ e <&> \(wMod, directRecConArgs) => do
+  let finalConsRecs = mapWithKey' consRecs $ \tyName, (_, cons), givenTyArgs => do
+    let wTyArgs = (maybe SortedMap.empty .| weightableTyArgs . args .| lookupType tyName) `intersectionMap` givenTyArgs
+    cons <&> \(con ** e) => (con,) $ MkConWeightInfo $ e <&> \(wMod, directRecConArgs) => do
+      let conRetTyArgs = snd $ unAppAny con.type
+      let directRecConArgArgs = flip mapMaybe con.args $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => do
+                                  toMaybe (getAppVar conArgTy == Just tyName) conArgArgs
       -- default behaviour, spend fuel, weight proportional to fuel
       fromMaybe (SpendingFuel $ wMod . app `(Deriving.DepTyCheck.Util.Reflection.leftDepth) . varStr) $ do
       -- work only with given args
-      let wTyArgs = wTyArgs `intersectionMap` givenTyArgs
       -- fail-fast if no given weightable args
       guard $ not $ null wTyArgs
       -- If for any weightable type argument (in `wTyArgs`) there exists a directly recursive constructor arg (in `directRecConArgs`) that has
       -- this type argument strictly decreasing, we consider this constructor to be non-fuel-spending.
-      let conRetTyArgs = snd $ unAppAny con.type
-      let conArgs = con.args
-      let conArgNames = SortedSet.fromList $ mapMaybe name conArgs
+      let conArgNames = SortedSet.fromList $ mapMaybe name con.args
       (decrTy, weightExpr) <- foldAlt' wTyArgs.asList $ \(wTyArg, weightTy, weightArgName) => map (weightTy,) $ do
         conRetTyArg <- getExpr <$> getAt wTyArg conRetTyArgs
         guard $ isJust $ lookupCon =<< getAppVar conRetTyArg
         let freeNamesLessThanOrig = allVarNames' conRetTyArg `intersection` conArgNames
-        foldAlt' conArgs $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => whenTs (getAppVar conArgTy == Just tyName) $ do
-          getAt wTyArg conArgArgs >>= getAppVar . getExpr >>= \arg => whenT .| contains arg freeNamesLessThanOrig .|
+        foldAlt' directRecConArgArgs $ \conArgArgs => do
+          getAt wTyArg conArgArgs >>= getAppVar . getExpr >>= \arg => toMaybe .| contains arg freeNamesLessThanOrig .|
             var (weightFunName weightTy) .$ varStr (interimNamesWrapper weightArgName)
       pure $ StructurallyDecreasing decrTy $ wMod weightExpr
 
@@ -856,31 +853,26 @@ getConsRecs = do
     let inTyArg = arg $ foldl (\f, n => namedApp f n $ var n) .| var ty.name .| mapMaybe name ty.args
     let funSig = export' weightFunName $ piAll `(Data.Nat1.Nat1) $ map {piInfo := ImplicitArg} ty.args ++ [inTyArg]
 
-    let cons : List (con : Con ** _) := cons <&> \(con ** e) => (con ** either (const Nothing) snd e)
-    let wClauses = cons <&> \case
-      (con ** Nothing) => do
-        let consMatch = con.name `appAll` replicate (length $ filter ((== ExplicitArg) . piInfo) con.args) implicitTrue
-        patClause .| var weightFunName .$ consMatch .| liftWeight1
-      (con ** Just wArgs) => do
-        let lhsArgs : List (_, _) = mapI con.args $ \idx, arg => appArg arg <$> if contains idx wArgs
-                                      then let bindName = "arg^\{show idx}" in (Just bindName, bindVar bindName)
-                                      else (Nothing, implicitTrue)
-        let rhsArgs = mapMaybe (map (UN . Basic) . fst) lhsArgs
-        let callSelfOn : Name -> TTImp
-            callSelfOn n = var weightFunName .$ var n
-        let rhs : List Name -> TTImp
-            rhs [] = liftWeight1
-            rhs [x] = `(succ ~(callSelfOn x))
-            rhs xs  = `(succ $ foldMap @{%search} @{Maximal} ~(liftList $ xs <&> callSelfOn))
-        patClause (var weightFunName .$ (reAppAny .| var con.name .| snd <$> lhsArgs)) (rhs rhsArgs)
+    let wClauses = cons <&> \(con ** e) => do
+      let wArgs = either (const empty) (fromMaybe empty . snd) e
+      let lhsArgs : List (_, _) = mapI con.args $ \idx, arg => appArg arg <$> if contains idx wArgs
+                                    then let bindName = "arg^\{show idx}" in (Just bindName, bindVar bindName)
+                                    else (Nothing, implicitTrue)
+      let callSelfOn : Name -> TTImp
+          callSelfOn n = var weightFunName .$ var n
+      patClause (var weightFunName .$ (reAppAny .| var con.name .| snd <$> lhsArgs)) $ case mapMaybe (map (UN . Basic) . fst) lhsArgs of
+        []  => liftWeight1
+        [x] => `(succ ~(callSelfOn x))
+        xs  => `(succ $ foldMap @{%search} @{Maximal} ~(liftList $ xs <&> callSelfOn))
 
     pure (funSig, def weightFunName wClauses)
 
   pure $ MkConsRecs finalConsRecs deriveWeightingFun
 
 export
-lookupConsWithWeight : ConsRecs => TypeInfo -> Maybe $ List (Con, (givenTyArgs : SortedSet Nat) -> ConWeightInfo)
-lookupConsWithWeight @{crs} = lookup' crs.conWeights . name
+-- TODO to change `SortedSet Nat` to `GenSignature`, but this requires moving all this to a module that can import `*/Derive.idr`
+lookupConsWithWeight : ConsRecs => TypeInfo -> (givenTyArgs : SortedSet Nat) -> Maybe $ List (Con, ConWeightInfo)
+lookupConsWithWeight @{crs} ti givs = lookup' crs.conWeights ti.name <&> (`apply` givs)
 
 export
 deriveWeightingFun : ConsRecs => TypeInfo -> Maybe (Decl, Decl)
