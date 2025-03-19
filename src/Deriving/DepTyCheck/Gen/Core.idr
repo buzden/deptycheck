@@ -30,10 +30,8 @@ ConstructorDerivator => DerivatorCore where
       canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
     -- calculate which constructors are recursive and spend fuel, and which are not
-    let Just consRecs = lookupConsWithWeight sig.targetType
+    let Just consRecs = lookupConsWithWeight sig.targetType $ mapIn finToNat sig.givenParams
       | Nothing => fail "INTERNAL ERROR: unknown type for consRecs: \{show sig.targetType.name}"
-    let givens = mapIn finToNat sig.givenParams
-    let consRecs = map @{Compose} (`apply` givens) consRecs
 
     -- ask to derive all needed weigthing functions, if any
     traverse_ needWeightFun $ mapMaybe (usedWeightFun . snd) consRecs
