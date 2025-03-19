@@ -14,16 +14,16 @@ uniq: True
 list: ["b", "g", "h"]
 uniq: True
 -----------
-list: ["g", "f", "c", "d", "h"]
+list: ["b", "f", "c", "d", "h"]
 uniq: True
 -----------
-list: ["a", "g", "c", "b"]
+list: ["g", "c"]
 uniq: True
 -----------
-list: ["a", "h", "c", "b", "d", "f"]
+list: ["f", "h", "d"]
 uniq: True
 -----------
-list: ["f"]
+list: ["a", "b", "c", "h", "d", "f", "g"]
 uniq: True
 -----------
 list: ["g", "d", "b", "a", "h", "f", "c"]

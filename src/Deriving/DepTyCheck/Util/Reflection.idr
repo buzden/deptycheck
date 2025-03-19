@@ -800,27 +800,25 @@ getConsRecs = do
   consRecs <- for niit.types $ \targetType => logBounds {level=DetailedTrace} "consRec" [targetType] $ do
     crsForTy <- for targetType.cons $ \con => do
       tuneImpl <- search $ ProbabilityTuning con.name
-      w : Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length) <- case isRecursive {containingType=Just targetType} con of
-        --             ^^^^^^^^^^^^^^  ^^^^^   ^^^^^^^^^^^^^^^ <- set of directly recursive constructor arguments
-        --                   |           \-- `Just` in this `Maybe` means that this constructor only contains direct recursion (not mutual one)
+      w : Either Nat1 (TTImp -> TTImp, SortedSet $ Fin con.args.length) <- case isRecursive {containingType=Just targetType} con of
+        --             ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^ <- set of directly recursive constructor arguments
         --                    \------ Modifier of the standard weight expression
         False => pure $ Left $ maybe one (\impl => tuneWeight @{impl} one) tuneImpl
         True  => Right <$> do
           fuelWeightExpr <- case tuneImpl of
             Nothing   => pure id
             Just impl => quote (tuneWeight @{impl}) <&> \wm, expr => workaroundFromNat $ wm `applySyn` expr
-          let directlyRec = filter (not . null) $ map (fromList . mapMaybe id) $ for con.args.withIdx $ \(idx, arg) => do
-            case (== targetType.name) <$> getAppVar arg.type of
-              Just True => Just $ Just idx
-              _         => if hasNameInsideDeep targetType.name arg.type then Nothing else Just Nothing
-          whenJust directlyRec $ \ars =>
-            logPoint {level=DetailedTrace} "consRec" [targetType, con] "- directly recursive, rec args: \{show $ finToNat <$> ars.asList}"
-          pure (fuelWeightExpr, directlyRec)
+          let directlyRecArgs : List $ Fin con.args.length := flip mapMaybe con.args.withIdx $ \idxarg => do
+            argTy <- getAppVar (snd idxarg).type
+            whenT .| argTy == targetType.name .| fst idxarg
+          when (not $ null directlyRecArgs) $
+            logPoint {level=DetailedTrace} "consRec" [targetType, con] "- directly recursive args: \{show $ finToNat <$> directlyRecArgs}"
+          pure (fuelWeightExpr, fromList directlyRecArgs)
       pure (con ** w)
     -- determine if this type is a nat-or-list-like data, i.e. one which we can measure for the probability
-    let weightable = flip all crsForTy $ \case (_ ** Right (_, Nothing)) => False; _ => True
+    let weightable = flip any crsForTy $ \case (_ ** Right (_, dra)) => not $ null dra; _ => False
     pure (toMaybe weightable targetType, crsForTy)
-  let 0 _ : SortedMap Name (Maybe TypeInfo, List (con : Con ** Either Nat1 (TTImp -> TTImp, Maybe $ SortedSet $ Fin con.args.length))) := consRecs
+  let 0 _ : SortedMap Name (Maybe TypeInfo, List (con : Con ** Either Nat1 (TTImp -> TTImp, SortedSet $ Fin con.args.length))) := consRecs
 
   let weightableTyArgs : (ars : List Arg) -> SortedMap Nat (TypeInfo, Name) -- <- a map from Fin ars.length to a weightable type and its argument name
       weightableTyArgs ars = fromList $ flip List.mapMaybe ars.withIdx $ \(idx, ar) =>
@@ -858,7 +856,7 @@ getConsRecs = do
     let funSig = export' weightFunName $ piAll `(Data.Nat1.Nat1) $ map {piInfo := ImplicitArg} ty.args ++ [inTyArg]
 
     let wClauses = cons <&> \(con ** e) => do
-      let wArgs = either (const empty) (fromMaybe empty . snd) e
+      let wArgs = either (const empty) snd e
       let lhsArgs : List (_, _) = mapI con.args $ \idx, arg => appArg arg <$> if contains idx wArgs && arg.count == MW
                                     then let bindName = "arg^\{show idx}" in (Just bindName, bindVar bindName)
                                     else (Nothing, implicitTrue)
