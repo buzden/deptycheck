@@ -6,8 +6,8 @@ LOG deptycheck.derive.least-effort:7: Data.List.Sorted.FirstGT[] E - used final 
 LOG deptycheck.derive.least-effort:7: Data.List.Sorted.FirstGT[] NE - used final order: [#3 (n), #4, #2 (prf)]
 LOG deptycheck.derive.least-effort:7: Data.List.Sorted.FirstGT[0] E - used final order: []
 LOG deptycheck.derive.least-effort:7: Data.List.Sorted.FirstGT[0] NE - used final order: [#4, #2 (prf)]
-LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0] LTEZero - used final order: [#0 (right)]
-LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0] LTESucc - used final order: [#2]
+LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n)] LTEZero - used final order: [#0 (right)]
+LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n)] LTESucc - used final order: [#2]
 LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] Z - used final order: []
 LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: [#0]
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
@@ -528,11 +528,11 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                            , clauses =
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0] (dry fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0(n)] (dry fuel)"))
                                     .$ (var "<<Data.Nat.LTEZero>>" .$ var "^fuel_arg^" .$ var "inter^<n>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0(n)] (spend fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"

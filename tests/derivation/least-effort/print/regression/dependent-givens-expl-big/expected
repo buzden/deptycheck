@@ -1,7 +1,7 @@
 1/1: Building DerivedGen (DerivedGen.idr)
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (n : Nat) -> (v : VectMaybeAnyType n) -> Gen MaybeEmpty (i : Fin n ** (t : MaybeAnyType ** AtIndex n i t v))
-LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0, 3] Here - used final order: []
-LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0, 3] There - used final order: [#5]
+LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 3] Here - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 3] There - used final order: [#5]
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> MkArg MW ExplicitArg (Just "outer^<n>") implicitTrue
 .=> MkArg MW ExplicitArg (Just "outer^<v>") implicitTrue
@@ -167,11 +167,11 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0, 3] 
                            , clauses =
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.AtIndex[0, 3] (dry fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.AtIndex[0(n), 3] (dry fuel)"))
                                     .$ (var "<<DerivedGen.VectMaybeAnyType.Here>>" .$ var "^fuel_arg^" .$ var "inter^<n>" .$ var "inter^<{arg:1}>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.AtIndex[0, 3] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.AtIndex[0(n), 3] (spend fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"

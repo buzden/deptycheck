@@ -1,7 +1,7 @@
 1/1: Building DerivedGen (DerivedGen.idr)
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (xs : X) -> (ys : X) -> Gen MaybeEmpty (Y xs ys)
-LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0, 1] A - used final order: []
-LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0, 1] B - used final order: [#4]
+LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0(xs), 1(ys)] A - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0(xs), 1(ys)] B - used final order: [#4]
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> MkArg MW ExplicitArg (Just "outer^<xs>") implicitTrue
 .=> MkArg MW ExplicitArg (Just "outer^<ys>") implicitTrue
@@ -150,11 +150,11 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0, 1] B - used final order: [
                            , clauses =
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0, 1] (dry fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0(xs), 1(ys)] (dry fuel)"))
                                     .$ (var "<<DerivedGen.A>>" .$ var "^fuel_arg^" .$ var "inter^<xs>" .$ var "inter^<ys>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0, 1] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0(xs), 1(ys)] (spend fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"

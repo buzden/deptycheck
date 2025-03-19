@@ -1,9 +1,9 @@
 1/2: Building Decls (Decls.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (rs : Regs r) -> (t : Ty) -> Gen MaybeEmpty (Expr rs t)
-LOG deptycheck.derive.least-effort:7: Decls.Expr[0, 1, 2] Read - used final order: [#4]
-LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0, 2, 3] Here - used final order: []
-LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0, 2, 3] There - used final order: [#5]
+LOG deptycheck.derive.least-effort:7: Decls.Expr[0(r), 1, 2] Read - used final order: [#4]
+LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] Here - used final order: []
+LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used final order: [#5]
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> MkArg MW ImplicitArg (Just "outer^<r>") implicitTrue
 .=> MkArg MW ExplicitArg (Just "outer^<rs>") implicitTrue
@@ -105,7 +105,7 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0, 2, 3] There - used fina
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Decls.Expr[0, 1, 2] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "Decls.Expr[0(r), 1, 2] (non-recursive)"))
                          .$ (var "<<Decls.Read>>" .$ var "^fuel_arg^" .$ var "inter^<r>" .$ var "inter^<{arg:1}>" .$ var "inter^<{arg:2}>")
                      }
               ]
@@ -252,7 +252,7 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0, 2, 3] There - used fina
                            , clauses =
                                [    var "Data.Fuel.Dry"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Decls.RegIsType[0, 2, 3] (dry fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Decls.RegIsType[0(r), 2, 3] (dry fuel)"))
                                     .$ (   var "<<Decls.Here>>"
                                         .$ var "^fuel_arg^"
                                         .$ var "inter^<r>"
@@ -260,7 +260,7 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0, 2, 3] There - used fina
                                         .$ var "inter^<{arg:4}>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Decls.RegIsType[0, 2, 3] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Decls.RegIsType[0(r), 2, 3] (spend fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
