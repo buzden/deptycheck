@@ -1,10 +1,10 @@
 1/1: Building DerivedGen (DerivedGen.idr)
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty Z
 LOG deptycheck.derive.least-effort:7: DerivedGen.Z[] MkZ - used final order: [#1 (i), #2 (x), #3 (y)]
-LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0, 1] Y0 - used final order: []
-LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0, 1] Y2 - used final order: []
-LOG deptycheck.derive.least-effort:7: DerivedGen.X[0, 1] X0 - used final order: []
-LOG deptycheck.derive.least-effort:7: DerivedGen.X[0, 1] X2 - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0(n), 1] Y0 - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0(n), 1] Y2 - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.X[0(n), 1] X0 - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.X[0(n), 1] X2 - used final order: []
 LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[] FZ - used final order: [#0 (k)]
 LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[] FS - used final order: [#1]
 LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] Z - used final order: []
@@ -218,7 +218,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0, 1] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0(n), 1] (non-recursive)"))
                          .$ (   var "Test.DepTyCheck.Gen.oneOf"
                              .! ("em", var "MaybeEmpty")
                              .$ (   var "::"
@@ -298,7 +298,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0, 1] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0(n), 1] (non-recursive)"))
                          .$ (   var "Test.DepTyCheck.Gen.oneOf"
                              .! ("em", var "MaybeEmpty")
                              .$ (   var "::"
