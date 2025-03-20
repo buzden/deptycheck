@@ -1,0 +1,4 @@
+package derive-test
+
+depends = deptycheck
+        , sorted-tree-naive
