@@ -133,7 +133,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[] (non-spending)"))
                          .$ (var "<<DerivedGen.MkY>>" .$ var "^fuel_arg^")
                      }
               ]
@@ -180,7 +180,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0] (non-spending)"))
                          .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>")
                      }
               ]
@@ -234,7 +234,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-spending)"))
                          .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^")
                      }
               ]
@@ -307,7 +307,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                     .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))

@@ -9,7 +9,7 @@ license = "MPL-2.0"
 sourcedir = "src"
 builddir = ".build"
 
-version = 0.0.250305
+version = 0.0.250319
 
 modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen

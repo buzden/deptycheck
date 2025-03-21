@@ -1,0 +1,205 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (sx : SnocListTyMut) -> (mut : Mut) -> Gen MaybeEmpty (idx : IndexIn sx ** (ty : Ty ** AtIndex idx ty mut))
+LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex[0(sx), 3] Here' - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex[0(sx), 3] There' - used final order: [#6]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ExplicitArg (Just "outer^<sx>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<mut>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "weight^DerivedGen.SnocListTyMut"
+                       , type = MkArg MW ExplicitArg Nothing (var "DerivedGen.SnocListTyMut") .-> var "Data.Nat1.Nat1"
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<DerivedGen.AtIndex>[0, 3]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "sx") (var "DerivedGen.SnocListTyMut")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Mut")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (   var "Builtin.DPair.DPair"
+                                   .$ (var "DerivedGen.IndexIn" .$ var "sx")
+                                   .$ (    MkArg MW ExplicitArg (Just "idx") (var "DerivedGen.IndexIn" .$ var "sx")
+                                       .=>    var "Builtin.DPair.DPair"
+                                           .$ var "DerivedGen.Ty"
+                                           .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
+                                               .=> var "DerivedGen.AtIndex" .! ("sx", var "sx") .$ var "idx" .$ var "{arg:2}" .$ var "{arg:1}")))
+                       }
+                 })
+          , IDef
+              emptyFC
+              "weight^DerivedGen.SnocListTyMut"
+              [ var "weight^DerivedGen.SnocListTyMut" .$ var "DerivedGen.Lin" .= var "Data.Nat1.one"
+              ,    var "weight^DerivedGen.SnocListTyMut" .$ (var "DerivedGen.(:<)" .$ bindVar "arg^0" .$ implicitTrue .$ implicitTrue)
+                .= var "succ" .$ (var "weight^DerivedGen.SnocListTyMut" .$ var "arg^0")
+              ]
+          , IDef
+              emptyFC
+              "<DerivedGen.AtIndex>[0, 3]"
+              [    var "<DerivedGen.AtIndex>[0, 3]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<sx>" .$ bindVar "inter^<{arg:1}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.Here'>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "sx") (var "DerivedGen.SnocListTyMut")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Mut")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ (var "DerivedGen.IndexIn" .$ var "sx")
+                                                  .$ (    MkArg MW ExplicitArg (Just "idx") (var "DerivedGen.IndexIn" .$ var "sx")
+                                                      .=>    var "Builtin.DPair.DPair"
+                                                          .$ var "DerivedGen.Ty"
+                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
+                                                              .=>    var "DerivedGen.AtIndex"
+                                                                  .! ("sx", var "sx")
+                                                                  .$ var "idx"
+                                                                  .$ var "{arg:2}"
+                                                                  .$ var "{arg:1}")))
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.There'>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "sx") (var "DerivedGen.SnocListTyMut")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Mut")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ (var "DerivedGen.IndexIn" .$ var "sx")
+                                                  .$ (    MkArg MW ExplicitArg (Just "idx") (var "DerivedGen.IndexIn" .$ var "sx")
+                                                      .=>    var "Builtin.DPair.DPair"
+                                                          .$ var "DerivedGen.Ty"
+                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
+                                                              .=>    var "DerivedGen.AtIndex"
+                                                                  .! ("sx", var "sx")
+                                                                  .$ var "idx"
+                                                                  .$ var "{arg:2}"
+                                                                  .$ var "{arg:1}")))
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.Here'>>"
+                             [ withClause
+                                 { lhs =
+                                        var "<<DerivedGen.Here'>>"
+                                     .$ bindVar "^cons_fuel^"
+                                     .$ (var "DerivedGen.(:<)" .$ bindVar "sx" .$ bindVar "ty" .$ bindVar "mut")
+                                     .$ bindVar "to_be_deceqed^^mut0"
+                                 , rig = MW
+                                 , wval = var "Decidable.Equality.decEq" .$ var "to_be_deceqed^^mut0" .$ var "mut"
+                                 , prf = Nothing
+                                 , flags = []
+                                 , clauses =
+                                     [       var "<<DerivedGen.Here'>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ (var "DerivedGen.(:<)" .$ bindVar "sx" .$ bindVar "ty" .$ bindVar "mut")
+                                          .$ bindVar "mut"
+                                          .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                       .=    var "Test.DepTyCheck.Gen.label"
+                                          .$ (var "fromString" .$ primVal (Str "DerivedGen.Here' (orders)"))
+                                          .$ (   var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "Builtin.DPair.MkDPair"
+                                                  .$ implicitTrue
+                                                  .$ (   var "Builtin.DPair.MkDPair"
+                                                      .$ implicitTrue
+                                                      .$ (var "DerivedGen.Here'" .! ("sx", var "sx") .! ("mut", var "mut") .! ("ty", var "ty")))))
+                                     ,       var "<<DerivedGen.Here'>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ (var "DerivedGen.(:<)" .$ bindVar "sx" .$ bindVar "ty" .$ bindVar "mut")
+                                          .$ bindVar "to_be_deceqed^^mut0"
+                                          .$ (var "Prelude.No" .$ implicitTrue)
+                                       .= var "empty"
+                                     ]
+                                 }
+                             , var "<<DerivedGen.Here'>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.There'>>"
+                             [       var "<<DerivedGen.There'>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (var "DerivedGen.(:<)" .$ bindVar "sx" .$ bindVar "x" .$ bindVar "m")
+                                  .$ bindVar "mut"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.There' (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<DerivedGen.AtIndex>[0, 3]" .$ var "^cons_fuel^" .$ var "sx" .$ var "mut")
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:1}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [       var "Builtin.DPair.MkDPair"
+                                                         .$ bindVar "i"
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "ty" .$ bindVar "^bnd^{arg:3}")
+                                                      .=    var "Prelude.pure"
+                                                         .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                         .$ (   var "Builtin.DPair.MkDPair"
+                                                             .$ implicitTrue
+                                                             .$ (   var "Builtin.DPair.MkDPair"
+                                                                 .$ implicitTrue
+                                                                 .$ (   var "DerivedGen.There'"
+                                                                     .! ("m", var "m")
+                                                                     .! ("x", var "x")
+                                                                     .! ("mut", implicitTrue)
+                                                                     .! ("ty", implicitTrue)
+                                                                     .! ("sx", implicitTrue)
+                                                                     .! ("i", implicitTrue)
+                                                                     .$ var "^bnd^{arg:3}")))
+                                                    ]
+                                                }))
+                             , var "<<DerivedGen.There'>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.AtIndex[0(sx), 3] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.frequency"
+                             .$ (   var "::"
+                                 .$ (   var "Builtin.MkPair"
+                                     .$ var "Data.Nat1.one"
+                                     .$ (var "<<DerivedGen.Here'>>" .$ var "^fuel_arg^" .$ var "inter^<sx>" .$ var "inter^<{arg:1}>"))
+                                 .$ (   var "::"
+                                     .$ (   var "Builtin.MkPair"
+                                         .$ (var "weight^DerivedGen.SnocListTyMut" .$ var "inter^<sx>")
+                                         .$ (var "<<DerivedGen.There'>>" .$ var "^fuel_arg^" .$ var "inter^<sx>" .$ var "inter^<{arg:1}>"))
+                                     .$ var "Nil")))
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.AtIndex>[0, 3]" .$ var "^outmost-fuel^" .$ var "outer^<sx>" .$ var "outer^<mut>"
+      }
+

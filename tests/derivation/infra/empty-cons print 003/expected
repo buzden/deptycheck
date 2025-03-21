@@ -64,7 +64,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Prelude.Basics.Bool[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "Prelude.Basics.Bool[] (non-spending)"))
                          .$ (   var "Test.DepTyCheck.Gen.oneOf"
                              .! ("em", var "MaybeEmpty")
                              .$ (   var "::"

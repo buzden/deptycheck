@@ -239,7 +239,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                             .$ (var "::" .$ (var "<<DerivedGen.TL>>" .$ var "^fuel_arg^") .$ var "Nil")))
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.D[] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.D[] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<DerivedGen.JJ>>" .$ var "^fuel_arg^"))
@@ -315,7 +315,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Prelude.Basics.Bool[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "Prelude.Basics.Bool[] (non-spending)"))
                          .$ (   var "Test.DepTyCheck.Gen.oneOf"
                              .! ("em", var "MaybeEmpty")
                              .$ (   var "::"

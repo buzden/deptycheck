@@ -6,6 +6,8 @@ import public Deriving.DepTyCheck.Util.Reflection
 
 %default total
 
+%hide Text.PrettyPrint.Bernardy.Core.Doc.(>>=)
+
 ----------------------------
 --- Derivation functions ---
 ----------------------------
@@ -27,18 +29,21 @@ ConstructorDerivator => DerivatorCore where
     consBodies <- for sig.targetType.cons $ \con => logBounds {level=Info} "consBody" [sig, con] $
       canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
-    -- calculate which constructors are recursive and which are not
-    let Just consRecs = lookupConsWithWeight sig.targetType
+    -- calculate which constructors are recursive and spend fuel, and which are not
+    let Just consRecs = lookupConsWithWeight sig.targetType $ mapIn finToNat sig.givenParams
       | Nothing => fail "INTERNAL ERROR: unknown type for consRecs: \{show sig.targetType.name}"
+
+    -- ask to derive all needed weigthing functions, if any
+    traverse_ needWeightFun $ mapMaybe (usedWeightFun . snd) consRecs
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
 
     -- generate the case expression deciding whether will we go into recursive constructors or not
-    let outmostRHS = fuelDecisionExpr fuelArg consRecs
+    let outmostRHS = fuelDecisionExpr fuelArg $ map @{Compose} weightExpr consRecs
 
     -- return function definition
-    pure [ canonicDefaultLHS' namesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
+    pure [ canonicDefaultLHS' interimNamesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
 
   where
 
@@ -46,46 +51,37 @@ ConstructorDerivator => DerivatorCore where
     consGenName con = UN $ Basic $ "<<\{show con.name}>>"
     -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend
 
-    -- this is a workarond for Idris compiler bug #2983
-    namesWrapper : String -> String
-    namesWrapper s = "inter^<\{s}>"
-
-    fuelDecisionExpr : (fuelArg : String) -> List (Con, ConWeightInfo) -> TTImp
+    fuelDecisionExpr : (fuelArg : String) -> List (Con, Either TTImp (String -> TTImp)) -> TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
-      let reflectNat1 : Nat1 -> TTImp
-          reflectNat1 $ FromNat 1 = liftWeight1
-          reflectNat1 $ FromNat n = `(fromInteger ~(primVal $ BI $ cast n))
-
-      let callConstFreqs : CTLabel -> (fuel : TTImp) -> List (Con, Nat1) -> TTImp
-          callConstFreqs l fuel cons = if isJust $ find ((/=) 1 . toNat . snd) cons
-            then callFrequency l $ cons <&> bimap reflectNat1 (callConsGen fuel) . swap
+      let callConstFreqs : CTLabel -> (fuel : TTImp) -> List (Con, TTImp) -> TTImp
+          callConstFreqs l fuel cons = if isJust $ find (((/=) liftWeight1) . snd) cons
+            then callFrequency l $ cons <&> map (callConsGen fuel) . swap
             else callOneOf l $ cons <&> callConsGen fuel . fst
 
       -- check if there are any non-recursive constructors
-      let Nothing = for consRecs $ \(con, w) => (con,) <$> getLeft w.weight
+      let Nothing = for consRecs $ \(con, w) => (con,) <$> getLeft w
           -- only constantly weighted constructors (usually, non-recusrive), thus just call all without spending fuel
-        | Just consRecs => callConstFreqs "\{logPosition sig} (non-recursive)".label (varStr fuelAr) consRecs
+        | Just consRecs => callConstFreqs "\{logPosition sig} (non-spending)".label (varStr fuelAr) consRecs
 
       -- pattern match on the fuel argument
       iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
-          let nonRecCons = mapMaybe (\(con, w) => (con,) <$> getLeft w.weight) consRecs in
-          var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonRecCons
+          let nonSpendCons = mapMaybe (\(con, w) => (con,) <$> getLeft w) consRecs in
+          var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonSpendCons
 
-        , do -- if fuel is `More`, spend one fuel and call all constructors on the rest
+        , do -- if fuel is `More`, call spending constructors on the rest and other on the original fuel
           let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-          let selectFuel = \r => varStr $ if mustSpendFuel r then subFuelArg else fuelAr
-          let weight = either reflectNat1 (`apply` subFuelArg) . weight
-          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (spend fuel)".label
-                                                           (consRecs <&> \(con, rec) => (weight rec, callConsGen (selectFuel rec) con))
+          let weightAndFuel = either ((varStr fuelAr,)) (\f => (varStr subFuelArg, f subFuelArg))
+          var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (non-dry fuel)".label
+            (consRecs <&> \(con, rec) => let (f, w) = weightAndFuel rec in (w, callConsGen f con))
         ]
 
       where
 
         callConsGen : (fuel : TTImp) -> Con -> TTImp
-        callConsGen fuel con = canonicDefaultRHS' namesWrapper sig .| consGenName con .| fuel
+        callConsGen fuel con = canonicDefaultRHS' interimNamesWrapper sig .| consGenName con .| fuel
 
 export
 MainCoreDerivator : ConstructorDerivator => DerivatorCore

@@ -109,7 +109,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.FinInc[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.FinInc[] (non-spending)"))
                          .$ (var "<<DerivedGen.MkFinInc>>" .$ var "^fuel_arg^")
                      }
               ]
@@ -219,7 +219,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                     .$ (var "<<Data.Nat.LTEZero>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Data.Nat.LTEZero>>" .$ var "^fuel_arg^"))
@@ -301,7 +301,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                     .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))

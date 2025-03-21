@@ -114,7 +114,7 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-spending)"))
                          .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^")
                      }
               ]
@@ -152,7 +152,7 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Data.So.So[0] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "Data.So.So[0] (non-spending)"))
                          .$ (var "<<Data.So.Oh>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>")
                      }
               ]
@@ -227,7 +227,7 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.BoolP[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.BoolP[] (non-spending)"))
                          .$ (   var "Test.DepTyCheck.Gen.oneOf"
                              .! ("em", var "MaybeEmpty")
                              .$ (   var "::"
@@ -265,7 +265,7 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Builtin.Unit[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "Builtin.Unit[] (non-spending)"))
                          .$ (var "<<Builtin.MkUnit>>" .$ var "^fuel_arg^")
                      }
               ]
