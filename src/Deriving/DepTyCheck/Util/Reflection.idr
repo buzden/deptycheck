@@ -859,7 +859,7 @@ getConsRecs = do
 
     let wClauses = cons <&> \(con ** e) => do
       let wArgs = either (const empty) (fromMaybe empty . snd) e
-      let lhsArgs : List (_, _) = mapI con.args $ \idx, arg => appArg arg <$> if contains idx wArgs
+      let lhsArgs : List (_, _) = mapI con.args $ \idx, arg => appArg arg <$> if contains idx wArgs && arg.count == MW
                                     then let bindName = "arg^\{show idx}" in (Just bindName, bindVar bindName)
                                     else (Nothing, implicitTrue)
       let callSelfOn : Name -> TTImp
