@@ -243,6 +243,10 @@ public export
 liftList : Foldable f => f TTImp -> TTImp
 liftList = foldr (\l, r => `(~l :: ~r)) `([])
 
+public export
+liftList' : Foldable f => f TTImp -> TTImp
+liftList' = foldr (\l, r => `(Prelude.(::) ~l ~r)) `(Prelude.Nil)
+
 export
 liftWeight1 : TTImp
 liftWeight1 = `(Data.Nat1.one)
@@ -863,7 +867,7 @@ getConsRecs = do
       patClause (var weightFunName .$ (reAppAny .| var con.name .| snd <$> lhsArgs)) $ case mapMaybe (map (UN . Basic) . fst) lhsArgs of
         []  => liftWeight1
         [x] => `(succ ~(callSelfOn x))
-        xs  => `(succ $ foldMap @{%search} @{Maximal} ~(liftList $ xs <&> callSelfOn))
+        xs  => `(succ $ Prelude.concat @{Maximum} ~(liftList' $ xs <&> callSelfOn))
 
     pure (funSig, def weightFunName wClauses)
 
