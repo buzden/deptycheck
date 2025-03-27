@@ -10,7 +10,7 @@ import System.Random.Pure.StdGen
 
 main : IO ()
 main = do
-  let vals = unGenTryN 10 someStdGen $ genSortedBinTree $ limit 6
+  let vals = unGenTryN 10 someStdGen $ genSortedBinTree $ limit 5
   Lazy.for_ vals $ \tree => do
     putStrLn "--------------"
     let list = toList tree

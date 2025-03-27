@@ -117,6 +117,10 @@ areAllTyArgsNamed $ MkTypeInfo _ ars cns with (all isNamedArg ars, all areConArg
 -------------------------------------
 
 public export %inline
+(.tyName) : TypeInfo -> Name
+(.tyName) = name
+
+public export %inline
 (.tyArgs) : TypeInfo -> List Arg
 (.tyArgs) = args
 

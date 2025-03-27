@@ -6,16 +6,26 @@ import DistrCheckCommon
 
 %default total
 
+%hint DA : ConstructorDerivator; DA = LeastEffort
+
 data ListNat : Type
-data Constraint : ListNat -> Type
+data Constraint : Nat -> ListNat -> Type
+
+namespace Hide
+  export
+  f : ListNat -> ListNat
+  f = id
 
 data ListNat : Type where
   Nil  : ListNat
-  (::) : Nat -> (xs : ListNat) -> Constraint xs => ListNat
+  (::) : (x : Nat) -> (xs : ListNat) -> Constraint x (f xs) => ListNat
 
-data Constraint : ListNat -> Type where
-  Empty    : Constraint []
-  NonEmpty : Constraint $ (x::xs) @{prf}
+data Constraint : Nat -> ListNat -> Type where
+  Empty    : Constraint e []
+  NonEmpty : Constraint e $ (x::xs) @{prf}
+  Any1     : Constraint e xs
+  Any2     : Constraint e xs
+  Any3     : Constraint e xs
 
 length : ListNat -> Nat
 length []      = Z

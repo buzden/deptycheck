@@ -79,7 +79,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.R[] R - used final order: [#0 (
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.R[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.R[] (non-spending)"))
                          .$ (var "<<DerivedGen.R>>" .$ var "^fuel_arg^")
                      }
               ]
