@@ -384,12 +384,15 @@ deriveGenPrinter ty = do
   when logDerivation $ declare `[%logging "deptycheck.derive.print" 5; %logging "deptycheck.derive.least-effort" 7]
   logSugaredTerm "deptycheck.derive.print" (toNatLevel Details) "type" ty
   expr <- deriveGenExpr ty
-  expr <- quote expr
+  shownExpr : String <- if printTTImp then resugarTerm (Just 160) expr else pure ""
+
   printTTImp <- quote printTTImp
+  expr <- quote expr
+  shownExpr <- quote shownExpr
   declare `[
     export
     main : IO Unit
     main = do
-      putStr $ if ~printTTImp then interpolate ~expr else show ~expr
+      putStr $ if ~printTTImp then interpolate ~expr else ~shownExpr
       putStrLn ""
   ]
