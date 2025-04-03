@@ -54,33 +54,39 @@ record ExternalGenSignature where
   targetType : TypeInfo
   {auto 0 targetTypeCorrect : AllTyArgsNamed targetType}
   givenParams : SortedMap (Fin targetType.args.length) (ArgExplicitness, Name)
+  givensOrder : Vect givenParams.size $ Fin givenParams.size -- must be a permutation
+  --gendOrder : Vect generatedParams.size $ Fin generatedParams.size -- must be a permutation
 
 namespace ExternalGenSignature
 
+  -- characterises external generator signatures ignoring particular order of given/generated arguments
   export
   characteristics : ExternalGenSignature -> (String, List Nat)
-  characteristics $ MkExternalGenSignature ty giv = (show ty.name, toNatList $ keys giv)
+  characteristics $ MkExternalGenSignature ty giv _ = (show ty.name, toNatList $ keys giv)
 
+-- Compares external generator signatures ignoring particular order of given/generated arguments
 public export
 Eq ExternalGenSignature where
   (==) = (==) `on` characteristics
 
+-- Compares external generator signatures ignoring particular order of given/generated arguments
 public export
 Ord ExternalGenSignature where
   compare = comparing characteristics
 
 export
 internalise : (extSig : ExternalGenSignature) -> Subset GenSignature $ \sig => sig.givenParams.size = extSig.givenParams.size
-internalise $ MkExternalGenSignature ty giv = Element (MkGenSignature ty $ keySet giv) $ keySetSize giv
+internalise $ MkExternalGenSignature ty giv _ = Element (MkGenSignature ty $ keySet giv) $ keySetSize giv
 
 ---------------------------------
 --- Infrastructural functions ---
 ---------------------------------
 
 callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> TTImp
-callExternalGen sig topmost fuel values = foldl (flip apply) (appFuel topmost fuel) $ sig.givenParams.asVect `zip` values <&> \case
-  ((_, ExplicitArg, _   ), value) => (.$ value)
-  ((_, ImplicitArg, name), value) => \f => namedApp f name value
+callExternalGen sig topmost fuel values =
+  foldl (flip apply) (appFuel topmost fuel) $ reorder sig.givensOrder (sig.givenParams.asVect `zip` values) <&> \case
+    ((_, ExplicitArg, _   ), value) => (.$ value)
+    ((_, ImplicitArg, name), value) => \f => namedApp f name value
 
 --- Particular implementations producing the-core-derivation-function closure ---
 

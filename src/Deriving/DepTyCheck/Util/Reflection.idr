@@ -22,6 +22,7 @@ import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedSet
 
+import public Decidable.Equality
 import public Deriving.DepTyCheck.Util.Logging
 
 import public Language.Reflection.Compat
@@ -36,6 +37,48 @@ import public Syntax.Monad.Logic
 import public Text.PrettyPrint.Bernardy
 
 %default total
+
+namespace Util
+
+  -- TODO Wrongly placed, to be moved somewhere else
+
+  sortedPreservesLength : Ord a => (xs : List a) -> length (sort xs) = xs.length
+  sortedPreservesLength xs = believe_me $ Refl {x=Z} -- in the sake of honesty, we need to prove this
+
+  export
+  orderIndices : Ord a => (xs : List a) -> Vect xs.length $ Fin xs.length
+  orderIndices [] = []
+  orderIndices xs@(_::_) = do
+    let idxMap = SortedMap.fromList $ mapI (sort xs) $ flip $ rewrite sortedPreservesLength xs in (,)
+    fromMaybe FZ . lookup' idxMap <$> xs.asVect
+    --        ^^ - must never happen, if `Ord` is correct
+
+  export
+  reorder : Vect n (Fin n) -> Vect n a -> Vect n a
+  reorder perm orig = perm <&> flip index orig
+
+  toList : Vect n a -> List a
+  toList []      = []
+  toList (x::xs) = x :: Util.toList xs
+
+  toListLength : (xs : Vect n a) -> length (Util.toList xs) = n
+  toListLength []      = Refl
+  toListLength (x::xs) = rewrite toListLength xs in Refl
+
+  export
+  reorder' : (xs : List a) -> Vect xs.length (Fin xs.length) -> (ys : List a ** ys.length = xs.length)
+  reorder' orig perm = do
+    let xs = reorder perm orig.asVect
+    (Util.toList xs ** toListLength xs)
+
+  export
+  mapAndPerm : Ord a => List (a, b) -> Either String (xs : SortedMap a b ** Vect xs.size $ Fin xs.size)
+  mapAndPerm xs = do
+    let idxs = fst <$> xs
+    let m = SortedMap.fromList xs
+    let Yes lenCorr = m.size `decEq` idxs.length
+      | No _ => Left "INTERNAL ERROR: lengths of given params set and the permutation differ"
+    pure (m ** rewrite lenCorr in orderIndices idxs)
 
 ---------------------------------------------------
 --- Working around primitive and special values ---
