@@ -201,26 +201,23 @@ checkTypeIsGen checkSide sig = do
     Nothing => failAt (getFC ty) "Generated parameter is not used in the target type"
 
   -- check that all target type's parameters classified as "given" are present in the given params list
-  givenParams <- for {b=(_, Fin targetType.args.length, _)} givenParams $ \(explicitness, name, ty) => case findIndex (== name) targetTypeArgs of
-    Just found => pure (ty, rewrite targetTypeArgsLengthCorrect in found, explicitness, UN name)
+  givenParams <- for {b=(Fin targetType.args.length, _)} givenParams $ \(explicitness, name, ty) => case findIndex (== name) targetTypeArgs of
+    Just found => pure (rewrite targetTypeArgsLengthCorrect in found, explicitness, UN name)
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
   -- check the increasing order of generated params
   let [] = findConsequentsWhich ((>=) `on` snd) paramsToBeGenerated
     | (_, (ty, _)) :: _ => failAt (getFC ty) "Generated arguments must go in the same order as in the target type"
 
-  -- check the increasing order of given params
-  let [] = findConsequentsWhich ((>=) `on` \(_, n, _) => n) givenParams
-    | (_, (ty, _, _)) :: _ => failAt (getFC ty) "Given arguments must go in the same order as in the target type"
-
   -- make unable to use generated params list
   let 0 paramsToBeGenerated = paramsToBeGenerated
 
-  -- forget the order of the given params, convert to a map from index to explicitness
-  let givenParams = fromList $ snd <$> givenParams
+  -- remember the order of given params as a permutation and forget the order of the given params, convert to a map from index to explicitness
+  let Right (givenParams ** givensOrder) = mapAndPerm givenParams
+    | Left err => fail err
 
   -- make the resulting signature
-  let genSig = MkExternalGenSignature {targetType, givenParams}
+  let genSig = MkExternalGenSignature targetType givenParams givensOrder
 
   -------------------------------------
   -- Auto-implicit generators checks --
@@ -271,7 +268,8 @@ nameMod n = UN $ Basic "outer^<\{show n}>"
 
 internalGenCallingLambda : Elaboration m => CheckResult DerivationTask -> TTImp -> m TTImp
 internalGenCallingLambda (sig ** exts ** givsPos) call = do
-    let Just args = joinEithersPos sig.givenParams.asList exts.externals givsPos
+    let (givensReordered ** lenCorr) = reorder' sig.givenParams.asList sig.givensOrder
+    let Just args = joinEithersPos givensReordered exts.externals $ rewrite lenCorr in givsPos
       | Nothing => fail "INTERNAL ERROR: can't join partitioned args back"
     pure $ foldr mkLam call args
 
