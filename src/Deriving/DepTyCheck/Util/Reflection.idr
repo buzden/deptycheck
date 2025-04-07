@@ -51,33 +51,32 @@ namespace Util
   orderIndices xs@(_::_) = do
     let idxMap = SortedMap.fromList $ mapI (sort xs) $ flip $ rewrite sortedPreservesLength xs in (,)
     fromMaybe FZ . lookup' idxMap <$> xs.asVect
-    --        ^^ - must never happen, if `Ord` is correct
+    --        ^^ - must never happen, if `Ord` is an order mathematically
 
   export
-  reorder : Vect n (Fin n) -> Vect n a -> Vect n a
+  reorder : (perm : Vect n $ Fin n) -> Vect n a -> Vect n a
   reorder perm orig = perm <&> flip index orig
 
-  toList : Vect n a -> List a
-  toList []      = []
-  toList (x::xs) = x :: Util.toList xs
-
-  toListLength : (xs : Vect n a) -> length (Util.toList xs) = n
-  toListLength []      = Refl
-  toListLength (x::xs) = rewrite toListLength xs in Refl
-
   export
-  reorder' : (xs : List a) -> Vect xs.length (Fin xs.length) -> (ys : List a ** ys.length = xs.length)
+  reorder' : (xs : List a) -> (perm : Vect xs.length $ Fin xs.length) -> (ys : List a ** ys.length = xs.length)
   reorder' orig perm = do
     let xs = reorder perm orig.asVect
-    (Util.toList xs ** toListLength xs)
+    (toList xs ** toListLength xs)
+    where
+      toList : Vect n a -> List a
+      toList []      = []
+      toList (x::xs) = x :: toList xs
+
+      toListLength : (xs : Vect n a) -> length (toList xs) = n
+      toListLength []      = Refl
+      toListLength (x::xs) = rewrite toListLength xs in Refl
 
   export
-  mapAndPerm : Ord a => List (a, b) -> Either String (xs : SortedMap a b ** Vect xs.size $ Fin xs.size)
+  mapAndPerm : Ord a => List (a, b) -> Maybe (xs : SortedMap a b ** Vect xs.size $ Fin xs.size)
   mapAndPerm xs = do
     let idxs = fst <$> xs
     let m = SortedMap.fromList xs
-    let Yes lenCorr = m.size `decEq` idxs.length
-      | No _ => Left "INTERNAL ERROR: lengths of given params set and the permutation differ"
+    let Yes lenCorr = m.size `decEq` idxs.length | No _ => Nothing
     pure (m ** rewrite lenCorr in orderIndices idxs)
 
 ---------------------------------------------------

@@ -213,8 +213,8 @@ checkTypeIsGen checkSide sig = do
   let 0 paramsToBeGenerated = paramsToBeGenerated
 
   -- remember the order of given params as a permutation and forget the order of the given params, convert to a map from index to explicitness
-  let Right (givenParams ** givensOrder) = mapAndPerm givenParams
-    | Left err => fail err
+  let Just (givenParams ** givensOrder) = mapAndPerm givenParams
+    | Nothing => fail "INTERNAL ERROR: can't compute correct given params permutation"
 
   -- make the resulting signature
   let genSig = MkExternalGenSignature targetType givenParams givensOrder
