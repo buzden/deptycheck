@@ -71,14 +71,6 @@ namespace Util
       toListLength []      = Refl
       toListLength (x::xs) = rewrite toListLength xs in Refl
 
-  export
-  mapAndPerm : Ord a => List (a, b) -> Maybe (xs : SortedMap a b ** Vect xs.size $ Fin xs.size)
-  mapAndPerm xs = do
-    let idxs = fst <$> xs
-    let m = SortedMap.fromList xs
-    let Yes lenCorr = m.size `decEq` idxs.length | No _ => Nothing
-    pure (m ** rewrite lenCorr in orderIndices idxs)
-
 ---------------------------------------------------
 --- Working around primitive and special values ---
 ---------------------------------------------------

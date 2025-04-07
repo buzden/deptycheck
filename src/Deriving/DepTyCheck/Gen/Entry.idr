@@ -53,6 +53,13 @@ CheckResult ExternalGen    = (GenSignatureFC, ExternalGenSignature)
 
 --- Analysis functions ---
 
+mapAndPerm : Ord a => List (a, b) -> Maybe (xs : SortedMap a b ** Vect xs.size $ Fin xs.size)
+mapAndPerm xs = do
+  let idxs = fst <$> xs
+  let m = SortedMap.fromList xs
+  let Yes lenCorr = m.size `decEq` idxs.length | No _ => Nothing
+  pure (m ** rewrite lenCorr in orderIndices idxs)
+
 checkTypeIsGen : (checkSide : GenCheckSide) -> TTImp -> Elab $ CheckResult checkSide
 checkTypeIsGen checkSide sig = do
 
