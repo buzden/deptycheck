@@ -221,6 +221,26 @@ buildDPair : (rhs : TTImp) -> List (Name, TTImp) -> TTImp
 buildDPair = foldr $ \(name, type), res =>
   var `{Builtin.DPair.DPair} .$ type .$ lam (MkArg MW ExplicitArg (Just name) type) res
 
+||| Produces expression returning a mkdpair in a different order, if needed
+|||
+||| Direct means that given expression which returns acending order, result is permutated; non-direct means vice versa.
+export
+reorderGend : (direct : Bool) -> {n : _} -> (perm : Vect n $ Fin n) -> TTImp -> TTImp
+reorderGend direct perm e = do
+  let perm = toList perm
+  let all = allFins _
+  let False = perm == all | True => e
+  let (lhs, rhs) : (_, _) := if direct then (all, perm) else (perm, all)
+  let lhs = simpleMkdpair True lhs
+  let rhs = simpleMkdpair False rhs
+  let lamName : Name := "^lam_arg^"
+  `(Prelude.(<&>)) .$ e .$ lam (lambdaArg lamName) (iCase (var lamName) implicitFalse $ pure $ patClause lhs rhs)
+  where
+    v : (bind : Bool) -> String -> TTImp
+    v bind = if bind then bindVar else varStr
+    simpleMkdpair : (bind : Bool) -> List (Fin n) -> TTImp
+    simpleMkdpair bind = foldr (app . (app `(Builtin.DPair.MkDPair)) . v bind . ("^a" ++) . show) (v bind "^res^")
+
 --- Facilities for managing any kind of function application at once ---
 
 public export

@@ -196,8 +196,8 @@ checkTypeIsGen checkSide sig = do
   -----------------------------------------------------------------------
 
   -- check that all parameters to be generated are actually used inside the target type
-  paramsToBeGenerated <- for {b=(_, Fin targetType.args.length)} paramsToBeGenerated $ \(name, ty) => case findIndex (== name) targetTypeArgs of
-    Just found => pure (ty, rewrite targetTypeArgsLengthCorrect in found)
+  paramsToBeGenerated <- for {b=Fin targetType.args.length} paramsToBeGenerated $ \(name, ty) => case findIndex (== name) targetTypeArgs of
+    Just found => pure $ rewrite targetTypeArgsLengthCorrect in found
     Nothing => failAt (getFC ty) "Generated parameter is not used in the target type"
 
   -- check that all target type's parameters classified as "given" are present in the given params list
@@ -205,19 +205,15 @@ checkTypeIsGen checkSide sig = do
     Just found => pure (rewrite targetTypeArgsLengthCorrect in found, explicitness, UN name)
     Nothing => failAt (getFC ty) "Given parameter is not used in the target type"
 
-  -- check the increasing order of generated params
-  let [] = findConsequentsWhich ((>=) `on` snd) paramsToBeGenerated
-    | (_, (ty, _)) :: _ => failAt (getFC ty) "Generated arguments must go in the same order as in the target type"
-
-  -- make unable to use generated params list
-  let 0 paramsToBeGenerated = paramsToBeGenerated
-
   -- remember the order of given params as a permutation and forget the order of the given params, convert to a map from index to explicitness
   let Just (givenParams ** givensOrder) = mapAndPerm givenParams
     | Nothing => fail "INTERNAL ERROR: can't compute correct given params permutation"
 
+  -- compute the order of generated params as a permutation
+  let gendOrder = orderIndices paramsToBeGenerated
+
   -- make the resulting signature
-  let genSig = MkExternalGenSignature targetType givenParams givensOrder
+  let genSig = MkExternalGenSignature targetType givenParams givensOrder gendOrder
 
   -------------------------------------
   -- Auto-implicit generators checks --
@@ -283,9 +279,9 @@ internalGenCallingLambda (sig ** exts ** givsPos) call = do
                                    -- TODO to think whether it's okay to calculate the name twice: here and below for a map
 
 callMainDerivedGen : CanonicGen m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
-callMainDerivedGen sig fuelArg =
-  let Element intSig prf = internalise sig in
-  callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var $ nameMod name
+callMainDerivedGen sig fuelArg = do
+  let Element intSig prf = internalise sig
+  map (reorderGend True sig.gendOrder) $ callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var $ nameMod name
 
 wrapFuel : (fuelArg : Name) -> TTImp -> TTImp
 wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
