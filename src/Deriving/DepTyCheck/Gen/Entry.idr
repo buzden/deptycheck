@@ -288,7 +288,8 @@ internalGenCallingLambda (sig ** exts ** givsPos) call = do
 callMainDerivedGen : CanonicGen m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
 callMainDerivedGen sig fuelArg = do
   let Element intSig prf = internalise sig
-  map (reorderGend True sig.gendOrder) $ callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var $ nameMod name
+  map (reorderGend True sig.gendOrder . fst) $
+    callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var $ nameMod name
 
 wrapFuel : (fuelArg : Name) -> TTImp -> TTImp
 wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)

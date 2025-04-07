@@ -20,7 +20,7 @@ export
 [CallSelf] DerivatorCore where
   canonicBody sig n = pure
     [ callCanonic sig n (var `{Dry})                    irrelevantArgs      .= `(empty)
-    , callCanonic sig n (var `{More} .$ bindVar "fuel") (numberedArgs True) .= !(callGen sig (var "fuel") $ numberedArgs False)
+    , callCanonic sig n (var `{More} .$ bindVar "fuel") (numberedArgs True) .= fst !(callGen sig (var "fuel") $ numberedArgs False)
     ]
 
 export
@@ -38,7 +38,7 @@ EmptyCons = MainCoreDerivator @{EmptyCons'}
 callSimpleGen : CanonicGen m => TypeInfo -> (fuel : TTImp) -> m TTImp
 callSimpleGen tyi fuel = do
   _ <- ensureTyArgsNamed tyi
-  callGen (MkGenSignature tyi SortedSet.empty) fuel $ believe_me $ Vect.Nil {elem = TTImp}
+  map fst $ callGen (MkGenSignature tyi SortedSet.empty) fuel $ believe_me $ Vect.Nil {elem = TTImp}
 
 callStrGen : CanonicGen m => (fuel : TTImp) -> m TTImp
 callStrGen = callSimpleGen $ typeInfoForPrimType StringType

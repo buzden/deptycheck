@@ -14,6 +14,7 @@ import public Decidable.Equality
 import public Deriving.DepTyCheck.Gen.Derive
 
 %default total
+%hide Text.PrettyPrint.Bernardy.Core.Doc.(>>=)
 
 -------------------------------------------------------------------
 --- Data types characterising constructors for particular tasks ---
@@ -324,10 +325,12 @@ namespace NonObligatoryExts
             let subfuel = if mutRec then fuel else var outmostFuelArg
 
             -- Form an expression to call the subgen
-            subgenCall <- callGen subsig subfuel $ snd <$> subgivens
+            (subgenCall, reordering) <- callGen subsig subfuel $ snd <$> subgivens
 
             -- Form an expression of binding the result of subgen
             let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
+            let Just subgeneratedArgs = reorder'' reordering subgeneratedArgs
+              | Nothing => fail "INTERNAL ERROR: cannot reorder subgenerated arguments"
             let bindSubgenResult = foldr (\l, r => var `{Builtin.DPair.MkDPair} .$ l .$ r) genedArg subgeneratedArgs
 
             -- Form an expression of the RHS of a bind; simplify lambda if subgeneration result type does not require pattern matching

@@ -71,6 +71,13 @@ namespace Util
       toListLength []      = Refl
       toListLength (x::xs) = rewrite toListLength xs in Refl
 
+  export
+  reorder'' : Maybe (n ** Vect n $ Fin n) -> List TTImp -> Maybe $ List TTImp
+  reorder'' Nothing xs = pure xs
+  reorder'' (Just (n ** perm)) xs = do
+    let Yes prf = decEq (length xs) n | No _ => Nothing
+    Just $ fst $ reorder' xs $ rewrite prf in perm
+
 ---------------------------------------------------
 --- Working around primitive and special values ---
 ---------------------------------------------------

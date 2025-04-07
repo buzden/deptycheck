@@ -84,7 +84,7 @@ internalise $ MkExternalGenSignature ty giv _ _ = Element (MkGenSignature ty $ k
 ---------------------------------
 
 callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> TTImp
-callExternalGen sig topmost fuel values = reorderGend False sig.gendOrder $
+callExternalGen sig topmost fuel values =
   foldl (flip apply) (appFuel topmost fuel) $ reorder sig.givensOrder (sig.givenParams.asVect `zip` values) <&> \case
     ((_, ExplicitArg, _   ), value) => (.$ value)
     ((_, ImplicitArg, name), value) => \f => namedApp f name value
@@ -126,7 +126,7 @@ namespace ClosuringCanonicImpl
       let Nothing = lookupLengthChecked sig !ask
         | Just (name, Element extSig lenEq) => do
             logPoint {level=Details} "closuring.external" [sig] "is used as an external generator"
-            pure $ callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values
+            pure (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
 
       -- get the name of internal gen, derive if necessary
       internalGenName <- do
@@ -156,7 +156,7 @@ namespace ClosuringCanonicImpl
 
       -- call the internal gen
       logPoint {level=DetailedDebug} "closuring.internal" [sig] "is used as an internal generator"
-      pure $ callCanonic sig internalGenName fuel values
+      pure (callCanonic sig internalGenName fuel values, Nothing)
 
       where
 
