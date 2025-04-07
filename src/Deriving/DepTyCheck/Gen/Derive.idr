@@ -55,7 +55,10 @@ Ord GenSignature where
 
 public export
 interface Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
-  callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m TTImp
+  callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m (TTImp, Maybe (gend ** Vect gend $ Fin gend))
+  --                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  --                                                                   this is a permutation of generated arguments --/
+  --                                                                   actually, `gend` can be calculated from `sig`, but we simplify things here
 
 export
 CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where

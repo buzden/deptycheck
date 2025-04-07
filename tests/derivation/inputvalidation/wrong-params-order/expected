@@ -1,71 +1,41 @@
 1/1: Building ValidateInput (ValidateInput.idr)
-Error: While processing right hand side of genY_wrong_giv_order. Error during reflection: Given arguments must go in the same order as in the target type
+Error: While processing right hand side of genX_wrong_giv_order_autoimpl_rep. Error during reflection: Repetition of an auto-implicit external generator
 
 ValidateInput:1
- 16 | -- TODO to add if it is needed
- 17 | 
- 18 | --- Wrong order of parameters ---
- 19 | 
- 20 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b
-                                             ^^^^
+ 25 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
+ 26 | genX_wrong_giv_order_autoimpl = deriveGen
+ 27 | 
+ 28 | genX_wrong_giv_order_autoimpl_rep :
+ 29 |   Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
+                                                                                                                ^^^^^
 
-Error: While processing right hand side of genX_wrong_giv_order_autoimpl. Error during reflection: Given arguments must go in the same order as in the target type
+Error: While processing right hand side of genX_wrong_gened_order_autoimpl_rep. Error during reflection: Repetition of an auto-implicit external generator
 
 ValidateInput:2
- 19 | 
- 20 | genY_wrong_giv_order : Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b
- 21 | genY_wrong_giv_order = deriveGen
- 22 | 
- 23 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
-                                                               ^^^^
+ 38 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => Gen MaybeEmpty X
+ 39 | genX_wrong_gened_order_autoimpl = deriveGen
+ 40 | 
+ 41 | genX_wrong_gened_order_autoimpl_rep :
+ 42 |   Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen MaybeEmpty (a : Type ** b : Type ** Y a b)) => Gen MaybeEmpty X
+                                                                                                                             ^^^^^
 
-Error: While processing right hand side of genX_wrong_giv_order_autoimpl_rep. Error during reflection: Given arguments must go in the same order as in the target type
+Error: While processing right hand side of genX_two_mngf. Error during reflection: Repetition of an auto-implicit external generator
 
 ValidateInput:3
- 23 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
- 24 | genX_wrong_giv_order_autoimpl = deriveGen
- 25 | 
- 26 | genX_wrong_giv_order_autoimpl_rep :
- 27 |   Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
-                                 ^^^^
+ 87 | 
+ 88 | -- should fail
+ 89 | genX_two_mngf : Fuel ->
+ 90 |                 (Fuel -> {m : Nat} -> {n : Nat} -> (g : Fin m) -> (f : Fin n) -> Gen MaybeEmpty $ Z f g) =>
+ 91 |                 (Fuel -> {m : Nat} -> {n : Nat} -> (g : Fin m) -> (f : Fin n) -> Gen MaybeEmpty $ Z f g) =>
+                                                                                                        ^^^^^
 
-Error: While processing right hand side of genY_wrong_gened_order. Error during reflection: Generated arguments must go in the same order as in the target type
+Error: While processing right hand side of genX_mgnf_mngf. Error during reflection: Repetition of an auto-implicit external generator
 
 ValidateInput:4
- 26 | genX_wrong_giv_order_autoimpl_rep :
- 27 |   Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
- 28 | genX_wrong_giv_order_autoimpl_rep = deriveGen
- 29 | 
- 30 | genY_wrong_gened_order : Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)
-                                                                       ^^^^
-
-Error: While processing right hand side of genY_wrong_gened_order'. Error during reflection: Generated arguments must go in the same order as in the target type
-
-ValidateInput:5
- 07 | %default total
- 08 | 
- 09 | data X = MkX
- 10 | 
- 11 | data Y : Type -> Type -> Type where
-               ^^^^
-
-Error: While processing right hand side of genX_wrong_gened_order_autoimpl. Error during reflection: Generated arguments must go in the same order as in the target type
-
-ValidateInput:6
- 32 | 
- 33 | genY_wrong_gened_order' : Fuel -> Gen MaybeEmpty (b ** a ** Y a b)
- 34 | genY_wrong_gened_order' = deriveGen
- 35 | 
- 36 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => Gen MaybeEmpty X
-                                                                                         ^^^^
-
-Error: While processing right hand side of genX_wrong_gened_order_autoimpl_rep. Error during reflection: Generated arguments must go in the same order as in the target type
-
-ValidateInput:7
- 36 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => Gen MaybeEmpty X
- 37 | genX_wrong_gened_order_autoimpl = deriveGen
- 38 | 
- 39 | genX_wrong_gened_order_autoimpl_rep :
- 40 |   Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen MaybeEmpty (a : Type ** b : Type ** Y a b)) => Gen MaybeEmpty X
-                                                         ^^^^
+ 94 | 
+ 95 | -- should fail
+ 96 | genX_mgnf_mngf : Fuel ->
+ 97 |                  (Fuel -> {m : Nat} -> (g : Fin m) -> {n : Nat} -> (f : Fin n) -> Gen MaybeEmpty $ Z f g) =>
+ 98 |                  (Fuel -> {m : Nat} -> {n : Nat} -> (g : Fin m) -> (f : Fin n) -> Gen MaybeEmpty $ Z f g) =>
+                                                                                                         ^^^^^
 
