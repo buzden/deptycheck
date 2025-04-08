@@ -7,10 +7,6 @@ on:
       - '**'
     tags:
       - '**'
-  pull_request:
-    branches:
-      - main
-      - master
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   schedule:
@@ -157,8 +153,6 @@ jobs:
 
   get-test-sets:
     name: Acquire test sets
-    needs:
-      - deptycheck-build-lib
     runs-on: ubuntu-latest
     outputs:
       test-sets: ${{ steps.get-test-sets.outputs.test-sets }}
@@ -206,8 +200,6 @@ jobs:
 
   get-examples:
     name: Acquire examples
-    needs:
-      - deptycheck-build-lib
     runs-on: ubuntu-latest
     outputs:
       examples: ${{ steps.get-examples.outputs.examples }}
