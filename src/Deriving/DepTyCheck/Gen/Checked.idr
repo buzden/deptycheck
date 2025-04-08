@@ -99,7 +99,7 @@ namespace ClosuringCanonicImpl
     , MonadState  (SortedMap GenSignature Name) m                         -- gens already asked to be derived
     , MonadState  (List (GenSignature, Name)) m                           -- queue of gens to be derived
     , MonadState  Bool m                                                  -- flag that there is a need to start derivation loop
-    , MonadState  (SortedSet Name) m                                      -- a set of type names what were asked to weighting function
+    , MonadState  (SortedSet Name) m                                      -- type names that were asked for deriving their weighting function
     , MonadWriter (List Decl, List Decl) m                                -- function declarations and bodies
     )
 
