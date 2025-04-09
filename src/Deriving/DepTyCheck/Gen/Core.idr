@@ -68,6 +68,8 @@ ConstructorDerivator => DerivatorCore where
         | Just consRecs => callConstFreqs "\{logPosition sig} (non-recursive)".label (varStr fuelAr) consRecs
 
       -- pattern match on the fuel argument
+      let givenNames = (\x => `(show ~(varStr x))) . namesWrapper . show . argName . index' sig.targetType.args <$> sig.givenParams.asList
+      labelGen ("\{logPosition sig}, givens: ".label <+> MkCTLabel `(joinBy ", " ~(liftList givenNames))) $
       iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
