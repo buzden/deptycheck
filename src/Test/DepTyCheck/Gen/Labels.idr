@@ -1,5 +1,10 @@
 module Test.DepTyCheck.Gen.Labels
 
+import Control.Monad.State.Interface
+import public Control.Monad.Trans
+
+import Data.String
+
 %default total
 
 -----------------
@@ -26,12 +31,22 @@ export
 Ord Label where
   compare = comparing $ \(StringLabel x) => x
 
+--- Labels management interface ---
+
 public export
-interface CanManageLabels (0 m : Type -> Type) where
-  manageLabel : Label -> m a -> m a
+interface Monad m => CanManageLabels (0 m : Type -> Type) where
+  manageLabel : Label -> m ()
+
+public export
+CanManageLabels m => MonadTrans t => Monad (t m) => CanManageLabels (t m) where
+  manageLabel = lift . manageLabel
 
 export %defaulthint
-IgnoreLabels : CanManageLabels m
+IgnoreLabels : Monad m => CanManageLabels m
 IgnoreLabels = I where
   [I] CanManageLabels m where
-    manageLabel _ = id
+    manageLabel _ = pure ()
+
+export
+[PrintAllLabels] HasIO io => CanManageLabels io where
+  manageLabel = putStrLn . show

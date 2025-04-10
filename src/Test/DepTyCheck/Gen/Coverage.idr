@@ -38,7 +38,7 @@ Monoid ModelCoverage where
   neutral = MkModelCoverage empty
 
 MonadWriter ModelCoverage m => CanManageLabels m where
-  manageLabel l x = tell (MkModelCoverage $ singleton l 1) >> x
+  manageLabel l = tell $ MkModelCoverage $ singleton l 1
 
 export
 unGenD : MonadRandom m => MonadError () m => Gen em a -> m (ModelCoverage, a)

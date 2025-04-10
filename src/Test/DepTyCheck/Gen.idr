@@ -308,14 +308,14 @@ mkOneOf {em=MaybeEmpty} xs =
 --- Non-empty generators ---
 
 export
-unGen1 : MonadRandom m => CanManageLabels m => Gen1 a -> m a
+unGen1 : MonadRandom m => (labels : CanManageLabels m) => Gen1 a -> m a
 unGen1 $ Pure x         = pure x
 unGen1 $ Raw sf         = sf.unRawGen
 unGen1 $ OneOf @{_} @{nw} oo with 0 (nonEmptyIsMaximal nw)
   _ | Refl = assert_total unGen1 . force . pickWeighted oo.unGenAlts . finToNat =<< randomFin oo.totalWeight
 unGen1 $ Bind @{nw} x f with 0 (nonEmptyIsMaximal nw)
   _ | Refl = x.unRawGen >>= unGen1 . f
-unGen1 $ Labelled l x   = manageLabel l $ unGen1 x
+unGen1 $ Labelled l x   = manageLabel l >> unGen1 x
 
 export
 unGenAll' : RandomGen g => (seed : g) -> Gen1 a -> Stream (g, a)
@@ -335,16 +335,16 @@ pick1 gen = initSeed <&> \s => evalRandom s $ unGen1 gen
 --- Possibly empty generators ---
 
 export
-unGen : MonadRandom m => MonadError () m => CanManageLabels m => Gen em a -> m a
+unGen : MonadRandom m => MonadError () m => (labels : CanManageLabels m) => Gen em a -> m a
 unGen $ Empty        = throwError ()
 unGen $ Pure x       = pure x
 unGen $ Raw sf       = sf.unRawGen
 unGen $ OneOf oo     = assert_total unGen . force . pickWeighted oo.unGenAlts . finToNat =<< randomFin oo.totalWeight
 unGen $ Bind x f     = x.unRawGen >>= unGen . f
-unGen $ Labelled l x = manageLabel l $ unGen x
+unGen $ Labelled l x = manageLabel l >> unGen x
 
 export %inline
-unGen' : MonadRandom m => CanManageLabels m => Gen em a -> m $ Maybe a
+unGen' : MonadRandom m => (labels : CanManageLabels m) => Gen em a -> m $ Maybe a
 unGen' = runMaybeT . unGen {m=MaybeT m}
 
 export
