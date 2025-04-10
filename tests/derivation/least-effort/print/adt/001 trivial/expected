@@ -47,7 +47,7 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Builtin.Unit[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "Builtin.Unit[] (non-spending)"))
                          .$ (var "<<Builtin.MkUnit>>" .$ var "^fuel_arg^")
                      }
               ]

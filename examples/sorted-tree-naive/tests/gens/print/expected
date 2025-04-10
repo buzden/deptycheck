@@ -1,0 +1,1430 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty SortedBinTree
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree[] Empty - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree[] Node - used final order: [#3, #4]
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllGT[0] EmptyGT - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllGT[0] NodeGT - used final order: [#6, #2 (prf2), #8, #4 (prf1), #7]
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllLT[] EmptyLT - used final order: [#0 (ref)]
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllLT[] NodeLT - used final order: [#2 (prf2), #6, #8, #4 (prf1), #7]
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllLT[0, 1] EmptyLT - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllLT[0, 1] NodeLT - used final order: [#6, #7, #8]
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllGT[] EmptyGT - used final order: [#0 (ref)]
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllGT[] NodeGT - used final order: [#7, #6, #4 (prf1), #2 (prf2), #8]
+LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] Z - used final order: []
+LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: [#0]
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllLT[0] EmptyLT - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllLT[0] NodeLT - used final order: [#2 (prf2), #6, #8, #4 (prf1), #7]
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllGT[0, 1] EmptyGT - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.SortedBinTree.SortedBinTree.AllGT[0, 1] NodeGT - used final order: [#6, #7, #8]
+LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n)] LTEZero - used final order: [#0 (right)]
+LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n)] LTESucc - used final order: [#2]
+LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTEZero - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used final order: [#2]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> local
+      { decls =
+          [ IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Data.SortedBinTree.SortedBinTree>[]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Data.SortedBinTree.SortedBinTree"
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Data.SortedBinTree.SortedBinTree.AllGT>[0]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (   var "Builtin.DPair.DPair"
+                                   .$ var "Data.SortedBinTree.SortedBinTree"
+                                   .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                       .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:1}" .$ var "{arg:2}"))
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Data.SortedBinTree.SortedBinTree.AllLT>[]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (   var "Builtin.DPair.DPair"
+                                   .$ var "Prelude.Types.Nat"
+                                   .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                       .=>    var "Builtin.DPair.DPair"
+                                           .$ var "Data.SortedBinTree.SortedBinTree"
+                                           .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                               .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:3}" .$ var "{arg:4}")))
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "weight^Data.SortedBinTree.SortedBinTree"
+                       , type = MkArg MW ExplicitArg Nothing (var "Data.SortedBinTree.SortedBinTree") .-> var "Data.Nat1.Nat1"
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:3}" .$ var "{arg:4}")
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Data.SortedBinTree.SortedBinTree.AllGT>[]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (   var "Builtin.DPair.DPair"
+                                   .$ var "Prelude.Types.Nat"
+                                   .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                       .=>    var "Builtin.DPair.DPair"
+                                           .$ var "Data.SortedBinTree.SortedBinTree"
+                                           .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                               .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:1}" .$ var "{arg:2}")))
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Prelude.Types.Nat>[]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Data.SortedBinTree.SortedBinTree.AllLT>[0]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (   var "Builtin.DPair.DPair"
+                                   .$ var "Data.SortedBinTree.SortedBinTree"
+                                   .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                       .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:3}" .$ var "{arg:4}"))
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:1}" .$ var "{arg:2}")
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type = mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Data.Nat.LTE>[0]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (   var "Builtin.DPair.DPair"
+                                   .$ var "Prelude.Types.Nat"
+                                   .$ (MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat") .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Data.Nat.LTE>[0, 1]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
+                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
+                       }
+                 })
+          , IDef
+              emptyFC
+              "<Data.SortedBinTree.SortedBinTree>[]"
+              [    var "<Data.SortedBinTree.SortedBinTree>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.Empty>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ var "Data.SortedBinTree.SortedBinTree"
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.Node>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ var "Data.SortedBinTree.SortedBinTree"
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.Empty>>"
+                             [    var "<<Data.SortedBinTree.Empty>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.Empty (orders)"))
+                                  .$ (var "Prelude.pure" .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue) .$ var "Data.SortedBinTree.Empty")
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.Node>>"
+                             [    var "<<Data.SortedBinTree.Node>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.Node (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.SortedBinTree.SortedBinTree.AllLT>[]" .$ var "^cons_fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:1}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [       var "Builtin.DPair.MkDPair"
+                                                         .$ bindVar "x"
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "left" .$ bindVar "^bnd^{conArg:1}")
+                                                      .=    var ">>="
+                                                         .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[0]" .$ var "^cons_fuel^" .$ var "x")
+                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                                             .=> iCase
+                                                                   { sc = var "{lamc:1}"
+                                                                   , ty = implicitFalse
+                                                                   , clauses =
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "right" .$ bindVar "^bnd^{conArg:2}"
+                                                                         .=    var "Prelude.pure"
+                                                                            .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                                            .$ (   var "Data.SortedBinTree.Node"
+                                                                                .$ implicitTrue
+                                                                                .$ implicitTrue
+                                                                                .$ implicitTrue
+                                                                                .@ var "^bnd^{conArg:1}"
+                                                                                .@ var "^bnd^{conArg:2}")
+                                                                       ]
+                                                                   })
+                                                    ]
+                                                }))
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree[] (dry fuel)"))
+                                    .$ (var "<<Data.SortedBinTree.Empty>>" .$ var "^fuel_arg^")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree[] (non-dry fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Data.SortedBinTree.Empty>>" .$ var "^fuel_arg^"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Data.SortedBinTree.Node>>" .$ var "^sub^fuel_arg^"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Data.SortedBinTree.SortedBinTree.AllGT>[0]"
+              [    var "<Data.SortedBinTree.SortedBinTree.AllGT>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<{arg:1}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ var "Data.SortedBinTree.SortedBinTree"
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                                      .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:1}" .$ var "{arg:2}"))
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ var "Data.SortedBinTree.SortedBinTree"
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                                      .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:1}" .$ var "{arg:2}"))
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
+                             [    var "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>" .$ bindVar "^cons_fuel^" .$ bindVar "ref"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.EmptyGT (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "Builtin.DPair.MkDPair" .$ implicitTrue .$ (var "Data.SortedBinTree.SortedBinTree.EmptyGT" .! ("ref", var "ref"))))
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                             [    var "<<Data.SortedBinTree.SortedBinTree.NodeGT>>" .$ bindVar "^cons_fuel^" .$ bindVar "ref"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.NodeGT (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.Nat.LTE>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "ref"))
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:1}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:5}"
+                                                      .=    var ">>="
+                                                         .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[0]" .$ var "^cons_fuel^" .$ var "x")
+                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                                             .=> iCase
+                                                                   { sc = var "{lamc:1}"
+                                                                   , ty = implicitFalse
+                                                                   , clauses =
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "r" .$ bindVar "prf2"
+                                                                         .=    var ">>="
+                                                                            .$ (   var "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]"
+                                                                                .$ var "^cons_fuel^"
+                                                                                .$ var "ref"
+                                                                                .$ var "r")
+                                                                            .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:6}") implicitFalse
+                                                                                .=>    var ">>="
+                                                                                    .$ (   var "<Data.SortedBinTree.SortedBinTree.AllLT>[0]"
+                                                                                        .$ var "^cons_fuel^"
+                                                                                        .$ var "x")
+                                                                                    .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                                                                        .=> iCase
+                                                                                              { sc = var "{lamc:1}"
+                                                                                              , ty = implicitFalse
+                                                                                              , clauses =
+                                                                                                  [    var "Builtin.DPair.MkDPair" .$ bindVar "l" .$ bindVar "prf1"
+                                                                                                    .=    var ">>="
+                                                                                                       .$ (   var "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]"
+                                                                                                           .$ var "^cons_fuel^"
+                                                                                                           .$ var "ref"
+                                                                                                           .$ var "l")
+                                                                                                       .$ (    MkArg
+                                                                                                                 MW
+                                                                                                                 ExplicitArg
+                                                                                                                 (Just "^bnd^{arg:7}")
+                                                                                                                 implicitFalse
+                                                                                                           .=>    var "Prelude.pure"
+                                                                                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                                                                               .$ (   var "Builtin.DPair.MkDPair"
+                                                                                                                   .$ implicitTrue
+                                                                                                                   .$ (   var
+                                                                                                                            "Data.SortedBinTree.SortedBinTree.NodeGT"
+                                                                                                                       .! ("r", implicitTrue)
+                                                                                                                       .! ("x", implicitTrue)
+                                                                                                                       .! ("prf2", var "prf2")
+                                                                                                                       .! ("l", implicitTrue)
+                                                                                                                       .! ("prf1", var "prf1")
+                                                                                                                       .! ("ref", implicitTrue)
+                                                                                                                       .$ var "^bnd^{arg:5}"
+                                                                                                                       .$ var "^bnd^{arg:7}"
+                                                                                                                       .$ var "^bnd^{arg:6}")))
+                                                                                                  ]
+                                                                                              }))
+                                                                       ]
+                                                                   })
+                                                    ]
+                                                }))
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.AllGT[0] (dry fuel)"))
+                                    .$ (var "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.AllGT[0] (non-dry fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (   var "Builtin.MkPair"
+                                                .$ var "Data.Nat1.one"
+                                                .$ (var "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Data.SortedBinTree.SortedBinTree.NodeGT>>" .$ var "^sub^fuel_arg^" .$ var "inter^<{arg:1}>"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Data.SortedBinTree.SortedBinTree.AllLT>[]"
+              [    var "<Data.SortedBinTree.SortedBinTree.AllLT>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ var "Prelude.Types.Nat"
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                                      .=>    var "Builtin.DPair.DPair"
+                                                          .$ var "Data.SortedBinTree.SortedBinTree"
+                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                                              .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:3}" .$ var "{arg:4}")))
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ var "Prelude.Types.Nat"
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                                      .=>    var "Builtin.DPair.DPair"
+                                                          .$ var "Data.SortedBinTree.SortedBinTree"
+                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                                              .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:3}" .$ var "{arg:4}")))
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
+                             [    var "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.EmptyLT (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "ref") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "Builtin.DPair.MkDPair"
+                                                  .$ implicitTrue
+                                                  .$ (var "Builtin.DPair.MkDPair" .$ implicitTrue .$ (var "Data.SortedBinTree.SortedBinTree.EmptyLT" .! ("ref", var "ref"))))))
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                             [    var "<<Data.SortedBinTree.SortedBinTree.NodeLT>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.NodeLT (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[]" .$ var "^cons_fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:1}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ (var "Builtin.DPair.MkDPair" .$ bindVar "r" .$ bindVar "prf2")
+                                                      .=    var ">>="
+                                                         .$ (var "<Data.Nat.LTE>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "x"))
+                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                                             .=> iCase
+                                                                   { sc = var "{lamc:1}"
+                                                                   , ty = implicitFalse
+                                                                   , clauses =
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "ref" .$ bindVar "^bnd^{arg:8}"
+                                                                         .=    var ">>="
+                                                                            .$ (   var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
+                                                                                .$ var "^cons_fuel^"
+                                                                                .$ var "ref"
+                                                                                .$ var "r")
+                                                                            .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                                                                .=>    var ">>="
+                                                                                    .$ (var "<Data.SortedBinTree.SortedBinTree.AllLT>[0]" .$ var "^cons_fuel^" .$ var "x")
+                                                                                    .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                                                                        .=> iCase
+                                                                                              { sc = var "{lamc:1}"
+                                                                                              , ty = implicitFalse
+                                                                                              , clauses =
+                                                                                                  [    var "Builtin.DPair.MkDPair" .$ bindVar "l" .$ bindVar "prf1"
+                                                                                                    .=    var ">>="
+                                                                                                       .$ (   var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
+                                                                                                           .$ var "^cons_fuel^"
+                                                                                                           .$ var "ref"
+                                                                                                           .$ var "l")
+                                                                                                       .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:10}") implicitFalse
+                                                                                                           .=>    var "Prelude.pure"
+                                                                                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                                                                               .$ (   var "Builtin.DPair.MkDPair"
+                                                                                                                   .$ implicitTrue
+                                                                                                                   .$ (   var "Builtin.DPair.MkDPair"
+                                                                                                                       .$ implicitTrue
+                                                                                                                       .$ (   var
+                                                                                                                                "Data.SortedBinTree.SortedBinTree.NodeLT"
+                                                                                                                           .! ("r", implicitTrue)
+                                                                                                                           .! ("x", implicitTrue)
+                                                                                                                           .! ("prf2", var "prf2")
+                                                                                                                           .! ("l", implicitTrue)
+                                                                                                                           .! ("prf1", var "prf1")
+                                                                                                                           .! ("ref", implicitTrue)
+                                                                                                                           .$ var "^bnd^{arg:8}"
+                                                                                                                           .$ var "^bnd^{arg:10}"
+                                                                                                                           .$ var "^bnd^{arg:9}"))))
+                                                                                                  ]
+                                                                                              }))
+                                                                       ]
+                                                                   })
+                                                    ]
+                                                }))
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.AllLT[] (dry fuel)"))
+                                    .$ (var "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>" .$ var "^fuel_arg^")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.AllLT[] (non-dry fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>" .$ var "^fuel_arg^"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Data.SortedBinTree.SortedBinTree.NodeLT>>" .$ var "^sub^fuel_arg^"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "weight^Data.SortedBinTree.SortedBinTree"
+              [ var "weight^Data.SortedBinTree.SortedBinTree" .$ var "Data.SortedBinTree.Empty" .= var "Data.Nat1.one"
+              ,       var "weight^Data.SortedBinTree.SortedBinTree"
+                   .$ (var "Data.SortedBinTree.Node" .$ implicitTrue .$ bindVar "arg^1" .$ bindVar "arg^2" .@ implicitTrue .@ implicitTrue)
+                .=    var "succ"
+                   .$ (   var "Prelude.concat"
+                       .@ var "Maximum"
+                       .$ (   var "Prelude.(::)"
+                           .$ (var "weight^Data.SortedBinTree.SortedBinTree" .$ var "arg^1")
+                           .$ (var "Prelude.(::)" .$ (var "weight^Data.SortedBinTree.SortedBinTree" .$ var "arg^2") .$ var "Prelude.Nil")))
+              ]
+          , IDef
+              emptyFC
+              "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
+              [    var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<{arg:3}>" .$ bindVar "inter^<{arg:4}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:3}" .$ var "{arg:4}")
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:3}" .$ var "{arg:4}")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
+                             [    var "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>" .$ bindVar "^cons_fuel^" .$ bindVar "ref" .$ var "Data.SortedBinTree.Empty"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.EmptyLT (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "Data.SortedBinTree.SortedBinTree.EmptyLT" .! ("ref", var "ref")))
+                             , var "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                             [       var "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ bindVar "ref"
+                                  .$ (   var "Data.SortedBinTree.Node"
+                                      .$ bindVar "x"
+                                      .$ bindVar "l"
+                                      .$ bindVar "r"
+                                      .! ("{conArg:1}", bindVar "prf1")
+                                      .! ("{conArg:2}", bindVar "prf2"))
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.NodeLT (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.Nat.LTE>[0, 1]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "x") .$ var "ref")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:8}") implicitFalse
+                                          .=>    var ">>="
+                                              .$ (var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]" .$ var "^cons_fuel^" .$ var "ref" .$ var "l")
+                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:10}") implicitFalse
+                                                  .=>    var ">>="
+                                                      .$ (var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]" .$ var "^cons_fuel^" .$ var "ref" .$ var "r")
+                                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                                          .=>    var "Prelude.pure"
+                                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                              .$ (   var "Data.SortedBinTree.SortedBinTree.NodeLT"
+                                                                  .! ("r", implicitTrue)
+                                                                  .! ("x", implicitTrue)
+                                                                  .! ("prf2", var "prf2")
+                                                                  .! ("l", implicitTrue)
+                                                                  .! ("prf1", var "prf1")
+                                                                  .! ("ref", implicitTrue)
+                                                                  .$ var "^bnd^{arg:8}"
+                                                                  .$ var "^bnd^{arg:10}"
+                                                                  .$ var "^bnd^{arg:9}")))))
+                             , var "<<Data.SortedBinTree.SortedBinTree.NodeLT>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.AllLT[0, 1] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.frequency"
+                             .$ (   var "::"
+                                 .$ (   var "Builtin.MkPair"
+                                     .$ var "Data.Nat1.one"
+                                     .$ (   var "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
+                                         .$ var "^fuel_arg^"
+                                         .$ var "inter^<{arg:3}>"
+                                         .$ var "inter^<{arg:4}>"))
+                                 .$ (   var "::"
+                                     .$ (   var "Builtin.MkPair"
+                                         .$ (var "weight^Data.SortedBinTree.SortedBinTree" .$ var "inter^<{arg:4}>")
+                                         .$ (   var "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                                             .$ var "^fuel_arg^"
+                                             .$ var "inter^<{arg:3}>"
+                                             .$ var "inter^<{arg:4}>"))
+                                     .$ var "Nil")))
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Data.SortedBinTree.SortedBinTree.AllGT>[]"
+              [    var "<Data.SortedBinTree.SortedBinTree.AllGT>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ var "Prelude.Types.Nat"
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                                      .=>    var "Builtin.DPair.DPair"
+                                                          .$ var "Data.SortedBinTree.SortedBinTree"
+                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                                              .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:1}" .$ var "{arg:2}")))
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ var "Prelude.Types.Nat"
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                                      .=>    var "Builtin.DPair.DPair"
+                                                          .$ var "Data.SortedBinTree.SortedBinTree"
+                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                                              .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:1}" .$ var "{arg:2}")))
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
+                             [    var "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.EmptyGT (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "ref") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "Builtin.DPair.MkDPair"
+                                                  .$ implicitTrue
+                                                  .$ (var "Builtin.DPair.MkDPair" .$ implicitTrue .$ (var "Data.SortedBinTree.SortedBinTree.EmptyGT" .! ("ref", var "ref"))))))
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                             [    var "<<Data.SortedBinTree.SortedBinTree.NodeGT>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.NodeGT (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[]" .$ var "^cons_fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:1}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [       var "Builtin.DPair.MkDPair"
+                                                         .$ bindVar "ref"
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "l" .$ bindVar "^bnd^{arg:7}")
+                                                      .=    var ">>="
+                                                         .$ (var "<Data.Nat.LTE>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "ref"))
+                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                                             .=> iCase
+                                                                   { sc = var "{lamc:1}"
+                                                                   , ty = implicitFalse
+                                                                   , clauses =
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:5}"
+                                                                         .=    var ">>="
+                                                                            .$ (   var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
+                                                                                .$ var "^cons_fuel^"
+                                                                                .$ var "x"
+                                                                                .$ var "l")
+                                                                            .$ (    MkArg MW ExplicitArg (Just "prf1") implicitFalse
+                                                                                .=>    var ">>="
+                                                                                    .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[0]" .$ var "^cons_fuel^" .$ var "x")
+                                                                                    .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                                                                        .=> iCase
+                                                                                              { sc = var "{lamc:1}"
+                                                                                              , ty = implicitFalse
+                                                                                              , clauses =
+                                                                                                  [    var "Builtin.DPair.MkDPair" .$ bindVar "r" .$ bindVar "prf2"
+                                                                                                    .=    var ">>="
+                                                                                                       .$ (   var "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]"
+                                                                                                           .$ var "^cons_fuel^"
+                                                                                                           .$ var "ref"
+                                                                                                           .$ var "r")
+                                                                                                       .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:6}") implicitFalse
+                                                                                                           .=>    var "Prelude.pure"
+                                                                                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                                                                               .$ (   var "Builtin.DPair.MkDPair"
+                                                                                                                   .$ implicitTrue
+                                                                                                                   .$ (   var "Builtin.DPair.MkDPair"
+                                                                                                                       .$ implicitTrue
+                                                                                                                       .$ (   var
+                                                                                                                                "Data.SortedBinTree.SortedBinTree.NodeGT"
+                                                                                                                           .! ("r", implicitTrue)
+                                                                                                                           .! ("x", implicitTrue)
+                                                                                                                           .! ("prf2", var "prf2")
+                                                                                                                           .! ("l", implicitTrue)
+                                                                                                                           .! ("prf1", var "prf1")
+                                                                                                                           .! ("ref", implicitTrue)
+                                                                                                                           .$ var "^bnd^{arg:5}"
+                                                                                                                           .$ var "^bnd^{arg:7}"
+                                                                                                                           .$ var "^bnd^{arg:6}"))))
+                                                                                                  ]
+                                                                                              }))
+                                                                       ]
+                                                                   })
+                                                    ]
+                                                }))
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.AllGT[] (dry fuel)"))
+                                    .$ (var "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>" .$ var "^fuel_arg^")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.AllGT[] (non-dry fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>" .$ var "^fuel_arg^"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Data.SortedBinTree.SortedBinTree.NodeGT>>" .$ var "^sub^fuel_arg^"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Prelude.Types.Nat>[]"
+              [    var "<Prelude.Types.Nat>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Prelude.Types.Z>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Prelude.Types.S>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Prelude.Types.Z>>"
+                             [    var "<<Prelude.Types.Z>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Prelude.Types.Z (orders)"))
+                                  .$ (var "Prelude.pure" .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue) .$ var "Prelude.Types.Z")
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Prelude.Types.S>>"
+                             [    var "<<Prelude.Types.S>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:11}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Prelude.Types.S" .$ var "^bnd^{arg:11}")))
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (dry fuel)"))
+                                    .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (non-dry fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Prelude.Types.S>>" .$ var "^sub^fuel_arg^"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Data.SortedBinTree.SortedBinTree.AllLT>[0]"
+              [    var "<Data.SortedBinTree.SortedBinTree.AllLT>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<{arg:3}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ var "Data.SortedBinTree.SortedBinTree"
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                                      .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:3}" .$ var "{arg:4}"))
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ var "Data.SortedBinTree.SortedBinTree"
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                                      .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:3}" .$ var "{arg:4}"))
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
+                             [    var "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>" .$ bindVar "^cons_fuel^" .$ bindVar "ref"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.EmptyLT (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "Builtin.DPair.MkDPair" .$ implicitTrue .$ (var "Data.SortedBinTree.SortedBinTree.EmptyLT" .! ("ref", var "ref"))))
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                             [    var "<<Data.SortedBinTree.SortedBinTree.NodeLT>>" .$ bindVar "^cons_fuel^" .$ bindVar "ref"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.NodeLT (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[]" .$ var "^cons_fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:1}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [       var "Builtin.DPair.MkDPair"
+                                                         .$ bindVar "x"
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "r" .$ bindVar "prf2")
+                                                      .=    var ">>="
+                                                         .$ (   var "<Data.Nat.LTE>[0, 1]"
+                                                             .$ var "^outmost-fuel^"
+                                                             .$ (var "Prelude.Types.S" .$ var "x")
+                                                             .$ var "ref")
+                                                         .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:8}") implicitFalse
+                                                             .=>    var ">>="
+                                                                 .$ (   var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
+                                                                     .$ var "^cons_fuel^"
+                                                                     .$ var "ref"
+                                                                     .$ var "r")
+                                                                 .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                                                     .=>    var ">>="
+                                                                         .$ (var "<Data.SortedBinTree.SortedBinTree.AllLT>[0]" .$ var "^cons_fuel^" .$ var "x")
+                                                                         .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                                                             .=> iCase
+                                                                                   { sc = var "{lamc:1}"
+                                                                                   , ty = implicitFalse
+                                                                                   , clauses =
+                                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "l" .$ bindVar "prf1"
+                                                                                         .=    var ">>="
+                                                                                            .$ (   var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
+                                                                                                .$ var "^cons_fuel^"
+                                                                                                .$ var "ref"
+                                                                                                .$ var "l")
+                                                                                            .$ (    MkArg
+                                                                                                      MW
+                                                                                                      ExplicitArg
+                                                                                                      (Just "^bnd^{arg:10}")
+                                                                                                      implicitFalse
+                                                                                                .=>    var "Prelude.pure"
+                                                                                                    .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                                                                    .$ (   var "Builtin.DPair.MkDPair"
+                                                                                                        .$ implicitTrue
+                                                                                                        .$ (   var "Data.SortedBinTree.SortedBinTree.NodeLT"
+                                                                                                            .! ("r", implicitTrue)
+                                                                                                            .! ("x", implicitTrue)
+                                                                                                            .! ("prf2", var "prf2")
+                                                                                                            .! ("l", implicitTrue)
+                                                                                                            .! ("prf1", var "prf1")
+                                                                                                            .! ("ref", implicitTrue)
+                                                                                                            .$ var "^bnd^{arg:8}"
+                                                                                                            .$ var "^bnd^{arg:10}"
+                                                                                                            .$ var "^bnd^{arg:9}")))
+                                                                                       ]
+                                                                                   })))
+                                                    ]
+                                                }))
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.AllLT[0] (dry fuel)"))
+                                    .$ (var "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:3}>")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.AllLT[0] (non-dry fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (   var "Builtin.MkPair"
+                                                .$ var "Data.Nat1.one"
+                                                .$ (var "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:3}>"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Data.SortedBinTree.SortedBinTree.NodeLT>>" .$ var "^sub^fuel_arg^" .$ var "inter^<{arg:3}>"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]"
+              [    var "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<{arg:1}>" .$ bindVar "inter^<{arg:2}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:1}" .$ var "{arg:2}")
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:1}" .$ var "{arg:2}")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
+                             [    var "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>" .$ bindVar "^cons_fuel^" .$ bindVar "ref" .$ var "Data.SortedBinTree.Empty"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.EmptyGT (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "Data.SortedBinTree.SortedBinTree.EmptyGT" .! ("ref", var "ref")))
+                             , var "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                             [       var "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ bindVar "ref"
+                                  .$ (   var "Data.SortedBinTree.Node"
+                                      .$ bindVar "x"
+                                      .$ bindVar "l"
+                                      .$ bindVar "r"
+                                      .! ("{conArg:1}", bindVar "prf1")
+                                      .! ("{conArg:2}", bindVar "prf2"))
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.NodeGT (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.Nat.LTE>[0, 1]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "ref") .$ var "x")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:5}") implicitFalse
+                                          .=>    var ">>="
+                                              .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]" .$ var "^cons_fuel^" .$ var "ref" .$ var "l")
+                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:7}") implicitFalse
+                                                  .=>    var ">>="
+                                                      .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]" .$ var "^cons_fuel^" .$ var "ref" .$ var "r")
+                                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:6}") implicitFalse
+                                                          .=>    var "Prelude.pure"
+                                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                              .$ (   var "Data.SortedBinTree.SortedBinTree.NodeGT"
+                                                                  .! ("r", implicitTrue)
+                                                                  .! ("x", implicitTrue)
+                                                                  .! ("prf2", var "prf2")
+                                                                  .! ("l", implicitTrue)
+                                                                  .! ("prf1", var "prf1")
+                                                                  .! ("ref", implicitTrue)
+                                                                  .$ var "^bnd^{arg:5}"
+                                                                  .$ var "^bnd^{arg:7}"
+                                                                  .$ var "^bnd^{arg:6}")))))
+                             , var "<<Data.SortedBinTree.SortedBinTree.NodeGT>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.AllGT[0, 1] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.frequency"
+                             .$ (   var "::"
+                                 .$ (   var "Builtin.MkPair"
+                                     .$ var "Data.Nat1.one"
+                                     .$ (   var "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
+                                         .$ var "^fuel_arg^"
+                                         .$ var "inter^<{arg:1}>"
+                                         .$ var "inter^<{arg:2}>"))
+                                 .$ (   var "::"
+                                     .$ (   var "Builtin.MkPair"
+                                         .$ (var "weight^Data.SortedBinTree.SortedBinTree" .$ var "inter^<{arg:2}>")
+                                         .$ (   var "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                                             .$ var "^fuel_arg^"
+                                             .$ var "inter^<{arg:1}>"
+                                             .$ var "inter^<{arg:2}>"))
+                                     .$ var "Nil")))
+                     }
+              ]
+          , IDef
+              emptyFC
+              "weight^Prelude.Types.Nat"
+              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
+              , var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0") .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
+              ]
+          , IDef
+              emptyFC
+              "<Data.Nat.LTE>[0]"
+              [    var "<Data.Nat.LTE>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.Nat.LTEZero>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ var "Prelude.Types.Nat"
+                                                  .$ (MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat") .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.Nat.LTESucc>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "Builtin.DPair.DPair"
+                                                  .$ var "Prelude.Types.Nat"
+                                                  .$ (MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat") .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.Nat.LTEZero>>"
+                             [    var "<<Data.Nat.LTEZero>>" .$ bindVar "^cons_fuel^" .$ var "Prelude.Types.Z"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.Nat.LTEZero (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "right") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Builtin.DPair.MkDPair" .$ implicitTrue .$ (var "Data.Nat.LTEZero" .! ("right", var "right")))))
+                             , var "<<Data.Nat.LTEZero>>" .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.Nat.LTESucc>>"
+                             [    var "<<Data.Nat.LTESucc>>" .$ bindVar "^cons_fuel^" .$ (var "Prelude.Types.S" .$ bindVar "left")
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.Nat.LTESucc (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.Nat.LTE>[0]" .$ var "^cons_fuel^" .$ var "left")
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:1}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "right" .$ bindVar "^bnd^{arg:12}"
+                                                      .=    var "Prelude.pure"
+                                                         .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                         .$ (   var "Builtin.DPair.MkDPair"
+                                                             .$ implicitTrue
+                                                             .$ (   var "Data.Nat.LTESucc"
+                                                                 .! ("right", implicitTrue)
+                                                                 .! ("left", implicitTrue)
+                                                                 .$ var "^bnd^{arg:12}"))
+                                                    ]
+                                                }))
+                             , var "<<Data.Nat.LTESucc>>" .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0(n)] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.frequency"
+                             .$ (   var "::"
+                                 .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Data.Nat.LTEZero>>" .$ var "^fuel_arg^" .$ var "inter^<n>"))
+                                 .$ (   var "::"
+                                     .$ (   var "Builtin.MkPair"
+                                         .$ (var "weight^Prelude.Types.Nat" .$ var "inter^<n>")
+                                         .$ (var "<<Data.Nat.LTESucc>>" .$ var "^fuel_arg^" .$ var "inter^<n>"))
+                                     .$ var "Nil")))
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Data.Nat.LTE>[0, 1]"
+              [    var "<Data.Nat.LTE>[0, 1]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>" .$ bindVar "inter^<m>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.Nat.LTEZero>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.Nat.LTESucc>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.Nat.LTEZero>>"
+                             [    var "<<Data.Nat.LTEZero>>" .$ bindVar "^cons_fuel^" .$ var "Prelude.Types.Z" .$ bindVar "right"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.Nat.LTEZero (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "Data.Nat.LTEZero" .! ("right", var "right")))
+                             , var "<<Data.Nat.LTEZero>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.Nat.LTESucc>>"
+                             [       var "<<Data.Nat.LTESucc>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (var "Prelude.Types.S" .$ bindVar "left")
+                                  .$ (var "Prelude.Types.S" .$ bindVar "right")
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.Nat.LTESucc (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.Nat.LTE>[0, 1]" .$ var "^cons_fuel^" .$ var "left" .$ var "right")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:12}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Data.Nat.LTESucc" .! ("right", implicitTrue) .! ("left", implicitTrue) .$ var "^bnd^{arg:12}")))
+                             , var "<<Data.Nat.LTESucc>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "Data.Nat.LTE[0(n), 1(m)] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.frequency"
+                             .$ (   var "::"
+                                 .$ (   var "Builtin.MkPair"
+                                     .$ var "Data.Nat1.one"
+                                     .$ (var "<<Data.Nat.LTEZero>>" .$ var "^fuel_arg^" .$ var "inter^<n>" .$ var "inter^<m>"))
+                                 .$ (   var "::"
+                                     .$ (   var "Builtin.MkPair"
+                                         .$ (var "weight^Prelude.Types.Nat" .$ var "inter^<n>")
+                                         .$ (var "<<Data.Nat.LTESucc>>" .$ var "^fuel_arg^" .$ var "inter^<n>" .$ var "inter^<m>"))
+                                     .$ var "Nil")))
+                     }
+              ]
+          ]
+      , scope = var "<Data.SortedBinTree.SortedBinTree>[]" .$ var "^outmost-fuel^"
+      }
+
