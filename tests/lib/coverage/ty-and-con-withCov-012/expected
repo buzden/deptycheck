@@ -1,0 +1,23 @@
+1/1: Building PrintCoverage (PrintCoverage.idr)
+
+--------
+
+PrintCoverage.Y[?]
+PrintCoverage.Y1 (user-defined)
+value: Y1
+--------
+
+PrintCoverage.Y[?]
+PrintCoverage.X[?]
+PrintCoverage.X2 (user-defined)
+PrintCoverage.Y2 (user-defined)
+value: Y2 (X2 4)
+--------
+
+PrintCoverage.Y[?]
+PrintCoverage.X[?]
+PrintCoverage.X[?]
+PrintCoverage.X2 (user-defined)
+PrintCoverage.X2 (user-defined)
+PrintCoverage.Y3 (user-defined)
+value: Y3 (X2 4) (X2 8)

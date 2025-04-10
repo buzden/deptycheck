@@ -1,0 +1,8 @@
+rm -rf build
+
+flock "$1" pack -q install-deps test.ipkg && \
+idris2 --no-color --console-width 0 --no-banner --find-ipkg --check PrintCoverage.idr && \
+echo && \
+pack exec PrintCoverage.idr
+
+rm -rf build
