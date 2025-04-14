@@ -85,7 +85,7 @@ analyseDeepConsApp ccdi freeNames = isD where
 
     -- Check that this is an application to a constructor's name
     let Just con = lookupCon lhsName
-      | Nothing => Left "name `\{lhsName}` is not a constructor"
+      | Nothing => if ccdi then Left "name `\{lhsName}` is not a constructor" else pure ([] ** const implicitTrue)
 
     -- Acquire type-determination info, if needed
     typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral

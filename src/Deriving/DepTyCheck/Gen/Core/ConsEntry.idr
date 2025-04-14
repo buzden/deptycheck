@@ -46,11 +46,16 @@ canonicConsBody sig name con = do
   --   - (maybe, deeply) constructor call (need to match)
   --   - function call on a free param (need to use "inverted function" filtering trick)
   --   - something else (cannot manage yet)
-  deepConsApps <- for sig.givenParams.asVect $ \idx => do
+  let deepConsApps = sig.givenParams.asVect <&> \idx => do
     let argExpr = conRetTypeArg idx
-    let Right analysed = analyseDeepConsApp True conArgNames argExpr
-      | Left err => failAt conFC "Argument #\{show idx} is not supported yet, argument expression: \{show argExpr}, reason: \{err}"
-    pure analysed
+    mapFst (\err => ("Argument #\{show idx} is not supported yet, argument expression: \{show argExpr}, reason: \{err}", argExpr)) $
+      analyseDeepConsApp True conArgNames argExpr
+  let allAppliedFreeNames = foldMap (either .| const empty .| SortedSet.fromList . map fst . fst) deepConsApps
+  deepConsApps <- for deepConsApps $ \case
+    Right x => pure x
+    Left (err, argExpr) => if null $ (allVarNames' argExpr `intersection` conArgNames) `difference` allAppliedFreeNames
+                             then pure ([] ** const argExpr)
+                             else failAt conFC err
 
   -- Acquire LHS bind expressions for the given parameters
   -- Determine pairs of names which should be `decEq`'ed

@@ -19,10 +19,11 @@ printDeepConsApp freeNames tyExpr = do
     | Left (n, alts) => logMsg "deptycheck.deep-cons-app" 0 "fail: name \{n} is not unique, alternatives: \{show alts}"
   logSugaredTerm "deptycheck.deep-cons-app" 0 "resolved expression" tyExpr
   logMsg         "deptycheck.deep-cons-app" 0 "------------------------"
-  let Right (appliedNames ** bindExprF) = analyseDeepConsApp False (fromList freeNames) tyExpr
+  let Right (appliedNames ** bindExprF) = analyseDeepConsApp True (fromList freeNames) tyExpr
     | Left err => logMsg "deptycheck.deep-cons-app" 0 "not a (deep) constructor application, reason: \{err}"
+  let appliedNames = fst <$> appliedNames.asVect
   logMsg         "deptycheck.deep-cons-app" 0 "applied names:   \{show appliedNames}"
-  let bindExpr = bindExprF $ \idx => bindVar $ show (index' appliedNames idx) ++ show idx
+  let bindExpr = bindExprF $ \idx => bindVar $ show (index idx appliedNames) ++ show idx
   logSugaredTerm "deptycheck.deep-cons-app" 0 "bind expression" bindExpr
 
 %runElab consApps >>= traverse_ (uncurry printDeepConsApp)
