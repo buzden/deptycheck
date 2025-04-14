@@ -3,23 +3,23 @@
 Generated values:
 -----
 -----
-(2 ** (Just RefTy ** ..!))
+(1 ** (Just PrimTy ** .!))
+-----
+(1 ** (Just PrimTy ** .!))
+-----
+(0 ** (Nothing ** !))
 -----
 (2 ** (Just RefTy ** ..!))
 -----
+(0 ** (Nothing ** !))
+-----
 (2 ** (Just RefTy ** ..!))
+-----
+(0 ** (Nothing ** !))
 -----
 (2 ** (Just RefTy ** ..!))
 -----
 (2 ** (Just RefTy ** ..!))
 -----
 (1 ** (Just PrimTy ** .!))
------
-(2 ** (Just RefTy ** ..!))
------
-(2 ** (Just RefTy ** ..!))
------
-(2 ** (Just RefTy ** ..!))
------
-(2 ** (Just RefTy ** ..!))
 -----

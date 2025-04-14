@@ -165,9 +165,7 @@ LOG deptycheck.derive.least-effort:7: Data.So.So[0] Oh - used final order: []
                              ]
                          ]
                      , scope =
-                            var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.R[] (non-recursive)"))
-                         .$ (var "<<DerivedGen.R>>" .$ var "^fuel_arg^")
+                         var "Test.DepTyCheck.Gen.label" .$ (var "fromString" .$ primVal (Str "DerivedGen.R[] (non-spending)")) .$ (var "<<DerivedGen.R>>" .$ var "^fuel_arg^")
                      }
               ]
           , IDef
@@ -204,7 +202,7 @@ LOG deptycheck.derive.least-effort:7: Data.So.So[0] Oh - used final order: []
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Data.So.So[0] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "Data.So.So[0] (non-spending)"))
                          .$ (var "<<Data.So.Oh>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:2}>")
                      }
               ]

@@ -1,0 +1,46 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+-----
+(1 ** (int ** indeed))
+-----
+(2 ** (bool ** indeed))
+-----
+(2 ** (bool ** indeed))
+-----
+(2 ** (bool ** indeed))
+-----
+(1 ** (int ** indeed))
+-----
+(2 ** (bool ** indeed))
+-----
+(1 ** (int ** indeed))
+-----
+(2 ** (bool ** indeed))
+-----
+(2 ** (bool ** indeed))
+-----
+(2 ** (bool ** indeed))
+-----
+-----
+(3 ** (int ** indeed))
+-----
+(0 ** (bool ** indeed))
+-----
+(3 ** (int ** indeed))
+-----
+(0 ** (bool ** indeed))
+-----
+(3 ** (int ** indeed))
+-----
+(0 ** (bool ** indeed))
+-----
+(3 ** (int ** indeed))
+-----
+(3 ** (int ** indeed))
+-----
+(3 ** (int ** indeed))
+-----
+(0 ** (bool ** indeed))

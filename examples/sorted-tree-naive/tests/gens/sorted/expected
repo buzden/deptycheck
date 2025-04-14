@@ -1,40 +1,40 @@
 --------------
 length: 5
-as list: [2, 3, 4, 5, 6]
+as list: [2, 3, 4, 5, 8]
 sorted: True
 --------------
-length: 7
-as list: [0, 1, 2, 3, 4, 5, 7]
+length: 5
+as list: [2, 5, 6, 7, 8]
 sorted: True
 --------------
-length: 2
-as list: [5, 10]
+length: 5
+as list: [0, 4, 5, 6, 12]
 sorted: True
 --------------
-length: 7
-as list: [0, 1, 2, 3, 4, 5, 8]
+length: 5
+as list: [2, 8, 12, 18, 24]
 sorted: True
 --------------
-length: 7
-as list: [0, 1, 2, 3, 4, 5, 8]
+length: 1
+as list: [5]
 sorted: True
 --------------
-length: 7
-as list: [0, 1, 2, 3, 4, 5, 8]
-sorted: True
---------------
-length: 7
-as list: [0, 1, 2, 3, 4, 5, 6]
+length: 6
+as list: [3, 7, 8, 9, 11, 14]
 sorted: True
 --------------
 length: 0
 as list: []
 sorted: True
 --------------
-length: 6
-as list: [1, 2, 3, 4, 5, 7]
+length: 8
+as list: [0, 1, 5, 6, 7, 8, 12, 16]
 sorted: True
 --------------
 length: 7
-as list: [0, 1, 2, 3, 4, 5, 7]
+as list: [0, 5, 6, 11, 15, 20, 24]
+sorted: True
+--------------
+length: 7
+as list: [3, 5, 7, 8, 9, 13, 16]
 sorted: True

@@ -153,7 +153,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[0, 1, 2, 3] MkX - used final 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0, 1, 2, 3] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0, 1, 2, 3] (non-spending)"))
                          .$ (   var "<<DerivedGen.MkX>>"
                              .$ var "^fuel_arg^"
                              .$ var "inter^<{arg:1}>"

@@ -97,7 +97,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty (a : Type **
                                             .$ (var "::" .$ (var "<<DerivedGen.X1>>" .$ var "^fuel_arg^") .$ var "Nil")))
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<DerivedGen.X0>>" .$ var "^fuel_arg^"))

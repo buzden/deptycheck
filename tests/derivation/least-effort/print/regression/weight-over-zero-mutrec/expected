@@ -1,0 +1,217 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (a : Ty) -> (b : Ty) -> Gen MaybeEmpty (EqSuperBasic a b)
+LOG deptycheck.derive.least-effort:7: DerivedGen.EqSuperBasic[0, 1] EqBasicV - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.EqSuperBasic[0, 1] EqBasicP - used final order: [#8]
+LOG deptycheck.derive.least-effort:7: DerivedGen.EqSuperBasic[0, 1] EqBasicU - used final order: [#6]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ExplicitArg (Just "outer^<a>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<b>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type = mkTy {name = "weight^DerivedGen.Ty", type = MkArg MW ExplicitArg Nothing (var "DerivedGen.Ty") .-> var "Data.Nat1.Nat1"}
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<DerivedGen.EqSuperBasic>[0, 1]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Ty")
+                           .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "DerivedGen.EqSuperBasic" .$ var "{arg:1}" .$ var "{arg:2}")
+                       }
+                 })
+          , IDef
+              emptyFC
+              "weight^DerivedGen.Ty"
+              [       var "weight^DerivedGen.Ty"
+                   .$ (var "DerivedGen.Arr" .! ("e", implicitTrue) .! ("s", implicitTrue) .! ("t", implicitTrue) .$ implicitTrue)
+                .= var "Data.Nat1.one"
+              , var "weight^DerivedGen.Ty" .$ (var "DerivedGen.Var" .$ implicitTrue) .= var "Data.Nat1.one"
+              ]
+          , IDef
+              emptyFC
+              "<DerivedGen.EqSuperBasic>[0, 1]"
+              [    var "<DerivedGen.EqSuperBasic>[0, 1]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<{arg:1}>" .$ bindVar "inter^<{arg:2}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.EqBasicV>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Ty")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.EqSuperBasic" .$ var "{arg:1}" .$ var "{arg:2}")
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.EqBasicP>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Ty")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.EqSuperBasic" .$ var "{arg:1}" .$ var "{arg:2}")
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.EqBasicU>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Ty")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.EqSuperBasic" .$ var "{arg:1}" .$ var "{arg:2}")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.EqBasicV>>"
+                             [       var "<<DerivedGen.EqBasicV>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (var "DerivedGen.Var" .$ bindVar "t")
+                                  .$ (var "DerivedGen.Var" .$ bindVar "t'")
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.EqBasicV (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "DerivedGen.EqBasicV" .! ("t'", var "t'") .! ("t", var "t")))
+                             , var "<<DerivedGen.EqBasicV>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.EqBasicP>>"
+                             [       var "<<DerivedGen.EqBasicP>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (   var "DerivedGen.Arr"
+                                      .! ("e", bindVar "^bnd^{e:1}")
+                                      .! ("s", bindVar "^bnd^{s:1}")
+                                      .! ("t", bindVar "t")
+                                      .$ (   var "DerivedGen.Pck"
+                                          .$ implicitTrue
+                                          .$ implicitTrue
+                                          .$ implicitTrue
+                                          .! ("{conArg:1}", bindVar "^bnd^{_:1}")))
+                                  .$ (   var "DerivedGen.Arr"
+                                      .! ("e", bindVar "^bnd^{e:2}")
+                                      .! ("s", bindVar "^bnd^{s:2}")
+                                      .! ("t", bindVar "t'")
+                                      .$ (   var "DerivedGen.Pck"
+                                          .$ implicitTrue
+                                          .$ implicitTrue
+                                          .$ implicitTrue
+                                          .! ("{conArg:1}", bindVar "^bnd^{_:2}")))
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.EqBasicP (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<DerivedGen.EqSuperBasic>[0, 1]" .$ var "^cons_fuel^" .$ var "t" .$ var "t'")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "DerivedGen.EqBasicP"
+                                                  .! ("{e:1}", var "^bnd^{e:1}")
+                                                  .! ("{s:1}", var "^bnd^{s:1}")
+                                                  .! ("t", implicitTrue)
+                                                  .! ("{_:1}", var "^bnd^{_:1}")
+                                                  .! ("{e:2}", var "^bnd^{e:2}")
+                                                  .! ("{s:2}", var "^bnd^{s:2}")
+                                                  .! ("t'", implicitTrue)
+                                                  .! ("{_:2}", var "^bnd^{_:2}")
+                                                  .$ var "^bnd^{arg:3}")))
+                             , var "<<DerivedGen.EqBasicP>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.EqBasicU>>"
+                             [       var "<<DerivedGen.EqBasicU>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (   var "DerivedGen.Arr"
+                                      .! ("e", bindVar "^bnd^{e:3}")
+                                      .! ("s", bindVar "^bnd^{s:3}")
+                                      .! ("t", bindVar "t")
+                                      .$ (var "DerivedGen.Unp" .$ implicitTrue .$ implicitTrue .$ implicitTrue))
+                                  .$ (   var "DerivedGen.Arr"
+                                      .! ("e", bindVar "^bnd^{e:4}")
+                                      .! ("s", bindVar "^bnd^{s:4}")
+                                      .! ("t", bindVar "t'")
+                                      .$ (var "DerivedGen.Unp" .$ implicitTrue .$ implicitTrue .$ implicitTrue))
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.EqBasicU (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<DerivedGen.EqSuperBasic>[0, 1]" .$ var "^cons_fuel^" .$ var "t" .$ var "t'")
+                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:4}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "DerivedGen.EqBasicU"
+                                                  .! ("{e:3}", var "^bnd^{e:3}")
+                                                  .! ("{s:3}", var "^bnd^{s:3}")
+                                                  .! ("{e:4}", var "^bnd^{e:4}")
+                                                  .! ("{s:4}", var "^bnd^{s:4}")
+                                                  .! ("t'", implicitTrue)
+                                                  .! ("t", implicitTrue)
+                                                  .$ var "^bnd^{arg:4}")))
+                             , var "<<DerivedGen.EqBasicU>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.EqSuperBasic[0, 1] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.frequency"
+                             .$ (   var "::"
+                                 .$ (   var "Builtin.MkPair"
+                                     .$ var "Data.Nat1.one"
+                                     .$ (var "<<DerivedGen.EqBasicV>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>" .$ var "inter^<{arg:2}>"))
+                                 .$ (   var "::"
+                                     .$ (   var "Builtin.MkPair"
+                                         .$ (var "weight^DerivedGen.Ty" .$ var "inter^<{arg:1}>")
+                                         .$ (   var "<<DerivedGen.EqBasicP>>"
+                                             .$ var "^fuel_arg^"
+                                             .$ var "inter^<{arg:1}>"
+                                             .$ var "inter^<{arg:2}>"))
+                                     .$ (   var "::"
+                                         .$ (   var "Builtin.MkPair"
+                                             .$ (var "weight^DerivedGen.Ty" .$ var "inter^<{arg:1}>")
+                                             .$ (   var "<<DerivedGen.EqBasicU>>"
+                                                 .$ var "^fuel_arg^"
+                                                 .$ var "inter^<{arg:1}>"
+                                                 .$ var "inter^<{arg:2}>"))
+                                         .$ var "Nil"))))
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.EqSuperBasic>[0, 1]" .$ var "^outmost-fuel^" .$ var "outer^<a>" .$ var "outer^<b>"
+      }
+

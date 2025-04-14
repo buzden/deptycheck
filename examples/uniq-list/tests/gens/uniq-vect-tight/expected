@@ -3,16 +3,16 @@ no spare strings to generate from (4 for vects of length 4)
 vect: ["d", "a", "c", "b"]
 uniq: True
 -----------
-vect: ["c", "a", "b", "d"]
+vect: ["c", "d", "a", "b"]
 uniq: True
 -----------
-vect: ["c", "a", "b", "d"]
+vect: ["b", "c", "a", "d"]
 uniq: True
 -----------
-vect: ["b", "a", "d", "c"]
+vect: ["c", "b", "d", "a"]
 uniq: True
 -----------
-vect: ["c", "b", "a", "d"]
+vect: ["d", "c", "a", "b"]
 uniq: True
 -----------
 vect: ["b", "d", "c", "a"]
@@ -21,7 +21,7 @@ uniq: True
 vect: ["d", "c", "a", "b"]
 uniq: True
 -----------
-vect: ["b", "c", "d", "a"]
+vect: ["c", "b", "d", "a"]
 uniq: True
 -----------
 vect: ["c", "a", "d", "b"]

@@ -131,7 +131,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[1] MkX - used final order: [#
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0] (non-spending)"))
                          .$ (var "<<DerivedGen.MkY>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:3}>")
                      }
               ]
@@ -171,7 +171,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[1] MkX - used final order: [#
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0, 1] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[0, 1] (non-spending)"))
                          .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:4}>" .$ var "inter^<{arg:5}>")
                      }
               ]
@@ -216,7 +216,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[1] MkX - used final order: [#
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[1] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[1] (non-spending)"))
                          .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:5}>")
                      }
               ]

@@ -136,7 +136,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[] Step - used final order: 
                                     .$ (var "<<DerivedGen.Base>>" .$ var "^fuel_arg^")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.LT2[] (spend fuel)"))
+                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.LT2[] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<DerivedGen.Base>>" .$ var "^fuel_arg^"))

@@ -12,6 +12,13 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                  { rig = MW
                  , vis = Export
                  , opts = []
+                 , type = mkTy {name = "weight^DerivedGen.X", type = MkArg MW ExplicitArg Nothing (var "DerivedGen.X") .-> var "Data.Nat1.Nat1"}
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
                  , type =
                      mkTy
                        { name = "<DerivedGen.Y>[1]"
@@ -39,6 +46,13 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                            .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Builtin.Unit"
                        }
                  })
+          , IDef
+              emptyFC
+              "weight^DerivedGen.X"
+              [ var "weight^DerivedGen.X" .$ var "DerivedGen.Nil" .= var "Data.Nat1.one"
+              ,    var "weight^DerivedGen.X" .$ (var "DerivedGen.(::)" .$ implicitTrue .$ bindVar "arg^1" .@ implicitTrue)
+                .= var "succ" .$ (var "weight^DerivedGen.X" .$ var "arg^1")
+              ]
           , IDef
               emptyFC
               "<DerivedGen.Y>[1]"
@@ -129,29 +143,18 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                              ]
                          ]
                      , scope =
-                         iCase
-                           { sc = var "^fuel_arg^"
-                           , ty = var "Data.Fuel.Fuel"
-                           , clauses =
-                               [    var "Data.Fuel.Dry"
-                                 .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[1] (dry fuel)"))
-                                    .$ (var "<<DerivedGen.A>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>")
-                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
-                                 .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[1] (spend fuel)"))
-                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
-                                        .$ (   var "::"
-                                            .$ (   var "Builtin.MkPair"
-                                                .$ var "Data.Nat1.one"
-                                                .$ (var "<<DerivedGen.A>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>"))
-                                            .$ (   var "::"
-                                                .$ (   var "Builtin.MkPair"
-                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
-                                                    .$ (var "<<DerivedGen.B>>" .$ var "^sub^fuel_arg^" .$ var "inter^<{arg:1}>"))
-                                                .$ var "Nil")))
-                               ]
-                           }
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[1] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.frequency"
+                             .$ (   var "::"
+                                 .$ (   var "Builtin.MkPair"
+                                     .$ var "Data.Nat1.one"
+                                     .$ (var "<<DerivedGen.A>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>"))
+                                 .$ (   var "::"
+                                     .$ (   var "Builtin.MkPair"
+                                         .$ (var "weight^DerivedGen.X" .$ var "inter^<{arg:1}>")
+                                         .$ (var "<<DerivedGen.B>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>"))
+                                     .$ var "Nil")))
                      }
               ]
           , IDef
@@ -184,7 +187,7 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                          ]
                      , scope =
                             var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Builtin.Unit[] (non-recursive)"))
+                         .$ (var "fromString" .$ primVal (Str "Builtin.Unit[] (non-spending)"))
                          .$ (var "<<Builtin.MkUnit>>" .$ var "^fuel_arg^")
                      }
               ]
