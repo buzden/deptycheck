@@ -160,7 +160,7 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                              [       var "<<DerivedGen.MHere>>"
                                   .$ bindVar "^cons_fuel^"
                                   .$ (var "DerivedGen.B.(::)" .$ bindVar "p" .$ bindVar "ps")
-                                  .$ (var "Data.Fin.FZ" .! ("k", var "DerivedGen.B..length" .$ var "ps"))
+                                  .$ (var "Data.Fin.FZ" .! ("k", var "DerivedGen.B..length" .$ bindVar "ps"))
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MHere (orders)"))
                                   .$ (   var "Prelude.pure"

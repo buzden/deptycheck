@@ -69,7 +69,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.B[0(n), 1] B2 - used final orde
                              "<<DerivedGen.B1>>"
                              [       var "<<DerivedGen.B1>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (var "Prelude.Types.plus" .$ var "a" .$ var "b")
+                                  .$ (var "Prelude.Types.plus" .$ bindVar "a" .$ bindVar "b")
                                   .$ (var "DerivedGen.A1" .$ bindVar "a" .$ bindVar "b")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.B1 (orders)"))
@@ -84,7 +84,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.B[0(n), 1] B2 - used final orde
                              [       var "<<DerivedGen.B2>>"
                                   .$ bindVar "^cons_fuel^"
                                   .$ (   var "Prelude.Types.plus"
-                                      .$ (var "Prelude.Types.plus" .$ var "a" .$ var "b")
+                                      .$ (var "Prelude.Types.plus" .$ bindVar "a" .$ bindVar "b")
                                       .$ (var "Prelude.Types.S" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z")))
                                   .$ (var "DerivedGen.A2" .$ bindVar "a" .$ bindVar "b")
                                .=    var "Test.DepTyCheck.Gen.label"
