@@ -52,10 +52,16 @@ canonicConsBody sig name con = do
                      "argument expression: \{show argExpr}, reason: \{err}", argExpr)) $
       analyseDeepConsApp True conArgNames argExpr
   let allAppliedFreeNames = foldMap (either .| const empty .| SortedSet.fromList . map fst . fst) deepConsApps
+  let bindAppliedFreeNames : TTImp -> TTImp
+      bindAppliedFreeNames orig@(IVar _ n) = if contains n allAppliedFreeNames then bindVar $ bindNameRenamer n else orig
+      --                              /---------------------------------------------^^^^^^^
+      -- `bindVar` instead of `var` here is because this expression can be earlier than the real binding, thus undeclared,
+      -- and the compiler turns unnecessary `IBindVar`s into `IVar`s by itself
+      bindAppliedFreeNames x = x
   deepConsApps <- for deepConsApps $ \case
     Right x => pure x
     Left (err, argExpr) => if null $ (allVarNames' argExpr `intersection` conArgNames) `difference` allAppliedFreeNames
-                             then pure ([] ** const argExpr)
+                             then pure ([] ** const $ mapTTImp bindAppliedFreeNames argExpr)
                              else failAt conFC err
 
   -- Acquire LHS bind expressions for the given parameters

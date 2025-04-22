@@ -1,0 +1,99 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (cfg : Nat) -> (ar : NA) -> (node : N cfg ar) -> Gen MaybeEmpty (NT node)
+LOG deptycheck.derive.least-effort:7: DerivedGen.NT[0(ar), 1(cfg), 2] NTF - used final order: []
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ExplicitArg (Just "outer^<cfg>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<ar>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<node>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<DerivedGen.NT>[0, 1, 2]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "ar") (var "DerivedGen.NA")
+                           .-> MkArg MW ExplicitArg (Just "cfg") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.N" .$ var "cfg" .$ var "ar")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "DerivedGen.NT" .! ("ar", var "ar") .! ("cfg", var "cfg") .$ var "{arg:1}")
+                       }
+                 })
+          , IDef
+              emptyFC
+              "<DerivedGen.NT>[0, 1, 2]"
+              [       var "<DerivedGen.NT>[0, 1, 2]"
+                   .$ bindVar "^fuel_arg^"
+                   .$ bindVar "inter^<ar>"
+                   .$ bindVar "inter^<cfg>"
+                   .$ bindVar "inter^<{arg:1}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.NTF>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "ar") (var "DerivedGen.NA")
+                                          .-> MkArg MW ExplicitArg (Just "cfg") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.N" .$ var "cfg" .$ var "ar")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.NT" .! ("ar", var "ar") .! ("cfg", var "cfg") .$ var "{arg:1}")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.NTF>>"
+                             [       var "<<DerivedGen.NTF>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ (   var "DerivedGen.MkNA"
+                                      .$ (   var "DerivedGen.case block in "f""
+                                          .$ bindVar "^bnd^{cfg:1}"
+                                          .$ bindVar "nz"
+                                          .$ bindVar "^bnd^{k:1}"
+                                          .$ (var "Data.Nat.modNatNZ" .$ bindVar "^bnd^{k:1}" .$ bindVar "^bnd^{cfg:1}" .$ bindVar "nz"))
+                                      .! ( "curTotLTE"
+                                         ,    var "Data.Nat.reflexive"
+                                           .! ( "x"
+                                              ,    var "DerivedGen.case block in "f""
+                                                .$ bindVar "^bnd^{cfg:1}"
+                                                .$ bindVar "nz"
+                                                .$ bindVar "^bnd^{k:1}"
+                                                .$ (var "Data.Nat.modNatNZ" .$ bindVar "^bnd^{k:1}" .$ bindVar "^bnd^{cfg:1}" .$ bindVar "nz")
+                                              )
+                                         ))
+                                  .$ bindVar "^bnd^{cfg:1}"
+                                  .$ (var "DerivedGen.F" .! ("c", implicitTrue) .! ("nz", bindVar "nz") .! ("k", bindVar "^bnd^{k:1}"))
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.NTF (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (   var "DerivedGen.NTF"
+                                          .! ("{cfg:1}", implicitTrue)
+                                          .! ("{k:1}", var "^bnd^{k:1}")
+                                          .! ("nz", var "nz")))
+                             , var "<<DerivedGen.NTF>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.NT[0(ar), 1(cfg), 2] (non-spending)"))
+                         .$ (var "<<DerivedGen.NTF>>" .$ var "^fuel_arg^" .$ var "inter^<ar>" .$ var "inter^<cfg>" .$ var "inter^<{arg:1}>")
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.NT>[0, 1, 2]" .$ var "^outmost-fuel^" .$ var "outer^<ar>" .$ var "outer^<cfg>" .$ var "outer^<node>"
+      }
+

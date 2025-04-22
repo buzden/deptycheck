@@ -1,0 +1,26 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Warning: Unreachable clause: (<<DerivedGen.NTF>>) (^outmost-fuel^) outer^<cfg> outer^<ar> outer^<node> inter^<cfg> inter^<ar> inter^<{arg:1}> (^fuel_arg^) _ _ _ _
+
+Generated values:
+-----
+-----
+NTF
+-----
+NTF
+-----
+NTF
+-----
+NTF
+-----
+NTF
+-----
+NTF
+-----
+NTF
+-----
+NTF
+-----
+NTF
+-----
+NTF
