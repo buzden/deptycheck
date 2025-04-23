@@ -50,7 +50,7 @@ canonicConsBody sig name con = do
     let argExpr = conRetTypeArg idx
     mapFst (\err => ("Argument #\{show idx} of \{show con.name} with given type arguments [\{showGivens sig}] is not supported, " ++
                      "argument expression: \{show argExpr}, reason: \{err}", argExpr)) $
-      analyseDeepConsApp True conArgNames argExpr
+      analyseDeepConsApp {m=Either String} True conArgNames argExpr
   let allAppliedFreeNames = foldMap (either .| const empty .| SortedSet.fromList . map fst . fst) deepConsApps
   let bindAppliedFreeNames : TTImp -> TTImp
       bindAppliedFreeNames orig@(IVar _ n) = if contains n allAppliedFreeNames then bindVar $ bindNameRenamer n else orig
