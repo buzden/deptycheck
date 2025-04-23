@@ -2,6 +2,8 @@ module Infra
 
 import public ConsApps
 
+import public Control.Monad.Writer
+
 import Deriving.DepTyCheck.Gen.Core.Util
 
 %language ElabReflection
@@ -19,7 +21,7 @@ printDeepConsApp freeNames tyExpr = do
     | Left (n, alts) => logMsg "deptycheck.deep-cons-app" 0 "fail: name \{n} is not unique, alternatives: \{show alts}"
   logSugaredTerm "deptycheck.deep-cons-app" 0 "resolved expression" tyExpr
   logMsg         "deptycheck.deep-cons-app" 0 "------------------------"
-  let Right (appliedNames ** bindExprF) = analyseDeepConsApp True (fromList freeNames) tyExpr
+  let Right ((appliedNames ** bindExprF), _) = runWriterT {m=Either String} {w=List Name} $ analyseDeepConsApp True (fromList freeNames) tyExpr
     | Left err => logMsg "deptycheck.deep-cons-app" 0 "not a (deep) constructor application, reason: \{err}"
   let appliedNames = fst <$> appliedNames.asVect
   logMsg         "deptycheck.deep-cons-app" 0 "applied names:   \{show appliedNames}"

@@ -1,7 +1,9 @@
 ||| Derivation of the outer layer of a constructor-generating function, performing GADT indices check of given arguments.
 module Deriving.DepTyCheck.Gen.Core.ConsEntry
 
+import public Control.Monad.Error.Either
 import public Control.Monad.State.Tuple
+import public Control.Monad.Writer
 
 import public Decidable.Equality
 
@@ -45,13 +47,14 @@ canonicConsBody sig name con = do
   --   - repeated name of another given parameter (need of `decEq`)
   --   - (maybe, deeply) constructor call (need to match)
   --   - function call on a free param (need to use "inverted function" filtering trick)
-  --   - something else (cannot manage yet)
-  let deepConsApps = sig.givenParams.asVect <&> \idx => do
+  --   - something else (cannot manage yet, unless it is fully determined by other given arguments)
+  let deepConsApps : Vect _ $ Either (String, TTImp, List Name) _ := sig.givenParams.asVect <&> \idx => do
     let argExpr = conRetTypeArg idx
-    mapFst (\err => ("Argument #\{show idx} of \{show con.name} with given type arguments [\{showGivens sig}] is not supported, " ++
-                     "argument expression: \{show argExpr}, reason: \{err}", argExpr)) $
-      analyseDeepConsApp {m=Either String} True conArgNames argExpr
-  let allAppliedFreeNames = foldMap (either .| const empty .| SortedSet.fromList . map fst . fst) deepConsApps
+    let (ei, fns) = runWriter $ runEitherT {e=String} {m=Writer _} $ analyseDeepConsApp True conArgNames argExpr
+    flip mapFst ei $ \err =>
+      ("Argument #\{show idx} of \{show con.name} with given type arguments [\{showGivens sig}] is not supported, " ++
+       "argument expression: \{show argExpr}, reason: \{err}", argExpr, fns)
+  let allAppliedFreeNames = foldMap (SortedSet.fromList . either (snd . snd) (map fst . fst)) deepConsApps
   let bindAppliedFreeNames : TTImp -> TTImp
       bindAppliedFreeNames orig@(IVar _ n) = if contains n allAppliedFreeNames then bindVar $ bindNameRenamer n else orig
       --                              /---------------------------------------------^^^^^^^
@@ -60,9 +63,9 @@ canonicConsBody sig name con = do
       bindAppliedFreeNames x = x
   deepConsApps <- for deepConsApps $ \case
     Right x => pure x
-    Left (err, argExpr) => if null $ (allVarNames' argExpr `intersection` conArgNames) `difference` allAppliedFreeNames
-                             then pure ([] ** const $ mapTTImp bindAppliedFreeNames argExpr)
-                             else failAt conFC err
+    Left (err, argExpr, fns) => if null $ (allVarNames' argExpr `intersection` conArgNames) `difference` allAppliedFreeNames
+      then pure (filter (contains' conArgNames) fns <&> (, neutral) ** const $ mapTTImp bindAppliedFreeNames argExpr)
+      else failAt conFC err
 
   -- Acquire LHS bind expressions for the given parameters
   -- Determine pairs of names which should be `decEq`'ed
