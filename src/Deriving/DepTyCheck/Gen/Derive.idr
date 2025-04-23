@@ -33,13 +33,16 @@ public export %inline
 sig.generatedParams = fromList (allFins sig.targetType.args.length) `difference` sig.givenParams
 
 export
+showGivens : GenSignature -> String
+showGivens sig = joinBy ", " $ do
+  let uName : Arg -> Maybe UserName
+      uName $ MkArg {name=Just $ UN un, _} = Just un
+      uName _ = Nothing
+  sig.givenParams.asList <&> \idx => maybe (show idx) (\n => "\{show idx}(\{show n})") $ uName $ index' sig.targetType.args idx
+
+export
 SingleLogPosition GenSignature where
-  logPosition sig = do
-    let uName : Arg -> Maybe UserName
-        uName $ MkArg {name=Just $ UN un, _} = Just un
-        uName _ = Nothing
-    let givs = sig.givenParams.asList <&> \idx => maybe (show idx) (\n => "\{show idx}(\{show n})") $ uName $ index' sig.targetType.args idx
-    "\{logPosition sig.targetType}[\{joinBy ", " givs}]"
+  logPosition sig = "\{logPosition sig.targetType}[\{showGivens sig}]"
 
 public export
 Eq GenSignature where

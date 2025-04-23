@@ -48,7 +48,8 @@ canonicConsBody sig name con = do
   --   - something else (cannot manage yet)
   let deepConsApps = sig.givenParams.asVect <&> \idx => do
     let argExpr = conRetTypeArg idx
-    mapFst (\err => ("Argument #\{show idx} is not supported yet, argument expression: \{show argExpr}, reason: \{err}", argExpr)) $
+    mapFst (\err => ("Argument #\{show idx} of \{show con.name} with given type arguments [\{showGivens sig}] is not supported, " ++
+                     "argument expression: \{show argExpr}, reason: \{err}", argExpr)) $
       analyseDeepConsApp True conArgNames argExpr
   let allAppliedFreeNames = foldMap (either .| const empty .| SortedSet.fromList . map fst . fst) deepConsApps
   deepConsApps <- for deepConsApps $ \case
