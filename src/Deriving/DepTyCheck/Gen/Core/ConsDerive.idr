@@ -63,11 +63,11 @@ getTypeApps con = do
                                    -- we didn't found, failing, there are at least two reasons
                                    failAt (getFC lhs) $ if isNamespaced lhsName
                                      then "Data type `\{lhsName}` is unavailable at the site of derivation (forgotten import?)"
-                                     else "Usupported applications to a non-concrete type `\{lhsName}`"
+                                     else "Usupported applications to a non-concrete type `\{lhsName}` in \{show con.name}"
           IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
           IType _            => pure typeInfoForTypeOfTypes
-          lhs@(IPi {})       => failAt (getFC lhs) "Fields with function types are not supported in constructors"
-          lhs                => failAt (getFC lhs) "Unsupported type of a constructor field: \{show lhs}"
+          lhs@(IPi {})       => failAt (getFC lhs) "Fields with function types are not supported in constructors, like in \{show con.name}"
+          lhs                => failAt (getFC lhs) "Unsupported type of a constructor's \{show con.name} field: \{show lhs}"
         let Yes lengthCorrect = decEq ty.args.length args.length
           | No _ => failAt (getFC lhs) "INTERNAL ERROR: wrong count of unapp when analysing type application"
         _ <- ensureTyArgsNamed ty

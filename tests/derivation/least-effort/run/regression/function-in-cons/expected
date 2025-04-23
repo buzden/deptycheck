@@ -2,7 +2,7 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Sorry, I can't find any elaboration which works. All errors:
 Possible error:
-    Error during reflection: Fields with function types are not supported in constructors
+    Error during reflection: Fields with function types are not supported in constructors, like in DerivedGen.MkX
 
     DerivedGen:1
      4 | 

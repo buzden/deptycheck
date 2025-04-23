@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `ty`
+Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `ty` in Prelude.Types.Just
 
 DerivedGen:1
  13 | XShow = %runElab derive

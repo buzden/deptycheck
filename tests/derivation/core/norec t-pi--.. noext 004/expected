@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `a`
+Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `a` in Builtin.Refl
 
 DerivedGen:1
  15 |   show (X0 b1 b2 _) = "X0 \{show b1} \{show b2} Refl"
