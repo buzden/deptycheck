@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+NewCompositeModule _ _
+-----
+End
+-----
+End
+-----
+NewCompositeModule _ _
+-----
+NewCompositeModule _ _
+-----
+NewCompositeModule _ _
+-----
+End
+-----
+NewCompositeModule _ _
+-----
+NewCompositeModule _ _
+-----
+NewCompositeModule _ _

@@ -1,5 +1,7 @@
 module Deriving.DepTyCheck.Gen.Core.Util
 
+import public Control.Monad.Writer.Interface
+
 import public Data.Fin.Split
 
 import public Decidable.Equality
@@ -39,11 +41,8 @@ BindExprFun n = (bindExpr : Fin n -> TTImp) -> {-bind expression-} TTImp
 
 public export
 DeepConsAnalysisRes : (collectConsDetermInfo : Bool) -> Type
-DeepConsAnalysisRes c = (appliedFreeNames : List (FreeName c) ** BindExprFun appliedFreeNames.length)
-  where
-    FreeName : Bool -> Type
-    FreeName False = Name
-    FreeName True  = (Name, ConsDetermInfo)
+DeepConsAnalysisRes False = List Name
+DeepConsAnalysisRes True = (appliedFreeNames : List (Name, ConsDetermInfo) ** BindExprFun appliedFreeNames.length)
 
 MaybeConsDetermInfo : Bool -> Type
 MaybeConsDetermInfo True  = ConsDetermInfo
@@ -60,39 +59,39 @@ MaybeConsDetermInfo False = Unit
 ||| It returns correct bind expression only when all given bind names are different.
 export
 analyseDeepConsApp : NamesInfoInTypes =>
+                     MonadError String m =>
+                     MonadWriter (List Name) m => -- a redundant thing, allowing, however, returning this list even on errors
                      (collectConsDetermInfo : Bool) ->
                      (freeNames : SortedSet Name) ->
                      (analysedExpr : TTImp) ->
-                     Either String $ DeepConsAnalysisRes collectConsDetermInfo
+                     m $ DeepConsAnalysisRes collectConsDetermInfo
 analyseDeepConsApp ccdi freeNames = isD where
 
-  isD : TTImp -> Either String $ DeepConsAnalysisRes ccdi
+  isD : TTImp -> m $ DeepConsAnalysisRes ccdi
   isD e = do
 
     -- Treat given expression as a function application to some name
     let (IVar _ lhsName, args) = unAppAny e
-      | (IType {}   , _) => pure ([] ** const e)
-      | (IPrimVal {}, _) => pure ([] ** const e)
-      | _ => Left "not an application to a variable"
+      | (IType {}   , _) => pure $ noFree e
+      | (IPrimVal {}, _) => pure $ noFree e
+      | _ => throwError "not an application to a variable"
 
     -- Check if this is a free name
     let False = contains lhsName freeNames
       | True => if null args
-                  then do
-                    let n = if ccdi then (lhsName, neutral) else lhsName
-                    pure (singleton n ** \f => f FZ)
-                  else Left "applying free name to some arguments"
+                  then do tell [lhsName]; pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
+                  else throwError "applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
     let Just con = lookupCon lhsName
-      | Nothing => if ccdi then Left "name `\{lhsName}` is not a constructor" else pure ([] ** const implicitTrue)
+      | Nothing => if ccdi then throwError "name `\{lhsName}` is not a constructor" else pure $ noFree implicitTrue
 
     -- Acquire type-determination info, if needed
     typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
     let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := typeDetermInfo
 
     let Just typeDetermInfo = reorder typeDetermInfo
-      | Nothing => Left "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
+      | Nothing => throwError "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
 
     -- Analyze deeply all the arguments
     deepArgs <- for (args.asVect `zip` typeDetermInfo) $
@@ -102,11 +101,15 @@ analyseDeepConsApp ccdi freeNames = isD where
         pure (anyApp, subResult)
 
     -- Collect all the applied names and form proper application expression with binding variables
-    pure $ foldl mergeApp ([] ** const $ var lhsName) deepArgs
+    pure $ foldl (mergeApp _) (noFree $ var lhsName) deepArgs
 
     where
-      mergeApp : DeepConsAnalysisRes ccdi -> (AnyApp, DeepConsAnalysisRes ccdi) -> DeepConsAnalysisRes ccdi
-      mergeApp (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
+      noFree : TTImp -> DeepConsAnalysisRes ccdi
+      noFree e = if ccdi then ([] ** const e) else []
+
+      mergeApp : (ccdi : _) -> DeepConsAnalysisRes ccdi -> (AnyApp, DeepConsAnalysisRes ccdi) -> DeepConsAnalysisRes ccdi
+      mergeApp False namesL (_, namesR) = namesL ++ namesR
+      mergeApp True (namesL ** bindL) (anyApp, (namesR ** bindR)) = MkDPair (namesL ++ namesR) $ \bindNames => do
         let bindNames : Fin (namesL.length + namesR.length) -> _ := rewrite sym $ lengthConcat namesL namesR in bindNames
         let lhs = bindL $ bindNames . indexSum . Left
         let rhs = bindR $ bindNames . indexSum . Right
@@ -116,10 +119,10 @@ analyseDeepConsApp ccdi freeNames = isD where
       mapLstDPair f (lst ** d) = (map f lst ** rewrite lengthMap {f} lst in d)
 
       ||| Determines which constructor's arguments would be definitely determined by fully known result type.
-      typeDeterminedArgs : (con : Con) -> Either String $ Vect con.args.length ConsDetermInfo
+      typeDeterminedArgs : (con : Con) -> m $ Vect con.args.length ConsDetermInfo
       typeDeterminedArgs con = do
         let conArgNames = fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
-        determined <- fst <$> analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
+        determined <- analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
         let determined = mapMaybe (lookup' conArgNames) determined
         pure $ map cast $ presenceVect $ fromList determined
 
