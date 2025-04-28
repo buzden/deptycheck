@@ -1,4 +1,4 @@
-||| A bridge between a single act of derivation and a user derivation task
+||| A bridge between a single act of derivation (for a single type) and a user derivation task
 module Deriving.DepTyCheck.Gen.ForAllNeededTypes
 
 import public Control.Monad.Either
