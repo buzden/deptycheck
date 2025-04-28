@@ -8,7 +8,7 @@ All experiments were performed with the following settings:
 
 <!-- idris
 import Deriving.DepTyCheck.Gen
-%hide Deriving.DepTyCheck.Gen.Entry.deriveGen
+%hide Deriving.DepTyCheck.Gen.deriveGen
 
 -- a stub pretending it is a derivator
 deriveGen : a
