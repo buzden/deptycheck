@@ -11,7 +11,7 @@ import public Data.SortedSet.Extra
 
 import public Decidable.Equality
 
-import public Deriving.DepTyCheck.Gen.InterfaceForOneType
+import public Deriving.DepTyCheck.Gen.ForOneCon
 
 %default total
 %hide Text.PrettyPrint.Bernardy.Core.Doc.(>>=)
@@ -227,17 +227,6 @@ searchOrder left = do
 -------------------------------------------------
 --- Derivation of a generator for constructor ---
 -------------------------------------------------
-
---- Interface ---
-
-public export
-interface ConstructorDerivator where
-  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
-
-  ||| Workarond of inability to put an arbitrary name under `IBindVar`
-  bindNameRenamer : Name -> String
-  bindNameRenamer $ UN $ Basic n = n
-  bindNameRenamer n = "^bnd^" ++ show n
 
 --- Particular tactics ---
 
