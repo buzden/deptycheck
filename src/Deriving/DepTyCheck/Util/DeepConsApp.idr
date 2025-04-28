@@ -1,12 +1,11 @@
-module Deriving.DepTyCheck.Gen.Core.Util
+module Deriving.DepTyCheck.Util.DeepConsApp
 
+import public Control.Monad.Error.Interface
 import public Control.Monad.Writer.Interface
 
 import public Data.Fin.Split
 
-import public Decidable.Equality
-
-import public Deriving.DepTyCheck.Gen.InterfaceForOneType
+import public Deriving.DepTyCheck.Util.Reflection
 
 %default total
 

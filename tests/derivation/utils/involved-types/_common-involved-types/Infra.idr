@@ -2,7 +2,7 @@ module Infra
 
 import public TypesAndInvolved
 
-import Deriving.DepTyCheck.Gen.Core.Util
+import Deriving.DepTyCheck.Util.DeepConsApp
 
 %language ElabReflection
 
