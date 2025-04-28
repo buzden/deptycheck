@@ -5,7 +5,7 @@ import public Data.Fuel
 
 import public Decidable.Equality
 
-import public Deriving.DepTyCheck.Gen.Core
+import public Deriving.DepTyCheck.Gen.ForOneType
 import public Deriving.DepTyCheck.Gen.ForAllNeededTypes
 
 import public Test.DepTyCheck.Gen -- for `Gen` data type
