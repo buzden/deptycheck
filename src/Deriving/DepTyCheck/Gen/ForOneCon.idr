@@ -1,5 +1,5 @@
 ||| Derivation of the outer layer of a constructor-generating function, performing GADT indices check of given arguments.
-module Deriving.DepTyCheck.Gen.Core.ConsEntry
+module Deriving.DepTyCheck.Gen.ForOneCon
 
 import public Control.Monad.Error.Either
 import public Control.Monad.State.Tuple

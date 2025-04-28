@@ -16,9 +16,9 @@ modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen.Entry
         , Deriving.DepTyCheck.Gen.InterfaceForOneType
         , Deriving.DepTyCheck.Gen.ForAllNeededTypes
+        , Deriving.DepTyCheck.Gen.ForOneCon
         , Deriving.DepTyCheck.Gen.ForOneType
         , Deriving.DepTyCheck.Gen.Core.ConsDerive
-        , Deriving.DepTyCheck.Gen.Core.ConsEntry
         , Deriving.DepTyCheck.Gen.Core.Util
         , Deriving.DepTyCheck.Gen.Signature
         , Deriving.DepTyCheck.Util.Logging

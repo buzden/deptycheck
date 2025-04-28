@@ -1,7 +1,7 @@
 ||| Main implementation of the derivator core interface
 module Deriving.DepTyCheck.Gen.ForOneType
 
-import public Deriving.DepTyCheck.Gen.Core.ConsEntry
+import public Deriving.DepTyCheck.Gen.ForOneCon
 import public Deriving.DepTyCheck.Util.Reflection
 
 %default total
