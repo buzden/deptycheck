@@ -6,7 +6,7 @@ import public Data.Fin.Split
 
 import public Decidable.Equality
 
-import public Deriving.DepTyCheck.Gen.Derive
+import public Deriving.DepTyCheck.Gen.InterfaceForOneType
 
 %default total
 

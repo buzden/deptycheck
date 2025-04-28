@@ -11,7 +11,7 @@ import public Data.SortedSet.Extra
 
 import public Decidable.Equality
 
-import public Deriving.DepTyCheck.Gen.Derive
+import public Deriving.DepTyCheck.Gen.InterfaceForOneType
 
 %default total
 %hide Text.PrettyPrint.Bernardy.Core.Doc.(>>=)

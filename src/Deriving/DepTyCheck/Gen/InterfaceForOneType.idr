@@ -1,5 +1,5 @@
 ||| Interfaces for using a one type derivator
-module Deriving.DepTyCheck.Gen.Derive
+module Deriving.DepTyCheck.Gen.InterfaceForOneType
 
 import public Control.Monad.Error.Interface
 
