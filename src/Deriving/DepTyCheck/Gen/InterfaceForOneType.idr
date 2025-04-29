@@ -59,10 +59,10 @@ public export
 interface DerivatorCore where
   canonicBody : CanonicGen m => GenSignature -> Name -> m $ List Clause
 
--- NOTE: Implementation of `internalGenBody` cannot know the `Name` of the called gen, thus it cannot use `callInternalGen` function directly.
+-- NOTE: Implementation of `internalGenBody` cannot know the `Name` of the called gen, thus it cannot use `callCanonic` function directly.
 --       It have to use `callGen` function from `CanonicGen` interface instead.
---       But `callInternalGen` function is still present here because, in some sense, it is a complementary to `internalGenSig`.
---       Internals and changes in the implementation of `internalGenSig` influence on the implementation of `callInternalGen`.
+--       But `callCanonic` function is still present here because, in some sense, it is a complementary to `internalGenSig`.
+--       Internals and changes in the implementation of `internalGenSig` influence on the implementation of `callCanonic`.
 
 --- Expressions generation utils ---
 
