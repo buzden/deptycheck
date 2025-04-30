@@ -129,5 +129,12 @@ public export
 Ord ExternalGenSignature where compare = comparing characteristics
 
 export
+callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> TTImp
+callExternalGen sig topmost fuel values =
+  foldl (flip apply) (appFuel topmost fuel) $ reorder sig.givensOrder (sig.givenParams.asVect `zip` values) <&> \case
+    ((_, ExplicitArg, _   ), value) => (.$ value)
+    ((_, ImplicitArg, name), value) => \f => namedApp f name value
+
+export
 internalise : (extSig : ExternalGenSignature) -> Subset GenSignature $ \sig => sig.givenParams.size = extSig.givenParams.size
 internalise $ MkExternalGenSignature ty giv _ _ = Element (MkGenSignature ty $ keySet giv) $ keySetSize giv

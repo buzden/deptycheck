@@ -22,16 +22,6 @@ import public Deriving.DepTyCheck.Util.Reflection
 %hide Text.PrettyPrint.Bernardy.Core.Doc.(>>=)
 %ambiguity_depth 4
 
----------------------------------
---- Infrastructural functions ---
----------------------------------
-
-callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> TTImp
-callExternalGen sig topmost fuel values =
-  foldl (flip apply) (appFuel topmost fuel) $ reorder sig.givensOrder (sig.givenParams.asVect `zip` values) <&> \case
-    ((_, ExplicitArg, _   ), value) => (.$ value)
-    ((_, ImplicitArg, name), value) => \f => namedApp f name value
-
 --- Particular implementations producing the-core-derivation-function closure ---
 
 namespace ClosuringCanonicImpl
