@@ -2,9 +2,8 @@ module Infra
 
 import DepsCheck
 
-import Deriving.DepTyCheck.Util.Reflection
-
 import Language.Reflection.Compat
+import Language.Reflection.Expr
 
 %language ElabReflection
 

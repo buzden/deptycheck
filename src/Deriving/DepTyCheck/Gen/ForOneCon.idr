@@ -15,6 +15,10 @@ import public Deriving.DepTyCheck.Util.DeepConsApp
 --- Derivation of a generator for constructor ---
 -------------------------------------------------
 
+isSimpleBindVar : TTImp -> Bool
+isSimpleBindVar $ IBindVar {} = True
+isSimpleBindVar _             = False
+
 export
 canonicConsBody : DeriveBodyRhsForCon => DeriveClosure m => GenSignature -> Name -> Con -> m $ List Clause
 canonicConsBody sig name con = do

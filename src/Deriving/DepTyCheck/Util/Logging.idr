@@ -1,14 +1,28 @@
 module Deriving.DepTyCheck.Util.Logging
 
+import public Data.List.Extra
 import public Data.So
 
-import public Language.Reflection
+import public Deriving.DepTyCheck.Util.Primitives
+
+import public Language.Reflection.Compat
 
 %default total
 
 public export
 interface SingleLogPosition a where
   logPosition : a -> String
+
+export
+SingleLogPosition Con where
+  logPosition con = do
+    let fullName = show con.name
+    let fullName' = unpack fullName
+    maybe fullName (pack . flip drop fullName' . S . finToNat) $ findLastIndex (== '.') fullName'
+
+export
+SingleLogPosition TypeInfo where
+  logPosition ti = "\{show $ extractTargetTyExpr ti}"
 
 public export
 data LogPosition : Type where

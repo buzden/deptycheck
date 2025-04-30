@@ -1,15 +1,14 @@
 ||| Main implementation of the derivator core interface
 module Deriving.DepTyCheck.Gen.ForOneType
 
+import public Data.Either
 import public Data.SortedSet.Extra
 
+import public Deriving.DepTyCheck.Gen.CompiletimeLabel
 import public Deriving.DepTyCheck.Gen.ForOneCon
 import public Deriving.DepTyCheck.Gen.Interfaces.ForOneType
-import public Deriving.DepTyCheck.Util.Reflection
 
 %default total
-
-%hide Text.PrettyPrint.Bernardy.Core.Doc.(>>=)
 
 ------------------------------------
 --- Expressions generation utils ---
@@ -81,7 +80,7 @@ DeriveBodyRhsForCon => DeriveBodyForType where
     fuelDecisionExpr fuelAr consRecs = do
 
       let callConstFreqs : CTLabel -> (fuel : TTImp) -> List (Con, TTImp) -> TTImp
-          callConstFreqs l fuel cons = if isJust $ find (((/=) liftWeight1) . snd) cons
+          callConstFreqs l fuel cons = if isJust $ find (not . isWeight1 . snd) cons
             then callFrequency l $ cons <&> map (callConsGen fuel) . swap
             else callOneOf l $ cons <&> callConsGen fuel . fst
 

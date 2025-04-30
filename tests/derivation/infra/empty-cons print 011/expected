@@ -105,7 +105,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty (a : Type **
                                                 .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<DerivedGen.X1>>" .$ var "^fuel_arg^"))
                                                 .$ (   var "::"
                                                     .$ (   var "Builtin.MkPair"
-                                                        .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                        .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                         .$ (var "<<DerivedGen.X2>>" .$ var "^sub^fuel_arg^"))
                                                     .$ var "Nil"))))
                                ]

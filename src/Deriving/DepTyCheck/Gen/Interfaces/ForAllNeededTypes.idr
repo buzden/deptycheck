@@ -1,5 +1,6 @@
 module Deriving.DepTyCheck.Gen.Interfaces.ForAllNeededTypes
 
+import public Deriving.DepTyCheck.Gen.ConsRecs
 import public Deriving.DepTyCheck.Gen.Signature
 
 %default total
@@ -20,3 +21,11 @@ export
 DeriveClosure m => MonadTrans t => Monad (t m) => DeriveClosure (t m) where
   needWeightFun = lift . needWeightFun
   callGen sig fuel params = lift $ callGen sig fuel params
+
+-------------------
+--- Conventions ---
+-------------------
+
+export
+outmostFuelArg : Name
+outmostFuelArg = UN $ Basic "^outmost-fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend

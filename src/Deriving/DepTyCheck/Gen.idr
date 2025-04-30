@@ -2,6 +2,7 @@
 module Deriving.DepTyCheck.Gen
 
 import public Data.Fuel
+import public Data.List.Lazy
 
 import public Deriving.DepTyCheck.Gen.ForAllNeededTypes
 import public Deriving.DepTyCheck.Gen.ForOneConRhs

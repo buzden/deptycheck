@@ -1,13 +1,38 @@
-module Language.Reflection.Compat.Constructors
+module Language.Reflection.Compat.Con
 
+import Data.Cozippable
 import Data.List.Elem
 
 import public Language.Reflection.Compat
-import public Language.Reflection.Unapp
+import public Language.Reflection.Expr
 
 import Syntax.IHateParens.List
 
 %default total
+
+--------------------------------------------
+--- Compiler-based `Con` transformations ---
+--------------------------------------------
+
+-- This is a workaround to not to change `elab-util`'s `getInfo'`
+export
+normaliseCon : Elaboration m => Con -> m Con
+normaliseCon orig@(MkCon n args ty) = do
+  let whole = piAll ty args
+  Just whole <- catch $ normaliseAsType whole
+    | Nothing => pure orig -- didn't manage to normalise, e.g. due to private stuff
+  let (args', ty) = unPi whole
+  -- `quote` may corrupt names, workaround it:
+  let args = comergeWith (\pre => {name := pre.name}) args args'
+  pure $ MkCon n args ty
+
+------------------------------------
+--- Syntactic analysis of `Con`s ---
+------------------------------------
+
+export
+conSubexprs : Con -> List TTImp
+conSubexprs con = map type con.args ++ (map getExpr $ snd $ unAppAny con.type)
 
 --------------------------------------
 --- Compile-time constructors info ---

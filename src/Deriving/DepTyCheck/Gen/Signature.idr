@@ -1,12 +1,18 @@
 module Deriving.DepTyCheck.Gen.Signature
 
+import public Data.DPair
 import public Data.Fin
 import public Data.List.Extra
 import public Data.SortedMap
 import public Data.SortedMap.Dependent
+import public Data.SortedMap.Extra
 import public Data.SortedSet
 
-import public Deriving.DepTyCheck.Util.Reflection
+import public Deriving.DepTyCheck.Util.ArgsPerm
+import public Deriving.DepTyCheck.Util.Logging
+
+import public Language.Reflection.Compat
+import public Language.Reflection.Expr
 
 %default total
 
@@ -47,6 +53,9 @@ Eq GenSignature where (==) = (==) `on` characteristics
 
 public export
 Ord GenSignature where compare = comparing characteristics
+
+appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
+appFuel = app . var
 
 export
 canonicSig : GenSignature -> TTImp

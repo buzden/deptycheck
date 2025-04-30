@@ -1,7 +1,6 @@
 module Infra
 
-import public Deriving.DepTyCheck.Util.Reflection
-
+import public Language.Reflection.Expr
 import public Language.Reflection.Syntax
 
 %default total

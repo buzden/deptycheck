@@ -4,8 +4,11 @@ import public Control.Monad.Error.Interface
 import public Control.Monad.Writer.Interface
 
 import public Data.Fin.Split
+import public Data.List.Extra
+import public Data.SortedSet
+import public Data.Vect.Extra
 
-import public Deriving.DepTyCheck.Util.Reflection
+import public Language.Reflection.Compat.TypeInfo
 
 %default total
 

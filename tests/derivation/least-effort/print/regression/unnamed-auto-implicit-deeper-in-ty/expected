@@ -247,7 +247,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
-                                                .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                 .$ (   var "<<DerivedGen.MkY0>>"
                                                     .$ var "^sub^fuel_arg^"
                                                     .$ var "inter^<b>"
@@ -373,7 +373,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
-                                                .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                 .$ (var "<<DerivedGen.MkY0>>" .$ var "^sub^fuel_arg^" .$ var "inter^<b>" .$ var "inter^<{arg:3}>"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
