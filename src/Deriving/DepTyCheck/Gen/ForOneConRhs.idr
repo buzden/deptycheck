@@ -1,5 +1,5 @@
 ||| Several tactics for derivation of particular generators for a constructor regarding to how they use externals
-module Deriving.DepTyCheck.Gen.Core.ConsDerive
+module Deriving.DepTyCheck.Gen.ForOneConRhs
 
 import public Control.Monad.State
 import public Control.Monad.State.Tuple

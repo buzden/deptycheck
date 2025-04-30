@@ -1,6 +1,6 @@
 module Test
 
-import Deriving.DepTyCheck.Gen.Core.ConsDerive
+import Deriving.DepTyCheck.Gen.ForOneConRhs
 
 %default total
 
