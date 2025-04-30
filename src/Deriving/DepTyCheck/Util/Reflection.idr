@@ -26,6 +26,7 @@ import public Decidable.Equality
 import public Deriving.DepTyCheck.Util.Logging
 
 import public Language.Reflection.Compat
+import public Language.Reflection.Compat.Constructors
 import public Language.Reflection.TTImp
 import public Language.Reflection.Pretty
 
@@ -180,58 +181,6 @@ public export
 buildDPair : (rhs : TTImp) -> List (Name, TTImp) -> TTImp
 buildDPair = foldr $ \(name, type), res =>
   var `{Builtin.DPair.DPair} .$ type .$ lam (MkArg MW ExplicitArg (Just name) type) res
-
---- Facilities for managing any kind of function application at once ---
-
-public export
-data AnyApp
-  = PosApp TTImp
-  | NamedApp Name TTImp
-  | AutoApp TTImp
-  | WithApp TTImp
-
-public export
-appArg : Arg -> TTImp -> AnyApp
-appArg (MkArg {piInfo=ExplicitArg, _})         expr = PosApp expr
-appArg (MkArg {piInfo=ImplicitArg, name, _})   expr = NamedApp (stname name) expr
-appArg (MkArg {piInfo=DefImplicit _, name, _}) expr = NamedApp (stname name) expr
-appArg (MkArg {piInfo=AutoImplicit, _})        expr = AutoApp expr
-
-public export
-getExpr : AnyApp -> TTImp
-getExpr $ PosApp e     = e
-getExpr $ NamedApp _ e = e
-getExpr $ AutoApp e    = e
-getExpr $ WithApp e    = e
-
--- Shallow expression mapping
-public export
-mapExpr : (TTImp -> TTImp) -> AnyApp -> AnyApp
-mapExpr f $ PosApp e     = PosApp $ f e
-mapExpr f $ NamedApp n e = NamedApp n $ f e
-mapExpr f $ AutoApp e    = AutoApp $ f e
-mapExpr f $ WithApp e    = WithApp $ f e
-
-public export
-unAppAny : TTImp -> (TTImp, List AnyApp)
-unAppAny = runTR [] where
-  runTR : List AnyApp -> TTImp -> (TTImp, List AnyApp)
-  runTR curr $ IApp      _ lhs   rhs = runTR (PosApp rhs     :: curr) lhs
-  runTR curr $ INamedApp _ lhs n rhs = runTR (NamedApp n rhs :: curr) lhs
-  runTR curr $ IAutoApp  _ lhs   rhs = runTR (AutoApp rhs    :: curr) lhs
-  runTR curr $ IWithApp  _ lhs   rhs = runTR (WithApp rhs    :: curr) lhs
-  runTR curr lhs                     = (lhs, curr)
-
-public export
-reAppAny1 : TTImp -> AnyApp -> TTImp
-reAppAny1 l $ PosApp e     = app l e
-reAppAny1 l $ NamedApp n e = namedApp l n e
-reAppAny1 l $ AutoApp e    = autoApp l e
-reAppAny1 l $ WithApp e    = IWithApp EmptyFC l e
-
-public export %inline
-reAppAny : Foldable f => TTImp -> f AnyApp -> TTImp
-reAppAny = foldl reAppAny1
 
 --- Specific expressions building helpers ---
 
@@ -663,78 +612,6 @@ getNamesInfoInTypes' expr = do
                        pure $ SortedSet.insert n $ flip concatMap ns $ \(n', ty) => insert n' $ allVarNames' ty
   tys <- map (mapMaybe id) $ for (Prelude.toList varsSecondOrder) $ catch . getInfo'
   concat <$> Prelude.for tys getNamesInfoInTypes
-
---------------------------------------
---- Compile-time constructors info ---
---------------------------------------
-
---- Constructor argument with nice literals ---
-
-public export
-record ConArg (0 con : Con) where
-  constructor MkConArg
-  conArgIdx : Fin con.args.length
-
-namespace ConArg
-
-  public export
-  fromInteger : (x : Integer) -> So (integerLessThanNat x con.args.length) => ConArg con
-  fromInteger x = MkConArg $ fromInteger x
-
-  elemToFin : Elem e xs -> Fin xs.length
-  elemToFin Here      = FZ
-  elemToFin (There x) = FS $ elemToFin x
-
-  public export
-  fromName : (n : Name) -> Elem (Just n) (map Arg.name con.args) => ConArg con
-  fromName _ @{e} = MkConArg $ rewrite sym $ lengthMap con.args in elemToFin e
-
-  -- this function is not exported because it breaks type inference in polymorphic higher-kinded case,
-  -- but we still leave this a) in a hope that type inference woukd be improved; b) to make sure we still can implement it.
-  --public export
-  fromString : (n : String) -> Elem (Just $ fromString n) (map Arg.name con.args) => ConArg con
-  fromString n = fromName $ fromString n
-
---- Getting full names of a data constructor ---
-
-dataCon : Name -> Elab Name
-dataCon n = do
-  [n] <- mapMaybe id <$> (traverse isAccessibleDataCon =<< getInfo n)
-    | [] => fail "Not found data constructor `\{n}`"
-    | ns => fail "Ambiguous data constructors: \{joinBy ", " $ show <$> ns}"
-  pure n
-
-  where
-    isAccessibleDataCon : (Name, NameInfo) -> Elab $ Maybe Name
-    isAccessibleDataCon (n, MkNameInfo $ DataCon {}) = (catch (check {expected=()} `(let x = ~(var n) in ())) $> n) @{Compose}
-    isAccessibleDataCon _                            = pure Nothing
-
-export %macro (.dataCon) : Name -> Elab Name; (.dataCon) = dataCon
-
---- Information about constructors ---
-
-public export
-record IsConstructor (0 n : Name) where
-  constructor ItIsCon
-  typeInfo : TypeInfo
-  conInfo  : Con
-
-namespace IsConstructor
-  export
-  data GenuineProof : IsConstructor n -> Type where
-    ItIsGenuine : GenuineProof iscn
-
-export %macro
-itIsConstructor : {n : Name} -> Elab (con : IsConstructor n ** GenuineProof con)
-itIsConstructor = do
-  cn <- dataCon n
-  let True = n == cn
-    | False => fail "Name `\{show n}` is not a full name, use either `\{show cn}` or macro `.dataCon`"
-  con <- getCon cn
-  let (IVar _ ty, _) = unAppAny con.type
-    | (lhs, _) => fail "Can't get type name: \{show lhs}"
-  ty <- getInfo' ty
-  pure (ItIsCon ty con ** ItIsGenuine)
 
 -------------------------------
 --- Tuning of probabilities ---

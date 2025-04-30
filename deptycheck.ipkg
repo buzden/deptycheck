@@ -25,6 +25,8 @@ modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Util.DeepConsApp
         , Deriving.DepTyCheck.Util.Reflection
         , Language.Reflection.Compat
+        , Language.Reflection.Compat.Constructors
+        , Language.Reflection.Unapp
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Coverage
         , Test.DepTyCheck.Gen.Emptiness
