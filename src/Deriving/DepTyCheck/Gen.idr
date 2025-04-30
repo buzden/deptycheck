@@ -284,7 +284,7 @@ internalGenCallingLambda (sig ** exts ** givsPos) call = do
   mkLam $ Right (extSig, ty)     = lam $ MkArg MW AutoImplicit .| Just (nameForGen extSig) .| ty
                                    -- TODO to think whether it's okay to calculate the name twice: here and below for a map
 
-callMainDerivedGen : CanonicGen m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
+callMainDerivedGen : DeriveClosure m => ExternalGenSignature -> (fuelArg : Name) -> m TTImp
 callMainDerivedGen sig fuelArg = do
   let Element intSig prf = internalise sig
   map (reorderGend True sig.gendOrder . fst) $

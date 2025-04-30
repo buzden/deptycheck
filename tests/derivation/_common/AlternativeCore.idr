@@ -35,15 +35,15 @@ EmptyCons = MainCoreDerivator @{EmptyCons'}
 --- Working with externals ---
 ------------------------------
 
-callSimpleGen : CanonicGen m => TypeInfo -> (fuel : TTImp) -> m TTImp
+callSimpleGen : DeriveClosure m => TypeInfo -> (fuel : TTImp) -> m TTImp
 callSimpleGen tyi fuel = do
   _ <- ensureTyArgsNamed tyi
   map fst $ callGen (MkGenSignature tyi SortedSet.empty) fuel $ believe_me $ Vect.Nil {elem = TTImp}
 
-callStrGen : CanonicGen m => (fuel : TTImp) -> m TTImp
+callStrGen : DeriveClosure m => (fuel : TTImp) -> m TTImp
 callStrGen = callSimpleGen $ typeInfoForPrimType StringType
 
-callNatGen : CanonicGen m => (fuel : TTImp) -> m TTImp
+callNatGen : DeriveClosure m => (fuel : TTImp) -> m TTImp
 callNatGen = callSimpleGen $ getInfo "Nat"
 
 --- One (string) argument taken from external ---

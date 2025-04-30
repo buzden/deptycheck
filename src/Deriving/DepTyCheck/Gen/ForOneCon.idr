@@ -21,7 +21,7 @@ import public Deriving.DepTyCheck.Util.DeepConsApp
 
 public export
 interface DeriveBodyForCon where
-  consGenExpr : CanonicGen m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
+  consGenExpr : DeriveClosure m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
 
   ||| Workarond of inability to put an arbitrary name under `IBindVar`
   bindNameRenamer : Name -> String
@@ -31,7 +31,7 @@ interface DeriveBodyForCon where
 --- Entry function ---
 
 export
-canonicConsBody : DeriveBodyForCon => CanonicGen m => GenSignature -> Name -> Con -> m $ List Clause
+canonicConsBody : DeriveBodyForCon => DeriveClosure m => GenSignature -> Name -> Con -> m $ List Clause
 canonicConsBody sig name con = do
 
   -- Get file position of the constructor definition (for better error reporting)

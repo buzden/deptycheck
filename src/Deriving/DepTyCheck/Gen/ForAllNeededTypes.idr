@@ -48,7 +48,7 @@ namespace ClosuringCanonicImpl
                                       Yes prf => Just $ Element extSig prf
                                       No _    => Nothing
 
-  DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
+  DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => DeriveClosure m where
 
     needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
       modify $ insert ty.name
@@ -120,7 +120,7 @@ namespace ClosuringCanonicImpl
 
   export
   runCanonic : DeriveBodyForType => NamesInfoInTypes => ConsRecs =>
-               SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
+               SortedMap ExternalGenSignature Name -> (forall m. DeriveClosure m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
     (x, defs, bodies) <- evalRWST
