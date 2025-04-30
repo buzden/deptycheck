@@ -7,9 +7,9 @@ import public Deriving.DepTyCheck.Gen.Signature
 
 %default total
 
-----------------------
---- Main interface ---
-----------------------
+--------------------------------------------------
+--- Using and deriving of any needed generator ---
+--------------------------------------------------
 
 public export
 interface Elaboration m => NamesInfoInTypes => ConsRecs => DeriveClosure m where
@@ -23,6 +23,10 @@ export
 DeriveClosure m => MonadTrans t => Monad (t m) => DeriveClosure (t m) where
   needWeightFun = lift . needWeightFun
   callGen sig fuel params = lift $ callGen sig fuel params
+
+------------------------------------------------------
+--- Deriving body of a generator for a single type ---
+------------------------------------------------------
 
 public export
 interface DeriveBodyForType where
