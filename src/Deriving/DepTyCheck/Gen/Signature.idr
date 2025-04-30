@@ -48,6 +48,35 @@ Eq GenSignature where (==) = (==) `on` characteristics
 public export
 Ord GenSignature where compare = comparing characteristics
 
+export
+canonicSig : GenSignature -> TTImp
+canonicSig sig = piAll returnTy $ MkArg MW ExplicitArg Nothing `(Data.Fuel.Fuel) :: (arg <$> Prelude.toList sig.givenParams) where
+  -- TODO Check that the resulting `TTImp` reifies to a `Type`? During this check, however, all types must be present in the caller's context.
+
+  arg : Fin sig.targetType.args.length -> Arg
+  arg idx = let MkArg {name, type, _} = index' sig.targetType.args idx in MkArg MW ExplicitArg name type
+
+  returnTy : TTImp
+  returnTy = `(Test.DepTyCheck.Gen.Gen Test.DepTyCheck.Gen.Emptiness.MaybeEmpty ~(buildDPair targetTypeApplied generatedArgs)) where
+
+    targetTypeApplied : TTImp
+    targetTypeApplied = foldr apply (extractTargetTyExpr sig.targetType) $ reverse $ sig.targetType.args <&> \(MkArg {name, piInfo, _}) => do
+                          let name = stname name
+                          case piInfo of
+                            ExplicitArg   => (.$ var name)
+                            ImplicitArg   => \f => namedApp f name $ var name
+                            DefImplicit _ => \f => namedApp f name $ var name
+                            AutoImplicit  => (`autoApp` var name)
+
+    generatedArgs : List (Name, TTImp)
+    generatedArgs = mapMaybeI sig.targetType.args $ \idx, (MkArg {name, type, _}) =>
+                      ifThenElse .| contains idx sig.givenParams .| Nothing .| Just (stname name, type)
+
+-- Complementary to `canonicSig`
+export
+callCanonic : (0 sig : GenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> TTImp
+callCanonic _ = foldl app .: appFuel
+
 -----------------------------------------------------
 --- Data types for the safe signature formulation ---
 -----------------------------------------------------

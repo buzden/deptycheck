@@ -10,6 +10,29 @@ import public Deriving.DepTyCheck.Util.Reflection
 
 %hide Text.PrettyPrint.Bernardy.Core.Doc.(>>=)
 
+------------------------------------
+--- Expressions generation utils ---
+------------------------------------
+
+defArgNames : {sig : GenSignature} -> Vect sig.givenParams.size Name
+defArgNames = sig.givenParams.asVect <&> argName . index' sig.targetType.args
+
+export %inline
+canonicDefaultLHS' : (namesFun : Name -> String) -> GenSignature -> Name -> (fuel : String) -> TTImp
+canonicDefaultLHS' nmf sig n fuel = callCanonic sig n .| bindVar fuel .| bindVar . nmf <$> defArgNames
+
+export %inline
+canonicDefaultRHS' : (namesFun : Name -> String) -> GenSignature -> Name -> (fuel : TTImp) -> TTImp
+canonicDefaultRHS' nmf sig n fuel = callCanonic sig n fuel .| varStr . nmf <$> defArgNames
+
+export %inline
+canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
+canonicDefaultLHS = canonicDefaultLHS' show
+
+export %inline
+canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
+canonicDefaultRHS = canonicDefaultRHS' show
+
 ----------------------------
 --- Derivation functions ---
 ----------------------------

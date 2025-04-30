@@ -113,7 +113,8 @@ namespace ClosuringCanonicImpl
         deriveOne (sig, name) = do
 
           -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
-          (genFunClaim, genFunBody) <- logBounds {level=Info} "type" [sig] $ assert_total $ deriveCanonical sig name
+          let genFunClaim = export' name $ canonicSig sig
+          genFunBody <- logBounds {level=Info} "type" [sig] $ def name <$> assert_total canonicBody sig name
 
           -- remember the derived stuff
           tell ([genFunClaim], [genFunBody])
