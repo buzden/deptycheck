@@ -399,5 +399,5 @@ deriveGenPrinter ty = do
 
 %defaulthint %inline
 public export
-DefaultConstructorDerivator : DeriveBodyForCon
+DefaultConstructorDerivator : DeriveBodyRhsForCon
 DefaultConstructorDerivator = LeastEffort

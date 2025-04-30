@@ -24,7 +24,7 @@ export
     ]
 
 export
-[EmptyCons'] DeriveBodyForCon where
+[EmptyCons'] DeriveBodyRhsForCon where
   consGenExpr _ _ _ _ = pure `(empty)
 
 export

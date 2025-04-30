@@ -38,7 +38,7 @@ canonicDefaultRHS = canonicDefaultRHS' show
 ----------------------------
 
 export
-DeriveBodyForCon => DeriveBodyForType where
+DeriveBodyRhsForCon => DeriveBodyForType where
   canonicBody sig n = do
 
     -- check that there is at least one constructor
@@ -109,5 +109,5 @@ DeriveBodyForCon => DeriveBodyForType where
         callConsGen fuel con = canonicDefaultRHS' interimNamesWrapper sig .| consGenName con .| fuel
 
 export
-MainCoreDerivator : DeriveBodyForCon => DeriveBodyForType
+MainCoreDerivator : DeriveBodyRhsForCon => DeriveBodyForType
 MainCoreDerivator = %search

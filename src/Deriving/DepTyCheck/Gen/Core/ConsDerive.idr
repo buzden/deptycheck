@@ -239,7 +239,7 @@ namespace NonObligatoryExts
   ||| It is seemingly most simple to implement, maybe the fastest and
   ||| fits well when external generators are provided for non-dependent types.
   export
-  [LeastEffort] DeriveBodyForCon where
+  [LeastEffort] DeriveBodyRhsForCon where
     consGenExpr sig con givs fuel = do
 
       -- Prepare local search context
@@ -393,7 +393,7 @@ namespace NonObligatoryExts
   ||| i.e. to use both of external generators to form the generated values list
   ||| but not obligatorily all the external generators at the same time.
   export
-  [BestEffort] DeriveBodyForCon where
+  [BestEffort] DeriveBodyRhsForCon where
     consGenExpr sig con givs fuel = do
       ?cons_body_besteff_nonoblig_rhs
 
@@ -421,11 +421,11 @@ namespace NonObligatoryExts
 namespace ObligatoryExts
 
   export
-  [FailFast] DeriveBodyForCon where
+  [FailFast] DeriveBodyRhsForCon where
     consGenExpr sig con givs fuel = do
       ?cons_body_obl_ff_rhs
 
   export
-  [DecEqConflicts] DeriveBodyForCon where
+  [DecEqConflicts] DeriveBodyRhsForCon where
     consGenExpr sig con givs fuel = do
       ?cons_body_obl_deceq_rhs

@@ -20,7 +20,7 @@ import public Deriving.DepTyCheck.Util.DeepConsApp
 --- Interface ---
 
 public export
-interface DeriveBodyForCon where
+interface DeriveBodyRhsForCon where
   consGenExpr : DeriveClosure m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
 
   ||| Workarond of inability to put an arbitrary name under `IBindVar`
@@ -31,7 +31,7 @@ interface DeriveBodyForCon where
 --- Entry function ---
 
 export
-canonicConsBody : DeriveBodyForCon => DeriveClosure m => GenSignature -> Name -> Con -> m $ List Clause
+canonicConsBody : DeriveBodyRhsForCon => DeriveClosure m => GenSignature -> Name -> Con -> m $ List Clause
 canonicConsBody sig name con = do
 
   -- Get file position of the constructor definition (for better error reporting)
