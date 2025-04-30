@@ -14,7 +14,7 @@ import Deriving.DepTyCheck.Gen
 deriveGen : a
 -->
 
-<!-- The code block above uses ```<space>idris intentionally, now this code does not compile and it's okay -->
+<!-- The code block below uses ```<space>idris intentionally, now this code does not compile and it's okay -->
 ``` idris
 %language ElabReflection
 

@@ -26,7 +26,7 @@ how do we analyse which constructors are (mutually) recursive
 ## Derivation tuning via parametrisation
 
 :::{todo}
-`DerivatorCore` and `ConsDerivator` interfaces, their role and design
+`DeriveBodyForType` and `DeriveBodyForCon` interfaces, their role and design
 :::
 
 ## Dependencies calculation
