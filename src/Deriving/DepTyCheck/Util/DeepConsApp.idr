@@ -12,8 +12,6 @@ import public Language.Reflection.Compat.TypeInfo
 
 %default total
 
---- Utilities ---
-
 public export
 data ConsDetermInfo = DeterminedByType | NotDeterminedByType
 

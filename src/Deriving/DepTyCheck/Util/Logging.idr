@@ -67,25 +67,23 @@ DefaultLogLevel : LogLevel
 DefaultLogLevel = Trace
 
 export
-logPoint :
-  Elaboration m =>
-  {default DefaultLogLevel level : LogLevel} ->
-  (subTopic : String) -> So (subTopic /= "") =>
-  (position : LogPosition) ->
-  (mark : String) ->
-  m ()
+logPoint : Elaboration m =>
+           {default DefaultLogLevel level : LogLevel} ->
+           (subTopic : String) -> So (subTopic /= "") =>
+           (position : LogPosition) ->
+           (mark : String) ->
+           m ()
 logPoint subTopic position mark = do
   let topic = "deptycheck.derive.\{subTopic}"
   logMsg topic (toNatLevel level) "\{position}\{mark}"
 
 export
-logBounds :
-  Elaboration m =>
-  {default DefaultLogLevel level : LogLevel} ->
-  (subTopic : String) -> So (subTopic /= "") =>
-  (position : LogPosition) ->
-  m a ->
-  m a
+logBounds : Elaboration m =>
+            {default DefaultLogLevel level : LogLevel} ->
+            (subTopic : String) -> So (subTopic /= "") =>
+            (position : LogPosition) ->
+            m a ->
+            m a
 logBounds subTopic position action = do
   let ticksCnt = (4 `minus` length position) `max` 1
 
