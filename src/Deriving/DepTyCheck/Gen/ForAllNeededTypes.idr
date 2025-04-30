@@ -58,7 +58,7 @@ namespace ClosuringCanonicImpl
                                       Yes prf => Just $ Element extSig prf
                                       No _    => Nothing
 
-  DerivatorCore => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
+  DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => CanonicGen m where
 
     needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
       modify $ insert ty.name
@@ -129,7 +129,7 @@ namespace ClosuringCanonicImpl
   --- Canonic-dischagring function ---
 
   export
-  runCanonic : DerivatorCore => NamesInfoInTypes => ConsRecs =>
+  runCanonic : DeriveBodyForType => NamesInfoInTypes => ConsRecs =>
                SortedMap ExternalGenSignature Name -> (forall m. CanonicGen m => m a) -> Elab (a, List Decl)
   runCanonic exts calc = do
     let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)

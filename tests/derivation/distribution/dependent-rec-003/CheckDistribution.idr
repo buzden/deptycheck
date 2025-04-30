@@ -6,7 +6,7 @@ import DistrCheckCommon
 
 %default total
 
-%hint DA : ConstructorDerivator; DA = LeastEffort
+%hint DA : DeriveBodyForCon; DA = LeastEffort
 
 data ListNat : Type
 data Constraint : Nat -> ListNat -> Type

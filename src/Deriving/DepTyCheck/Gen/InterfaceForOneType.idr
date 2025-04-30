@@ -25,5 +25,5 @@ CanonicGen m => MonadTrans t => Monad (t m) => CanonicGen (t m) where
   callGen sig fuel params = lift $ callGen sig fuel params
 
 public export
-interface DerivatorCore where
+interface DeriveBodyForType where
   canonicBody : CanonicGen m => GenSignature -> Name -> m $ List Clause
