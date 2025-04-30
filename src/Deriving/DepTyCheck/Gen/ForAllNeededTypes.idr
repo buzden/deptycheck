@@ -15,7 +15,7 @@ import public Data.SortedSet
 
 import public Decidable.Equality
 
-import public Deriving.DepTyCheck.Gen.InterfaceForOneType
+import public Deriving.DepTyCheck.Gen.Interfaces.ForOneType
 import public Deriving.DepTyCheck.Util.Reflection
 
 %default total

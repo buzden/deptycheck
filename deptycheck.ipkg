@@ -13,10 +13,11 @@ version = 0.0.250319
 
 modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
-        , Deriving.DepTyCheck.Gen.InterfaceForOneType
         , Deriving.DepTyCheck.Gen.ForAllNeededTypes
         , Deriving.DepTyCheck.Gen.ForOneCon
         , Deriving.DepTyCheck.Gen.ForOneType
+        , Deriving.DepTyCheck.Gen.Interfaces.ForAllNeededTypes
+        , Deriving.DepTyCheck.Gen.Interfaces.ForOneType
         , Deriving.DepTyCheck.Gen.Core.ConsDerive
         , Deriving.DepTyCheck.Gen.Signature
         , Deriving.DepTyCheck.Util.Logging

@@ -8,7 +8,7 @@ import public Control.Monad.Writer
 
 import public Decidable.Equality
 
-import public Deriving.DepTyCheck.Gen.InterfaceForOneType
+import public Deriving.DepTyCheck.Gen.Interfaces.ForAllNeededTypes
 import public Deriving.DepTyCheck.Util.DeepConsApp
 
 %default total

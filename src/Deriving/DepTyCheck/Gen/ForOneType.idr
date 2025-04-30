@@ -4,6 +4,7 @@ module Deriving.DepTyCheck.Gen.ForOneType
 import public Data.SortedSet.Extra
 
 import public Deriving.DepTyCheck.Gen.ForOneCon
+import public Deriving.DepTyCheck.Gen.Interfaces.ForOneType
 import public Deriving.DepTyCheck.Util.Reflection
 
 %default total

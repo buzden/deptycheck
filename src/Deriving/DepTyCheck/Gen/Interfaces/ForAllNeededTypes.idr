@@ -1,7 +1,4 @@
-||| Interfaces for using a one type derivator
-module Deriving.DepTyCheck.Gen.InterfaceForOneType
-
-import public Control.Monad.Error.Interface
+module Deriving.DepTyCheck.Gen.Interfaces.ForAllNeededTypes
 
 import public Deriving.DepTyCheck.Gen.Signature
 
@@ -23,11 +20,3 @@ export
 DeriveClosure m => MonadTrans t => Monad (t m) => DeriveClosure (t m) where
   needWeightFun = lift . needWeightFun
   callGen sig fuel params = lift $ callGen sig fuel params
-
-------------------------------------------------------
---- Deriving body of a generator for a single type ---
-------------------------------------------------------
-
-public export
-interface DeriveBodyForType where
-  canonicBody : DeriveClosure m => GenSignature -> Name -> m $ List Clause
