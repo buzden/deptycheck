@@ -17,6 +17,7 @@ modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen.ForOneCon
         , Deriving.DepTyCheck.Gen.ForOneType
         , Deriving.DepTyCheck.Gen.Interfaces.ForAllNeededTypes
+        , Deriving.DepTyCheck.Gen.Interfaces.ForOneConRhs
         , Deriving.DepTyCheck.Gen.Interfaces.ForOneType
         , Deriving.DepTyCheck.Gen.Core.ConsDerive
         , Deriving.DepTyCheck.Gen.Signature

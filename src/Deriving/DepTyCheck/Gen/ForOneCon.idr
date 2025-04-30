@@ -6,9 +6,7 @@ import public Control.Monad.State
 import public Control.Monad.State.Tuple
 import public Control.Monad.Writer
 
-import public Decidable.Equality
-
-import public Deriving.DepTyCheck.Gen.Interfaces.ForAllNeededTypes
+import public Deriving.DepTyCheck.Gen.Interfaces.ForOneConRhs
 import public Deriving.DepTyCheck.Util.DeepConsApp
 
 %default total
@@ -16,19 +14,6 @@ import public Deriving.DepTyCheck.Util.DeepConsApp
 -------------------------------------------------
 --- Derivation of a generator for constructor ---
 -------------------------------------------------
-
---- Interface ---
-
-public export
-interface DeriveBodyRhsForCon where
-  consGenExpr : DeriveClosure m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
-
-  ||| Workarond of inability to put an arbitrary name under `IBindVar`
-  bindNameRenamer : Name -> String
-  bindNameRenamer $ UN $ Basic n = n
-  bindNameRenamer n = "^bnd^" ++ show n
-
---- Entry function ---
 
 export
 canonicConsBody : DeriveBodyRhsForCon => DeriveClosure m => GenSignature -> Name -> Con -> m $ List Clause
