@@ -224,208 +224,216 @@ searchOrder left = do
   -- `next` is smaller than `left` because `curr` must be not empty
   curr :: searchOrder (assert_smaller left next)
 
--------------------------------------------------
---- Derivation of a generator for constructor ---
--------------------------------------------------
+-------------------------------------------------------
+-------------------------------------------------------
+--- Derivation of a generator for constructor's RHS ---
+-------------------------------------------------------
+-------------------------------------------------------
 
 --- Particular tactics ---
 
-||| "Non-obligatory" means that some present external generator of some type
-||| may be ignored even if its type is really used in a generated data constructor.
-namespace NonObligatoryExts
+------------------------------
+--- Non-obligatory tactics ---
+------------------------------
 
-  ||| Least-effort non-obligatory tactic is one which *does not use externals* during taking a decision on the order.
-  ||| It uses externals if decided order happens to be given by an external generator, but is not obliged to use any.
-  ||| It is seemingly most simple to implement, maybe the fastest and
-  ||| fits well when external generators are provided for non-dependent types.
-  export
-  [LeastEffort] DeriveBodyRhsForCon where
-    consGenExpr sig con givs fuel = do
+-- "Non-obligatory" means that some present external generator of some type
+-- may be ignored even if its type is really used in a generated data constructor.
 
-      -- Prepare local search context
-      let _ : NamesInfoInTypes = %search    -- I don't why it won't be found without this
+||| Least-effort non-obligatory tactic is one which *does not use externals* during taking a decision on the order.
+||| It uses externals if decided order happens to be given by an external generator, but is not obliged to use any.
+||| It is seemingly most simple to implement, maybe the fastest and
+||| fits well when external generators are provided for non-dependent types.
+export
+[LeastEffort] DeriveBodyRhsForCon where
+  consGenExpr sig con givs fuel = do
 
-      -------------------------------------------------------------
-      -- Prepare intermediate data and functions using this data --
-      -------------------------------------------------------------
+    -- Prepare local search context
+    let _ : NamesInfoInTypes = %search    -- I don't why it won't be found without this
 
-      -- Compute left-to-right need of generation when there are non-trivial types at the left
-      argsTypeApps <- getTypeApps con
+    -------------------------------------------------------------
+    -- Prepare intermediate data and functions using this data --
+    -------------------------------------------------------------
 
-      -- Decide how constructor arguments would be named during generation
-      let bindNames = bindNameRenamer . argName <$> fromList con.args
-      let argsTypeApps = do
-        let conArgNames : SortedSet Name = fromList $ argName <$> con.args
-        let intExprMapper : TTImp -> TTImp
-            intExprMapper $ IVar fc n = IVar fc $ if conArgNames `contains'` n then UN $ Basic $ bindNameRenamer n else n
-            intExprMapper x = x
-        argsTypeApps <&> {argApps $= map @{Compose} $ mapTTImp intExprMapper}
+    -- Compute left-to-right need of generation when there are non-trivial types at the left
+    argsTypeApps <- getTypeApps con
 
-      -- Get arguments which any other argument depends on
-      let dependees = dependees con.args
+    -- Decide how constructor arguments would be named during generation
+    let bindNames = bindNameRenamer . argName <$> fromList con.args
+    let argsTypeApps = do
+      let conArgNames : SortedSet Name = fromList $ argName <$> con.args
+      let intExprMapper : TTImp -> TTImp
+          intExprMapper $ IVar fc n = IVar fc $ if conArgNames `contains'` n then UN $ Basic $ bindNameRenamer n else n
+          intExprMapper x = x
+      argsTypeApps <&> {argApps $= map @{Compose} $ mapTTImp intExprMapper}
 
-      -- Form the expression of calling the current constructor
-      let callCons = do
-        let constructorCall = callCon con $ bindNames.withIdx <&> \(idx, n) => if contains idx dependees then implicitTrue else varStr n
-        let wrapImpls : Nat -> TTImp
-            wrapImpls Z     = constructorCall
-            wrapImpls (S n) = var `{Builtin.DPair.MkDPair} .$ implicitTrue .$ wrapImpls n
-        let consExpr = wrapImpls $ sig.targetType.args.length `minus` sig.givenParams.size
-        `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen _} ~consExpr)
+    -- Get arguments which any other argument depends on
+    let dependees = dependees con.args
 
-      -- Derive constructor calling expression for given order of generation
-      let genForOrder : List (Fin con.args.length) -> m TTImp
-          -- ... state is the set of arguments that are already present (given or generated)
-          genForOrder order = map (foldr apply callCons) $ evalStateT givs $ for order $ \genedArg => do
+    -- Form the expression of calling the current constructor
+    let callCons = do
+      let constructorCall = callCon con $ bindNames.withIdx <&> \(idx, n) => if contains idx dependees then implicitTrue else varStr n
+      let wrapImpls : Nat -> TTImp
+          wrapImpls Z     = constructorCall
+          wrapImpls (S n) = var `{Builtin.DPair.MkDPair} .$ implicitTrue .$ wrapImpls n
+      let consExpr = wrapImpls $ sig.targetType.args.length `minus` sig.givenParams.size
+      `(Prelude.pure {f=Test.DepTyCheck.Gen.Gen _} ~consExpr)
 
-            -- Get info for the `genedArg`
-            let MkTypeApp typeOfGened argsOfTypeOfGened _ = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
+    -- Derive constructor calling expression for given order of generation
+    let genForOrder : List (Fin con.args.length) -> m TTImp
+        -- ... state is the set of arguments that are already present (given or generated)
+        genForOrder order = map (foldr apply callCons) $ evalStateT givs $ for order $ \genedArg => do
 
-            -- Acquire the set of arguments that are already present
-            presentArguments <- get
+          -- Get info for the `genedArg`
+          let MkTypeApp typeOfGened argsOfTypeOfGened _ = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
 
-            -- TODO to put the following check as up as possible as soon as it typecheks O_O
-            -- Check that those argument that we need to generate is not already present
-            let False = contains genedArg presentArguments
-              | True => pure id
+          -- Acquire the set of arguments that are already present
+          presentArguments <- get
 
-            -- Filter arguments classification according to the set of arguments that are left to be generated;
-            -- Those which are `Right` are given, those which are `Left` are needs to be generated.
-            let depArgs : Vect typeOfGened.args.length (Either (Fin con.args.length) TTImp) := argsOfTypeOfGened <&> \case
-              Right expr => Right expr
-              Left i     => if contains i presentArguments then Right $ varStr $ index i bindNames else Left i
+          -- TODO to put the following check as up as possible as soon as it typecheks O_O
+          -- Check that those argument that we need to generate is not already present
+          let False = contains genedArg presentArguments
+            | True => pure id
 
-            -- Determine which arguments will be on the left of dpair in subgen call, in correct order
-            let subgeneratedArgs = mapMaybe getLeft $ toList depArgs
+          -- Filter arguments classification according to the set of arguments that are left to be generated;
+          -- Those which are `Right` are given, those which are `Left` are needs to be generated.
+          let depArgs : Vect typeOfGened.args.length (Either (Fin con.args.length) TTImp) := argsOfTypeOfGened <&> \case
+            Right expr => Right expr
+            Left i     => if contains i presentArguments then Right $ varStr $ index i bindNames else Left i
 
-            -- Make sure generated arguments will not be generated again
-            modify $ insert genedArg . union (fromList subgeneratedArgs)
+          -- Determine which arguments will be on the left of dpair in subgen call, in correct order
+          let subgeneratedArgs = mapMaybe getLeft $ toList depArgs
 
-            -- Form a task for subgen
-            let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` Fin.range
-            let subsig : GenSignature := MkGenSignature typeOfGened $ fromList $ fst <$> toList subgivens
-            let Yes Refl = decEq subsig.givenParams.size subgivensLength
-              | No _ => fail "INTERNAL ERROR: error in given params set length computation"
+          -- Make sure generated arguments will not be generated again
+          modify $ insert genedArg . union (fromList subgeneratedArgs)
 
-            -- Check if called subgenerator can call the current one
-            let mutRec = hasNameInsideDeep sig.targetType.name $ var subsig.targetType.name
+          -- Form a task for subgen
+          let (subgivensLength ** subgivens) = mapMaybe (\(ie, idx) => (idx,) <$> getRight ie) $ depArgs `zip` Fin.range
+          let subsig : GenSignature := MkGenSignature typeOfGened $ fromList $ fst <$> toList subgivens
+          let Yes Refl = decEq subsig.givenParams.size subgivensLength
+            | No _ => fail "INTERNAL ERROR: error in given params set length computation"
 
-            -- Decide whether to use local (decreasing) or outmost fuel, depending on whether we are in mutual recursion with subgen
-            let subfuel = if mutRec then fuel else var outmostFuelArg
+          -- Check if called subgenerator can call the current one
+          let mutRec = hasNameInsideDeep sig.targetType.name $ var subsig.targetType.name
 
-            -- Form an expression to call the subgen
-            (subgenCall, reordering) <- callGen subsig subfuel $ snd <$> subgivens
+          -- Decide whether to use local (decreasing) or outmost fuel, depending on whether we are in mutual recursion with subgen
+          let subfuel = if mutRec then fuel else var outmostFuelArg
 
-            -- Form an expression of binding the result of subgen
-            let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
-            let Just subgeneratedArgs = reorder'' reordering subgeneratedArgs
-              | Nothing => fail "INTERNAL ERROR: cannot reorder subgenerated arguments"
-            let bindSubgenResult = foldr (\l, r => var `{Builtin.DPair.MkDPair} .$ l .$ r) genedArg subgeneratedArgs
+          -- Form an expression to call the subgen
+          (subgenCall, reordering) <- callGen subsig subfuel $ snd <$> subgivens
 
-            -- Form an expression of the RHS of a bind; simplify lambda if subgeneration result type does not require pattern matching
-            let bindRHS = \cont => case bindSubgenResult of
-                                     IBindVar _ n => lam (MkArg MW ExplicitArg (Just $ UN $ Basic n) implicitFalse) cont
-                                     _            => `(\ ~bindSubgenResult => ~cont)
+          -- Form an expression of binding the result of subgen
+          let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
+          let Just subgeneratedArgs = reorder'' reordering subgeneratedArgs
+            | Nothing => fail "INTERNAL ERROR: cannot reorder subgenerated arguments"
+          let bindSubgenResult = foldr (\l, r => var `{Builtin.DPair.MkDPair} .$ l .$ r) genedArg subgeneratedArgs
 
-            -- Chain the subgen call with a given continuation
-            pure $ \cont => `(~subgenCall >>= ~(bindRHS cont))
+          -- Form an expression of the RHS of a bind; simplify lambda if subgeneration result type does not require pattern matching
+          let bindRHS = \cont => case bindSubgenResult of
+                                   IBindVar _ n => lam (MkArg MW ExplicitArg (Just $ UN $ Basic n) implicitFalse) cont
+                                   _            => `(\ ~bindSubgenResult => ~cont)
 
-      --------------------------------------------
-      -- Compute possible orders of generation ---
-      --------------------------------------------
+          -- Chain the subgen call with a given continuation
+          pure $ \cont => `(~subgenCall >>= ~(bindRHS cont))
 
-      -- Compute determination map without weak determination information
-      let determ = insertFrom' empty $ mapI (\i, ta => (i, ta.determ)) argsTypeApps
+    --------------------------------------------
+    -- Compute possible orders of generation ---
+    --------------------------------------------
 
-      logPoint {level=Debug} "least-effort" [sig, con] "- determ: \{determ}"
-      logPoint {level=Debug} "least-effort" [sig, con] "- givs: \{givs}"
+    -- Compute determination map without weak determination information
+    let determ = insertFrom' empty $ mapI (\i, ta => (i, ta.determ)) argsTypeApps
 
-      -- Find user-imposed tuning of the order
-      userImposed <- findUserImposedDeriveFirst
+    logPoint {level=Debug} "least-effort" [sig, con] "- determ: \{determ}"
+    logPoint {level=Debug} "least-effort" [sig, con] "- givs: \{givs}"
 
-      -- Compute the order
-      let nonDetermGivs = removeDeeply userImposed $ removeDeeply givs determ
-      let theOrder = userImposed ++ searchOrder nonDetermGivs
+    -- Find user-imposed tuning of the order
+    userImposed <- findUserImposedDeriveFirst
 
-      logPoint {level=DeepDetails} "least-effort" [sig, con] "- used final order: \{theOrder}"
+    -- Compute the order
+    let nonDetermGivs = removeDeeply userImposed $ removeDeeply givs determ
+    let theOrder = userImposed ++ searchOrder nonDetermGivs
 
-      --------------------------
-      -- Producing the result --
-      --------------------------
+    logPoint {level=DeepDetails} "least-effort" [sig, con] "- used final order: \{theOrder}"
 
-      with FromString.(.label)
-      labelGen "\{show con.name} (orders)".label <$> genForOrder theOrder
+    --------------------------
+    -- Producing the result --
+    --------------------------
 
-      where
+    with FromString.(.label)
+    labelGen "\{show con.name} (orders)".label <$> genForOrder theOrder
 
-        Interpolation (Fin con.args.length) where
-          interpolate i = case name $ index' con.args i of
-            Just (UN n) => "#\{show i} (\{show n})"
-            _           => "#\{show i}"
+    where
 
-        Foldable f => Interpolation (f $ Fin con.args.length) where
-          interpolate = ("[" ++) . (++ "]") . joinBy ", " . map interpolate . toList
+      Interpolation (Fin con.args.length) where
+        interpolate i = case name $ index' con.args i of
+          Just (UN n) => "#\{show i} (\{show n})"
+          _           => "#\{show i}"
 
-        Interpolation (Determination con) where
-          interpolate ta = "<=\{ta.stronglyDeterminingArgs} ->\{ta.argsDependsOn}"
+      Foldable f => Interpolation (f $ Fin con.args.length) where
+        interpolate = ("[" ++) . (++ "]") . joinBy ", " . map interpolate . toList
 
-        findUserImposedDeriveFirst : m $ List $ Fin con.args.length
-        findUserImposedDeriveFirst = do
-          Just impl <- search $ GenOrderTuning $ Con.name con | Nothing => pure []
-          let Yes tyLen = decEq (isConstructor @{impl}).fst.typeInfo.args.length sig.targetType.args.length
-            | No _ => fail "INTERNAL ERROR: type args length of found gen order tuning is wrong"
-          let Yes conLen = decEq (isConstructor @{impl}).fst.conInfo.args.length con.args.length
-            | No _ => fail "INTERNAL ERROR: con args length of found gen order tuning is wrong"
-          -- TODO to get rid of `believe_me` below
-          let df = believe_me $ deriveFirst @{impl} (rewrite tyLen in Prelude.toList sig.givenParams) (rewrite conLen in Prelude.toList givs)
-          let userImposed = filter (not . contains' givs) $ nub $ conArgIdx <$> df
-          logPoint {level=DeepDetails} "least-effort" [sig, con] "- user-imposed: \{userImposed}"
-          pure userImposed
+      Interpolation (Determination con) where
+        interpolate ta = "<=\{ta.stronglyDeterminingArgs} ->\{ta.argsDependsOn}"
 
-  ||| Best effort non-obligatory tactic tries to use as much external generators as possible
-  ||| but discards some there is a conflict between them.
-  ||| All possible non-conflicting layouts may be produced in the generated values list.
-  |||
-  ||| E.g. when we have external generators ``(a : _) -> (b : T ** C a b)`` and ``(b : T ** D b)`` and
-  ||| a constructor of form ``C a b -> D b -> ...``, we can use values from both pairs
-  ||| ``(a : _) -> (b : T ** C a b)`` with ``(b : T) -> D b`` and
-  ||| ``(a : _) -> (b : T) -> C a b`` with ``(b : T ** D b)``,
-  ||| i.e. to use both of external generators to form the generated values list
-  ||| but not obligatorily all the external generators at the same time.
-  export
-  [BestEffort] DeriveBodyRhsForCon where
-    consGenExpr sig con givs fuel = do
-      ?cons_body_besteff_nonoblig_rhs
+      findUserImposedDeriveFirst : m $ List $ Fin con.args.length
+      findUserImposedDeriveFirst = do
+        Just impl <- search $ GenOrderTuning $ Con.name con | Nothing => pure []
+        let Yes tyLen = decEq (isConstructor @{impl}).fst.typeInfo.args.length sig.targetType.args.length
+          | No _ => fail "INTERNAL ERROR: type args length of found gen order tuning is wrong"
+        let Yes conLen = decEq (isConstructor @{impl}).fst.conInfo.args.length con.args.length
+          | No _ => fail "INTERNAL ERROR: con args length of found gen order tuning is wrong"
+        -- TODO to get rid of `believe_me` below
+        let df = believe_me $ deriveFirst @{impl} (rewrite tyLen in Prelude.toList sig.givenParams) (rewrite conLen in Prelude.toList givs)
+        let userImposed = filter (not . contains' givs) $ nub $ conArgIdx <$> df
+        logPoint {level=DeepDetails} "least-effort" [sig, con] "- user-imposed: \{userImposed}"
+        pure userImposed
 
-||| "Obligatory" means that is some external generator is present and a constructor has
-||| an argument of a type which is generated by this external generator, it must be used
-||| in the constructor's generator.
-|||
-||| Dependent types are important here, i.e. generator ``(a : _) -> (b ** C a b)``
-||| is considered to be a generator for the type ``C``.
-||| The problem with obligatory generators is that some external generators may be incompatible.
-|||
-|||   E.g. once we have ``(a : _) -> (b ** C a b)`` and ``(a ** b ** C a b)`` at the same time,
-|||   once ``C`` is used in the same constructor, we cannot guarantee that we will use both external generators.
-|||
-|||   The same problem is present once we have external generators for ``(a : _) -> (b : T ** C a b)`` and ``(b : T ** D b)`` at the same time,
-|||   and both ``C`` and ``D`` are used in the same constructor with the same parameter of type ``T``,
-|||   i.e. when constructor have something like ``C a b -> D b -> ...``.
-|||
-|||   Notice, that this problem does not arise in constructors of type ``C a b1 -> D b2 -> ...``
-|||
-||| In this case, we cannot decide in general which value of type ``T`` to be used for generation is we have to use both generators.
-||| We can either fail to generate a value for such constructor (``FailFast`` tactic),
-||| or alternatively we can try to match all the generated values of type ``T`` from both generators
-||| using ``DecEq`` and leave only intersection (``DecEqConflicts`` tactic).
-namespace ObligatoryExts
+--||| Best effort non-obligatory tactic tries to use as much external generators as possible
+--||| but discards some there is a conflict between them.
+--||| All possible non-conflicting layouts may be produced in the generated values list.
+--|||
+--||| E.g. when we have external generators ``(a : _) -> (b : T ** C a b)`` and ``(b : T ** D b)`` and
+--||| a constructor of form ``C a b -> D b -> ...``, we can use values from both pairs
+--||| ``(a : _) -> (b : T ** C a b)`` with ``(b : T) -> D b`` and
+--||| ``(a : _) -> (b : T) -> C a b`` with ``(b : T ** D b)``,
+--||| i.e. to use both of external generators to form the generated values list
+--||| but not obligatorily all the external generators at the same time.
+--export
+--[BestEffort] DeriveBodyRhsForCon where
+--  consGenExpr sig con givs fuel = do
+--    ?cons_body_besteff_nonoblig_rhs
 
-  export
-  [FailFast] DeriveBodyRhsForCon where
-    consGenExpr sig con givs fuel = do
-      ?cons_body_obl_ff_rhs
+--------------------------
+--- Obligatory tactics ---
+--------------------------
 
-  export
-  [DecEqConflicts] DeriveBodyRhsForCon where
-    consGenExpr sig con givs fuel = do
-      ?cons_body_obl_deceq_rhs
+-- "Obligatory" means that is some external generator is present and a constructor has
+-- an argument of a type which is generated by this external generator, it must be used
+-- in the constructor's generator.
+--
+-- Dependent types are important here, i.e. generator ``(a : _) -> (b ** C a b)``
+-- is considered to be a generator for the type ``C``.
+-- The problem with obligatory generators is that some external generators may be incompatible.
+--
+--   E.g. once we have ``(a : _) -> (b ** C a b)`` and ``(a ** b ** C a b)`` at the same time,
+--   once ``C`` is used in the same constructor, we cannot guarantee that we will use both external generators.
+--
+--   The same problem is present once we have external generators for ``(a : _) -> (b : T ** C a b)`` and ``(b : T ** D b)`` at the same time,
+--   and both ``C`` and ``D`` are used in the same constructor with the same parameter of type ``T``,
+--   i.e. when constructor have something like ``C a b -> D b -> ...``.
+--
+--   Notice, that this problem does not arise in constructors of type ``C a b1 -> D b2 -> ...``
+--
+-- In this case, we cannot decide in general which value of type ``T`` to be used for generation is we have to use both generators.
+-- We can either fail to generate a value for such constructor (``FailFast`` tactic),
+-- or alternatively we can try to match all the generated values of type ``T`` from both generators
+-- using ``DecEq`` and leave only intersection (``DecEqConflicts`` tactic).
+
+--export
+--[FailFast] DeriveBodyRhsForCon where
+--  consGenExpr sig con givs fuel = do
+--    ?cons_body_obl_ff_rhs
+
+--export
+--[DecEqConflicts] DeriveBodyRhsForCon where
+--  consGenExpr sig con givs fuel = do
+--    ?cons_body_obl_deceq_rhs
