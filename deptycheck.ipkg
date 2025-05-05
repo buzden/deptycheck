@@ -29,7 +29,7 @@ modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Util.Logging
         , Deriving.DepTyCheck.Util.Primitives
         , Language.Reflection.Compat
-        , Language.Reflection.Compat.Con
+        , Language.Reflection.Compat.Constr
         , Language.Reflection.Compat.TypeInfo
         , Language.Reflection.Expr
         , Test.DepTyCheck.Gen

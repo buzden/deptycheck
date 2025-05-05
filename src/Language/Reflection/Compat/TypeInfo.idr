@@ -3,7 +3,7 @@ module Language.Reflection.Compat.TypeInfo
 import Data.SortedMap
 import Data.SortedSet
 
-import public Language.Reflection.Compat.Con
+import public Language.Reflection.Compat.Constr
 import public Language.Reflection.Expr
 
 import Syntax.IHateParens.SortedSet

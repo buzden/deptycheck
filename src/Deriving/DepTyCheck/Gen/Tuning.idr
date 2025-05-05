@@ -2,7 +2,7 @@ module Deriving.DepTyCheck.Gen.Tuning
 
 import Data.Nat1
 
-import Language.Reflection.Compat.Con
+import Language.Reflection.Compat.Constr
 
 import Syntax.IHateParens.List
 

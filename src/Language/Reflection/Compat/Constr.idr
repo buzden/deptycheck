@@ -1,4 +1,6 @@
-module Language.Reflection.Compat.Con
+-- This module should've be called `*.Con`, since it serves the `Con` data type,
+-- but due to a need of compatibility with some lame OSes, we named it like this
+module Language.Reflection.Compat.Constr
 
 import Data.Cozippable
 import Data.List.Elem
