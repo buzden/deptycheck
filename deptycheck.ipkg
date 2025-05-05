@@ -32,6 +32,7 @@ modules = Deriving.DepTyCheck
         , Language.Reflection.Compat.Constr
         , Language.Reflection.Compat.TypeInfo
         , Language.Reflection.Expr
+        , Language.Reflection.Expr.Interpolation
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Coverage
         , Test.DepTyCheck.Gen.Emptiness

@@ -10,6 +10,8 @@ import public Deriving.DepTyCheck.Gen.ForOneType
 
 import public Test.DepTyCheck.Gen -- for `Gen` data type
 
+import public Language.Reflection.Expr.Interpolation -- for `deriveGenPrinter`
+
 %default total
 
 ----------------------------------------

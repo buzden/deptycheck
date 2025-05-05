@@ -3,11 +3,9 @@ module Infra
 import public Data.So
 
 import public Language.Reflection.Expr
-import public Language.Reflection.Pretty
+import public Language.Reflection.Expr.Interpolation
 import public Language.Reflection.Syntax
 import public Language.Reflection.Syntax.Ops
-
-import Text.PrettyPrint.Bernardy
 
 %default total
 
@@ -27,9 +25,6 @@ NotTTImp _     = True
 export
 So (NotTTImp a) => GivesTTImp a where
   toTTImp x = quote x
-
-Interpolation TTImp where
-  interpolate = render (Opts 152) . pretty
 
 export
 checkEq : GivesTTImp expr1 => GivesTTImp expr2 => String -> Bool -> expr1 -> expr2 -> Elab Unit

@@ -7,7 +7,7 @@ import public Deriving.DepTyCheck.Gen.ForOneType
 import public Test.DepTyCheck.Gen
 
 import public Language.Reflection.Compat
-import public Language.Reflection.Pretty
+import public Language.Reflection.Expr.Interpolation
 
 import Text.PrettyPrint.Bernardy
 
@@ -28,9 +28,6 @@ ATAN = ensureTyArgsNamed ty
 export
 chk : (ty : TypeInfo) -> (0 _ : AllTyArgsNamed ty) => List (Fin ty.tyArgs.length) -> Type -> TestCaseData
 chk ty giv expr = (canonicSig (MkGenSignature ty $ fromList giv), Fuel -> expr)
-
-Interpolation TTImp where
-  interpolate = render (Opts 152) . pretty
 
 export
 caseVerdict : TestCaseDesc -> Elab String
