@@ -2,13 +2,13 @@
 -- but due to a need of compatibility with some lame OSes, we named it like this
 module Language.Reflection.Compat.Constr
 
-import Data.Cozippable
+import public Data.Cozippable -- public due to compiler's bug #2439
 import Data.List.Elem
 
 import public Language.Reflection.Compat
-import public Language.Reflection.Expr
+import Language.Reflection.Expr
 
-import Syntax.IHateParens.List
+import public Syntax.IHateParens.List
 
 %default total
 

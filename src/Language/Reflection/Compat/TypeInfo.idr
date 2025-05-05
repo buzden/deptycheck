@@ -6,7 +6,7 @@ import Data.SortedSet
 import public Language.Reflection.Compat.Constr
 import public Language.Reflection.Expr
 
-import Syntax.IHateParens.SortedSet
+import public Syntax.IHateParens.SortedSet
 
 %default total
 

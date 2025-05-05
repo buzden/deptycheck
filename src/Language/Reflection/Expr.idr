@@ -1,6 +1,6 @@
 module Language.Reflection.Expr
 
-import Control.Applicative.Const
+import public Control.Applicative.Const -- public due to compiler's bug #2439
 
 import Data.Fin.ToFin
 import Data.List.Extra
@@ -9,7 +9,8 @@ import Data.SortedSet
 import Data.These
 import Data.Vect.Dependent
 
-import public Language.Reflection.Compat
+import public Language.Reflection
+import Language.Reflection.Compat
 
 import public Syntax.IHateParens.List
 
