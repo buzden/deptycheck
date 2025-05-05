@@ -1,5 +1,7 @@
 module RenamingTTImpEqCheck
 
+import Data.Vect
+
 import public Infra
 
 %default total

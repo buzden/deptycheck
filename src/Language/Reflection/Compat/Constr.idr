@@ -3,7 +3,8 @@
 module Language.Reflection.Compat.Constr
 
 import public Data.Cozippable -- public due to compiler's bug #2439
-import Data.List.Elem
+import public Data.List.Elem
+import public Data.So
 
 import public Language.Reflection.Compat
 import Language.Reflection.Expr
@@ -50,7 +51,7 @@ record ConArg (0 con : Con) where
 namespace ConArg
 
   public export
-  fromInteger : (x : Integer) -> So (integerLessThanNat x con.args.length) => ConArg con
+  fromInteger : (x : Integer) -> (0 _ : So $ integerLessThanNat x con.args.length) => ConArg con
   fromInteger x = MkConArg $ fromInteger x
 
   elemToFin : Elem e xs -> Fin xs.length
@@ -62,7 +63,7 @@ namespace ConArg
   fromName _ @{e} = MkConArg $ rewrite sym $ lengthMap con.args in elemToFin e
 
   -- this function is not exported because it breaks type inference in polymorphic higher-kinded case,
-  -- but we still leave this a) in a hope that type inference woukd be improved; b) to make sure we still can implement it.
+  -- but we still leave this a) in a hope that type inference would be improved; b) to make sure we still can implement it.
   --public export
   fromString : (n : String) -> Elem (Just $ fromString n) (map Arg.name con.args) => ConArg con
   fromString n = fromName $ fromString n
