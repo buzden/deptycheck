@@ -1,10 +1,10 @@
 module Deriving.DepTyCheck.Gen.Tuning
 
-import Data.Nat1
+import public Data.Nat1
 
-import Language.Reflection.Compat.Constr
+import public Language.Reflection.Compat.Constr
 
-import Syntax.IHateParens.List
+import public Syntax.IHateParens.List
 
 %default total
 
