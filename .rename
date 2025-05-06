@@ -30,7 +30,8 @@ TO_MODULE="$(filename_to_module "$TO_FILE")"
 echo "Renaming $FROM_MODULE to $TO_MODULE..."
 
 mv "$FROM_FILE" "$TO_FILE"
-grep -l -r --include='*.idr' --include='*.lidr' --include='*.ipkg' --include='*.md' --include='*.typ' "$FROM_MODULE"'\( \|$\)' | while read -r r; do
-  echo "  - usage in $r..."
-  sed -i -e "s/$FROM_MODULE$/$TO_MODULE/g" -e "s/$FROM_MODULE /$TO_MODULE /g" "$r"
-done
+grep -l -r --include='*.idr' --include='*.lidr' --include='*.ipkg' --include='*.md' --include='*.typ' "$FROM_MODULE"'\([^a-zA-Z_]\|$\)' |
+  while read -r r; do
+    echo "  - usage in $r..."
+    sed -i -e "s/$FROM_MODULE\([^a-zA-Z_]\|$\)/$TO_MODULE\1/g" "$r"
+  done

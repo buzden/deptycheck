@@ -29,7 +29,7 @@ indent_size = 4
 indent_style = space
 indent_size = 2
 
-[{*.sh,run,tar,*.bat,.patch-*}]
+[{*.sh,run,.rename,tar,*.bat,.patch-*}]
 indent_style = space
 indent_size = 2
 shell_variant = posix
