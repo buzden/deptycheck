@@ -103,7 +103,7 @@ checkTypeIsGen checkSide sig = do
     failAt (getFC sigResult) "The result type of the generator function must be of type \"`Gen MaybeEmpty` of desired result\""
 
   unless (genEmptiness `nameConformsTo` `{Test.DepTyCheck.Gen.Emptiness.MaybeEmpty}) $
-    failAt genFC "Only `GenBeEmptyStatic` variant of generator is supported, `\{show genEmptiness}` is given"
+    failAt genFC "Only `MaybeEmpty` variant of generator is supported, `\{show genEmptiness}` is given"
     -- this check can be changed to `==` as soon as we gen the result type normalised properly.
 
   -- treat the generated type as a dependent pair
