@@ -47,7 +47,7 @@ public export %inline
 sig.generatedParams = fromList (allFins sig.targetType.args.length) `difference` sig.givenParams
 
 export
-LogPosition GenSignature where logPosition sig = "\{logPosition sig.targetType}[\{showGivens sig}]"
+LogPosition GenSignature where logPosition sig = "\{show $ extractTargetTyExpr sig.targetType}[\{showGivens sig}]"
 
 public export
 Eq GenSignature where (==) = (==) `on` characteristics
