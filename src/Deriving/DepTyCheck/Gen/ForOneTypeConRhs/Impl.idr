@@ -1,5 +1,5 @@
 ||| Several tactics for derivation of particular generators for a constructor regarding to how they use externals
-module Deriving.DepTyCheck.Gen.ForOneConRhs
+module Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Impl
 
 import public Control.Monad.State
 import public Control.Monad.State.Tuple
@@ -12,8 +12,8 @@ import public Data.Vect.Extra
 
 import public Decidable.Equality
 
-import public Deriving.DepTyCheck.Gen.CompiletimeLabel
-import public Deriving.DepTyCheck.Gen.Interfaces.ForOneConRhs
+import public Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Interface
+import public Deriving.DepTyCheck.Gen.Labels
 import public Deriving.DepTyCheck.Gen.Tuning
 
 %default total

@@ -1,6 +1,6 @@
-module Deriving.DepTyCheck.Gen.Interfaces.ForOneType
+module Deriving.DepTyCheck.Gen.ForOneType.Interface
 
-import public Deriving.DepTyCheck.Gen.Interfaces.ForAllNeededTypes
+import public Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface
 import public Deriving.DepTyCheck.Gen.Signature
 
 %default total

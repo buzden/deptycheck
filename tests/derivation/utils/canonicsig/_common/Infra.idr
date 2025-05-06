@@ -2,7 +2,7 @@ module Infra
 
 import public Data.Fuel
 
-import public Deriving.DepTyCheck.Gen.ForOneType
+import public Deriving.DepTyCheck.Gen.ForOneType.Impl
 
 import public Test.DepTyCheck.Gen
 

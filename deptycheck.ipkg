@@ -13,15 +13,15 @@ version = 0.0.250319
 
 modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
-        , Deriving.DepTyCheck.Gen.CompiletimeLabel
         , Deriving.DepTyCheck.Gen.ConsRecs
-        , Deriving.DepTyCheck.Gen.ForAllNeededTypes
-        , Deriving.DepTyCheck.Gen.ForOneCon
-        , Deriving.DepTyCheck.Gen.ForOneConRhs
-        , Deriving.DepTyCheck.Gen.ForOneType
-        , Deriving.DepTyCheck.Gen.Interfaces.ForAllNeededTypes
-        , Deriving.DepTyCheck.Gen.Interfaces.ForOneConRhs
-        , Deriving.DepTyCheck.Gen.Interfaces.ForOneType
+        , Deriving.DepTyCheck.Gen.ForAllNeededTypes.Impl
+        , Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface
+        , Deriving.DepTyCheck.Gen.ForOneType.Impl
+        , Deriving.DepTyCheck.Gen.ForOneType.Interface
+        , Deriving.DepTyCheck.Gen.ForOneTypeCon.Impl
+        , Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Impl
+        , Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Interface
+        , Deriving.DepTyCheck.Gen.Labels
         , Deriving.DepTyCheck.Gen.Signature
         , Deriving.DepTyCheck.Gen.Tuning
         , Deriving.DepTyCheck.Util.ArgsPerm

@@ -4,9 +4,9 @@ module Deriving.DepTyCheck.Gen
 import public Data.Fuel
 import public Data.List.Lazy
 
-import public Deriving.DepTyCheck.Gen.ForAllNeededTypes
-import public Deriving.DepTyCheck.Gen.ForOneConRhs
-import public Deriving.DepTyCheck.Gen.ForOneType
+import public Deriving.DepTyCheck.Gen.ForAllNeededTypes.Impl
+import public Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Impl
+import public Deriving.DepTyCheck.Gen.ForOneType.Impl
 
 import public Test.DepTyCheck.Gen -- for `Gen` data type
 

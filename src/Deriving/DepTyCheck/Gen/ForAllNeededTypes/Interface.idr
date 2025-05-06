@@ -1,4 +1,4 @@
-module Deriving.DepTyCheck.Gen.Interfaces.ForAllNeededTypes
+module Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface
 
 import public Deriving.DepTyCheck.Gen.ConsRecs
 import public Deriving.DepTyCheck.Gen.Signature

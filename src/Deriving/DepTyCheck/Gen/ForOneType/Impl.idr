@@ -1,12 +1,12 @@
 ||| Main implementation of the derivator core interface
-module Deriving.DepTyCheck.Gen.ForOneType
+module Deriving.DepTyCheck.Gen.ForOneType.Impl
 
 import public Data.Either
 import public Data.SortedSet.Extra
 
-import public Deriving.DepTyCheck.Gen.CompiletimeLabel
-import public Deriving.DepTyCheck.Gen.ForOneCon
-import public Deriving.DepTyCheck.Gen.Interfaces.ForOneType
+import public Deriving.DepTyCheck.Gen.Labels
+import public Deriving.DepTyCheck.Gen.ForOneTypeCon.Impl
+import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 
 %default total
 

@@ -1,12 +1,12 @@
 ||| Derivation of the outer layer of a constructor-generating function, performing GADT indices check of given arguments.
-module Deriving.DepTyCheck.Gen.ForOneCon
+module Deriving.DepTyCheck.Gen.ForOneTypeCon.Impl
 
 import public Control.Monad.Error.Either
 import public Control.Monad.State
 import public Control.Monad.State.Tuple
 import public Control.Monad.Writer
 
-import public Deriving.DepTyCheck.Gen.Interfaces.ForOneConRhs
+import public Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Interface
 import public Deriving.DepTyCheck.Util.DeepConsApp
 
 %default total

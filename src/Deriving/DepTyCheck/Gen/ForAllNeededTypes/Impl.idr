@@ -1,5 +1,5 @@
 ||| A bridge between a single act of derivation (for a single type) and a user derivation task
-module Deriving.DepTyCheck.Gen.ForAllNeededTypes
+module Deriving.DepTyCheck.Gen.ForAllNeededTypes.Impl
 
 import public Control.Monad.Either
 import public Control.Monad.Reader
@@ -15,7 +15,7 @@ import public Data.SortedSet
 
 import public Decidable.Equality
 
-import public Deriving.DepTyCheck.Gen.Interfaces.ForOneType
+import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 
 %default total
 

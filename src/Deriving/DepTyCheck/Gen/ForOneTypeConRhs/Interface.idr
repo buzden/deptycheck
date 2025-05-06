@@ -1,6 +1,6 @@
-module Deriving.DepTyCheck.Gen.Interfaces.ForOneConRhs
+module Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Interface
 
-import public Deriving.DepTyCheck.Gen.Interfaces.ForAllNeededTypes
+import public Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface
 
 %default total
 

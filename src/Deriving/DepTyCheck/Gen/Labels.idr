@@ -1,4 +1,4 @@
-module Deriving.DepTyCheck.Gen.CompiletimeLabel
+module Deriving.DepTyCheck.Gen.Labels
 
 import public Language.Reflection.Expr
 import public Language.Reflection.Syntax
