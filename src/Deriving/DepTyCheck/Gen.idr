@@ -63,10 +63,10 @@ mapAndPerm xs = do
   pure (m ** rewrite lenCorr in orderIndices idxs)
 
 checkTypeIsGen : (checkSide : GenCheckSide) -> TTImp -> Elab $ CheckResult checkSide
-checkTypeIsGen checkSide sig = do
+checkTypeIsGen checkSide origsig@sig = do
 
-  -- check the given expression is a type
-  _ <- check {expected=Type} sig
+  -- check the given expression is a type, and normalise it
+  sig <- normaliseAsType sig
 
   -- treat the given type expression as a (possibly 0-ary) function type
   let (sigArgs, sigResult) = unPi sig
@@ -90,10 +90,6 @@ checkTypeIsGen checkSide sig = do
   ---------------------------------------------------------------
   -- First looks at the resulting type of a generator function --
   ---------------------------------------------------------------
-
-  -- normalise the generator expression and the target type expression, if we can
-  -- CAUTION: if the result of this normalisation is a Pi-type, we won't count its arguments; so it would be an error
-  sigResult <- normaliseAsType sigResult <|> pure sigResult
 
   -- check the resulting type is `Gen`
   let IApp _ (IApp _ (IVar genFC topmostResultName) (IVar _ genEmptiness)) targetType = sigResult
@@ -234,7 +230,7 @@ checkTypeIsGen checkSide sig = do
       failAt genFC "Auto-implicit argument should not contain its own auto-implicit arguments"
 
   -- check all auto-implicit arguments pass the checks for the `Gen` in an appropriate context
-  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> checkTypeIsGen ExternalGen (assert_smaller sig tti)
+  autoImplArgs <- for autoImplArgs $ \tti => mapSnd (,tti) <$> checkTypeIsGen ExternalGen (assert_smaller origsig tti)
 
   -- check that all auto-imlicit arguments are unique
   let [] = findDiffPairWhich ((==) `on` \(_, sig, _) => sig) autoImplArgs

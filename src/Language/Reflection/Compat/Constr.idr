@@ -2,7 +2,6 @@
 -- but due to a need of compatibility with some lame OSes, we named it like this
 module Language.Reflection.Compat.Constr
 
-import public Data.Cozippable -- public due to compiler's bug #2439
 import public Data.List.Elem
 import public Data.So
 
@@ -17,17 +16,9 @@ import public Syntax.IHateParens.List
 --- Compiler-based `Con` transformations ---
 --------------------------------------------
 
--- This is a workaround to not to change `elab-util`'s `getInfo'`
 export
 normaliseCon : Elaboration m => Con -> m Con
-normaliseCon orig@(MkCon n args ty) = do
-  let whole = piAll ty args
-  Just whole <- catch $ normaliseAsType whole
-    | Nothing => pure orig -- didn't manage to normalise, e.g. due to private stuff
-  let (args', ty) = unPi whole
-  -- `quote` may corrupt names, workaround it:
-  let args = comergeWith (\pre => {name := pre.name}) args args'
-  pure $ MkCon n args ty
+normaliseCon $ MkCon n args ty = uncurry (MkCon n) . unPi <$> normaliseAsType (piAll ty args)
 
 ------------------------------------
 --- Syntactic analysis of `Con`s ---
