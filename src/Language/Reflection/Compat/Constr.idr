@@ -35,7 +35,7 @@ normaliseCon orig@(MkCon n args ty) = do
 
 export
 conSubexprs : Con -> List TTImp
-conSubexprs con = map type con.args ++ (map getExpr $ snd $ unAppAny con.type)
+conSubexprs con = map type con.args ++ map getExpr (snd $ unAppAny con.type)
 
 --------------------------------------
 --- Compile-time constructors info ---
