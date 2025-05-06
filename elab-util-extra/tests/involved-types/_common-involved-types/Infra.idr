@@ -1,8 +1,8 @@
 module Infra
 
-import public TypesAndInvolved
+import Language.Reflection.Compat.TypeInfo
 
-import Deriving.DepTyCheck.Util.DeepConsApp
+import public TypesAndInvolved
 
 %language ElabReflection
 

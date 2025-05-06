@@ -5,6 +5,16 @@
 [install]
 whitelist = [ "deptycheck-docs", "pil-fun", "pil-dyn" ]
 
+#######################
+### Elab-util-extra ###
+#######################
+
+[custom.all.elab-util-extra]
+type = "local"
+path = "elab-util-extra"
+ipkg = "elab-util-extra.ipkg"
+test = "tests/tests.ipkg"
+
 ##################
 ### DepTyCheck ###
 ##################

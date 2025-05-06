@@ -97,6 +97,29 @@ jobs:
           name: built-thirdparties
           path: ${{ env.pack_dir_file }}
 
+  ########################
+  # Test elab-util-extra #
+  ########################
+
+  elab-util-extra-test:
+    name: Test elab-util-extra
+    needs:
+      - prepare-pack
+      - thirdparties-build
+    runs-on: ubuntu-latest
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Restore built thirdparties
+        uses: actions/download-artifact@v4
+        with:
+          name: built-thirdparties
+      - name: Untar the `pack` dir
+        run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+
+      - run: pack test elab-util-extra
+
   ############################
   # Build DepTyCheck library #
   ############################

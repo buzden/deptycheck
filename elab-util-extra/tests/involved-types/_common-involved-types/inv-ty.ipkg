@@ -2,4 +2,4 @@ package inv-tys
 
 opts = "--no-color --console-width 0"
 
-depends = deptycheck
+depends = elab-util-extra
