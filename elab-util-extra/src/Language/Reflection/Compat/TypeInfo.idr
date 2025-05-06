@@ -57,7 +57,7 @@ ensureTyArgsNamed ty = do
 
 normaliseCons : Elaboration m => TypeInfo -> m TypeInfo
 normaliseCons ty = do
-  cons' <- for ty.cons normaliseCon
+  cons' <- for ty.cons $ \con => fromMaybe con <$> catch (normaliseCon con) -- catch if we didn't manage to normalise, e.g. due to private stuff
   pure $ {cons := cons'} ty
 
 ---------------------------
