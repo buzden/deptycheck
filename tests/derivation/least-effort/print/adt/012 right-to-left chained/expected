@@ -35,7 +35,8 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                .$ (   var "Builtin.DPair.DPair"
                                    .$ var "Prelude.Types.Nat"
-                                   .$ (MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat") .=> var "DerivedGen.X2" .$ var "{arg:1}"))
+                                   .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                       .=> var "DerivedGen.X2" .$ var "{arg:1}"))
                        }
                  })
           , IClaim
@@ -52,7 +53,8 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                .$ (   var "Builtin.DPair.DPair"
                                    .$ var "Prelude.Types.Nat"
-                                   .$ (MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat") .=> var "DerivedGen.X1" .$ var "{arg:2}"))
+                                   .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                       .=> var "DerivedGen.X1" .$ var "{arg:2}"))
                        }
                  })
           , IClaim
