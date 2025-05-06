@@ -2,8 +2,8 @@ module Language.Reflection.Expr
 
 import public Control.Applicative.Const -- public due to compiler's bug #2439
 
-import Data.Fin.ToFin
-import Data.List.Extra
+import public Data.Fin.ToFin -- public due to compiler's bug #2439
+import public Data.List.Extra -- public due to compiler's bug #2439
 import Data.SortedMap
 import public Data.SortedSet
 import Data.These
