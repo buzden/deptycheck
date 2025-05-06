@@ -5,9 +5,9 @@ import public Control.Applicative.Const -- public due to compiler's bug #2439
 import Data.Fin.ToFin
 import Data.List.Extra
 import Data.SortedMap
-import Data.SortedSet
+import public Data.SortedSet
 import Data.These
-import Data.Vect.Dependent
+import public Data.Vect.Dependent
 
 import public Language.Reflection
 import Language.Reflection.Compat
