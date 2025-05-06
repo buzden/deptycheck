@@ -5,7 +5,7 @@ die() {
   exit "$1"
 }
 
-stat -t ./*.ipkg >/dev/null 2>/dev/null || die 2 "No *.ipkg file found in the current dir"
+stat -t ./*.ipkg > /dev/null 2> /dev/null || die 2 "No *.ipkg file found in the current dir"
 
 FROM_FILE="$1"
 TO_FILE="$2"
