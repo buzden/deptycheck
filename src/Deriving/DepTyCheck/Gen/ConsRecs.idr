@@ -160,7 +160,7 @@ getConsRecs = do
             argTy <- getAppVar (snd idxarg).type
             whenT .| argTy == targetType.name .| fst idxarg
           when (not $ null directlyRecArgs) $
-            logPoint {level=DetailedTrace} "consRec" [targetType, con] "- directly recursive args: \{show $ finToNat <$> directlyRecArgs}"
+            logPoint {level=DeepDetails} "consRec" [targetType, con] "- directly recursive args: \{show $ finToNat <$> directlyRecArgs}"
           pure (fuelWeightExpr, fromList directlyRecArgs)
       pure (con ** w)
     -- determine if this type is a nat-or-list-like data, i.e. one which we can measure for the probability
