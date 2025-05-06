@@ -188,7 +188,7 @@ jobs:
           (
           echo -n "test-sets=["
           find tests/ -type f,l -name run | grep -v '/_' | \
-            sed -e 's|^tests/|"|' -e 's|\(.*\)distribution/\([^-]*\)-[^/]*/run|\1distribution/\2"|' -e 's|/[^/]*/run$|"|' | \
+            sed -e 's|^tests/|"|' -e 's|\(.*\)distribution/\([^-]*\)-[^/]*/run|\1distribution/\2-"|' -e 's|/[^/]*/run$|"|' | \
             sort | uniq | awk 'ORS=", "' | head -c -2
           echo "]"
           ) >> "$GITHUB_OUTPUT"
