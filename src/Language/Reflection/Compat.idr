@@ -11,23 +11,11 @@ import public Data.String
 import public Data.Vect
 
 import public Language.Reflection
+import Language.Reflection.Expr
 import public Language.Reflection.Syntax
 import public Language.Reflection.Syntax.Ops
 
 %default total
-
-public export
-stname : Maybe Name -> Name
-stname = fromMaybe $ UN Underscore
-
-public export
-argName : Arg -> Name
-argName = stname . (.name)
-
-cleanupNamedHoles : TTImp -> TTImp
-cleanupNamedHoles = mapTTImp $ \case
-  IHole {} => implicitFalse
-  e        => e
 
 --------------------------------------------------------------------------------
 --          General Types

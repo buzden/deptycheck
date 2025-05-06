@@ -10,7 +10,8 @@ import Data.These
 import public Data.Vect.Dependent
 
 import public Language.Reflection
-import Language.Reflection.Compat
+import Language.Reflection.Syntax
+import Language.Reflection.Syntax.Ops
 
 import public Syntax.IHateParens.List
 
@@ -23,6 +24,24 @@ import public Syntax.IHateParens.List
 export
 normaliseAsType : Elaboration m => TTImp -> m TTImp
 normaliseAsType expr = quote !(check {expected=Type} expr)
+
+------------------------------------
+--- General pure transformations ---
+------------------------------------
+
+public export
+stname : Maybe Name -> Name
+stname = fromMaybe $ UN Underscore
+
+public export
+argName : Arg -> Name
+argName = stname . (.name)
+
+export
+cleanupNamedHoles : TTImp -> TTImp
+cleanupNamedHoles = mapTTImp $ \case
+  IHole {} => implicitFalse
+  e        => e
 
 ------------------------------------------------------------------------
 --- Facilities for managing any kind of function application at once ---
@@ -161,10 +180,9 @@ isImplicit ExplicitArg     = False
 --- Syntactic analysis of `TTImp` expressions ---
 -------------------------------------------------
 
--- fails is given names are not types
 public export
 isSameTypeAs : Name -> Name -> Elab Bool
-isSameTypeAs checked expected = let eq = (==) `on` name in [| getInfo' checked `eq` getInfo' expected |]
+isSameTypeAs n m = let eq = (==) `on` fst in [| lookupName n `eq` lookupName m |]
 
 export
 nameConformsTo : (cand, origin : Name) -> Bool
