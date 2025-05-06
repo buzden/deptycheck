@@ -43,7 +43,7 @@ lookupLengthChecked intSig m = lookup intSig m >>= \(extSig, name) => (name,) <$
                                     Yes prf => Just $ Element extSig prf
                                     No _    => Nothing
 
-DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => DeriveClosure m where
+DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => DerivationClosure m where
 
   needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
     modify $ insert ty.name
@@ -115,7 +115,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
 
 export
 runCanonic : DeriveBodyForType => NamesInfoInTypes => ConsRecs =>
-             SortedMap ExternalGenSignature Name -> (forall m. DeriveClosure m => m a) -> Elab (a, List Decl)
+             SortedMap ExternalGenSignature Name -> (forall m. DerivationClosure m => m a) -> Elab (a, List Decl)
 runCanonic exts calc = do
   let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
   (x, defs, bodies) <- evalRWST

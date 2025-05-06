@@ -10,7 +10,7 @@ import public Deriving.DepTyCheck.Gen.Signature
 --------------------------------------------------
 
 public export
-interface Elaboration m => NamesInfoInTypes => ConsRecs => DeriveClosure m where
+interface Elaboration m => NamesInfoInTypes => ConsRecs => DerivationClosure m where
   needWeightFun : TypeInfo -> m ()
   callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m (TTImp, Maybe (gend ** Vect gend $ Fin gend))
   --                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -18,7 +18,7 @@ interface Elaboration m => NamesInfoInTypes => ConsRecs => DeriveClosure m where
   --                                                                   actually, `gend` can be calculated from `sig`, but we simplify things here
 
 export
-DeriveClosure m => MonadTrans t => Monad (t m) => DeriveClosure (t m) where
+DerivationClosure m => MonadTrans t => Monad (t m) => DerivationClosure (t m) where
   needWeightFun = lift . needWeightFun
   callGen sig fuel params = lift $ callGen sig fuel params
 
