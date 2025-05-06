@@ -4,13 +4,12 @@ import public Control.Applicative.Const -- public due to compiler's bug #2439
 
 import public Data.Fin.ToFin -- public due to compiler's bug #2439
 import public Data.List.Extra -- public due to compiler's bug #2439
-import Data.SortedMap
 import public Data.SortedSet
-import Data.These
+import public Data.These -- public due to compiler's bug #2439
 import public Data.Vect.Dependent
 
 import public Language.Reflection
-import Language.Reflection.Syntax
+import public Language.Reflection.Syntax
 import Language.Reflection.Syntax.Ops
 
 import public Syntax.IHateParens.List
