@@ -9,9 +9,9 @@ import public Data.SortedMap.Extra
 import public Data.SortedSet
 
 import public Deriving.DepTyCheck.Gen.Tuning
-import public Deriving.DepTyCheck.Util.Logging
 
 import public Language.Reflection.Compat.TypeInfo
+import public Language.Reflection.Logging
 
 import public Syntax.IHateParens.Function
 
@@ -145,7 +145,7 @@ finCR tyName wTyArgs cons givenTyArgs = do
 export
 getConsRecs : Elaboration m => NamesInfoInTypes => m ConsRecs
 getConsRecs = do
-  consRecs <- for knownTypes $ \targetType => logBounds {level=DetailedTrace} "consRec" [targetType] $ do
+  consRecs <- for knownTypes $ \targetType => logBounds {level=DetailedTrace} "deptycheck.derive.consRec" [targetType] $ do
     crsForTy <- for targetType.cons $ \con => do
       tuneImpl <- search $ ProbabilityTuning con.name
       w : Either Nat1 (TTImp -> TTImp, SortedSet $ Fin con.args.length) <- case isRecursive {containingType=Just targetType} con of
@@ -160,7 +160,8 @@ getConsRecs = do
             argTy <- getAppVar (snd idxarg).type
             whenT .| argTy == targetType.name .| fst idxarg
           when (not $ null directlyRecArgs) $
-            logPoint {level=DeepDetails} "consRec" [targetType, con] "- directly recursive args: \{show $ finToNat <$> directlyRecArgs}"
+            logPoint {level=FineDetails} "deptycheck.derive.consRec" [targetType, con]
+              "- directly recursive args: \{show $ finToNat <$> directlyRecArgs}"
           pure (fuelWeightExpr, fromList directlyRecArgs)
       pure (con ** w)
     -- determine if this type is a nat-or-list-like data, i.e. one which we can measure for the probability

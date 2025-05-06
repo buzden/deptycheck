@@ -12,6 +12,7 @@ import public Data.Vect
 
 import public Language.Reflection
 import Language.Reflection.Expr
+import Language.Reflection.Logging
 import public Language.Reflection.Syntax
 import public Language.Reflection.Syntax.Ops
 
@@ -36,6 +37,13 @@ getCon n = do (n', tt) <- lookupName n
               let (args, tpe) = unPi $ cleanupNamedHoles tt
               pure $ MkCon n' args tpe
 
+export
+LogPosition Con where
+  logPosition con = do
+    let fullName = show con.name
+    let fullName' = unpack fullName
+    maybe fullName (pack . flip drop fullName' . S . finToNat) $ findLastIndex (== '.') fullName'
+
 ||| Information about a data type
 |||
 ||| @name : Name of the data type
@@ -49,6 +57,10 @@ record TypeInfo where
   name : Name
   args : List Arg
   cons : List Con
+
+export
+LogPosition TypeInfo where
+  logPosition ti = "\{show $ ti.name}"
 
 ||| Tries to get information about the data type specified
 ||| by name. The name need not be fully qualified, but

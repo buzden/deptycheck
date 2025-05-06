@@ -15,9 +15,8 @@ import Data.List.Lazy
 import Data.Singleton
 import Data.SortedMap
 
-import public Deriving.DepTyCheck.Util.Logging
-
 import public Language.Reflection.Compat.TypeInfo
+import public Language.Reflection.Logging
 
 import Test.DepTyCheck.Gen
 

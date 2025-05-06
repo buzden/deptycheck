@@ -9,10 +9,11 @@ import public Data.SortedMap.Extra
 import public Data.SortedSet
 
 import public Deriving.DepTyCheck.Util.ArgsPerm
-import public Deriving.DepTyCheck.Util.Logging
+import public Deriving.DepTyCheck.Util.Primitives
 
 import public Language.Reflection.Compat
 import public Language.Reflection.Expr
+import public Language.Reflection.Logging
 
 %default total
 
@@ -46,7 +47,7 @@ public export %inline
 sig.generatedParams = fromList (allFins sig.targetType.args.length) `difference` sig.givenParams
 
 export
-SingleLogPosition GenSignature where logPosition sig = "\{logPosition sig.targetType}[\{showGivens sig}]"
+LogPosition GenSignature where logPosition sig = "\{logPosition sig.targetType}[\{showGivens sig}]"
 
 public export
 Eq GenSignature where (==) = (==) `on` characteristics

@@ -51,7 +51,7 @@ DeriveBodyRhsForCon => DeriveBodyForType where
     let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
 
     -- derive bodies for generators per constructors
-    consBodies <- for sig.targetType.cons $ \con => logBounds {level=Info} "consBody" [sig, con] $
+    consBodies <- for sig.targetType.cons $ \con => logBounds {level=Info} "deptycheck.derive.consBody" [sig, con] $
       canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
     -- calculate which constructors are recursive and spend fuel, and which are not

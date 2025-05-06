@@ -26,13 +26,13 @@ modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen.Tuning
         , Deriving.DepTyCheck.Util.ArgsPerm
         , Deriving.DepTyCheck.Util.DeepConsApp
-        , Deriving.DepTyCheck.Util.Logging
         , Deriving.DepTyCheck.Util.Primitives
         , Language.Reflection.Compat
         , Language.Reflection.Compat.Constr
         , Language.Reflection.Compat.TypeInfo
         , Language.Reflection.Expr
         , Language.Reflection.Expr.Interpolation
+        , Language.Reflection.Logging
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Coverage
         , Test.DepTyCheck.Gen.Emptiness
