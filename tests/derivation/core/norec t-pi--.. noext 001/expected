@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Target type `Builtin.(===)` is not a top-level data definition
+Error: While processing right hand side of checkedGen. Error during reflection: Target type's argument must be a variable name, got `Prelude.Basics.Bool`
 
 DerivedGen:1
  5 | %default total
@@ -8,5 +8,5 @@ DerivedGen:1
  7 | %language ElabReflection
  8 | 
  9 | checkedGen : Fuel -> (a, b : Bool) -> Gen MaybeEmpty (a = b)
-                                           ^^^
+                                  ^^^^
 

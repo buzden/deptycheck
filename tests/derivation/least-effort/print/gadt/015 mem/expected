@@ -38,7 +38,11 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex[0(sx), 3] There' - used
                                        .=>    var "Builtin.DPair.DPair"
                                            .$ var "DerivedGen.Ty"
                                            .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
-                                               .=> var "DerivedGen.AtIndex" .! ("sx", var "sx") .$ var "idx" .$ var "{arg:2}" .$ var "{arg:1}")))
+                                               .=>    var "DerivedGen.AtIndex"
+                                                   .! ("sx", var "sx")
+                                                   .$ var "idx"
+                                                   .$ var "{arg:2}"
+                                                   .$ var "{arg:1}")))
                        }
                  })
           , IDef

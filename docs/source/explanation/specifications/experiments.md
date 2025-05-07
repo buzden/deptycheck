@@ -8,13 +8,13 @@ All experiments were performed with the following settings:
 
 <!-- idris
 import Deriving.DepTyCheck.Gen
-%hide Deriving.DepTyCheck.Gen.Entry.deriveGen
+%hide Deriving.DepTyCheck.Gen.deriveGen
 
 -- a stub pretending it is a derivator
 deriveGen : a
 -->
 
-<!-- The code block above uses ```<space>idris intentionally, now this code does not compile and it's okay -->
+<!-- The code block below uses ```<space>idris intentionally, now this code does not compile and it's okay -->
 ``` idris
 %language ElabReflection
 

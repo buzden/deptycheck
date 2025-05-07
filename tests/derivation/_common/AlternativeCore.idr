@@ -1,6 +1,6 @@
 module AlternativeCore
 
-import public Deriving.DepTyCheck.Gen.Core
+import public Deriving.DepTyCheck.Gen.ForOneType.Impl
 
 %default total
 
@@ -13,37 +13,37 @@ numberedArgs : (bind : Bool) -> {n : _} -> Vect n TTImp
 numberedArgs bind = Fin.tabulate $ (if bind then bindVar else varStr) . show
 
 export
-[EmptyBody] DerivatorCore where
+[EmptyBody] DeriveBodyForType where
   canonicBody sig n = pure [ callCanonic sig n implicitTrue irrelevantArgs .= `(empty) ]
 
 export
-[CallSelf] DerivatorCore where
+[CallSelf] DeriveBodyForType where
   canonicBody sig n = pure
     [ callCanonic sig n (var `{Dry})                    irrelevantArgs      .= `(empty)
     , callCanonic sig n (var `{More} .$ bindVar "fuel") (numberedArgs True) .= fst !(callGen sig (var "fuel") $ numberedArgs False)
     ]
 
 export
-[EmptyCons'] ConstructorDerivator where
+[EmptyCons'] DeriveBodyRhsForCon where
   consGenExpr _ _ _ _ = pure `(empty)
 
 export
-EmptyCons : DerivatorCore
+EmptyCons : DeriveBodyForType
 EmptyCons = MainCoreDerivator @{EmptyCons'}
 
 ------------------------------
 --- Working with externals ---
 ------------------------------
 
-callSimpleGen : CanonicGen m => TypeInfo -> (fuel : TTImp) -> m TTImp
+callSimpleGen : DerivationClosure m => TypeInfo -> (fuel : TTImp) -> m TTImp
 callSimpleGen tyi fuel = do
   _ <- ensureTyArgsNamed tyi
   map fst $ callGen (MkGenSignature tyi SortedSet.empty) fuel $ believe_me $ Vect.Nil {elem = TTImp}
 
-callStrGen : CanonicGen m => (fuel : TTImp) -> m TTImp
+callStrGen : DerivationClosure m => (fuel : TTImp) -> m TTImp
 callStrGen = callSimpleGen $ typeInfoForPrimType StringType
 
-callNatGen : CanonicGen m => (fuel : TTImp) -> m TTImp
+callNatGen : DerivationClosure m => (fuel : TTImp) -> m TTImp
 callNatGen = callSimpleGen $ getInfo "Nat"
 
 --- One (string) argument taken from external ---
@@ -56,7 +56,7 @@ Show XS where
   show (MkXS s) = "MkXS \{show s}"
 
 export
-[Ext_XS] DerivatorCore where
+[Ext_XS] DeriveBodyForType where
   canonicBody sig n =
     pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXS <$> ~(!(callStrGen $ var "fuel"))) ]
 
@@ -70,7 +70,7 @@ Show XSS where
   show (MkXSS s1 s2) = "MkXSS \{show s1} \{show s2}"
 
 export
-[Ext_XSS] DerivatorCore where
+[Ext_XSS] DeriveBodyForType where
   canonicBody sig n =
     pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSS <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callStrGen $ var "fuel"))) ]
 
@@ -84,7 +84,7 @@ Show XSN where
   show (MkXSN s n) = "MkXSN \{show s} \{show n}"
 
 export
-[Ext_XSN] DerivatorCore where
+[Ext_XSN] DeriveBodyForType where
   canonicBody sig n =
     pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSN <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callNatGen $ var "fuel"))) ]
 
@@ -99,6 +99,6 @@ export
   show (MkX'S s) = "MkX'S \{show s} : X'S \{show n}"
 
 export
-[Ext_X'S] DerivatorCore where
+[Ext_X'S] DeriveBodyForType where
   canonicBody sig n =
     pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkX'S <$> ~(!(callStrGen $ var "fuel"))) ]

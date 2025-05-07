@@ -8,14 +8,15 @@ import Control.Monad.Maybe
 import Control.Monad.Random
 import Control.Monad.Writer
 
+import Data.Alternative
+import Data.Fuel
 import Data.List
+import Data.List.Lazy
 import Data.Singleton
 import Data.SortedMap
 
-import public Deriving.DepTyCheck.Util.Logging
-import public Deriving.DepTyCheck.Util.Reflection
-
-import public Language.Reflection
+import public Language.Reflection.Compat.TypeInfo
+import public Language.Reflection.Logging
 
 import Test.DepTyCheck.Gen
 
@@ -107,9 +108,47 @@ initCoverageInfo'' = go where
   go [n] = coverageGenInfo n
   go (n::ns) = [| mergeCovGenInfos {g=n} (coverageGenInfo n) (go ns) |]
 
+||| Returns a name by the generator's type
+|||
+||| Say, for the `Fuel -> Gen em (n ** Fin n)` it returns name of `Data.Fin.Fin`
+genTypeName : (0 _ : Type) -> Elab Name
+genTypeName g = do
+  genTy <- quote g
+  let (_, genTy) = unPi genTy
+  let (lhs, args) = unAppAny genTy
+  let IVar _ lhsName = lhs
+    | _ => failAt (getFC lhs) "Generator or generator function expected"
+  let True = lhsName `nameConformsTo` `{Test.DepTyCheck.Gen.Gen}
+    | _ => failAt (getFC lhs) "Return type must be a generator of some type"
+  let [_, genTy] = args
+    | _ => failAt (getFC lhs) "Wrong number of type arguments of a generator"
+  let (_, genTy) = unDPair $ getExpr genTy
+  let (IVar _ genTy, _) = unApp genTy
+    | (genTy, _) => failAt (getFC genTy) "Expected a type name"
+  pure genTy
+
 export %macro
 initCoverageInfo : (0 x : g) -> Elab $ CoverageGenInfo x
 initCoverageInfo _ = genTypeName g >>= coverageGenInfo
+
+||| Derives function `A -> B` where `A` is determined by the given `TypeInfo`, `B` is determined by `retTy`
+|||
+||| For each constructor of `A` the `matcher` function is applied and its result (of type `B`) is used as a result.
+||| Currently, `B` must be a non-dependent type.
+deriveMatchingCons : (retTy : TTImp) -> (matcher : Con -> TTImp) -> (funName : Name) -> TypeInfo -> List Decl
+deriveMatchingCons retTy matcher funName ti = do
+  let claim = do
+    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ argName arg
+    let sig = foldr
+                (pi . {count := M0, piInfo := ImplicitArg})
+                `(~tyApplied -> ~retTy)
+                ti.args
+    private' funName sig
+  let body = do
+    let matchCon = \con => reAppAny (var con.name) $ con.args <&> flip appArg implicitTrue
+    def funName $ ti.cons <&> \con =>
+      patClause (var funName .$ matchCon con) $ matcher con
+  [claim, body]
 
 ||| Adds labelling of types and constructors to a given generator
 |||

@@ -35,7 +35,8 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                .$ (   var "Builtin.DPair.DPair"
                                    .$ var "Prelude.Types.Nat"
-                                   .$ (MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat") .=> var "DerivedGen.X2" .$ var "{arg:1}"))
+                                   .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                       .=> var "DerivedGen.X2" .$ var "{arg:1}"))
                        }
                  })
           , IClaim
@@ -52,7 +53,8 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                .$ (   var "Builtin.DPair.DPair"
                                    .$ var "Prelude.Types.Nat"
-                                   .$ (MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat") .=> var "DerivedGen.X1" .$ var "{arg:2}"))
+                                   .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                       .=> var "DerivedGen.X1" .$ var "{arg:2}"))
                        }
                  })
           , IClaim
@@ -286,7 +288,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
-                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                     .$ (var "<<Prelude.Types.S>>" .$ var "^sub^fuel_arg^"))
                                                 .$ var "Nil")))
                                ]

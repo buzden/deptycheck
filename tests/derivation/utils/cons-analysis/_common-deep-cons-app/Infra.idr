@@ -4,7 +4,7 @@ import public ConsApps
 
 import public Control.Monad.Writer
 
-import Deriving.DepTyCheck.Gen.Core.Util
+import Deriving.DepTyCheck.Util.DeepConsApp
 
 %language ElabReflection
 

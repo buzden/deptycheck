@@ -139,7 +139,10 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[0, 1] Step - used final ord
                                  .$ (   var "::"
                                      .$ (   var "Builtin.MkPair"
                                          .$ (var "weight^Prelude.Types.Nat" .$ var "inter^<{arg:2}>")
-                                         .$ (var "<<DerivedGen.Step>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>" .$ var "inter^<{arg:2}>"))
+                                         .$ (   var "<<DerivedGen.Step>>"
+                                             .$ var "^fuel_arg^"
+                                             .$ var "inter^<{arg:1}>"
+                                             .$ var "inter^<{arg:2}>"))
                                      .$ var "Nil")))
                      }
               ]

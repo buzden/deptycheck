@@ -2,11 +2,14 @@ module Infra
 
 import public Data.Fuel
 
-import public Deriving.DepTyCheck.Gen.Core
+import public Deriving.DepTyCheck.Gen.ForOneType.Impl
 
 import public Test.DepTyCheck.Gen
 
 import public Language.Reflection.Compat
+import public Language.Reflection.Expr.Interpolation
+
+import Text.PrettyPrint.Bernardy
 
 %default total
 

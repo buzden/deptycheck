@@ -254,14 +254,14 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                                     .$ var "inter^<{arg:1}>"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
-                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                     .$ (   var "<<Data.List.Covering.Miss>>"
                                                         .$ var "^sub^fuel_arg^"
                                                         .$ var "inter^<n>"
                                                         .$ var "inter^<{arg:1}>"))
                                                 .$ (   var "::"
                                                     .$ (   var "Builtin.MkPair"
-                                                        .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                        .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                         .$ (   var "<<Data.List.Covering.Hit>>"
                                                             .$ var "^sub^fuel_arg^"
                                                             .$ var "inter^<n>"
@@ -518,7 +518,7 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
-                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                     .$ (var "<<Prelude.Types.S>>" .$ var "^sub^fuel_arg^"))
                                                 .$ var "Nil")))
                                ]

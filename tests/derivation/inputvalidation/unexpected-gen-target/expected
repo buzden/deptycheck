@@ -149,7 +149,7 @@ ValidateInput:15
  58 | genOfFuns_out_pair1 : Fuel -> Gen MaybeEmpty $ (1 b : Type) -> (a ** Y a b)
                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Error: While processing right hand side of nonEmptyGen. Error during reflection: Only `GenBeEmptyStatic` variant of generator is supported, `Test.DepTyCheck.Gen.Emptiness.NonEmpty` is given
+Error: While processing right hand side of nonEmptyGen. Error during reflection: Only `MaybeEmpty` variant of generator is supported, `Test.DepTyCheck.Gen.Emptiness.NonEmpty` is given
 
 ValidateInput:16
  57 | 

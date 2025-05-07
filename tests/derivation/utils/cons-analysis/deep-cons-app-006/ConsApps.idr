@@ -3,6 +3,7 @@ module ConsApps
 import public Data.List.Views
 
 import Language.Reflection.Compat
+import Language.Reflection.Expr
 
 %default total
 

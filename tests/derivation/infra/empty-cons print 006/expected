@@ -90,7 +90,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (a : Type) -> Gen MaybeEmpt
                                                 .$ (var "<<Data.Vect.Nil>>" .$ var "^fuel_arg^" .$ var "inter^<elem>"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
-                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                     .$ (var "<<Data.Vect.(::)>>" .$ var "^sub^fuel_arg^" .$ var "inter^<elem>"))
                                                 .$ var "Nil")))
                                ]

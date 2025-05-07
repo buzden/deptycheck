@@ -7,7 +7,7 @@ import public Deriving.DepTyCheck.Gen
 
 -- Empty body derivation
 export
-DerivatorCore where
+DeriveBodyForType where
   canonicBody sig n = pure [ callCanonic sig n implicitTrue (replicate _ implicitTrue) .= `(empty) ]
 -->
 
