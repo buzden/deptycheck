@@ -60,7 +60,7 @@ record TypeInfo where
 
 export
 LogPosition TypeInfo where
-  logPosition ti = "\{show $ ti.name}"
+  logPosition = show . name
 
 ||| Tries to get information about the data type specified
 ||| by name. The name need not be fully qualified, but

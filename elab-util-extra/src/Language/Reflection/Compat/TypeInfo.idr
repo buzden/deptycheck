@@ -56,9 +56,7 @@ ensureTyArgsNamed ty = do
 --------------------------
 
 normaliseCons : Elaboration m => TypeInfo -> m TypeInfo
-normaliseCons ty = do
-  cons' <- for ty.cons normaliseCon
-  pure $ {cons := cons'} ty
+normaliseCons ty = for ty.cons normaliseCon <&> \cons' => {cons := cons'} ty
 
 ---------------------------
 --- Names info in types ---
