@@ -92,7 +92,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty (n : Nat ** 
                                             .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Data.Vect.Nil>>" .$ var "^fuel_arg^"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
-                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                     .$ (var "<<Data.Vect.(::)>>" .$ var "^sub^fuel_arg^"))
                                                 .$ var "Nil")))
                                ]

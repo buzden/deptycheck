@@ -266,7 +266,11 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.BS[0(n)] MkBS - used final orde
                                                           .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
                                                               .=>    var "Builtin.DPair.DPair"
                                                                   .$ (var "DerivedGen.BS" .$ var "n")
-                                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.BS" .$ var "n")
+                                                                  .$ (    MkArg
+                                                                            MW
+                                                                            ExplicitArg
+                                                                            (Just "{arg:3}")
+                                                                            (var "DerivedGen.BS" .$ var "n")
                                                                       .=> var "DerivedGen.Y" .$ var "n" .$ var "{arg:2}" .$ var "{arg:3}"))))
                                       }
                                 })
@@ -290,7 +294,11 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.BS[0(n)] MkBS - used final orde
                                                           .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.Fin.Fin" .$ var "n")
                                                               .=>    var "Builtin.DPair.DPair"
                                                                   .$ (var "DerivedGen.BS" .$ var "n")
-                                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.BS" .$ var "n")
+                                                                  .$ (    MkArg
+                                                                            MW
+                                                                            ExplicitArg
+                                                                            (Just "{arg:3}")
+                                                                            (var "DerivedGen.BS" .$ var "n")
                                                                       .=> var "DerivedGen.Y" .$ var "n" .$ var "{arg:2}" .$ var "{arg:3}"))))
                                       }
                                 })

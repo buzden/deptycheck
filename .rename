@@ -1,0 +1,37 @@
+#!/bin/sh
+
+die() {
+  echo "$2" >&2
+  exit "$1"
+}
+
+stat -t ./*.ipkg > /dev/null 2> /dev/null || die 2 "No *.ipkg file found in the current dir"
+
+FROM_FILE="$1"
+TO_FILE="$2"
+
+check_readability() {
+  test -r "$1" || die 3 "Can't read file '$1'"
+}
+
+check_to_dotdot() {
+  grep '\.\.' "$1" && die 4 "Filename cannot contain '..': $1"
+}
+
+filename_to_module() {
+  echo "$1" | sed -e 's|^src/||' -e 's|\.idr$||' -e 's|/|\.|g'
+}
+
+check_readability "$FROM_FILE"
+
+FROM_MODULE="$(filename_to_module "$FROM_FILE")"
+TO_MODULE="$(filename_to_module "$TO_FILE")"
+
+echo "Renaming $FROM_MODULE to $TO_MODULE..."
+
+mv "$FROM_FILE" "$TO_FILE"
+grep -l -r --include='*.idr' --include='*.lidr' --include='*.ipkg' --include='*.md' --include='*.typ' "$FROM_MODULE"'\([^a-zA-Z_]\|$\)' |
+  while read -r r; do
+    echo "  - usage in $r..."
+    sed -i -e "s/$FROM_MODULE\([^a-zA-Z_]\|$\)/$TO_MODULE\1/g" "$r"
+  done

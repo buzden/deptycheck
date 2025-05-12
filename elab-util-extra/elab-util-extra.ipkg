@@ -1,0 +1,23 @@
+package elab-util-extra
+
+authors = "Denis Buzdalov"
+
+brief = "Additional utilities for elaborator reflection"
+
+license = "Apache-2.0"
+
+sourcedir = "src"
+builddir = ".build"
+
+depends = collection-utils
+        , cozippable
+        , elab-pretty
+        , elab-util
+        , fin-lizzie
+
+modules = Language.Reflection.Compat
+        , Language.Reflection.Compat.Constr
+        , Language.Reflection.Compat.TypeInfo
+        , Language.Reflection.Expr
+        , Language.Reflection.Expr.Interpolation
+        , Language.Reflection.Logging

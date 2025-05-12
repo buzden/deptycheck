@@ -9,20 +9,24 @@ license = "MPL-2.0"
 sourcedir = "src"
 builddir = ".build"
 
-version = 0.0.250319
+version = 0.0.250511
 
 modules = Deriving.DepTyCheck
         , Deriving.DepTyCheck.Gen
-        , Deriving.DepTyCheck.Gen.Derive
-        , Deriving.DepTyCheck.Gen.Entry
-        , Deriving.DepTyCheck.Gen.Core
-        , Deriving.DepTyCheck.Gen.Core.ConsDerive
-        , Deriving.DepTyCheck.Gen.Core.ConsEntry
-        , Deriving.DepTyCheck.Gen.Core.Util
-        , Deriving.DepTyCheck.Gen.Checked
-        , Deriving.DepTyCheck.Util.Logging
-        , Deriving.DepTyCheck.Util.Reflection
-        , Language.Reflection.Compat
+        , Deriving.DepTyCheck.Gen.ConsRecs
+        , Deriving.DepTyCheck.Gen.ForAllNeededTypes.Impl
+        , Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface
+        , Deriving.DepTyCheck.Gen.ForOneType.Impl
+        , Deriving.DepTyCheck.Gen.ForOneType.Interface
+        , Deriving.DepTyCheck.Gen.ForOneTypeCon.Impl
+        , Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Impl
+        , Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Interface
+        , Deriving.DepTyCheck.Gen.Labels
+        , Deriving.DepTyCheck.Gen.Signature
+        , Deriving.DepTyCheck.Gen.Tuning
+        , Deriving.DepTyCheck.Util.ArgsPerm
+        , Deriving.DepTyCheck.Util.DeepConsApp
+        , Deriving.DepTyCheck.Util.Primitives
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Coverage
         , Test.DepTyCheck.Gen.Emptiness
@@ -30,12 +34,8 @@ modules = Deriving.DepTyCheck
 
 depends = ansi
         , best-alternative
-        , collection-utils
-        , cozippable
         , dependent-vect
-        , elab-pretty
-        , elab-util
-        , fin-lizzie
+        , elab-util-extra
         , i-hate-parens
         , if-unsolved-implicit
         , mtl-tuple-impls

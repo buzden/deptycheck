@@ -1,6 +1,6 @@
 module Test
 
-import Deriving.DepTyCheck.Util.Reflection
+import Deriving.DepTyCheck.Gen.Tuning
 
 %default total
 

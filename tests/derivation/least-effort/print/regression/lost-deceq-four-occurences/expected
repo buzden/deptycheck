@@ -54,7 +54,11 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[0, 1, 2, 3] MkX - used final 
                                           .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Prelude.Types.Nat")
                                           .->    var "Test.DepTyCheck.Gen.Gen"
                                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "DerivedGen.X" .$ var "{arg:1}" .$ var "{arg:2}" .$ var "{arg:3}" .$ var "{arg:4}")
+                                              .$ (   var "DerivedGen.X"
+                                                  .$ var "{arg:1}"
+                                                  .$ var "{arg:2}"
+                                                  .$ var "{arg:3}"
+                                                  .$ var "{arg:4}")
                                       }
                                 })
                          , IDef

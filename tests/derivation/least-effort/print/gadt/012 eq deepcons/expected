@@ -124,7 +124,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[0] Step - used final order:
                                                 .$ (var "<<DerivedGen.Base>>" .$ var "^fuel_arg^" .$ var "inter^<{arg:1}>"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
-                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                     .$ (var "<<DerivedGen.Step>>" .$ var "^sub^fuel_arg^" .$ var "inter^<{arg:1}>"))
                                                 .$ var "Nil")))
                                ]

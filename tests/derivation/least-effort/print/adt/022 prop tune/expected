@@ -115,7 +115,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] C - used final order: []
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
                                                 .$ (   var "Data.Nat1.(*)"
-                                                    .$ (var "Deriving.DepTyCheck.Util.Reflection.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                     .$ (   var "Data.Nat1.FromNat"
                                                         .$ (var "Prelude.Types.S" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z"))))
                                                 .$ (var "<<DerivedGen.A>>" .$ var "^sub^fuel_arg^"))

@@ -1,0 +1,5 @@
+package renaming-ttimp-eq
+
+opts = "--no-color --console-width 0"
+
+depends = elab-util-extra

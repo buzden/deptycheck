@@ -1,0 +1,8 @@
+package elab-util-extra-tests
+
+main = Tests
+executable = runtests
+
+builddir = ".build"
+
+depends = golden-runner-helper
