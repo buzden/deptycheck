@@ -2,7 +2,6 @@
 module Deriving.DepTyCheck.Gen.ForOneType.Impl
 
 import public Data.Either
-import public Data.SortedSet.Extra
 
 import public Deriving.DepTyCheck.Gen.Labels
 import public Deriving.DepTyCheck.Gen.ForOneTypeCon.Impl
@@ -55,7 +54,7 @@ DeriveBodyRhsForCon => DeriveBodyForType where
       canonicConsBody sig (consGenName con) con <&> def (consGenName con)
 
     -- calculate which constructors are recursive and spend fuel, and which are not
-    let Just consRecs = lookupConsWithWeight sig.targetType $ mapIn finToNat sig.givenParams
+    let Just consRecs = lookupConsWithWeight sig
       | Nothing => fail "INTERNAL ERROR: unknown type for consRecs: \{show sig.targetType.name}"
 
     -- ask to derive all needed weigthing functions, if any

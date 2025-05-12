@@ -7,7 +7,9 @@ import public Data.Nat1
 import public Data.SortedMap
 import public Data.SortedMap.Extra
 import public Data.SortedSet
+import public Data.SortedSet.Extra
 
+import public Deriving.DepTyCheck.Gen.Signature
 import public Deriving.DepTyCheck.Gen.Tuning
 
 import public Language.Reflection.Compat.TypeInfo
@@ -178,9 +180,10 @@ getConsRecs = do
   pure $ MkConsRecs finalConsRecs $ deriveW consRecs
 
 export
--- TODO to change `SortedSet Nat` to `GenSignature`, but this requires moving all this to a module that can import `*/Derive.idr`
-lookupConsWithWeight : ConsRecs => TypeInfo -> (givenTyArgs : SortedSet Nat) -> Maybe $ List (Con, ConWeightInfo)
-lookupConsWithWeight @{crs} ti givs = lookup' crs.conWeights ti.name <&> (`apply` givs)
+lookupConsWithWeight : ConsRecs => GenSignature -> Maybe $ List (Con, ConWeightInfo)
+lookupConsWithWeight @{crs} sig = do
+  let givs = mapIn finToNat sig.givenParams
+  lookup' crs.conWeights sig.targetType.name <&> (`apply` givs)
 
 export
 deriveWeightingFun : ConsRecs => TypeInfo -> Maybe (Decl, Decl)
