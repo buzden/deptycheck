@@ -18,7 +18,7 @@ import public Syntax.IHateParens.List
 
 export
 normaliseCon : Elaboration m => Con -> m Con
-normaliseCon $ MkCon n args ty = uncurry (MkCon n) . unPi <$> normaliseAsType (piAll ty args)
+normaliseCon orig@(MkCon n args ty) = uncurry (MkCon n) . unPi <$> normaliseAsType (piAll ty args) `try` pure orig
 
 ------------------------------------
 --- Syntactic analysis of `Con`s ---
