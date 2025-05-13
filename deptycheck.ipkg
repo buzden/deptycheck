@@ -11,8 +11,7 @@ builddir = ".build"
 
 version = 0.0.250511
 
-modules = Deriving.DepTyCheck
-        , Deriving.DepTyCheck.Gen
+modules = Deriving.DepTyCheck.Gen
         , Deriving.DepTyCheck.Gen.ConsRecs
         , Deriving.DepTyCheck.Gen.ForAllNeededTypes.Impl
         , Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface

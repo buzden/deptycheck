@@ -1,6 +1,6 @@
 module DerivedGen
 
-import Deriving.DepTyCheck
+import Deriving.DepTyCheck.Gen
 
 %default total
 
