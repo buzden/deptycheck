@@ -1,0 +1,26 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Warning: Unreachable clause: (<<DerivedGen.MkX>>) (^outmost-fuel^) outer^<b> outer^<n> outer^<y> inter^<b> inter^<n> inter^<{arg:1}> (^fuel_arg^) _ _ _ _
+
+Generated values:
+-----
+-----
+MkX
+-----
+MkX
+-----
+MkX
+-----
+MkX
+-----
+MkX
+-----
+MkX
+-----
+MkX
+-----
+MkX
+-----
+MkX
+-----
+MkX
