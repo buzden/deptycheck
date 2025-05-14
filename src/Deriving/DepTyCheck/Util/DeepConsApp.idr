@@ -94,11 +94,10 @@ analyseDeepConsApp ccdi freeNames = isD where
       | Nothing => throwError "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
 
     -- Analyze deeply all the arguments
-    deepArgs <- for (args.asVect `zip` typeDetermInfo) $
-      \(anyApp, typeDetermined) => do
-        subResult <- isD $ assert_smaller e $ getExpr anyApp
-        let subResult = if ccdi then mapSnd (<+> typeDetermined) `mapLstDPair` subResult else subResult
-        pure (anyApp, subResult)
+    deepArgs <- for (args.asVect `zip` typeDetermInfo) $ \(anyApp, typeDetermined) => do
+      subResult <- isD $ assert_smaller e $ getExpr anyApp
+      let subResult = if ccdi then mapSnd (<+> typeDetermined) `mapLstDPair` subResult else subResult
+      pure (anyApp, subResult)
 
     -- Collect all the applied names and form proper application expression with binding variables
     pure $ foldl (mergeApp _) (noFree $ var lhsName) deepArgs
