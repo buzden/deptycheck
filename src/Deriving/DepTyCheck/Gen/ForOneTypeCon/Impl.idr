@@ -49,13 +49,13 @@ canonicConsBody sig name con = do
   --   - (maybe, deeply) constructor call (need to match)
   --   - function call on a free param (need to use "inverted function" filtering trick)
   --   - something else (cannot manage yet, unless it is fully determined by other given arguments)
-  let deepConsApps : Vect _ $ Either (String, TTImp, List Name) _ := sig.givenParams.asVect <&> \idx => do
+  let deepConsApps : Vect _ $ Either (String, TTImp, List (Name, ConsDetermInfo)) _ := sig.givenParams.asVect <&> \idx => do
     let argExpr = conRetTypeArg idx
     let (ei, fns) = runWriter $ runEitherT {e=String} {m=Writer _} $ analyseDeepConsApp True conArgNames argExpr
     flip mapFst ei $ \err =>
       ("Argument #\{show idx} of \{show con.name} with given type arguments [\{showGivens sig}] is not supported, " ++
        "argument expression: \{show argExpr}, reason: \{err}", argExpr, fns)
-  let allAppliedFreeNames = foldMap (SortedSet.fromList . either (snd . snd) (map fst . fst)) deepConsApps
+  let allAppliedFreeNames = foldMap (SortedSet.fromList . map fst . either (snd . snd) fst) deepConsApps
   let bindAppliedFreeNames : TTImp -> TTImp
       bindAppliedFreeNames orig@(IVar _ n) = if contains n allAppliedFreeNames then bindVar n else orig
       --                              /---------------------------------------------^^^^^^^
@@ -65,7 +65,7 @@ canonicConsBody sig name con = do
   deepConsApps <- for deepConsApps $ \case
     Right x => pure x
     Left (err, argExpr, fns) => if null $ (allVarNames' argExpr `intersection` conArgNames) `difference` allAppliedFreeNames
-      then pure (filter (contains' conArgNames) fns <&> (, neutral) ** const $ mapTTImp bindAppliedFreeNames argExpr)
+      then pure (filter (contains' conArgNames . fst) fns ** const $ mapTTImp bindAppliedFreeNames argExpr)
       else failAt conFC err
 
   -- Acquire LHS bind expressions for the given parameters

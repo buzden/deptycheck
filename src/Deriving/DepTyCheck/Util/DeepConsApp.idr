@@ -60,7 +60,7 @@ MaybeConsDetermInfo False = Unit
 export
 analyseDeepConsApp : NamesInfoInTypes =>
                      MonadError String m =>
-                     MonadWriter (List Name) m => -- a redundant thing, allowing, however, returning this list even on errors
+                     MonadWriter (List (Name, ConsDetermInfo)) m =>
                      (collectConsDetermInfo : Bool) ->
                      (freeNames : SortedSet Name) ->
                      (analysedExpr : TTImp) ->
@@ -79,7 +79,7 @@ analyseDeepConsApp ccdi freeNames = isD where
     -- Check if this is a free name
     let False = contains lhsName freeNames
       | True => if null args
-                  then do tell [lhsName]; pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
+                  then do tell [(lhsName, cast ccdi)]; pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
                   else throwError "applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
