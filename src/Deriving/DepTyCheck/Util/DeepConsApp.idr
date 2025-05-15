@@ -79,13 +79,15 @@ analyseDeepConsApp ccdi freeNames = isD where
     -- Remember the name and determination for the case of a future failure
     when (null args) $ tell [(lhsName, cast $ not ccdi)]
 
-    -- Check that this is an application to a constructor's name
-    let Just con = lookupCon lhsName
-      | Nothing => if ccdi then throwError "name `\{lhsName}` is not a constructor" else pure $ noFree implicitTrue
-
     -- Acquire type-determination info, if needed
-    typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
-    let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := typeDetermInfo
+    typeDetermInfo : Either _ (Vect _ _) <- do
+      let Just con = lookupCon lhsName -- check this is an application to a constructor's name
+        | Nothing => pure $ Left $ if ccdi then throwError "name `\{lhsName}` is not a constructor" else pure $ noFree implicitTrue
+      tdi <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
+      let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := tdi
+      let Just tdi = reorder tdi
+        | Nothing => throwError "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
+      pure $ Right tdi
 
     -- Check if this is a free name. This must go AFTER type determination check, since it should write determination info before we may fail here
     let False = contains lhsName freeNames
@@ -93,8 +95,9 @@ analyseDeepConsApp ccdi freeNames = isD where
                   then pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
                   else throwError "applying free name to some arguments"
 
-    let Just typeDetermInfo = reorder typeDetermInfo
-      | Nothing => throwError "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
+    -- Get type determination info out or return as should
+    let Right typeDetermInfo = typeDetermInfo
+      | Left fallback => fallback
 
     -- Analyze deeply all the arguments
     deepArgs <- for (args.asVect `zip` typeDetermInfo) $ \(anyApp, typeDetermined) => do
