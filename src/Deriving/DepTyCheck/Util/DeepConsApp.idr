@@ -76,11 +76,8 @@ analyseDeepConsApp ccdi freeNames = isD where
       | (IPrimVal {}, _) => pure $ noFree e
       | _ => throwError "not an application to a variable"
 
-    -- Check if this is a free name
-    let False = contains lhsName freeNames
-      | True => if null args
-                  then do tell [(lhsName, cast ccdi)]; pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
-                  else throwError "applying free name to some arguments"
+    -- Remember the name and determination for the case of a future failure
+    when (null args) $ tell [(lhsName, cast $ not ccdi)]
 
     -- Check that this is an application to a constructor's name
     let Just con = lookupCon lhsName
@@ -89,6 +86,12 @@ analyseDeepConsApp ccdi freeNames = isD where
     -- Acquire type-determination info, if needed
     typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
     let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := typeDetermInfo
+
+    -- Check if this is a free name. This must go AFTER type determination check, since it should write determination info before we may fail here
+    let False = contains lhsName freeNames
+      | True => if null args
+                  then pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
+                  else throwError "applying free name to some arguments"
 
     let Just typeDetermInfo = reorder typeDetermInfo
       | Nothing => throwError "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
