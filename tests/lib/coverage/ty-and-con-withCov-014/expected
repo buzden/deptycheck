@@ -1,0 +1,6 @@
+1/1: Building PrintCoverage (PrintCoverage.idr)
+
+PrintCoverage.Y covered fully (100 times)
+  - Y1: covered (47 times)
+  - Y2: covered (53 times)
+
