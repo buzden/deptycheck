@@ -264,10 +264,10 @@ mapMaybeTaggedLazy = mapMaybe . wrapMaybeTaggedLazy
 allMapMaybeJustTaggedLazy h = allMap $ allMapMaybeJust helper
   where
     helper : (x : (tag, Lazy a)) ->
-             {0 _ : IsJust $ wrapMaybeTaggedLazy f x} ->
+             (0 _ : IsJust $ wrapMaybeTaggedLazy f x) ->
              p $ force $ snd $ fromJust $ wrapMaybeTaggedLazy f x
-    helper (w, x) with (f x) proof 0 prf
-      helper (w, x) | Just y = do
+    helper (w, x) _ with (f x) proof 0 prf
+      _ | Just y = do
         let yIsJust : IsJust (f x) = rewrite prf in ItIsJust
         let Refl : y === fromJust (f x) = rewrite prf in Refl
         h x yIsJust
