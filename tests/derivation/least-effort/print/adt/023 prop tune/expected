@@ -86,10 +86,10 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] D - used final order: []
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.A (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.X>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:1}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:1}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "DerivedGen.A" .$ var "^bnd^{arg:1}")))
+                                              .$ (var "DerivedGen.A" .$ var "{arg:1}")))
                              ]
                          , IDef
                              emptyFC

@@ -111,14 +111,14 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                                       .! ("s", var "DerivedGen.B..length" .$ var "nats")
                                                       .$ var "fins"
                                                       .$ var "f"))
-                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:3}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "DerivedGen.MkT"
                                                           .! ("nats", implicitTrue)
                                                           .! ("fins", implicitTrue)
                                                           .! ("f", implicitTrue)
-                                                          .$ var "^bnd^{arg:3}"))))
+                                                          .$ var "{arg:3}"))))
                              ]
                          ]
                      , scope =
@@ -239,10 +239,10 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "Data.Fin.FS (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Fin.Fin>[0]" .$ var "^cons_fuel^" .$ var "k")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:4}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:4}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "^bnd^{arg:4}")))
+                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "{arg:4}")))
                              , var "<<Data.Fin.FS>>" .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

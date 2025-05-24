@@ -225,13 +225,7 @@ export
     argsTypeApps <- getTypeApps con
 
     -- Decide how constructor arguments would be named during generation
-    let bindNames = bindNameRenamer . argName <$> fromList con.args
-    let argsTypeApps = do
-      let conArgNames : SortedSet Name = fromList $ argName <$> con.args
-      let intExprMapper : TTImp -> TTImp
-          intExprMapper $ IVar fc n = IVar fc $ if conArgNames `contains'` n then bindNameRenamer n else n
-          intExprMapper x = x
-      argsTypeApps <&> {argApps $= map @{Compose} $ mapTTImp intExprMapper}
+    let bindNames = argName <$> fromList con.args
 
     -- Get arguments which any other argument depends on
     let dependees = dependees con.args

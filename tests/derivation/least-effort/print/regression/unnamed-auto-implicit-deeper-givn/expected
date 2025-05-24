@@ -84,7 +84,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[0] MkX - used final order: []
                          , IDef
                              emptyFC
                              "<<DerivedGen.Start>>"
-                             [    var "<<DerivedGen.Start>>" .$ bindVar "^cons_fuel^" .$ bindVar "^bnd^{b:1}" .$ bindVar "y"
+                             [    var "<<DerivedGen.Start>>" .$ bindVar "^cons_fuel^" .$ bindVar "{b:1}" .$ bindVar "y"
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.Start (orders)"))
                                   .$ (   var "Prelude.pure"
@@ -96,19 +96,19 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[0] MkX - used final order: []
                              "<<DerivedGen.Go>>"
                              [       var "<<DerivedGen.Go>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ bindVar "^bnd^{b:2}"
+                                  .$ bindVar "{b:2}"
                                   .$ (var "DerivedGen.MkY" .! ("b", implicitTrue) .$ bindVar "x" .$ bindVar "x2")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.Go (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<DerivedGen.X>[0]" .$ var "^outmost-fuel^" .$ var "^bnd^{b:2}")
+                                      .$ (var "<DerivedGen.X>[0]" .$ var "^outmost-fuel^" .$ var "{b:2}")
                                       .$ (    MkArg MW ExplicitArg (Just "x1") implicitFalse
                                           .=>    var ">>="
                                               .$ (   var "<DerivedGen.Z>[0, 1]"
                                                   .$ var "^cons_fuel^"
-                                                  .$ var "^bnd^{b:2}"
-                                                  .$ (var "DerivedGen.MkY" .! ("b", var "^bnd^{b:2}") .$ var "x" .$ var "x1"))
-                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
+                                                  .$ var "{b:2}"
+                                                  .$ (var "DerivedGen.MkY" .! ("b", var "{b:2}") .$ var "x" .$ var "x1"))
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:3}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "DerivedGen.Go"
@@ -116,7 +116,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[0] MkX - used final order: []
                                                           .! ("x2", var "x2")
                                                           .! ("x1", implicitTrue)
                                                           .! ("x", implicitTrue)
-                                                          .$ var "^bnd^{arg:3}"))))
+                                                          .$ var "{arg:3}"))))
                              , var "<<DerivedGen.Go>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

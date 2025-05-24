@@ -51,7 +51,7 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (v : Fin n) -> Gen MaybeEmp
                              "<<DerivedGen.ItIsFS>>"
                              [       var "<<DerivedGen.ItIsFS>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{k:1}")
+                                  .$ (var "Prelude.Types.S" .$ bindVar "{k:1}")
                                   .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ bindVar "i")
                                .= var "empty"
                              , var "<<DerivedGen.ItIsFS>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"

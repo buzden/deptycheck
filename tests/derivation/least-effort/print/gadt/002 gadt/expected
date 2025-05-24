@@ -103,12 +103,12 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                                 { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "k" .$ bindVar "^bnd^{arg:1}"
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "k" .$ bindVar "{arg:1}"
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Builtin.DPair.MkDPair"
                                                              .$ implicitTrue
-                                                             .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "^bnd^{arg:1}"))
+                                                             .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "{arg:1}"))
                                                     ]
                                                 }))
                              ]
@@ -189,10 +189,10 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:2}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:2}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Prelude.Types.S" .$ var "^bnd^{arg:2}")))
+                                              .$ (var "Prelude.Types.S" .$ var "{arg:2}")))
                              ]
                          ]
                      , scope =

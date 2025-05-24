@@ -70,12 +70,12 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] MkX - used final order: [#4
                                                 , ty = implicitFalse
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"
-                                                         .$ bindVar "^bnd^{m:1}"
+                                                         .$ bindVar "{m:1}"
                                                          .$ (   var "Builtin.DPair.MkDPair"
                                                              .$ bindVar "b"
                                                              .$ (   var "Builtin.DPair.MkDPair"
-                                                                 .$ bindVar "^bnd^{n:1}"
-                                                                 .$ (var "Builtin.DPair.MkDPair" .$ bindVar "a" .$ bindVar "^bnd^{arg:2}")))
+                                                                 .$ bindVar "{n:1}"
+                                                                 .$ (var "Builtin.DPair.MkDPair" .$ bindVar "a" .$ bindVar "{arg:2}")))
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "DerivedGen.MkX"
@@ -83,7 +83,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] MkX - used final order: [#4
                                                              .! ("{n:1}", implicitTrue)
                                                              .! ("b", implicitTrue)
                                                              .! ("a", implicitTrue)
-                                                             .$ var "^bnd^{arg:2}")
+                                                             .$ var "{arg:2}")
                                                     ]
                                                 }))
                              ]
