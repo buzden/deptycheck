@@ -16,6 +16,6 @@ interface DeriveBodyRhsForCon where
 
 ||| Workarond of inability to put an arbitrary name under `IBindVar`
 export
-bindNameRenamer : Name -> String
-bindNameRenamer $ UN $ Basic n = n
-bindNameRenamer n = "^bnd^" ++ show n
+bindNameRenamer : Name -> Name
+bindNameRenamer n@(UN $ Basic _) = n
+bindNameRenamer n = UN $ Basic $ "^bnd^" ++ show n
