@@ -17,20 +17,20 @@ defArgNames : {sig : GenSignature} -> Vect sig.givenParams.size Name
 defArgNames = sig.givenParams.asVect <&> argName . index' sig.targetType.args
 
 export %inline
-canonicDefaultLHS' : (namesFun : Name -> String) -> GenSignature -> Name -> (fuel : String) -> TTImp
+canonicDefaultLHS' : (namesFun : Name -> Name) -> GenSignature -> Name -> (fuel : Name) -> TTImp
 canonicDefaultLHS' nmf sig n fuel = callCanonic sig n .| bindVar fuel .| bindVar . nmf <$> defArgNames
 
 export %inline
-canonicDefaultRHS' : (namesFun : Name -> String) -> GenSignature -> Name -> (fuel : TTImp) -> TTImp
-canonicDefaultRHS' nmf sig n fuel = callCanonic sig n fuel .| varStr . nmf <$> defArgNames
+canonicDefaultRHS' : (namesFun : Name -> Name) -> GenSignature -> Name -> (fuel : TTImp) -> TTImp
+canonicDefaultRHS' nmf sig n fuel = callCanonic sig n fuel .| var . nmf <$> defArgNames
 
 export %inline
-canonicDefaultLHS : GenSignature -> Name -> (fuel : String) -> TTImp
-canonicDefaultLHS = canonicDefaultLHS' show
+canonicDefaultLHS : GenSignature -> Name -> (fuel : Name) -> TTImp
+canonicDefaultLHS = canonicDefaultLHS' id
 
 export %inline
 canonicDefaultRHS : GenSignature -> Name -> (fuel : TTImp) -> TTImp
-canonicDefaultRHS = canonicDefaultRHS' show
+canonicDefaultRHS = canonicDefaultRHS' id
 
 ----------------------------
 --- Derivation functions ---
@@ -75,7 +75,7 @@ DeriveBodyRhsForCon => DeriveBodyForType where
     consGenName con = UN $ Basic $ "<<\{show con.name}>>"
     -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend
 
-    fuelDecisionExpr : (fuelArg : String) -> List (Con, Either TTImp (String -> TTImp)) -> TTImp
+    fuelDecisionExpr : (fuelArg : Name) -> List (Con, Either TTImp (Name -> TTImp)) -> TTImp
     fuelDecisionExpr fuelAr consRecs = do
 
       let callConstFreqs : CTLabel -> (fuel : TTImp) -> List (Con, TTImp) -> TTImp
@@ -86,18 +86,19 @@ DeriveBodyRhsForCon => DeriveBodyForType where
       -- check if there are any non-recursive constructors
       let Nothing = for consRecs $ \(con, w) => (con,) <$> getLeft w
           -- only constantly weighted constructors (usually, non-recusrive), thus just call all without spending fuel
-        | Just consRecs => callConstFreqs "\{logPosition sig} (non-spending)".label (varStr fuelAr) consRecs
+        | Just consRecs => callConstFreqs "\{logPosition sig} (non-spending)".label (var fuelAr) consRecs
 
       -- pattern match on the fuel argument
-      iCase .| varStr fuelAr .| var `{Data.Fuel.Fuel} .|
+      iCase .| var fuelAr .| var `{Data.Fuel.Fuel} .|
 
         [ -- if fuel is dry, call all non-recursive constructors on `Dry`
           let nonSpendCons = mapMaybe (\(con, w) => (con,) <$> getLeft w) consRecs in
-          var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (varStr fuelAr) nonSpendCons
+          var `{Data.Fuel.Dry}                        .= callConstFreqs "\{logPosition sig} (dry fuel)".label (var fuelAr) nonSpendCons
 
         , do -- if fuel is `More`, call spending constructors on the rest and other on the original fuel
-          let subFuelArg = "^sub" ++ fuelAr -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-          let weightAndFuel = either ((varStr fuelAr,)) (\f => (varStr subFuelArg, f subFuelArg))
+          -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
+          let subFuelArg = UN $ Basic $ "^sub" ++ show fuelAr
+          let weightAndFuel = either ((var fuelAr,)) (\f => (var subFuelArg, f subFuelArg))
           var `{Data.Fuel.More} .$ bindVar subFuelArg .= callFrequency "\{logPosition sig} (non-dry fuel)".label
             (consRecs <&> \(con, rec) => let (f, w) = weightAndFuel rec in (w, callConsGen f con))
         ]
