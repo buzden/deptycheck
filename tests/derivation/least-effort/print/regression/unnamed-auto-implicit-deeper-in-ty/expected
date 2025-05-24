@@ -106,22 +106,19 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                          , IDef
                              emptyFC
                              "<<DerivedGen.MkZ>>"
-                             [    var "<<DerivedGen.MkZ>>" .$ bindVar "^cons_fuel^" .$ bindVar "^bnd^{b:1}" .$ bindVar "x"
+                             [    var "<<DerivedGen.MkZ>>" .$ bindVar "^cons_fuel^" .$ bindVar "{b:1}" .$ bindVar "x"
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkZ (orders)"))
                                   .$ (   var ">>="
                                       .$ (   var "<DerivedGen.Y>[0, 1, 2]"
                                           .$ var "^outmost-fuel^"
-                                          .$ var "^bnd^{b:1}"
+                                          .$ var "{b:1}"
                                           .$ var "x"
-                                          .$ (var "DerivedGen.MkX0" .! ("b", var "^bnd^{b:1}")))
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{conArg:1}") implicitFalse
+                                          .$ (var "DerivedGen.MkX0" .! ("b", var "{b:1}")))
+                                      .$ (    MkArg MW ExplicitArg (Just "{conArg:1}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (   var "DerivedGen.MkZ"
-                                                  .! ("{b:1}", implicitTrue)
-                                                  .! ("x", implicitTrue)
-                                                  .@ var "^bnd^{conArg:1}")))
+                                              .$ (var "DerivedGen.MkZ" .! ("{b:1}", implicitTrue) .! ("x", implicitTrue) .@ var "{conArg:1}")))
                              ]
                          ]
                      , scope =
@@ -181,25 +178,25 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                              "<<DerivedGen.MkY0>>"
                              [       var "<<DerivedGen.MkY0>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ bindVar "^bnd^{b:2}"
+                                  .$ bindVar "{b:2}"
                                   .$ (var "DerivedGen.MkX1" .! ("b", implicitTrue))
                                   .$ bindVar "unusedX"
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkY0 (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Basics.Bool>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{b:3}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{b:3}") implicitFalse
                                           .=>    var ">>="
                                               .$ (   var "<DerivedGen.Y>[0, 2]"
                                                   .$ var "^cons_fuel^"
-                                                  .$ var "^bnd^{b:3}"
-                                                  .$ (var "DerivedGen.MkX1" .! ("b", var "^bnd^{b:3}")))
+                                                  .$ var "{b:3}"
+                                                  .$ (var "DerivedGen.MkX1" .! ("b", var "{b:3}")))
                                               .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                                   .=> iCase
                                                         { sc = var "{lamc:1}"
                                                         , ty = implicitFalse
                                                         , clauses =
-                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "rndX" .$ bindVar "^bnd^{conArg:2}"
+                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "rndX" .$ bindVar "{conArg:2}"
                                                               .=    var "Prelude.pure"
                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                  .$ (   var "DerivedGen.MkY0"
@@ -207,7 +204,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                                                      .! ("{b:2}", implicitTrue)
                                                                      .! ("unusedX", var "unusedX")
                                                                      .! ("rndX", implicitTrue)
-                                                                     .@ var "^bnd^{conArg:2}")
+                                                                     .@ var "{conArg:2}")
                                                             ]
                                                         })))
                              , var "<<DerivedGen.MkY0>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
@@ -217,7 +214,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                              "<<DerivedGen.MkY1>>"
                              [       var "<<DerivedGen.MkY1>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ bindVar "^bnd^{b:4}"
+                                  .$ bindVar "{b:4}"
                                   .$ (var "DerivedGen.MkX1" .! ("b", implicitTrue))
                                   .$ bindVar "unusedX"
                                .=    var "Test.DepTyCheck.Gen.label"
@@ -315,23 +312,23 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                          , IDef
                              emptyFC
                              "<<DerivedGen.MkY0>>"
-                             [    var "<<DerivedGen.MkY0>>" .$ bindVar "^cons_fuel^" .$ bindVar "^bnd^{b:2}" .$ bindVar "unusedX"
+                             [    var "<<DerivedGen.MkY0>>" .$ bindVar "^cons_fuel^" .$ bindVar "{b:2}" .$ bindVar "unusedX"
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkY0 (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Basics.Bool>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{b:3}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{b:3}") implicitFalse
                                           .=>    var ">>="
                                               .$ (   var "<DerivedGen.Y>[0, 2]"
                                                   .$ var "^cons_fuel^"
-                                                  .$ var "^bnd^{b:3}"
-                                                  .$ (var "DerivedGen.MkX1" .! ("b", var "^bnd^{b:3}")))
+                                                  .$ var "{b:3}"
+                                                  .$ (var "DerivedGen.MkX1" .! ("b", var "{b:3}")))
                                               .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                                   .=> iCase
                                                         { sc = var "{lamc:1}"
                                                         , ty = implicitFalse
                                                         , clauses =
-                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "rndX" .$ bindVar "^bnd^{conArg:2}"
+                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "rndX" .$ bindVar "{conArg:2}"
                                                               .=    var "Prelude.pure"
                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                  .$ (   var "Builtin.DPair.MkDPair"
@@ -341,14 +338,14 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                                                          .! ("{b:2}", implicitTrue)
                                                                          .! ("unusedX", var "unusedX")
                                                                          .! ("rndX", implicitTrue)
-                                                                         .@ var "^bnd^{conArg:2}"))
+                                                                         .@ var "{conArg:2}"))
                                                             ]
                                                         })))
                              ]
                          , IDef
                              emptyFC
                              "<<DerivedGen.MkY1>>"
-                             [    var "<<DerivedGen.MkY1>>" .$ bindVar "^cons_fuel^" .$ bindVar "^bnd^{b:4}" .$ bindVar "unusedX"
+                             [    var "<<DerivedGen.MkY1>>" .$ bindVar "^cons_fuel^" .$ bindVar "{b:4}" .$ bindVar "unusedX"
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkY1 (orders)"))
                                   .$ (   var "Prelude.pure"

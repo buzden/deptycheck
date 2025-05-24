@@ -109,7 +109,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[1] MkX - used final order: [#
                                                         { sc = var "{lamc:1}"
                                                         , ty = implicitFalse
                                                         , clauses =
-                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "n" .$ bindVar "^bnd^{arg:6}"
+                                                            [    var "Builtin.DPair.MkDPair" .$ bindVar "n" .$ bindVar "{arg:6}"
                                                               .=    var ">>="
                                                                  .$ (var "external^<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
                                                                  .$ (    MkArg MW ExplicitArg (Just "k") implicitFalse
@@ -118,7 +118,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[1] MkX - used final order: [#
                                                                              .$ var "^outmost-fuel^"
                                                                              .$ var "n"
                                                                              .$ (var "Prelude.Types.S" .$ var "k"))
-                                                                         .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:7}") implicitFalse
+                                                                         .$ (    MkArg MW ExplicitArg (Just "{arg:7}") implicitFalse
                                                                              .=>    var "Prelude.pure"
                                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                                  .$ (   var "DerivedGen.MkY"
@@ -126,8 +126,8 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[1] MkX - used final order: [#
                                                                                      .! ("n", implicitTrue)
                                                                                      .! ("m", implicitTrue)
                                                                                      .! ("k", implicitTrue)
-                                                                                     .$ var "^bnd^{arg:6}"
-                                                                                     .$ var "^bnd^{arg:7}")))
+                                                                                     .$ var "{arg:6}"
+                                                                                     .$ var "{arg:7}")))
                                                             ]
                                                         })))
                              , var "<<DerivedGen.MkY>>" .$ implicitTrue .$ implicitTrue .= var "empty"

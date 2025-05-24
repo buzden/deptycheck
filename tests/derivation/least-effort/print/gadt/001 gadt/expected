@@ -92,10 +92,10 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "Data.Fin.FS (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Fin.Fin>[0]" .$ var "^cons_fuel^" .$ var "k")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:1}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:1}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "^bnd^{arg:1}")))
+                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "{arg:1}")))
                              , var "<<Data.Fin.FS>>" .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

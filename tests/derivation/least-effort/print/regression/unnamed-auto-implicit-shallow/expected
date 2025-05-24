@@ -116,7 +116,7 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                              "<<DerivedGen.B>>"
                              [       var "<<DerivedGen.B>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (var "DerivedGen.(::)" .$ bindVar "x" .$ bindVar "xs" .! ("{conArg:1}", bindVar "^bnd^{conArg:2}"))
+                                  .$ (var "DerivedGen.(::)" .$ bindVar "x" .$ bindVar "xs" .! ("{conArg:1}", bindVar "{conArg:2}"))
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.B (orders)"))
                                   .$ (   var ">>="
@@ -126,7 +126,7 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                                                 { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "n" .$ bindVar "^bnd^{arg:3}"
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "n" .$ bindVar "{arg:3}"
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Builtin.DPair.MkDPair"
@@ -135,8 +135,8 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                                                                  .! ("x", implicitTrue)
                                                                  .! ("xs", implicitTrue)
                                                                  .! ("n", implicitTrue)
-                                                                 .$ var "^bnd^{arg:3}"
-                                                                 .@ var "^bnd^{conArg:2}"))
+                                                                 .$ var "{arg:3}"
+                                                                 .@ var "{conArg:2}"))
                                                     ]
                                                 }))
                              , var "<<DerivedGen.B>>" .$ implicitTrue .$ implicitTrue .= var "empty"
