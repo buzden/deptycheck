@@ -4,7 +4,7 @@ import public Control.Applicative.Const -- public due to compiler's bug #2439
 
 import public Data.Cozippable -- public due to compiler's bug #2439
 import public Data.Fin.ToFin -- public due to compiler's bug #2439
-import public Data.List.Extra -- public due to compiler's bug #2439
+import public Data.List.Ex -- public due to compiler's bug #2439
 import public Data.SortedSet
 import public Data.These -- public due to compiler's bug #2439
 import public Data.Vect.Dependent
