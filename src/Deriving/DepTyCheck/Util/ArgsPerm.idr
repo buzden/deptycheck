@@ -70,7 +70,7 @@ reorderGend direct perm e = do
   let lamName : Name := "^lam_arg^"
   `(Prelude.(<&>)) .$ e .$ lam (lambdaArg lamName) (iCase (var lamName) implicitFalse $ pure $ patClause lhs rhs)
   where
-    v : (bind : Bool) -> String -> TTImp
-    v bind = if bind then bindVar else varStr
+    v : (bind : Bool) -> Name -> TTImp
+    v bind = if bind then bindVar else var
     simpleMkdpair : (bind : Bool) -> List (Fin n) -> TTImp
-    simpleMkdpair bind = foldr (app . (app `(Builtin.DPair.MkDPair)) . v bind . ("^a" ++) . show) (v bind "^res^")
+    simpleMkdpair bind = foldr (app . (app `(Builtin.DPair.MkDPair)) . v bind . UN . Basic . ("^a" ++) . show) (v bind "^res^")

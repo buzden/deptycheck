@@ -25,7 +25,7 @@ printDeepConsApp freeNames tyExpr = do
     | Left err => logMsg "deptycheck.deep-cons-app" 0 "not a (deep) constructor application, reason: \{err}"
   let appliedNames = fst <$> appliedNames.asVect
   logMsg         "deptycheck.deep-cons-app" 0 "applied names:   \{show appliedNames}"
-  let bindExpr = bindExprF $ \idx => bindVar $ show (index idx appliedNames) ++ show idx
+  let bindExpr = bindExprF $ \idx => bindVar $ UN $ Basic $ show (index idx appliedNames) ++ show idx
   logSugaredTerm "deptycheck.deep-cons-app" 0 "bind expression" bindExpr
 
 %runElab consApps >>= traverse_ (uncurry printDeepConsApp)

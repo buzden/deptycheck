@@ -10,7 +10,7 @@ irrelevantArgs : {n : _} -> Vect n TTImp
 irrelevantArgs = replicate _ implicitTrue
 
 numberedArgs : (bind : Bool) -> {n : _} -> Vect n TTImp
-numberedArgs bind = Fin.tabulate $ (if bind then bindVar else varStr) . show
+numberedArgs bind = Fin.tabulate $ (if bind then bindVar else var) . UN . Basic . show
 
 export
 [EmptyBody] DeriveBodyForType where
