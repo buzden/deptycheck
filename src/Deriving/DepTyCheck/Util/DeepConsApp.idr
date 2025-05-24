@@ -4,7 +4,7 @@ import public Control.Monad.Error.Interface
 import public Control.Monad.Writer.Interface
 
 import public Data.Fin.Split
-import public Data.List.Extra
+import public Data.List.Ex
 import public Data.SortedSet
 import public Data.Vect.Extra
 

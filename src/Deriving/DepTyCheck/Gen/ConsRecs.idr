@@ -2,7 +2,7 @@ module Deriving.DepTyCheck.Gen.ConsRecs
 
 import public Data.Alternative
 import public Data.Fuel
-import public Data.List.Extra
+import public Data.List.Ex
 import public Data.Nat1
 import public Data.SortedMap
 import public Data.SortedMap.Extra
