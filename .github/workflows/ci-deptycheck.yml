@@ -176,6 +176,7 @@ jobs:
 
   get-test-sets:
     name: Acquire test sets
+    needs: validate_trigger
     runs-on: ubuntu-latest
     outputs:
       test-sets: ${{ steps.get-test-sets.outputs.test-sets }}
@@ -223,6 +224,7 @@ jobs:
 
   get-examples:
     name: Acquire examples
+    needs: validate_trigger
     runs-on: ubuntu-latest
     outputs:
       examples: ${{ steps.get-examples.outputs.examples }}
