@@ -76,11 +76,11 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                          , IDef
                              emptyFC
                              "<<DerivedGen.ItIsFS>>"
-                             [    var "<<DerivedGen.ItIsFS>>" .$ bindVar "^cons_fuel^" .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{k:1}")
+                             [    var "<<DerivedGen.ItIsFS>>" .$ bindVar "^cons_fuel^" .$ (var "Prelude.Types.S" .$ bindVar "{k:1}")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.ItIsFS (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<Data.Fin.Fin>[0]" .$ var "^outmost-fuel^" .$ var "^bnd^{k:1}")
+                                      .$ (var "<Data.Fin.Fin>[0]" .$ var "^outmost-fuel^" .$ var "{k:1}")
                                       .$ (    MkArg MW ExplicitArg (Just "i") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
@@ -160,10 +160,10 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "Data.Fin.FS (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Fin.Fin>[0]" .$ var "^cons_fuel^" .$ var "k")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:2}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:2}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "^bnd^{arg:2}")))
+                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "{arg:2}")))
                              , var "<<Data.Fin.FS>>" .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

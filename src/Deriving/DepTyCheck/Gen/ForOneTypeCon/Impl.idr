@@ -57,7 +57,7 @@ canonicConsBody sig name con = do
        "argument expression: \{show argExpr}, reason: \{err}", argExpr, fns)
   let allAppliedFreeNames = foldMap (SortedSet.fromList . either (snd . snd) (map fst . fst)) deepConsApps
   let bindAppliedFreeNames : TTImp -> TTImp
-      bindAppliedFreeNames orig@(IVar _ n) = if contains n allAppliedFreeNames then bindVar $ bindNameRenamer n else orig
+      bindAppliedFreeNames orig@(IVar _ n) = if contains n allAppliedFreeNames then bindVar n else orig
       --                              /---------------------------------------------^^^^^^^
       -- `bindVar` instead of `var` here is because this expression can be earlier than the real binding, thus undeclared,
       -- and the compiler turns unnecessary `IBindVar`s into `IVar`s by itself
@@ -75,17 +75,16 @@ canonicConsBody sig name con = do
   ((givenConArgs, decEqedNames, _), bindExprs) <-
     runStateT (empty, empty, 0) {stateType=(SortedSet Name, SortedSet (Name, Name), Nat)} {m} $
       for deepConsApps $ \(appliedNames ** bindExprF) => do
-        renamedAppliedNames <- for appliedNames.asVect $ \(name, typeDetermined) => do
-          let bindName = bindNameRenamer name
+        renamedAppliedNames <- for appliedNames.asVect $ \(name, typeDetermined) =>
           if cast typeDetermined
             then pure $ const implicitTrue -- no need to match type-determined parameter by hand
             else if contains name !get
             then do
               -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-              let substName = UN $ Basic $ "to_be_deceqed^^" ++ show bindName ++ show !getAndInc
-              modify $ insert (bindName, substName)
-              pure $ \alreadyMatchedRenames => bindVar $ if contains substName alreadyMatchedRenames then bindName else substName
-            else modify (insert name) $> const (bindVar bindName)
+              let substName = UN $ Basic $ "to_be_deceqed^^" ++ show name ++ show !getAndInc
+              modify $ insert (name, substName)
+              pure $ \alreadyMatchedRenames => bindVar $ if contains substName alreadyMatchedRenames then name else substName
+            else modify (insert name) $> const (bindVar name)
         let _ : Vect appliedNames.length $ SortedSet Name -> TTImp = renamedAppliedNames
         pure $ \alreadyMatchedRenames => bindExprF $ \idx => index idx renamedAppliedNames $ alreadyMatchedRenames
   let bindExprs = \alreadyMatchedRenames => bindExprs <&> \f => f alreadyMatchedRenames

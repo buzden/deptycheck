@@ -72,10 +72,10 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] C - used final order: []
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.A (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.X>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:1}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:1}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "DerivedGen.A" .$ var "^bnd^{arg:1}")))
+                                              .$ (var "DerivedGen.A" .$ var "{arg:1}")))
                              ]
                          , IDef
                              emptyFC
@@ -85,10 +85,10 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] C - used final order: []
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.B (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.X>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:2}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:2}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "DerivedGen.B" .$ var "^bnd^{arg:2}")))
+                                              .$ (var "DerivedGen.B" .$ var "{arg:2}")))
                              ]
                          , IDef
                              emptyFC

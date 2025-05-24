@@ -374,7 +374,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                                 { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "ps" .$ bindVar "^bnd^{arg:4}"
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "ps" .$ bindVar "{arg:4}"
                                                       .=    var ">>="
                                                          .$ (var "<DerivedGen.ModuleSig.ModuleSig>[]" .$ var "^outmost-fuel^")
                                                          .$ (    MkArg MW ExplicitArg (Just "p") implicitFalse
@@ -389,7 +389,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                                                          .! ("subMs", implicitTrue)
                                                                          .! ("subMF", var "subMF")
                                                                          .! ("restFins", implicitTrue)
-                                                                         .$ var "^bnd^{arg:4}")))
+                                                                         .$ var "{arg:4}")))
                                                     ]
                                                 }))
                              , var "<<DerivedGen.CPCons>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
@@ -474,16 +474,16 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.FinsList.(::) (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Fin.Fin>[0]" .$ var "^outmost-fuel^" .$ var "n")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:5}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:5}") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "<DerivedGen.FinsList.FinsList>[0]" .$ var "^cons_fuel^" .$ var "n")
-                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:6}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:6}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "DerivedGen.FinsList.(::)"
                                                           .! ("n", implicitTrue)
-                                                          .$ var "^bnd^{arg:5}"
-                                                          .$ var "^bnd^{arg:6}"))))
+                                                          .$ var "{arg:5}"
+                                                          .$ var "{arg:6}"))))
                              ]
                          ]
                      , scope =
@@ -576,10 +576,10 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "Data.Fin.FS (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Fin.Fin>[0]" .$ var "^cons_fuel^" .$ var "k")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:7}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:7}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "^bnd^{arg:7}")))
+                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "{arg:7}")))
                              , var "<<Data.Fin.FS>>" .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]
@@ -692,13 +692,13 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.NatsList.(::) (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:8}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:8}") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "<DerivedGen.NatsList.NatsList>[]" .$ var "^cons_fuel^")
-                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:9}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                      .$ (var "DerivedGen.NatsList.(::)" .$ var "^bnd^{arg:8}" .$ var "^bnd^{arg:9}"))))
+                                                      .$ (var "DerivedGen.NatsList.(::)" .$ var "{arg:8}" .$ var "{arg:9}"))))
                              ]
                          ]
                      , scope =
@@ -779,10 +779,10 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:10}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:10}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Prelude.Types.S" .$ var "^bnd^{arg:10}")))
+                                              .$ (var "Prelude.Types.S" .$ var "{arg:10}")))
                              ]
                          ]
                      , scope =

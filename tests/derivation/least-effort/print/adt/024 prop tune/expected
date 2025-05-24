@@ -85,13 +85,13 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.(::) (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:1}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:1}") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "<DerivedGen.ListNat>[]" .$ var "^cons_fuel^")
-                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:2}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:2}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                      .$ (var "DerivedGen.(::)" .$ var "^bnd^{arg:1}" .$ var "^bnd^{arg:2}"))))
+                                                      .$ (var "DerivedGen.(::)" .$ var "{arg:1}" .$ var "{arg:2}"))))
                              ]
                          ]
                      , scope =
@@ -170,10 +170,10 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:3}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Prelude.Types.S" .$ var "^bnd^{arg:3}")))
+                                              .$ (var "Prelude.Types.S" .$ var "{arg:3}")))
                              ]
                          ]
                      , scope =

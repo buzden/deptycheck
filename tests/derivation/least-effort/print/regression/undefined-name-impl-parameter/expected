@@ -98,7 +98,7 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                                 { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "idx" .$ bindVar "^bnd^{conArg:1}"
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "idx" .$ bindVar "{conArg:1}"
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Decls.Read"
@@ -106,7 +106,7 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                                              .! ("regs", implicitTrue)
                                                              .! ("t", implicitTrue)
                                                              .$ implicitTrue
-                                                             .@ var "^bnd^{conArg:1}")
+                                                             .@ var "{conArg:1}")
                                                     ]
                                                 }))
                              ]
@@ -191,7 +191,7 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                  { lhs =
                                         var "<<Decls.Here>>"
                                      .$ bindVar "^cons_fuel^"
-                                     .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{n:1}")
+                                     .$ (var "Prelude.Types.S" .$ bindVar "{n:1}")
                                      .$ bindVar "t"
                                      .$ (var "Decls.(::)" .! ("n", implicitTrue) .$ (var "Decls.Just" .$ bindVar "to_be_deceqed^^t0") .$ bindVar "rest")
                                  , rig = MW
@@ -201,7 +201,7 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                  , clauses =
                                      [       var "<<Decls.Here>>"
                                           .$ bindVar "^cons_fuel^"
-                                          .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{n:1}")
+                                          .$ (var "Prelude.Types.S" .$ bindVar "{n:1}")
                                           .$ bindVar "t"
                                           .$ (var "Decls.(::)" .! ("n", implicitTrue) .$ (var "Decls.Just" .$ bindVar "t") .$ bindVar "rest")
                                           .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
@@ -214,7 +214,7 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                                   .$ (var "Decls.Here" .! ("{n:1}", implicitTrue) .! ("rest", var "rest") .! ("t", var "t"))))
                                      ,       var "<<Decls.Here>>"
                                           .$ bindVar "^cons_fuel^"
-                                          .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{n:1}")
+                                          .$ (var "Prelude.Types.S" .$ bindVar "{n:1}")
                                           .$ bindVar "t"
                                           .$ (   var "Decls.(::)"
                                               .! ("n", implicitTrue)
@@ -231,19 +231,19 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                              "<<Decls.There>>"
                              [       var "<<Decls.There>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{r:1}")
+                                  .$ (var "Prelude.Types.S" .$ bindVar "{r:1}")
                                   .$ bindVar "t"
                                   .$ (var "Decls.(::)" .! ("n", implicitTrue) .$ bindVar "reg" .$ bindVar "rest")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "Decls.There (orders)"))
                                   .$ (   var ">>="
-                                      .$ (var "<Decls.RegIsType>[0, 2, 3]" .$ var "^cons_fuel^" .$ var "^bnd^{r:1}" .$ var "t" .$ var "rest")
+                                      .$ (var "<Decls.RegIsType>[0, 2, 3]" .$ var "^cons_fuel^" .$ var "{r:1}" .$ var "t" .$ var "rest")
                                       .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
                                           .=> iCase
                                                 { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "i" .$ bindVar "^bnd^{arg:6}"
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "i" .$ bindVar "{arg:6}"
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Builtin.DPair.MkDPair"
@@ -254,7 +254,7 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                                                  .! ("rest", implicitTrue)
                                                                  .! ("t", implicitTrue)
                                                                  .! ("i", implicitTrue)
-                                                                 .$ var "^bnd^{arg:6}"))
+                                                                 .$ var "{arg:6}"))
                                                     ]
                                                 }))
                              , var "<<Decls.There>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"

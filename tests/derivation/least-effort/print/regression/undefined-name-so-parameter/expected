@@ -104,10 +104,10 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                                                          .$ (   var "<Data.So.So>[0]"
                                                              .$ var "^outmost-fuel^"
                                                              .$ (var "DerivedGen.f" .! ("x", var "u") .$ var "x"))
-                                                         .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
+                                                         .$ (    MkArg MW ExplicitArg (Just "{arg:3}") implicitFalse
                                                              .=>    var "Prelude.pure"
                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                                 .$ (var "DerivedGen.MkX" .$ implicitTrue .$ implicitTrue .$ var "^bnd^{arg:3}"))
+                                                                 .$ (var "DerivedGen.MkX" .$ implicitTrue .$ implicitTrue .$ var "{arg:3}"))
                                                     ]
                                                 }))
                              ]

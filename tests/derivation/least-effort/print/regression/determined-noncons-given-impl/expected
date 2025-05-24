@@ -60,30 +60,27 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.NT[0(ar), 1(cfg), 2] NTF - used
                                   .$ bindVar "^cons_fuel^"
                                   .$ (   var "DerivedGen.MkNA"
                                       .$ (   var "DerivedGen.case block in "f""
-                                          .$ bindVar "^bnd^{cfg:1}"
+                                          .$ bindVar "{cfg:1}"
                                           .$ bindVar "nz"
-                                          .$ bindVar "^bnd^{k:1}"
-                                          .$ (var "Data.Nat.modNatNZ" .$ bindVar "^bnd^{k:1}" .$ bindVar "^bnd^{cfg:1}" .$ bindVar "nz"))
+                                          .$ bindVar "{k:1}"
+                                          .$ (var "Data.Nat.modNatNZ" .$ bindVar "{k:1}" .$ bindVar "{cfg:1}" .$ bindVar "nz"))
                                       .! ( "curTotLTE"
                                          ,    var "Data.Nat.reflexive"
                                            .! ( "x"
                                               ,    var "DerivedGen.case block in "f""
-                                                .$ bindVar "^bnd^{cfg:1}"
+                                                .$ bindVar "{cfg:1}"
                                                 .$ bindVar "nz"
-                                                .$ bindVar "^bnd^{k:1}"
-                                                .$ (var "Data.Nat.modNatNZ" .$ bindVar "^bnd^{k:1}" .$ bindVar "^bnd^{cfg:1}" .$ bindVar "nz")
+                                                .$ bindVar "{k:1}"
+                                                .$ (var "Data.Nat.modNatNZ" .$ bindVar "{k:1}" .$ bindVar "{cfg:1}" .$ bindVar "nz")
                                               )
                                          ))
-                                  .$ bindVar "^bnd^{cfg:1}"
-                                  .$ (var "DerivedGen.F" .! ("c", implicitTrue) .! ("nz", bindVar "nz") .! ("k", bindVar "^bnd^{k:1}"))
+                                  .$ bindVar "{cfg:1}"
+                                  .$ (var "DerivedGen.F" .! ("c", implicitTrue) .! ("nz", bindVar "nz") .! ("k", bindVar "{k:1}"))
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.NTF (orders)"))
                                   .$ (   var "Prelude.pure"
                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                      .$ (   var "DerivedGen.NTF"
-                                          .! ("{cfg:1}", implicitTrue)
-                                          .! ("{k:1}", var "^bnd^{k:1}")
-                                          .! ("nz", var "nz")))
+                                      .$ (var "DerivedGen.NTF" .! ("{cfg:1}", implicitTrue) .! ("{k:1}", var "{k:1}") .! ("nz", var "nz")))
                              , var "<<DerivedGen.NTF>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

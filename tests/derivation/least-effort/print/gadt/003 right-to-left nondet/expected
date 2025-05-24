@@ -145,7 +145,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"
                                                          .$ bindVar "n"
-                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "m" .$ bindVar "^bnd^{arg:3}")
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "m" .$ bindVar "{arg:3}")
                                                       .=    var ">>="
                                                          .$ (var "<DerivedGen.X_GADT>[0]" .$ var "^outmost-fuel^" .$ var "n")
                                                          .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
@@ -153,15 +153,15 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                                                    { sc = var "{lamc:1}"
                                                                    , ty = implicitFalse
                                                                    , clauses =
-                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "k" .$ bindVar "^bnd^{arg:4}"
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "k" .$ bindVar "{arg:4}"
                                                                          .=    var "Prelude.pure"
                                                                             .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                             .$ (   var "DerivedGen.MkY1"
                                                                                 .! ("k", implicitTrue)
                                                                                 .! ("m", implicitTrue)
                                                                                 .! ("n", implicitTrue)
-                                                                                .$ var "^bnd^{arg:3}"
-                                                                                .$ var "^bnd^{arg:4}")
+                                                                                .$ var "{arg:3}"
+                                                                                .$ var "{arg:4}")
                                                                        ]
                                                                    })
                                                     ]
@@ -182,7 +182,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"
                                                          .$ bindVar "n"
-                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "m" .$ bindVar "^bnd^{arg:5}")
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "m" .$ bindVar "{arg:5}")
                                                       .=    var ">>="
                                                          .$ (var "<DerivedGen.X_GADT>[1]" .$ var "^outmost-fuel^" .$ var "m")
                                                          .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
@@ -190,15 +190,15 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                                                    { sc = var "{lamc:1}"
                                                                    , ty = implicitFalse
                                                                    , clauses =
-                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "k" .$ bindVar "^bnd^{arg:6}"
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "k" .$ bindVar "{arg:6}"
                                                                          .=    var "Prelude.pure"
                                                                             .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                             .$ (   var "DerivedGen.MkY2"
                                                                                 .! ("k", implicitTrue)
                                                                                 .! ("m", implicitTrue)
                                                                                 .! ("n", implicitTrue)
-                                                                                .$ var "^bnd^{arg:5}"
-                                                                                .$ var "^bnd^{arg:6}")
+                                                                                .$ var "{arg:5}"
+                                                                                .$ var "{arg:6}")
                                                                        ]
                                                                    })
                                                     ]
@@ -520,10 +520,10 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:7}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:7}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Prelude.Types.S" .$ var "^bnd^{arg:7}")))
+                                              .$ (var "Prelude.Types.S" .$ var "{arg:7}")))
                              ]
                          ]
                      , scope =

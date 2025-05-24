@@ -273,7 +273,7 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"
                                                          .$ bindVar "x"
-                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "left" .$ bindVar "^bnd^{conArg:1}")
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "left" .$ bindVar "{conArg:1}")
                                                       .=    var ">>="
                                                          .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[0]" .$ var "^cons_fuel^" .$ var "x")
                                                          .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
@@ -281,15 +281,15 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                    { sc = var "{lamc:1}"
                                                                    , ty = implicitFalse
                                                                    , clauses =
-                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "right" .$ bindVar "^bnd^{conArg:2}"
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "right" .$ bindVar "{conArg:2}"
                                                                          .=    var "Prelude.pure"
                                                                             .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                             .$ (   var "Data.SortedBinTree.Node"
                                                                                 .$ implicitTrue
                                                                                 .$ implicitTrue
                                                                                 .$ implicitTrue
-                                                                                .@ var "^bnd^{conArg:1}"
-                                                                                .@ var "^bnd^{conArg:2}")
+                                                                                .@ var "{conArg:1}"
+                                                                                .@ var "{conArg:2}")
                                                                        ]
                                                                    })
                                                     ]
@@ -387,7 +387,7 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                 { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:5}"
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "{arg:5}"
                                                       .=    var ">>="
                                                          .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[0]" .$ var "^cons_fuel^" .$ var "x")
                                                          .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
@@ -401,7 +401,7 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                                 .$ var "^cons_fuel^"
                                                                                 .$ var "ref"
                                                                                 .$ var "r")
-                                                                            .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:6}") implicitFalse
+                                                                            .$ (    MkArg MW ExplicitArg (Just "{arg:6}") implicitFalse
                                                                                 .=>    var ">>="
                                                                                     .$ (   var "<Data.SortedBinTree.SortedBinTree.AllLT>[0]"
                                                                                         .$ var "^cons_fuel^"
@@ -417,11 +417,7 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                                                            .$ var "^cons_fuel^"
                                                                                                            .$ var "ref"
                                                                                                            .$ var "l")
-                                                                                                       .$ (    MkArg
-                                                                                                                 MW
-                                                                                                                 ExplicitArg
-                                                                                                                 (Just "^bnd^{arg:7}")
-                                                                                                                 implicitFalse
+                                                                                                       .$ (    MkArg MW ExplicitArg (Just "{arg:7}") implicitFalse
                                                                                                            .=>    var "Prelude.pure"
                                                                                                                .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                                                                .$ (   var "Builtin.DPair.MkDPair"
@@ -434,9 +430,9 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                                                                        .! ("l", implicitTrue)
                                                                                                                        .! ("prf1", var "prf1")
                                                                                                                        .! ("ref", implicitTrue)
-                                                                                                                       .$ var "^bnd^{arg:5}"
-                                                                                                                       .$ var "^bnd^{arg:7}"
-                                                                                                                       .$ var "^bnd^{arg:6}")))
+                                                                                                                       .$ var "{arg:5}"
+                                                                                                                       .$ var "{arg:7}"
+                                                                                                                       .$ var "{arg:6}")))
                                                                                                   ]
                                                                                               }))
                                                                        ]
@@ -555,13 +551,13 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                    { sc = var "{lamc:1}"
                                                                    , ty = implicitFalse
                                                                    , clauses =
-                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "ref" .$ bindVar "^bnd^{arg:8}"
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "ref" .$ bindVar "{arg:8}"
                                                                          .=    var ">>="
                                                                             .$ (   var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
                                                                                 .$ var "^cons_fuel^"
                                                                                 .$ var "ref"
                                                                                 .$ var "r")
-                                                                            .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                                                            .$ (    MkArg MW ExplicitArg (Just "{arg:9}") implicitFalse
                                                                                 .=>    var ">>="
                                                                                     .$ (var "<Data.SortedBinTree.SortedBinTree.AllLT>[0]" .$ var "^cons_fuel^" .$ var "x")
                                                                                     .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
@@ -575,7 +571,7 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                                                            .$ var "^cons_fuel^"
                                                                                                            .$ var "ref"
                                                                                                            .$ var "l")
-                                                                                                       .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:10}") implicitFalse
+                                                                                                       .$ (    MkArg MW ExplicitArg (Just "{arg:10}") implicitFalse
                                                                                                            .=>    var "Prelude.pure"
                                                                                                                .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                                                                .$ (   var "Builtin.DPair.MkDPair"
@@ -590,9 +586,9 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                                                                            .! ("l", implicitTrue)
                                                                                                                            .! ("prf1", var "prf1")
                                                                                                                            .! ("ref", implicitTrue)
-                                                                                                                           .$ var "^bnd^{arg:8}"
-                                                                                                                           .$ var "^bnd^{arg:10}"
-                                                                                                                           .$ var "^bnd^{arg:9}"))))
+                                                                                                                           .$ var "{arg:8}"
+                                                                                                                           .$ var "{arg:10}"
+                                                                                                                           .$ var "{arg:9}"))))
                                                                                                   ]
                                                                                               }))
                                                                        ]
@@ -705,13 +701,13 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                   .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.NodeLT (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Nat.LTE>[0, 1]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "x") .$ var "ref")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:8}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:8}") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]" .$ var "^cons_fuel^" .$ var "ref" .$ var "l")
-                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:10}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:10}") implicitFalse
                                                   .=>    var ">>="
                                                       .$ (var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]" .$ var "^cons_fuel^" .$ var "ref" .$ var "r")
-                                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                                      .$ (    MkArg MW ExplicitArg (Just "{arg:9}") implicitFalse
                                                           .=>    var "Prelude.pure"
                                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                               .$ (   var "Data.SortedBinTree.SortedBinTree.NodeLT"
@@ -721,9 +717,9 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                   .! ("l", implicitTrue)
                                                                   .! ("prf1", var "prf1")
                                                                   .! ("ref", implicitTrue)
-                                                                  .$ var "^bnd^{arg:8}"
-                                                                  .$ var "^bnd^{arg:10}"
-                                                                  .$ var "^bnd^{arg:9}")))))
+                                                                  .$ var "{arg:8}"
+                                                                  .$ var "{arg:10}"
+                                                                  .$ var "{arg:9}")))))
                              , var "<<Data.SortedBinTree.SortedBinTree.NodeLT>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]
@@ -824,9 +820,7 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                 { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [       var "Builtin.DPair.MkDPair"
-                                                         .$ bindVar "ref"
-                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "l" .$ bindVar "^bnd^{arg:7}")
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "ref" .$ (var "Builtin.DPair.MkDPair" .$ bindVar "l" .$ bindVar "{arg:7}")
                                                       .=    var ">>="
                                                          .$ (var "<Data.Nat.LTE>[0]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "ref"))
                                                          .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
@@ -834,7 +828,7 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                    { sc = var "{lamc:1}"
                                                                    , ty = implicitFalse
                                                                    , clauses =
-                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:5}"
+                                                                       [    var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "{arg:5}"
                                                                          .=    var ">>="
                                                                             .$ (   var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
                                                                                 .$ var "^cons_fuel^"
@@ -854,7 +848,7 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                                                            .$ var "^cons_fuel^"
                                                                                                            .$ var "ref"
                                                                                                            .$ var "r")
-                                                                                                       .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:6}") implicitFalse
+                                                                                                       .$ (    MkArg MW ExplicitArg (Just "{arg:6}") implicitFalse
                                                                                                            .=>    var "Prelude.pure"
                                                                                                                .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                                                                .$ (   var "Builtin.DPair.MkDPair"
@@ -869,9 +863,9 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                                                                            .! ("l", implicitTrue)
                                                                                                                            .! ("prf1", var "prf1")
                                                                                                                            .! ("ref", implicitTrue)
-                                                                                                                           .$ var "^bnd^{arg:5}"
-                                                                                                                           .$ var "^bnd^{arg:7}"
-                                                                                                                           .$ var "^bnd^{arg:6}"))))
+                                                                                                                           .$ var "{arg:5}"
+                                                                                                                           .$ var "{arg:7}"
+                                                                                                                           .$ var "{arg:6}"))))
                                                                                                   ]
                                                                                               }))
                                                                        ]
@@ -952,10 +946,10 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                   .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:11}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:11}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Prelude.Types.S" .$ var "^bnd^{arg:11}")))
+                                              .$ (var "Prelude.Types.S" .$ var "{arg:11}")))
                              ]
                          ]
                      , scope =
@@ -1057,13 +1051,13 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                              .$ var "^outmost-fuel^"
                                                              .$ (var "Prelude.Types.S" .$ var "x")
                                                              .$ var "ref")
-                                                         .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:8}") implicitFalse
+                                                         .$ (    MkArg MW ExplicitArg (Just "{arg:8}") implicitFalse
                                                              .=>    var ">>="
                                                                  .$ (   var "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
                                                                      .$ var "^cons_fuel^"
                                                                      .$ var "ref"
                                                                      .$ var "r")
-                                                                 .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                                                 .$ (    MkArg MW ExplicitArg (Just "{arg:9}") implicitFalse
                                                                      .=>    var ">>="
                                                                          .$ (var "<Data.SortedBinTree.SortedBinTree.AllLT>[0]" .$ var "^cons_fuel^" .$ var "x")
                                                                          .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
@@ -1077,11 +1071,7 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                                                 .$ var "^cons_fuel^"
                                                                                                 .$ var "ref"
                                                                                                 .$ var "l")
-                                                                                            .$ (    MkArg
-                                                                                                      MW
-                                                                                                      ExplicitArg
-                                                                                                      (Just "^bnd^{arg:10}")
-                                                                                                      implicitFalse
+                                                                                            .$ (    MkArg MW ExplicitArg (Just "{arg:10}") implicitFalse
                                                                                                 .=>    var "Prelude.pure"
                                                                                                     .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                                                     .$ (   var "Builtin.DPair.MkDPair"
@@ -1093,9 +1083,9 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                                                             .! ("l", implicitTrue)
                                                                                                             .! ("prf1", var "prf1")
                                                                                                             .! ("ref", implicitTrue)
-                                                                                                            .$ var "^bnd^{arg:8}"
-                                                                                                            .$ var "^bnd^{arg:10}"
-                                                                                                            .$ var "^bnd^{arg:9}")))
+                                                                                                            .$ var "{arg:8}"
+                                                                                                            .$ var "{arg:10}"
+                                                                                                            .$ var "{arg:9}")))
                                                                                        ]
                                                                                    })))
                                                     ]
@@ -1195,13 +1185,13 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                   .$ (var "fromString" .$ primVal (Str "Data.SortedBinTree.SortedBinTree.NodeGT (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Nat.LTE>[0, 1]" .$ var "^outmost-fuel^" .$ (var "Prelude.Types.S" .$ var "ref") .$ var "x")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:5}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:5}") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]" .$ var "^cons_fuel^" .$ var "ref" .$ var "l")
-                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:7}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:7}") implicitFalse
                                                   .=>    var ">>="
                                                       .$ (var "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]" .$ var "^cons_fuel^" .$ var "ref" .$ var "r")
-                                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:6}") implicitFalse
+                                                      .$ (    MkArg MW ExplicitArg (Just "{arg:6}") implicitFalse
                                                           .=>    var "Prelude.pure"
                                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                               .$ (   var "Data.SortedBinTree.SortedBinTree.NodeGT"
@@ -1211,9 +1201,9 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                                   .! ("l", implicitTrue)
                                                                   .! ("prf1", var "prf1")
                                                                   .! ("ref", implicitTrue)
-                                                                  .$ var "^bnd^{arg:5}"
-                                                                  .$ var "^bnd^{arg:7}"
-                                                                  .$ var "^bnd^{arg:6}")))))
+                                                                  .$ var "{arg:5}"
+                                                                  .$ var "{arg:7}"
+                                                                  .$ var "{arg:6}")))))
                              , var "<<Data.SortedBinTree.SortedBinTree.NodeGT>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]
@@ -1313,15 +1303,12 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                                 { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "right" .$ bindVar "^bnd^{arg:12}"
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "right" .$ bindVar "{arg:12}"
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Builtin.DPair.MkDPair"
                                                              .$ implicitTrue
-                                                             .$ (   var "Data.Nat.LTESucc"
-                                                                 .! ("right", implicitTrue)
-                                                                 .! ("left", implicitTrue)
-                                                                 .$ var "^bnd^{arg:12}"))
+                                                             .$ (var "Data.Nat.LTESucc" .! ("right", implicitTrue) .! ("left", implicitTrue) .$ var "{arg:12}"))
                                                     ]
                                                 }))
                              , var "<<Data.Nat.LTESucc>>" .$ implicitTrue .$ implicitTrue .= var "empty"
@@ -1402,10 +1389,10 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                                   .$ (var "fromString" .$ primVal (Str "Data.Nat.LTESucc (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Nat.LTE>[0, 1]" .$ var "^cons_fuel^" .$ var "left" .$ var "right")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:12}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:12}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Data.Nat.LTESucc" .! ("right", implicitTrue) .! ("left", implicitTrue) .$ var "^bnd^{arg:12}")))
+                                              .$ (var "Data.Nat.LTESucc" .! ("right", implicitTrue) .! ("left", implicitTrue) .$ var "{arg:12}")))
                              , var "<<Data.Nat.LTESucc>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

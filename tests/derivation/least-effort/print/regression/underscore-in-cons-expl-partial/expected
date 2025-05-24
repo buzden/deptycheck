@@ -51,7 +51,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.IsFS[0(n), 1] ItIsFS - used fin
                              "<<DerivedGen.ItIsFS>>"
                              [       var "<<DerivedGen.ItIsFS>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{_:1}")
+                                  .$ (var "Prelude.Types.S" .$ bindVar "{_:1}")
                                   .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ bindVar "i")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.ItIsFS (orders)"))

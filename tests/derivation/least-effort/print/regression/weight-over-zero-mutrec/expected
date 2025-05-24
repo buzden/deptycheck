@@ -117,40 +117,40 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.EqSuperBasic[0, 1] EqBasicU - u
                              [       var "<<DerivedGen.EqBasicP>>"
                                   .$ bindVar "^cons_fuel^"
                                   .$ (   var "DerivedGen.Arr"
-                                      .! ("e", bindVar "^bnd^{e:1}")
-                                      .! ("s", bindVar "^bnd^{s:1}")
+                                      .! ("e", bindVar "{e:1}")
+                                      .! ("s", bindVar "{s:1}")
                                       .! ("t", bindVar "t")
                                       .$ (   var "DerivedGen.Pck"
                                           .$ implicitTrue
                                           .$ implicitTrue
                                           .$ implicitTrue
-                                          .! ("{conArg:1}", bindVar "^bnd^{_:1}")))
+                                          .! ("{conArg:1}", bindVar "{_:1}")))
                                   .$ (   var "DerivedGen.Arr"
-                                      .! ("e", bindVar "^bnd^{e:2}")
-                                      .! ("s", bindVar "^bnd^{s:2}")
+                                      .! ("e", bindVar "{e:2}")
+                                      .! ("s", bindVar "{s:2}")
                                       .! ("t", bindVar "t'")
                                       .$ (   var "DerivedGen.Pck"
                                           .$ implicitTrue
                                           .$ implicitTrue
                                           .$ implicitTrue
-                                          .! ("{conArg:1}", bindVar "^bnd^{_:2}")))
+                                          .! ("{conArg:1}", bindVar "{_:2}")))
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.EqBasicP (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.EqSuperBasic>[0, 1]" .$ var "^cons_fuel^" .$ var "t" .$ var "t'")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:3}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                               .$ (   var "DerivedGen.EqBasicP"
-                                                  .! ("{e:1}", var "^bnd^{e:1}")
-                                                  .! ("{s:1}", var "^bnd^{s:1}")
+                                                  .! ("{e:1}", var "{e:1}")
+                                                  .! ("{s:1}", var "{s:1}")
                                                   .! ("t", implicitTrue)
-                                                  .! ("{_:1}", var "^bnd^{_:1}")
-                                                  .! ("{e:2}", var "^bnd^{e:2}")
-                                                  .! ("{s:2}", var "^bnd^{s:2}")
+                                                  .! ("{_:1}", var "{_:1}")
+                                                  .! ("{e:2}", var "{e:2}")
+                                                  .! ("{s:2}", var "{s:2}")
                                                   .! ("t'", implicitTrue)
-                                                  .! ("{_:2}", var "^bnd^{_:2}")
-                                                  .$ var "^bnd^{arg:3}")))
+                                                  .! ("{_:2}", var "{_:2}")
+                                                  .$ var "{arg:3}")))
                              , var "<<DerivedGen.EqBasicP>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          , IDef
@@ -159,30 +159,30 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.EqSuperBasic[0, 1] EqBasicU - u
                              [       var "<<DerivedGen.EqBasicU>>"
                                   .$ bindVar "^cons_fuel^"
                                   .$ (   var "DerivedGen.Arr"
-                                      .! ("e", bindVar "^bnd^{e:3}")
-                                      .! ("s", bindVar "^bnd^{s:3}")
+                                      .! ("e", bindVar "{e:3}")
+                                      .! ("s", bindVar "{s:3}")
                                       .! ("t", bindVar "t")
                                       .$ (var "DerivedGen.Unp" .$ implicitTrue .$ implicitTrue .$ implicitTrue))
                                   .$ (   var "DerivedGen.Arr"
-                                      .! ("e", bindVar "^bnd^{e:4}")
-                                      .! ("s", bindVar "^bnd^{s:4}")
+                                      .! ("e", bindVar "{e:4}")
+                                      .! ("s", bindVar "{s:4}")
                                       .! ("t", bindVar "t'")
                                       .$ (var "DerivedGen.Unp" .$ implicitTrue .$ implicitTrue .$ implicitTrue))
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.EqBasicU (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.EqSuperBasic>[0, 1]" .$ var "^cons_fuel^" .$ var "t" .$ var "t'")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:4}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:4}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                               .$ (   var "DerivedGen.EqBasicU"
-                                                  .! ("{e:3}", var "^bnd^{e:3}")
-                                                  .! ("{s:3}", var "^bnd^{s:3}")
-                                                  .! ("{e:4}", var "^bnd^{e:4}")
-                                                  .! ("{s:4}", var "^bnd^{s:4}")
+                                                  .! ("{e:3}", var "{e:3}")
+                                                  .! ("{s:3}", var "{s:3}")
+                                                  .! ("{e:4}", var "{e:4}")
+                                                  .! ("{s:4}", var "{s:4}")
                                                   .! ("t'", implicitTrue)
                                                   .! ("t", implicitTrue)
-                                                  .$ var "^bnd^{arg:4}")))
+                                                  .$ var "{arg:4}")))
                              , var "<<DerivedGen.EqBasicU>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]
