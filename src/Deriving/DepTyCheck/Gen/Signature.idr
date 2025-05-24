@@ -2,7 +2,7 @@ module Deriving.DepTyCheck.Gen.Signature
 
 import public Data.DPair
 import public Data.Fin
-import public Data.List.Extra
+import public Data.List.Ex
 import public Data.SortedMap
 import public Data.SortedMap.Dependent
 import public Data.SortedMap.Extra

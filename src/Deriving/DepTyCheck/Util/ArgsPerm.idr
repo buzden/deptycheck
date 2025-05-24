@@ -1,6 +1,6 @@
 module Deriving.DepTyCheck.Util.ArgsPerm
 
-import public Data.List.Extra
+import public Data.List.Ex
 import public Data.SortedMap
 import public Data.Vect
 
