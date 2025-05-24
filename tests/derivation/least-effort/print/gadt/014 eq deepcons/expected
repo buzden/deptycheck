@@ -121,10 +121,10 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[0, 1] Step - used final ord
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.Step (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<DerivedGen.LT2>[0, 1]" .$ var "^cons_fuel^" .$ var "x" .$ var "y")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:3}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "DerivedGen.Step" .! ("y", implicitTrue) .! ("x", implicitTrue) .$ var "^bnd^{arg:3}")))
+                                              .$ (var "DerivedGen.Step" .! ("y", implicitTrue) .! ("x", implicitTrue) .$ var "{arg:3}")))
                              , var "<<DerivedGen.Step>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

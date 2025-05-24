@@ -13,9 +13,3 @@ import public Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface
 public export
 interface DeriveBodyRhsForCon where
   consGenExpr : DerivationClosure m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
-
-||| Workarond of inability to put an arbitrary name under `IBindVar`
-export
-bindNameRenamer : Name -> String
-bindNameRenamer $ UN $ Basic n = n
-bindNameRenamer n = "^bnd^" ++ show n

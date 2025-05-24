@@ -74,13 +74,13 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.B[0(n), 1(x), 2] B2 - used fina
                              [       var "<<DerivedGen.B1>>"
                                   .$ bindVar "^cons_fuel^"
                                   .$ (var "Prelude.Types.plus" .$ bindVar "a" .$ bindVar "b")
-                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{x:1}")
+                                  .$ (var "Prelude.Types.S" .$ bindVar "{x:1}")
                                   .$ (var "DerivedGen.A1" .! ("x", implicitTrue) .$ bindVar "a" .$ bindVar "b")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.B1 (orders)"))
                                   .$ (   var "Prelude.pure"
                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                      .$ (var "DerivedGen.B1" .! ("{x:1}", var "^bnd^{x:1}") .! ("b", var "b") .! ("a", var "a")))
+                                      .$ (var "DerivedGen.B1" .! ("{x:1}", var "{x:1}") .! ("b", var "b") .! ("a", var "a")))
                              , var "<<DerivedGen.B1>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          , IDef
@@ -91,13 +91,13 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.B[0(n), 1(x), 2] B2 - used fina
                                   .$ (   var "Prelude.Types.plus"
                                       .$ (var "Prelude.Types.plus" .$ bindVar "a" .$ bindVar "b")
                                       .$ (var "Prelude.Types.S" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z")))
-                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{x:2}")
+                                  .$ (var "Prelude.Types.S" .$ bindVar "{x:2}")
                                   .$ (var "DerivedGen.A2" .! ("x", implicitTrue) .$ bindVar "a" .$ bindVar "b")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.B2 (orders)"))
                                   .$ (   var "Prelude.pure"
                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                      .$ (var "DerivedGen.B2" .! ("{x:2}", var "^bnd^{x:2}") .! ("b", var "b") .! ("a", var "a")))
+                                      .$ (var "DerivedGen.B2" .! ("{x:2}", var "{x:2}") .! ("b", var "b") .! ("a", var "a")))
                              , var "<<DerivedGen.B2>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

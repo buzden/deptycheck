@@ -110,7 +110,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[] Step - used final order: 
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"
                                                          .$ bindVar "x"
-                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "y" .$ bindVar "^bnd^{arg:4}")
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "y" .$ bindVar "{arg:4}")
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Builtin.DPair.MkDPair"
@@ -120,7 +120,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[] Step - used final order: 
                                                                  .$ (   var "DerivedGen.Step"
                                                                      .! ("y", implicitTrue)
                                                                      .! ("x", implicitTrue)
-                                                                     .$ var "^bnd^{arg:4}")))
+                                                                     .$ var "{arg:4}")))
                                                     ]
                                                 }))
                              ]

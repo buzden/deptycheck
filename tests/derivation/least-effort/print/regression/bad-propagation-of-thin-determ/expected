@@ -140,7 +140,7 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                                          .$ bindVar "target"
                                                          .$ (   var "Builtin.DPair.MkDPair"
                                                              .$ bindVar "i"
-                                                             .$ (var "Builtin.DPair.MkDPair" .$ bindVar "contRegs" .$ bindVar "^bnd^{conArg:1}"))
+                                                             .$ (var "Builtin.DPair.MkDPair" .$ bindVar "contRegs" .$ bindVar "{conArg:1}"))
                                                       .=    var ">>="
                                                          .$ (   var "<DerivedGen.Program>[0, 1]"
                                                              .$ var "^cons_fuel^"
@@ -151,7 +151,7 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                                                  .$ var "uc"
                                                                  .$ var "contRegs"
                                                                  .$ var "fs"))
-                                                         .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:2}") implicitFalse
+                                                         .$ (    MkArg MW ExplicitArg (Just "{arg:2}") implicitFalse
                                                              .=>    var "Prelude.pure"
                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                  .$ (   var "DerivedGen.Assign"
@@ -163,8 +163,8 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                                                      .! ("regs", implicitTrue)
                                                                      .$ implicitTrue
                                                                      .$ implicitTrue
-                                                                     .@ var "^bnd^{conArg:1}"
-                                                                     .$ var "^bnd^{arg:2}"))
+                                                                     .@ var "{conArg:1}"
+                                                                     .$ var "{arg:2}"))
                                                     ]
                                                 }))
                              , var "<<DerivedGen.Assign>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
@@ -172,7 +172,7 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                          , IDef
                              emptyFC
                              "<<DerivedGen.Finish>>"
-                             [    var "<<DerivedGen.Finish>>" .$ bindVar "^cons_fuel^" .$ bindVar "^bnd^{n:1}" .$ bindVar "ctx"
+                             [    var "<<DerivedGen.Finish>>" .$ bindVar "^cons_fuel^" .$ bindVar "{n:1}" .$ bindVar "ctx"
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.Finish (orders)"))
                                   .$ (   var "Prelude.pure"
@@ -341,10 +341,10 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "Data.Fin.FS (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Fin.Fin>[0]" .$ var "^cons_fuel^" .$ var "k")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:3}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:3}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "^bnd^{arg:3}")))
+                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "{arg:3}")))
                              , var "<<Data.Fin.FS>>" .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

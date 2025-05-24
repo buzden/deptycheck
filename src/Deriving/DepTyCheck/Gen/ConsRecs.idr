@@ -26,7 +26,7 @@ import public Syntax.IHateParens.Function
 ||| Weight info of recursive constructors
 public export
 data RecWeightInfo : Type where
-  SpendingFuel : ((leftFuelVarName : String) -> TTImp) -> RecWeightInfo
+  SpendingFuel : ((leftFuelVarName : Name) -> TTImp) -> RecWeightInfo
   StructurallyDecreasing : (decrTy : TypeInfo) -> (wExpr : TTImp) -> RecWeightInfo
 
 public export
@@ -48,7 +48,7 @@ isWeight1 : TTImp -> Bool
 isWeight1 = (== liftWeight1)
 
 public export
-weightExpr : ConWeightInfo -> Either TTImp ((leftFuelVarName : String) -> TTImp)
+weightExpr : ConWeightInfo -> Either TTImp ((leftFuelVarName : Name) -> TTImp)
 weightExpr $ MkConWeightInfo $ Left n = Left $ reflectNat1 n
 weightExpr $ MkConWeightInfo $ Right $ StructurallyDecreasing {wExpr, _} = Left wExpr
 weightExpr $ MkConWeightInfo $ Right $ SpendingFuel e = Right e
@@ -77,8 +77,8 @@ weightFunName ty = fromString "weight^\{show ty.name}"
 
 -- this is a workarond for Idris compiler bug #2983
 export
-interimNamesWrapper : Name -> String
-interimNamesWrapper n = "inter^<\{show n}>"
+interimNamesWrapper : Name -> Name
+interimNamesWrapper n = UN $ Basic "inter^<\{show n}>"
 
 -- This function is moved out from `getConsRecs` to reduce the closure of the returned function
 deriveW : SortedMap Name (Maybe a, List (con : Con ** Either Nat1 (b, SortedSet $ Fin con.args.length))) -> TypeInfo -> Maybe (Decl, Decl)
@@ -93,11 +93,11 @@ deriveW consRecs ty = do
   let wClauses = cons <&> \(con ** e) => do
     let wArgs = either (const empty) snd e
     let lhsArgs : List (_, _) = mapI con.args $ \idx, arg => appArg arg <$> if contains idx wArgs && arg.count == MW
-                                  then let bindName = "arg^\{show idx}" in (Just bindName, bindVar bindName)
+                                  then let bindName = UN $ Basic "arg^\{show idx}" in (Just bindName, bindVar bindName)
                                   else (Nothing, implicitTrue)
     let callSelfOn : Name -> TTImp
         callSelfOn n = var weightFunName .$ var n
-    patClause (var weightFunName .$ (reAppAny .| var con.name .| snd <$> lhsArgs)) $ case mapMaybe (map (UN . Basic) . fst) lhsArgs of
+    patClause (var weightFunName .$ (reAppAny .| var con.name .| snd <$> lhsArgs)) $ case mapMaybe fst lhsArgs of
       []  => liftWeight1
       [x] => `(succ ~(callSelfOn x))
       xs  => `(succ $ Prelude.concat @{Maximum} ~(liftList' $ xs <&> callSelfOn))
@@ -128,7 +128,7 @@ finCR tyName wTyArgs cons givenTyArgs = do
     let directRecConArgArgs = flip mapMaybe con.args $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => do
                                 toMaybe (getAppVar conArgTy == Just tyName) conArgArgs
     -- default behaviour, spend fuel, weight proportional to fuel
-    fromMaybe (SpendingFuel $ wMod . app `(Deriving.DepTyCheck.Gen.ConsRecs.leftDepth) . varStr) $ do
+    fromMaybe (SpendingFuel $ wMod . app `(Deriving.DepTyCheck.Gen.ConsRecs.leftDepth) . var) $ do
     -- work only with given args
     -- fail-fast if no given weightable args
     guard $ not $ null wTyArgs
@@ -141,7 +141,7 @@ finCR tyName wTyArgs cons givenTyArgs = do
       let freeNamesLessThanOrig = allVarNames' conRetTyArg `intersection` conArgNames
       foldAlt' directRecConArgArgs $ \conArgArgs => do
         getAt wTyArg conArgArgs >>= getAppVar . getExpr >>= \arg => toMaybe .| contains arg freeNamesLessThanOrig .|
-          var (weightFunName weightTy) .$ varStr (interimNamesWrapper weightArgName)
+          var (weightFunName weightTy) .$ var (interimNamesWrapper weightArgName)
     pure $ StructurallyDecreasing decrTy $ wMod weightExpr
 
 export

@@ -164,13 +164,10 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                           .$ var "n"
                                           .$ var "Prelude.Basics.False"
                                           .$ var "bs")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{conArg:1}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{conArg:1}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (   var "Data.List.Covering.End"
-                                                  .! ("n", implicitTrue)
-                                                  .! ("bs", implicitTrue)
-                                                  .@ var "^bnd^{conArg:1}")))
+                                              .$ (var "Data.List.Covering.End" .! ("n", implicitTrue) .! ("bs", implicitTrue) .@ var "{conArg:1}")))
                              ]
                          , IDef
                              emptyFC
@@ -180,17 +177,17 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                   .$ (var "fromString" .$ primVal (Str "Data.List.Covering.Miss (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.List.Covering.CoveringSequence>[0, 1]" .$ var "^cons_fuel^" .$ var "n" .$ var "bs")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:7}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:7}") implicitFalse
                                           .=>    var ">>="
                                               .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
-                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:8}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:8}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "Data.List.Covering.Miss"
                                                           .! ("n", implicitTrue)
                                                           .! ("bs", implicitTrue)
-                                                          .$ var "^bnd^{arg:8}"
-                                                          .$ var "^bnd^{arg:7}"))))
+                                                          .$ var "{arg:8}"
+                                                          .$ var "{arg:7}"))))
                              ]
                          , IDef
                              emptyFC
@@ -209,7 +206,7 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                                 { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "i" .$ bindVar "^bnd^{conArg:2}"
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "i" .$ bindVar "{conArg:2}"
                                                       .=    var ">>="
                                                          .$ (   var "<Data.List.Covering.CoveringSequence>[0, 1]"
                                                              .$ var "^cons_fuel^"
@@ -219,15 +216,15 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                                                  .$ var "i"
                                                                  .$ var "Prelude.Basics.False"
                                                                  .$ var "bs"))
-                                                         .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:9}") implicitFalse
+                                                         .$ (    MkArg MW ExplicitArg (Just "{arg:9}") implicitFalse
                                                              .=>    var "Prelude.pure"
                                                                  .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                                  .$ (   var "Data.List.Covering.Hit"
                                                                      .! ("n", implicitTrue)
                                                                      .! ("bs", implicitTrue)
                                                                      .$ implicitTrue
-                                                                     .@ var "^bnd^{conArg:2}"
-                                                                     .$ var "^bnd^{arg:9}"))
+                                                                     .@ var "{conArg:2}"
+                                                                     .$ var "{arg:9}"))
                                                     ]
                                                 }))
                              ]
@@ -402,7 +399,7 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                                 { sc = var "{lamc:1}"
                                                 , ty = implicitFalse
                                                 , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "i" .$ bindVar "^bnd^{arg:10}"
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "i" .$ bindVar "{arg:10}"
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Builtin.DPair.MkDPair"
@@ -413,7 +410,7 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                                                  .! ("n", implicitTrue)
                                                                  .! ("bs", implicitTrue)
                                                                  .! ("i", implicitTrue)
-                                                                 .$ var "^bnd^{arg:10}"))
+                                                                 .$ var "{arg:10}"))
                                                     ]
                                                 }))
                              ,    var "<<Data.List.Covering.BitMask.Index.There>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue
@@ -495,10 +492,10 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                   .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:11}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:11}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Prelude.Types.S" .$ var "^bnd^{arg:11}")))
+                                              .$ (var "Prelude.Types.S" .$ var "{arg:11}")))
                              ]
                          ]
                      , scope =
@@ -616,14 +613,14 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                                   .$ var "n"
                                                   .$ var "b"
                                                   .$ var "bs")
-                                              .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:12}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:12}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "Data.List.Covering.BitMask.Index.Continue"
                                                           .! ("n", implicitTrue)
                                                           .! ("bs", implicitTrue)
                                                           .! ("b", implicitTrue)
-                                                          .$ var "^bnd^{arg:12}")))
+                                                          .$ var "{arg:12}")))
                                      ,       var "<<Data.List.Covering.BitMask.Index.Continue>>"
                                           .$ bindVar "^cons_fuel^"
                                           .$ (var "Prelude.Types.S" .$ bindVar "n")

@@ -122,7 +122,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 
                              "<<DerivedGen.VectMaybeAnyType.Here>>"
                              [       var "<<DerivedGen.VectMaybeAnyType.Here>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (var "Prelude.Types.S" .$ bindVar "^bnd^{n:1}")
+                                  .$ (var "Prelude.Types.S" .$ bindVar "{n:1}")
                                   .$ (var "DerivedGen.VectMaybeAnyType.(::)" .! ("n", implicitTrue) .$ bindVar "x" .$ bindVar "xs")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.VectMaybeAnyType.Here (orders)"))
@@ -156,7 +156,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 
                                                 , clauses =
                                                     [       var "Builtin.DPair.MkDPair"
                                                          .$ bindVar "i"
-                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "^bnd^{arg:4}")
+                                                         .$ (var "Builtin.DPair.MkDPair" .$ bindVar "x" .$ bindVar "{arg:4}")
                                                       .=    var "Prelude.pure"
                                                          .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                          .$ (   var "Builtin.DPair.MkDPair"
@@ -169,7 +169,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 
                                                                      .! ("n", implicitTrue)
                                                                      .! ("i", implicitTrue)
                                                                      .! ("zs", implicitTrue)
-                                                                     .$ var "^bnd^{arg:4}")))
+                                                                     .$ var "{arg:4}")))
                                                     ]
                                                 }))
                              , var "<<DerivedGen.VectMaybeAnyType.There>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"

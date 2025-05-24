@@ -65,10 +65,10 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] MkX - used final order: [#0
                                              , var "Prelude.Types.S" .$ (var "Prelude.Types.S" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z"))
                                              )
                                           .$ (var "Data.Fin.FZ" .! ("k", var "Prelude.Types.S" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z"))))
-                                      .$ (    MkArg MW ExplicitArg (Just "^bnd^{arg:2}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:2}") implicitFalse
                                           .=>    var "Prelude.pure"
                                               .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "DerivedGen.MkX" .$ var "^bnd^{arg:2}")))
+                                              .$ (var "DerivedGen.MkX" .$ var "{arg:2}")))
                              ]
                          ]
                      , scope =
