@@ -8,7 +8,7 @@ import public Data.Collections.Analysis
 import public Data.Either
 import public Data.Fin.Map
 import public Data.SortedSet.Extra
-import public Data.Vect.Extra
+import public Data.Vect.Ex
 
 import public Decidable.Equality
 

@@ -6,7 +6,7 @@ import public Control.Monad.Writer.Interface
 import public Data.Fin.Split
 import public Data.List.Ex
 import public Data.SortedSet
-import public Data.Vect.Extra
+import public Data.Vect.Ex
 
 import public Language.Reflection.Compat.TypeInfo
 
