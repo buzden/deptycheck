@@ -84,6 +84,15 @@ getTypeApps con = do
 
   for con.args.asVect $ analyseTypeApp . type
 
+enrichStrongDet : FinMap con.args.length (Determination con) -> List (Fin con.args.length) -> List (Fin con.args.length)
+enrichStrongDet determ xs = go xs xs where
+  go : (acc : List $ Fin con.args.length) -> List (Fin con.args.length) -> List (Fin con.args.length)
+  go acc [] = acc
+  go acc (x::xs) = do
+    let subx = fromMaybe empty $ stronglyDeterminingArgs <$> Fin.Map.lookup x determ
+    let subx = Prelude.toList $ foldl delete' subx $ x :: acc
+    assert_total $ go (subx ++ acc) (xs ++ subx) -- total since we wouldn't add repeating elements and the thus we're closer to the full list
+
 ----------------------------------------------------------------
 --- Facilities for automatic search of good generation order ---
 ----------------------------------------------------------------
@@ -310,8 +319,9 @@ export
     userImposed <- findUserImposedDeriveFirst
 
     -- Compute the order
-    let nonDetermGivs = removeDeeply userImposed $ removeDeeply givs determ
-    let theOrder = userImposed ++ searchOrder nonDetermGivs
+    let nonDetermGivs = removeDeeply givs determ
+    let userImposed = enrichStrongDet nonDetermGivs userImposed
+    let theOrder = userImposed ++ searchOrder (removeDeeply userImposed nonDetermGivs)
 
     logPoint {level=FineDetails} "deptycheck.derive.least-effort" [sig, con] "- used final order: \{theOrder}"
 
@@ -338,6 +348,7 @@ export
       findUserImposedDeriveFirst : m $ List $ Fin con.args.length
       findUserImposedDeriveFirst = do
         Just impl <- search $ GenOrderTuning $ Con.name con | Nothing => pure []
+        pure () -- WTF is going on? If you remove this, elaborator script hangs O_O
         let Yes tyLen = decEq (isConstructor @{impl}).fst.typeInfo.args.length sig.targetType.args.length
           | No _ => fail "INTERNAL ERROR: type args length of found gen order tuning is wrong"
         let Yes conLen = decEq (isConstructor @{impl}).fst.conInfo.args.length con.args.length
