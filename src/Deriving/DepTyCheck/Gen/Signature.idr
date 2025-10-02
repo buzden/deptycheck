@@ -2,10 +2,8 @@ module Deriving.DepTyCheck.Gen.Signature
 
 import public Data.DPair
 import public Data.Fin
+import public Data.Fin.Map
 import public Data.List.Ex
-import public Data.SortedMap
-import public Data.SortedMap.Dependent
-import public Data.SortedMap.Extra
 import public Data.SortedSet
 
 import public Deriving.DepTyCheck.Util.ArgsPerm
@@ -118,7 +116,7 @@ record ExternalGenSignature where
   constructor MkExternalGenSignature
   targetType : TypeInfo
   {auto 0 targetTypeCorrect : AllTyArgsNamed targetType}
-  givenParams : SortedMap (Fin targetType.args.length) (ArgExplicitness, Name)
+  givenParams : FinMap targetType.args.length (ArgExplicitness, Name)
   givensOrder : Vect givenParams.size $ Fin givenParams.size -- must be a permutation
   {gendParamsCnt : _}
   gendOrder   : Vect gendParamsCnt $ Fin gendParamsCnt -- must be a permutation
@@ -141,10 +139,10 @@ Ord ExternalGenSignature where compare = comparing characteristics
 export
 callExternalGen : (sig : ExternalGenSignature) -> (topmost : Name) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> TTImp
 callExternalGen sig topmost fuel values =
-  foldl (flip apply) (appFuel topmost fuel) $ reorder sig.givensOrder (sig.givenParams.asVect `zip` values) <&> \case
+  foldl (flip apply) (appFuel topmost fuel) $ reorder sig.givensOrder (sig.givenParams.asKVVect `zip` values) <&> \case
     ((_, ExplicitArg, _   ), value) => (.$ value)
     ((_, ImplicitArg, name), value) => \f => namedApp f name value
 
 export
 internalise : (extSig : ExternalGenSignature) -> Subset GenSignature $ \sig => sig.givenParams.size = extSig.givenParams.size
-internalise $ MkExternalGenSignature ty giv _ _ = Element (MkGenSignature ty $ keySet giv) $ keySetSize giv
+internalise $ MkExternalGenSignature ty giv _ _ = Element (MkGenSignature ty $ fromList $ keys giv) $ ?foo -- keySetSize giv

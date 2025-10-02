@@ -55,10 +55,10 @@ CheckResult ExternalGen    = (GenSignatureFC, ExternalGenSignature)
 
 --- Analysis functions ---
 
-mapAndPerm : Ord a => List (a, b) -> Maybe (xs : SortedMap a b ** Vect xs.size $ Fin xs.size)
+mapAndPerm : {n : _} -> List (Fin n, b) -> Maybe (xs : FinMap n b ** Vect xs.size $ Fin xs.size)
 mapAndPerm xs = do
   let idxs = fst <$> xs
-  let m = SortedMap.fromList xs
+  let m = Fin.Map.fromList xs
   let Yes lenCorr = m.size `decEq` idxs.length | No _ => Nothing
   pure (m ** rewrite lenCorr in orderIndices idxs)
 
@@ -269,7 +269,7 @@ nameMod n = UN $ Basic "outer^<\{show n}>"
 
 internalGenCallingLambda : Elaboration m => CheckResult DerivationTask -> TTImp -> m TTImp
 internalGenCallingLambda (sig ** exts ** givsPos) call = do
-    let (givensReordered ** lenCorr) = reorder' sig.givenParams.asList sig.givensOrder
+    let (givensReordered ** lenCorr) = reorder' sig.givenParams.asKVList sig.givensOrder
     let Just args = joinEithersPos givensReordered exts.externals $ rewrite lenCorr in givsPos
       | Nothing => fail "INTERNAL ERROR: can't join partitioned args back"
     pure $ foldr mkLam call args
@@ -287,7 +287,7 @@ callMainDerivedGen : DerivationClosure m => ExternalGenSignature -> (fuelArg : N
 callMainDerivedGen sig fuelArg = do
   let Element intSig prf = internalise sig
   map (reorderGend True sig.gendOrder . fst) $
-    callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asVect <&> \(_, _, name) => var $ nameMod name
+    callGen intSig (var fuelArg) $ rewrite prf in sig.givenParams.asKVVect <&> \(_, _, name) => var $ nameMod name
 
 wrapFuel : (fuelArg : Name) -> TTImp -> TTImp
 wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
