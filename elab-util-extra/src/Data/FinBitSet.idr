@@ -58,10 +58,10 @@ invert : {v : Nat} -> FinBitSet v -> FinBitSet v
 invert (MkFBS x) = MkFBS $ complement x .&. mask v
 
 toLN' : Nat -> Integer -> List Nat
-toLN' x s = 
-  if s == 0 
-     then [] 
-     else if testBit s 0 
+toLN' x s =
+  if s == 0
+     then []
+     else if testBit s 0
                             -- Since s != 0, shiftR s 1 < s
       then x :: toLN' (S x) (assert_smaller s $ shiftR s 1)
       else toLN' (S x) (assert_smaller s $ shiftR s 1)

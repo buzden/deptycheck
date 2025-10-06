@@ -18,7 +18,7 @@ import public Language.Reflection.TT
 import public Language.Reflection.TTImp
 import public Language.Reflection.Unifier
 import public Language.Reflection.Util
-import public Language.Reflection.VarSubst2
+import public Language.Reflection.VarSubst
 import public Syntax.IHateParens
 
 %language ElabReflection
