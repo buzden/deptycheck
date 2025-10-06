@@ -14,10 +14,19 @@ depends = collection-utils
         , elab-pretty
         , elab-util
         , fin-lizzie
+        , i-hate-parens
+        , mtl-tuple-impls
 
-modules = Language.Reflection.Compat
+modules = Data.FinBitSet
+        , Data.SnocVect
+        , Language.Reflection.Compat
         , Language.Reflection.Compat.Constr
         , Language.Reflection.Compat.TypeInfo
         , Language.Reflection.Expr
         , Language.Reflection.Expr.Interpolation
         , Language.Reflection.Logging
+        , Language.Reflection.Monomorphiser
+        , Language.Reflection.Unifier
+        , Language.Reflection.Unifier.Interface
+        , Language.Reflection.Unifier.TypecheckUnifier
+        , Language.Reflection.VarSubst
