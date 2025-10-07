@@ -2,7 +2,9 @@ module Language.Reflection.Expr
 
 import public Control.Applicative.Const -- public due to compiler's bug #2439
 
+import public Data.Bits -- public due to compiler's bug #2439
 import public Data.Cozippable -- public due to compiler's bug #2439
+import public Data.Fin.Set
 import public Data.Fin.ToFin -- public due to compiler's bug #2439
 import public Data.List.Ex -- public due to compiler's bug #2439
 import public Data.SortedSet
@@ -262,18 +264,18 @@ isVar _         = False
 
 public export
 0 ArgDeps : Nat -> Type
-ArgDeps n = DVect n $ SortedSet . Fin . Fin.finToNat
+ArgDeps n = DVect n $ FinSet . Fin.finToNat
 
 export
 argDeps : (args : List Arg) -> ArgDeps args.length
 argDeps args = do
-  let nameToIndices = SortedMap.fromList $ mapI args $ \i, arg => (argName' arg, SortedSet.singleton i)
+  let nameToIndices = SortedMap.fromList $ mapI args $ \i, arg => (argName' arg, Fin.Set.singleton i)
   let args = Vect.fromList args <&> \arg => allVarNames arg.type |> map (fromMaybe empty . lookup' nameToIndices)
   flip upmapI args $ \i, deps => flip concatMap deps $ \candidates =>
-    maybe empty singleton $ last' $ mapMaybe tryToFit $ Prelude.toList candidates
+    maybe empty singleton $ last' $ mapMaybe tryToFit $ Fin.Set.toList candidates
 
 export
-dependees : (args : List Arg) -> SortedSet $ Fin $ args.length
+dependees : (args : List Arg) -> FinSet args.length
 dependees args = do
   let nameToIndex = SortedMap.fromList $ mapI args $ \i, arg => (argName' arg, i)
   let varsInTypes = concatMap (\arg => allVarNames' arg.type) args

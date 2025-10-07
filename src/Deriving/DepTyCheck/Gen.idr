@@ -47,7 +47,7 @@ isExternalGen ExternalGen = True
 isExternalGen _           = False
 
 OriginalSignatureInfo : ExternalGenSignature -> GenExternals -> Type
-OriginalSignatureInfo sig exts = SortedSet $ Fin $ sig.givenParams.size + exts.externals.length
+OriginalSignatureInfo sig exts = FinSet $ sig.givenParams.size + exts.externals.length
 
 CheckResult : GenCheckSide -> Type
 CheckResult DerivationTask = (sig : ExternalGenSignature ** exts : GenExternals ** OriginalSignatureInfo sig exts)
