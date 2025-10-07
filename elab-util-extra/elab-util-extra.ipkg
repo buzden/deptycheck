@@ -10,16 +10,16 @@ sourcedir = "src"
 builddir = ".build"
 
 depends = collection-utils
+        , containers
         , cozippable
         , elab-pretty
         , elab-util
         , fin-lizzie
         , i-hate-parens
-        , mtl-tuple-impls
         , mk
+        , mtl-tuple-impls
 
 modules = Data.FinBitSet
-        , Data.SnocVect
         , Language.Reflection.Compat
         , Language.Reflection.Compat.Constr
         , Language.Reflection.Compat.TypeInfo
