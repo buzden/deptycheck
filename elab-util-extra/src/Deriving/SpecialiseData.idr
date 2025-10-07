@@ -401,12 +401,10 @@ mkMToPImplClause :
   mt.Con ->
   Clause
 mkMToPImplClause t ur mt con mcon =
-  patClause
-    (var "mToPImpl" .$
-      mcon.invoke bindVar
-        (substituteVariables
-          (fromList $ argsToBindMap $ toList mcon.args) <$> ur.fullResult))
-    (con.invoke var ur.fullResult)
+  (var "mToPImpl" .$ mcon.invoke bindVar
+    (substituteVariables
+      (fromList $ argsToBindMap $ toList mcon.args) <$> ur.fullResult))
+  .= (con.invoke var ur.fullResult)
 
 ||| Generate monomorphic to polimorphic type conversion function declarations
 mkMToPImplDecls :
@@ -430,7 +428,7 @@ mkMToPSig t mt = do
 mkMToPDecls : MonoTask -> TypeInfo -> List Decl
 mkMToPDecls t mt =
   [ interfaceHint Public "mToP" $ mkMToPSig t mt
-  , def "mToP" [ patClause (var "mToP") `(MkCast mToPImpl)]
+  , def "mToP" [ (var "mToP") .= `(MkCast mToPImpl)]
   ]
 
 -----------------------------------
@@ -602,9 +600,7 @@ mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur con n = do
         0 => `(Refl)
         _ => (var $ fromString $ "mCong\{show n}") .$
               ((var $ fromString $ "mInj\{show n}") .$ var "r")
-  pure $ patClause
-    .| bta2 .! (n1, lhsCon) .! (n2, rhsCon) .$ bindVar "r"
-    .| patRhs
+  pure $ bta2 .! (n1, lhsCon) .! (n2, rhsCon) .$ bindVar "r" .= patRhs
 
 ||| Derive cast injectivity proof
 mkCastInjDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
@@ -638,9 +634,7 @@ mkCastInjDecls mt ur ti = do
     , interfaceHint Public "castInj" $ forallMTArgs mt $
         `(Injective ~(withTyArgs tyArgPairs mToPImplVar))
     , def "castInj" $ singleton $
-        patClause
-          (bindTyArgs tyArgPairs empty `(castInj))
-          `(MkInjective castInjImpl)
+        bindTyArgs tyArgPairs empty `(castInj) .= `(MkInjective castInjImpl)
     ]
 
 -------------------------------------
@@ -663,9 +657,8 @@ mkDecEqImplSig mt ti =
 mkDecEqImplClause : MonoTask -> Clause
 mkDecEqImplClause mt =
   let mToPImpl = var $ inGenNS mt "mToPImpl"
-  in patClause
-      `(decEqImpl x1 x2)
-      `(decEqInj {f = ~mToPImpl} $ decEq (~mToPImpl x1) (~mToPImpl x2))
+  in `(decEqImpl x1 x2)
+      .= `(decEqInj {f = ~mToPImpl} $ decEq (~mToPImpl x1) (~mToPImpl x2))
 
 
 ||| Derive decidable equality
@@ -677,7 +670,7 @@ mkDecEqDecls mt ur ti = do
     , interfaceHint Public "decEq'" $ forallMTArgs mt
       `(DecEq ~(mt.fullInvocation) => DecEq ~(ti.invoke var empty))
     , def "decEq'"
-      [ patClause `(decEq') `((Mk DecEq) ~(var $ inGenNS mt "decEqImpl")) ]
+      [ `(decEq') .= `((Mk DecEq) ~(var $ inGenNS mt "decEqImpl")) ]
     ]
 
 -----------------------
@@ -691,15 +684,15 @@ mkShowDecls mt ur ti = do
   [ public' "showImpl" $
     forallMTArgs mt
       `(Show ~(mt.fullInvocation) => ~(ti.invoke var empty) -> String)
-  , def "showImpl" [ patClause `(showImpl x) `(show $ ~mToPImpl x) ]
+  , def "showImpl" [ `(showImpl x) .= `(show $ ~mToPImpl x) ]
   , public' "showPrecImpl" $
     forallMTArgs mt
       `(Show ~(mt.fullInvocation) => Prec -> ~(ti.invoke var empty) -> String)
   , def "showPrecImpl"
-    [ patClause `(showPrecImpl p x) `(showPrec p $ ~mToPImpl x) ]
+    [ `(showPrecImpl p x) .= `(showPrec p $ ~mToPImpl x) ]
   , interfaceHint Public "show'" $ forallMTArgs mt $
     `(Show ~(mt.fullInvocation) => Show ~(ti.invoke var empty))
-  , def "show'" [ patClause `(show') `(MkShow showImpl showPrecImpl) ]
+  , def "show'" [ `(show') .= `(MkShow showImpl showPrecImpl) ]
   ]
 
 ---------------------
@@ -714,14 +707,14 @@ mkEqDecls mt ur ti = do
   [ public' "eqImpl" $
     forallMTArgs mt
       `(Eq ~(mt.fullInvocation) => ~tInv -> ~tInv -> Bool)
-  , def "eqImpl" [ patClause `(eqImpl x y) `((~mToPImpl x) == (~mToPImpl y)) ]
+  , def "eqImpl" [ `(eqImpl x y) .= `((~mToPImpl x) == (~mToPImpl y)) ]
   , public' "neqImpl" $
     forallMTArgs mt
       `(Eq ~(mt.fullInvocation) => ~tInv -> ~tInv -> Bool)
-  , def "neqImpl" [ patClause `(neqImpl x y) `((~mToPImpl x) /= (~mToPImpl y)) ]
+  , def "neqImpl" [ `(neqImpl x y) .= `((~mToPImpl x) /= (~mToPImpl y)) ]
   , interfaceHint Public "eq'" $ forallMTArgs mt $
     `(Eq ~(mt.fullInvocation) => Eq ~tInv)
-  , def "eq'" [ patClause `(eq') `(MkEq eqImpl neqImpl) ]
+  , def "eq'" [ `(eq') .= `(MkEq eqImpl neqImpl) ]
   ]
 
 ------------------------------------
@@ -743,11 +736,10 @@ mkPToMImplClause :
   mt.Con ->
   Clause
 mkPToMImplClause t ur mt con mcon =
-  patClause
-    .| var "pToMImpl" .$ con.invoke bindVar
-      (substituteVariables
-        (fromList $ argsToBindMap $ toList con.args) <$> ur.fullResult)
-    .| mcon.invoke var ur.fullResult
+  var "pToMImpl" .$ con.invoke bindVar
+    (substituteVariables
+      (fromList $ argsToBindMap $ toList con.args) <$> ur.fullResult)
+    .= mcon.invoke var ur.fullResult
 
 ||| Generate monomorphic to polimorphic type conversion function declarations
 mkPToMImplDecls :
@@ -771,7 +763,7 @@ mkPToMSig t mt = do
 mkPToMDecls : MonoTask -> TypeInfo -> List Decl
 mkPToMDecls t mt =
   [ interfaceHint Public "pToM" $ mkPToMSig t mt
-  , def "pToM" [ patClause (var "pToM") `(MkCast pToMImpl)]
+  , def "pToM" [ (var "pToM") .= `(MkCast pToMImpl)]
   ]
 
 ||| Alias all monomorphic type's arguments to rule out the possibility
