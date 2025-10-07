@@ -105,30 +105,31 @@ containsVariableImpl n (IVar _ n') m =
   else m
 containsVariableImpl n tt m = m
 
+||| Check if a TTImp contains a variable
 public export
 containsVariable : Name -> TTImp -> Bool
 containsVariable n =
   execState False .
     mapTTOp (containsVariableImpl n)
 
-collectVariablesImpl : Monad m =>
-                       MonadReader QuoteInfo m =>
-                       MonadReader ShadowingInfo m =>
-                       MonadState NameSet m =>
-                       Name -> TTOp m
-collectVariablesImpl n (IVar _ n') m = do
-  if n == n'
-     && not !(asks isQuote)
-     && not !(asks $ isShadowed n)
-     then modify (insert n) *> m
-     else m
-collectVariablesImpl n tt m = m
-
-public export
-usesVariables : Name -> TTImp -> NameSet
-usesVariables n =
-  execState empty .
-    mapTTOp (collectVariablesImpl n)
+-- collectVariablesImpl : Monad m =>
+--                        MonadReader QuoteInfo m =>
+--                        MonadReader ShadowingInfo m =>
+--                        MonadState NameSet m =>
+--                        Name -> TTOp m
+-- collectVariablesImpl n (IVar _ n') m = do
+--   if n == n'
+--      && not !(asks isQuote)
+--      && not !(asks $ isShadowed n)
+--      then modify (insert n) *> m
+--      else m
+-- collectVariablesImpl n tt m = m
+--
+-- public export
+-- usesVariables : Name -> TTImp -> NameSet
+-- usesVariables n =
+--   execState empty .
+--     mapTTOp (collectVariablesImpl n)
 
 substituteVariablesImpl : Monad m =>
                           MonadReader QuoteInfo m =>
@@ -142,12 +143,14 @@ substituteVariablesImpl vMap (IVar fc n) m =
   else m
 substituteVariablesImpl _ _ m = m
 
+||| Substitute all occurrences of each variable with the given expression
 public export
 substituteVariables : SortedMap Name TTImp -> TTImp -> TTImp
 substituteVariables vMap =
   runIdentity .
     mapTTOp (substituteVariablesImpl vMap)
 
+||| Substitute all occurrences of given variable with given expression
 public export
 substituteVariable : Name -> TTImp -> TTImp -> TTImp
 substituteVariable n t =
@@ -173,6 +176,7 @@ substituteBindImpl vMap (IBindVar fc n) m =
   else m
 substituteBindImpl _ _ m = m
 
+||| Substitute all variable and BindVar occurrences with given
 public export
 substituteBind : SortedMap Name TTImp -> TTImp -> TTImp
 substituteBind vMap = do

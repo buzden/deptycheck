@@ -11,6 +11,7 @@ import public Language.Reflection.TTImp
 import public Language.Reflection.TT
 import public Language.Reflection.Syntax
 
+||| Free variable input data
 public export
 record TaskFVData where
   constructor MkTFVD
@@ -25,6 +26,7 @@ Show a => Show (PiInfo a) where
   show AutoImplicit = "AutoImplicit"
   show (DefImplicit x) = "DefImplicit \{show x}"
 
+||| Generate `TaskFVData` from given `Arg`. Fails if it is unnamed.
 public export
 tryFromArg : MonadError e m => Lazy e -> Arg -> m TaskFVData
 tryFromArg errMsg (MkArg count piInfo Nothing type) =
@@ -37,14 +39,21 @@ Show TaskFVData where
   show (MkTFVD name rig piInfo type) =
     showPiInfo piInfo $ showCount rig "\{name} : \{show type}"
 
+||| Unification task
 public export
 record UnificationTask where
   constructor MkUniTask
+  ||| Amount of left-hand-side free variables
   lfv : Nat
+  ||| Left-hand-side free variables
   lhsFreeVars : Vect lfv TaskFVData
+  ||| Left-hand-side expression
   lhs : TTImp
+  ||| Amount of right-hand-side free variables
   rfv : Nat
+  ||| Right-hand-side free variables
   rhsFreeVars : Vect rfv TaskFVData
+  ||| Right-hand-side expression
   rhs : TTImp
 
 %name UnificationTask task
@@ -54,6 +63,7 @@ Show UnificationTask where
   show (MkUniTask l lfv lhs r rfv rhs) =
     "MkUniTask \{show l} \{show lfv} \{show lhs} \{show r} \{show rfv} \{show rhs}"
 
+||| Free variable output data
 public export
 record FVData where
   constructor MkFVData
@@ -79,17 +89,21 @@ public export
 makeFVData : (String, TaskFVData, Name, TTImp, Maybe TTImp) -> FVData
 makeFVData (h, fv, n, t, v) = MkFVData n h fv.rig fv.piInfo t v
 
+||| Free variable depenfdency graph
 public export
 record DependencyGraph where
   constructor MkDG
+  ||| Free variable amount
   freeVars : Nat
+  ||| Free variable data
   fvData : Vect freeVars FVData
+  ||| Free variable dependency matrix
   fvDeps : Vect freeVars $ FinBitSet freeVars
-  --- The set of all i: (Fin freeVars), where (index i fvData).value = None
+  ||| The set of all i: (Fin freeVars), where (index i fvData).value = None
   empties : FinBitSet freeVars
-  --- For all i : (Fin freeVars); (lookup (index i fvData).name nameToId) = i
+  ||| For all i : (Fin freeVars); (lookup (index i fvData).name nameToId) = i
   nameToId : SortedMap Name $ Fin freeVars
-  --- For all i : (Fin freeVars); (lookup (index i fvData).holeName holeToId) = i
+  ||| For all i : (Fin freeVars); (lookup (index i fvData).holeName holeToId) = i
   holeToId : SortedMap String $ Fin freeVars
 
 %name DependencyGraph dg, depGraph
@@ -124,6 +138,7 @@ prettyFV dg fvd =
     " h2Id : \{show $ lookup fvd.holeName dg.holeToId}\n"
 
 
+||| Pretty-print dependency graph
 public export
 prettyDG : DependencyGraph -> String
 prettyDG dg = joinBy ""
@@ -138,6 +153,7 @@ prettyDG dg = joinBy ""
   , "\n======"
   ]
 
+||| List all free variables that don't depende on any other free variables
 leaves : (dg : DependencyGraph) -> FinBitSet dg.freeVars
 leaves dg =
   foldl
@@ -145,7 +161,7 @@ leaves dg =
     empty $
   zip (allFins dg.freeVars) dg.fvDeps
 
--- List all the free variables without a value that don't depend on any other free variables
+||| List all the free variables without a value that don't depend on any other free variables
 emptyLeaves : (dg : DependencyGraph) -> FinBitSet dg.freeVars
 emptyLeaves dg = intersection dg.empties $ leaves dg
 
@@ -153,7 +169,6 @@ updateCtx : List (Fin v) -> SnocList (Fin v) -> SnocList (Fin v)
 updateCtx [] acc = acc
 updateCtx (x :: xs) acc = updateCtx xs $ acc :< x
 
--- List all the free variables without a value in order of dependency
 flattenEmpties' : (dg : DependencyGraph) -> SnocList (Fin dg.freeVars) -> SnocList $ Fin dg.freeVars
 flattenEmpties' dg ctx = do
   let els = emptyLeaves dg
@@ -162,11 +177,7 @@ flattenEmpties' dg ctx = do
   let newCtx = updateCtx (toList els) ctx
   flattenEmpties' (MkDG dg.freeVars dg.fvData (removeAll els <$> dg.fvDeps) (removeAll els dg.empties) dg.nameToId dg.holeToId) newCtx
 
+||| List all the free variables without a value in order of dependency
 public export
 flattenEmpties : (dg : DependencyGraph) -> SnocList $ Fin dg.freeVars
 flattenEmpties dg = flattenEmpties' dg [<]
-
-public export
-Unifier : Type
-Unifier = UnificationTask -> Elab $ Either String DependencyGraph
-

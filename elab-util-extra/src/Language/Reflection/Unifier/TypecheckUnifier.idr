@@ -6,6 +6,7 @@ import public Data.SnocVect
 
 import public Language.Reflection.Unifier.Interface
 
+||| Generate free variable name to index mapping
 genNameToId :
   {freeVars : Nat} ->
   Vect freeVars FVData ->
@@ -13,6 +14,7 @@ genNameToId :
 genNameToId fvs =
   foldl (\acc, (i, fv) => insert fv.name i acc) empty (zip (allFins freeVars) fvs)
 
+||| Generate free variable hole to index mapping
 genHoleToId :
   {freeVars : Nat} ->
   Vect freeVars FVData ->
@@ -33,6 +35,7 @@ aMHImpl h2Id h = do
   | _ => pure h
   writer (h, insert id empty)
 
+||| Generate a set of free variables whose holes appear in a TTImp
 allMatchingHoles :
   {0 freeVars : Nat} ->
   SortedMap String (Fin freeVars) ->
@@ -40,6 +43,7 @@ allMatchingHoles :
   FinBitSet freeVars
 allMatchingHoles h2Id t = execWriter $ mapMTTImp (aMHImpl h2Id) t
 
+||| Generate a dependency map from unification output and hole-to-index mapping
 genDeps :
   {freeVars : Nat} ->
   Vect freeVars FVData ->
@@ -53,6 +57,7 @@ genDeps fvs h2Id =
           allMatchingHoles h2Id <$> fv.value)
     fvs
 
+||| Find free variables without value
 genEmpties :
   {freeVars : Nat} ->
   Vect freeVars FVData ->
@@ -65,6 +70,7 @@ genEmpties fvs = foldl genEmpties' empty $ zip (allFins freeVars) fvs
          then insert i set
          else set
 
+||| Generate a dependency graph based on free variable data
 genDG :
   {freeVars : Nat} ->
   Vect freeVars FVData ->
@@ -73,6 +79,7 @@ genDG fvs = do
   let h2Id = genHoleToId fvs
   MkDG freeVars fvs (genDeps fvs h2Id) (genEmpties fvs) (genNameToId fvs) h2Id
 
+||| Find all free variables that can be substituted
 canSub :
   (dg : DependencyGraph) ->
   FinBitSet dg.freeVars
@@ -102,6 +109,7 @@ subMatchingHolesImpl dg fbs ih@(IHole _ h) =
     Nothing => ih
 subMatchingHolesImpl _ _ t = t
 
+||| Substitute all holes matching free variables in set with their values
 subMatchingHoles :
   (dg : DependencyGraph) ->
   FinBitSet dg.freeVars ->
@@ -109,6 +117,7 @@ subMatchingHoles :
   TTImp
 subMatchingHoles dg fbs = mapTTImp $ subMatchingHolesImpl dg fbs
 
+||| Substitute all free variables in set within other free variable's data
 fvSubMatching :
   (dg: DependencyGraph) ->
   FinBitSet dg.freeVars ->
@@ -119,6 +128,7 @@ fvSubMatching dg canSub =
   , value $= map $ subMatchingHoles dg canSub
   }
 
+||| Substitute all free variables in set within dependency graph
 doSub :
   (dg : DependencyGraph) ->
   FinBitSet dg.freeVars ->
@@ -151,11 +161,13 @@ subEmptiesFV dg  =
   , value $= map $ subEmptiesT dg
   }
 
+||| Substitute holes of empty free variables with their names
 subEmpties :
   (dg : DependencyGraph) ->
   DependencyGraph
 subEmpties dg = {fvData $= map $ subEmptiesFV dg} dg
 
+||| Solve dependency graph
 solveDG :
   (dg : DependencyGraph) ->
   DependencyGraph
@@ -168,6 +180,7 @@ solveDG dg = do
      then dg
      else solveDG ds
 
+||| Generate hole name for free variables
 genHoleNames :
   Elaboration m =>
   SnocVect l TaskFVData ->
@@ -178,6 +191,7 @@ genHoleNames (xs :< fv) = do
   (others, others') <- genHoleNames xs
   pure $ (insert fv.name (show gs) others, others' :< show gs)
 
+||| Build up dependent pair type for typechecking
 buildUpDPair : SnocVect l TaskFVData -> TTImp -> TTImp
 buildUpDPair [<] t = t
 buildUpDPair (xs :< fv) t =
@@ -186,13 +200,11 @@ buildUpDPair (xs :< fv) t =
       ~(fv.type)
       ~(ILam EmptyFC MW ExplicitArg (Just fv.name) fv.type t))
 
+||| Build up dependent pair value for typechecking
 buildUpTarget : SnocVect l (String, TaskFVData) -> TTImp -> TTImp
 buildUpTarget [<] t = t
 buildUpTarget (xs :< (s, _)) t =
   buildUpTarget xs `((~(IHole EmptyFC s) ** ~t))
-
-helper' : (1 _ : (a ~=~ b)) -> String
-helper' Refl = "Refl"
 
 extractFVData :
   Elaboration m =>
@@ -224,15 +236,14 @@ extractFVData t v [] [] = do
   qT <- quote t
   qV <- quote v
   case t of
-    (Equal x y) => do
-      logMsg "Unifier.TypecheckUnifier" 0 "\{show $ helper' v}"
-      pure ()
-    _ => fail "What?"
-  logMsg "Unifier.TypecheckUnifier" 0
-    "Final : \{show qT} = \{show qV}"
+    (Equal x y) =>
+      case qV of
+        INamedApp _ (INamedApp _ `(Builtin.Refl) _ _) _ _ => pure ()
+        _ => throwError "Compiler failed to generate correct unification. Instead generated \{show qV}"
+    _ => throwError "Internal unifier error: DPairs don't correspond to each other. Should never occur."
   pure []
 
--- TODO: Crashes if given a task with named holes
+||| Run unification
 unify :
   Elaboration m =>
   MonadError String m =>
@@ -279,6 +290,7 @@ unify task = do
   logMsg "Unifier.TypecheckUnifier" 0 "Solved DG :\n\{prettyDG solved}"
   pure solved
 
+||| Run unification in a try block
 public export
 typeCheckUnifier :
   Elaboration m =>

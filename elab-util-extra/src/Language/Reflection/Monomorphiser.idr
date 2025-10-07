@@ -10,6 +10,7 @@ import public Data.Either
 import public Data.SortedMap
 import public Data.SortedSet
 import public Data.SortedMap.Dependent
+import public Language.Mk
 import public Language.Reflection
 import public Language.Reflection.Expr
 import public Language.Reflection.Syntax
@@ -39,11 +40,15 @@ TypeTask Type
 public export
 TypeTask b => TypeTask (a -> b)
 
+||| Monomorphisation error
 public export
-data MonomorphisationError
-  = InvocationExtractionError
-  | TaskTypeExtractionError
-  | EmptyMonoConError
+data MonomorphisationError : Type where
+  ||| Failed to extract invocation from task
+  InvocationExtractionError : MonomorphisationError
+  ||| Failed to extract polymorphic type name from task
+  TaskTypeExtractionError : MonomorphisationError
+  ||| All constructors failed unification
+  EmptyMonoConError : MonomorphisationError
 
 public export
 Show MonomorphisationError where
@@ -103,6 +108,7 @@ record MonoTask where
   ||| Polymorphic type's TypeInfo
   polyTy         : TypeInfo
 
+public export
 Show MonoTask where
   show (MkMonoTask tq tt ns tn on fi pt) = "MkMonoTask \{show tq} \{show tt} \{show ns} \{show tn} \{show on} \{show fi} <typeinfo>"
 
@@ -163,31 +169,38 @@ inGenNS task n = do
 --- TASK ANALYSIS ---
 ---------------------
 
+||| Run `cleanupNamedHoles` over a `PiInfo`'s inner `TTImp`
 cleanupPiInfo : PiInfo TTImp -> PiInfo TTImp
 cleanupPiInfo (DefImplicit t) = DefImplicit $ cleanupNamedHoles t
 cleanupPiInfo p = p
 
+||| Run `cleanupNamedHoles` over all `Arg`'s `TTImp`s
 cleanupArg : Arg -> Arg
 cleanupArg = { type $= cleanupNamedHoles, piInfo $= cleanupPiInfo }
 
+||| Convert MissingInfo for compatibility with `cleanupNamedHoles`
 cleanupMissing : MissingInfo p -> MissingInfo (cleanupPiInfo p)
 cleanupMissing Auto = Auto
 cleanupMissing Implicit = Implicit
 cleanupMissing Deflt = Deflt
 
+||| Run `cleanupNamedHoles` over all `AppArg`'s `TTImp`s
 cleanupAppArg : AppArg a -> AppArg (cleanupArg a)
 cleanupAppArg (NamedApp n s) = NamedApp n $ cleanupNamedHoles s
 cleanupAppArg (AutoApp s) = AutoApp $ cleanupNamedHoles s
 cleanupAppArg (Regular s) = Regular $ cleanupNamedHoles s
 cleanupAppArg (Missing x) = Missing $ cleanupMissing x
 
+||| Run `cleanupNamedHoles` over all `AppArgs`'s `TTImp`s
 cleanupAppArgs : {0 n : Nat} -> {0 a : Vect n Arg} -> AppArgs a -> AppArgs (map Monomorphiser.cleanupArg a)
 cleanupAppArgs [] = []
 cleanupAppArgs (x :: xs) = cleanupAppArg x :: cleanupAppArgs xs
 
+||| Run `cleanupNamedHoled` over all `Con`'s `TTImp`s
 cleanupCon : Con a b -> Con a (map Monomorphiser.cleanupArg b)
 cleanupCon = { args $= map cleanupArg, typeArgs $= cleanupAppArgs }
 
+||| Run `cleanupNamedHoles` over all `TypeInfo`'s `TTImp`s
 cleanupTypeInfo : TypeInfo -> TypeInfo
 cleanupTypeInfo (MkTypeInfo name arty args argNames cons) =
   MkTypeInfo name arty (cleanupArg <$> args) argNames (cleanupCon <$> cons)
@@ -710,16 +723,19 @@ mkMultiCongDecls t ur monoTy = do
 -----------------------------------
 --- CAST INJECTIVITY DERIVATION ---
 -----------------------------------
+||| Create a binding application of aliased arguments
 bindTyArgs : SnocList (Name, Name) -> SortedMap Name TTImp -> TTImp -> TTImp
 bindTyArgs [<] nm t = t
 bindTyArgs (xs :< (n, an)) nm t =
   bindTyArgs xs nm t .! (an, fromMaybe (bindVar n) $ lookup n nm)
 
+||| Create a non-binding application of aliased arguments
 withTyArgs : SnocList (Name, Name) -> TTImp -> TTImp
 withTyArgs [<] t = t
 withTyArgs (xs :< (n, an)) t =
   withTyArgs xs t .! (n, var an)
 
+||| Make a clause for the cast injectivity proof
 mkCastInjClause :
   Elaboration m =>
   (tal1, tal2 : (List Arg, List (Name, Name))) ->
@@ -752,6 +768,7 @@ mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur con n = do
           (~(var $ fromString $ "mInj\{show n}") r)))
 
 
+||| Derive cast injectivity proof
 mkCastInjDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
 mkCastInjDecls mt ur ti = do
   let prepArgs = prepareArg <$> toList ti.args
@@ -792,6 +809,7 @@ mkCastInjDecls mt ur ti = do
 --- DECIDABLE EQUALITY DERIVATION ---
 -------------------------------------
 
+||| Decidable equality signatures
 mkDecEqImplSig : MonoTask -> TypeInfo -> TTImp
 mkDecEqImplSig mt ti =
   let tInv = ti.invoke empty
@@ -803,6 +821,7 @@ mkDecEqImplSig mt ti =
       , MkArg MW ExplicitArg (Just "x2") tInv
       ]
 
+||| Decidable equality clause
 mkDecEqImplClause : MonoTask -> Clause
 mkDecEqImplClause mt =
   let mToPImpl = var $ inGenNS mt "mToPImpl"
@@ -811,6 +830,7 @@ mkDecEqImplClause mt =
       `(decEqInj {f = ~mToPImpl} $ decEq (~mToPImpl x1) (~mToPImpl x2))
 
 
+||| Derive decidable equality
 mkDecEqDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
 mkDecEqDecls mt ur ti = do
   pure
@@ -826,6 +846,7 @@ mkDecEqDecls mt ur ti = do
 --- SHOW DERIVATION ---
 -----------------------
 
+||| Derive Show implementation via cast
 mkShowDecls : MonoTask -> UniResults -> TypeInfo -> List Decl
 mkShowDecls mt ur ti = do
   let mToPImpl = var $ inGenNS mt "mToPImpl"
@@ -847,6 +868,7 @@ mkShowDecls mt ur ti = do
 --- EQ DERIVATION ---
 ---------------------
 
+||| Derive Eq implementation via cast
 mkEqDecls : MonoTask -> UniResults -> TypeInfo -> List Decl
 mkEqDecls mt ur ti = do
   let mToPImpl = var $ inGenNS mt "mToPImpl"
@@ -914,10 +936,8 @@ mkPToMDecls t mt =
   , def "pToM" [ patClause (var "pToM") `(MkCast pToMImpl)]
   ]
 
-extractArgNames : TTImp -> List Name -> List Name
-extractArgNames (IPi _ _ _ (Just n ) _ _) ns = n :: ns
-extractArgNames _ ns = ns
-
+||| Alias all monomorphic type's arguments to rule out the possibility
+||| of lhs-rhs name collision during unification (and derivation)
 prepTask : Elaboration m => MonoTask -> m MonoTask
 prepTask task = do
   let (lamArgs, lamRet) = unLambda task.taskQuote
@@ -929,6 +949,7 @@ prepTask task = do
   let newFI = wil task.fullInvocation
   pure $ { taskQuote := newTQ, taskType := newTT, fullInvocation := newFI } task
 
+||| Generate declarations for given task, unification results, and monomorphic type
 monoDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
 monoDecls task uniResults monoTy = do
   let monoTyDecl = monoTy.decl

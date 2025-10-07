@@ -16,6 +16,7 @@ depends = collection-utils
         , fin-lizzie
         , i-hate-parens
         , mtl-tuple-impls
+        , mk
 
 modules = Data.FinBitSet
         , Data.SnocVect
