@@ -1,4 +1,4 @@
-module Language.Reflection.Monomorphiser
+module Deriving.SpecialiseData
 
 import public Control.Monad.Reader.Tuple
 import public Data.SnocList
@@ -17,7 +17,7 @@ import public Language.Reflection.Syntax
 import public Language.Reflection.Syntax.Ops
 import public Language.Reflection.TT
 import public Language.Reflection.TTImp
-import public Language.Reflection.Unifier
+import public Language.Reflection.Unify
 import public Language.Reflection.Util
 import public Language.Reflection.VarSubst
 import public Syntax.IHateParens
@@ -40,18 +40,18 @@ TypeTask Type
 public export
 TypeTask b => TypeTask (a -> b)
 
-||| Monomorphisation error
+||| Specialisation error
 public export
-data MonomorphisationError : Type where
+data SpecialisationError : Type where
   ||| Failed to extract invocation from task
-  InvocationExtractionError : MonomorphisationError
+  InvocationExtractionError : SpecialisationError
   ||| Failed to extract polymorphic type name from task
-  TaskTypeExtractionError : MonomorphisationError
+  TaskTypeExtractionError : SpecialisationError
   ||| All constructors failed unification
-  EmptyMonoConError : MonomorphisationError
+  EmptyMonoConError : SpecialisationError
 
 public export
-Show MonomorphisationError where
+Show SpecialisationError where
   show InvocationExtractionError = "InvocationExtractionError"
   show TaskTypeExtractionError = "TaskTypeExtractionError"
   show EmptyMonoConError = "EmptyMonoConError"
@@ -60,7 +60,7 @@ Show MonomorphisationError where
 taskInvocation :
   Monad m =>
   Elaboration m =>
-  MonadError MonomorphisationError m =>
+  MonadError SpecialisationError m =>
   TTImp ->
   m TTImp
 taskInvocation  (ILam _ _ _ _ _ r)   = taskInvocation r
@@ -76,7 +76,7 @@ taskInvocation x                     =
 taskTName :
   Monad m =>
   Elaboration m =>
-  MonadError MonomorphisationError m =>
+  MonadError SpecialisationError m =>
   TTImp -> m Name
 taskTName (IVar _ n)          = pure n
 taskTName (IApp _ f _)        = taskTName f
@@ -90,7 +90,7 @@ taskTName t                   =
 --- CUSTOM DATA TYPES ---
 -------------------------
 
-||| Monomorphisation task
+||| Specialisation task
 record MonoTask where
   constructor MkMonoTask
   ||| Full unification task
@@ -192,12 +192,12 @@ cleanupAppArg (Regular s) = Regular $ cleanupNamedHoles s
 cleanupAppArg (Missing x) = Missing $ cleanupMissing x
 
 ||| Run `cleanupNamedHoles` over all `AppArgs`'s `TTImp`s
-cleanupAppArgs : {0 n : Nat} -> {0 a : Vect n Arg} -> AppArgs a -> AppArgs (map Monomorphiser.cleanupArg a)
+cleanupAppArgs : {0 n : Nat} -> {0 a : Vect n Arg} -> AppArgs a -> AppArgs (map SpecialiseData.cleanupArg a)
 cleanupAppArgs [] = []
 cleanupAppArgs (x :: xs) = cleanupAppArg x :: cleanupAppArgs xs
 
 ||| Run `cleanupNamedHoled` over all `Con`'s `TTImp`s
-cleanupCon : Con a b -> Con a (map Monomorphiser.cleanupArg b)
+cleanupCon : Con a b -> Con a (map SpecialiseData.cleanupArg b)
 cleanupCon = { args $= map cleanupArg, typeArgs $= cleanupAppArgs }
 
 ||| Run `cleanupNamedHoles` over all `TypeInfo`'s `TTImp`s
@@ -210,7 +210,7 @@ getTask :
   TypeTask l =>
   Monad m =>
   Elaboration m =>
-  MonadError MonomorphisationError m =>
+  MonadError SpecialisationError m =>
   l ->
   Name ->
   m MonoTask
@@ -352,16 +352,16 @@ unifyCon t con = do
   argsR <- traverse .| tryFromArg "nameless arg!" .| fromList argsR
   argsL <- traverse .| tryFromArg "nameless arg!" .| con.args
   let uniTask = MkUniTask _ argsL conRet _ argsR tRet
-  logMsg "Monomorphiser" 0 "Unifier task: \{show uniTask}"
-  Right uniRes <- tryError $ typeCheckUnifier uniTask
+  logMsg "SpecialiseData" 0 "Unifier task: \{show uniTask}"
+  Right uniRes <- tryError $ unifyWithCompiler uniTask
   | Left err => MkEitherT $ do
-    logMsg "Monomorphiser" 0 "Unifier failed: \{err}"
+    logMsg "SpecialiseData" 0 "Unifier failed: \{err}"
     pure $ Left err
-  logMsg "Monomorphiser" 0 "Unifier returned: \{show uniRes}"
+  logMsg "SpecialiseData" 0 "Unifier returned: \{show uniRes}"
   let fvOrder = flattenEmpties uniRes
-  logMsg "Monomorphiser" 0 "Arguments: \{show fvOrder}"
+  logMsg "SpecialiseData" 0 "Arguments: \{show fvOrder}"
   let urList = filterEmpty uniRes.fvData
-  logMsg "Monomorphiser" 0 "FullResult: \{show urList}"
+  logMsg "SpecialiseData" 0 "FullResult: \{show urList}"
   let (lhsRL, rhsRL) = List.splitAt con.arty urList
   MkEitherT $ pure $ Right $
     MkUR
@@ -953,27 +953,27 @@ prepTask task = do
 monoDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
 monoDecls task uniResults monoTy = do
   let monoTyDecl = monoTy.decl
-  logMsg "Monomorphiser" 0 "monoTyDecl : \{show monoTyDecl}"
+  logMsg "SpecialiseData" 0 "monoTyDecl : \{show monoTyDecl}"
   let mToPImplDecls = mkMToPImplDecls task uniResults monoTy
-  logMsg "Monomorphiser" 0 "mToPImplDecls : \{show mToPImplDecls}"
+  logMsg "SpecialiseData" 0 "mToPImplDecls : \{show mToPImplDecls}"
   let mToPDecls = mkMToPDecls task monoTy
-  logMsg "Monomorphiser" 0 "mToP : \{show mToPDecls}"
+  logMsg "SpecialiseData" 0 "mToP : \{show mToPDecls}"
   multiInjDecls <- mkMultiInjDecls task uniResults monoTy
-  logMsg "Monomorphiser" 0 "multiInj : \{show multiInjDecls}"
+  logMsg "SpecialiseData" 0 "multiInj : \{show multiInjDecls}"
   multiCongDecls <- mkMultiCongDecls task uniResults monoTy
-  logMsg "Monomorphiser" 0 "multiCong : \{show multiCongDecls}"
+  logMsg "SpecialiseData" 0 "multiCong : \{show multiCongDecls}"
   castInjDecls <- mkCastInjDecls task uniResults monoTy
-  logMsg "Monomorphiser" 0 "castInj : \{show castInjDecls}"
+  logMsg "SpecialiseData" 0 "castInj : \{show castInjDecls}"
   decEqDecls <- mkDecEqDecls task uniResults monoTy
-  logMsg "Monomorphiser" 0 "decEq : \{show decEqDecls}"
+  logMsg "SpecialiseData" 0 "decEq : \{show decEqDecls}"
   let showDecls = mkShowDecls task uniResults monoTy
-  logMsg "Monomorphiser" 0 "Show : \{show showDecls}"
+  logMsg "SpecialiseData" 0 "Show : \{show showDecls}"
   let eqDecls = mkEqDecls task uniResults monoTy
-  logMsg "Monomorphiser" 0 "Eq : \{show eqDecls}"
+  logMsg "SpecialiseData" 0 "Eq : \{show eqDecls}"
   let pToMImplDecls = mkPToMImplDecls task uniResults monoTy
-  logMsg "Monomorphiser" 0 "pToMImplDecls : \{show pToMImplDecls}"
+  logMsg "SpecialiseData" 0 "pToMImplDecls : \{show pToMImplDecls}"
   let pToMDecls = mkPToMDecls task monoTy
-  logMsg "Monomorphiser" 0 "pToM : \{show pToMDecls}"
+  logMsg "SpecialiseData" 0 "pToM : \{show pToMDecls}"
   pure $ singleton $ INamespace EmptyFC (MkNS [ show task.outputName ]) $
     monoTyDecl :: join
       [ mToPImplDecls
@@ -988,20 +988,20 @@ monoDecls task uniResults monoTy = do
       , pToMDecls
       ]
 
-||| Perform a specified monomorphisation
+||| Perform a specified specialisation
 public export
-monomorphise :
+specialiseData :
   TypeTask l =>
   Monad m =>
   Elaboration m =>
-  MonadError MonomorphisationError m =>
+  MonadError SpecialisationError m =>
   l ->
   Name ->
   m (TypeInfo, List Decl)
-monomorphise taskT outputName = do
+specialiseData taskT outputName = do
   task <- getTask taskT outputName
   task <- prepTask task
-  logMsg "Monomorphiser" 0 "New task: \{show task}"
+  logMsg "SpecialiseData" 0 "New task: \{show task}"
   uniResults <- mapCons (\t,ci => runEitherT $ unifyCon t ci) task
   let (S _) = length $ filter isRight $ uniResults
   | _ => throwError EmptyMonoConError
@@ -1012,10 +1012,10 @@ monomorphise taskT outputName = do
 
 ||| Perform a specified monomorphisation and declare the results
 public export
-monomorphise' : TypeTask l => l -> Name -> Elab ()
-monomorphise' taskT outputName = do
+specialiseData' : TypeTask l => l -> Name -> Elab ()
+specialiseData' taskT outputName = do
   (Right (monoTy, decls)) <-
-    runEitherT {m=Elab} {e=MonomorphisationError} $
-      monomorphise taskT outputName
-  | Left err => fail "Monomorphisation error: \{show err}"
+    runEitherT {m=Elab} {e=SpecialisationError} $
+      specialiseData taskT outputName
+  | Left err => fail "Specialisation error: \{show err}"
   declare decls

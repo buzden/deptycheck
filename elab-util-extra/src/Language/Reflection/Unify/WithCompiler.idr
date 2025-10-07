@@ -1,10 +1,10 @@
-module Language.Reflection.Unifier.TypecheckUnifier
+module Language.Reflection.Unify.WithCompiler
 
 import public Control.Monad.Writer
 import public Control.Monad.Identity
 import public Data.SnocVect
 
-import public Language.Reflection.Unifier.Interface
+import public Language.Reflection.Unify.Interface
 
 ||| Generate free variable name to index mapping
 genNameToId :
@@ -244,15 +244,15 @@ extractFVData t v [] [] = do
   pure []
 
 ||| Run unification
-unify :
+unify' :
   Elaboration m =>
   MonadError String m =>
   UnificationTask ->
   m $ DependencyGraph
-unify task = do
+unify' task = do
   let allFreeVars = task.lhsFreeVars ++ task.rhsFreeVars
-  let snocLFV = fromVect task.lhsFreeVars
-  let snocRFV = fromVect task.rhsFreeVars
+  let snocLFV : SnocVect task.lfv TaskFVData = cast task.lhsFreeVars
+  let snocRFV : SnocVect task.rfv TaskFVData = cast task.rhsFreeVars
   (lhsNMap, lhsNames) <- genHoleNames snocLFV
   (rhsNMap, rhsNames) <- genHoleNames snocRFV
   let allNames = lhsNames ++ rhsNames
@@ -276,7 +276,7 @@ unify task = do
   | _ => throwError "Unification failed"
   ctQuote <- quote checkTarget'
   logMsg "Unifier.TypecheckUnifier" 0 "\{show ctQuote}"
-  let vectNames = toVect allNames
+  let vectNames = cast allNames
   -- Extract unification results
   uniResults <-
     extractFVData checkTargetType' checkTarget' allFreeVars vectNames
@@ -292,14 +292,14 @@ unify task = do
 
 ||| Run unification in a try block
 public export
-typeCheckUnifier :
+unifyWithCompiler :
   Elaboration m =>
   MonadError String m =>
   UnificationTask ->
   m $ DependencyGraph
-typeCheckUnifier task = do
+unifyWithCompiler task = do
   -- runEitherT {m=Elab} $ unify task
-  let ret = runEitherT {m=Elab} {e=String} $ unify task
+  let ret = runEitherT {m=Elab} {e=String} $ unify' task
   let err = pure {f=Elab} $ Left $ "Unification failed catastrophically (likely because of the named hole bug or postpone bug)"
   rr <- try ret err
   liftEither rr

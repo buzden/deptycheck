@@ -20,14 +20,14 @@ depends = collection-utils
         , mtl-tuple-impls
 
 modules = Data.FinBitSet
+        , Deriving.SpecialiseData
         , Language.Reflection.Compat
         , Language.Reflection.Compat.Constr
         , Language.Reflection.Compat.TypeInfo
         , Language.Reflection.Expr
         , Language.Reflection.Expr.Interpolation
         , Language.Reflection.Logging
-        , Language.Reflection.Monomorphiser
-        , Language.Reflection.Unifier
-        , Language.Reflection.Unifier.Interface
-        , Language.Reflection.Unifier.TypecheckUnifier
+        , Language.Reflection.Unify
+        , Language.Reflection.Unify.Interface
+        , Language.Reflection.Unify.WithCompiler
         , Language.Reflection.VarSubst

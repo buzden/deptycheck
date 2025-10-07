@@ -1,4 +1,4 @@
-module Language.Reflection.Unifier.Interface
+module Language.Reflection.Unify.Interface
 
 import public Control.Monad.Either
 import public Data.Either
