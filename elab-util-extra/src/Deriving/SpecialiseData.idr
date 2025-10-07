@@ -506,8 +506,10 @@ mkMultiInjDecl ur con con' n = do
   | _ => pure []
   (a1, am1) <- genArgAliases ourArgs []
   (a2, am2) <- genArgAliases ourArgs []
-  let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $ con.invoke var $ mergeAliases ur.fullResult am1
-  let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $ con.invoke var $ mergeAliases ur.fullResult am2
+  let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
+                con.invoke var $ mergeAliases ur.fullResult am1
+  let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $
+                con.invoke var $ mergeAliases ur.fullResult am2
 
   let eqs = mkEqs $ zip a1 a2
   let sig =
@@ -617,15 +619,12 @@ mkCastInjDecls mt ur ti = do
   let arg2 = MkArg MW ImplicitArg (Just yVar) $
               ti.invoke var $ fromList $ mapSnd var <$> am2
   let eqs =
-    `(
-      ( ~(withTyArgs (cast am1) $ mToPImplVar)
-        ~(var xVar) ~=~
-        ~(withTyArgs (cast am2) $ mToPImplVar)
-        ~(var yVar)) ->
-      ~(var xVar) ~=~ ~(var yVar))
+    `((~(withTyArgs (cast am1) mToPImplVar .$ var xVar)
+       ~=~
+       ~(withTyArgs (cast am2) $ mToPImplVar .$ var yVar)) ->
+        ~(var xVar) ~=~ ~(var yVar))
   castInjImplClauses <-
     map2UConsN (\_,ur,_,_ => mkCastInjClause ta1 ta2 xVar yVar ur) mt ur ti
-  -- let mToPVar = var $ inGenNS mt "mToP"
   let tyArgPairs = cast $ toList $ zip ti.argNames ti.argNames
   pure
     [ public' "castInjImpl" $
