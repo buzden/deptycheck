@@ -35,96 +35,33 @@ public export
 
 ||| Generate AppArg for given Arg, substituting names for values if present
 public export
-(.appArg) : (arg : Arg) -> SortedMap Name TTImp -> Maybe $ AppArg arg
-(.appArg) (MkArg count piInfo (Just n) type) argVals = do
-  let val = fromMaybe (var n) $ lookup n argVals
+(.appArg) : (arg : Arg) -> (Name -> TTImp) -> SortedMap Name TTImp -> Maybe $ AppArg arg
+(.appArg) (MkArg count piInfo (Just n) type) f argVals = do
+  let val = fromMaybe (f n) $ lookup n argVals
   Just $ case piInfo of
     ExplicitArg => Regular val
     AutoImplicit => AutoApp val
     _ => NamedApp n val
-(.appArg) (MkArg count piInfo Nothing type) argVals = Nothing
-
-||| Generate AppArg for given Arg, substituting names for values if present
-||| and binding otherwise
-public export
-(.appArgBind) : (arg : Arg) -> SortedMap Name TTImp -> Maybe $ AppArg arg
-(.appArgBind) (MkArg count piInfo (Just n) type) argVals = do
-  let val = fromMaybe (bindVar n) $ lookup n argVals
-  Just $ case piInfo of
-    ExplicitArg => Regular val
-    AutoImplicit => AutoApp val
-    _ => NamedApp n val
-(.appArgBind) (MkArg count piInfo Nothing type) argVals = Nothing
-
-||| Generate AppArg for given Arg, substituting names for values if present
-||| and using hole otherwise
-public export
-(.appArgHole) : (arg : Arg) -> SortedMap Name TTImp -> Maybe $ AppArg arg
-(.appArgHole) (MkArg count piInfo (Just n) type) argVals = do
-  let val = fromMaybe (Implicit EmptyFC False) $ lookup n argVals
-  Just $ case piInfo of
-    ExplicitArg => Regular val
-    AutoImplicit => AutoApp val
-    _ => NamedApp n val
-(.appArgHole) (MkArg count piInfo Nothing type) argVals = Nothing
+(.appArg) (MkArg count piInfo Nothing type) f argVals = Nothing
 
 ||| Generate AppArgs for given argument vector, substituting names for values
 ||| if present
 public export
-(.appArgs) : (args: Vect _ Arg) -> SortedMap Name TTImp -> Maybe $ AppArgs args
-(.appArgs) [] argVals = Just []
-(.appArgs) (x :: xs) argVals = [| x.appArg argVals :: xs.appArgs argVals |]
-
-||| Generate AppArgs for given argument vector, substituting names for values
-||| if present, and binding otherwise
-public export
-(.appArgsBind) :
-  (args: Vect _ Arg) ->
-  SortedMap Name TTImp ->
-  Maybe $ AppArgs args
-(.appArgsBind) [] argVals = Just []
-(.appArgsBind) (x :: xs) argVals =
-  [| x.appArgBind argVals :: xs.appArgsBind argVals |]
-
-||| Generate AppArgs for given argument vector, substituting names for values
-||| if present, and using hole otherwise
-public export
-(.appArgsHole) :
-  (args: Vect _ Arg) ->
-  SortedMap Name TTImp ->
-  Maybe $ AppArgs args
-(.appArgsHole) [] argVals = Just []
-(.appArgsHole) (x :: xs) argVals =
-  [| x.appArgHole argVals :: xs.appArgsHole argVals |]
+(.appArgs) : (args: Vect _ Arg) -> (Name -> TTImp) -> SortedMap Name TTImp -> Maybe $ AppArgs args
+(.appArgs) [] f argVals = Just []
+(.appArgs) (x :: xs) f argVals = [| x.appArg f argVals :: xs.appArgs f argVals |]
 
 namespace TypeInfoInvoke
   ||| Generate type invocation, substituting argument values
   public export
-  (.invoke) : TypeInfo -> SortedMap Name TTImp -> TTImp
-  (.invoke) t vals =
-    fromMaybe `(_) $ appArgs (var t.name) <$> t.args.appArgs vals
-
-  ||| Generate binding type invocation, substituting argument values
-  public export
-  (.invokeBind) : TypeInfo -> SortedMap Name TTImp -> TTImp
-  (.invokeBind) t vals =
-    fromMaybe `(_) $ appArgs (var t.name) <$> t.args.appArgsBind vals
+  (.invoke) : TypeInfo -> (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
+  (.invoke) t f vals =
+    fromMaybe `(_) $ appArgs (var t.name) <$> t.args.appArgs f vals
 
 namespace ConInvoke
   ||| Generate constructor invocation, substituting argument values
   public export
-  (.invoke) : Con _ _ -> SortedMap Name TTImp -> TTImp
-  (.invoke) con vals =
-    fromMaybe `(_) $ appArgs (var con.name) <$> con.args.appArgs vals
-
-  ||| Generate binding constructor invocation, substituting argument values
-  public export
-  (.invokeBind) : Con _ _ -> SortedMap Name TTImp -> TTImp
-  (.invokeBind) con vals =
-    fromMaybe `(_) $ appArgs (var con.name) <$> con.args.appArgsBind vals
-
-  public export
-  (.invokeHole) : Con _ _ -> SortedMap Name TTImp -> TTImp
-  (.invokeHole) con vals =
-    fromMaybe `(_) $ appArgs (var con.name) <$> con.args.appArgsHole vals
+  (.invoke) : Con _ _ -> (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
+  (.invoke) con f vals =
+    fromMaybe `(_) $ appArgs (var con.name) <$> con.args.appArgs f vals
 

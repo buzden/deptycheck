@@ -49,11 +49,7 @@ data SpecialisationError : Type where
   ||| All constructors failed unification
   EmptyMonoConError : SpecialisationError
 
-public export
-Show SpecialisationError where
-  show InvocationExtractionError = "InvocationExtractionError"
-  show TaskTypeExtractionError = "TaskTypeExtractionError"
-  show EmptyMonoConError = "EmptyMonoConError"
+%runElab derive "SpecialisationError" [Show]
 
 ||| Extract contents of a lambda
 taskInvocation :
@@ -97,7 +93,7 @@ record MonoTask where
   ||| Unification task type
   taskType       : TTImp
   ||| Namespace in which monomorphise was called
-  ns             : Namespace
+  currentNs      : Namespace
   ||| Name of polymorphic type
   typeName       : Name
   ||| Name of monomorphic type
@@ -121,7 +117,7 @@ record UnificationResult where
   ||| Task given to the unifier
   task : UnificationTask
   ||| Dependency graph returned by the unifier
-  dg : DependencyGraph
+  uniDg : DependencyGraph
   ||| LHS free variable (polymorphic constructor argument) values
   lhsResult : SortedMap Name TTImp
   ||| RHS free variable (monomorphic type argument) values
@@ -130,7 +126,7 @@ record UnificationResult where
   fullResult : SortedMap Name TTImp
   ||| Order of dependency of free variables without values
   ||| (monomorphic constructor arguments)
-  order : List $ Fin dg.freeVars
+  order : List $ Fin uniDg.freeVars
 
 %runElab derive "UnificationResult" [Show]
 
@@ -152,10 +148,10 @@ getCurrentNS = do
 ||| Prepend namespace into which everything is generated to name
 inGenNS : MonoTask -> Name -> Name
 inGenNS task (NS (MkNS subs) n) = do
-  let MkNS tns = task.ns
+  let MkNS tns = task.currentNs
   NS (MkNS $ subs ++ show task.outputName :: tns) $ dropNS n
 inGenNS task n = do
-  let MkNS tns = task.ns
+  let MkNS tns = task.currentNs
   NS (MkNS $ show task.outputName :: tns) $ dropNS n
 
 ---------------------
@@ -210,14 +206,14 @@ getTask :
 getTask l' outputName = with Prelude.(>>=) do
   taskQuote : TTImp <- cleanupNamedHoles <$> quote l'
   taskType : TTImp <- cleanupNamedHoles <$> quote l
-  ns <- getCurrentNS
+  currentNs <- getCurrentNS
   fullInvocation <- taskInvocation taskQuote
   typeName : Name <- taskTName fullInvocation
   polyTy <- cleanupTypeInfo <$> Types.getInfo' typeName
   pure $ MkMonoTask
     { taskQuote
     , taskType
-    , ns
+    , currentNs
     , typeName
     , outputName
     , fullInvocation
@@ -354,7 +350,7 @@ unifyCon t con = do
   MkEitherT $ pure $ Right $
     MkUR
       { task = uniTask
-      , dg = uniRes
+      , uniDg = uniRes
       , lhsResult = fromList lhsRL
       , rhsResult = fromList rhsRL
       , fullResult = fromList urList
@@ -369,10 +365,10 @@ unifyCon t con = do
 mkMonoArg :
   (t : MonoTask) ->
   (ur : UnificationResult) ->
-  Fin (ur.dg.freeVars) ->
+  Fin (ur.uniDg.freeVars) ->
   Arg
 mkMonoArg t ur fvId = do
-  let fvData = index fvId ur.dg.fvData
+  let fvData = index fvId ur.uniDg.fvData
   MkArg fvData.rig fvData.piInfo (Just fvData.name) fvData.type
 
 ||| Generate a monomorphic constructor
@@ -384,7 +380,7 @@ mkMonoCon :
   Con _ newArgs
 mkMonoCon newArgs t ur pCon = do
   let args = mkMonoArg t ur <$> Vect.fromList ur.order
-  let Just typeArgs = newArgs.appArgs ur.fullResult
+  let Just typeArgs = newArgs.appArgs var ur.fullResult
   | _ => ?mmc_rhs
   MkCon
     { name = inGenNS t $ dropNS pCon.name
@@ -423,7 +419,7 @@ forallMTArgs task = rewireIPiImplicit task.taskType
 ||| Generate monomorphic to polimorphic type conversion function signature
 mkMToPImplSig : MonoTask -> UniResults -> TypeInfo -> TTImp
 mkMToPImplSig t urs mt =
-  forallMTArgs t $ arg (mt.invoke empty) .-> t.fullInvocation
+  forallMTArgs t $ arg (mt.invoke var empty) .-> t.fullInvocation
 
 argsToBindMap : List Arg -> List (Name, TTImp)
 argsToBindMap [] = []
@@ -444,10 +440,10 @@ mkMToPImplClause :
 mkMToPImplClause t ur mt con mcon =
   patClause
     (var "mToPImpl" .$
-      mcon.invokeBind
+      mcon.invoke bindVar
         (substituteVariables
           (fromList $ argsToBindMap $ toList mcon.args) <$> ur.fullResult))
-    (con.invoke ur.fullResult)
+    (con.invoke var ur.fullResult)
 
 ||| Generate monomorphic to polimorphic type conversion function declarations
 mkMToPImplDecls :
@@ -465,7 +461,7 @@ mkMToPImplDecls t urs mt = do
 ||| Generate monomorphic to polimorphic cast signature
 mkMToPSig : MonoTask -> TypeInfo -> TTImp
 mkMToPSig t mt = do
-  forallMTArgs t $ `(Cast ~(mt.invoke empty) ~(t.fullInvocation))
+  forallMTArgs t $ `(Cast ~(mt.invoke var empty) ~(t.fullInvocation))
 
 ||| Generate monomorphic to polimorphic cast declarations
 mkMToPDecls : MonoTask -> TypeInfo -> List Decl
@@ -549,8 +545,8 @@ mkMultiInjDecl ur con con' n = do
   | _ => pure []
   (a1, am1) <- genArgAliases ourArgs []
   (a2, am2) <- genArgAliases ourArgs []
-  let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $ con.invoke $ mergeAliases ur.fullResult am1
-  let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $ con.invoke $ mergeAliases ur.fullResult am2
+  let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $ con.invoke var $ mergeAliases ur.fullResult am1
+  let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $ con.invoke var $ mergeAliases ur.fullResult am2
 
   let eqs = mkEqs $ zip a1 a2
   let sig =
@@ -583,8 +579,8 @@ mkMultiCongDecl ur con n = do
   | _ => pure []
   (a1, am1) <- genArgAliases ourArgs []
   (a2, am2) <- genArgAliases ourArgs []
-  let lhsCon = con.invoke $ mergeAliases ur.fullResult am1
-  let rhsCon = con.invoke $ mergeAliases ur.fullResult am2
+  let lhsCon = con.invoke var $ mergeAliases ur.fullResult am1
+  let rhsCon = con.invoke var $ mergeAliases ur.fullResult am2
   let eqs = mkEqs $ zip a1 a2
   let sig =
     flip piAll a1 $ flip piAll a2 $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
@@ -636,8 +632,8 @@ mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur con n = do
   let ures2 = substituteVariables am2' <$> ur.fullResult
   let bta1 = bindTyArgs (cast tam1) ures1 `(castInjImpl)
   let bta2 = bindTyArgs (cast tam2) ures2 bta1
-  let lhsCon = con.invokeBind $ am1'
-  let rhsCon = con.invokeBind $ am2'
+  let lhsCon = con.invoke bindVar $ am1'
+  let rhsCon = con.invoke bindVar $ am2'
   let patRhs : TTImp
       patRhs = case (length a1) of
         0 => `(Refl)
@@ -658,9 +654,9 @@ mkCastInjDecls mt ur ti = do
   let mToPVar = var $ inGenNS mt "mToP"
   let mToPImplVar = var $ inGenNS mt "mToPImpl"
   let arg1 = MkArg MW ImplicitArg (Just xVar) $
-              ti.invoke $ fromList $ mapSnd var <$> am1
+              ti.invoke var $ fromList $ mapSnd var <$> am1
   let arg2 = MkArg MW ImplicitArg (Just yVar) $
-              ti.invoke $ fromList $ mapSnd var <$> am2
+              ti.invoke var $ fromList $ mapSnd var <$> am2
   let eqs =
     `(
       ( ~(withTyArgs (cast am1) $ mToPImplVar)
@@ -691,7 +687,7 @@ mkCastInjDecls mt ur ti = do
 ||| Decidable equality signatures
 mkDecEqImplSig : MonoTask -> TypeInfo -> TTImp
 mkDecEqImplSig mt ti =
-  let tInv = ti.invoke empty
+  let tInv = ti.invoke var empty
   in forallMTArgs mt $
     piAll
       `(Dec (Equal {a = ~tInv} {b = ~tInv} x1 x2))
@@ -716,7 +712,7 @@ mkDecEqDecls mt ur ti = do
     [ public' "decEqImpl" $ mkDecEqImplSig mt ti
     , def "decEqImpl" [ mkDecEqImplClause mt ]
     , interfaceHint Public "decEq'" $ forallMTArgs mt
-      `(DecEq ~(mt.fullInvocation) => DecEq ~(ti.invoke empty))
+      `(DecEq ~(mt.fullInvocation) => DecEq ~(ti.invoke var empty))
     , def "decEq'"
       [ patClause `(decEq') `((Mk DecEq) ~(var $ inGenNS mt "decEqImpl")) ]
     ]
@@ -731,15 +727,15 @@ mkShowDecls mt ur ti = do
   let mToPImpl = var $ inGenNS mt "mToPImpl"
   [ public' "showImpl" $
     forallMTArgs mt
-      `(Show ~(mt.fullInvocation) => ~(ti.invoke empty) -> String)
+      `(Show ~(mt.fullInvocation) => ~(ti.invoke var empty) -> String)
   , def "showImpl" [ patClause `(showImpl x) `(show $ ~mToPImpl x) ]
   , public' "showPrecImpl" $
     forallMTArgs mt
-      `(Show ~(mt.fullInvocation) => Prec -> ~(ti.invoke empty) -> String)
+      `(Show ~(mt.fullInvocation) => Prec -> ~(ti.invoke var empty) -> String)
   , def "showPrecImpl"
     [ patClause `(showPrecImpl p x) `(showPrec p $ ~mToPImpl x) ]
   , interfaceHint Public "show'" $ forallMTArgs mt $
-    `(Show ~(mt.fullInvocation) => Show ~(ti.invoke empty))
+    `(Show ~(mt.fullInvocation) => Show ~(ti.invoke var empty))
   , def "show'" [ patClause `(show') `(MkShow showImpl showPrecImpl) ]
   ]
 
@@ -751,7 +747,7 @@ mkShowDecls mt ur ti = do
 mkEqDecls : MonoTask -> UniResults -> TypeInfo -> List Decl
 mkEqDecls mt ur ti = do
   let mToPImpl = var $ inGenNS mt "mToPImpl"
-  let tInv = ti.invoke empty
+  let tInv = ti.invoke var empty
   [ public' "eqImpl" $
     forallMTArgs mt
       `(Eq ~(mt.fullInvocation) => ~tInv -> ~tInv -> Bool)
@@ -772,7 +768,7 @@ mkEqDecls mt ur ti = do
 ||| Generate monomorphic to polimorphic type conversion function signature
 mkPToMImplSig : MonoTask -> UniResults -> TypeInfo -> TTImp
 mkPToMImplSig t urs mt =
-  forallMTArgs t $ arg t.fullInvocation .-> mt.invoke empty
+  forallMTArgs t $ arg t.fullInvocation .-> mt.invoke var empty
 
 ||| Generate monomorphic to polimorphic type conversion function clause
 ||| for given constructor
@@ -785,10 +781,10 @@ mkPToMImplClause :
   Clause
 mkPToMImplClause t ur mt con mcon =
   patClause
-    (var "pToMImpl" .$ con.invokeBind
+    .| var "pToMImpl" .$ con.invoke bindVar
       (substituteVariables
-        (fromList $ argsToBindMap $ toList con.args) <$> ur.fullResult))
-    (mcon.invoke ur.fullResult)
+        (fromList $ argsToBindMap $ toList con.args) <$> ur.fullResult)
+    .| mcon.invoke var ur.fullResult
 
 ||| Generate monomorphic to polimorphic type conversion function declarations
 mkPToMImplDecls :
@@ -806,7 +802,7 @@ mkPToMImplDecls t urs mt = do
 ||| Generate monomorphic to polimorphic cast signature
 mkPToMSig : MonoTask -> TypeInfo -> TTImp
 mkPToMSig t mt = do
-  forallMTArgs t $ `(Cast ~(t.fullInvocation) ~(mt.invoke empty))
+  forallMTArgs t $ `(Cast ~(t.fullInvocation) ~(mt.invoke var empty))
 
 ||| Generate monomorphic to polimorphic cast declarations
 mkPToMDecls : MonoTask -> TypeInfo -> List Decl
