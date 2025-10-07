@@ -11,12 +11,11 @@ import public Data.SortedMap
 import public Data.SortedSet
 import public Data.SortedMap.Dependent
 import public Language.Mk
-import public Language.Reflection
 import public Language.Reflection.Expr
-import public Language.Reflection.Syntax
 import public Language.Reflection.Syntax.Ops
 import public Language.Reflection.TT
 import public Language.Reflection.TTImp
+import public Language.Reflection.Types.Extra
 import public Language.Reflection.Unify
 import public Language.Reflection.Util
 import public Language.Reflection.VarSubst
@@ -116,12 +115,6 @@ Show MonoTask where
 (.Con) : MonoTask -> Type
 (.Con) task = Con task.polyTy.arty task.polyTy.args
 
-namespace TypeInfo
-  ||| Type's constructor
-  public export
-  (.Con) : TypeInfo -> Type
-  (.Con) t = Con t.arty t.args
-
 ||| Unification result
 record UnificationResult where
   constructor MkUR
@@ -150,8 +143,8 @@ UniResults = List $ Either String UnificationResult
 ------------------------------
 
 ||| Get namespace in which elaborator script is executed
-getNS : Elaboration m => m Namespace
-getNS = do
+getCurrentNS : Elaboration m => m Namespace
+getCurrentNS = do
   NS nsn _ <- inCurrentNS ""
   | _ => fail "inCurrentNS failed?"
   pure nsn
@@ -217,7 +210,7 @@ getTask :
 getTask l' outputName = with Prelude.(>>=) do
   taskQuote : TTImp <- cleanupNamedHoles <$> quote l'
   taskType : TTImp <- cleanupNamedHoles <$> quote l
-  ns <- getNS
+  ns <- getCurrentNS
   fullInvocation <- taskInvocation taskQuote
   typeName : Name <- taskTName fullInvocation
   polyTy <- cleanupTypeInfo <$> Types.getInfo' typeName
@@ -329,11 +322,6 @@ map2UConsN' f t rs mt =
 --- Constructor unification ---
 -------------------------------
 
-||| Apply all arguments as specified in AppArgs to TTImp
-appArgs : TTImp -> AppArgs a -> TTImp
-appArgs t (x :: xs) = appArgs (appArg t x) xs
-appArgs t []        = t
-
 ||| Find all variables which have no value
 filterEmpty : Vect _ FVData -> List (Name, TTImp)
 filterEmpty = foldl myfun []
@@ -373,114 +361,6 @@ unifyCon t con = do
       , order = toList fvOrder
       }
 
--------------------------------
---- TypeInfo/Con EXTENSIONS ---
--------------------------------
-
-||| Given a type name to which constructor belongs, calculate its signature
-conSig : Con _ _ -> TTImp -> TTImp
-conSig con ty = piAll .| appArgs ty con.typeArgs .| toList con.args
-
-||| Given a type name to which constructor belongs, calculate its ITy
-conITy : TTImp -> Con _ ags -> ITy
-conITy retTy con = mkTy .| dropNS con.name .| conSig con retTy
-
-||| Generate a declaration from TypeInfo
-(.decl) : TypeInfo -> Decl
-(.decl) ti =
-  iData Public ti.name tySig [] conITys
-  where
-    tySig = piAll type $ toList ti.args
-    conITys = toList $ conITy (var ti.name) <$> ti.cons
-
-||| Generate AppArg for given Arg, substituting names for values if present
-(.appArg) : (arg : Arg) -> SortedMap Name TTImp -> Maybe $ AppArg arg
-(.appArg) (MkArg count piInfo (Just n) type) argVals = do
-  let val = fromMaybe (var n) $ lookup n argVals
-  Just $ case piInfo of
-    ExplicitArg => Regular val
-    AutoImplicit => AutoApp val
-    _ => NamedApp n val
-(.appArg) (MkArg count piInfo Nothing type) argVals = Nothing
-
-||| Generate AppArg for given Arg, substituting names for values if present
-||| and binding otherwise
-(.appArgBind) : (arg : Arg) -> SortedMap Name TTImp -> Maybe $ AppArg arg
-(.appArgBind) (MkArg count piInfo (Just n) type) argVals = do
-  let val = fromMaybe (bindVar n) $ lookup n argVals
-  Just $ case piInfo of
-    ExplicitArg => Regular val
-    AutoImplicit => AutoApp val
-    _ => NamedApp n val
-(.appArgBind) (MkArg count piInfo Nothing type) argVals = Nothing
-
-||| Generate AppArg for given Arg, substituting names for values if present
-||| and using hole otherwise
-(.appArgHole) : (arg : Arg) -> SortedMap Name TTImp -> Maybe $ AppArg arg
-(.appArgHole) (MkArg count piInfo (Just n) type) argVals = do
-  let val = fromMaybe (Implicit EmptyFC False) $ lookup n argVals
-  Just $ case piInfo of
-    ExplicitArg => Regular val
-    AutoImplicit => AutoApp val
-    _ => NamedApp n val
-(.appArgHole) (MkArg count piInfo Nothing type) argVals = Nothing
-
-||| Generate AppArgs for given argument vector, substituting names for values if present
-(.appArgs) : (args: Vect _ Arg) -> SortedMap Name TTImp -> Maybe $ AppArgs args
-(.appArgs) [] argVals = Just []
-(.appArgs) (x :: xs) argVals = [| x.appArg argVals :: xs.appArgs argVals |]
-
-||| Generate AppArgs for given argument vector, substituting names for values if present
-||| and binding otherwise
-(.appArgsBind) :
-  (args: Vect _ Arg) ->
-  SortedMap Name TTImp ->
-  Maybe $ AppArgs args
-(.appArgsBind) [] argVals = Just []
-(.appArgsBind) (x :: xs) argVals =
-  [| x.appArgBind argVals :: xs.appArgsBind argVals |]
-
-||| Generate AppArgs for given argument vector, substituting names for values if present
-||| and using hole otherwise
-(.appArgsHole) :
-  (args: Vect _ Arg) ->
-  SortedMap Name TTImp ->
-  Maybe $ AppArgs args
-(.appArgsHole) [] argVals = Just []
-(.appArgsHole) (x :: xs) argVals =
-  [| x.appArgHole argVals :: xs.appArgsHole argVals |]
-
-
-namespace TypeInfoInvoke
-  ||| Generate type invocation, substituting argument values
-  public export
-  (.invoke) : TypeInfo -> SortedMap Name TTImp -> TTImp
-  (.invoke) t vals =
-    fromMaybe `(_) $ appArgs (var t.name) <$> t.args.appArgs vals
-
-  ||| Generate binding type invocation, substituting argument values
-  public export
-  (.invokeBind) : TypeInfo -> SortedMap Name TTImp -> TTImp
-  (.invokeBind) t vals =
-    fromMaybe `(_) $ appArgs (var t.name) <$> t.args.appArgsBind vals
-
-namespace ConInvoke
-  ||| Generate constructor invocation, substituting argument values
-  public export
-  (.invoke) : Con _ _ -> SortedMap Name TTImp -> TTImp
-  (.invoke) con vals =
-    fromMaybe `(_) $ appArgs (var con.name) <$> con.args.appArgs vals
-
-  ||| Generate binding constructor invocation, substituting argument values
-  public export
-  (.invokeBind) : Con _ _ -> SortedMap Name TTImp -> TTImp
-  (.invokeBind) con vals =
-    fromMaybe `(_) $ appArgs (var con.name) <$> con.args.appArgsBind vals
-
-  public export
-  (.invokeHole) : Con _ _ -> SortedMap Name TTImp -> TTImp
-  (.invokeHole) con vals =
-    fromMaybe `(_) $ appArgs (var con.name) <$> con.args.appArgsHole vals
 -----------------------------------
 --- MONOMORPHIC TYPE GENERATION ---
 -----------------------------------
@@ -563,7 +443,10 @@ mkMToPImplClause :
   Clause
 mkMToPImplClause t ur mt con mcon =
   patClause
-    (var "mToPImpl" .$ mcon.invokeBind (substituteVariables (fromList $ argsToBindMap $ toList mcon.args) <$> ur.fullResult))
+    (var "mToPImpl" .$
+      mcon.invokeBind
+        (substituteVariables
+          (fromList $ argsToBindMap $ toList mcon.args) <$> ur.fullResult))
     (con.invoke ur.fullResult)
 
 ||| Generate monomorphic to polimorphic type conversion function declarations
@@ -755,18 +638,14 @@ mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur con n = do
   let bta2 = bindTyArgs (cast tam2) ures2 bta1
   let lhsCon = con.invokeBind $ am1'
   let rhsCon = con.invokeBind $ am2'
+  let patRhs : TTImp
+      patRhs = case (length a1) of
+        0 => `(Refl)
+        _ => (var $ fromString $ "mCong\{show n}") .$
+              ((var $ fromString $ "mInj\{show n}") .$ var "r")
   pure $ patClause
-    (
-      bta2
-      .! (n1, lhsCon)
-      .! (n2, rhsCon)
-      .$ bindVar "r")
-    (case (length a1) of
-      0 => `(Refl)
-      _ =>
-        `(~(var $ fromString $ "mCong\{show n}")
-          (~(var $ fromString $ "mInj\{show n}") r)))
-
+    .| bta2 .! (n1, lhsCon) .! (n2, rhsCon) .$ bindVar "r"
+    .| patRhs
 
 ||| Derive cast injectivity proof
 mkCastInjDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
