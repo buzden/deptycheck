@@ -48,13 +48,13 @@ record UnificationTask where
   ||| Left-hand-side free variables
   lhsFreeVars : Vect lfv TaskFVData
   ||| Left-hand-side expression
-  lhs : TTImp
+  lhsExpr : TTImp
   ||| Amount of right-hand-side free variables
   rfv : Nat
   ||| Right-hand-side free variables
   rhsFreeVars : Vect rfv TaskFVData
   ||| Right-hand-side expression
-  rhs : TTImp
+  rhsExpr : TTImp
 
 %name UnificationTask task
 

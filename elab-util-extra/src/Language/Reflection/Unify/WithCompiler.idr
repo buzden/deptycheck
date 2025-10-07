@@ -259,7 +259,7 @@ unify' task = do
   -- Assemble the type, the value of which is all our free variables + proof of equality
   let checkTargetType =
     buildUpDPair snocLFV $
-      buildUpDPair snocRFV `(~(task.lhs) ~=~ ~(task.rhs))
+      buildUpDPair snocRFV `(~(task.lhsExpr) ~=~ ~(task.rhsExpr))
   -- Assemble the value (holes + Refl)
   let checkTarget =
     buildUpTarget (zip lhsNames snocLFV) $

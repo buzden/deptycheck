@@ -158,42 +158,6 @@ inGenNS task n = do
 --- TASK ANALYSIS ---
 ---------------------
 
-||| Run `cleanupNamedHoles` over a `PiInfo`'s inner `TTImp`
-cleanupPiInfo : PiInfo TTImp -> PiInfo TTImp
-cleanupPiInfo (DefImplicit t) = DefImplicit $ cleanupNamedHoles t
-cleanupPiInfo p = p
-
-||| Run `cleanupNamedHoles` over all `Arg`'s `TTImp`s
-cleanupArg : Arg -> Arg
-cleanupArg = { type $= cleanupNamedHoles, piInfo $= cleanupPiInfo }
-
-||| Convert MissingInfo for compatibility with `cleanupNamedHoles`
-cleanupMissing : MissingInfo p -> MissingInfo (cleanupPiInfo p)
-cleanupMissing Auto = Auto
-cleanupMissing Implicit = Implicit
-cleanupMissing Deflt = Deflt
-
-||| Run `cleanupNamedHoles` over all `AppArg`'s `TTImp`s
-cleanupAppArg : AppArg a -> AppArg (cleanupArg a)
-cleanupAppArg (NamedApp n s) = NamedApp n $ cleanupNamedHoles s
-cleanupAppArg (AutoApp s) = AutoApp $ cleanupNamedHoles s
-cleanupAppArg (Regular s) = Regular $ cleanupNamedHoles s
-cleanupAppArg (Missing x) = Missing $ cleanupMissing x
-
-||| Run `cleanupNamedHoles` over all `AppArgs`'s `TTImp`s
-cleanupAppArgs : {0 n : Nat} -> {0 a : Vect n Arg} -> AppArgs a -> AppArgs (map SpecialiseData.cleanupArg a)
-cleanupAppArgs [] = []
-cleanupAppArgs (x :: xs) = cleanupAppArg x :: cleanupAppArgs xs
-
-||| Run `cleanupNamedHoled` over all `Con`'s `TTImp`s
-cleanupCon : Con a b -> Con a (map SpecialiseData.cleanupArg b)
-cleanupCon = { args $= map cleanupArg, typeArgs $= cleanupAppArgs }
-
-||| Run `cleanupNamedHoles` over all `TypeInfo`'s `TTImp`s
-cleanupTypeInfo : TypeInfo -> TypeInfo
-cleanupTypeInfo (MkTypeInfo name arty args argNames cons) =
-  MkTypeInfo name arty (cleanupArg <$> args) argNames (cleanupCon <$> cons)
-
 ||| Get all the information needed for monomorphisation from task
 getTask :
   TypeTask l =>
@@ -219,7 +183,6 @@ getTask l' outputName = with Prelude.(>>=) do
     , fullInvocation
     , polyTy
     }
-
 
 ---------------------------
 --- Constructor Mapping ---

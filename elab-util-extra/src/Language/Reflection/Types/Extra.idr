@@ -1,5 +1,6 @@
 module Language.Reflection.Types.Extra
 
+import Language.Reflection.Expr
 import Language.Reflection.Util
 import Syntax.IHateParens
 
@@ -13,6 +14,38 @@ public export
 appArgs : TTImp -> AppArgs a -> TTImp
 appArgs t (x :: xs) = appArgs (appArg t x) xs
 appArgs t []        = t
+
+||| Convert MissingInfo for compatibility with `cleanupNamedHoles`
+public export
+cleanupMissing : MissingInfo p -> MissingInfo (cleanupPiInfo p)
+cleanupMissing Auto = Auto
+cleanupMissing Implicit = Implicit
+cleanupMissing Deflt = Deflt
+
+||| Run `cleanupNamedHoles` over all `AppArg`'s `TTImp`s
+public export
+cleanupAppArg : AppArg a -> AppArg (cleanupArg a)
+cleanupAppArg (NamedApp n s) = NamedApp n $ cleanupNamedHoles s
+cleanupAppArg (AutoApp s) = AutoApp $ cleanupNamedHoles s
+cleanupAppArg (Regular s) = Regular $ cleanupNamedHoles s
+cleanupAppArg (Missing x) = Missing $ cleanupMissing x
+
+||| Run `cleanupNamedHoles` over all `AppArgs`'s `TTImp`s
+public export
+cleanupAppArgs : {0 n : Nat} -> {0 a : Vect n Arg} -> AppArgs a -> AppArgs (map Expr.cleanupArg a)
+cleanupAppArgs [] = []
+cleanupAppArgs (x :: xs) = cleanupAppArg x :: cleanupAppArgs xs
+
+||| Run `cleanupNamedHoled` over all `Con`'s `TTImp`s
+public export
+cleanupCon : Con a b -> Con a (map Expr.cleanupArg b)
+cleanupCon = { args $= map cleanupArg, typeArgs $= cleanupAppArgs }
+
+||| Run `cleanupNamedHoles` over all `TypeInfo`'s `TTImp`s
+public export
+cleanupTypeInfo : TypeInfo -> TypeInfo
+cleanupTypeInfo (MkTypeInfo name arty args argNames cons) =
+  MkTypeInfo name arty (cleanupArg <$> args) argNames (cleanupCon <$> cons)
 
 ||| Given a type name to which constructor belongs, calculate its signature
 public export
