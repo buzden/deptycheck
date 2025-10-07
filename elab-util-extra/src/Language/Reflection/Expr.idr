@@ -17,6 +17,19 @@ import public Syntax.IHateParens.List
 
 %default total
 
+--------------------------
+--- Namedness property ---
+--------------------------
+
+public export
+data IsNamedArg : Arg -> Type where
+  ItIsNamed : IsNamedArg $ MkArg cnt pii (Just n) ty
+
+public export
+isNamedArg : (arg : Arg) -> Dec $ IsNamedArg arg
+isNamedArg (MkArg count piInfo (Just x) type) = Yes ItIsNamed
+isNamedArg (MkArg count piInfo Nothing type)  = No $ \case ItIsNamed impossible
+
 ------------------------------------
 --- General pure transformations ---
 ------------------------------------
