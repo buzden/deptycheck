@@ -38,7 +38,7 @@ public export
 stname : Maybe Name -> Name
 stname = fromMaybe $ UN Underscore
 
-argName : (a : Arg) -> IsNamedArg a => Name
+argName : (a : Arg) -> (0 _ : IsNamedArg a) => Name
 argName (MkArg _ _ Nothing _) impossible
 argName (MkArg _ _ (Just x) _) = x
 
