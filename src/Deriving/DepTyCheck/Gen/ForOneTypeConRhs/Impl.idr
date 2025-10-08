@@ -52,7 +52,7 @@ record TypeApp (0 con : Con) where
 
 getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length $ TypeApp con
 getTypeApps con = do
-  let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
+  let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName' arg, idx)
 
   -- Analyse that we can do subgeneration for each constructor argument
   -- Fails using `Elaboration` if the given expression is not an application to a type constructor
@@ -234,7 +234,7 @@ export
     argsTypeApps <- getTypeApps con
 
     -- Decide how constructor arguments would be named during generation
-    let bindNames = argName <$> fromList con.args
+    let bindNames = argName' <$> fromList con.args
 
     -- Get arguments which any other argument depends on
     let dependees = dependees con.args

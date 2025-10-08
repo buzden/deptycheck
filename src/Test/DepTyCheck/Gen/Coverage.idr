@@ -138,7 +138,7 @@ initCoverageInfo _ = genTypeName g >>= coverageGenInfo
 deriveMatchingCons : (retTy : TTImp) -> (matcher : Con -> TTImp) -> (funName : Name) -> TypeInfo -> List Decl
 deriveMatchingCons retTy matcher funName ti = do
   let claim = do
-    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ argName arg
+    let tyApplied = reAppAny (var ti.name) $ ti.args <&> \arg => appArg arg $ var $ argName' arg
     let sig = foldr
                 (pi . {count := M0, piInfo := ImplicitArg})
                 `(~tyApplied -> ~retTy)
