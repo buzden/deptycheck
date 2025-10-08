@@ -25,23 +25,30 @@ import public Deriving.DepTyCheck.Gen.Tuning
 record Determination (0 con : Con) where
   constructor MkDetermination
   ||| Args which cannot be determined by this arg, e.g. because it is used in a non-trivial expression.
-  stronglyDeterminingArgs : SortedSet $ Fin con.args.length
+  stronglyDeterminingArgs : FinSet con.args.length
   ||| Args which this args depends on, which are not strongly determining.
-  argsDependsOn : SortedSet $ Fin con.args.length
+  argsDependsOn : FinSet con.args.length
   ||| Count of influencing arguments
   influencingArgs : Nat
 
-mapDetermination : {0 con : Con} -> (SortedSet (Fin con.args.length) -> SortedSet (Fin con.args.length)) -> Determination con -> Determination con
+mapDetermination : {con : Con} -> (FinSet con.args.length -> FinSet con.args.length) -> Determination con -> Determination con
 mapDetermination f oldDet = do
   let newDet : Determination con := {stronglyDeterminingArgs $= f, argsDependsOn $= f} oldDet
   let patchInfl = if null (newDet.stronglyDeterminingArgs) && not (null oldDet.stronglyDeterminingArgs) then S else id
   ({influencingArgs $= patchInfl} newDet)
 
 removeDeeply : Foldable f =>
+               {con : _} ->
                (toRemove : f $ Fin con.args.length) ->
                (fromWhat : FinMap con.args.length $ Determination con) ->
                FinMap con.args.length $ Determination con
 removeDeeply toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
+
+removeDeeply' : {con : _} ->
+                (toRemove : FinSet con.args.length) ->
+                (fromWhat : FinMap con.args.length $ Determination con) ->
+                FinMap con.args.length $ Determination con
+removeDeeply' toRemove fromWhat = foldl delete' fromWhat toRemove <&> mapDetermination (\s => foldl delete' s toRemove)
 
 record TypeApp (0 con : Con) where
   constructor MkTypeApp
@@ -84,13 +91,13 @@ getTypeApps con = do
 
   for con.args.asVect $ analyseTypeApp . type
 
-enrichStrongDet : FinMap con.args.length (Determination con) -> List (Fin con.args.length) -> List (Fin con.args.length)
+enrichStrongDet : {con : _} -> FinMap con.args.length (Determination con) -> List (Fin con.args.length) -> List (Fin con.args.length)
 enrichStrongDet determ xs = go xs xs where
   go : (acc : List $ Fin con.args.length) -> List (Fin con.args.length) -> List (Fin con.args.length)
   go acc [] = acc
   go acc (x::xs) = do
     let subx = fromMaybe empty $ stronglyDeterminingArgs <$> Fin.Map.lookup x determ
-    let subx = Prelude.toList $ foldl delete' subx $ x :: acc
+    let subx = toList $ foldl delete' subx $ x :: acc
     assert_total $ go (subx ++ acc) (xs ++ subx) -- total since we wouldn't add repeating elements and the thus we're closer to the full list
 
 ----------------------------------------------------------------
@@ -116,7 +123,7 @@ refineBasePri ps = snd $ execState (Fin.Set.empty {n=con.args.length}, ps) $ tra
 
     let Just (det, currPri) = lookup curr !(get @{pris}) | Nothing => pure ()
 
-    let unvisitedDeps = fromFoldable $ det.argsDependsOn `union` det.stronglyDeterminingArgs
+    let unvisitedDeps = det.argsDependsOn `union` det.stronglyDeterminingArgs
 
     -- run this for all dependences
     for_ (unvisitedDeps `difference` visited) $ assert_total go
@@ -129,14 +136,14 @@ refineBasePri ps = snd $ execState (Fin.Set.empty {n=con.args.length}, ps) $ tra
     -- update the priority of the currenly managed argument
     modify $ updateExisting (mapSnd $ const newPri) curr
 
-propagateStrongDet, propagateDep : Ord a => FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
+propagateStrongDet, propagateDep : Ord a => {con : _} -> FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
 -- propagate back along dependencies, but influence of this propagation should be approx. anti-propotrional to givens, hence `minus`
 propagateDep dets = dets <&> \(det, pri) => (det,) $ foldl (\x => maybe x (max x . snd) . lookup' dets) pri $ det.argsDependsOn
 -- propagate back along strong determinations
 propagateStrongDet dets =
   foldl (\dets, (det, pri) => foldl (flip $ updateExisting $ map $ max pri) dets det.stronglyDeterminingArgs) dets dets
 
-propagatePri : Ord a => FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
+propagatePri : Ord a => {con : _} -> FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
 propagatePri dets = do
   let next = propagatePriOnce dets
   if ((==) `on` map snd) dets next
@@ -195,7 +202,7 @@ searchOrder left = do
     | Nothing => []
 
   -- remove information about all currently chosen args
-  let next = removeDeeply .| Id curr .| removeDeeply currDet.argsDependsOn left
+  let next = removeDeeply .| Id curr .| removeDeeply' currDet.argsDependsOn left
 
   -- `next` is smaller than `left` because `curr` must be not empty
   curr :: searchOrder (assert_smaller left next)
