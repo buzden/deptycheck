@@ -14,7 +14,7 @@ import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 ------------------------------------
 
 defArgNames : {sig : GenSignature} -> Vect sig.givenParams.size Name
-defArgNames = sig.givenParams.asVect <&> argName . index' sig.targetType.args
+defArgNames = sig.givenParams.asVect <&> argName' . index' sig.targetType.args
 
 export %inline
 canonicDefaultLHS' : (namesFun : Name -> Name) -> GenSignature -> Name -> (fuel : Name) -> TTImp

@@ -8,7 +8,7 @@ import Language.Reflection.Expr
 %default total
 
 rhsConsOf : Name -> Elab $ List (List Name, TTImp)
-rhsConsOf n = getInfo' n <&> \tyInfo => tyInfo.cons <&> \con => (con.args <&> argName, con.type)
+rhsConsOf n = getInfo' n <&> \tyInfo => tyInfo.cons <&> \con => (con.args <&> argName', con.type)
 
 public export
 data EqExp : (tyL : Type) -> (tyR : Type) -> tyL -> tyR -> Type where

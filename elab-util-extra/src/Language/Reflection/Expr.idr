@@ -38,9 +38,13 @@ public export
 stname : Maybe Name -> Name
 stname = fromMaybe $ UN Underscore
 
+argName : (a : Arg) -> IsNamedArg a => Name
+argName (MkArg _ _ Nothing _) impossible
+argName (MkArg _ _ (Just x) _) = x
+
 public export
-argName : Arg -> Name
-argName = stname . (.name)
+argName' : Arg -> Name
+argName' = stname . (.name)
 
 export
 cleanupNamedHoles : TTImp -> TTImp
@@ -262,7 +266,7 @@ ArgDeps n = DVect n $ SortedSet . Fin . Fin.finToNat
 export
 argDeps : (args : List Arg) -> ArgDeps args.length
 argDeps args = do
-  let nameToIndices = SortedMap.fromList $ mapI args $ \i, arg => (argName arg, SortedSet.singleton i)
+  let nameToIndices = SortedMap.fromList $ mapI args $ \i, arg => (argName' arg, SortedSet.singleton i)
   let args = Vect.fromList args <&> \arg => allVarNames arg.type |> map (fromMaybe empty . lookup' nameToIndices)
   flip upmapI args $ \i, deps => flip concatMap deps $ \candidates =>
     maybe empty singleton $ last' $ mapMaybe tryToFit $ Prelude.toList candidates
@@ -270,7 +274,7 @@ argDeps args = do
 export
 dependees : (args : List Arg) -> SortedSet $ Fin $ args.length
 dependees args = do
-  let nameToIndex = SortedMap.fromList $ mapI args $ \i, arg => (argName arg, i)
+  let nameToIndex = SortedMap.fromList $ mapI args $ \i, arg => (argName' arg, i)
   let varsInTypes = concatMap (\arg => allVarNames' arg.type) args
   fromList $ mapMaybe (lookup' nameToIndex) $ Prelude.toList varsInTypes
 

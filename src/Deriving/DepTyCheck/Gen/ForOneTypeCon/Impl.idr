@@ -41,7 +41,7 @@ canonicConsBody sig name con = do
       conRetTypeArg idx = index' conRetTypeArgs $ rewrite conRetTypeArgsLengthCorrect in idx
 
   -- Determine names of the arguments of the constructor (as a function)
-  let conArgNames = fromList $ argName <$> con.args
+  let conArgNames = fromList $ argName' <$> con.args
 
   -- For given arguments, determine whether they are
   --   - just a free name
@@ -90,7 +90,7 @@ canonicConsBody sig name con = do
   let bindExprs = \alreadyMatchedRenames => bindExprs <&> \f => f alreadyMatchedRenames
 
   -- Build a map from constructor's argument name to its index
-  let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName arg, idx)
+  let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName' arg, idx)
 
   -- Determine indices of constructor's arguments that are given
   givenConArgs <- for givenConArgs.asList $ \givenArgName => do
