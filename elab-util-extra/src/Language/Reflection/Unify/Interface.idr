@@ -20,17 +20,17 @@ public export
 record UnificationTask where
   constructor MkUniTask
   ||| Amount of left-hand-side free variables
-  lfv : Nat
+  { lfv : Nat }
   ||| Left-hand-side free variables
   lhsFreeVars : Vect lfv Arg
-  lhsAreNamed : All IsNamedArg lhsFreeVars
+  { 0 lhsAreNamed : All IsNamedArg lhsFreeVars }
   ||| Left-hand-side expression
   lhsExpr : TTImp
   ||| Amount of right-hand-side free variables
-  rfv : Nat
+  { rfv : Nat }
   ||| Right-hand-side free variables
   rhsFreeVars : Vect rfv Arg
-  rhsAreNamed : All IsNamedArg rhsFreeVars
+  { 0 rhsAreNamed : All IsNamedArg rhsFreeVars }
   ||| Right-hand-side expression
   rhsExpr : TTImp
 
@@ -130,6 +130,30 @@ prettyDG dg = joinBy ""
   , "\n======"
   ]
 
+||| Unification result
+public export
+record UnificationResult where
+  constructor MkUR
+  ||| Task given to the unifier
+  task : UnificationTask
+  ||| Dependency graph returned by the unifier
+  uniDg : DependencyGraph
+  ||| LHS free variable (polymorphic constructor argument) values
+  lhsResult : SortedMap Name TTImp
+  ||| RHS free variable (monomorphic type argument) values
+  rhsResult : SortedMap Name TTImp
+  ||| All free variable values
+  fullResult : SortedMap Name TTImp
+  ||| Order of dependency of free variables without values
+  ||| (monomorphic constructor arguments)
+  order : List $ Fin uniDg.freeVars
+
+%runElab derive "UnificationResult" [Show]
+
+
+
+
+
 ||| List all free variables that don't depende on any other free variables
 leaves : (dg : DependencyGraph) -> FinBitSet dg.freeVars
 leaves dg =
@@ -158,3 +182,28 @@ flattenEmpties' dg ctx = do
 public export
 flattenEmpties : (dg : DependencyGraph) -> SnocList $ Fin dg.freeVars
 flattenEmpties dg = flattenEmpties' dg [<]
+
+||| Find all variables which have no value
+filterEmpty : Vect _ FVData -> List (Name, TTImp)
+filterEmpty = foldl myfun []
+  where
+    myfun : List (Name, TTImp) -> FVData -> List (Name, TTImp)
+    myfun xs x =
+      case x.value of
+        Just val => (x.name, val) :: xs
+        Nothing => xs
+
+public export
+finalizeDG : (task : UnificationTask) -> (dg : DependencyGraph) -> UnificationResult
+finalizeDG task dg = do
+  let fvOrder = flattenEmpties dg
+  let urList = filterEmpty dg.fvData
+  let (lhsRL, rhsRL) = List.splitAt task.lfv urList
+  MkUR
+    { task
+    , uniDg = dg
+    , lhsResult = fromList lhsRL
+    , rhsResult = fromList rhsRL
+    , fullResult = fromList urList
+    , order = toList fvOrder
+    }

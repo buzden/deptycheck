@@ -2,6 +2,7 @@ module Language.Reflection.Unify.WithCompiler
 
 import public Control.Monad.Writer
 import public Control.Monad.Identity
+import public Data.DPair
 import public Data.SnocVect
 
 import public Language.Reflection.Unify.Interface
@@ -181,7 +182,7 @@ solveDG dg = do
      else solveDG ds
 
 ArgDPair : Type
-ArgDPair = (arg : Arg ** IsNamedArg arg)
+ArgDPair = Subset Arg IsNamedArg
 
 ||| Generate hole name for free variables
 genHoleNames :
@@ -189,7 +190,7 @@ genHoleNames :
   SnocVect l ArgDPair ->
   m $ (SortedMap Name String, SnocVect l String)
 genHoleNames [<] = pure (empty, [<])
-genHoleNames (xs :< (fv ** isNamed)) = do
+genHoleNames (xs :< (Element fv isNamed)) = do
   let n = argName fv
   gs <- genSym $ show fv.name
   (others, others') <- genHoleNames xs
@@ -198,7 +199,7 @@ genHoleNames (xs :< (fv ** isNamed)) = do
 ||| Build up dependent pair type for typechecking
 buildUpDPair : SnocVect l ArgDPair -> TTImp -> TTImp
 buildUpDPair [<] t = t
-buildUpDPair (xs :< (fv ** isNamed)) t =
+buildUpDPair (xs :< (Element fv isNamed)) t =
   buildUpDPair xs
     `(Builtin.DPair.DPair
       ~(fv.type)
@@ -218,7 +219,7 @@ extractFVData :
   Vect l ArgDPair ->
   Vect l String ->
   m $ Vect l (Name, TTImp, Maybe TTImp)
-extractFVData t v ((fv ** isNamed) :: xs) (hn :: hns) = do
+extractFVData t v ((Element fv isNamed) :: xs) (hn :: hns) = do
   case t of
     (DPair myTy dNext) => do
       let (vv ** vRest) = v
@@ -247,10 +248,6 @@ extractFVData t v [] [] = do
     _ => throwError "Internal unifier error: DPairs don't correspond to each other. Should never occur."
   pure []
 
-allToDPairs : (a : Vect n t) -> All p a -> Vect n (b : t ** p b)
-allToDPairs [] [] = []
-allToDPairs (x :: xs) (p :: ps) = (x ** p) :: allToDPairs xs ps
-
 ||| Run unification
 unify' :
   Elaboration m =>
@@ -258,12 +255,12 @@ unify' :
   UnificationTask ->
   m $ DependencyGraph
 unify' task = do
-  let allFVsNamed = task.lhsAreNamed ++ task.rhsAreNamed
-  let allFreeVars = allToDPairs (task.lhsFreeVars ++ task.rhsFreeVars) allFVsNamed
+  let 0 allFVsNamed = task.lhsAreNamed ++ task.rhsAreNamed
+  let allFreeVars = pushIn (task.lhsFreeVars ++ task.rhsFreeVars) allFVsNamed
   let snocLFV : SnocVect task.lfv _ =
-    cast $ allToDPairs task.lhsFreeVars task.lhsAreNamed
+    cast $ pushIn task.lhsFreeVars task.lhsAreNamed
   let snocRFV : SnocVect task.rfv _ =
-    cast $ allToDPairs task.rhsFreeVars task.rhsAreNamed
+    cast $ pushIn task.rhsFreeVars task.rhsAreNamed
   (lhsNMap, lhsNames) <- genHoleNames snocLFV
   (rhsNMap, rhsNames) <- genHoleNames snocRFV
   let allNames = lhsNames ++ rhsNames
@@ -307,10 +304,11 @@ unifyWithCompiler :
   Elaboration m =>
   MonadError String m =>
   UnificationTask ->
-  m $ DependencyGraph
+  m $ UnificationResult
 unifyWithCompiler task = do
   -- runEitherT {m=Elab} $ unify task
   let ret = runEitherT {m=Elab} {e=String} $ unify' task
   let err = pure {f=Elab} $ Left $ "Unification failed catastrophically (likely because of the named hole bug or postpone bug)"
   rr <- try ret err
-  liftEither rr
+  dg <- liftEither rr
+  pure $ finalizeDG task dg

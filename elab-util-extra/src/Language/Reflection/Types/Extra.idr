@@ -68,7 +68,7 @@ public export
 
 ||| Generate AppArg for given Arg, substituting names for values if present
 public export
-(.appArg) : (arg : Arg) -> IsNamedArg arg => (Name -> TTImp) -> SortedMap Name TTImp -> AppArg arg
+(.appArg) : (arg : Arg) -> (0 _ : IsNamedArg arg) => (Name -> TTImp) -> SortedMap Name TTImp -> AppArg arg
 (.appArg) (MkArg count piInfo (Just n) type) f argVals = do
   let val = fromMaybe (f n) $ lookup n argVals
   case piInfo of
@@ -103,20 +103,20 @@ isFullyNamedType ti = do
 ||| Generate AppArgs for given argument vector, substituting names for values
 ||| if present
 public export
-(.appArgs) : (args: Vect _ Arg) -> All IsNamedArg args => (Name -> TTImp) -> SortedMap Name TTImp -> AppArgs args
+(.appArgs) : (args: Vect _ Arg) -> (0 _ : All IsNamedArg args) => (Name -> TTImp) -> SortedMap Name TTImp -> AppArgs args
 (.appArgs) [] f argVals = []
 (.appArgs) (x :: xs) @{p :: ps} f argVals = x.appArg f argVals :: xs.appArgs f argVals
 
 namespace TypeInfoInvoke
   ||| Generate type invocation, substituting argument values
   public export
-  (.invoke) : (ti: TypeInfo) -> IsFullyNamedType ti =>(Name -> TTImp) -> SortedMap Name TTImp -> TTImp
+  (.invoke) : (ti: TypeInfo) -> (0 _ : IsFullyNamedType ti) =>(Name -> TTImp) -> SortedMap Name TTImp -> TTImp
   (.invoke) t @{pt} f vals = do
     appArgs (var t.name) $ t.args.appArgs @{pt.argsAreNamed} f vals
 
 namespace ConInvoke
   ||| Generate constructor invocation, substituting argument values
   public export
-  (.invoke) : (con : Con _ _) -> IsFullyNamedCon con => (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
+  (.invoke) : (con : Con _ _) -> (0 _ : IsFullyNamedCon con) => (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
   (.invoke) con @{conP} f vals = appArgs (var con.name) $ con.args.appArgs f vals
 
