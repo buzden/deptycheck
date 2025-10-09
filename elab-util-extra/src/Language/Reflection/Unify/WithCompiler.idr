@@ -180,28 +180,32 @@ solveDG dg = do
      then dg
      else solveDG ds
 
+ArgDPair : Type
+ArgDPair = (arg : Arg ** IsNamedArg arg)
+
 ||| Generate hole name for free variables
 genHoleNames :
   Elaboration m =>
-  SnocVect l TaskFVData ->
+  SnocVect l ArgDPair ->
   m $ (SortedMap Name String, SnocVect l String)
 genHoleNames [<] = pure (empty, [<])
-genHoleNames (xs :< fv) = do
+genHoleNames (xs :< (fv ** isNamed)) = do
+  let n = argName fv
   gs <- genSym $ show fv.name
   (others, others') <- genHoleNames xs
-  pure $ (insert fv.name (show gs) others, others' :< show gs)
+  pure $ (insert n (show gs) others, others' :< show gs)
 
 ||| Build up dependent pair type for typechecking
-buildUpDPair : SnocVect l TaskFVData -> TTImp -> TTImp
+buildUpDPair : SnocVect l ArgDPair -> TTImp -> TTImp
 buildUpDPair [<] t = t
-buildUpDPair (xs :< fv) t =
+buildUpDPair (xs :< (fv ** isNamed)) t =
   buildUpDPair xs
     `(Builtin.DPair.DPair
       ~(fv.type)
-      ~(ILam EmptyFC MW ExplicitArg (Just fv.name) fv.type t))
+      ~(ILam EmptyFC MW ExplicitArg (Just $ argName fv) fv.type t))
 
 ||| Build up dependent pair value for typechecking
-buildUpTarget : SnocVect l (String, TaskFVData) -> TTImp -> TTImp
+buildUpTarget : SnocVect l (String, ArgDPair) -> TTImp -> TTImp
 buildUpTarget [<] t = t
 buildUpTarget (xs :< (s, _)) t =
   buildUpTarget xs `((~(IHole EmptyFC s) ** ~t))
@@ -211,24 +215,24 @@ extractFVData :
   MonadError String m =>
   (t : Type) ->
   t ->
-  Vect l TaskFVData ->
+  Vect l ArgDPair ->
   Vect l String ->
   m $ Vect l (Name, TTImp, Maybe TTImp)
-extractFVData t v (fv :: xs) (hn :: hns) = do
+extractFVData t v ((fv ** isNamed) :: xs) (hn :: hns) = do
   case t of
     (DPair myTy dNext) => do
       let (vv ** vRest) = v
       quoteV <- quote vv
       quoteT <- quote myTy
       logMsg "Unifier.TypecheckUnifier" 0
-        "\{show fv.name} : \{show quoteT} = \{show quoteV}"
+        "\{show $ Expr.argName fv} : \{show quoteT} = \{show quoteV}"
       rest <- extractFVData (dNext vv) vRest xs hns
       let retVal =
         case quoteV of
             IHole _ hh =>
               if hh == hn then Nothing else Just quoteV
             qv => Just qv
-      pure $ (fv.name, quoteT, retVal) :: rest
+      pure $ (argName fv, quoteT, retVal) :: rest
     _ => do
       qT <- quote t
       throwError "Failed to extract dependent pair from \{show qT}"
@@ -243,6 +247,10 @@ extractFVData t v [] [] = do
     _ => throwError "Internal unifier error: DPairs don't correspond to each other. Should never occur."
   pure []
 
+allToDPairs : (a : Vect n t) -> All p a -> Vect n (b : t ** p b)
+allToDPairs [] [] = []
+allToDPairs (x :: xs) (p :: ps) = (x ** p) :: allToDPairs xs ps
+
 ||| Run unification
 unify' :
   Elaboration m =>
@@ -250,9 +258,12 @@ unify' :
   UnificationTask ->
   m $ DependencyGraph
 unify' task = do
-  let allFreeVars = task.lhsFreeVars ++ task.rhsFreeVars
-  let snocLFV : SnocVect task.lfv TaskFVData = cast task.lhsFreeVars
-  let snocRFV : SnocVect task.rfv TaskFVData = cast task.rhsFreeVars
+  let allFVsNamed = task.lhsAreNamed ++ task.rhsAreNamed
+  let allFreeVars = allToDPairs (task.lhsFreeVars ++ task.rhsFreeVars) allFVsNamed
+  let snocLFV : SnocVect task.lfv _ =
+    cast $ allToDPairs task.lhsFreeVars task.lhsAreNamed
+  let snocRFV : SnocVect task.rfv _ =
+    cast $ allToDPairs task.rhsFreeVars task.rhsAreNamed
   (lhsNMap, lhsNames) <- genHoleNames snocLFV
   (rhsNMap, rhsNames) <- genHoleNames snocRFV
   let allNames = lhsNames ++ rhsNames
@@ -281,7 +292,7 @@ unify' task = do
   uniResults <-
     extractFVData checkTargetType' checkTarget' allFreeVars vectNames
   -- Generate dependency graph
-  let allZipped = zip vectNames $ zip allFreeVars uniResults
+  let allZipped = zip vectNames $ zip (task.lhsFreeVars ++ task.rhsFreeVars) uniResults
   let dg = genDG $ makeFVData <$> allZipped
   logMsg "Unifier.TypecheckUnifier" 0 "Initial DG:\n\{prettyDG dg}"
   let dg = subEmpties dg

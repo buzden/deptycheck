@@ -6,38 +6,14 @@ import public Data.FinBitSet
 import public Data.SortedMap
 import public Data.Vect
 import public Decidable.Equality
+import public Derive.Prelude
 import public Language.Reflection
+import public Language.Reflection.Expr
 import public Language.Reflection.TTImp
 import public Language.Reflection.TT
 import public Language.Reflection.Syntax
 
-||| Free variable input data
-public export
-record TaskFVData where
-  constructor MkTFVD
-  name : Name
-  rig : Count
-  piInfo : PiInfo TTImp
-  type : TTImp
-
-Show a => Show (PiInfo a) where
-  show ImplicitArg = "ImplicitArg"
-  show ExplicitArg = "ExplicitArg"
-  show AutoImplicit = "AutoImplicit"
-  show (DefImplicit x) = "DefImplicit \{show x}"
-
-||| Generate `TaskFVData` from given `Arg`. Fails if it is unnamed.
-public export
-tryFromArg : MonadError e m => Lazy e -> Arg -> m TaskFVData
-tryFromArg errMsg (MkArg count piInfo Nothing type) =
-  throwError errMsg
-tryFromArg errMsg (MkArg count piInfo (Just x) type) =
-  pure $ MkTFVD x count piInfo type
-
-public export
-Show TaskFVData where
-  show (MkTFVD name rig piInfo type) =
-    showPiInfo piInfo $ showCount rig "\{name} : \{show type}"
+%language ElabReflection
 
 ||| Unification task
 public export
@@ -46,22 +22,29 @@ record UnificationTask where
   ||| Amount of left-hand-side free variables
   lfv : Nat
   ||| Left-hand-side free variables
-  lhsFreeVars : Vect lfv TaskFVData
+  lhsFreeVars : Vect lfv Arg
+  lhsAreNamed : All IsNamedArg lhsFreeVars
   ||| Left-hand-side expression
   lhsExpr : TTImp
   ||| Amount of right-hand-side free variables
   rfv : Nat
   ||| Right-hand-side free variables
-  rhsFreeVars : Vect rfv TaskFVData
+  rhsFreeVars : Vect rfv Arg
+  rhsAreNamed : All IsNamedArg rhsFreeVars
   ||| Right-hand-side expression
   rhsExpr : TTImp
 
 %name UnificationTask task
 
+%runElab derive "Count" [Show]
+%runElab derive "PiInfo" [Show]
+%runElab derive "Syntax.Arg" [Show]
+
 public export
 Show UnificationTask where
-  show (MkUniTask l lfv lhs r rfv rhs) =
-    "MkUniTask \{show l} \{show lfv} \{show lhs} \{show r} \{show rfv} \{show rhs}"
+  showPrec p t = showCon p "MkUniTask" $ joinBy "" $ [showArg t.lfv, showArg t.lhsFreeVars, showArg t.lhsExpr, showArg t.rfv, showArg t.rhsFreeVars,
+                                                     showArg t.rhsExpr]
+-- %runElab derive "UnificationTask" [Show]
 
 ||| Free variable output data
 public export
@@ -76,18 +59,15 @@ record FVData where
 
 %name FVData fv, fvData
 
-public export
-Eq FVData where
-  (==) (MkFVData n h r p t v) (MkFVData n' h' r' p' t' v') =
-    n == n' && h == h' && t == t' && v == v' && r == r' && p == p'
+%runElab derive "FVData" [Show, Eq]
 
 public export
-Show FVData where
-  show (MkFVData n h r p t v) = joinBy "" [ showPiInfo p $ showCount r "\{n} \{h} : \{show t}", " = \{show v}" ]
+Interpolation FVData where
+  interpolate (MkFVData n h r p t v) = joinBy "" [ showPiInfo p $ showCount r "\{n} \{h} : \{show t}", " = \{show v}" ]
 
 public export
-makeFVData : (String, TaskFVData, Name, TTImp, Maybe TTImp) -> FVData
-makeFVData (h, fv, n, t, v) = MkFVData n h fv.rig fv.piInfo t v
+makeFVData : (String, Arg, Name, TTImp, Maybe TTImp) -> FVData
+makeFVData (h, fv, n, t, v) = MkFVData n h fv.count fv.piInfo t v
 
 ||| Free variable depenfdency graph
 public export
@@ -108,6 +88,8 @@ record DependencyGraph where
 
 %name DependencyGraph dg, depGraph
 
+%runElab derive "DependencyGraph" [Show]
+
 public export
 Eq DependencyGraph where
   (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') with (decEq a a')
@@ -115,11 +97,6 @@ Eq DependencyGraph where
     a == a' && b == (rewrite p in b') && c == (rewrite p in c') &&
       d == (rewrite p in d') && e == (rewrite p in e') && f == (rewrite p in f')
    (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') | No _ = False
-
-public export
-Show DependencyGraph where
-  show (MkDG a b c d e f) =
-    "MkDG \{show a} \{show b} \{show c} \{show d} \{show e} \{show f}"
 
 prettyDeps : (dg : DependencyGraph) -> FinBitSet dg.freeVars -> String
 prettyDeps dg deps =

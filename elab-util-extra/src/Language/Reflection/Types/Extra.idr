@@ -1,5 +1,6 @@
 module Language.Reflection.Types.Extra
 
+import Data.List.Quantifiers
 import Language.Reflection.Expr
 import Language.Reflection.Util
 import Syntax.IHateParens
@@ -44,8 +45,7 @@ cleanupCon = { args $= map cleanupArg, typeArgs $= cleanupAppArgs }
 ||| Run `cleanupNamedHoles` over all `TypeInfo`'s `TTImp`s
 public export
 cleanupTypeInfo : TypeInfo -> TypeInfo
-cleanupTypeInfo (MkTypeInfo name arty args argNames cons) =
-  MkTypeInfo name arty (cleanupArg <$> args) argNames (cleanupCon <$> cons)
+cleanupTypeInfo = {args $= map cleanupArg, cons $= map cleanupCon}
 
 ||| Given a type name to which constructor belongs, calculate its signature
 public export
@@ -68,33 +68,55 @@ public export
 
 ||| Generate AppArg for given Arg, substituting names for values if present
 public export
-(.appArg) : (arg : Arg) -> (Name -> TTImp) -> SortedMap Name TTImp -> Maybe $ AppArg arg
+(.appArg) : (arg : Arg) -> IsNamedArg arg => (Name -> TTImp) -> SortedMap Name TTImp -> AppArg arg
 (.appArg) (MkArg count piInfo (Just n) type) f argVals = do
   let val = fromMaybe (f n) $ lookup n argVals
-  Just $ case piInfo of
+  case piInfo of
     ExplicitArg => Regular val
     AutoImplicit => AutoApp val
     _ => NamedApp n val
-(.appArg) (MkArg count piInfo Nothing type) f argVals = Nothing
+
+public export
+IsFullyNamedCon : Con _ _ -> Type
+IsFullyNamedCon c = All IsNamedArg c.args
+
+public export
+isFullyNamedCon : (c : Con _ _) -> Dec $ IsFullyNamedCon c
+isFullyNamedCon c = all isNamedArg c.args
+
+public export
+record IsFullyNamedType (ti : TypeInfo) where
+  constructor ItIsFullyNamed
+  argsAreNamed : All IsNamedArg ti.args
+  consAreNamed : All IsFullyNamedCon ti.cons
+
+public export
+isFullyNamedType : (ti : TypeInfo) -> Dec $ IsFullyNamedType ti
+isFullyNamedType ti = do
+  let Yes aan = all isNamedArg ti.args
+  | No cntr => No (\ifnt => cntr ifnt.argsAreNamed)
+  let Yes can = all isFullyNamedCon ti.cons
+  | No cntr => No (\ifnt => cntr ifnt.consAreNamed)
+  Yes $ ItIsFullyNamed aan can
+
 
 ||| Generate AppArgs for given argument vector, substituting names for values
 ||| if present
 public export
-(.appArgs) : (args: Vect _ Arg) -> (Name -> TTImp) -> SortedMap Name TTImp -> Maybe $ AppArgs args
-(.appArgs) [] f argVals = Just []
-(.appArgs) (x :: xs) f argVals = [| x.appArg f argVals :: xs.appArgs f argVals |]
+(.appArgs) : (args: Vect _ Arg) -> All IsNamedArg args => (Name -> TTImp) -> SortedMap Name TTImp -> AppArgs args
+(.appArgs) [] f argVals = []
+(.appArgs) (x :: xs) @{p :: ps} f argVals = x.appArg f argVals :: xs.appArgs f argVals
 
 namespace TypeInfoInvoke
   ||| Generate type invocation, substituting argument values
   public export
-  (.invoke) : TypeInfo -> (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
-  (.invoke) t f vals =
-    fromMaybe `(_) $ appArgs (var t.name) <$> t.args.appArgs f vals
+  (.invoke) : (ti: TypeInfo) -> IsFullyNamedType ti =>(Name -> TTImp) -> SortedMap Name TTImp -> TTImp
+  (.invoke) t @{pt} f vals = do
+    appArgs (var t.name) $ t.args.appArgs @{pt.argsAreNamed} f vals
 
 namespace ConInvoke
   ||| Generate constructor invocation, substituting argument values
   public export
-  (.invoke) : Con _ _ -> (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
-  (.invoke) con f vals =
-    fromMaybe `(_) $ appArgs (var con.name) <$> con.args.appArgs f vals
+  (.invoke) : (con : Con _ _) -> IsFullyNamedCon con => (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
+  (.invoke) con @{conP} f vals = appArgs (var con.name) $ con.args.appArgs f vals
 

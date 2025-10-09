@@ -6,6 +6,7 @@ import public Derive.Prelude
 import public Data.List1
 import public Data.Vect
 import public Data.List
+import public Data.List.Quantifiers
 import public Data.Either
 import public Data.SortedMap
 import public Data.SortedSet
@@ -30,7 +31,7 @@ import public Syntax.IHateParens
 ||| Valid type task interface
 |||
 ||| Auto-implemented by any Type or any function that returns Type.
-public export
+export
 interface TypeTask (t : Type) where
 
 public export
@@ -85,13 +86,21 @@ taskTName t                   =
 --- CUSTOM DATA TYPES ---
 -------------------------
 
+
 ||| Specialisation task
 record MonoTask where
   constructor MkMonoTask
   ||| Full unification task
   taskQuote      : TTImp
+  tqArty         : Nat
+  tqArgs         : Vect tqArty Arg
+  tqRet          : TTImp
+  tqArgsNamed    : All IsNamedArg tqArgs
   ||| Unification task type
   taskType       : TTImp
+  ttArty         : Nat
+  ttArgs         : Vect ttArty Arg
+  ttArgsNamed    : All IsNamedArg ttArgs
   ||| Namespace in which monomorphise was called
   currentNs      : Namespace
   ||| Name of polymorphic type
@@ -102,10 +111,12 @@ record MonoTask where
   fullInvocation : TTImp
   ||| Polymorphic type's TypeInfo
   polyTy         : TypeInfo
+  ||| Proof that all the constructors of the polymorphic type are named
+  polyTyNamed    : IsFullyNamedType polyTy
 
 public export
 Show MonoTask where
-  show (MkMonoTask tq tt ns tn on fi pt) = "MkMonoTask \{show tq} \{show tt} \{show ns} \{show tn} \{show on} \{show fi} <typeinfo>"
+  show (MkMonoTask tq _ _ _ _ tt _ _ _ ns tn on fi pt _) = "MkMonoTask \{show tq} \{show tt} \{show ns} \{show tn} \{show on} \{show fi} <typeinfo> <proof>"
 
 ||| Polymorphic type's constructor
 (.Con) : MonoTask -> Type
@@ -142,7 +153,7 @@ UniResults = List $ Either String UnificationResult
 getCurrentNS : Elaboration m => m Namespace
 getCurrentNS = do
   NS nsn _ <- inCurrentNS ""
-  | _ => fail "inCurrentNS failed?"
+  | _ => fail "Internal error: inCurrentNS did not return NS"
   pure nsn
 
 ||| Prepend namespace into which everything is generated to name
@@ -169,113 +180,144 @@ getTask :
   m MonoTask
 getTask l' outputName = with Prelude.(>>=) do
   taskQuote : TTImp <- cleanupNamedHoles <$> quote l'
+  let (tqArgs, tqRet) = unLambda taskQuote
+  let Yes tqArgsNamed = all isNamedArg $ fromList tqArgs
+  | _ => fail "Internal error: lambda has unnamed arguments"
   taskType : TTImp <- cleanupNamedHoles <$> quote l
+  let (ttArgs, _) = unPi taskType
+  let Yes ttArgsNamed = all isNamedArg $ fromList ttArgs
+  | _ => fail "Internal error: lambda type has unnamed arguments"
   currentNs <- getCurrentNS
   fullInvocation <- taskInvocation taskQuote
   typeName : Name <- taskTName fullInvocation
   polyTy <- cleanupTypeInfo <$> Types.getInfo' typeName
+  let Yes polyTyNamed = isFullyNamedType polyTy
+  | _ => fail "Internal error: getInfo' returned a type with unnamed arguments or constructors."
   pure $ MkMonoTask
     { taskQuote
+    , tqArty = length tqArgs
+    , tqArgs = fromList tqArgs
+    , tqRet
+    , tqArgsNamed
     , taskType
+    , ttArty = length ttArgs
+    , ttArgs = fromList ttArgs
+    , ttArgsNamed
     , currentNs
     , typeName
     , outputName
     , fullInvocation
     , polyTy
+    , polyTyNamed
     }
 
 ---------------------------
 --- Constructor Mapping ---
 ---------------------------
 
+allToDPairs : (l : List t) -> All p l -> List (x : t ** p x)
+allToDPairs [] [] = []
+allToDPairs (x :: xs) (p :: ps) = (x ** p) :: allToDPairs xs ps
+
 ||| Run monadic operation on all constructors of monomorphic type
 mapCons :
   Monad m =>
-  (f : (t : MonoTask) -> t.Con -> m r) ->
+  (f : (t : MonoTask) ->
+       (pCon : t.Con) ->
+       IsFullyNamedCon pCon =>
+       m r) ->
   MonoTask ->
   m $ List r
-mapCons f task = traverse (f task) task.polyTy.cons
-
-||| Run monadic operation on all constructors for which unification succeeded
-mapUCons :
-  Monad m =>
-  (f : (t : MonoTask) -> UnificationResult -> t.Con -> m r) ->
-  MonoTask ->
-  UniResults ->
-  m $ List r
-mapUCons f t rs = traverseA (f t) $ zip t.polyTy.cons rs
-  where
-    traverseA :
-      (UnificationResult -> t.Con -> m r) ->
-      List (t.Con, Either String UnificationResult) ->
-      m (List r)
-    traverseA f [] = pure []
-    traverseA f ((con, Left _) :: xs) = traverseA f xs
-    traverseA f ((con, Right res) :: xs) = [| f res con :: traverseA f xs |]
+  -- traverse (f task) task.polyTy.cons
+mapCons f task = do
+  let pt = task.polyTyNamed
+  let adp = allToDPairs task.polyTy.cons pt.consAreNamed
+  traverse (\(c ** pc) => f task c @{pc}) adp
 
 ||| Map over all constructors for which unification succeeded
-mapUCons' :
-  (f : (t : MonoTask) -> UnificationResult -> t.Con -> r) ->
+mapUCons :
+  (f : (t : MonoTask) ->
+       UnificationResult ->
+       (pCon : t.Con) ->
+       IsFullyNamedCon pCon =>
+       r) ->
   MonoTask ->
   UniResults ->
   List r
-mapUCons' f t rs = runIdentity $ mapUCons (\a,b,c => Id $ f a b c) t rs
-
-||| Run monadic operation on all pairs of monomorphic and polymorphic constructors
-map2UCons :
-  Monad m =>
-  (f : (t : MonoTask) -> UnificationResult -> (mt: TypeInfo) -> t.Con -> mt.Con -> m r) ->
-  MonoTask ->
-  UniResults ->
-  TypeInfo ->
-  m $ List r
-map2UCons f t rs mt = traverseA $ zip t.polyTy.cons (zip mt.cons rs)
+mapUCons f t rs = do
+  let pt = t.polyTyNamed
+  let adp = allToDPairs t.polyTy.cons pt.consAreNamed
+  foldMap travA $ zip adp rs
   where
-    traverseA :
-      List (t.Con, mt.Con, Either String UnificationResult) ->
-      m (List r)
-    traverseA [] = pure []
-    traverseA ((con, (mcon, Left _)) :: xs) = traverseA xs
-    traverseA ((con, (mcon, Right res)) :: xs) = [| f t res mt con mcon :: traverseA xs |]
+    travA :
+      ((con : t.Con ** IsFullyNamedCon con), Either String UnificationResult) ->
+      List r
+    travA ((con ** prf), Left _) = []
+    travA ((con ** prf), Right res) = [f t res con]
 
 ||| Map over all pairs of monomorphic and polymorphic constructors
-map2UCons' :
-  (f : (t : MonoTask) -> UnificationResult -> (mt: TypeInfo) -> t.Con -> mt.Con -> r) ->
+map2UCons :
+  (f : (t : MonoTask) ->
+       UnificationResult ->
+       (mt: TypeInfo) ->
+       (pc : t.Con) ->
+       IsFullyNamedCon pc =>
+       (mc : mt.Con) ->
+       IsFullyNamedCon mc =>
+       r) ->
   MonoTask ->
   UniResults ->
-  TypeInfo ->
+  (mt : TypeInfo) ->
+  IsFullyNamedType mt =>
   List r
-map2UCons' f t rs mt =
-  runIdentity $ map2UCons (\a,b,c,d,e => Id $ f a b c d e) t rs mt
+map2UCons f t rs mt @{mtp} = do
+  let pt = t.polyTyNamed
+  let p1 = allToDPairs t.polyTy.cons pt.consAreNamed
+  let p2 = allToDPairs mt.cons mtp.consAreNamed
+  foldMap travA $ zip p1 $ zip p2 rs
+  where
+    travA :
+      ( (pc : t.Con ** IsFullyNamedCon pc)
+      , (mc : mt.Con ** IsFullyNamedCon mc)
+      , Either String UnificationResult) ->
+      List r
+    travA ((con ** cprf), (mcon ** mprf), Right res) = [f t res mt con mcon]
+    travA _ = []
+
 
 ||| Run monadic operation on all pairs of monomorphic and polymorphic constructors
 map2UConsN :
-  Monad m =>
-  (f : (t : MonoTask) -> UnificationResult -> (mt: TypeInfo) -> t.Con -> mt.Con -> Nat -> m r) ->
+  (f : (t : MonoTask) ->
+       UnificationResult ->
+       (mt: TypeInfo) ->
+       (con : t.Con) ->
+       IsFullyNamedCon con =>
+       (mcon : mt.Con) ->
+       IsFullyNamedCon mcon =>
+       Nat ->
+       r) ->
   MonoTask ->
   UniResults ->
-  TypeInfo ->
-  m $ List r
-map2UConsN f t rs mt = traverseA 0 $ zip t.polyTy.cons (zip mt.cons rs)
+  (mt : TypeInfo) ->
+  IsFullyNamedType mt =>
+  List r
+map2UConsN f t rs mt @{mtp} = do
+  let pt = t.polyTyNamed
+  let p1 = allToDPairs t.polyTy.cons pt.consAreNamed
+  let p2 = allToDPairs mt.cons mtp.consAreNamed
+  traverseA 0 $ zip p1 (zip p2 rs)
   where
     traverseA :
       Nat ->
-      List (t.Con, mt.Con, Either String UnificationResult) ->
-      m (List r)
-    traverseA n [] = pure []
-    traverseA n ((con, (mcon, Left _)) :: xs) = traverseA (S n) xs
-    traverseA n ((con, (mcon, Right res)) :: xs) =
-      [| f t res mt con mcon n :: traverseA (S n)  xs|]
-
-||| Map over all pairs of monomorphic and polymorphic constructors
-map2UConsN' :
-  (f : (t : MonoTask) -> UnificationResult -> (mt: TypeInfo) -> t.Con -> mt.Con -> Nat -> r) ->
-  MonoTask ->
-  UniResults ->
-  TypeInfo ->
-  List r
-map2UConsN' f t rs mt =
-  runIdentity $ map2UConsN (\a,b,c,d,e,g => Id $ f a b c d e g) t rs mt
+      List
+        ( (pc : t.Con ** IsFullyNamedCon pc)
+        , (mc : mt.Con ** IsFullyNamedCon mc)
+        , Either String UnificationResult) ->
+      List r
+    traverseA n ((_, _, Left _) :: xs) = traverseA (S n) xs
+    traverseA n (((con ** pprf), (mcon ** mprf), Right res) :: xs) =
+      f t res mt con mcon n :: traverseA (S n) xs
+    traverseA n _ = []
 
 -------------------------------
 --- Constructor unification ---
@@ -291,14 +333,18 @@ filterEmpty = foldl myfun []
         Just val => (x.name, val) :: xs
         Nothing => xs
 
+
 ||| Run unification for a given polymorphic constructor
-unifyCon : Elaboration m => (t : MonoTask) -> t.Con -> EitherT String m UnificationResult
+unifyCon :
+  Elaboration m =>
+  (t : MonoTask) ->
+  (con : t.Con) ->
+  IsFullyNamedCon con =>
+  EitherT String m UnificationResult
 unifyCon t con = do
   let conRet = appArgs .| var t.typeName .| con.typeArgs
-  let (argsR, tRet) = unLambda t.taskQuote
-  argsR <- traverse .| tryFromArg "nameless arg!" .| fromList argsR
-  argsL <- traverse .| tryFromArg "nameless arg!" .| con.args
-  let uniTask = MkUniTask _ argsL conRet _ argsR tRet
+  let uniTask =
+    MkUniTask _ con.args %search conRet _ t.tqArgs t.tqArgsNamed t.fullInvocation
   logMsg "SpecialiseData" 0 "Unifier task: \{show uniTask}"
   Right uniRes <- tryError $ unifyWithCompiler uniTask
   | Left err => MkEitherT $ do
@@ -329,41 +375,55 @@ mkMonoArg :
   (t : MonoTask) ->
   (ur : UnificationResult) ->
   Fin (ur.uniDg.freeVars) ->
-  Arg
+  (arg : Arg ** IsNamedArg arg)
 mkMonoArg t ur fvId = do
   let fvData = index fvId ur.uniDg.fvData
-  MkArg fvData.rig fvData.piInfo (Just fvData.name) fvData.type
+  (MkArg fvData.rig fvData.piInfo (Just fvData.name) fvData.type ** ItIsNamed)
+
+dPairsToAll : Vect l (a : t ** p a) -> (v : Vect l t ** All p v)
+dPairsToAll [] = ([] ** [])
+dPairsToAll ((x ** p) :: ms) = do
+  let (xs ** ps) = dPairsToAll ms
+  ((x :: xs) ** (p :: ps))
+
+dPairsToAll' : List (a : t ** p a) -> (v : List t ** All p v)
+dPairsToAll' [] = ([] ** [])
+dPairsToAll' ((x ** p) :: ms) = do
+  let (xs ** ps) = dPairsToAll' ms
+  ((x :: xs) ** (p :: ps))
 
 ||| Generate a monomorphic constructor
 mkMonoCon :
   (newArgs : _) ->
+  All IsNamedArg newArgs =>
   (t : MonoTask) ->
   UnificationResult ->
-  t.Con ->
-  Con _ newArgs
+  (con : t.Con) ->
+  IsFullyNamedCon con =>
+  (con : Con _ newArgs ** IsFullyNamedCon con)
 mkMonoCon newArgs t ur pCon = do
-  let args = mkMonoArg t ur <$> Vect.fromList ur.order
-  let Just typeArgs = newArgs.appArgs var ur.fullResult
-  | _ => ?mmc_rhs
-  MkCon
+  let (args ** allArgs) =
+    dPairsToAll $ mkMonoArg t ur <$> Vect.fromList ur.order
+  let typeArgs = newArgs.appArgs var ur.fullResult
+  (MkCon
     { name = inGenNS t $ dropNS pCon.name
     , arty = _
     , args
     , typeArgs
-    }
+    } ** allArgs)
 
 ||| Generate a monomorphic type
-mkMonoTy : MonoTask -> UniResults -> TypeInfo
-mkMonoTy t ur =
-  MkTypeInfo
-    { name = inGenNS t t.outputName
-    , arty = _
-    , args
-    , argNames = map (fromMaybe (UN Underscore) . name) args
-    , cons = mapUCons' (mkMonoCon args) t ur
-    }
-  where
-    args = Vect.fromList $ fst $ unPi t.taskType
+mkMonoTy : MonoTask -> UniResults -> (ti : TypeInfo ** IsFullyNamedType ti)
+mkMonoTy t ur = do
+  let (cons ** consAreNamed) =
+    dPairsToAll' $ mapUCons (mkMonoCon t.ttArgs @{t.ttArgsNamed}) t ur
+  (MkTypeInfo
+            { name = inGenNS t t.outputName
+            , arty = _
+            , args = t.ttArgs
+            , argNames = map (fromMaybe (UN Underscore) . name) t.ttArgs
+            , cons
+            } ** ItIsFullyNamed t.ttArgsNamed consAreNamed)
 
 ------------------------------------
 --- MONO TO POLY CAST DERIVATION ---
@@ -380,7 +440,7 @@ forallMTArgs : MonoTask -> TTImp -> TTImp
 forallMTArgs task = rewireIPiImplicit task.taskType
 
 ||| Generate monomorphic to polimorphic type conversion function signature
-mkMToPImplSig : MonoTask -> UniResults -> TypeInfo -> TTImp
+mkMToPImplSig : MonoTask -> UniResults -> (mt : TypeInfo) -> IsFullyNamedType mt => TTImp
 mkMToPImplSig t urs mt =
   forallMTArgs t $ arg (mt.invoke var empty) .-> t.fullInvocation
 
@@ -397,8 +457,10 @@ mkMToPImplClause :
   (t : MonoTask) ->
   UnificationResult ->
   (mt : TypeInfo) ->
-  t.Con ->
-  mt.Con ->
+  (pCon : t.Con) ->
+  IsFullyNamedCon pCon =>
+  (mCon : mt.Con) ->
+  IsFullyNamedCon mCon =>
   Clause
 mkMToPImplClause t ur mt con mcon =
   (var "mToPImpl" .$ mcon.invoke bindVar
@@ -410,22 +472,23 @@ mkMToPImplClause t ur mt con mcon =
 mkMToPImplDecls :
   MonoTask ->
   UniResults ->
-  TypeInfo ->
+  (mt : TypeInfo) ->
+  IsFullyNamedType mt =>
   List Decl
-mkMToPImplDecls t urs mt = do
-  let sig = mkMToPImplSig t urs mt
-  let clauses = map2UCons' mkMToPImplClause t urs mt
+mkMToPImplDecls t urs mt @{mtp} = do
+  let sig = mkMToPImplSig t urs mt @{mtp}
+  let clauses = map2UCons mkMToPImplClause t urs mt
   [ public' "mToPImpl" sig
   , def "mToPImpl" clauses
   ]
 
 ||| Generate monomorphic to polimorphic cast signature
-mkMToPSig : MonoTask -> TypeInfo -> TTImp
+mkMToPSig : MonoTask -> (mt : TypeInfo) -> IsFullyNamedType mt => TTImp
 mkMToPSig t mt = do
   forallMTArgs t $ `(Cast ~(mt.invoke var empty) ~(t.fullInvocation))
 
 ||| Generate monomorphic to polimorphic cast declarations
-mkMToPDecls : MonoTask -> TypeInfo -> List Decl
+mkMToPDecls : MonoTask -> (mt : TypeInfo) -> IsFullyNamedType mt => List Decl
 mkMToPDecls t mt =
   [ interfaceHint Public "mToP" $ mkMToPSig t mt
   , def "mToP" [ (var "mToP") .= `(MkCast mToPImpl)]
@@ -434,35 +497,36 @@ mkMToPDecls t mt =
 -----------------------------------
 --- MULTIINJECTIVITY DERIVATION ---
 -----------------------------------
-||| Wrap an expression in let expressions as defined by list
-wrapInLets : List (Name, TTImp) -> TTImp -> TTImp
-wrapInLets [] t = t
-wrapInLets ((n, t') :: xs) t = iLet MW n `(_) t' $ wrapInLets xs t
-
 ||| Given a list of arguments, generate a list of aliased arguments
 ||| and a list of aliases
-genArgAliases : Elaboration m => List Arg -> List (Name, Name) -> m (List Arg, List (Name, Name))
-genArgAliases [] lnn = pure ([], lnn)
-genArgAliases ((MkArg count piInfo Nothing type) :: xs) lnn =
-  genArgAliases xs lnn
-genArgAliases ((MkArg count piInfo (Just name) type) :: xs) lnn = do
+
+genArgAliases :
+  Elaboration m =>
+  (as: Vect l Arg) ->
+  All IsNamedArg as =>
+  List (Name, Name) ->
+  m ((v : Vect l Arg ** All IsNamedArg v), List (Name, Name))
+genArgAliases [] lnn = pure (([] ** []), lnn)
+genArgAliases @{_} (x :: xs) @{(p :: ps)} lnn = do
+  let name = Expr.argName x
   alias <- genSym $ show name
-  (as, am) <- genArgAliases xs ((name, alias) :: lnn)
-  let type = substituteVariables (fromList $ mapSnd var <$> lnn) type
-  pure ((MkArg count piInfo (Just alias) type) :: as, am)
+  ((as ** aps), am) <- genArgAliases xs ((name, alias) :: lnn)
+  let type = substituteVariables (fromList $ mapSnd var <$> lnn) x.type
+  pure ((MkArg x.count x.piInfo (Just alias) type :: as ** ItIsNamed :: aps), am)
 
 ||| Given a list of aliased argument pairs, generate a list of equality type
 ||| for each pair
-mkEqs : List (Arg, Arg) -> TTImp
-mkEqs [] = `(MkUnit)
-mkEqs [(a1, a2)] =
-  case (a1.name, a2.name) of
-    (Just a1n, Just a2n) => `(~(var a1n) ~=~ ~(var a2n))
-    _ => `(MkUnit)
-mkEqs ((a1, a2) :: as) =
-  case (a1.name, a2.name) of
-    (Just a1n, Just a2n) => `(Pair (~(var a1n) ~=~ ~(var a2n)) ~(mkEqs as))
-    _ => mkEqs as
+mkEqualsTuple :
+  (v1 : Vect l Arg) ->
+  (v2 : Vect l Arg) ->
+  All IsNamedArg v1 =>
+  All IsNamedArg v2 =>
+  TTImp
+mkEqualsTuple [] [] = `(MkUnit)
+mkEqualsTuple [(a1)] [(a2)] @{a1p :: []} @{a2p :: []} =
+  `(~(var $ argName a1) ~=~ ~(var $ argName a2))
+mkEqualsTuple (a1 :: a1s) (a2 :: a2s) @{a1p :: a1ps} @{a2p :: a2ps} =
+  `(Pair (~(var $ argName a1) ~=~ ~(var $ argName a2)) ~(mkEqualsTuple a1s a2s))
 
 ||| Given a list of aliased argument pairs [(a, b), ...], generate a series of
 ||| named applications: (... {a=a} {b=a})
@@ -470,12 +534,13 @@ mkDoubleBinds : SnocList (Arg, Arg) -> TTImp -> TTImp
 mkDoubleBinds [<] t = t
 mkDoubleBinds (as :< (a1, a2)) t =
   case (a1.name, a2.name) of
-    (Just a1n, Just a2n) => mkDoubleBinds as t .! (a1n, bindVar a1n) .! (a2n, bindVar a1n)
+    (Just a1n, Just a2n) =>
+      mkDoubleBinds as t .! (a1n, bindVar a1n) .! (a2n, bindVar a1n)
     _ => mkDoubleBinds as t
 
 ||| Make an argument omega implicit
-prepareArg : Arg -> Arg
-prepareArg = { piInfo := ImplicitArg, count := MW }
+setMWImplicit : Arg -> Arg
+setMWImplicit = { piInfo := ImplicitArg, count := MW }
 
 ||| A tuple value of multiple repeating expressons
 tupleOfN : Nat -> TTImp -> TTImp
@@ -487,67 +552,89 @@ tupleOfN (S n) t = `(MkPair ~(t) ~(tupleOfN n t))
 mergeAliases : SortedMap Name TTImp -> List (Name, Name) -> SortedMap Name TTImp
 mergeAliases m = mergeWith (curry fst) m . fromList . map (mapSnd var)
 
-||| Map all unmapped variables from the list to their aliases (with binding)
-mergeAliasesBind : SortedMap Name TTImp -> List (Name, Name) -> SortedMap Name TTImp
-mergeAliasesBind m = mergeWith (curry fst) m . fromList . map (mapSnd bindVar)
+renewProof : (args : Vect l Arg) -> All IsNamedArg args => All IsNamedArg (SpecialiseData.setMWImplicit <$> args)
+renewProof [] @{[]} = []
+renewProof (x :: xs) @{(p :: ps)} with (x)
+  renewProof (x :: xs) @{(p :: ps)} | (MkArg _ _ (Just n) _) =
+    ItIsNamed :: renewProof xs
 
 ||| Derive multiinjectivity for a polymorphic constructor that has a
 ||| monomorphic equivalent
 mkMultiInjDecl :
   Elaboration m =>
+  (t : MonoTask) ->
   UnificationResult ->
-  Con aty ags ->
-  Con aty' ags' ->
-  Name ->
+  (mt : TypeInfo) ->
+  (pCon : t.Con) ->
+  IsFullyNamedCon pCon =>
+  (mCon : mt.Con) ->
+  IsFullyNamedCon mCon =>
+  Nat ->
   m $ List Decl
-mkMultiInjDecl ur con con' n = do
-  let ourArgs = prepareArg <$> toList con'.args
-  let (S _) = con'.arty
+mkMultiInjDecl _ ur _ con mcon i = do
+  let n = fromString "mInj\{show i}"
+  let ourArgs : Vect mcon.arty Arg
+      ourArgs = setMWImplicit <$> mcon.args
+  let (S _) = mcon.arty
   | _ => pure []
-  (a1, am1) <- genArgAliases ourArgs []
-  (a2, am2) <- genArgAliases ourArgs []
+  let prf : All IsNamedArg ourArgs = renewProof mcon.args
+  ((a1 ** ap1), am1) <- genArgAliases ourArgs []
+  ((a2 ** ap2), am2) <- genArgAliases ourArgs []
   let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
                 con.invoke var $ mergeAliases ur.fullResult am1
   let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $
                 con.invoke var $ mergeAliases ur.fullResult am2
 
-  let eqs = mkEqs $ zip a1 a2
+  let eqs = mkEqualsTuple a1 a2
   let sig =
-    flip piAll a1 $ flip piAll a2 $ `((~(lhsCon) ~=~ ~(rhsCon)) -> ~(eqs))
-  let lhs = mkDoubleBinds (cast $ zip a1 a2) (var n) .$ `(Refl)
+    flip piAll (toList a1) $ flip piAll (toList a2) $ `((~(lhsCon) ~=~ ~(rhsCon)) -> ~(eqs))
+  let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ `(Refl)
   pure
     [ public' n sig
-    , def n $ singleton $ patClause lhs $ tupleOfN con'.arty `(Refl)
+    , def n $ singleton $ patClause lhs $ tupleOfN mcon.arty `(Refl)
     ]
 
 ||| Derive multiinjectivity for all polymorphic constructors that have
 ||| a monomorphic equivalent
-mkMultiInjDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
+mkMultiInjDecls :
+  Elaboration m => MonoTask -> UniResults -> (mt : TypeInfo) -> IsFullyNamedType mt => m $ List Decl
 mkMultiInjDecls t ur monoTy = do
-  join <$>
-    map2UConsN
-      (\_,ur,_,tc,mc,i => mkMultiInjDecl ur tc mc $ fromString "mInj\{show i}")
-      t ur monoTy
+  let s = map2UConsN mkMultiInjDecl t ur monoTy
+  join <$> sequence s
 
 ----------------------------------
 --- MULTICONGRUENCY DERIVATION ---
 ----------------------------------
 
-||| Derive multicongruency for a polymorphic constructor that has a
-||| monomorphic equivalent
-mkMultiCongDecl : Elaboration m => UnificationResult -> Con aty ags -> Name -> m $ List Decl
-mkMultiCongDecl ur con n = do
-  let ourArgs = prepareArg <$> toList con.args
-  let (S _) = con.arty
+||| Derive multicongruency for a monomorphic constructor
+|||
+||| mCongN : forall argsN, argsN'; conN argsN === conN argsN'
+mkMultiCongDecl :
+  Elaboration m =>
+  (t : MonoTask) ->
+  UnificationResult ->
+  (mt : TypeInfo) ->
+  (pCon : t.Con) ->
+  IsFullyNamedCon pCon =>
+  (mCon : mt.Con) ->
+  IsFullyNamedCon mCon =>
+  Nat ->
+  m $ List Decl
+mkMultiCongDecl _ ur _ _ mcon i = do
+  let n = fromString "mCong\{show i}"
+  let ourArgs : Vect mcon.arty Arg
+      ourArgs = setMWImplicit <$> mcon.args
+  let (S _) = mcon.arty
   | _ => pure []
-  (a1, am1) <- genArgAliases ourArgs []
-  (a2, am2) <- genArgAliases ourArgs []
-  let lhsCon = con.invoke var $ mergeAliases ur.fullResult am1
-  let rhsCon = con.invoke var $ mergeAliases ur.fullResult am2
-  let eqs = mkEqs $ zip a1 a2
+  let prf : All IsNamedArg ourArgs = renewProof mcon.args
+  ((a1 ** _), am1) <- genArgAliases ourArgs []
+  ((a2 ** _), am2) <- genArgAliases ourArgs []
+  let lhsCon = mcon.invoke var $ mergeAliases ur.fullResult am1
+  let rhsCon = mcon.invoke var $ mergeAliases ur.fullResult am2
+  let eqs = mkEqualsTuple a1 a2
   let sig =
-    flip piAll a1 $ flip piAll a2 $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
-  let lhs = mkDoubleBinds (cast $ zip a1 a2) (var n) .$ tupleOfN con.arty `(Refl)
+    flip piAll (toList a1) $ flip piAll (toList a2) $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
+  let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ tupleOfN mcon.arty `(Refl)
   pure
     [ public' n sig
     , def n $ singleton $ patClause lhs $ `(Refl)
@@ -555,12 +642,11 @@ mkMultiCongDecl ur con n = do
 
 ||| Derive multicongruency for all polymorphic constructors that have
 ||| a monomorphic equivalent
-mkMultiCongDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
+mkMultiCongDecls :
+  Elaboration m => MonoTask -> UniResults -> (mt : TypeInfo) -> IsFullyNamedType mt => m $ List Decl
 mkMultiCongDecls t ur monoTy = do
-  join <$>
-    map2UConsN
-      (\_,ur,_,_,tc,i => mkMultiCongDecl ur tc $ fromString "mCong\{show i}")
-      t ur monoTy
+  let s = map2UConsN mkMultiCongDecl t ur monoTy
+  join <$> sequence s
 
 -----------------------------------
 --- CAST INJECTIVITY DERIVATION ---
@@ -582,13 +668,18 @@ mkCastInjClause :
   Elaboration m =>
   (tal1, tal2 : (List Arg, List (Name, Name))) ->
   (n1, n2 : Name) ->
+  (t : MonoTask) ->
   UnificationResult ->
-  Con aa bb ->
+  (mt : TypeInfo) ->
+  (con : t.Con) ->
+  IsFullyNamedCon con =>
+  (mcon : mt.Con) ->
+  IsFullyNamedCon mcon =>
   Nat ->
   m Clause
-mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur con n = do
-  (a1, am1) <- genArgAliases (toList $ con.args) []
-  (a2, am2) <- genArgAliases (toList $ con.args) []
+mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 _ ur _ _ con n = do
+  ((a1 ** _), am1) <- genArgAliases con.args []
+  ((a2 ** _), am2) <- genArgAliases con.args []
   let am1' = fromList $ mapSnd bindVar <$> am1
   let am2' = fromList $ mapSnd bindVar <$> am2
   let ures1 = substituteVariables am1' <$> ur.fullResult
@@ -605,11 +696,19 @@ mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur con n = do
   pure $ bta2 .! (n1, lhsCon) .! (n2, rhsCon) .$ bindVar "r" .= patRhs
 
 ||| Derive cast injectivity proof
-mkCastInjDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
-mkCastInjDecls mt ur ti = do
-  let prepArgs = prepareArg <$> toList ti.args
-  ta1@(a1, am1) <- genArgAliases prepArgs []
-  ta2@(a2, am2) <- genArgAliases prepArgs []
+mkCastInjDecls :
+  Elaboration m =>
+  MonoTask ->
+  UniResults ->
+  (mt : TypeInfo) ->
+  IsFullyNamedType mt =>
+  m $ List Decl
+mkCastInjDecls @{_} mt ur ti @{tip} = do
+  let prepArgs : Vect ti.arty Arg
+      prepArgs = setMWImplicit <$> ti.args
+  let prf : All IsNamedArg prepArgs = renewProof ti.args @{tip.argsAreNamed}
+  ta1@((a1 ** _), am1) <- genArgAliases prepArgs []
+  ta2@((a2 ** _), am2) <- genArgAliases prepArgs []
   xVar <- genSym "x"
   yVar <- genSym "y"
   let mToPVar = var $ inGenNS mt "mToP"
@@ -624,11 +723,11 @@ mkCastInjDecls mt ur ti = do
        ~(withTyArgs (cast am2) $ mToPImplVar .$ var yVar)) ->
         ~(var xVar) ~=~ ~(var yVar))
   castInjImplClauses <-
-    map2UConsN (\_,ur,_,_ => mkCastInjClause ta1 ta2 xVar yVar ur) mt ur ti
+    sequence $ map2UConsN (mkCastInjClause (toList a1, am1) (toList a2, am2) xVar yVar) mt ur ti
   let tyArgPairs = cast $ toList $ zip ti.argNames ti.argNames
   pure
     [ public' "castInjImpl" $
-        flip piAll a1 $ flip piAll a2 $ pi arg1 $ pi arg2 $ eqs
+        flip piAll (toList a1) $ flip piAll (toList a2) $ pi arg1 $ pi arg2 $ eqs
     , def "castInjImpl" castInjImplClauses
     , interfaceHint Public "castInj" $ forallMTArgs mt $
         `(Injective ~(withTyArgs tyArgPairs mToPImplVar))
@@ -641,7 +740,7 @@ mkCastInjDecls mt ur ti = do
 -------------------------------------
 
 ||| Decidable equality signatures
-mkDecEqImplSig : MonoTask -> TypeInfo -> TTImp
+mkDecEqImplSig : MonoTask -> (mt : TypeInfo) -> IsFullyNamedType mt => TTImp
 mkDecEqImplSig mt ti =
   let tInv = ti.invoke var empty
   in forallMTArgs mt $
@@ -661,7 +760,13 @@ mkDecEqImplClause mt =
 
 
 ||| Derive decidable equality
-mkDecEqDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
+mkDecEqDecls :
+  Elaboration m =>
+  MonoTask ->
+  UniResults ->
+  (mt : TypeInfo) ->
+  IsFullyNamedType mt =>
+  m $ List Decl
 mkDecEqDecls mt ur ti = do
   pure
     [ public' "decEqImpl" $ mkDecEqImplSig mt ti
@@ -677,7 +782,12 @@ mkDecEqDecls mt ur ti = do
 -----------------------
 
 ||| Derive Show implementation via cast
-mkShowDecls : MonoTask -> UniResults -> TypeInfo -> List Decl
+mkShowDecls :
+  MonoTask ->
+  UniResults ->
+  (mt : TypeInfo) ->
+  IsFullyNamedType mt =>
+  List Decl
 mkShowDecls mt ur ti = do
   let mToPImpl = var $ inGenNS mt "mToPImpl"
   [ public' "showImpl" $
@@ -699,7 +809,12 @@ mkShowDecls mt ur ti = do
 ---------------------
 
 ||| Derive Eq implementation via cast
-mkEqDecls : MonoTask -> UniResults -> TypeInfo -> List Decl
+mkEqDecls :
+  MonoTask ->
+  UniResults ->
+  (mt : TypeInfo) ->
+  IsFullyNamedType mt =>
+  List Decl
 mkEqDecls mt ur ti = do
   let mToPImpl = var $ inGenNS mt "mToPImpl"
   let tInv = ti.invoke var empty
@@ -721,7 +836,12 @@ mkEqDecls mt ur ti = do
 ------------------------------------
 
 ||| Generate monomorphic to polimorphic type conversion function signature
-mkPToMImplSig : MonoTask -> UniResults -> TypeInfo -> TTImp
+mkPToMImplSig :
+  MonoTask ->
+  UniResults ->
+  (mt : TypeInfo) ->
+  IsFullyNamedType mt =>
+  TTImp
 mkPToMImplSig t urs mt =
   forallMTArgs t $ arg t.fullInvocation .-> mt.invoke var empty
 
@@ -731,8 +851,10 @@ mkPToMImplClause :
   (t : MonoTask) ->
   UnificationResult ->
   (mt : TypeInfo) ->
-  t.Con ->
-  mt.Con ->
+  (pCon : t.Con) ->
+  IsFullyNamedCon pCon =>
+  (mCon : mt.Con) ->
+  IsFullyNamedCon mCon =>
   Clause
 mkPToMImplClause t ur mt con mcon =
   var "pToMImpl" .$ con.invoke bindVar
@@ -744,22 +866,23 @@ mkPToMImplClause t ur mt con mcon =
 mkPToMImplDecls :
   MonoTask ->
   UniResults ->
-  TypeInfo ->
+  (mt : TypeInfo) ->
+  IsFullyNamedType mt =>
   List Decl
 mkPToMImplDecls t urs mt = do
   let sig = mkPToMImplSig t urs mt
-  let clauses = map2UCons' mkPToMImplClause t urs mt
+  let clauses = map2UCons mkPToMImplClause t urs mt
   [ public' "pToMImpl" sig
   , def "pToMImpl" clauses
   ]
 
 ||| Generate monomorphic to polimorphic cast signature
-mkPToMSig : MonoTask -> TypeInfo -> TTImp
+mkPToMSig : MonoTask -> (mt : TypeInfo) -> IsFullyNamedType mt => TTImp
 mkPToMSig t mt = do
   forallMTArgs t $ `(Cast ~(t.fullInvocation) ~(mt.invoke var empty))
 
 ||| Generate monomorphic to polimorphic cast declarations
-mkPToMDecls : MonoTask -> TypeInfo -> List Decl
+mkPToMDecls : MonoTask -> (mt : TypeInfo) -> IsFullyNamedType mt => List Decl
 mkPToMDecls t mt =
   [ interfaceHint Public "pToM" $ mkPToMSig t mt
   , def "pToM" [ (var "pToM") .= `(MkCast pToMImpl)]
@@ -769,17 +892,25 @@ mkPToMDecls t mt =
 ||| of lhs-rhs name collision during unification (and derivation)
 prepTask : Elaboration m => MonoTask -> m MonoTask
 prepTask task = do
-  let (lamArgs, lamRet) = unLambda task.taskQuote
-  let (tyArgs, tyRet) = unPi task.taskType
-  (newArgs, am) <- genArgAliases lamArgs []
+  ((newArgs ** newArgsNamed), am) <-
+    genArgAliases @{%search} task.tqArgs @{task.tqArgsNamed} []
+  logMsg "Monomorphiser" 0 "generated aliases: \{show am}"
   let wil = substituteVariables (fromList $ mapSnd var <$> am)
-  let newTQ = foldr lam (wil lamRet) newArgs
-  let newTT = piAll (wil tyRet) newArgs
+  -- let newTTArgs = prepTTArg <$> task.ttArgs
+  let newTQ = foldr lam (wil task.tqRet) newArgs
+  let newTT = piAll (wil `(Type)) $ toList newArgs
   let newFI = wil task.fullInvocation
-  pure $ { taskQuote := newTQ, taskType := newTT, fullInvocation := newFI } task
+  pure $
+    { taskQuote := newTQ
+    , tqArgs := newArgs
+    , tqArgsNamed := newArgsNamed
+    , tqRet := wil task.tqRet
+    , taskType := newTT
+    , fullInvocation := newFI
+    } task
 
 ||| Generate declarations for given task, unification results, and monomorphic type
-monoDecls : Elaboration m => MonoTask -> UniResults -> TypeInfo -> m $ List Decl
+monoDecls : Elaboration m => MonoTask -> UniResults -> (mt : TypeInfo) -> IsFullyNamedType mt => m $ List Decl
 monoDecls task uniResults monoTy = do
   let monoTyDecl = monoTy.decl
   logMsg "SpecialiseData" 0 "monoTyDecl : \{show monoTyDecl}"
@@ -829,12 +960,12 @@ specialiseData :
   m (TypeInfo, List Decl)
 specialiseData taskT outputName = do
   task <- getTask taskT outputName
-  task <- prepTask task
+  -- task <- prepTask task
   logMsg "SpecialiseData" 0 "New task: \{show task}"
   uniResults <- mapCons (\t,ci => runEitherT $ unifyCon t ci) task
   let (S _) = length $ filter isRight $ uniResults
   | _ => throwError EmptyMonoConError
-  let monoTy = mkMonoTy task uniResults
+  let (monoTy ** monoTyNamed) = mkMonoTy task uniResults
   decls <- monoDecls task uniResults monoTy
   pure (monoTy, decls)
 
