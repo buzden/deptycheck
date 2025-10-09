@@ -2,6 +2,7 @@ module Language.Reflection.Types.Extra
 
 import Data.List.Quantifiers
 import Language.Reflection.Expr
+import Language.Reflection.Logging
 import Language.Reflection.Util
 import Syntax.IHateParens
 
@@ -120,3 +121,10 @@ namespace ConInvoke
   (.invoke) : (con : Con _ _) -> (0 _ : IsFullyNamedCon con) => (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
   (.invoke) con @{conP} f vals = appArgs (var con.name) $ con.args.appArgs f vals
 
+public export
+LogPosition TypeInfo where
+  logPosition = show . name
+
+public export
+LogPosition (Con aty ags) where
+  logPosition = show . dropNS . name

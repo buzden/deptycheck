@@ -1,11 +1,20 @@
 module Language.Reflection.Unify.WithCompiler
 
-import public Control.Monad.Writer
-import public Control.Monad.Identity
-import public Data.DPair
-import public Data.SnocVect
-
-import public Language.Reflection.Unify.Interface
+import Control.Monad.Either
+import Control.Monad.Writer
+import Control.Monad.Identity
+import Data.DPair
+import Data.FinBitSet
+import Data.Vect
+import Data.Vect.Quantifiers
+import Data.SnocVect
+import Data.SortedMap
+import Decidable.Equality
+import Language.Reflection
+import Language.Reflection.Expr
+import Language.Reflection.Logging
+import Language.Reflection.Syntax
+import Language.Reflection.Unify.Interface
 
 ||| Generate free variable name to index mapping
 genNameToId :
@@ -225,8 +234,9 @@ extractFVData t v ((Element fv isNamed) :: xs) (hn :: hns) = do
       let (vv ** vRest) = v
       quoteV <- quote vv
       quoteT <- quote myTy
-      logMsg "Unifier.TypecheckUnifier" 0
-        "\{show $ Expr.argName fv} : \{show quoteT} = \{show quoteV}"
+      -- logMsg "Unifier.TypecheckUnifier" 0
+      --   "\{show $ Expr.argName fv} : \{show quoteT} = \{show quoteV}"
+      -- This makes the unifier *MUCH* slower.
       rest <- extractFVData (dNext vv) vRest xs hns
       let retVal =
         case quoteV of
@@ -272,8 +282,8 @@ unify' task = do
   let checkTarget =
     buildUpTarget (zip lhsNames snocLFV) $
       buildUpTarget (zip rhsNames snocRFV) `(Refl)
-  logMsg "Unifier.TypecheckUnifier" 0 "\{show checkTargetType}"
-  logMsg "Unifier.TypecheckUnifier" 0 "\{show checkTarget}"
+  logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Target type: \{show checkTargetType}"
+  logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Target value: \{show checkTarget}"
   -- Instantiate target type
   (Just checkTargetType') : Maybe Type <-
     try (Just <$> check checkTargetType) (pure Nothing)
@@ -281,22 +291,21 @@ unify' task = do
   -- Run unification
   (Just checkTarget') : Maybe checkTargetType' <-
     try (Just <$> check checkTarget) (pure Nothing)
-  | _ => throwError "Unification failed"
+  | _ => throwError "Failed to instantiate equality proof"
   ctQuote <- quote checkTarget'
-  logMsg "Unifier.TypecheckUnifier" 0 "\{show ctQuote}"
+  logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Target value after quoting: \{show ctQuote}"
   let vectNames = cast allNames
   -- Extract unification results
   uniResults <-
     extractFVData checkTargetType' checkTarget' allFreeVars vectNames
+  logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Raw unification results: \{show uniResults}"
   -- Generate dependency graph
   let allZipped = zip vectNames $ zip (task.lhsFreeVars ++ task.rhsFreeVars) uniResults
-  let dg = genDG $ makeFVData <$> allZipped
-  logMsg "Unifier.TypecheckUnifier" 0 "Initial DG:\n\{prettyDG dg}"
-  let dg = subEmpties dg
-  logMsg "Unifier.TypecheckUnifier" 0 "Subst empties:\n\{prettyDG dg}"
-  let solved = solveDG dg
-  logMsg "Unifier.TypecheckUnifier" 0 "Solved DG :\n\{prettyDG solved}"
-  pure solved
+  dg <- logBounds "unifyWithCompiler.genDG" [] $ pure $ genDG $ makeFVData <$> allZipped
+  logBounds "unifyWithCompiler.solveDG" [] $ do
+    let dg = subEmpties dg
+    let solved = solveDG dg
+    pure solved
 
 ||| Run unification in a try block
 public export
@@ -310,5 +319,6 @@ unifyWithCompiler task = do
   let ret = runEitherT {m=Elab} {e=String} $ unify' task
   let err = pure {f=Elab} $ Left $ "Unification failed catastrophically (likely because of the named hole bug or postpone bug)"
   rr <- try ret err
-  dg <- liftEither rr
-  pure $ finalizeDG task dg
+  logBounds "unifyWithCompiler.finalizeDG" [] $ do
+    dg <- liftEither rr
+    pure $ finalizeDG task dg

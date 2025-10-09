@@ -1,17 +1,17 @@
 module Language.Reflection.Unify.Interface
 
-import public Control.Monad.Either
-import public Data.Either
-import public Data.FinBitSet
-import public Data.SortedMap
-import public Data.Vect
-import public Decidable.Equality
-import public Derive.Prelude
-import public Language.Reflection
-import public Language.Reflection.Expr
-import public Language.Reflection.TTImp
-import public Language.Reflection.TT
-import public Language.Reflection.Syntax
+import Control.Monad.Either
+import Data.Either
+import Data.FinBitSet
+import Data.SortedMap
+import Data.Vect
+import Decidable.Equality
+import Derive.Prelude
+import Language.Reflection
+import Language.Reflection.Expr
+import Language.Reflection.TTImp
+import Language.Reflection.TT
+import Language.Reflection.Syntax
 
 %language ElabReflection
 
@@ -20,17 +20,17 @@ public export
 record UnificationTask where
   constructor MkUniTask
   ||| Amount of left-hand-side free variables
-  { lfv : Nat }
+  {lfv : Nat}
   ||| Left-hand-side free variables
   lhsFreeVars : Vect lfv Arg
-  { 0 lhsAreNamed : All IsNamedArg lhsFreeVars }
+  {auto 0 lhsAreNamed : All IsNamedArg lhsFreeVars}
   ||| Left-hand-side expression
   lhsExpr : TTImp
   ||| Amount of right-hand-side free variables
-  { rfv : Nat }
+  {rfv : Nat}
   ||| Right-hand-side free variables
   rhsFreeVars : Vect rfv Arg
-  { 0 rhsAreNamed : All IsNamedArg rhsFreeVars }
+  {auto 0 rhsAreNamed : All IsNamedArg rhsFreeVars}
   ||| Right-hand-side expression
   rhsExpr : TTImp
 
@@ -42,9 +42,16 @@ record UnificationTask where
 
 public export
 Show UnificationTask where
-  showPrec p t = showCon p "MkUniTask" $ joinBy "" $ [showArg t.lfv, showArg t.lhsFreeVars, showArg t.lhsExpr, showArg t.rfv, showArg t.rhsFreeVars,
-                                                     showArg t.rhsExpr]
--- %runElab derive "UnificationTask" [Show]
+  showPrec p t =
+    showCon p "MkUniTask" $
+      joinBy "" $
+        [ showArg t.lfv
+        , showArg t.lhsFreeVars
+        , showArg t.lhsExpr
+        , showArg t.rfv
+        , showArg t.rhsFreeVars,
+        showArg t.rhsExpr
+        ]
 
 ||| Free variable output data
 public export
@@ -150,10 +157,6 @@ record UnificationResult where
 
 %runElab derive "UnificationResult" [Show]
 
-
-
-
-
 ||| List all free variables that don't depende on any other free variables
 leaves : (dg : DependencyGraph) -> FinBitSet dg.freeVars
 leaves dg =
@@ -179,7 +182,6 @@ flattenEmpties' dg ctx = do
   flattenEmpties' (MkDG dg.freeVars dg.fvData (removeAll els <$> dg.fvDeps) (removeAll els dg.empties) dg.nameToId dg.holeToId) newCtx
 
 ||| List all the free variables without a value in order of dependency
-public export
 flattenEmpties : (dg : DependencyGraph) -> SnocList $ Fin dg.freeVars
 flattenEmpties dg = flattenEmpties' dg [<]
 

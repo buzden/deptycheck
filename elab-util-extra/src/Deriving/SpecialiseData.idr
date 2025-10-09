@@ -1,27 +1,29 @@
 module Deriving.SpecialiseData
 
-import public Control.Monad.Reader.Tuple
-import public Data.SnocList
-import public Derive.Prelude
-import public Data.DPair
-import public Data.List1
-import public Data.Vect
-import public Data.List
-import public Data.List.Quantifiers
-import public Data.Either
-import public Data.SortedMap
-import public Data.SortedSet
-import public Data.SortedMap.Dependent
+import Control.Monad.Either
+import Control.Monad.Reader.Tuple
+import Data.SnocList
+import Derive.Prelude
+import Data.DPair
+import Data.List1
+import Data.Vect
+import Data.List
+import Data.List.Quantifiers
+import Data.Either
+import Data.SortedMap
+import Data.SortedSet
+import Data.SortedMap.Dependent
 import public Language.Mk
-import public Language.Reflection.Expr
-import public Language.Reflection.Syntax.Ops
-import public Language.Reflection.TT
-import public Language.Reflection.TTImp
-import public Language.Reflection.Types.Extra
-import public Language.Reflection.Unify
-import public Language.Reflection.Util
-import public Language.Reflection.VarSubst
-import public Syntax.IHateParens
+import Language.Reflection.Expr
+import Language.Reflection.Logging
+import Language.Reflection.Syntax.Ops
+import Language.Reflection.TT
+import Language.Reflection.TTImp
+import Language.Reflection.Types.Extra
+import Language.Reflection.Unify
+import Language.Reflection.Util
+import Language.Reflection.VarSubst
+import Syntax.IHateParens
 
 %language ElabReflection
 
@@ -50,6 +52,10 @@ data SpecialisationError : Type where
   TaskTypeExtractionError : SpecialisationError
   ||| All constructors failed unification
   EmptyMonoConError : SpecialisationError
+  ||| Unused variable
+  UnusedVarError : SpecialisationError
+  ||| Partial specification
+  PartialSpecError : SpecialisationError
 
 %runElab derive "SpecialisationError" [Show]
 
@@ -116,9 +122,10 @@ getCurrentNS = do
 inGenNS : SpecTask -> Name -> Name
 inGenNS task n = do
   let MkNS tns = task.currentNs
-  let newNS = case n of
-                   (NS (MkNS subs) n) => subs
-                   n => []
+  let newNS =
+    case n of
+       (NS (MkNS subs) n) => subs
+       n => []
   NS (MkNS $ newNS ++ show task.outputName :: tns) $ dropNS n
 
 argsToBindMap : List Arg -> List (Name, TTImp)
@@ -139,7 +146,7 @@ applyArgAliases (x :: xs) @{p :: ps} ys            ins = do
   let (Element rec prec) = applyArgAliases xs @{ps} ys newIns
   Element
     (MkArg x.count x.piInfo (Just newName) (substituteVariables newIns x.type) :: rec)
-    (%search :: prec)
+    (ItIsNamed :: prec)
 
 genAliases' : Elaboration m => (as : Vect l Arg) -> (0 _ : All IsNamedArg as) => m $ List (Name, Name)
 genAliases' [] = pure []
@@ -195,7 +202,10 @@ tupleOfN (S n) t = `(MkPair ~(t) ~(tupleOfN n t))
 mergeAliases : SortedMap Name TTImp -> List (Name, Name) -> SortedMap Name TTImp
 mergeAliases m = mergeWith (Prelude.curry fst) m . fromList . map (mapSnd var)
 
-renewProof : (args : Vect l Arg) -> (0 _ : All IsNamedArg args) => All IsNamedArg (SpecialiseData.setMWImplicit <$> args)
+renewProof :
+  (args : Vect l Arg) ->
+  (0 _ : All IsNamedArg args) =>
+  All IsNamedArg (SpecialiseData.setMWImplicit <$> args)
 renewProof [] @{[]} = []
 renewProof (x :: xs) @{(p :: ps)} with (x)
   renewProof (x :: xs) @{(p :: ps)} | (MkArg _ _ (Just n) _) =
@@ -217,6 +227,19 @@ aliasedApp (xs :< (n, an)) t =
 --- TASK ANALYSIS ---
 ---------------------
 
+checkArgsUse :
+  MonadError SpecialisationError m =>
+  List Arg ->
+  TTImp ->
+  m ()
+checkArgsUse [] _ = pure ()
+checkArgsUse (x :: xs) t = do
+  let Just n = x.name
+  | _ => checkArgsUse xs t
+  if containsVariable n t
+    then checkArgsUse xs t
+    else throwError UnusedVarError
+
 ||| Get all the information needed for monomorphisation from task
 getTask :
   TaskLambda l =>
@@ -227,21 +250,36 @@ getTask :
   Name ->
   m SpecTask
 getTask l' outputName = with Prelude.(>>=) do
-  taskQuote : TTImp <- cleanupNamedHoles <$> quote l' --- TODO: alias lambda args
-  taskType : TTImp <- cleanupNamedHoles <$> quote l
+  -- Quote spec lambda
+  taskQuote : TTImp <- cleanupNamedHoles <$> quote l'
   let (tqArgs, tqRet) = unLambda taskQuote
+  -- Check for unused arguments
+  checkArgsUse tqArgs tqRet
+  -- Extract name of polymorphic type
   let (IVar _ typeName, _) = unApp tqRet
   | _ => throwError TaskTypeExtractionError
+  -- Prove that all spec lambda arguments are named
   let Yes tqArgsNamed = all isNamedArg $ fromList tqArgs
   | _ => fail "Internal error: lambda has unnamed arguments"
+  -- Create aliases for spec lambda's arguments and perform substitution
   ((Element tqArgs tqArgsNamed), tqAlias) <- genArgAliases (fromList tqArgs)
   let tqRet = substituteVariables (fromList $ mapSnd var <$> tqAlias) tqRet
+  -- Quote spec lambda type
+  taskType : TTImp <- cleanupNamedHoles <$> quote l
   let (ttArgs, _) = unPi taskType
+  -- Check for partial application in spec
+  let True = (length tqArgs == length ttArgs)
+  | _ => throwError PartialSpecError
+  -- Prove that all spec lambda type's arguments are named
   let Yes ttArgsNamed = all isNamedArg $ fromList ttArgs
   | _ => fail "Internal error: lambda type has unnamed arguments"
+  -- Apply aliasing to spec lambda type's info
   let (Element ttArgs ttArgsNamed) = applyArgAliases (fromList ttArgs) tqAlias empty
+  -- Get current namespace
   currentNs <- getCurrentNS
+  -- Get polymorphic type's info
   polyTy <- cleanupTypeInfo <$> Types.getInfo' typeName
+  -- Prove all its arguments/constructors/constructor arguments are named
   let Yes polyTyNamed = isFullyNamedType polyTy
   | _ => fail "Internal error: getInfo' returned a type with unnamed arguments or constructors."
   pure $ MkSpecTask
@@ -337,16 +375,18 @@ parameters (t : SpecTask)
     (con : t.Con) ->
     (0 conN : IsFullyNamedCon con) =>
     m UnificationResult
-  unifyCon con = do
+  unifyCon con = logBounds "specialiseData.unifyCon" [t.polyTy, con] $ do
     let conRet = appArgs .| var t.polyTy.name .| con.typeArgs
     let uniTask =
-      MkUniTask {lfv=_} con.args {lhsAreNamed=conN} conRet
+      MkUniTask {lfv=_} con.args conRet
                 {rfv=_} t.tqArgs {rhsAreNamed=t.tqArgsNamed} t.fullInvocation
-    logMsg "SpecialiseData" 0 "Unifier task: \{show uniTask}"
+    logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier task: \{show uniTask}"
     Right uniRes <- tryError $ unifyWithCompiler uniTask
     | Left err => do
-      logMsg "SpecialiseData" 0 "Unifier failed: \{err}"
+      logPoint "specialiseData.unifyCon" [t.polyTy, con] "Unifier failed: \{err}"
       throwError err
+    logPoint "specialiseData.unifyCon" [t.polyTy, con] "Unifier succeeded"
+    logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier output: \{show uniRes}"
     pure uniRes
 
   -----------------------------------
@@ -465,36 +505,39 @@ parameters (t : SpecTask)
       (0 _ : IsFullyNamedCon mCon) =>
       Nat ->
       m $ List Decl
-    mkMultiInjDecl ur _ con mcon i = do
-      let n = fromString "mInj\{show i}"
-      let ourArgs : Vect mcon.arty Arg
-          ourArgs = setMWImplicit <$> mcon.args
-      let (S _) = mcon.arty
-      | _ => pure []
-      let prf : All IsNamedArg ourArgs = renewProof mcon.args
-      ((Element a1 ap1), am1) <- genArgAliases ourArgs
-      ((Element a2 ap2), am2) <- genArgAliases ourArgs
-      let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
-                    con.invoke var $ mergeAliases ur.fullResult am1
-      let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $
-                    con.invoke var $ mergeAliases ur.fullResult am2
+    mkMultiInjDecl ur mt con mcon i =
+      logBounds "specialiseData.mkMultiInjDecl" [mt, mcon] $ do
+        let n = fromString "mInj\{show i}"
+        let ourArgs : Vect mcon.arty Arg
+            ourArgs = setMWImplicit <$> mcon.args
+        let (S _) = mcon.arty
+        | _ => pure []
+        let prf : All IsNamedArg ourArgs = renewProof mcon.args
+        ((Element a1 ap1), am1) <- genArgAliases ourArgs
+        ((Element a2 ap2), am2) <- genArgAliases ourArgs
+        let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
+                      con.invoke var $ mergeAliases ur.fullResult am1
+        let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $
+                      con.invoke var $ mergeAliases ur.fullResult am2
 
-      let eqs = mkEqualsTuple a1 a2
-      let sig =
-        flip piAll (toList a1) $ flip piAll (toList a2) $ `((~(lhsCon) ~=~ ~(rhsCon)) -> ~(eqs))
-      let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ `(Refl)
-      pure
-        [ public' n sig
-        , def n $ singleton $ patClause lhs $ tupleOfN mcon.arty `(Refl)
-        ]
+        let eqs = mkEqualsTuple a1 a2
+        let sig =
+          flip piAll (toList a1) $
+            flip piAll (toList a2) $ `((~(lhsCon) ~=~ ~(rhsCon)) -> ~(eqs))
+        let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ `(Refl)
+        pure
+          [ public' n sig
+          , def n $ singleton $ patClause lhs $ tupleOfN mcon.arty `(Refl)
+          ]
 
     ||| Derive multiinjectivity for all polymorphic constructors that have
     ||| a monomorphic equivalent
     mkMultiInjDecls :
       UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
-    mkMultiInjDecls ur monoTy = do
-      let s = map2UConsN mkMultiInjDecl ur monoTy
-      join <$> sequence s
+    mkMultiInjDecls ur monoTy =
+      logBounds "specialiseData.mkMultiInjDecls" [monoTy] $ do
+        let s = map2UConsN mkMultiInjDecl ur monoTy
+        join <$> sequence s
 
     ----------------------------------
     --- MULTICONGRUENCY DERIVATION ---
@@ -512,32 +555,34 @@ parameters (t : SpecTask)
       (0 _ : IsFullyNamedCon mCon) =>
       Nat ->
       m $ List Decl
-    mkMultiCongDecl ur _ _ mcon i = do
-      let n = fromString "mCong\{show i}"
-      let ourArgs : Vect mcon.arty Arg
-          ourArgs = setMWImplicit <$> mcon.args
-      let (S _) = mcon.arty
-      | _ => pure []
-      let prf : All IsNamedArg ourArgs = renewProof mcon.args
-      ((Element a1 _), am1) <- genArgAliases ourArgs
-      ((Element a2 _), am2) <- genArgAliases ourArgs
-      let lhsCon = mcon.invoke var $ mergeAliases ur.fullResult am1
-      let rhsCon = mcon.invoke var $ mergeAliases ur.fullResult am2
-      let eqs = mkEqualsTuple a1 a2
-      let sig =
-        flip piAll (toList a1) $ flip piAll (toList a2) $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
-      let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ tupleOfN mcon.arty `(Refl)
-      pure
-        [ public' n sig
-        , def n $ singleton $ patClause lhs $ `(Refl)
-        ]
+    mkMultiCongDecl ur mt _ mcon i =
+      logBounds "specialiseData.mkMultiCongDecl" [mt, mcon] $ do
+        let n = fromString "mCong\{show i}"
+        let ourArgs : Vect mcon.arty Arg
+            ourArgs = setMWImplicit <$> mcon.args
+        let (S _) = mcon.arty
+        | _ => pure []
+        let prf : All IsNamedArg ourArgs = renewProof mcon.args
+        ((Element a1 _), am1) <- genArgAliases ourArgs
+        ((Element a2 _), am2) <- genArgAliases ourArgs
+        let lhsCon = mcon.invoke var $ mergeAliases ur.fullResult am1
+        let rhsCon = mcon.invoke var $ mergeAliases ur.fullResult am2
+        let eqs = mkEqualsTuple a1 a2
+        let sig =
+          flip piAll (toList a1) $ flip piAll (toList a2) $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
+        let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ tupleOfN mcon.arty `(Refl)
+        pure
+          [ public' n sig
+          , def n $ singleton $ patClause lhs $ `(Refl)
+          ]
 
     ||| Derive multicongruency for all monomorphic constructors
     mkMultiCongDecls :
       UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
-    mkMultiCongDecls ur monoTy = do
-      let s = map2UConsN mkMultiCongDecl ur monoTy
-      join <$> sequence s
+    mkMultiCongDecls ur monoTy =
+      logBounds "specialiseData.mkMultiCongDecls" [monoTy] $ do
+        let s = map2UConsN mkMultiCongDecl ur monoTy
+        join <$> sequence s
 
   -----------------------------------
   --- CAST INJECTIVITY DERIVATION ---
@@ -556,23 +601,24 @@ parameters (t : SpecTask)
     (0 _ : IsFullyNamedCon mcon) =>
     Nat ->
     m Clause
-  mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur _ _ con n = do
-    ((Element a1 _), am1) <- genArgAliases con.args
-    ((Element a2 _), am2) <- genArgAliases con.args
-    let am1' = fromList $ mapSnd bindVar <$> am1
-    let am2' = fromList $ mapSnd bindVar <$> am2
-    let ures1 = substituteVariables am1' <$> ur.fullResult
-    let ures2 = substituteVariables am2' <$> ur.fullResult
-    let bta1 = aliasedAppBind (cast tam1) ures1 `(castInjImpl)
-    let bta2 = aliasedAppBind (cast tam2) ures2 bta1
-    let lhsCon = con.invoke bindVar $ am1'
-    let rhsCon = con.invoke bindVar $ am2'
-    let patRhs : TTImp
-        patRhs = case (length a1) of
-          0 => `(Refl)
-          _ => (var $ fromString $ "mCong\{show n}") .$
-                ((var $ fromString $ "mInj\{show n}") .$ var "r")
-    pure $ bta2 .! (n1, lhsCon) .! (n2, rhsCon) .$ bindVar "r" .= patRhs
+  mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur mt _ con n =
+    logBounds "specialiseData.mkCastInjClause" [mt, con] $ do
+      ((Element a1 _), am1) <- genArgAliases con.args
+      ((Element a2 _), am2) <- genArgAliases con.args
+      let am1' = fromList $ mapSnd bindVar <$> am1
+      let am2' = fromList $ mapSnd bindVar <$> am2
+      let ures1 = substituteVariables am1' <$> ur.fullResult
+      let ures2 = substituteVariables am2' <$> ur.fullResult
+      let bta1 = aliasedAppBind (cast tam1) ures1 `(castInjImpl)
+      let bta2 = aliasedAppBind (cast tam2) ures2 bta1
+      let lhsCon = con.invoke bindVar $ am1'
+      let rhsCon = con.invoke bindVar $ am2'
+      let patRhs : TTImp
+          patRhs = case (length a1) of
+            0 => `(Refl)
+            _ => (var $ fromString $ "mCong\{show n}") .$
+                  ((var $ fromString $ "mInj\{show n}") .$ var "r")
+      pure $ bta2 .! (n1, lhsCon) .! (n2, rhsCon) .$ bindVar "r" .= patRhs
 
   ||| Derive cast injectivity proof
   mkCastInjDecls :
@@ -581,37 +627,38 @@ parameters (t : SpecTask)
     (mt : TypeInfo) ->
     (0 _ : IsFullyNamedType mt) =>
     m $ List Decl
-  mkCastInjDecls @{_} ur ti @{tip} = do
-    let prepArgs : Vect ti.arty Arg
-        prepArgs = setMWImplicit <$> ti.args
-    let prf : All IsNamedArg prepArgs = renewProof ti.args @{tip.argsAreNamed}
-    ta1@((Element a1 _), am1) <- genArgAliases prepArgs
-    ta2@((Element a2 _), am2) <- genArgAliases prepArgs
-    xVar <- genSym "x"
-    yVar <- genSym "y"
-    let mToPVar = var $ inGenNS t "mToP"
-    let mToPImplVar = var $ inGenNS t "mToPImpl"
-    let arg1 = MkArg MW ImplicitArg (Just xVar) $
-                ti.invoke var $ fromList $ mapSnd var <$> am1
-    let arg2 = MkArg MW ImplicitArg (Just yVar) $
-                ti.invoke var $ fromList $ mapSnd var <$> am2
-    let eqs =
-      `((~(aliasedApp (cast am1) mToPImplVar .$ var xVar)
-         ~=~
-         ~(aliasedApp (cast am2) $ mToPImplVar .$ var yVar)) ->
-          ~(var xVar) ~=~ ~(var yVar))
-    castInjImplClauses <-
-      sequence $ map2UConsN (mkCastInjClause (toList a1, am1) (toList a2, am2) xVar yVar) ur ti
-    let tyArgPairs = cast $ toList $ zip ti.argNames ti.argNames
-    pure
-      [ public' "castInjImpl" $
-          flip piAll (toList a1) $ flip piAll (toList a2) $ pi arg1 $ pi arg2 $ eqs
-      , def "castInjImpl" castInjImplClauses
-      , interfaceHint Public "castInj" $ forallMTArgs $
-          `(Injective ~(aliasedApp tyArgPairs mToPImplVar))
-      , def "castInj" $ singleton $
-          aliasedAppBind tyArgPairs empty `(castInj) .= `(MkInjective castInjImpl)
-      ]
+  mkCastInjDecls @{_} ur ti @{tip} =
+    logBounds "mkCastInjDecls" [ti] $ do
+      let prepArgs : Vect ti.arty Arg
+          prepArgs = setMWImplicit <$> ti.args
+      let prf : All IsNamedArg prepArgs = renewProof ti.args @{tip.argsAreNamed}
+      ta1@((Element a1 _), am1) <- genArgAliases prepArgs
+      ta2@((Element a2 _), am2) <- genArgAliases prepArgs
+      xVar <- genSym "x"
+      yVar <- genSym "y"
+      let mToPVar = var $ inGenNS t "mToP"
+      let mToPImplVar = var $ inGenNS t "mToPImpl"
+      let arg1 = MkArg MW ImplicitArg (Just xVar) $
+                  ti.invoke var $ fromList $ mapSnd var <$> am1
+      let arg2 = MkArg MW ImplicitArg (Just yVar) $
+                  ti.invoke var $ fromList $ mapSnd var <$> am2
+      let eqs =
+        `((~(aliasedApp (cast am1) mToPImplVar .$ var xVar)
+           ~=~
+           ~(aliasedApp (cast am2) $ mToPImplVar .$ var yVar)) ->
+            ~(var xVar) ~=~ ~(var yVar))
+      castInjImplClauses <-
+        sequence $ map2UConsN (mkCastInjClause (toList a1, am1) (toList a2, am2) xVar yVar) ur ti
+      let tyArgPairs = cast $ toList $ zip ti.argNames ti.argNames
+      pure
+        [ public' "castInjImpl" $
+            flip piAll (toList a1) $ flip piAll (toList a2) $ pi arg1 $ pi arg2 $ eqs
+        , def "castInjImpl" castInjImplClauses
+        , interfaceHint Public "castInj" $ forallMTArgs $
+            `(Injective ~(aliasedApp tyArgPairs mToPImplVar))
+        , def "castInj" $ singleton $
+            aliasedAppBind tyArgPairs empty `(castInj) .= `(MkInjective castInjImpl)
+        ]
 
   -------------------------------------
   --- DECIDABLE EQUALITY DERIVATION ---
@@ -763,27 +810,38 @@ parameters (t : SpecTask)
   monoDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
   monoDecls  uniResults monoTy = do
     let monoTyDecl = monoTy.decl
-    logMsg "SpecialiseData" 0 "monoTyDecl : \{show monoTyDecl}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "monoTyDecl : \{show monoTyDecl}"
     let mToPImplDecls = mkMToPImplDecls uniResults monoTy
-    logMsg "SpecialiseData" 0 "mToPImplDecls : \{show mToPImplDecls}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "mToPImplDecls : \{show mToPImplDecls}"
     let mToPDecls = mkMToPDecls monoTy
-    logMsg "SpecialiseData" 0 "mToP : \{show mToPDecls}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "mToP : \{show mToPDecls}"
     multiInjDecls <- mkMultiInjDecls uniResults monoTy
-    logMsg "SpecialiseData" 0 "multiInj : \{show multiInjDecls}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "multiInj : \{show multiInjDecls}"
     multiCongDecls <- mkMultiCongDecls uniResults monoTy
-    logMsg "SpecialiseData" 0 "multiCong : \{show multiCongDecls}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "multiCong : \{show multiCongDecls}"
     castInjDecls <- mkCastInjDecls uniResults monoTy
-    logMsg "SpecialiseData" 0 "castInj : \{show castInjDecls}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "castInj : \{show castInjDecls}"
     let decEqDecls = mkDecEqDecls uniResults monoTy
-    logMsg "SpecialiseData" 0 "decEq : \{show decEqDecls}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "decEq : \{show decEqDecls}"
     let showDecls = mkShowDecls uniResults monoTy
-    logMsg "SpecialiseData" 0 "Show : \{show showDecls}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "Show : \{show showDecls}"
     let eqDecls = mkEqDecls uniResults monoTy
-    logMsg "SpecialiseData" 0 "Eq : \{show eqDecls}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "Eq : \{show eqDecls}"
     let pToMImplDecls = mkPToMImplDecls uniResults monoTy
-    logMsg "SpecialiseData" 0 "pToMImplDecls : \{show pToMImplDecls}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "pToMImplDecls : \{show pToMImplDecls}"
     let pToMDecls = mkPToMDecls monoTy
-    logMsg "SpecialiseData" 0 "pToM : \{show pToMDecls}"
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "pToM : \{show pToMDecls}"
     pure $ singleton $ INamespace EmptyFC (MkNS [ show t.outputName ]) $
       monoTyDecl :: join
         [ mToPImplDecls
@@ -810,8 +868,7 @@ specialiseData :
   m (TypeInfo, List Decl)
 specialiseData taskT outputName = do
   task <- getTask taskT outputName
-  -- task <- prepTask task
-  logMsg "SpecialiseData" 0 "New task: \{show task}"
+  logPoint {level=DetailedTrace} "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
   uniResults <- Prelude.sequence $ mapCons task (\ci => runEitherT {m} $ unifyCon task ci)
   let (S _) = length $ filter isRight $ uniResults
   | _ => throwError EmptyMonoConError
