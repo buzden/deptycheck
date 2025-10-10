@@ -357,7 +357,7 @@ parameters (t : SpecTask)
         List (Subset mt.Con IsFullyNamedCon) ->
         UniResults ->
         List r
-      f' n (x                :: xs)                       ys  (Left _    :: zs) = 
+      f' n (x                :: xs)                       ys  (Left _    :: zs) =
         f' n xs ys zs
       f' n (Element con pprf :: xs) (Element mcon mprf :: ys) (Right res :: zs) =
         f res mt con mcon n :: f' (S n) xs ys zs
@@ -472,7 +472,7 @@ parameters (t : SpecTask)
     (0 _ : IsFullyNamedType mt) =>
     List Decl
   mkMToPImplDecls urs mt = do
-    let sig = mkMToPImplSig urs mt 
+    let sig = mkMToPImplSig urs mt
     let clauses = map2UConsN mkMToPImplClause urs mt
     [ public' "mToPImpl" sig
     , def "mToPImpl" clauses

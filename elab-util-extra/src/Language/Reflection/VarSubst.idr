@@ -13,39 +13,43 @@ import public Control.Monad.Reader
 import public Control.Monad.Reader.Tuple
 import public Control.Monad.State
 
+||| Monadic operation on a TTImp
 TTOp : (Type -> Type) -> Type
 TTOp m = TTImp -> m TTImp -> m TTImp
 
+||| SortedSet of Names
 public export
 NameSet : Type
 NameSet = SortedSet Name
 
+||| Insert `Maybe Name`'s content into a NameSet
 insertM : Maybe Name -> NameSet -> NameSet
 insertM Nothing = id
 insertM (Just x) = insert x
 
-data ShadowingInfo : Type where
-  MkSI : (shadowedNames : NameSet) -> ShadowingInfo
+||| Information about variable shadowing
+record ShadowingInfo where
+  constructor MkSI
+  ||| Set of shadowed names
+  shadowedNames : NameSet
 
-shadowedNames : ShadowingInfo -> NameSet
-shadowedNames (MkSI names) = names
-
-(.shadowedNames) : ShadowingInfo -> NameSet
-(.shadowedNames) (MkSI names) = names
-
+||| Check if a variable is shadowed
 isShadowed : Name -> ShadowingInfo -> Bool
 isShadowed n = contains n . shadowedNames
 
 parameters {auto _ : MonadReader ShadowingInfo m}
            (f: TTOp m)
   mutual
+    ||| Provide a ShadowingInfo for an operation on a TTImp over a PiInfo TTImp
     doPiInfo : PiInfo TTImp -> m $ PiInfo TTImp
     doPiInfo (DefImplicit x) = DefImplicit <$> doTTImp x
     doPiInfo x = pure x
 
+    ||| Provide a ShadowingInfo for an operation on a TTImp
     doTTImp : TTImp -> m TTImp
     doTTImp = assert_total mapATTImp' provideSI
 
+    ||| Provide a ShadowingInfo for an operation on a TTImp
     provideSI : TTOp m
     provideSI b@(IPi fc count pinfo mn argTy lamTy) newM = do
       pinfo <- doPiInfo pinfo
@@ -65,15 +69,13 @@ parameters {auto _ : MonadReader ShadowingInfo m}
     provideSI b newM = do
       f b newM
 
-data QuoteInfo : Type where
-  MkQI : (isQuote : Bool) -> QuoteInfo
+||| Information about quoting
+record QuoteInfo where
+  constructor MkQI
+  ||| Indicator of being in a quote
+  isQuote : Bool
 
-isQuote : QuoteInfo -> Bool
-isQuote (MkQI iq) = iq
-
-(.isQuote) : QuoteInfo -> Bool
-(.isQuote) (MkQI iq) = iq
-
+||| Provide QuoteInfo for a monadic operation on a TTImp
 provideQI : MonadReader QuoteInfo m =>
             (f: TTOp m) ->
             TTOp m
@@ -82,12 +84,14 @@ provideQI f b@(IQuoteDecl fc decls) newM = f b $ local {isQuote := True} newM
 provideQI f b@(IUnquote fc t) newM = f b $ local {isQuote := False} newM
 provideQI f b newM = f b newM
 
+||| Provide QuoteInfo and ShadowingInfo for a monadic operation on a TTImp
 provideCtx : Monad m =>
              MonadReader QuoteInfo m =>
              MonadReader ShadowingInfo m =>
              TTOp m -> TTOp m
 provideCtx = provideSI . provideQI
 
+||| Run a monadic operation requiring ShadowingInfo and QuoteInfo on a TTImp
 mapTTOp : Monad m => TTOp (ReaderT (ShadowingInfo, QuoteInfo) m) -> TTImp -> m TTImp
 mapTTOp op t = do
   let readerOp = mapATTImp' . provideCtx $ op
@@ -125,6 +129,7 @@ collectVariablesImpl (IVar _ n) m = do
      else m
 collectVariablesImpl tt m = m
 
+||| Calculate a set of used variables
 public export
 usesVariables : TTImp -> NameSet
 usesVariables =

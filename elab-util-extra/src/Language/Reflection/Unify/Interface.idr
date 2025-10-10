@@ -57,11 +57,17 @@ Show UnificationTask where
 public export
 record FVData where
   constructor MkFVData
+  ||| Free variable name
   name : Name
+  ||| Free variable hole name
   holeName : String
+  ||| Free variable count
   rig : Count
+  ||| Free variable PiInfo
   piInfo : PiInfo TTImp
+  ||| Free variable type
   type : TTImp
+  ||| Free variable value
   value : Maybe TTImp
 
 %name FVData fv, fvData
@@ -72,6 +78,7 @@ public export
 Interpolation FVData where
   interpolate (MkFVData n h r p t v) = joinBy "" [ showPiInfo p $ showCount r "\{n} \{h} : \{show t}", " = \{show v}" ]
 
+||| Make FVData out of most its components and an argument
 public export
 makeFVData : (String, Arg, Name, TTImp, Maybe TTImp) -> FVData
 makeFVData (h, fv, n, t, v) = MkFVData n h fv.count fv.piInfo t v
@@ -105,6 +112,7 @@ Eq DependencyGraph where
       d == (rewrite p in d') && e == (rewrite p in e') && f == (rewrite p in f')
    (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') | No _ = False
 
+||| Pretty print a DependencyGraph.fvDeps field
 prettyDeps : (dg : DependencyGraph) -> FinSet dg.freeVars -> String
 prettyDeps dg deps =
   if deps == empty then
@@ -112,6 +120,7 @@ prettyDeps dg deps =
   else
     " Depends on: \{show $ (name . flip index dg.fvData) <$> toList deps}\n"
 
+||| Pretty print a FVData in a dependency graph
 prettyFV : (dg : DependencyGraph) -> FVData -> String
 prettyFV dg fvd =
   "\{show fvd.name} : \{show fvd.type}" ++
@@ -122,7 +131,7 @@ prettyFV dg fvd =
     " h2Id : \{show $ lookup fvd.holeName dg.holeToId}\n"
 
 
-||| Pretty-print dependency graph
+||| Pretty-print a dependency graph
 public export
 prettyDG : DependencyGraph -> String
 prettyDG dg = joinBy ""
@@ -169,21 +178,30 @@ leaves dg =
 emptyLeaves : (dg : DependencyGraph) -> FinSet dg.freeVars
 emptyLeaves dg = intersection dg.empties $ leaves dg
 
-updateCtx : List (Fin v) -> SnocList (Fin v) -> SnocList (Fin v)
-updateCtx [] acc = acc
-updateCtx (x :: xs) acc = updateCtx xs $ acc :< x
 
-flattenEmpties' : (dg : DependencyGraph) -> SnocList (Fin dg.freeVars) -> SnocList $ Fin dg.freeVars
-flattenEmpties' dg ctx = do
-  let els = emptyLeaves dg
-  let False = els == empty
-  | _ => ctx
-  let newCtx = updateCtx (toList els) ctx
-  flattenEmpties' (MkDG dg.freeVars dg.fvData (flip difference els <$> dg.fvDeps) (flip difference els dg.empties) dg.nameToId dg.holeToId) newCtx
 
 ||| List all the free variables without a value in order of dependency
 flattenEmpties : (dg : DependencyGraph) -> SnocList $ Fin dg.freeVars
 flattenEmpties dg = flattenEmpties' dg [<]
+  where
+    flattenEmpties' : (dg : DependencyGraph) -> SnocList (Fin dg.freeVars) -> SnocList $ Fin dg.freeVars
+    flattenEmpties' dg ctx = do
+      let els = emptyLeaves dg
+      let False = els == empty
+      | _ => ctx
+      let updateCtx : List (Fin v) -> SnocList (Fin v) -> SnocList (Fin v)
+          updateCtx [] acc = acc
+          updateCtx (x :: xs) acc = updateCtx xs $ acc :< x
+      let newCtx = updateCtx (toList els) ctx
+      flattenEmpties' 
+        (MkDG 
+          dg.freeVars 
+          dg.fvData 
+          (flip difference els <$> dg.fvDeps) 
+          (flip difference els dg.empties) 
+          dg.nameToId 
+          dg.holeToId)
+        newCtx
 
 ||| Find all variables which have no value
 filterEmpty : Vect _ FVData -> List (Name, TTImp)
@@ -195,6 +213,7 @@ filterEmpty = foldl myfun []
         Just val => (x.name, val) :: xs
         Nothing => xs
 
+||| Calculate UnificationResult (var-to-value mappings and empty leaf dependency order)
 public export
 finalizeDG : (task : UnificationTask) -> (dg : DependencyGraph) -> UnificationResult
 finalizeDG task dg = do

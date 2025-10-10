@@ -234,9 +234,6 @@ extractFVData t v ((Element fv isNamed) :: xs) (hn :: hns) = do
       let (vv ** vRest) = v
       quoteV <- quote vv
       quoteT <- quote myTy
-      -- logMsg "Unifier.TypecheckUnifier" 0
-      --   "\{show $ Expr.argName fv} : \{show quoteT} = \{show quoteV}"
-      -- This makes the unifier *MUCH* slower.
       rest <- extractFVData (dNext vv) vRest xs hns
       let retVal =
         case quoteV of
@@ -315,7 +312,6 @@ unifyWithCompiler :
   UnificationTask ->
   m $ UnificationResult
 unifyWithCompiler task = do
-  -- runEitherT {m=Elab} $ unify task
   let ret = runEitherT {m=Elab} {e=String} $ unify' task
   let err = pure {f=Elab} $ Left $ "Unification failed catastrophically (likely because of the named hole bug or postpone bug)"
   rr <- try ret err
