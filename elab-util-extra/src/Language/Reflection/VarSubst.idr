@@ -16,6 +16,7 @@ import public Control.Monad.State
 TTOp : (Type -> Type) -> Type
 TTOp m = TTImp -> m TTImp -> m TTImp
 
+public export
 NameSet : Type
 NameSet = SortedSet Name
 
@@ -112,24 +113,23 @@ containsVariable n =
   execState False .
     mapTTOp (containsVariableImpl n)
 
--- collectVariablesImpl : Monad m =>
---                        MonadReader QuoteInfo m =>
---                        MonadReader ShadowingInfo m =>
---                        MonadState NameSet m =>
---                        Name -> TTOp m
--- collectVariablesImpl n (IVar _ n') m = do
---   if n == n'
---      && not !(asks isQuote)
---      && not !(asks $ isShadowed n)
---      then modify (insert n) *> m
---      else m
--- collectVariablesImpl n tt m = m
---
--- public export
--- usesVariables : Name -> TTImp -> NameSet
--- usesVariables n =
---   execState empty .
---     mapTTOp (collectVariablesImpl n)
+collectVariablesImpl : Monad m =>
+                       MonadReader QuoteInfo m =>
+                       MonadReader ShadowingInfo m =>
+                       MonadState NameSet m =>
+                       TTOp m
+collectVariablesImpl (IVar _ n) m = do
+  if not !(asks isQuote)
+     && not !(asks $ isShadowed n)
+     then modify (insert n) *> m
+     else m
+collectVariablesImpl tt m = m
+
+public export
+usesVariables : TTImp -> NameSet
+usesVariables =
+  execState empty .
+    mapTTOp (collectVariablesImpl)
 
 substituteVariablesImpl : Monad m =>
                           MonadReader QuoteInfo m =>

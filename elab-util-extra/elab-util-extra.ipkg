@@ -19,8 +19,7 @@ depends = collection-utils
         , mk
         , mtl-tuple-impls
 
-modules = Data.FinBitSet
-        , Deriving.SpecialiseData
+modules = Deriving.SpecialiseData
         , Language.Reflection.Compat
         , Language.Reflection.Compat.Constr
         , Language.Reflection.Compat.TypeInfo

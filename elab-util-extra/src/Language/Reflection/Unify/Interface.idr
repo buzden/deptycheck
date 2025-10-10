@@ -2,7 +2,7 @@ module Language.Reflection.Unify.Interface
 
 import Control.Monad.Either
 import Data.Either
-import Data.FinBitSet
+import Data.Fin.Set
 import Data.SortedMap
 import Data.Vect
 import Decidable.Equality
@@ -49,8 +49,8 @@ Show UnificationTask where
         , showArg t.lhsFreeVars
         , showArg t.lhsExpr
         , showArg t.rfv
-        , showArg t.rhsFreeVars,
-        showArg t.rhsExpr
+        , showArg t.rhsFreeVars
+        , showArg t.rhsExpr
         ]
 
 ||| Free variable output data
@@ -85,9 +85,9 @@ record DependencyGraph where
   ||| Free variable data
   fvData : Vect freeVars FVData
   ||| Free variable dependency matrix
-  fvDeps : Vect freeVars $ FinBitSet freeVars
+  fvDeps : Vect freeVars $ FinSet freeVars
   ||| The set of all i: (Fin freeVars), where (index i fvData).value = None
-  empties : FinBitSet freeVars
+  empties : FinSet freeVars
   ||| For all i : (Fin freeVars); (lookup (index i fvData).name nameToId) = i
   nameToId : SortedMap Name $ Fin freeVars
   ||| For all i : (Fin freeVars); (lookup (index i fvData).holeName holeToId) = i
@@ -105,7 +105,7 @@ Eq DependencyGraph where
       d == (rewrite p in d') && e == (rewrite p in e') && f == (rewrite p in f')
    (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') | No _ = False
 
-prettyDeps : (dg : DependencyGraph) -> FinBitSet dg.freeVars -> String
+prettyDeps : (dg : DependencyGraph) -> FinSet dg.freeVars -> String
 prettyDeps dg deps =
   if deps == empty then
     ""
@@ -158,7 +158,7 @@ record UnificationResult where
 %runElab derive "UnificationResult" [Show]
 
 ||| List all free variables that don't depende on any other free variables
-leaves : (dg : DependencyGraph) -> FinBitSet dg.freeVars
+leaves : (dg : DependencyGraph) -> FinSet dg.freeVars
 leaves dg =
   foldl
     (\acc,(id, deps) => if deps == empty then insert id acc else acc)
@@ -166,7 +166,7 @@ leaves dg =
   zip (allFins dg.freeVars) dg.fvDeps
 
 ||| List all the free variables without a value that don't depend on any other free variables
-emptyLeaves : (dg : DependencyGraph) -> FinBitSet dg.freeVars
+emptyLeaves : (dg : DependencyGraph) -> FinSet dg.freeVars
 emptyLeaves dg = intersection dg.empties $ leaves dg
 
 updateCtx : List (Fin v) -> SnocList (Fin v) -> SnocList (Fin v)
@@ -179,7 +179,7 @@ flattenEmpties' dg ctx = do
   let False = els == empty
   | _ => ctx
   let newCtx = updateCtx (toList els) ctx
-  flattenEmpties' (MkDG dg.freeVars dg.fvData (removeAll els <$> dg.fvDeps) (removeAll els dg.empties) dg.nameToId dg.holeToId) newCtx
+  flattenEmpties' (MkDG dg.freeVars dg.fvData (flip difference els <$> dg.fvDeps) (flip difference els dg.empties) dg.nameToId dg.holeToId) newCtx
 
 ||| List all the free variables without a value in order of dependency
 flattenEmpties : (dg : DependencyGraph) -> SnocList $ Fin dg.freeVars

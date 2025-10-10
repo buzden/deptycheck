@@ -13,7 +13,7 @@ import Data.Either
 import Data.SortedMap
 import Data.SortedSet
 import Data.SortedMap.Dependent
-import public Language.Mk
+import public Language.Mk -- TODO: Fix mk so that it works without this hack
 import Language.Reflection.Expr
 import Language.Reflection.Logging
 import Language.Reflection.Syntax.Ops
@@ -230,13 +230,13 @@ aliasedApp (xs :< (n, an)) t =
 checkArgsUse :
   MonadError SpecialisationError m =>
   List Arg ->
-  TTImp ->
+  SortedSet Name ->
   m ()
 checkArgsUse [] _ = pure ()
 checkArgsUse (x :: xs) t = do
   let Just n = x.name
   | _ => checkArgsUse xs t
-  if containsVariable n t
+  if contains n t
     then checkArgsUse xs t
     else throwError UnusedVarError
 
@@ -254,7 +254,7 @@ getTask l' outputName = with Prelude.(>>=) do
   taskQuote : TTImp <- cleanupNamedHoles <$> quote l'
   let (tqArgs, tqRet) = unLambda taskQuote
   -- Check for unused arguments
-  checkArgsUse tqArgs tqRet
+  checkArgsUse tqArgs $ usesVariables tqRet
   -- Extract name of polymorphic type
   let (IVar _ typeName, _) = unApp tqRet
   | _ => throwError TaskTypeExtractionError
@@ -369,6 +369,7 @@ parameters (t : SpecTask)
 -------------------------------
 
   ||| Run unification for a given polymorphic constructor
+  ||| TODO: fix but with (\x,y => Vect x (Vect y Nat))
   unifyCon :
     Elaboration m =>
     MonadError String m =>
@@ -886,3 +887,11 @@ specialiseData' taskT outputName = do
       specialiseData taskT outputName
   | Left err => fail "Specialisation error: \{show err}"
   declare decls
+
+specialiseData'' : TaskLambda l => l -> Name -> Elab $ List Decl
+specialiseData'' taskT outputName = do
+  (Right (monoTy, decls)) <-
+    runEitherT {m=Elab} {e=SpecialisationError} $
+      specialiseData taskT outputName
+  | Left err => fail "Specialisation error: \{show err}"
+  pure decls

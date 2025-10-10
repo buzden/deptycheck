@@ -4,7 +4,7 @@ import Control.Monad.Either
 import Control.Monad.Writer
 import Control.Monad.Identity
 import Data.DPair
-import Data.FinBitSet
+import Data.Fin.Set
 import Data.Vect
 import Data.Vect.Quantifiers
 import Data.SnocVect
@@ -34,7 +34,7 @@ genHoleToId fvs =
 
 aMHImpl :
   {0 freeVars : Nat} ->
-  MonadWriter (FinBitSet freeVars) m =>
+  MonadWriter (FinSet freeVars) m =>
   SortedMap String (Fin freeVars) ->
   TTImp ->
   m TTImp
@@ -50,7 +50,7 @@ allMatchingHoles :
   {0 freeVars : Nat} ->
   SortedMap String (Fin freeVars) ->
   TTImp ->
-  FinBitSet freeVars
+  FinSet freeVars
 allMatchingHoles h2Id t = execWriter $ mapMTTImp (aMHImpl h2Id) t
 
 ||| Generate a dependency map from unification output and hole-to-index mapping
@@ -58,11 +58,11 @@ genDeps :
   {freeVars : Nat} ->
   Vect freeVars FVData ->
   SortedMap String (Fin freeVars) ->
-  Vect freeVars $ FinBitSet freeVars
+  Vect freeVars $ FinSet freeVars
 genDeps fvs h2Id =
   map
     (\fv =>
-      merge (allMatchingHoles h2Id fv.type) $
+      union (allMatchingHoles h2Id fv.type) $
         fromMaybe empty $
           allMatchingHoles h2Id <$> fv.value)
     fvs
@@ -71,10 +71,10 @@ genDeps fvs h2Id =
 genEmpties :
   {freeVars : Nat} ->
   Vect freeVars FVData ->
-  FinBitSet freeVars
+  FinSet freeVars
 genEmpties fvs = foldl genEmpties' empty $ zip (allFins freeVars) fvs
   where
-    genEmpties' : FinBitSet fv -> (Fin fv, FVData) -> FinBitSet fv
+    genEmpties' : FinSet fv -> (Fin fv, FVData) -> FinSet fv
     genEmpties' set (i, fv) =
       if isNothing fv.value
          then insert i set
@@ -92,26 +92,26 @@ genDG fvs = do
 ||| Find all free variables that can be substituted
 canSub :
   (dg : DependencyGraph) ->
-  FinBitSet dg.freeVars
+  FinSet dg.freeVars
 canSub dg =
-  removeAll dg.empties $
+  flip difference dg.empties $
     foldl
       (\s, (i, n) =>
-        if (removeAll dg.empties n) == empty
+        if (flip difference dg.empties n) == empty
            then insert i s
            else s)
-      empty
+      Fin.Set.empty
       $ zip (allFins dg.freeVars) dg.fvDeps
 
 subMatchingHolesImpl :
   (dg : DependencyGraph) ->
-  FinBitSet dg.freeVars ->
+  FinSet dg.freeVars ->
   TTImp ->
   TTImp
 subMatchingHolesImpl dg fbs ih@(IHole _ h) =
   case lookup h dg.holeToId of
     Just id =>
-      if lookup id fbs
+      if contains id fbs
         then
           let fv = index id dg.fvData
           in fromMaybe ih fv.value
@@ -122,7 +122,7 @@ subMatchingHolesImpl _ _ t = t
 ||| Substitute all holes matching free variables in set with their values
 subMatchingHoles :
   (dg : DependencyGraph) ->
-  FinBitSet dg.freeVars ->
+  FinSet dg.freeVars ->
   TTImp ->
   TTImp
 subMatchingHoles dg fbs = mapTTImp $ subMatchingHolesImpl dg fbs
@@ -130,7 +130,7 @@ subMatchingHoles dg fbs = mapTTImp $ subMatchingHolesImpl dg fbs
 ||| Substitute all free variables in set within other free variable's data
 fvSubMatching :
   (dg: DependencyGraph) ->
-  FinBitSet dg.freeVars ->
+  FinSet dg.freeVars ->
   FVData ->
   FVData
 fvSubMatching dg canSub =
@@ -141,18 +141,18 @@ fvSubMatching dg canSub =
 ||| Substitute all free variables in set within dependency graph
 doSub :
   (dg : DependencyGraph) ->
-  FinBitSet dg.freeVars ->
+  FinSet dg.freeVars ->
   DependencyGraph
 doSub dg canSub =
   { fvData $= map $ fvSubMatching dg canSub
-  , fvDeps $= map $ removeAll canSub
+  , fvDeps $= map $ flip difference canSub
   } dg
 
 subEmptiesTImpl : (dg : DependencyGraph) -> TTImp -> TTImp
 subEmptiesTImpl dg t@(IHole _ h) = do
   let Just id = lookup h dg.holeToId
   | _ => t
-  if lookup id dg.empties
+  if contains id dg.empties
     then
       let fv = index id dg.fvData
       in IVar EmptyFC fv.name
