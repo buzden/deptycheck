@@ -39,9 +39,9 @@ aMHImpl :
   TTImp ->
   m TTImp
 aMHImpl h2Id h = do
-  let (IHole _ s) = h
+  let IHole _ s = h
   | _ => pure h
-  let (Just id) = lookup s h2Id
+  let Just id = lookup s h2Id
   | _ => pure h
   writer (h, insert id empty)
 
@@ -230,7 +230,7 @@ extractFVData :
   m $ Vect l (Name, TTImp, Maybe TTImp)
 extractFVData t v ((Element fv isNamed) :: xs) (hn :: hns) = do
   case t of
-    (DPair myTy dNext) => do
+    DPair myTy dNext => do
       let (vv ** vRest) = v
       quoteV <- quote vv
       quoteT <- quote myTy
@@ -251,7 +251,7 @@ extractFVData t v [] [] = do
   qT <- quote t
   qV <- quote v
   case t of
-    (Equal x y) =>
+    Equal x y =>
       case qV of
         INamedApp _ (INamedApp _ `(Builtin.Refl) _ _) _ _ => pure ()
         _ => throwError "Compiler failed to generate correct unification. Instead generated \{show qV}"
@@ -285,11 +285,11 @@ unify' task = do
   logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Target type: \{show checkTargetType}"
   logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Target value: \{show checkTarget}"
   -- Instantiate target type
-  (Just checkTargetType') : Maybe Type <-
+  Just checkTargetType' : Maybe Type <-
     try (Just <$> check checkTargetType) (pure Nothing)
   | _ => throwError "Failed to build target type (\{show checkTargetType})"
   -- Run unification
-  (Just checkTarget') : Maybe checkTargetType' <-
+  Just checkTarget' : Maybe checkTargetType' <-
     try (Just <$> check checkTarget) (pure Nothing)
   | _ => throwError "Failed to instantiate equality proof"
   ctQuote <- quote checkTarget'
