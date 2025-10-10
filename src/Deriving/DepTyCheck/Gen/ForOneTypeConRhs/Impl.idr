@@ -99,8 +99,8 @@ enrichStrongDet determ xs = go xs xs where
 
 -- adds base priorities of args which we depend on transitively
 refineBasePri : Num p => {con : _} -> FinMap con.args.length (Determination con, p) -> FinMap con.args.length (Determination con, p)
-refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps) $ traverse_ go $ List.allFins _ where
-  go : (visited : MonadState (SortedSet $ Fin con.args.length) m) =>
+refineBasePri ps = snd $ execState (Fin.Set.empty {n=con.args.length}, ps) $ traverse_ go $ List.allFins _ where
+  go : (visited : MonadState (FinSet con.args.length) m) =>
        (pris : MonadState (FinMap con.args.length (Determination con, p)) m) =>
        Monad m =>
        Fin con.args.length ->
@@ -109,21 +109,22 @@ refineBasePri ps = snd $ execState (SortedSet.empty {k=Fin con.args.length}, ps)
 
     visited <- get
     -- if we already managed the current item, then exit
-    let False = contains curr visited | True => pure ()
+    let False = Fin.Set.contains curr visited | True => pure ()
     -- remember that we are in charge of the current item
-    let visited = insert curr visited
+    let visited = Fin.Set.insert curr visited
     put visited
 
     let Just (det, currPri) = lookup curr !(get @{pris}) | Nothing => pure ()
 
-    let unvisitedDeps = det.argsDependsOn `union` det.stronglyDeterminingArgs
+    let unvisitedDeps = fromFoldable $ det.argsDependsOn `union` det.stronglyDeterminingArgs
 
     -- run this for all dependences
     for_ (unvisitedDeps `difference` visited) $ assert_total go
 
     -- compute what needs to be added to the current priority
-    let addition = mapMaybe (map snd . lookup' !(get @{pris})) (Prelude.toList unvisitedDeps)
-    let newPri = foldl (+) currPri addition
+    newPri <- do
+      pris <- get @{pris}
+      pure $ foldl (\curr => maybe curr ((curr+) . snd) . lookup' pris) currPri unvisitedDeps
 
     -- update the priority of the currenly managed argument
     modify $ updateExisting (mapSnd $ const newPri) curr
