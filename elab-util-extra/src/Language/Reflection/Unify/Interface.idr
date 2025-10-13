@@ -193,13 +193,13 @@ flattenEmpties dg = flattenEmpties' dg [<]
           updateCtx [] acc = acc
           updateCtx (x :: xs) acc = updateCtx xs $ acc :< x
       let newCtx = updateCtx (toList els) ctx
-      flattenEmpties' 
-        (MkDG 
-          dg.freeVars 
-          dg.fvData 
-          (flip difference els <$> dg.fvDeps) 
-          (flip difference els dg.empties) 
-          dg.nameToId 
+      flattenEmpties'
+        (MkDG
+          dg.freeVars
+          dg.fvData
+          (flip difference els <$> dg.fvDeps)
+          (flip difference els dg.empties)
+          dg.nameToId
           dg.holeToId)
         newCtx
 
