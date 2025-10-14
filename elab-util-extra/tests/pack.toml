@@ -2,3 +2,8 @@
 type = "local"
 path = "unify-with-compiler/_shared"
 ipkg = "unifywc-shared.ipkg"
+
+[custom.all.specdata-shared]
+type = "local"
+path = "specialise-data/_shared"
+ipkg = "specdata-shared.ipkg"
