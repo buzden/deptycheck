@@ -68,7 +68,7 @@ jobs:
       - run: ./.patch-chez-gc-handler idris2
 
       - name: Tar the `pack` dir
-        run: .github/tar -cvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
+        run: .github/tar-pack save-pack "${{ env.pack_dir_file }}"
       - name: Save state of `pack`
         uses: actions/upload-artifact@v4
         with:
@@ -87,14 +87,14 @@ jobs:
         with:
           name: pack-dir
       - name: Untar the `pack` dir
-        run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
 
       - run: pack install-deps deptycheck
       - run: pack install summary-stat # for distr tests
              # TODO to compute test dependencies when we have special mini-test libs
 
       - name: Tar the `pack` dir
-        run: .github/tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
+        run: .github/tar-pack save-pack "${{ env.pack_dir_file }}"
       - name: Save built thirdparties
         uses: actions/upload-artifact@v4
         with:
@@ -120,7 +120,7 @@ jobs:
         with:
           name: built-thirdparties
       - name: Untar the `pack` dir
-        run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
 
       - run: pack test elab-util-extra
 
@@ -142,15 +142,15 @@ jobs:
         with:
           name: built-thirdparties
       - name: Untar the `pack` dir
-        run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
 
       - run: pack build deptycheck
       - run: pack install deptycheck
 
       - name: Tar the `pack` dir
-        run:  .github/tar -uvf "${{ env.pack_dir_file }}" --exclude=".cache" "$PACK_DIR"
+        run:  .github/tar-pack save-pack "${{ env.pack_dir_file }}"
       - name: Tar built TTC files
-        run: find "$(pwd)" -name '*.tt[cm]' | .github/tar -uvf "${{ env.pack_dir_file }}" --files-from /dev/stdin
+        run: find "$(pwd)" -name '*.tt[cm]' | .github/tar-pack save-stdin "${{ env.pack_dir_file }}"
       - name: Save built DepTyCheck
         uses: actions/upload-artifact@v4
         with:
@@ -218,7 +218,7 @@ jobs:
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
-        run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
 
       - run: pack test deptycheck "${{matrix.test_set}}"
 
@@ -265,7 +265,7 @@ jobs:
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
-        run: .github/tar -xvf "${{ env.pack_dir_file }}" --one-top-level=/ --touch
+        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
 
       - run: pack build "${{matrix.example}}"
       - run: pack test "${{matrix.example}}"

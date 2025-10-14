@@ -3,12 +3,12 @@ default:
   image: ghcr.io/stefan-hoeck/idris2-pack:latest
   interruptible: true
   before_script:
-    - find . -name '.pack.*.tar' -exec tar -xf '{}' --one-top-level=/ --touch \;
+    - find . -name '.pack.*.tar' -exec .github/tar-pack restore '{}' \;
   after_script:
     - rm -f .pack.*.tar
     - |
-      if [[ "$CI_JOB_NAME" =~ ":build" || "$CI_JOB_NAME" =~ "pack:" ]]
-        then tar -cf "$CI_PROJECT_DIR/.pack.${CI_JOB_NAME/:/-}.tar" --exclude=".cache" "$PACK_DIR"
+      if [[ "$CI_JOB_NAME" =~ ":build" || "$CI_JOB_NAME" =~ "pack:" ]]; then
+        .github/tar-pack save-pack "$CI_PROJECT_DIR/.pack.${CI_JOB_NAME/:/-}.tar"
       fi
   artifacts:
     paths:
