@@ -1,0 +1,4 @@
+[custom.all.unifywc-shared]
+type = "local"
+path = "unify-with-compiler/_shared"
+ipkg = "unifywc-shared.ipkg"

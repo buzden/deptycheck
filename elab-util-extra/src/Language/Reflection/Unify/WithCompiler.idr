@@ -313,8 +313,22 @@ unifyWithCompiler :
   m $ UnificationResult
 unifyWithCompiler task = do
   let ret = runEitherT {m=Elab} {e=String} $ unify' task
-  let err = pure {f=Elab} $ Left $ "Unification failed catastrophically (likely because of the named hole bug or postpone bug)"
+  let err = pure {f=Elab} $ Left $ "Unification failed catastrophically"
   rr <- try ret err
   logBounds "unifyWithCompiler.finalizeDG" [] $ do
     dg <- liftEither rr
     pure $ finalizeDG task dg
+
+||| Run unification in a try block
+public export
+unifyWithCompiler' :
+  Elaboration m =>
+  MonadError String m =>
+  UnificationTask ->
+  m $ UnificationResult
+unifyWithCompiler' task = do
+  rr <- runEitherT {m} {e=String} $ unify' task
+  logBounds "unifyWithCompiler.finalizeDG" [] $ do
+    dg <- liftEither rr
+    pure $ finalizeDG task dg
+

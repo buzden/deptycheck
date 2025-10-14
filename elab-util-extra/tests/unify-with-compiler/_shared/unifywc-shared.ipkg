@@ -1,0 +1,5 @@
+package unifywc-shared
+
+depends = elab-util-extra
+
+modules = Shared
