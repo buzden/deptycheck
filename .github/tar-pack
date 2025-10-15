@@ -1,0 +1,47 @@
+#!/bin/sh
+
+TAR="$(which tar)"
+tar() {
+  "$TAR" "$@"
+  EXITCODE="$?"
+  if [ "$EXITCODE" != 0 ] && [ "$EXITCODE" != 1 ]; then
+    exit "$EXITCODE"
+  fi
+}
+
+CMD="$1"
+ARCHIVE_FILE="$2"
+
+print_usage() {
+  echo "Usage: $0 <save-pack|save-stdin|restore> <tar-file-path>" >&2
+  if [ -z "$ARCHIVE_FILE" ]; then
+    echo "Haven't you forgot to pass the file name?" >&2
+  fi
+}
+
+if [ -z "$CMD" ] || [ -z "$ARCHIVE_FILE" ]; then
+  print_usage
+  exit 1
+fi
+
+pack_dirs() {
+  {
+    echo "$PACK_USER_DIR"
+    echo "$PACK_STATE_DIR"
+    echo "$PACK_CACHE_DIR"
+    echo "$PACK_BIN_DIR"
+  } | while read -r r; do
+    test -d "$r" && echo "$r"
+  done
+}
+
+case "$CMD" in
+  save-pack) pack_dirs | tar -uvf "$ARCHIVE_FILE" --exclude=".cache" --files-from /dev/stdin ;;
+  save-stdin) tar -uvf "$ARCHIVE_FILE" --files-from /dev/stdin ;;
+  restore) tar -xvf "$ARCHIVE_FILE" --one-top-level=/ --touch ;;
+  *)
+    echo "Bad command '$CMD'" >&2
+    print_usage
+    exit 2
+    ;;
+esac
