@@ -92,8 +92,10 @@ assert4 ur = do
 assert5 : UnificationResult -> Elab ()
 assert5 ur = do
   assertFV ur "x" `(Prelude.Types.S Prelude.Types.Z)
-  assertFV ur "y" `(Data.Vect.(::) {len = Prelude.Types.Z} {elem = Prelude.Types.Nat} (Prelude.Types.S $ Prelude.Types.S $ Prelude.Types.Z) $ Data.Vect.Nil {elem =
-                   Prelude.Types.Nat})
+  assertFV ur "y"
+    `(Data.Vect.(::) {len = Prelude.Types.Z} {elem = Prelude.Types.Nat}
+        (Prelude.Types.S $ Prelude.Types.S $ Prelude.Types.Z)
+        $ Data.Vect.Nil {elem = Prelude.Types.Nat})
 
 %runElab withUnify' ["x" #: `(Nat), "y" #: `(Vect x Nat)] `(MkPair x y)
                     []
