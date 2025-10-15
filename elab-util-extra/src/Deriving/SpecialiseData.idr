@@ -43,6 +43,21 @@ TaskLambda Type
 public export
 TaskLambda b => TaskLambda (a -> b)
 
+public export
+TaskLambda b => TaskLambda (a => b)
+
+public export
+TaskLambda b => TaskLambda ({_ : a} -> b)
+
+public export
+TaskLambda b => TaskLambda ((0 _ : a) -> b)
+
+public export
+TaskLambda b => TaskLambda ((0 _ : a) => b)
+
+public export
+TaskLambda b => TaskLambda ({0 _ : a} -> b)
+
 ||| Specialisation error
 public export
 data SpecialisationError : Type where
@@ -154,7 +169,9 @@ applyArgAliases (x :: xs) @{p :: ps} ys            ins = do
 genAliases' : Elaboration m => (as : Vect l Arg) -> (0 _ : All IsNamedArg as) => m $ List (Name, Name)
 genAliases' [] = pure []
 genAliases' @{_} (x :: xs) @{(p :: ps)} = do
-  pure $ (argName x, !(genSym $ show $ Expr.argName x)) :: !(genAliases' xs)
+  MN _ gn <- genSym $ show $ Expr.argName x
+  | _ => fail "Intenal specialiser error: genSym returned non-MS name"
+  pure $ (argName x, UN $ Basic $ show (Expr.argName x) ++ show gn) :: !(genAliases' xs)
 
 ||| Given a list of arguments, generate a list of aliased arguments
 ||| and a list of aliases
@@ -216,10 +233,12 @@ renewProof (x :: xs) @{(p :: ps)} with (x)
     ItIsNamed :: renewProof xs
 
 ||| Create a binding application of aliased arguments
-aliasedAppBind : SnocList (Name, Name) -> SortedMap Name TTImp -> TTImp -> TTImp
-aliasedAppBind [<] nm t = t
-aliasedAppBind (xs :< (n, an)) nm t =
-  aliasedAppBind xs nm t .! (an, fromMaybe (bindVar n) $ lookup n nm)
+||| binding everything to `(_)
+aliasedAppBind : SnocList (Name, Name) -> TTImp -> TTImp
+aliasedAppBind [<] t = t
+aliasedAppBind (xs :< (n, an)) t =
+  aliasedAppBind xs t .! (an, `(_))
+
 
 ||| Create a non-binding application of aliased arguments
 aliasedApp : SnocList (Name, Name) -> TTImp -> TTImp
@@ -252,7 +271,7 @@ getTask :
   Monad m =>
   Elaboration m =>
   MonadError SpecialisationError m =>
-  l ->
+  (0 l' : l) ->
   Name ->
   m SpecTask
 getTask l' outputName = with Prelude.(>>=) do
@@ -605,14 +624,14 @@ parameters (t : SpecTask)
     logBounds "specialiseData.mkCastInjClause" [mt, con] $ do
       (Element a1 _, am1) <- genArgAliases con.args
       (Element a2 _, am2) <- genArgAliases con.args
-      let am1' = fromList $ mapSnd bindVar <$> am1
-      let am2' = fromList $ mapSnd bindVar <$> am2
+      let am1' = fromList $ mapSnd (const `(_)) <$> am1
+      let am2' = fromList $ mapSnd (const `(_)) <$> am2
       let ures1 = substituteVariables am1' <$> ur.fullResult
       let ures2 = substituteVariables am2' <$> ur.fullResult
-      let bta1 = aliasedAppBind (cast tam1) ures1 `(castInjImpl)
-      let bta2 = aliasedAppBind (cast tam2) ures2 bta1
+      let bta1 = aliasedAppBind (cast tam1) `(castInjImpl)
+      let bta2 = aliasedAppBind (cast tam2) bta1
       let lhsCon = con.invoke bindVar $ am1'
-      let rhsCon = con.invoke bindVar $ am2'
+      let rhsCon = con.invoke bindVar $ am1'
       let patRhs : TTImp
           patRhs = case (length a1) of
             0 => `(Refl)
@@ -628,7 +647,7 @@ parameters (t : SpecTask)
     (0 _ : IsFullyNamedType mt) =>
     m $ List Decl
   mkCastInjDecls @{_} ur ti @{tip} =
-    logBounds "mkCastInjDecls" [ti] $ do
+    logBounds "specialiseData.mkCastInjDecls" [ti] $ do
       let prepArgs : Vect ti.arty Arg
           prepArgs = setMWImplicit <$> ti.args
       let prf : All IsNamedArg prepArgs = renewProof ti.args @{tip.argsAreNamed}
@@ -657,7 +676,7 @@ parameters (t : SpecTask)
         , interfaceHint Public "castInj" $ forallMTArgs $
             `(Injective ~(aliasedApp tyArgPairs mToPImplVar))
         , def "castInj" $ singleton $
-            aliasedAppBind tyArgPairs empty `(castInj) .= `(MkInjective castInjImpl)
+            aliasedAppBind tyArgPairs `(castInj) .= `(MkInjective castInjImpl)
         ]
 
   -------------------------------------
@@ -863,7 +882,7 @@ specialiseData :
   Monad m =>
   Elaboration m =>
   MonadError SpecialisationError m =>
-  l ->
+  (0 taskT : l) ->
   Name ->
   m (TypeInfo, List Decl)
 specialiseData taskT outputName = do
@@ -879,7 +898,7 @@ specialiseData taskT outputName = do
 
 ||| Perform a specified monomorphisation and declare the results
 public export
-specialiseData' : TaskLambda l => l -> Name -> Elab ()
+specialiseData' : TaskLambda l => (0 taskT: l) -> Name -> Elab ()
 specialiseData' taskT outputName = do
   Right (monoTy, decls) <-
     runEitherT {m=Elab} {e=SpecialisationError} $
@@ -888,7 +907,7 @@ specialiseData' taskT outputName = do
   declare decls
 
 ||| Perform a specified monomorphisation and return a list of declarations
-specialiseData'' : TaskLambda l => l -> Name -> Elab $ List Decl
+specialiseData'' : TaskLambda l => (0 taskT: l) -> Name -> Elab $ List Decl
 specialiseData'' taskT outputName = do
   Right (monoTy, decls) <-
     runEitherT {m=Elab} {e=SpecialisationError} $

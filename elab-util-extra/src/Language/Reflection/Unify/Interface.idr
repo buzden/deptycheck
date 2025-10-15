@@ -92,7 +92,7 @@ record DependencyGraph where
   ||| Free variable data
   fvData : Vect freeVars FVData
   ||| Free variable dependency matrix
-  fvDeps : Vect freeVars $ FinSet freeVars
+  fvDeps : Vect freeVars $ (FinSet freeVars, FinSet freeVars)
   ||| The set of all i: (Fin freeVars), where (index i fvData).value = None
   empties : FinSet freeVars
   ||| For all i : (Fin freeVars); (lookup (index i fvData).name nameToId) = i
@@ -112,39 +112,39 @@ Eq DependencyGraph where
       d == (rewrite p in d') && e == (rewrite p in e') && f == (rewrite p in f')
    (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') | No _ = False
 
-||| Pretty print a DependencyGraph.fvDeps field
-prettyDeps : (dg : DependencyGraph) -> FinSet dg.freeVars -> String
-prettyDeps dg deps =
-  if deps == empty then
-    ""
-  else
-    " Depends on: \{show $ (name . flip index dg.fvData) <$> toList deps}\n"
-
-||| Pretty print a FVData in a dependency graph
-prettyFV : (dg : DependencyGraph) -> FVData -> String
-prettyFV dg fvd =
-  "\{show fvd.name} : \{show fvd.type}" ++
-    (case fvd.value of
-      Nothing => "\n"
-      Just val => " = \{show val}\n") ++
-    " n2Id : \{show $ lookup fvd.name dg.nameToId}; " ++
-    " h2Id : \{show $ lookup fvd.holeName dg.holeToId}\n"
-
-
-||| Pretty-print a dependency graph
-public export
-prettyDG : DependencyGraph -> String
-prettyDG dg = joinBy ""
-  [ show dg.freeVars
-  , " free variables:\n"
-  , (joinBy "" $
-      (\(a,b) => prettyFV dg a ++ prettyDeps dg b) <$>
-        (toList $ zip dg.fvData dg.fvDeps))
-  , "===\n"
-  , "Empties: "
-  , show $ (name . flip index dg.fvData) <$> toList dg.empties
-  , "\n======"
-  ]
+-- ||| Pretty print a DependencyGraph.fvDeps field
+-- prettyDeps : (dg : DependencyGraph) -> FinSet dg.freeVars -> String
+-- prettyDeps dg deps =
+--   if deps == empty then
+--     ""
+--   else
+--     " Depends on: \{show $ (name . flip index dg.fvData) <$> toList deps}\n"
+--
+-- ||| Pretty print a FVData in a dependency graph
+-- prettyFV : (dg : DependencyGraph) -> FVData -> String
+-- prettyFV dg fvd =
+--   "\{show fvd.name} : \{show fvd.type}" ++
+--     (case fvd.value of
+--       Nothing => "\n"
+--       Just val => " = \{show val}\n") ++
+--     " n2Id : \{show $ lookup fvd.name dg.nameToId}; " ++
+--     " h2Id : \{show $ lookup fvd.holeName dg.holeToId}\n"
+--
+--
+-- ||| Pretty-print a dependency graph
+-- public export
+-- prettyDG : DependencyGraph -> String
+-- prettyDG dg = joinBy ""
+--   [ show dg.freeVars
+--   , " free variables:\n"
+--   , (joinBy "" $
+--       (\(a,b) => prettyFV dg a ++ prettyDeps dg b) <$>
+--         (toList $ zip dg.fvData dg.fvDeps))
+--   , "===\n"
+--   , "Empties: "
+--   , show $ (name . flip index dg.fvData) <$> toList dg.empties
+--   , "\n======"
+--   ]
 
 ||| Unification result
 public export
@@ -172,7 +172,7 @@ leaves dg =
   foldl
     (\acc,(id, deps) => if deps == empty then insert id acc else acc)
     empty $
-  zip (allFins dg.freeVars) dg.fvDeps
+  zip (allFins dg.freeVars) (map (uncurry union) dg.fvDeps)
 
 ||| List all the free variables without a value that don't depend on any other free variables
 emptyLeaves : (dg : DependencyGraph) -> FinSet dg.freeVars
@@ -197,7 +197,7 @@ flattenEmpties dg = flattenEmpties' dg [<]
         (MkDG
           dg.freeVars
           dg.fvData
-          (flip difference els <$> dg.fvDeps)
+          (bimap (flip difference els) (flip difference els) <$> dg.fvDeps)
           (flip difference els dg.empties)
           dg.nameToId
           dg.holeToId)

@@ -50,3 +50,20 @@ withUnify' lhsAs lhs rhsAs rhs f =
 public export
 showUnify' : {l,r : Nat} -> Vect l Arg -> TTImp -> Vect r Arg -> TTImp -> Elab ()
 showUnify' lhsAs lhs rhsAs rhs = withUnify' lhsAs lhs rhsAs rhs $ logMsg "" 0 . show
+
+public export
+assertFV : UnificationResult -> Name -> TTImp -> Elab ()
+assertFV ur n t = do
+  let Just res = lookup n ur.fullResult
+  | _ => fail "Free variable \{show n} doesn't have a value"
+  if res == t
+    then pure ()
+    else fail "Free variable \{show n}'s value is \{show res} instead of \{show t}"
+
+public export
+assertOrder : UnificationResult -> List Name -> Elab ()
+assertOrder ur expected = do
+  let actualNames = name . flip index ur.uniDg.fvData <$> ur.order
+  if actualNames == expected
+     then pure ()
+     else fail "Free variable order is \{show actualNames} instead of \{show expected}"

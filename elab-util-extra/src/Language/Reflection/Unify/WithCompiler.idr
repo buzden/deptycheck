@@ -58,11 +58,10 @@ genDeps :
   {freeVars : Nat} ->
   Vect freeVars FVData ->
   SortedMap String (Fin freeVars) ->
-  Vect freeVars $ FinSet freeVars
+  Vect freeVars (FinSet freeVars, FinSet freeVars)
 genDeps fvs h2Id =
   map
-    (\fv =>
-      union (allMatchingHoles h2Id fv.type) $
+    (\fv => MkPair (allMatchingHoles h2Id fv.type) $
         fromMaybe empty $
           allMatchingHoles h2Id <$> fv.value)
     fvs
@@ -96,8 +95,8 @@ canSub :
 canSub dg =
   flip difference dg.empties $
     foldl
-      (\s, (i, n) =>
-        if (flip difference dg.empties n) == empty
+      (\s, (i, (n,n')) =>
+        if (flip difference dg.empties (union n n')) == empty
            then insert i s
            else s)
       Fin.Set.empty
@@ -138,15 +137,37 @@ fvSubMatching dg canSub =
   , value $= map $ subMatchingHoles dg canSub
   }
 
+valDepsOfVar : (dg : DependencyGraph) -> Fin dg.freeVars -> FinSet dg.freeVars
+valDepsOfVar dg id = snd $ index id dg.fvDeps
+
+valDepsOfVars : (dg : DependencyGraph) -> FinSet dg.freeVars -> FinSet dg.freeVars
+valDepsOfVars dg vars = foldl (\a, b => union (valDepsOfVar dg b) a) empty (toList vars)
+
+fvSubMatching' :
+  (dg: DependencyGraph) ->
+  FinSet dg.freeVars ->
+  (FVData, FinSet dg.freeVars, FinSet dg.freeVars) ->
+  (FVData, FinSet dg.freeVars, FinSet dg.freeVars)
+fvSubMatching' dg canSub (fvData, tyDeps, valDeps) = do
+  let matchingHolesTy = allMatchingHoles dg.holeToId fvData.type
+  let matchingHolesVal = fromMaybe empty $ allMatchingHoles dg.holeToId <$> fvData.value
+  let canSubTy = intersection matchingHolesTy canSub
+  let canSubVal = intersection matchingHolesVal canSub
+  let tyAddDeps = valDepsOfVars dg canSubTy
+  let valAddDeps = valDepsOfVars dg canSubVal
+  let newTyDeps = union tyAddDeps (difference tyDeps canSubTy)
+  let newValDeps = union valAddDeps (difference valDeps canSubVal)
+  (fvSubMatching dg canSub fvData, newTyDeps, newValDeps)
+
+
 ||| Substitute all free variables in set within dependency graph
 doSub :
   (dg : DependencyGraph) ->
   FinSet dg.freeVars ->
   DependencyGraph
-doSub dg canSub =
-  { fvData $= map $ fvSubMatching dg canSub
-  , fvDeps $= map $ flip difference canSub
-  } dg
+doSub dg canSub = do
+  let (newFvData, newFvDeps) = unzip $ fvSubMatching' dg canSub <$> zip dg.fvData dg.fvDeps
+  ({fvData := newFvData, fvDeps := newFvDeps} dg)
 
 subEmptiesTImpl : (dg : DependencyGraph) -> TTImp -> TTImp
 subEmptiesTImpl dg t@(IHole _ h) = do
@@ -201,7 +222,7 @@ genHoleNames :
 genHoleNames [<] = pure (empty, [<])
 genHoleNames (xs :< (Element fv isNamed)) = do
   let n = argName fv
-  gs <- genSym $ show fv.name
+  gs <- genSym $ show n
   (others, others') <- genHoleNames xs
   pure $ (insert n (show gs) others, others' :< show gs)
 
@@ -298,11 +319,13 @@ unify' task = do
   logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Raw unification results: \{show uniResults}"
   -- Generate dependency graph
   let allZipped = zip vectNames $ zip (task.lhsFreeVars ++ task.rhsFreeVars) uniResults
-  dg <- logBounds "unifyWithCompiler.genDG" [] $ pure $ genDG $ makeFVData <$> allZipped
-  logBounds "unifyWithCompiler.solveDG" [] $ do
-    let dg = subEmpties dg
-    let solved = solveDG dg
-    pure solved
+  let dg = genDG $ makeFVData <$> allZipped
+  -- logPoint {level=DetailedTrace} "unifyWithCompiler" [] "InitialDG: \{show dg}"
+  let dg = subEmpties dg
+  -- logPoint {level=DetailedTrace} "unifyWithCompiler" [] "DG after subEmpties: \{show dg}"
+  let solved = solveDG dg
+  -- logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Solved DG: \{show solved}"
+  pure solved
 
 ||| Run unification in a try block
 public export
@@ -315,9 +338,11 @@ unifyWithCompiler task = do
   let ret = runEitherT {m=Elab} {e=String} $ unify' task
   let err = pure {f=Elab} $ Left $ "Unification failed catastrophically"
   rr <- try ret err
-  logBounds "unifyWithCompiler.finalizeDG" [] $ do
-    dg <- liftEither rr
-    pure $ finalizeDG task dg
+  dg <- liftEither rr
+  -- logPoint {level=DetailedTrace} "unifyWithCompiler" [] "DG after trying: \{show dg}"
+  let ur = finalizeDG task dg
+  -- logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Unification result: \{show ur}"
+  pure ur
 
 ||| Run unification in a try block
 public export
@@ -328,7 +353,6 @@ unifyWithCompiler' :
   m $ UnificationResult
 unifyWithCompiler' task = do
   rr <- runEitherT {m} {e=String} $ unify' task
-  logBounds "unifyWithCompiler.finalizeDG" [] $ do
-    dg <- liftEither rr
-    pure $ finalizeDG task dg
+  dg <- liftEither rr
+  pure $ finalizeDG task dg
 

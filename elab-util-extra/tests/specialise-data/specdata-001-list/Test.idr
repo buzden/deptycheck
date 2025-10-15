@@ -60,10 +60,16 @@ lss1 : ListListString
 lss1 = [["Hello world"]]
 
 lssCast1 : List (List String)
-lssCast1 = cast $ (the ListListString [["lol"]])
+lssCast1 = cast $ the ListListString [["lssCast1"]]
 
-lssCast1' : Test.lssCast1 = [["lol"]]
+lssCast1' : Test.lssCast1 = [["lssCast1"]]
 lssCast1' = Refl
+
+lssCast2 : ListListString
+lssCast2 = cast $ the (List (List String)) [["lssCast2"]]
+
+lssCast2' : Test.lssCast2 = [["lssCast2"]]
+lssCast2' = Refl
 
 %runElab specialiseData' (List Type) "ListType"
 
@@ -73,3 +79,7 @@ lt = [Nat, String]
 failing
   ltDecEq : Dec (the ListType [Nat] = the ListType [String])
   ltDecEq = decEq (the ListType [Nat]) (the ListType [String])
+
+failing
+  ltShow : String
+  ltShow = show $ the ListType [Fin 1, Fin 2]
