@@ -1,0 +1,7 @@
+rm -rf build
+
+flock "$1" pack -q install-deps unifywc-001-basic.ipkg && \
+idris2 --check --no-color --console-width 0 --no-banner --find-ipkg Test.idr
+
+rm -rf build
+

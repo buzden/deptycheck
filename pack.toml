@@ -15,18 +15,6 @@ path = "elab-util-extra"
 ipkg = "elab-util-extra.ipkg"
 test = "tests/tests.ipkg"
 
-[custom.nightly-251007.fin-lizzie]
-type   = "git"
-url    = "https://github.com/buzden/idris2-fin-lizzie"
-commit = "latest:master"
-ipkg   = "fin-lizzie.ipkg"
-
-[custom.nightly-251007.collection-utils]
-type   = "git"
-url    = "https://github.com/buzden/idris2-collection-utils"
-commit = "latest:master"
-ipkg   = "collection-utils.ipkg"
-
 ##################
 ### DepTyCheck ###
 ##################

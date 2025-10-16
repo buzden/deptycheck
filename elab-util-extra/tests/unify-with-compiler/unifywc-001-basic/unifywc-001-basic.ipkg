@@ -1,0 +1,6 @@
+package unifywc-001-basic
+
+opts = "--no-color --console-width 0"
+
+depends = unifywc-shared, elab-util-extra
+

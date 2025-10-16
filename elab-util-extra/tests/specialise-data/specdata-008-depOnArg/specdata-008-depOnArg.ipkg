@@ -1,0 +1,6 @@
+package specdata-007-vectConst
+
+opts = "--no-color --console-width 0"
+
+depends = specdata-shared, elab-util-extra
+
