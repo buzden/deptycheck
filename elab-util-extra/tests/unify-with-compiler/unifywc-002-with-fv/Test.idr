@@ -39,11 +39,11 @@ assert1 ur = do
                     []                              `(Vect 1     String)
                     assert1
 
-failing
+failing "Unifier failed with: Compiler couldn't find a unification"
   %runElab showUnify' ["x" #: `(Nat), "y" #: `(Type)] `(Vect (S $ S x) y)
                       []                              `(Vect 1     String)
 
-failing
+failing "Unifier failed with: Compiler failed to generate correct unification. Instead generated ?postpone"
   %runElab showUnify' ["x" #: `(Nat), "y" #: `(Type), "z" #: `(Nat)]
                       `(Vect (x + z) y)
                       []                              `(Vect 1 String)
@@ -52,7 +52,7 @@ failing
                     []                              `(Vect 1     String)
                     assert1
 
-failing
+failing "Unifier failed with: Compiler failed to generate correct unification. Instead generated ?postpone"
   %runElab showUnify' ["x" #: `(Nat), "y" #: `(Type)] `(Vect (x + 1) y)
                       []                              `(Vect 1     String)
 
@@ -118,3 +118,21 @@ assert7 ur = do
 %runElab withUnify' ["len" #: `(Nat), "elem" #: `(Type)] `(Vect len elem)
                     ["a" #: `(Nat), "b" #: `(Nat)] `(Vect a (Vect b Nat))
                     assert7
+
+assert8 : UnificationResult -> Elab ()
+assert8 ur = do
+  assertFV ur "a" `(Prelude.Types.S $ Prelude.Types.S $ Prelude.Types.Z)
+  assertFV ur "b" `(Prelude.Types.Nat)
+  assertOrder ur []
+
+%runElab withUnify' ["a" #: `(Nat)] `(Vect a Nat)
+                    ["b" #: `(Type)] `(Vect 2 b) assert8
+
+assert9 : UnificationResult -> Elab ()
+assert9 ur = do
+  assertFV ur "a" !(quote 10)
+  assertOrder ur []
+
+failing "Unifier failed with: Compiler couldn't find a unification"
+  %runElab withUnify' ["a" #: `(Nat)] `((\x => a))
+                      [] `(const 10) assert9

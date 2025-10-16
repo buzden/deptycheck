@@ -40,7 +40,7 @@ record UnificationTask where
 %runElab derive "PiInfo" [Show]
 %runElab derive "Syntax.Arg" [Show]
 
-public export
+export
 Show UnificationTask where
   showPrec p t =
     showCon p "MkUniTask" $
@@ -74,12 +74,12 @@ record FVData where
 
 %runElab derive "FVData" [Show, Eq]
 
-public export
+export
 Interpolation FVData where
   interpolate (MkFVData n h r p t v) = joinBy "" [ showPiInfo p $ showCount r "\{n} \{h} : \{show t}", " = \{show v}" ]
 
 ||| Make FVData out of most its components and an argument
-public export
+export
 makeFVData : (String, Arg, Name, TTImp, Maybe TTImp) -> FVData
 makeFVData (h, fv, n, t, v) = MkFVData n h fv.count fv.piInfo t v
 
@@ -104,7 +104,7 @@ record DependencyGraph where
 
 %runElab derive "DependencyGraph" [Show]
 
-public export
+export
 Eq DependencyGraph where
   (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') with (decEq a a')
    (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') | Yes p =
@@ -214,7 +214,7 @@ filterEmpty = foldl myfun []
         Nothing => xs
 
 ||| Calculate UnificationResult (var-to-value mappings and empty leaf dependency order)
-public export
+export
 finalizeDG : (task : UnificationTask) -> (dg : DependencyGraph) -> UnificationResult
 finalizeDG task dg = do
   let fvOrder = flattenEmpties dg

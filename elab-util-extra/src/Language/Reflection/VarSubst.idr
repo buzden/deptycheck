@@ -111,7 +111,7 @@ containsVariableImpl n (IVar _ n') m =
 containsVariableImpl n tt m = m
 
 ||| Check if a TTImp contains a variable
-public export
+export
 containsVariable : Name -> TTImp -> Bool
 containsVariable n =
   execState False .
@@ -130,7 +130,7 @@ collectVariablesImpl (IVar _ n) m = do
 collectVariablesImpl tt m = m
 
 ||| Calculate a set of used variables
-public export
+export
 usesVariables : TTImp -> NameSet
 usesVariables =
   execState empty .
@@ -149,14 +149,14 @@ substituteVariablesImpl vMap (IVar fc n) m =
 substituteVariablesImpl _ _ m = m
 
 ||| Substitute all occurrences of each variable with the given expression
-public export
+export
 substituteVariables : SortedMap Name TTImp -> TTImp -> TTImp
 substituteVariables vMap =
   runIdentity .
     mapTTOp (substituteVariablesImpl vMap)
 
 ||| Substitute all occurrences of given variable with given expression
-public export
+export
 substituteVariable : Name -> TTImp -> TTImp -> TTImp
 substituteVariable n t =
   runIdentity .
@@ -182,7 +182,7 @@ substituteBindImpl vMap (IBindVar fc n) m =
 substituteBindImpl _ _ m = m
 
 ||| Substitute all variable and BindVar occurrences with given
-public export
+export
 substituteBind : SortedMap Name TTImp -> TTImp -> TTImp
 substituteBind vMap = do
   runIdentity . mapTTOp (substituteBindImpl vMap)

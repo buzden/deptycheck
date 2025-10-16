@@ -37,29 +37,29 @@ import Syntax.IHateParens
 export
 interface TaskLambda (t : Type) where
 
-public export
+export
 TaskLambda Type
 
-public export
+export
 TaskLambda b => TaskLambda (a -> b)
 
-public export
+export
 TaskLambda b => TaskLambda (a => b)
 
-public export
+export
 TaskLambda b => TaskLambda ({_ : a} -> b)
 
-public export
+export
 TaskLambda b => TaskLambda ((0 _ : a) -> b)
 
-public export
+export
 TaskLambda b => TaskLambda ((0 _ : a) => b)
 
-public export
+export
 TaskLambda b => TaskLambda ({0 _ : a} -> b)
 
 ||| Specialisation error
-public export
+export
 data SpecialisationError : Type where
   ||| Failed to extract invocation from task
   InvocationExtractionError : SpecialisationError
@@ -101,7 +101,7 @@ record SpecTask where
   ||| Proof that all the constructors of the polymorphic type are named
   {auto 0 polyTyNamed    : IsFullyNamedType polyTy}
 
-public export
+export
 Show SpecTask where
   showPrec p t =
     showCon p "SpecTask" $ joinBy "" $
@@ -210,7 +210,7 @@ mkDoubleBinds (as :< (a1, a2)) t =
 
 ||| Make an argument omega implicit
 setMWImplicit : Arg -> Arg
-setMWImplicit = { piInfo := ImplicitArg, count := MW }
+setMWImplicit a = { piInfo := if a.piInfo == ExplicitArg then ImplicitArg else a.piInfo } a
 
 ||| A tuple value of multiple repeating expressons
 tupleOfN : Nat -> TTImp -> TTImp
@@ -419,7 +419,10 @@ parameters (t : SpecTask)
     (Subset Arg IsNamedArg)
   mkMonoArg ur fvId = do
     let fvData = index fvId ur.uniDg.fvData
-    (Element (MkArg fvData.rig fvData.piInfo (Just fvData.name) fvData.type) ItIsNamed)
+    let fromLambda = finToNat fvId >= ur.task.lfv
+    let rig = if fromLambda then M0 else fvData.rig
+    let piInfo = if fromLambda && (fvData.piInfo == ExplicitArg) then ImplicitArg else fvData.piInfo
+    (Element (MkArg rig piInfo (Just fvData.name) fvData.type) ItIsNamed)
 
   ||| Generate a monomorphic constructor
   mkMonoCon :
@@ -876,7 +879,7 @@ parameters (t : SpecTask)
         ]
 
 ||| Perform a specified specialisation
-public export
+export
 specialiseData :
   TaskLambda l =>
   Monad m =>
@@ -896,21 +899,35 @@ specialiseData taskT outputName = do
   pure (monoTy, decls)
 
 
-||| Perform a specified monomorphisation and declare the results
-public export
-specialiseData' : TaskLambda l => (0 taskT: l) -> Name -> Elab ()
-specialiseData' taskT outputName = do
-  Right (monoTy, decls) <-
-    runEitherT {m=Elab} {e=SpecialisationError} $
-      specialiseData taskT outputName
-  | Left err => fail "Specialisation error: \{show err}"
-  declare decls
+||| + make Elaborate m
+||| + Fix public export (use export where possible)
+||| + Automate spec tests with elab scripts
+||| + All args from lambda must be implicit 0 if not already AutoImpl
+||| + Split spec test 2
+||| Add spec:
+||| + a -> List a
+||| + n, a -> Vect n a
+||| + Either Void a
+||| + Vect 1 n
+||| + Vect 0 n
+||| + (Nat -> Type) -> depends on that (f : (Nat -> Type) -> Vect
+||| + Failing looks for *substring*, specify that substring!
+||| + Basic unify test: add lambdas, add ? to _
+||| + Test: Vect a Nat = Vect 2 b
+||| Advanced: Unification with lambdas...
+||| Error messages...
+
 
 ||| Perform a specified monomorphisation and return a list of declarations
-specialiseData'' : TaskLambda l => (0 taskT: l) -> Name -> Elab $ List Decl
+specialiseData'' : Elaboration m => TaskLambda l => (0 taskT: l) -> Name -> m $ List Decl
 specialiseData'' taskT outputName = do
   Right (monoTy, decls) <-
-    runEitherT {m=Elab} {e=SpecialisationError} $
+    runEitherT {m} {e=SpecialisationError} $
       specialiseData taskT outputName
   | Left err => fail "Specialisation error: \{show err}"
   pure decls
+
+||| Perform a specified monomorphisation and declare the results
+export
+specialiseData' : Elaboration m => TaskLambda l => (0 taskT: l) -> Name -> m ()
+specialiseData' taskT outputName = specialiseData'' taskT outputName >>= declare

@@ -309,7 +309,7 @@ unify' task = do
   -- Run unification
   Just checkTarget' : Maybe checkTargetType' <-
     try (Just <$> check checkTarget) (pure Nothing)
-  | _ => throwError "Failed to instantiate equality proof"
+  | _ => throwError "Compiler couldn't find a unification"
   ctQuote <- quote checkTarget'
   logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Target value after quoting: \{show ctQuote}"
   let vectNames = cast allNames
@@ -328,7 +328,7 @@ unify' task = do
   pure solved
 
 ||| Run unification in a try block
-public export
+export
 unifyWithCompiler :
   Elaboration m =>
   MonadError String m =>
@@ -345,7 +345,7 @@ unifyWithCompiler task = do
   pure ur
 
 ||| Run unification in a try block
-public export
+export
 unifyWithCompiler' :
   Elaboration m =>
   MonadError String m =>
