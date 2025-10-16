@@ -898,26 +898,6 @@ specialiseData taskT outputName = do
   decls <- monoDecls task uniResults monoTy
   pure (monoTy, decls)
 
-
-||| + make Elaborate m
-||| + Fix public export (use export where possible)
-||| + Automate spec tests with elab scripts
-||| + All args from lambda must be implicit 0 if not already AutoImpl
-||| + Split spec test 2
-||| Add spec:
-||| + a -> List a
-||| + n, a -> Vect n a
-||| + Either Void a
-||| + Vect 1 n
-||| + Vect 0 n
-||| + (Nat -> Type) -> depends on that (f : (Nat -> Type) -> Vect
-||| + Failing looks for *substring*, specify that substring!
-||| + Basic unify test: add lambdas, add ? to _
-||| + Test: Vect a Nat = Vect 2 b
-||| Advanced: Unification with lambdas...
-||| Error messages...
-
-
 ||| Perform a specified monomorphisation and return a list of declarations
 specialiseData'' : Elaboration m => TaskLambda l => (0 taskT: l) -> Name -> m $ List Decl
 specialiseData'' taskT outputName = do

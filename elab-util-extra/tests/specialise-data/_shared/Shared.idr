@@ -153,7 +153,7 @@ verifySpecialisation' pt mt vals = do
   case !(search $ Show pt) of
     Nothing => pure ()
     Just _ => verifyShows pt mt mvals
-  case !(search $ DecEq pt) of
+  case !(search $ Eq pt) of
     Nothing => pure ()
     Just _ => verifyEqs pt mt mvals
 
