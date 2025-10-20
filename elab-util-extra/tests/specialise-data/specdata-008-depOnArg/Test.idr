@@ -10,8 +10,8 @@ data X : (Nat -> Type) -> Type where
 
 %runElab specialiseData' (X Fin) "XFin"
 
-x0 : List TTImp
-x0 =
+--- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+x0' = %runElab verifySpecialisation (X Fin) XFin
   [ `(X5 0)
   , `(X5 1)
   , `(X5 2)
@@ -21,13 +21,10 @@ x0 =
   , `(Xn (the (Fin 6) 3))
   ]
 
-x0' : Unit
-x0' = %runElab verifySpecialisation (X Fin) XFin x0
-
 %runElab specialiseData' (X (\n => Vect n Nat)) "XVNat"
 
-x1 : List TTImp
-x1 =
+--- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+x1' = %runElab verifySpecialisation (X (\n => Vect n Nat)) XVNat
   [ `(X5 [1,2,3,4,5])
   , `(X5 [6,7,8,9,10])
   , `(Xn [])
@@ -35,13 +32,11 @@ x1 =
   , `(Xn [2,3])
   ]
 
-x1' : Unit
-x1' = %runElab verifySpecialisation (X (\n => Vect n Nat)) XVNat x1
 
 %runElab specialiseData' (X (\n => Vect n $ Fin n)) "XVFin"
 
-x2 : List TTImp
-x2 =
+--- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+x2' = %runElab verifySpecialisation (X (\n => Vect n $ Fin n)) XVFin
   [ `(X5 [0,1,2,3,4])
   , `(X5 [4,3,2,1,0])
   , `(X5 [0,4,1,3,2])
@@ -49,6 +44,3 @@ x2 =
   , `(Xn [0])
   , `(Xn [])
   ]
-
-x2' : Unit
-x2' = %runElab verifySpecialisation (X (\n => Vect n $ Fin n)) XVFin x2

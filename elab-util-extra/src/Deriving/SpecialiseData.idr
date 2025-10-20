@@ -64,13 +64,11 @@ data SpecialisationError : Type where
   ||| Failed to extract invocation from task
   InvocationExtractionError : SpecialisationError
   ||| Failed to extract polymorphic type name from task
-  TaskTypeExtractionError : SpecialisationError
-  ||| All constructors failed unification
-  EmptyMonoConError : SpecialisationError
+  TaskTypeExtractionError   : SpecialisationError
   ||| Unused variable
-  UnusedVarError : SpecialisationError
+  UnusedVarError            : SpecialisationError
   ||| Partial specification
-  PartialSpecError : SpecialisationError
+  PartialSpecError          : SpecialisationError
 
 %runElab derive "SpecialisationError" [Show]
 
@@ -82,24 +80,24 @@ data SpecialisationError : Type where
 record SpecTask where
   constructor MkSpecTask
   ||| Full unification task
-  {tqArty        : Nat}
-  tqArgs         : Vect tqArty Arg
-  tqRet          : TTImp
-  {auto 0 tqArgsNamed    : All IsNamedArg tqArgs}
+  {tqArty             : Nat}
+  tqArgs              : Vect tqArty Arg
+  tqRet               : TTImp
+  {auto 0 tqArgsNamed : All IsNamedArg tqArgs}
   ||| Unification task type
-  {ttArty         : Nat}
-  ttArgs         : Vect ttArty Arg
-  {auto 0 ttArgsNamed    : All IsNamedArg ttArgs}
+  {ttArty             : Nat}
+  ttArgs              : Vect ttArty Arg
+  {auto 0 ttArgsNamed : All IsNamedArg ttArgs}
   ||| Namespace in which monomorphise was called
-  currentNs      : Namespace
+  currentNs           : Namespace
   ||| Name of monomorphic type
-  outputName     : Name
+  outputName          : Name
   ||| Invocation of polymorphic type extracted from unification task
-  fullInvocation : TTImp
+  fullInvocation      : TTImp
   ||| Polymorphic type's TypeInfo
-  polyTy         : TypeInfo
+  polyTy              : TypeInfo
   ||| Proof that all the constructors of the polymorphic type are named
-  {auto 0 polyTyNamed    : IsFullyNamedType polyTy}
+  {auto 0 polyTyNamed : IsFullyNamedType polyTy}
 
 export
 Show SpecTask where
@@ -209,8 +207,8 @@ mkDoubleBinds (as :< (a1, a2)) t =
     _ => mkDoubleBinds as t
 
 ||| Make an argument omega implicit
-setMWImplicit : Arg -> Arg
-setMWImplicit a = { piInfo := if a.piInfo == ExplicitArg then ImplicitArg else a.piInfo } a
+hideExplicitArg : Arg -> Arg
+hideExplicitArg a = { piInfo := if a.piInfo == ExplicitArg then ImplicitArg else a.piInfo } a
 
 ||| A tuple value of multiple repeating expressons
 tupleOfN : Nat -> TTImp -> TTImp
@@ -222,15 +220,19 @@ tupleOfN (S n) t = `(MkPair ~(t) ~(tupleOfN n t))
 mergeAliases : SortedMap Name TTImp -> List (Name, Name) -> SortedMap Name TTImp
 mergeAliases m = mergeWith (Prelude.curry fst) m . fromList . map (mapSnd var)
 
-||| Proof that setMWImplicit doesn't affect namedness of arguments
-renewProof :
+||| Proof that hideExplicitArg doesn't affect namedness of arguments
+hideExplicitArgPreservesNames :
   (args : Vect l Arg) ->
   (0 _ : All IsNamedArg args) =>
-  All IsNamedArg (SpecialiseData.setMWImplicit <$> args)
-renewProof [] @{[]} = []
-renewProof (x :: xs) @{(p :: ps)} with (x)
-  renewProof (x :: xs) @{(p :: ps)} | (MkArg _ _ (Just n) _) =
-    ItIsNamed :: renewProof xs
+  All IsNamedArg (SpecialiseData.hideExplicitArg <$> args)
+hideExplicitArgPreservesNames [] @{[]} = []
+hideExplicitArgPreservesNames (x :: xs) @{(p :: ps)} with (x)
+  hideExplicitArgPreservesNames (x :: xs) @{(p :: ps)} | (MkArg _ _ (Just n) _) =
+    ItIsNamed :: hideExplicitArgPreservesNames xs
+
+hideExplicitArgs : (xs: Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys: Vect l Arg ** All IsNamedArg ys)
+hideExplicitArgs xs @{ps} =
+  (hideExplicitArg <$> xs ** hideExplicitArgPreservesNames xs)
 
 ||| Create a binding application of aliased arguments
 ||| binding everything to `(_)
@@ -387,7 +389,6 @@ parameters (t : SpecTask)
 -------------------------------
 
   ||| Run unification for a given polymorphic constructor
-  ||| TODO: fix bug with (\x,y => Vect x (Vect y Nat))
   unifyCon :
     Elaboration m =>
     MonadError String m =>
@@ -462,7 +463,7 @@ parameters (t : SpecTask)
 
   ||| Generate IPi with implicit type arguments and given return
   forallMTArgs : TTImp -> TTImp
-  forallMTArgs = flip (foldr pi) (setMWImplicit <$> t.ttArgs)
+  forallMTArgs = flip (foldr pi) (hideExplicitArg <$> t.ttArgs)
 
   ||| Generate monomorphic to polimorphic type conversion function signature
   mkMToPImplSig : UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => TTImp
@@ -529,12 +530,10 @@ parameters (t : SpecTask)
       m $ List Decl
     mkMultiInjDecl ur mt con mcon i =
       logBounds "specialiseData.mkMultiInjDecl" [mt, mcon] $ do
-        let n = fromString "mInj\{show i}"
-        let ourArgs : Vect mcon.arty Arg
-            ourArgs = setMWImplicit <$> mcon.args
         let S _ = mcon.arty
         | _ => pure []
-        let prf : All IsNamedArg ourArgs = renewProof mcon.args
+        let n = fromString "mInj\{show i}"
+        let (ourArgs ** prf) = hideExplicitArgs mcon.args
         (Element a1 ap1, am1) <- genArgAliases ourArgs
         (Element a2 ap2, am2) <- genArgAliases ourArgs
         let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
@@ -579,12 +578,10 @@ parameters (t : SpecTask)
       m $ List Decl
     mkMultiCongDecl ur mt _ mcon i =
       logBounds "specialiseData.mkMultiCongDecl" [mt, mcon] $ do
-        let n = fromString "mCong\{show i}"
-        let ourArgs : Vect mcon.arty Arg
-            ourArgs = setMWImplicit <$> mcon.args
         let S _ = mcon.arty
         | _ => pure []
-        let prf : All IsNamedArg ourArgs = renewProof mcon.args
+        let n = fromString "mCong\{show i}"
+        let (ourArgs ** prf) = hideExplicitArgs mcon.args
         (Element a1 _, am1) <- genArgAliases ourArgs
         (Element a2 _, am2) <- genArgAliases ourArgs
         let lhsCon = mcon.invoke var $ mergeAliases ur.fullResult am1
@@ -638,8 +635,8 @@ parameters (t : SpecTask)
       let patRhs : TTImp
           patRhs = case (length a1) of
             0 => `(Refl)
-            _ => (var $ fromString $ "mCong\{show n}") .$
-                  ((var $ fromString $ "mInj\{show n}") .$ var "r")
+            _ => (var $ inGenNS t $ fromString $ "mCong\{show n}") .$
+                  ((var $ inGenNS t $ fromString $ "mInj\{show n}") .$ var "r")
       pure $ bta2 .! (n1, lhsCon) .! (n2, rhsCon) .$ bindVar "r" .= patRhs
 
   ||| Derive cast injectivity proof
@@ -651,9 +648,7 @@ parameters (t : SpecTask)
     m $ List Decl
   mkCastInjDecls @{_} ur ti @{tip} =
     logBounds "specialiseData.mkCastInjDecls" [ti] $ do
-      let prepArgs : Vect ti.arty Arg
-          prepArgs = setMWImplicit <$> ti.args
-      let prf : All IsNamedArg prepArgs = renewProof ti.args @{tip.argsAreNamed}
+      let (prepArgs ** prf) = hideExplicitArgs ti.args @{tip.argsAreNamed}
       ta1@(Element a1 _, am1) <- genArgAliases prepArgs
       ta2@(Element a2 _, am2) <- genArgAliases prepArgs
       xVar <- genSym "x"
@@ -891,9 +886,7 @@ specialiseData :
 specialiseData taskT outputName = do
   task <- getTask taskT outputName
   logPoint {level=DetailedTrace} "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
-  uniResults <- Prelude.sequence $ mapCons task (\ci => runEitherT {m} $ unifyCon task ci)
-  let S _ = length $ filter isRight $ uniResults
-  | _ => throwError EmptyMonoConError
+  uniResults <- sequence $ mapCons task $ \ci => runEitherT {m} $ unifyCon task ci
   let Element monoTy monoTyNamed = mkMonoTy task uniResults
   decls <- monoDecls task uniResults monoTy
   pure (monoTy, decls)

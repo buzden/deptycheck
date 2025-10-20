@@ -6,22 +6,17 @@ import Shared
 
 %runElab specialiseData' (\a => List a) "MyList"
 
-l0 : List TTImp
-l0 =
-  [ `([])
-  , `([0])
-  , `([0, 1])
+--- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+l0' = %runElab verifySpecialisation (List Nat) (MyList Nat)
+  [ `( [] )
+  , `( [0] )
+  , `( [0, 1] )
   ]
 
-l0' : Unit
-l0' = %runElab verifySpecialisation (List Nat) (MyList Nat) l0
-
-l1 : List TTImp
-l1 =
-  [ `([])
-  , `(["a"])
-  , `(["a", "b"])
+--- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+l1' = %runElab verifySpecialisation (List String) (MyList String)
+  [ `( [] )
+  , `( ["a"] )
+  , `( ["a", "b"] )
   ]
 
-l1' : Unit
-l1' = %runElab verifySpecialisation (List String) (MyList String) l1

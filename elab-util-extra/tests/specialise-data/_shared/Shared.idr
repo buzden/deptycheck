@@ -3,172 +3,170 @@ module Shared
 import public Control.Monad.Either
 import public Control.Monad.Writer
 import public Control.Monad.Identity
-import public Decidable.Decidable
-import public Decidable.Equality
 import public Data.DPair
-import public Data.Vect
-import public Data.SnocVect
-import public Data.Vect.Quantifiers
+import public Data.Either
 import public Data.List
 import public Data.List.Quantifiers
+import public Data.SnocVect
+import public Data.SortedMap.Dependent
+import public Data.Vect
+import public Data.Vect.Quantifiers
+import public Decidable.Decidable
+import public Decidable.Equality
 import public Derive.Prelude
+import public Deriving.SpecialiseData
 import public Language.Reflection
 import public Language.Reflection.Derive
 import public Language.Reflection.Expr
-import public Language.Reflection.Types
-import public Language.Reflection.Types.Extra
 import public Language.Reflection.Logging
 import public Language.Reflection.Syntax
 import public Language.Reflection.Syntax.Ops
+import public Language.Reflection.Types
+import public Language.Reflection.Types.Extra
 import public Language.Reflection.Unify
 import public Language.Reflection.VarSubst
-import public Deriving.SpecialiseData
-import public Data.Either
-import public Data.SortedMap.Dependent
 
-export
+||| Verify that all values in list check to a given type
 constructExprs : Type -> List TTImp -> Elab ()
-constructExprs ty vals = do
-  for_ vals $ \val => do
-    c : ty <- check val
-    pure ()
+constructExprs ty = traverse_ $ check {expected=ty}
 
-verifySingleCast : Type -> Type -> TTImp -> TTImp -> Elab ()
-verifySingleCast a b a' b' = do
-  aInst : a <- check a'
-  bInst : b <- check b'
-  aQuote <- quote aInst
-  bQuote <- quote bInst
-  castRes : b <- check `(cast ~aQuote)
-  castRQuote <- quote castRes
-  targ : Type <- check `(~bQuote = ~castRQuote)
-  _ : targ <- check `(Refl)
+||| Check type-level equality for two values
+checkEq : TTImp -> TTImp -> Elab ()
+checkEq a b = do
+  eqT : Type <- check `(~a = ~b)
+  _ : eqT <- check `(Refl)
   pure ()
 
-verifyDoubleCast : Type -> Type -> TTImp -> Elab ()
-verifyDoubleCast pt mt val = do
-  val1 : mt <- check val
-  val1' <- quote val1
-  val2 : pt <- check `(cast ~val1')
-  val2' <- quote val2
-  val3 : mt <- check `(cast ~val2')
-  val3' <- quote val3
-  targ : Type <- check `(~val3' = ~val1')
-  _ : targ <- check `(Refl)
+||| Check runtime equality for two values
+checkSoEq : TTImp -> TTImp -> Elab ()
+checkSoEq a b = do
+  _ : So True <- check `(the (So $ ~a == ~b) Oh)
   pure ()
 
-export
-verifySingleCasts' : Type -> Type -> List (TTImp, TTImp) -> Elab ()
-verifySingleCasts' pt mt vals = do
-  for_ vals $ \(val, val') => do
-    verifySingleCast pt mt val val'
-    verifySingleCast mt pt val' val
+||| Verify that cast (fromValue) == toValue
+verifySingleCast : (fromType, toType : Type) -> (fromValue, toValue : TTImp) -> Elab ()
+verifySingleCast fromT toT from to = do
+  fromNorm <- normaliseAs fromT from
+  resultNorm <- normaliseAs toT `(cast ~fromNorm)
+  checkEq to resultNorm
 
-export
-verifySingleCasts : Type -> Type -> List TTImp -> Elab ()
-verifySingleCasts pt mt vals = verifySingleCasts' pt mt $ zip vals vals
+||| Verify that cast (cast specialisedValue) == specialisedValue
+verifyDoubleCast :
+  (polymorphicType, specialisedType : Type) -> (specialisedValue: TTImp) -> Elab ()
+verifyDoubleCast polyTy specTy val = do
+  valNorm <- normaliseAs specTy val
+  castNorm <- normaliseAs polyTy `(cast ~valNorm)
+  cast2Norm <- normaliseAs specTy `(cast ~castNorm)
+  checkEq valNorm cast2Norm
 
-export
-verifyDoubleCasts : Type -> Type -> List TTImp -> Elab ()
-verifyDoubleCasts pt mt vals = do
-  for_ vals $ \val => do
-    verifyDoubleCast pt mt val
+||| Run verifySingleCast for each pair of polymorphic and specialised value TTImps
+verifySingleCasts' :
+  (polymorphicType, specialisedType : Type) ->
+  (valuePairs: List (TTImp, TTImp)) ->
+  Elab ()
+verifySingleCasts' polyTy specTy =
+  traverse_ $ \(polyVal, specVal) => do
+    verifySingleCast polyTy specTy polyVal specVal
+    verifySingleCast specTy polyTy specVal polyVal
 
-verifyDecEq : Type -> Type -> TTImp -> TTImp -> Elab ()
-verifyDecEq a b a' b' = do
-  verA' : b <- check a'
-  verB' : b <- check b'
-  qA' <- quote verA'
-  qB' <- quote verB'
-  verA'' : a <- check `(cast ~qA')
-  verB'' : a <- check `(cast ~qB')
-  qA'' <- quote verA''
-  qB'' <- quote verB''
-  targ : Type <- check `(isYes (decEq ~qA' ~qB') = isYes (decEq ~qA'' ~qB''))
-  _ : targ <- check `(Refl)
+
+||| Run verifySingleCast for each value in list
+verifySingleCasts :
+  (polymorphicType, specialisedType : Type) -> (values: List TTImp) -> Elab ()
+verifySingleCasts polyTy specTy vals = verifySingleCasts' polyTy specTy $ zip vals vals
+
+||| Run verifyDoubleCast for each value in list
+verifyDoubleCasts :
+  (polymorphicType, specialisedType : Type) -> (values: List TTImp) -> Elab ()
+verifyDoubleCasts polyTy monoTy = traverse_ $ verifyDoubleCast polyTy monoTy
+
+||| Verify that DecEq implementations of polymorphicType and specialisedType
+||| return the same result for a pair of values
+verifyDecEq :
+  (polymorphicType, specialisedType : Type) ->
+  (specialisedLHS, specialisedRHS : TTImp) ->
+  Elab ()
+verifyDecEq polyTy specTy lhs rhs = do
+  lhsNorm <- normaliseAs specTy lhs
+  rhsNorm <- normaliseAs specTy rhs
+  lhsCast <- normaliseAs polyTy `(cast ~lhsNorm)
+  rhsCast <- normaliseAs polyTy `(cast ~rhsNorm)
+  checkSoEq `(isYes $ decEq ~lhsNorm ~rhsNorm)
+            `(isYes $ decEq ~lhsCast ~rhsCast)
   pure ()
 
-verifyEq : Type -> Type -> TTImp -> TTImp -> Elab ()
-verifyEq a b a' b' = do
-  verA' : b <- check a'
-  verB' : b <- check b'
-  qA' <- quote verA'
-  qB' <- quote verB'
-  verA'' : a <- check `(cast ~qA')
-  verB'' : a <- check `(cast ~qB')
-  qA'' <- quote verA''
-  qB'' <- quote verB''
-  targ : Type <- check `((~qA' == ~qB') = (~qA'' == ~qB''))
-  _ : targ <- check `(Refl)
-  targ' : Type <- check `((~qA' /= ~qB') = (~qA'' /= ~qB''))
-  _ : targ' <- check `(Refl)
-  pure ()
+||| Verify that Eq implementations of polymorphicType and specialisedType
+||| return the same result for a pair of values
+verifyEq :
+  (polymorphicType, specialisedType : Type) ->
+  (specialisedLHS, specialisedRHS : TTImp) ->
+  Elab ()
+verifyEq polyTy specTy lhs rhs = do
+  lhsNorm <- normaliseAs specTy lhs
+  rhsNorm <- normaliseAs specTy rhs
+  lhsCast <- normaliseAs polyTy `(cast ~lhsNorm)
+  rhsCast <- normaliseAs polyTy `(cast ~rhsNorm)
+  checkSoEq `(~lhsNorm == ~rhsNorm) `(~lhsCast == ~rhsCast)
+  checkSoEq `(~lhsNorm /= ~rhsNorm) `(~lhsCast /= ~rhsCast)
 
-verifyShow : Type -> Type -> TTImp -> Elab ()
-verifyShow a b a' = do
-  verA' : b <- check a'
-  qA' <- quote verA'
-  verA'' : a <- check `(cast ~qA')
-  qA'' <- quote verA''
-  s1 : String <- check `(show ~qA')
-  qS1 <- quote s1
-  s2 : String <- check `(show ~qA'')
-  qS2 <- quote s2
-  showsAreEqual : Bool <- check `(~qS1 == ~qS2)
-  if showsAreEqual
-     then pure ()
-     else do
-       qB <- quote b
-       failAt (getFC a') "Show implementation of type \{show qB} is wrong. When showing \{show qB}, expected \{s1}, but got \{s2}"
+||| Display the results of running Show implementations for polymorphicType and specialisedType
+||| on a given value
+verifyShow : (polymorphicType, specialisedType : Type) -> (specialisedValue : TTImp) -> Elab ()
+verifyShow polyTy specTy val = do
+  valNorm <- normaliseAs specTy val
+  valCast <- normaliseAs polyTy `(cast ~valNorm)
+  s1 <- normaliseAs String `(show ~valNorm)
+  s2 <- normaliseAs String `(show ~valCast)
+  checkSoEq s1 s2
 
+
+||| Run polymorphic and monomorphic `show` for every value in list
+verifyShows :
+  (polymorphicType, specialisedType : Type) -> (specialisedValues: List TTImp) -> Elab ()
+verifyShows polyTy specTy = traverse_ $ verifyShow polyTy specTy
+
+||| Verify correctness of DecEq for every possible pair of values from a given list
+verifyDecEqs :
+  (polymorphicType, specialisedType : Type) -> (specialisedValues: List TTImp) -> Elab ()
+verifyDecEqs polyTy specTy vals = do
+  for_ [| MkPair vals vals |] $ uncurry $ verifyDecEq polyTy specTy
+
+
+||| Verify correctness of Eq for every possible pair of values from a given list
+verifyEqs :
+  (polymorphicType, specialisedType : Type) -> (specialisedValues: List TTImp) -> Elab ()
+verifyEqs polyTy specTy vals = do
+  for_ [| MkPair vals vals |] $ uncurry $ verifyEq polyTy specTy
+
+||| Verify specialisation of polymorphicType into specialisedType for a given list of value pairs
+||| where the first element is the value of the polymorphic type, and the second - of the monomorphic one
 export
-verifyShows : Type -> Type -> List TTImp -> Elab ()
-verifyShows pt mt vals = do
-  for_ vals $ \val => do
-    verifyShow pt mt val
+verifySpecialisation' :
+  (polymorphicType, specialisedType : Type) -> (valuePairs: List (TTImp, TTImp)) -> Elab ()
+verifySpecialisation' polyTy specTy pairs = do
+  let (polyVals, specVals) = unzip pairs
+  constructExprs specTy specVals
+  verifySingleCasts' polyTy specTy pairs
+  verifyDoubleCasts polyTy specTy specVals
+  verifyDoubleCasts specTy polyTy polyVals
+  case (!(search $ DecEq polyTy), !(search $ DecEq specTy)) of
+    (Just _, Just _) => verifyDecEqs polyTy specTy specVals
+    (Nothing, Just _) => fail "Specialised type implements DecEq, while polymorhpic type doesn't"
+    (Just _, Nothing) => fail "Polymorphic type implements DecEq, while specialised type doesn't"
+    (Nothing, Nothing) => pure ()
+  case (!(search $ Show polyTy), !(search $ Show specTy)) of
+    (Just _, Just _) => verifyShows polyTy specTy specVals
+    (Nothing, Just _) => fail "Specialised type implements Show, while polymorhpic type doesn't"
+    (Just _, Nothing) => fail "Polymorphic type implements Show, while specialised type doesn't"
+    (Nothing, Nothing) => pure ()
+  case (!(search $ Eq polyTy), !(search $ Show specTy)) of
+    (Just _, Just _) => verifyEqs polyTy specTy specVals
+    (Nothing, Just _) => fail "Specialised type implements Eq, while polymorhpic type doesn't"
+    (Just _, Nothing) => fail "Polymorphic type implements Eq, while specialised type doesn't"
+    (Nothing, Nothing) => pure ()
 
+||| Verify specialisation of polymorphicType into specialisedType for a given list of values
+||| if polymorphic and monomorphic constructors share the same set of explicit arguments
 export
-verifyDecEqs : Type -> Type -> List TTImp -> Elab ()
-verifyDecEqs pt mt vals = do
-  for_ (MkPair <$> vals <*> vals) $ \(val, val') => do
-    verifyDecEq pt mt val val'
-
-export
-verifyEqs : Type -> Type -> List TTImp -> Elab ()
-verifyEqs pt mt vals = do
-  for_ (MkPair <$> vals <*> vals) $ \(val, val') => do
-    verifyEq pt mt val val'
-
-export
-verifySpecialisation' : Type -> Type -> List (TTImp, TTImp) -> Elab ()
-verifySpecialisation' pt mt vals = do
-  let (pvals, mvals) = unzip vals
-  constructExprs mt mvals
-  verifySingleCasts' pt mt vals
-  verifyDoubleCasts pt mt mvals
-  verifyDoubleCasts mt pt pvals
-  case !(search $ DecEq pt) of
-    Nothing => pure ()
-    Just _ => verifyDecEqs pt mt mvals
-  case !(search $ Show pt) of
-    Nothing => pure ()
-    Just _ => verifyShows pt mt mvals
-  case !(search $ Eq pt) of
-    Nothing => pure ()
-    Just _ => verifyEqs pt mt mvals
-
-export
-verifySpecialisation : Type -> Type -> List TTImp -> Elab ()
-verifySpecialisation pt mt vals = do
-  constructExprs mt vals
-  verifySingleCasts pt mt vals
-  verifyDoubleCasts pt mt vals
-  case !(search $ DecEq pt) of
-    Nothing => pure ()
-    Just _ => verifyDecEqs pt mt vals
-  case !(search $ Show pt) of
-    Nothing => pure ()
-    Just _ => verifyShows pt mt vals
-  case !(search $ DecEq pt) of
-    Nothing => pure ()
-    Just _ => verifyEqs pt mt vals
+verifySpecialisation : (polymorphicType, specialisedType : Type) -> List TTImp -> Elab ()
+verifySpecialisation polyTy specTy vals = verifySpecialisation' polyTy specTy $ zip vals vals

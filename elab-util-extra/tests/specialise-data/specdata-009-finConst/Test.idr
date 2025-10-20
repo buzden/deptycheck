@@ -1,0 +1,30 @@
+module Test
+
+import Shared
+
+%language ElabReflection
+
+%runElab specialiseData' (Fin 0) "Fin0"
+
+--- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+e0' = %runElab verifySpecialisation (Fin 0) Fin0 []
+
+e0NoCons : Fin0 -> Nat
+e0NoCons _ impossible
+
+%runElab specialiseData' (Fin 1) "Fin1"
+
+--- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+e1' = %runElab verifySpecialisation (Fin 1) Fin1
+  [ `( FZ )
+  ]
+
+%runElab specialiseData' (Fin 2) "Fin2"
+
+--- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+e2' = %runElab verifySpecialisation (Fin 2) Fin2
+  [ `( FZ )
+  , `( FS FZ ) -- TODO: Implement Num auto-derivation?
+  ]
+
+
