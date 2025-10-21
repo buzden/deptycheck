@@ -6,6 +6,8 @@ import Language.Reflection.Logging
 import Language.Reflection.Util
 import Syntax.IHateParens
 
+%default total
+
 ||| Type's constructor
 public export
 (.Con) : TypeInfo -> Type

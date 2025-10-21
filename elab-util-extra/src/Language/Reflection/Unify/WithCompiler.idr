@@ -16,6 +16,8 @@ import Language.Reflection.Logging
 import Language.Reflection.Syntax
 import Language.Reflection.Unify.Interface
 
+%default total
+
 ||| Generate free variable name to index mapping
 genNameToId :
   {freeVars : Nat} ->
@@ -199,6 +201,7 @@ subEmpties :
 subEmpties dg = {fvData $= map $ subEmptiesFV dg} dg
 
 ||| Solve dependency graph
+covering
 solveDG :
   (dg : DependencyGraph) ->
   DependencyGraph
@@ -277,6 +280,7 @@ extractFVData t v [] [] = do
   pure []
 
 ||| Run unification
+covering
 unify' :
   Elaboration m =>
   MonadError String m =>
@@ -329,6 +333,7 @@ unify' task = do
 
 ||| Run unification in a try block
 export
+covering
 unifyWithCompiler :
   Elaboration m =>
   MonadError String m =>
@@ -346,6 +351,7 @@ unifyWithCompiler task = do
 
 ||| Run unification in a try block
 export
+covering
 unifyWithCompiler' :
   Elaboration m =>
   MonadError String m =>

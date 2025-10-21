@@ -28,6 +28,8 @@ import Syntax.IHateParens
 
 %language ElabReflection
 
+%default total
+
 -------------------------------------
 --- SPECIALISATION TASK INTERFACE ---
 -------------------------------------
@@ -389,6 +391,7 @@ parameters (t : SpecTask)
 --- Constructor unification ---
 -------------------------------
 
+  covering
   ||| Run unification for a given polymorphic constructor
   unifyCon :
     Elaboration m =>
@@ -945,6 +948,7 @@ parameters (t : SpecTask)
 
 ||| Perform a specified specialisation
 export
+covering
 specialiseData :
   TaskLambda l =>
   Monad m =>
@@ -962,6 +966,7 @@ specialiseData taskT outputName = do
   pure (monoTy, decls)
 
 ||| Perform a specified monomorphisation and return a list of declarations
+covering
 specialiseData'' : Elaboration m => TaskLambda l => (0 taskT: l) -> Name -> m $ List Decl
 specialiseData'' taskT outputName = do
   Right (monoTy, decls) <-
@@ -972,5 +977,6 @@ specialiseData'' taskT outputName = do
 
 ||| Perform a specified monomorphisation and declare the results
 export
+covering
 specialiseData' : Elaboration m => TaskLambda l => (0 taskT: l) -> Name -> m ()
 specialiseData' taskT outputName = specialiseData'' taskT outputName >>= declare

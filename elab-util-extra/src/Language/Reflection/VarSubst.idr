@@ -13,6 +13,8 @@ import public Control.Monad.Reader
 import public Control.Monad.Reader.Tuple
 import public Control.Monad.State
 
+%default total
+
 ||| Monadic operation on a TTImp
 TTOp : (Type -> Type) -> Type
 TTOp m = TTImp -> m TTImp -> m TTImp
