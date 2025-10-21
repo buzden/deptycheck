@@ -25,6 +25,7 @@ import public Language.Reflection.Types
 import public Language.Reflection.Types.Extra
 import public Language.Reflection.Unify
 import public Language.Reflection.VarSubst
+import public Language.Mk
 
 ||| Verify that all values in list check to a given type
 constructExprs : Type -> List TTImp -> Elab ()

@@ -3,7 +3,6 @@ module Deriving.SpecialiseData
 import Control.Monad.Either
 import Control.Monad.Reader.Tuple
 import Data.SnocList
-import Derive.Prelude
 import Data.DPair
 import Data.List1
 import Data.Vect
@@ -13,7 +12,9 @@ import Data.Either
 import Data.SortedMap
 import Data.SortedSet
 import Data.SortedMap.Dependent
-import public Language.Mk -- TODO: Fix mk so that it works without this hack
+import Decidable.Equality
+import Derive.Prelude
+import Language.Mk
 import Language.Reflection.Expr
 import Language.Reflection.Logging
 import Language.Reflection.Syntax.Ops
@@ -703,18 +704,21 @@ parameters (t : SpecTask)
 
   ||| Derive decidable equality
   mkDecEqDecls :
+    Elaboration m =>
     UniResults ->
     (mt : TypeInfo) ->
     (0 _ : IsFullyNamedType mt) =>
-    List Decl
+    m $ List Decl
   mkDecEqDecls ur ti = do
-    [ public' "decEqImpl" $ mkDecEqImplSig ti
-    , def "decEqImpl" [ mkDecEqImplClause ]
-    , interfaceHint Public "decEq'" $ forallMTArgs
-      `(DecEq ~(t.fullInvocation) => DecEq ~(ti.invoke var empty))
-    , def "decEq'"
-      [ `(decEq') .= `((Mk DecEq) ~(var $ inGenNS t "decEqImpl")) ]
-    ]
+    mkDecEq <- var <$> try (getMk DecEq) (fail "Internal specialiser error: getMk failed.")
+    pure $ 
+      [ public' "decEqImpl" $ mkDecEqImplSig ti
+      , def "decEqImpl" [ mkDecEqImplClause ]
+      , interfaceHint Public "decEq'" $ forallMTArgs
+        `(DecEq ~(t.fullInvocation) => DecEq ~(ti.invoke var empty))
+      , def "decEq'"
+        [ `(decEq') .= `(~mkDecEq ~(var $ inGenNS t "decEqImpl")) ]
+      ]
 
   -----------------------
   --- SHOW DERIVATION ---
@@ -902,7 +906,7 @@ parameters (t : SpecTask)
     castInjDecls <- mkCastInjDecls uniResults monoTy
     logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
       "castInj : \{show castInjDecls}"
-    let decEqDecls = mkDecEqDecls uniResults monoTy
+    decEqDecls <- mkDecEqDecls uniResults monoTy
     logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
       "decEq : \{show decEqDecls}"
     let showDecls = mkShowDecls uniResults monoTy
