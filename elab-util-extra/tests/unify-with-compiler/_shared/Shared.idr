@@ -56,9 +56,8 @@ assertFV : UnificationResult -> Name -> TTImp -> Elab ()
 assertFV ur n t = do
   let Just res = lookup n ur.fullResult
   | _ => fail "Free variable \{show n} doesn't have a value"
-  if res == t
-    then pure ()
-    else fail "Free variable \{show n}'s value is \{show res} instead of \{show t}"
+  when (res /= t) $
+    fail "Free variable \{show n}'s value is \{show res} instead of \{show t}"
 
 public export
 assertFV' : UnificationResult -> Name -> Type -> TTImp -> Elab ()
@@ -66,9 +65,8 @@ assertFV' ur n ty expr = do
   let Just res = lookup n ur.fullResult
   | _ => fail "Free variable \{show n} doesn't have a value"
   expr <- normaliseAs ty expr
-  if res == expr
-    then pure ()
-    else fail "Free variable \{show n}'s value is \{show res} instead of \{show expr}"
+  when (res /= expr) $
+    fail "Free variable \{show n}'s value is \{show res} instead of \{show expr}"
 
 public export
 assertOrder : UnificationResult -> List Name -> Elab ()
