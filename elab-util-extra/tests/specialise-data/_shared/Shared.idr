@@ -109,8 +109,8 @@ verifyEq polyTy specTy lhs rhs = do
   checkSoEq `(~lhsNorm == ~rhsNorm) `(~lhsCast == ~rhsCast)
   checkSoEq `(~lhsNorm /= ~rhsNorm) `(~lhsCast /= ~rhsCast)
 
-||| Display the results of running Show implementations for polymorphicType and specialisedType
-||| on a given value
+||| Verify that Show implementations for polymorphicType and specialisedType
+||| return the same result for a given value
 verifyShow : (polymorphicType, specialisedType : Type) -> (specialisedValue : TTImp) -> Elab ()
 verifyShow polyTy specTy val = do
   valNorm <- normaliseAs specTy val
@@ -119,6 +119,23 @@ verifyShow polyTy specTy val = do
   s2 <- normaliseAs String `(show ~valCast)
   checkSoEq s1 s2
 
+||| Verify that FromString implementations for polymorphicType and specialisedType
+||| return the same result for a given string
+verifyFromString : (polymorphicType, specialisedType : Type) -> String -> Elab ()
+verifyFromString polyTy specTy str = do
+  str' <- quote str
+  polyFS <- normaliseAs polyTy `(fromString ~str')
+  specFS <- normaliseAs specTy `(fromString ~str')
+  checkSoEq polyFS `(cast ~specFS)
+
+||| Verify that FromString implementations for polymorphicType and specialisedType
+||| return the same result for a given string
+verifyNum : (polymorphicType, specialisedType : Type) -> Integer -> Elab ()
+verifyNum polyTy specTy i = do
+  i' <- quote i
+  polyFS <- normaliseAs polyTy `(Num.fromInteger ~i')
+  specFS <- normaliseAs specTy `(Num.fromInteger ~i')
+  checkSoEq polyFS `(cast ~specFS)
 
 ||| Run polymorphic and monomorphic `show` for every value in list
 verifyShows :
@@ -138,6 +155,35 @@ verifyEqs :
 verifyEqs polyTy specTy vals = do
   for_ [| MkPair vals vals |] $ uncurry $ verifyEq polyTy specTy
 
+
+||| Verify that FromString implementations for polymorphicType and specialisedType
+||| return the same result for a given list of strings
+export
+verifyFromStrings : (polymorphicType, specialisedType : Type) -> List String -> Elab ()
+verifyFromStrings polyTy specTy = traverse_ $ verifyFromString polyTy specTy
+
+||| Verify that FromString implementations for polymorphicType and specialisedType
+||| return the same result for a given list of strings
+export
+verifyNums : (polymorphicType, specialisedType : Type) -> List Integer -> Elab ()
+verifyNums polyTy specTy = traverse_ $ verifyNum polyTy specTy
+
+||| Helper function for interface verification
+verifyInterfaces :
+  (polymorphicType, specialisedType : Type) ->
+  (values : List TTImp) ->
+  (interfaces : List (Type -> Type, Type -> Type -> List TTImp -> Elab ())) ->
+  Elab ()
+verifyInterfaces polyTy specTy vals = traverse_ $ \(iface, verifyInterface) => do
+  polyImpl : Maybe _ <- search $ iface polyTy
+  specImpl : Maybe _ <- search $ iface specTy
+  qInterface <- quote iface
+  case (polyImpl, specImpl) of
+      (Just _, Just _) => verifyInterface polyTy specTy vals
+      (Nothing, Just _) => fail "Specialised type implements \{show qInterface}, while polymorhpic type doesn't"
+      (Just _, Nothing) => fail "Polymorphic type implements \{show qInterface}, while specialised type doesn't"
+      (Nothing, Nothing) => pure ()
+
 ||| Verify specialisation of polymorphicType into specialisedType for a given list of value pairs
 ||| where the first element is the value of the polymorphic type, and the second - of the monomorphic one
 export
@@ -149,21 +195,11 @@ verifySpecialisation' polyTy specTy pairs = do
   verifySingleCasts' polyTy specTy pairs
   verifyDoubleCasts polyTy specTy specVals
   verifyDoubleCasts specTy polyTy polyVals
-  case (!(search $ DecEq polyTy), !(search $ DecEq specTy)) of
-    (Just _, Just _) => verifyDecEqs polyTy specTy specVals
-    (Nothing, Just _) => fail "Specialised type implements DecEq, while polymorhpic type doesn't"
-    (Just _, Nothing) => fail "Polymorphic type implements DecEq, while specialised type doesn't"
-    (Nothing, Nothing) => pure ()
-  case (!(search $ Show polyTy), !(search $ Show specTy)) of
-    (Just _, Just _) => verifyShows polyTy specTy specVals
-    (Nothing, Just _) => fail "Specialised type implements Show, while polymorhpic type doesn't"
-    (Just _, Nothing) => fail "Polymorphic type implements Show, while specialised type doesn't"
-    (Nothing, Nothing) => pure ()
-  case (!(search $ Eq polyTy), !(search $ Show specTy)) of
-    (Just _, Just _) => verifyEqs polyTy specTy specVals
-    (Nothing, Just _) => fail "Specialised type implements Eq, while polymorhpic type doesn't"
-    (Just _, Nothing) => fail "Polymorphic type implements Eq, while specialised type doesn't"
-    (Nothing, Nothing) => pure ()
+  verifyInterfaces polyTy specTy specVals
+    [ (DecEq, verifyDecEqs)
+    , (Show, verifyShows)
+    , (Eq, verifyEqs)
+    ]
 
 ||| Verify specialisation of polymorphicType into specialisedType for a given list of values
 ||| if polymorphic and monomorphic constructors share the same set of explicit arguments

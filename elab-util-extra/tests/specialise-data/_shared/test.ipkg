@@ -1,4 +1,4 @@
-package specdata-005-vect
+package test
 
 opts = "--no-color --console-width 0"
 

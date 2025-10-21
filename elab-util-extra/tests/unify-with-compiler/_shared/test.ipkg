@@ -1,4 +1,4 @@
-package unifywc-001-basic
+package test
 
 opts = "--no-color --console-width 0"
 

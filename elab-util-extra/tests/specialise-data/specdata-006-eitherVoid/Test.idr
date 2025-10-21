@@ -6,7 +6,7 @@ import Shared
 
 %runElab specialiseData' (\a => Either Void a) "EitherVoid"
 
---- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 e0' = %runElab verifySpecialisation (Either Void Nat) (EitherVoid Nat)
   [ `(Right 0)
   , `(Right 1)
@@ -16,7 +16,7 @@ e0' = %runElab verifySpecialisation (Either Void Nat) (EitherVoid Nat)
 e0NoLeft : EitherVoid Nat -> Nat
 e0NoLeft (Right n) = n
 
---- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 e1' = %runElab verifySpecialisation (Either Void String) (EitherVoid String)
   [ `(Right "")
   , `(Right "hello")

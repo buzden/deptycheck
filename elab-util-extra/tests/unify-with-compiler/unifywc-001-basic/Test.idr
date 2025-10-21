@@ -59,6 +59,22 @@ hw2 = "Hello world!"
 
 %runElab runUnifyWithCompiler' [] `((\a => a)) [] `((\b => b))
 
+failing "Compiler failed to generate correct unification. Instead generated ?postpone"
+  %runElab runUnifyWithCompiler' [] `((\a, b => a + b)) [] `((\b', a' => b' + a'))
+
+failing "Compiler failed to generate correct unification. Instead generated ?postpone"
+  %runElab runUnifyWithCompiler' [] `((\a, b => a b)) [] `((\b', a' => b' a'))
+
+%runElab runUnifyWithCompiler' [] `((\x : Type, y : Type, a : (x -> y), b : x => a b)) [] `((\x' : Type, y' : Type, b' : (x' -> y'), a' : x' => b' a'))
+
+%runElab runUnifyWithCompiler'
+  [] `(the ({0 x,y : Type} -> (x -> y) -> x -> y) (\a,b => a b))
+  [] `((\b', a' => b' a'))
+
+%runElab runUnifyWithCompiler'
+  [] `(the ({0 x,y : Type} -> (x -> y) -> x -> y) (\a,b => a b))
+  [] `(Prelude.apply)
+
 %runElab runUnifyWithCompiler' [] `((\a => a)) [] `(id)
 
 %runElab runUnifyWithCompiler' [] `((\a => 0)) [] `(const 0)

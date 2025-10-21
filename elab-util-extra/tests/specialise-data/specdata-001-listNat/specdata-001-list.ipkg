@@ -1,6 +1,0 @@
-package specdata-001-list
-
-opts = "--no-color --console-width 0"
-
-depends = specdata-shared, elab-util-extra
-

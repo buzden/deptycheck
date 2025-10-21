@@ -6,7 +6,7 @@ import Shared
 
 %runElab specialiseData' (List Nat) "ListNat"
 
---- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 ln' = %runElab verifySpecialisation (List Nat) ListNat
   [ `( [] )
   , `( [0] )
@@ -22,7 +22,7 @@ failing "Can't find an implementation for FromString Nat"
 
 %runElab specialiseData' (List (List String)) "ListListString"
 
---- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 lss' = %runElab verifySpecialisation (List (List String)) ListListString
   [ `( [] )
   , `( [[]] )
@@ -35,7 +35,7 @@ lss' = %runElab verifySpecialisation (List (List String)) ListListString
 
 %runElab specialiseData' (List Type) "ListType"
 
---- Workaround for https://github.com/idris-lang/Idris2/issues/3651
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 lt' = %runElab verifySpecialisation (List Type) ListType
   [ `( [] )
   , `( [Nat] )

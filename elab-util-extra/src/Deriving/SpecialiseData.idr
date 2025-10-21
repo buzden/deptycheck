@@ -823,6 +823,64 @@ parameters (t : SpecTask)
     , def "pToM" [ (var "pToM") .= `(MkCast pToMImpl)]
     ]
 
+  -----------------------------
+  --- FROMSTRING DERIVATION ---
+  -----------------------------
+
+  mkFromStringDecls :
+    (mt : TypeInfo) ->
+    (0 _ : IsFullyNamedType mt) =>
+    List Decl
+  mkFromStringDecls ti = do
+    let pToMImpl = var $ inGenNS t "pToMImpl"
+    let tInv = ti.invoke var empty
+    [ public' "fromStringImpl" $
+        forallMTArgs
+          `(FromString ~(t.fullInvocation) => String -> ~tInv)
+    , def "fromStringImpl"
+        [ `(fromStringImpl s) .= `(~pToMImpl $ fromString s) ]
+    , interfaceHint Public "fromString'" $
+        forallMTArgs `(FromString ~(t.fullInvocation) => FromString ~tInv)
+    , def "fromString'"
+        [ `(fromString') .= `(MkFromString ~(var $ inGenNS t "fromStringImpl")) ]
+    ]
+
+  ----------------------
+  --- NUM DERIVATION ---
+  ----------------------
+
+  mkNumDecls :
+    (mt : TypeInfo) ->
+    (0 _ : IsFullyNamedType mt) =>
+    List Decl
+  mkNumDecls ti = do
+    let pToMImpl = var $ inGenNS t "pToMImpl"
+    let mToPImpl = var $ inGenNS t "mToPImpl"
+    let tInv = ti.invoke var empty
+    [ public' "numImpl" $
+        forallMTArgs
+          `(Num ~(t.fullInvocation) => Integer -> ~tInv)
+    , def "numImpl"
+        [ `(numImpl s) .= `(~pToMImpl $ Num.fromInteger s) ]
+    , public' "plusImpl" $
+        forallMTArgs
+          `(Num ~(t.fullInvocation) => ~tInv -> ~tInv -> ~tInv)
+    , def "plusImpl"
+        [ `(plusImpl a b ) .= `(~pToMImpl $ (~mToPImpl a) + (~mToPImpl b)) ]
+    , public' "starImpl" $
+        forallMTArgs
+          `(Num ~(t.fullInvocation) => ~tInv -> ~tInv -> ~tInv)
+    , def "starImpl"
+        [ `(starImpl a b ) .= `(~pToMImpl $ (~mToPImpl a) * (~mToPImpl b)) ]
+    , interfaceHint Public "num'" $
+        forallMTArgs `(Num ~(t.fullInvocation) => Num ~tInv)
+    , def "num'"
+        [ `(num') .= `(MkNum ~(var $ inGenNS t "plusImpl")
+                             ~(var $ inGenNS t "starImpl")
+                             ~(var $ inGenNS t "numImpl"))
+        ]
+    ]
+
   ||| Generate declarations for given task, unification results, and monomorphic type
   monoDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
   monoDecls  uniResults monoTy = do
@@ -859,6 +917,12 @@ parameters (t : SpecTask)
     let pToMDecls = mkPToMDecls monoTy
     logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
       "pToM : \{show pToMDecls}"
+    let fromStringDecls = mkFromStringDecls monoTy
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "fromString : \{show fromStringDecls}"
+    let numDecls = mkNumDecls monoTy
+    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+      "num : \{show numDecls}"
     pure $ singleton $ INamespace EmptyFC (MkNS [ show t.outputName ]) $
       monoTyDecl :: join
         [ mToPImplDecls
@@ -871,6 +935,8 @@ parameters (t : SpecTask)
         , eqDecls
         , pToMImplDecls
         , pToMDecls
+        , fromStringDecls
+        , numDecls
         ]
 
 ||| Perform a specified specialisation
