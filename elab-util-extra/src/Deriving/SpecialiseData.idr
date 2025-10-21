@@ -61,6 +61,10 @@ TaskLambda b => TaskLambda ((0 _ : a) => b)
 export
 TaskLambda b => TaskLambda ({0 _ : a} -> b)
 
+---------------------------------
+--- SPECIALISATION ERROR TYPE ---
+---------------------------------
+
 ||| Specialisation error
 export
 data SpecialisationError : Type where
@@ -75,9 +79,9 @@ data SpecialisationError : Type where
 
 %runElab derive "SpecialisationError" [Show]
 
--------------------------
---- CUSTOM DATA TYPES ---
--------------------------
+-------------------------------
+--- SPECIALISAION TASK TYPE ---
+-------------------------------
 
 ||| Specialisation task
 record SpecTask where
@@ -155,12 +159,12 @@ applyArgAliases :
   List (Name, Name) ->
   SortedMap Name TTImp ->
   Subset (Vect l Arg) (All IsNamedArg)
-applyArgAliases []        @{[]}      ns            ins = (Element [] [])
-applyArgAliases (x :: xs) @{p :: ps} ys            ins = do
-  let (newIns, newName, ys) : (SortedMap _ _, Name, List (Name, Name))
-    = case ys of
-           []              => (ins,                   argName x, [])
-           ((y, y') :: ys) => (insert y (var y') ins, y',        ys)
+applyArgAliases []        @{[]}      ns ins = (Element [] [])
+applyArgAliases (x :: xs) @{p :: ps} ys ins = do
+  let (newIns, newName, ys) : (SortedMap _ _, Name, List (Name, Name)) = 
+    case ys of
+       []              => (ins                  , argName x, [])
+       ((y, y') :: ys) => (insert y (var y') ins, y'       , ys)
   let Element rec prec = applyArgAliases xs ys newIns
   Element
     (MkArg x.count x.piInfo (Just newName) (substituteVariables newIns x.type) :: rec)
@@ -328,7 +332,7 @@ getTask l' outputName = with Prelude.(>>=) do
 
 parameters (t : SpecTask)
   ---------------------------
-  --- Constructor Mapping ---
+  --- CONSTRUCTOR MAPPING ---
   ---------------------------
   ||| Run monadic operation on all constructors of monomorphic type
   mapCons :
@@ -387,9 +391,9 @@ parameters (t : SpecTask)
         f res mt con mcon n :: f' (S n) xs ys zs
       f' _ _ _ _ = []
 
--------------------------------
---- Constructor unification ---
--------------------------------
+  -------------------------------
+  --- CONSTRUCTOR UNIFICATION ---
+  -------------------------------
 
   covering
   ||| Run unification for a given polymorphic constructor
@@ -714,7 +718,7 @@ parameters (t : SpecTask)
     m $ List Decl
   mkDecEqDecls ur ti = do
     mkDecEq <- var <$> try (getMk DecEq) (fail "Internal specialiser error: getMk failed.")
-    pure $ 
+    pure $
       [ public' "decEqImpl" $ mkDecEqImplSig ti
       , def "decEqImpl" [ mkDecEqImplClause ]
       , interfaceHint Public "decEq'" $ forallMTArgs
@@ -888,6 +892,10 @@ parameters (t : SpecTask)
         ]
     ]
 
+  ------------------------------------
+  --- SPECIALISED TYPE DECLARATION ---
+  ------------------------------------
+
   ||| Generate declarations for given task, unification results, and monomorphic type
   monoDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
   monoDecls  uniResults monoTy = do
@@ -945,6 +953,10 @@ parameters (t : SpecTask)
         , fromStringDecls
         , numDecls
         ]
+
+---------------------------
+--- DATA SPECIALISATION ---
+---------------------------
 
 ||| Perform a specified specialisation
 export
