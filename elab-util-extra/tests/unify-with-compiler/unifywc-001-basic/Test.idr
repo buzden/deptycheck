@@ -60,16 +60,30 @@ hw2 = "Hello world!"
 %runElab runUnifyWithCompiler' [] `((\a => a)) [] `((\b => b))
 
 failing "Compiler failed to generate correct unification. Instead generated ?postpone"
-  %runElab runUnifyWithCompiler' [] `((\a, b => a + b)) [] `((\b', a' => b' + a'))
+  %runElab runUnifyWithCompiler' [] `((\a, b => a + b)) [] `((\b, a => b + a))
+
+%runElab runUnifyWithCompiler'
+  [] `((\a : Nat, b : Nat => a + b))
+  [] `((\b : Nat, a : Nat => b + a))
+
+%runElab runUnifyWithCompiler'
+  [] `((\a : Nat, b : Nat => a + b))
+  [] `((+))
 
 failing "Compiler failed to generate correct unification. Instead generated ?postpone"
-  %runElab runUnifyWithCompiler' [] `((\a, b => a b)) [] `((\b', a' => b' a'))
+  %runElab runUnifyWithCompiler' [] `((\a, b => a b)) [] `((\b, a => b a))
 
-%runElab runUnifyWithCompiler' [] `((\x : Type, y : Type, a : (x -> y), b : x => a b)) [] `((\x' : Type, y' : Type, b' : (x' -> y'), a' : x' => b' a'))
+%runElab runUnifyWithCompiler'
+  [] `((\a : (Nat -> Nat), b : Nat => a b))
+  [] `((\b : (Nat -> Nat), a : Nat => b a))
+
+%runElab runUnifyWithCompiler'
+  [] `((\x : Type, y : Type, a : (x -> y), b : x => a b))
+  [] `((\x : Type, y : Type, b : (x -> y), a : x => b a))
 
 %runElab runUnifyWithCompiler'
   [] `(the ({0 x,y : Type} -> (x -> y) -> x -> y) (\a,b => a b))
-  [] `((\b', a' => b' a'))
+  [] `((\b, a => b a))
 
 %runElab runUnifyWithCompiler'
   [] `(the ({0 x,y : Type} -> (x -> y) -> x -> y) (\a,b => a b))
