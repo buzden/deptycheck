@@ -12,6 +12,10 @@ e0' = %runElab verifySpecialisation (Fin 0) Fin0 []
 e0NoCons : Fin0 -> Nat
 e0NoCons _ impossible
 
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
+e0'' = %runElab verifyEmptyType (Fin 0) Fin0
+
+
 %runElab specialiseData' (Fin 1) "Fin1"
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651

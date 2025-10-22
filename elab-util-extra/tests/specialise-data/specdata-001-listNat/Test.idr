@@ -16,6 +16,12 @@ ln' = %runElab verifySpecialisation (List Nat) ListNat
   , `( [0, 1, 2] )
   ]
 
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
+ln'' = %runElab verifyInvalidConstructors (List Nat) ListNat
+  [ `( ["x"] )
+  , `( ["x", "y", "z"] )
+  ]
+
 failing "Can't find an implementation for FromString Nat"
   ln1 : ListNat
   ln1 = ["test"]
@@ -31,6 +37,12 @@ lss' = %runElab verifySpecialisation (List (List String)) ListListString
   , `( [[], ["x"]] )
   , `( [["y"], []] )
   , `( [["x", "y"], ["z"]] )
+  ]
+
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
+lss'' = %runElab verifyInvalidConstructors (List (List String)) ListListString
+  [ `( ["x"] )
+  , `( [[1,2],[3,4]] )
   ]
 
 %runElab specialiseData' (List Type) "ListType"

@@ -10,6 +10,9 @@ import Shared
 v0' = %runElab verifySpecialisation (Vect 0 Nat) (MyVect 0 Nat) [`([])]
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
+v0'' = %runElab verifyInvalidConstructors (Vect 0 Nat) (MyVect 0 Nat) [`([0])]
+
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 v1' = %runElab verifySpecialisation (Vect 1 Nat) (MyVect 1 Nat)
   [ `( [0] )
   , `( [1] )

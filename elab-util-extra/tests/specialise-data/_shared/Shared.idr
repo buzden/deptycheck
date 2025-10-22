@@ -31,6 +31,30 @@ import public Language.Mk
 constructExprs : Type -> List TTImp -> Elab ()
 constructExprs ty = traverse_ $ check {expected=ty}
 
+||| Verify that all values in list check to a given type
+export
+verifyInvalidConstructors : (polymorphicType, specialisedType : Type) -> List TTImp -> Elab ()
+verifyInvalidConstructors polyTy specTy = traverse_ $ \val => do
+  Nothing <- catch $ check {expected=polyTy} val
+  | _ => fail "Despite assertion to the contrary, polymorphic type may be instantiated by \{show val}"
+  Nothing <- catch $ check {expected=specTy} val
+  | _ => fail "Despite assertion to the contrary, specialised type may be instantiated by \{show val}"
+  pure ()
+
+export
+verifyEmptyType : (polymorphicType, specialisedType : Type) -> Elab ()
+verifyEmptyType polyTy specTy = do
+  Nothing <- search polyTy
+  | v => do
+    val <- quote v
+    fail "Despite assertion to the contrary, polymorphic type may be instantiated by \{show val}"
+  Nothing <- search specTy
+  | v => do
+    val <- quote v
+    fail "Despite assertion to the contrary, specialised type may be instantiated by \{show val}"
+  pure ()
+
+
 ||| Check type-level equality for two values
 checkEq : TTImp -> TTImp -> Elab ()
 checkEq a b = do

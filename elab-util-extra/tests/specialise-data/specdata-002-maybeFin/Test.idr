@@ -12,6 +12,7 @@ mFin0NoJust (Just _) impossible
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 mf0' = %runElab verifySpecialisation (Maybe (Fin 0)) (MFin 0) [`(Nothing)]
+mf0'' = %runElab verifyInvalidConstructors (Maybe (Fin 0)) (MFin 0) [`(Just 0), `(Just 1)]
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 mf1' = %runElab verifySpecialisation (Maybe (Fin 1)) (MFin 1)

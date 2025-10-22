@@ -14,9 +14,20 @@ l0' = %runElab verifySpecialisation (List Nat) (MyList Nat)
   ]
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
+l0'' = %runElab verifyInvalidConstructors (List Nat) (MyList Nat)
+  [  `( ["a"] )
+  , `( ["a", "b"] )
+  ]
+
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 l1' = %runElab verifySpecialisation (List String) (MyList String)
   [ `( [] )
   , `( ["a"] )
   , `( ["a", "b"] )
   ]
 
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
+l1'' = %runElab verifyInvalidConstructors (List String) (MyList String)
+  [ `( [0] )
+  , `( [0, 1] )
+  ]
