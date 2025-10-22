@@ -95,9 +95,9 @@ record SpecTask where
   {ttArty             : Nat}
   ttArgs              : Vect ttArty Arg
   {auto 0 ttArgsNamed : All IsNamedArg ttArgs}
-  ||| Namespace in which monomorphise was called
+  ||| Namespace in which specialiseData was called
   currentNs           : Namespace
-  ||| Name of monomorphic type
+  ||| Name of specialised type
   outputName          : Name
   ||| Invocation of polymorphic type extracted from unification task
   fullInvocation      : TTImp
@@ -150,7 +150,7 @@ inGenNS task n = do
 
 ||| Given a sequence of arguments, return list of argument name-BindVar pairs
 argsToBindMap : Foldable f => f Arg -> List (Name, TTImp)
-argsToBindMap = foldMap (toList . map (\y => (y, bindVar y)) . name)
+argsToBindMap = foldMap $ toList . map (\y => (y, bindVar y)) . name
 
 ||| Given a vect of arguments and a list of their aliases, apply aliases to then
 applyArgAliases :
@@ -279,7 +279,7 @@ cleanupHoleAutoImplicitsImpl (IAutoApp _ x (Implicit _ _)) = x
 cleanupHoleAutoImplicitsImpl (INamedApp _ x _ (Implicit _ _)) = x
 cleanupHoleAutoImplicitsImpl x = x
 
-||| Get all the information needed for monomorphisation from task
+||| Get all the information needed for specialisation from task
 getTask :
   TaskLambda l =>
   Monad m =>
@@ -339,7 +339,7 @@ parameters (t : SpecTask)
   ---------------------------
   --- CONSTRUCTOR MAPPING ---
   ---------------------------
-  ||| Run monadic operation on all constructors of monomorphic type
+  ||| Run monadic operation on all constructors of specialised type
   mapCons :
     (f : (pCon : t.Con) ->
          (0 _ : IsFullyNamedCon pCon) =>
@@ -365,7 +365,7 @@ parameters (t : SpecTask)
         f' _ _ = []
     f' adp rs
 
-  ||| Run monadic operation on all pairs of monomorphic and polymorphic constructors
+  ||| Run monadic operation on all pairs of specified and polymorphic constructors
   map2UConsN :
     (f : UnificationResult ->
          (mt: TypeInfo) ->
@@ -421,33 +421,33 @@ parameters (t : SpecTask)
     logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier output: \{show uniRes}"
     pure uniRes
 
-  -----------------------------------
-  --- MONOMORPHIC TYPE GENERATION ---
-  -----------------------------------
+  ---------------------------------
+  --- SPECIFIED TYPE GENERATION ---
+  ---------------------------------
 
-  ||| Generate argument of a monomorphic constructor
-  mkMonoArg :
+  ||| Generate argument of a specified constructor
+  mkSpecArg :
     (ur : UnificationResult) ->
     Fin (ur.uniDg.freeVars) ->
     (Subset Arg IsNamedArg)
-  mkMonoArg ur fvId = do
+  mkSpecArg ur fvId = do
     let fvData = index fvId ur.uniDg.fvData
     let fromLambda = finToNat fvId >= ur.task.lfv
     let rig = if fromLambda then M0 else fvData.rig
     let piInfo = if fromLambda && (fvData.piInfo == ExplicitArg) then ImplicitArg else fvData.piInfo
     (Element (MkArg rig piInfo (Just fvData.name) fvData.type) ItIsNamed)
 
-  ||| Generate a monomorphic constructor
-  mkMonoCon :
+  ||| Generate a specialised constructor
+  mkSpecCon :
     (newArgs : _) ->
     (0 _ : All IsNamedArg newArgs) =>
     UnificationResult ->
     (con : t.Con) ->
     (0 _ : IsFullyNamedCon con) =>
     Subset (Con _ newArgs) IsFullyNamedCon
-  mkMonoCon newArgs ur pCon = do
+  mkSpecCon newArgs ur pCon = do
     let Element args allArgs =
-      pullOut $ mkMonoArg ur <$> Vect.fromList ur.order
+      pullOut $ mkSpecArg ur <$> Vect.fromList ur.order
     let typeArgs = newArgs.appArgs var ur.fullResult
     (Element (MkCon
       { name = inGenNS t $ dropNS pCon.name
@@ -456,11 +456,11 @@ parameters (t : SpecTask)
       , typeArgs
       }) allArgs)
 
-  ||| Generate a monomorphic type
-  mkMonoTy : UniResults -> Subset TypeInfo IsFullyNamedType
-  mkMonoTy ur = do
+  ||| Generate a specialised type
+  mkSpecTy : UniResults -> Subset TypeInfo IsFullyNamedType
+  mkSpecTy ur = do
     let Element cons consAreNamed =
-      pullOut $ mapUCons (mkMonoCon t.ttArgs @{t.ttArgsNamed}) ur
+      pullOut $ mapUCons (mkSpecCon t.ttArgs @{t.ttArgsNamed}) ur
     (Element (MkTypeInfo
               { name = inGenNS t t.outputName
               , arty = _
@@ -470,19 +470,19 @@ parameters (t : SpecTask)
               }) (ItIsFullyNamed t.ttArgsNamed consAreNamed))
 
   ------------------------------------
-  --- MONO TO POLY CAST DERIVATION ---
+  --- POLY TO POLY CAST DERIVATION ---
   ------------------------------------
 
   ||| Generate IPi with implicit type arguments and given return
   forallMTArgs : TTImp -> TTImp
   forallMTArgs = flip (foldr pi) (hideExplicitArg <$> t.ttArgs)
 
-  ||| Generate monomorphic to polimorphic type conversion function signature
+  ||| Generate specialised to polimorphic type conversion function signature
   mkMToPImplSig : UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => TTImp
   mkMToPImplSig urs mt =
     forallMTArgs $ arg (mt.invoke var empty) .-> t.fullInvocation
 
-  ||| Generate monomorphic to polimorphic type conversion function clause
+  ||| Generate specialised to polimorphic type conversion function clause
   ||| for given constructor
   mkMToPImplClause :
     UnificationResult ->
@@ -500,7 +500,7 @@ parameters (t : SpecTask)
           (fromList $ argsToBindMap $ toList mcon.args) <$> ur.fullResult))
     .= (con.invoke var ur.fullResult)
 
-  ||| Generate monomorphic to polimorphic type conversion function declarations
+  ||| Generate specialised to polimorphic type conversion function declarations
   mkMToPImplDecls :
     UniResults ->
     (mt : TypeInfo) ->
@@ -513,12 +513,12 @@ parameters (t : SpecTask)
     , def "mToPImpl" clauses
     ]
 
-  ||| Generate monomorphic to polimorphic cast signature
+  ||| Generate specialised to polimorphic cast signature
   mkMToPSig : (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => TTImp
   mkMToPSig mt = do
     forallMTArgs $ `(Cast ~(mt.invoke var empty) ~(t.fullInvocation))
 
-  ||| Generate monomorphic to polimorphic cast declarations
+  ||| Generate specialised to polimorphic cast declarations
   mkMToPDecls : (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => List Decl
   mkMToPDecls mt =
     [ interfaceHint Public "mToP" $ mkMToPSig mt
@@ -530,7 +530,7 @@ parameters (t : SpecTask)
   -----------------------------------
   parameters {auto _ : Elaboration m}
     ||| Derive multiinjectivity for a polymorphic constructor that has a
-    ||| monomorphic equivalent
+    ||| specialised equivalent
     mkMultiInjDecl :
       UnificationResult ->
       (mt : TypeInfo) ->
@@ -564,19 +564,19 @@ parameters (t : SpecTask)
           ]
 
     ||| Derive multiinjectivity for all polymorphic constructors that have
-    ||| a monomorphic equivalent
+    ||| a specialised equivalent
     mkMultiInjDecls :
       UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
-    mkMultiInjDecls ur monoTy =
-      logBounds "specialiseData.mkMultiInjDecls" [monoTy] $ do
-        let s = map2UConsN mkMultiInjDecl ur monoTy
+    mkMultiInjDecls ur specTy =
+      logBounds "specialiseData.mkMultiInjDecls" [specTy] $ do
+        let s = map2UConsN mkMultiInjDecl ur specTy
         join <$> sequence s
 
     ----------------------------------
     --- MULTICONGRUENCY DERIVATION ---
     ----------------------------------
 
-    ||| Derive multicongruency for a monomorphic constructor
+    ||| Derive multicongruency for a specialised constructor
     |||
     ||| mCongN : forall argsN, argsN'; conN argsN === conN argsN'
     mkMultiCongDecl :
@@ -607,12 +607,12 @@ parameters (t : SpecTask)
           , def n $ singleton $ patClause lhs $ `(Refl)
           ]
 
-    ||| Derive multicongruency for all monomorphic constructors
+    ||| Derive multicongruency for all specialised constructors
     mkMultiCongDecls :
       UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
-    mkMultiCongDecls ur monoTy =
-      logBounds "specialiseData.mkMultiCongDecls" [monoTy] $ do
-        let s = map2UConsN mkMultiCongDecl ur monoTy
+    mkMultiCongDecls ur specTy =
+      logBounds "specialiseData.mkMultiCongDecls" [specTy] $ do
+        let s = map2UConsN mkMultiCongDecl ur specTy
         join <$> sequence s
 
   -----------------------------------
@@ -784,10 +784,10 @@ parameters (t : SpecTask)
     ]
 
   ------------------------------------
-  --- POLY TO MONO CAST DERIVATION ---
+  --- POLY TO POLY CAST DERIVATION ---
   ------------------------------------
 
-  ||| Generate monomorphic to polimorphic type conversion function signature
+  ||| Generate specialised to polimorphic type conversion function signature
   mkPToMImplSig :
     UniResults ->
     (mt : TypeInfo) ->
@@ -796,7 +796,7 @@ parameters (t : SpecTask)
   mkPToMImplSig urs mt =
     forallMTArgs $ arg t.fullInvocation .-> mt.invoke var empty
 
-  ||| Generate monomorphic to polimorphic type conversion function clause
+  ||| Generate specialised to polimorphic type conversion function clause
   ||| for given constructor
   mkPToMImplClause :
     UnificationResult ->
@@ -813,7 +813,7 @@ parameters (t : SpecTask)
         (fromList $ argsToBindMap $ toList con.args) <$> ur.fullResult)
       .= mcon.invoke var ur.fullResult
 
-  ||| Generate monomorphic to polimorphic type conversion function declarations
+  ||| Generate specialised to polimorphic type conversion function declarations
   mkPToMImplDecls :
     UniResults ->
     (mt : TypeInfo) ->
@@ -826,12 +826,12 @@ parameters (t : SpecTask)
     , def "pToMImpl" clauses
     ]
 
-  ||| Generate monomorphic to polimorphic cast signature
+  ||| Generate specialised to polimorphic cast signature
   mkPToMSig : (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => TTImp
   mkPToMSig mt = do
     forallMTArgs $ `(Cast ~(t.fullInvocation) ~(mt.invoke var empty))
 
-  ||| Generate monomorphic to polimorphic cast declarations
+  ||| Generate specialised to polimorphic cast declarations
   mkPToMDecls : (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => List Decl
   mkPToMDecls mt =
     [ interfaceHint Public "pToM" $ mkPToMSig mt
@@ -906,47 +906,47 @@ parameters (t : SpecTask)
   hasPostpone (Left PostponeError) = True
   hasPostpone _ = False
 
-  ||| Generate declarations for given task, unification results, and monomorphic type
-  monoDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
-  monoDecls uniResults monoTy = do
-    let monoTyDecl = monoTy.decl
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
-      "monoTyDecl : \{show monoTyDecl}"
-    let mToPImplDecls = mkMToPImplDecls uniResults monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+  ||| Generate declarations for given task, unification results, and specialised type
+  specDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
+  specDecls uniResults specTy = do
+    let specTyDecl = specTy.decl
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+      "specTyDecl : \{show specTyDecl}"
+    let mToPImplDecls = mkMToPImplDecls uniResults specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "mToPImplDecls : \{show mToPImplDecls}"
-    let mToPDecls = mkMToPDecls monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    let mToPDecls = mkMToPDecls specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "mToP : \{show mToPDecls}"
-    multiInjDecls <- mkMultiInjDecls uniResults monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    multiInjDecls <- mkMultiInjDecls uniResults specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "multiInj : \{show multiInjDecls}"
-    multiCongDecls <- mkMultiCongDecls uniResults monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    multiCongDecls <- mkMultiCongDecls uniResults specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "multiCong : \{show multiCongDecls}"
-    castInjDecls <- mkCastInjDecls uniResults monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    castInjDecls <- mkCastInjDecls uniResults specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "castInj : \{show castInjDecls}"
-    decEqDecls <- mkDecEqDecls uniResults monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    decEqDecls <- mkDecEqDecls uniResults specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "decEq : \{show decEqDecls}"
-    let showDecls = mkShowDecls uniResults monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    let showDecls = mkShowDecls uniResults specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "Show : \{show showDecls}"
-    let eqDecls = mkEqDecls uniResults monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    let eqDecls = mkEqDecls uniResults specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "Eq : \{show eqDecls}"
-    let pToMImplDecls = mkPToMImplDecls uniResults monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    let pToMImplDecls = mkPToMImplDecls uniResults specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "pToMImplDecls : \{show pToMImplDecls}"
-    let pToMDecls = mkPToMDecls monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    let pToMDecls = mkPToMDecls specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "pToM : \{show pToMDecls}"
-    let fromStringDecls = mkFromStringDecls monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    let fromStringDecls = mkFromStringDecls specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "fromString : \{show fromStringDecls}"
-    let numDecls = mkNumDecls monoTy
-    logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
+    let numDecls = mkNumDecls specTy
+    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "num : \{show numDecls}"
     let onFull : List Decl =
       if any hasPostpone uniResults
@@ -958,7 +958,7 @@ parameters (t : SpecTask)
             , numDecls
             ]
     pure $ singleton $ INamespace EmptyFC (MkNS [ show t.outputName ]) $
-      monoTyDecl :: join
+      specTyDecl :: join
         [ mToPImplDecls
         , mToPDecls
         , multiInjDecls
@@ -973,7 +973,7 @@ parameters (t : SpecTask)
 --- DATA SPECIALISATION ---
 ---------------------------
 
-||| Perform a specified specialisation
+||| Perform a given specialisation
 export
 specialiseData :
   TaskLambda l =>
@@ -987,20 +987,20 @@ specialiseData taskT outputName = do
   task <- getTask taskT outputName
   logPoint {level=DetailedTrace} "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
   uniResults <- sequence $ mapCons task $ \ci => runEitherT {m} $ unifyCon task ci
-  let Element monoTy monoTyNamed = mkMonoTy task uniResults
-  decls <- monoDecls task uniResults monoTy
-  pure (monoTy, decls)
+  let Element specTy specTyNamed = mkSpecTy task uniResults
+  decls <- specDecls task uniResults specTy
+  pure (specTy, decls)
 
-||| Perform a specified monomorphisation and return a list of declarations
+||| Perform a given specialisation and return a list of declarations
 specialiseData'' : Elaboration m => TaskLambda l => (0 taskT: l) -> Name -> m $ List Decl
 specialiseData'' taskT outputName = do
-  Right (monoTy, decls) <-
+  Right (specTy, decls) <-
     runEitherT {m} {e=SpecialisationError} $
       specialiseData taskT outputName
   | Left err => fail "Specialisation error: \{show err}"
   pure decls
 
-||| Perform a specified monomorphisation and declare the results
+||| Perform a given specialisation and declare the results
 export
 specialiseData' : Elaboration m => TaskLambda l => (0 taskT: l) -> Name -> m ()
 specialiseData' taskT outputName = specialiseData'' taskT outputName >>= declare

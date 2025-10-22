@@ -158,12 +158,12 @@ record UnificationResult where
   uniDg : DependencyGraph
   ||| LHS free variable (polymorphic constructor argument) values
   lhsResult : SortedMap Name TTImp
-  ||| RHS free variable (monomorphic type argument) values
+  ||| RHS free variable (specialised type argument) values
   rhsResult : SortedMap Name TTImp
   ||| All free variable values
   fullResult : SortedMap Name TTImp
   ||| Order of dependency of free variables without values
-  ||| (monomorphic constructor arguments)
+  ||| (specialised constructor arguments)
   order : List $ Fin uniDg.freeVars
 
 %runElab derive "UnificationResult" [Show]

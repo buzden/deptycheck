@@ -103,7 +103,7 @@ verifySingleCasts polyTy specTy vals = verifySingleCasts' polyTy specTy $ zip va
 ||| Run verifyDoubleCast for each value in list
 verifyDoubleCasts :
   (polymorphicType, specialisedType : Type) -> (values: List TTImp) -> Elab ()
-verifyDoubleCasts polyTy monoTy = traverse_ $ verifyDoubleCast polyTy monoTy
+verifyDoubleCasts polyTy specTy = traverse_ $ verifyDoubleCast polyTy specTy
 
 ||| Verify that DecEq implementations of polymorphicType and specialisedType
 ||| return the same result for a pair of values
@@ -162,7 +162,7 @@ verifyNum polyTy specTy i = do
   specFS <- normaliseAs specTy `(Num.fromInteger ~i')
   checkSoEq polyFS `(cast ~specFS)
 
-||| Run polymorphic and monomorphic `show` for every value in list
+||| Run polymorphic and specialised `show` for every value in list
 verifyShows :
   (polymorphicType, specialisedType : Type) -> (specialisedValues: List TTImp) -> Elab ()
 verifyShows polyTy specTy = traverse_ $ verifyShow polyTy specTy
@@ -210,7 +210,7 @@ verifyInterfaces polyTy specTy vals = traverse_ $ \(iface, verifyInterface) => d
       (Nothing, Nothing) => pure ()
 
 ||| Verify specialisation of polymorphicType into specialisedType for a given list of value pairs
-||| where the first element is the value of the polymorphic type, and the second - of the monomorphic one
+||| where the first element is the value of the polymorphic type, and the second - of the specialised one
 export
 verifySpecialisation' :
   (polymorphicType, specialisedType : Type) -> (valuePairs: List (TTImp, TTImp)) -> Elab ()
@@ -227,7 +227,7 @@ verifySpecialisation' polyTy specTy pairs = do
     ]
 
 ||| Verify specialisation of polymorphicType into specialisedType for a given list of values
-||| if polymorphic and monomorphic constructors share the same set of explicit arguments
+||| if polymorphic and specialised constructors share the same set of explicit arguments
 export
 verifySpecialisation : (polymorphicType, specialisedType : Type) -> List TTImp -> Elab ()
 verifySpecialisation polyTy specTy vals = verifySpecialisation' polyTy specTy $ zip vals vals
