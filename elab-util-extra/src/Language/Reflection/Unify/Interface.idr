@@ -180,31 +180,27 @@ leaves dg =
 emptyLeaves : (dg : DependencyGraph) -> FinSet dg.freeVars
 emptyLeaves dg = intersection dg.empties $ leaves dg
 
-
-
 ||| List all the free variables without a value in order of dependency
-covering
+-- covering
 flattenEmpties : (dg : DependencyGraph) -> SnocList $ Fin dg.freeVars
 flattenEmpties dg = flattenEmpties' dg [<]
   where
     flattenEmpties' : (dg : DependencyGraph) -> SnocList (Fin dg.freeVars) -> SnocList $ Fin dg.freeVars
-    flattenEmpties' dg ctx = do
+    flattenEmpties' dg@(MkDG {freeVars, fvData, fvDeps, empties, nameToId, holeToId}) ctx = do
       let els = emptyLeaves dg
-      let False = els == empty
+      let False = null els
       | _ => ctx
-      let updateCtx : List (Fin v) -> SnocList (Fin v) -> SnocList (Fin v)
-          updateCtx [] acc = acc
-          updateCtx (x :: xs) acc = updateCtx xs $ acc :< x
-      let newCtx = updateCtx (toList els) ctx
+      -- Now els is a non-empty subset of dg.empties
       flattenEmpties'
-        (MkDG
-          dg.freeVars
-          dg.fvData
-          (bimap (flip difference els) (flip difference els) <$> dg.fvDeps)
-          (flip difference els dg.empties)
-          dg.nameToId
-          dg.holeToId)
-        newCtx
+        -- `assert_smaller dg` is a workaround for a non-working `assert_smaller empties`
+        (assert_smaller dg $ MkDG
+          freeVars
+          fvData
+          (mapHom (flip difference els) <$> fvDeps)
+          (assert_smaller empties $ flip difference els empties)
+          nameToId
+          holeToId)
+        (ctx <>< toList els)
 
 ||| Find all variables which have no value
 filterEmpty : Vect _ FVData -> List (Name, TTImp)

@@ -201,18 +201,19 @@ subEmpties :
 subEmpties dg = {fvData $= map $ subEmptiesFV dg} dg
 
 ||| Solve dependency graph
-covering
 solveDG :
   (dg : DependencyGraph) ->
   DependencyGraph
 solveDG dg = do
   let cs = canSub dg
-  let False = cs == empty
+  let False = null cs
   | _ => dg
   let ds = doSub dg cs
+  -- DG <= DS because cs is non-empty, and every doSub may shrink the set of possibly substitutable variables
+  -- If doSub can't shrink it, the dependency graph stays the same
   if ds == dg
      then dg
-     else solveDG ds
+     else solveDG $ assert_smaller dg ds
 
 ArgDPair : Type
 ArgDPair = Subset Arg IsNamedArg
@@ -280,7 +281,6 @@ extractFVData t v [] [] = do
   pure []
 
 ||| Run unification
-covering
 unify' :
   Elaboration m =>
   MonadError String m =>
@@ -333,7 +333,6 @@ unify' task = do
 
 ||| Run unification in a try block
 export
-covering
 unifyWithCompiler :
   Elaboration m =>
   MonadError String m =>
@@ -351,7 +350,6 @@ unifyWithCompiler task = do
 
 ||| Run unification in a try block
 export
-covering
 unifyWithCompiler' :
   Elaboration m =>
   MonadError String m =>
