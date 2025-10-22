@@ -247,7 +247,7 @@ buildUpTarget (xs :< (s, _)) t =
 
 extractFVData :
   Elaboration m =>
-  MonadError String m =>
+  MonadError UnificationError m =>
   (t : Type) ->
   t ->
   Vect l ArgDPair ->
@@ -268,7 +268,7 @@ extractFVData t v ((Element fv isNamed) :: xs) (hn :: hns) = do
       pure $ (argName fv, quoteT, retVal) :: rest
     _ => do
       qT <- quote t
-      throwError "Failed to extract dependent pair from \{show qT}"
+      throwError $ ExtractionError $ qT
 extractFVData t v [] [] = do
   qT <- quote t
   qV <- quote v
@@ -276,14 +276,14 @@ extractFVData t v [] [] = do
     Equal x y =>
       case qV of
         INamedApp _ (INamedApp _ `(Builtin.Refl) _ _) _ _ => pure ()
-        _ => throwError "Compiler failed to generate correct unification. Instead generated \{show qV}"
-    _ => throwError "Internal unifier error: DPairs don't correspond to each other. Should never occur."
+        _ => throwError $ PostponeError
+    _ => throwError $ InternalError "DPairs don't correspond to each other. Should never occur."
   pure []
 
 ||| Run unification
 unify' :
   Elaboration m =>
-  MonadError String m =>
+  MonadError UnificationError m =>
   UnificationTask ->
   m $ DependencyGraph
 unify' task = do
@@ -309,11 +309,11 @@ unify' task = do
   -- Instantiate target type
   Just checkTargetType' : Maybe Type <-
     try (Just <$> check checkTargetType) (pure Nothing)
-  | _ => throwError "Failed to build target type (\{show checkTargetType})"
+  | _ => throwError $ TargetTypeError checkTargetType
   -- Run unification
   Just checkTarget' : Maybe checkTargetType' <-
     try (Just <$> check checkTarget) (pure Nothing)
-  | _ => throwError "Compiler couldn't find a unification"
+  | _ => throwError NoUnificationError
   ctQuote <- quote checkTarget'
   logPoint {level=DetailedTrace} "unifyWithCompiler" [] "Target value after quoting: \{show ctQuote}"
   let vectNames = cast allNames
@@ -335,12 +335,12 @@ unify' task = do
 export
 unifyWithCompiler :
   Elaboration m =>
-  MonadError String m =>
+  MonadError UnificationError m =>
   UnificationTask ->
   m $ UnificationResult
 unifyWithCompiler task = do
-  let ret = runEitherT {m=Elab} {e=String} $ unify' task
-  let err = pure {f=Elab} $ Left $ "Unification failed catastrophically"
+  let ret = runEitherT {m=Elab} {e=UnificationError} $ unify' task
+  let err = pure {f=Elab} $ Left CatastrophicError
   rr <- try ret err
   dg <- liftEither rr
   -- logPoint {level=DetailedTrace} "unifyWithCompiler" [] "DG after trying: \{show dg}"
@@ -352,11 +352,11 @@ unifyWithCompiler task = do
 export
 unifyWithCompiler' :
   Elaboration m =>
-  MonadError String m =>
+  MonadError UnificationError m =>
   UnificationTask ->
   m $ UnificationResult
 unifyWithCompiler' task = do
-  rr <- runEitherT {m} {e=String} $ unify' task
+  rr <- runEitherT {m} {e=UnificationError} $ unify' task
   dg <- liftEither rr
   pure $ finalizeDG task dg
 

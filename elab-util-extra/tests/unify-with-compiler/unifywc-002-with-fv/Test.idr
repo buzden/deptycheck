@@ -14,7 +14,7 @@ import Shared
     assertFV res "y" `(Prelude.Types.S x)
     assertOrder res ["x"]
 
-failing "Compiler failed to generate correct unification. Instead generated ?postpone"
+failing "Unifier failed with: PostponeError"
   %runElab showUnify' ["x" #: `(Nat)] `(S x) ["y" #: `(Nat)] `(y + 1)
 
 %runElab withUnify' ["x" #: `(Nat)] `(S (S x)) ["y" #: `(Nat)] `(2 + y)
@@ -43,11 +43,11 @@ failing "Compiler failed to generate correct unification. Instead generated ?pos
     assertFV' ur "y" Type `(String)
     assertOrder ur []
 
-failing "Unifier failed with: Compiler couldn't find a unification"
+failing "Unifier failed with: NoUnificationError"
   %runElab showUnify' ["x" #: `(Nat), "y" #: `(Type)] `(Vect (S $ S x) y)
                       []                              `(Vect 1     String)
 
-failing "Unifier failed with: Compiler failed to generate correct unification. Instead generated ?postpone"
+failing "Unifier failed with: PostponeError"
   %runElab showUnify' ["x" #: `(Nat), "y" #: `(Type), "z" #: `(Nat)]
                       `(Vect (x + z) y)
                       []                              `(Vect 1 String)
@@ -60,7 +60,7 @@ failing "Unifier failed with: Compiler failed to generate correct unification. I
     assertFV' ur "y" Type `(String)
     assertOrder ur []
 
-failing "Unifier failed with: Compiler failed to generate correct unification. Instead generated ?postpone"
+failing "Unifier failed with: PostponeError"
   %runElab showUnify' ["x" #: `(Nat), "y" #: `(Type)] `(Vect (x + 1) y)
                       []                              `(Vect 1     String)
 
@@ -123,7 +123,7 @@ failing "Unifier failed with: Compiler failed to generate correct unification. I
     assertFV' ur "b" Type `(Nat)
     assertOrder ur []
 
-failing "Unifier failed with: Compiler couldn't find a unification"
+failing "Unifier failed with: NoUnificationError"
   %runElab withUnify'
     ["a" #: `(Nat)] `((\x => a))
     [] `(const 10)

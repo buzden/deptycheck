@@ -125,7 +125,7 @@ Show SpecTask where
 
 ||| Unification results for the whole type
 UniResults : Type
-UniResults = List $ Either String UnificationResult
+UniResults = List $ Either UnificationError UnificationResult
 
 ------------------------
 --- HELPER FUNCTIONS ---
@@ -274,6 +274,11 @@ checkArgsUse (x :: xs) t = do
     then checkArgsUse xs t
     else throwError UnusedVarError
 
+cleanupHoleAutoImplicitsImpl : TTImp -> TTImp
+cleanupHoleAutoImplicitsImpl (IAutoApp _ x (Implicit _ _)) = x
+cleanupHoleAutoImplicitsImpl (INamedApp _ x _ (Implicit _ _)) = x
+cleanupHoleAutoImplicitsImpl x = x
+
 ||| Get all the information needed for monomorphisation from task
 getTask :
   TaskLambda l =>
@@ -285,7 +290,7 @@ getTask :
   m SpecTask
 getTask l' outputName = with Prelude.(>>=) do
   -- Quote spec lambda
-  taskQuote : TTImp <- cleanupNamedHoles <$> quote l'
+  taskQuote : TTImp <- mapTTImp cleanupHoleAutoImplicitsImpl <$> cleanupNamedHoles <$> quote l'
   let (tqArgs, tqRet) = unLambda taskQuote
   -- Check for unused arguments
   checkArgsUse tqArgs $ usesVariables tqRet
@@ -299,7 +304,7 @@ getTask l' outputName = with Prelude.(>>=) do
   (Element tqArgs tqArgsNamed, tqAlias) <- genArgAliases (fromList tqArgs)
   let tqRet = substituteVariables (fromList $ mapSnd var <$> tqAlias) tqRet
   -- Quote spec lambda type
-  taskType : TTImp <- cleanupNamedHoles <$> quote l
+  taskType : TTImp <- mapTTImp cleanupHoleAutoImplicitsImpl <$> cleanupNamedHoles <$> quote l
   let (ttArgs, _) = unPi taskType
   -- Check for partial application in spec
   let True = (length tqArgs == length ttArgs)
@@ -398,7 +403,7 @@ parameters (t : SpecTask)
   ||| Run unification for a given polymorphic constructor
   unifyCon :
     Elaboration m =>
-    MonadError String m =>
+    MonadError UnificationError m =>
     (con : t.Con) ->
     (0 conN : IsFullyNamedCon con) =>
     m UnificationResult
@@ -410,7 +415,7 @@ parameters (t : SpecTask)
     logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier task: \{show uniTask}"
     Right uniRes <- tryError $ unifyWithCompiler uniTask
     | Left err => do
-      logPoint "specialiseData.unifyCon" [t.polyTy, con] "Unifier failed: \{err}"
+      logPoint "specialiseData.unifyCon" [t.polyTy, con] "Unifier failed: \{show err}"
       throwError err
     logPoint "specialiseData.unifyCon" [t.polyTy, con] "Unifier succeeded"
     logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier output: \{show uniRes}"
@@ -848,11 +853,11 @@ parameters (t : SpecTask)
         forallMTArgs
           `(FromString ~(t.fullInvocation) => String -> ~tInv)
     , def "fromStringImpl"
-        [ `(fromStringImpl s) .= `(~pToMImpl $ fromString s) ]
+      [ `(fromStringImpl @{fs} s) .= `(~pToMImpl $ fromString @{fs} s) ]
     , interfaceHint Public "fromString'" $
         forallMTArgs `(FromString ~(t.fullInvocation) => FromString ~tInv)
     , def "fromString'"
-        [ `(fromString') .= `(MkFromString ~(var $ inGenNS t "fromStringImpl")) ]
+        [ `(fromString' @{fs}) .= `(MkFromString $ ~(var $ inGenNS t "fromStringImpl") @{fs}) ]
     ]
 
   ----------------------
@@ -871,23 +876,25 @@ parameters (t : SpecTask)
         forallMTArgs
           `(Num ~(t.fullInvocation) => Integer -> ~tInv)
     , def "numImpl"
-        [ `(numImpl s) .= `(~pToMImpl $ Num.fromInteger s) ]
+      [ `(numImpl @{fs} s) .= `(~pToMImpl $ Num.fromInteger @{fs} s) ]
     , public' "plusImpl" $
         forallMTArgs
           `(Num ~(t.fullInvocation) => ~tInv -> ~tInv -> ~tInv)
     , def "plusImpl"
-        [ `(plusImpl a b ) .= `(~pToMImpl $ (~mToPImpl a) + (~mToPImpl b)) ]
+        [ `(plusImpl @{fs} a b ) .= `(~pToMImpl $ (+) @{fs} (~mToPImpl a) (~mToPImpl b)) ]
     , public' "starImpl" $
         forallMTArgs
           `(Num ~(t.fullInvocation) => ~tInv -> ~tInv -> ~tInv)
     , def "starImpl"
-        [ `(starImpl a b ) .= `(~pToMImpl $ (~mToPImpl a) * (~mToPImpl b)) ]
+        [ `(starImpl @{fs} a b ) .= `(~pToMImpl $ (*) @{fs} (~mToPImpl a) (~mToPImpl b)) ]
     , interfaceHint Public "num'" $
         forallMTArgs `(Num ~(t.fullInvocation) => Num ~tInv)
     , def "num'"
-        [ `(num') .= `(MkNum ~(var $ inGenNS t "plusImpl")
-                             ~(var $ inGenNS t "starImpl")
-                             ~(var $ inGenNS t "numImpl"))
+        [ `(num' @{fs}) .=
+            `(MkNum
+              (~(var $ inGenNS t "plusImpl") @{fs})
+              (~(var $ inGenNS t "starImpl") @{fs})
+              (~(var $ inGenNS t "numImpl") @{fs}))
         ]
     ]
 
@@ -895,9 +902,13 @@ parameters (t : SpecTask)
   --- SPECIALISED TYPE DECLARATION ---
   ------------------------------------
 
+  hasPostpone : Either UnificationError _ -> Bool
+  hasPostpone (Left PostponeError) = True
+  hasPostpone _ = False
+
   ||| Generate declarations for given task, unification results, and monomorphic type
   monoDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
-  monoDecls  uniResults monoTy = do
+  monoDecls uniResults monoTy = do
     let monoTyDecl = monoTy.decl
     logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
       "monoTyDecl : \{show monoTyDecl}"
@@ -937,6 +948,15 @@ parameters (t : SpecTask)
     let numDecls = mkNumDecls monoTy
     logPoint {level=DetailedTrace} "specialiseData.monoDecls" [monoTy]
       "num : \{show numDecls}"
+    let onFull : List Decl =
+      if any hasPostpone uniResults
+          then []
+          else join
+            [ pToMImplDecls
+            , pToMDecls
+            , fromStringDecls
+            , numDecls
+            ]
     pure $ singleton $ INamespace EmptyFC (MkNS [ show t.outputName ]) $
       monoTyDecl :: join
         [ mToPImplDecls
@@ -947,11 +967,7 @@ parameters (t : SpecTask)
         , decEqDecls
         , showDecls
         , eqDecls
-        , pToMImplDecls
-        , pToMDecls
-        , fromStringDecls
-        , numDecls
-        ]
+        ] ++ onFull
 
 ---------------------------
 --- DATA SPECIALISATION ---

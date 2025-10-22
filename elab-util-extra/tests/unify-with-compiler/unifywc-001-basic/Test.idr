@@ -8,7 +8,7 @@ import Shared
 
 %runElab runUnifyWithCompiler' [] `(1) [] `(1)
 
-failing "Unifier failed with: Compiler couldn't find a unification"
+failing "Unifier failed with: NoUnificationError"
   %runElab runUnifyWithCompiler' [] `(0) [] `(1)
 
 %runElab runUnifyWithCompiler' [] `(Z) [] `(Z)
@@ -19,22 +19,22 @@ failing "Unifier failed with: Compiler couldn't find a unification"
 
 %runElab runUnifyWithCompiler' [] `(the Nat 1) [] `(S Z)
 
-failing "Unifier failed with: Compiler couldn't find a unification"
+failing "Unifier failed with: NoUnificationError"
   %runElab runUnifyWithCompiler' [] `(0) [] `(Z)
 
-failing "Unifier failed with: Compiler couldn't find a unification"
+failing "Unifier failed with: NoUnificationError"
   %runElab runUnifyWithCompiler' [] `(1) [] `(S Z)
 
 %runElab runUnifyWithCompiler' [] `(the (List Nat) [1,2,3,4,5]) [] `(the (List Nat) [1,2,3,4,5])
 
-failing "Unifier failed with: Failed to build target type"
+failing "Unifier failed with: TargetTypeError"
   %runElab runUnifyWithCompiler' [] `([1,2,3,4,5]) [] `([1,2,3,4,5])
 
 %runElab runUnifyWithCompiler' [] `(the Nat (1 + 2)) [] `(the Nat 3)
 
 %runElab runUnifyWithCompiler' [] `(the String "Hello world!") [] `("Hello world!")
 
-failing "Unifier failed with: Compiler failed to generate correct unification. Instead generated ?postpone"
+failing "Unifier failed with: PostponeError"
   %runElab runUnifyWithCompiler' [] `("Hello world!") [] `("Hello world!")
 
 hw1 : String
@@ -59,7 +59,7 @@ hw2 = "Hello world!"
 
 %runElab runUnifyWithCompiler' [] `((\a => a)) [] `((\b => b))
 
-failing "Compiler failed to generate correct unification. Instead generated ?postpone"
+failing "Unifier failed with: PostponeError"
   %runElab runUnifyWithCompiler' [] `((\a, b => a + b)) [] `((\b, a => b + a))
 
 %runElab runUnifyWithCompiler'
@@ -70,7 +70,7 @@ failing "Compiler failed to generate correct unification. Instead generated ?pos
   [] `((\a : Nat, b : Nat => a + b))
   [] `((+))
 
-failing "Compiler failed to generate correct unification. Instead generated ?postpone"
+failing "Unifier failed with: PostponeError"
   %runElab runUnifyWithCompiler' [] `((\a, b => a b)) [] `((\b, a => b a))
 
 %runElab runUnifyWithCompiler'

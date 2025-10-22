@@ -168,6 +168,17 @@ record UnificationResult where
 
 %runElab derive "UnificationResult" [Show]
 
+public export
+data UnificationError : Type where
+  PostponeError : UnificationError
+  CatastrophicError : UnificationError
+  InternalError : String -> UnificationError
+  TargetTypeError : TTImp -> UnificationError
+  ExtractionError : TTImp -> UnificationError
+  NoUnificationError : UnificationError
+
+%runElab derive "UnificationError" [Show, Eq]
+
 ||| List all free variables that don't depende on any other free variables
 leaves : (dg : DependencyGraph) -> FinSet dg.freeVars
 leaves dg =
