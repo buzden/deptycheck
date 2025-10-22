@@ -161,7 +161,7 @@ applyArgAliases :
   Subset (Vect l Arg) (All IsNamedArg)
 applyArgAliases []        @{[]}      ns ins = (Element [] [])
 applyArgAliases (x :: xs) @{p :: ps} ys ins = do
-  let (newIns, newName, ys) : (SortedMap _ _, Name, List (Name, Name)) = 
+  let (newIns, newName, ys) : (SortedMap _ _, Name, List (Name, Name)) =
     case ys of
        []              => (ins                  , argName x, [])
        ((y, y') :: ys) => (insert y (var y') ins, y'       , ys)
