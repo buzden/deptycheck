@@ -213,9 +213,13 @@ mkDoubleBinds (as :< (a1, a2)) t =
       mkDoubleBinds as t .! (a1n, bindVar a1n) .! (a2n, bindVar a1n)
     _ => mkDoubleBinds as t
 
-||| Make an argument omega implicit
+||| Make an argument omega implicit if it is explicit
 hideExplicitArg : Arg -> Arg
 hideExplicitArg a = { piInfo := if a.piInfo == ExplicitArg then ImplicitArg else a.piInfo } a
+
+||| Make an argument omega implicit
+makeImplicit : Arg -> Arg
+makeImplicit a = { piInfo := ImplicitArg } a
 
 ||| A tuple value of multiple repeating expressons
 tupleOfN : Nat -> TTImp -> TTImp
@@ -237,9 +241,23 @@ hideExplicitArgPreservesNames (x :: xs) @{(p :: ps)} with (x)
   hideExplicitArgPreservesNames (x :: xs) @{(p :: ps)} | (MkArg _ _ (Just n) _) =
     ItIsNamed :: hideExplicitArgPreservesNames xs
 
+||| Proof that makeImplicit doesn't affect namedness of arguments
+makeImplicitPreservesNames :
+  (args : Vect l Arg) ->
+  (0 _ : All IsNamedArg args) =>
+  All IsNamedArg (SpecialiseData.makeImplicit <$> args)
+makeImplicitPreservesNames [] @{[]} = []
+makeImplicitPreservesNames (x :: xs) @{(p :: ps)} with (x)
+  makeImplicitPreservesNames (x :: xs) @{(p :: ps)} | (MkArg _ _ (Just n) _) =
+    ItIsNamed :: makeImplicitPreservesNames xs
+
 hideExplicitArgs : (xs: Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys: Vect l Arg ** All IsNamedArg ys)
 hideExplicitArgs xs @{ps} =
   (hideExplicitArg <$> xs ** hideExplicitArgPreservesNames xs)
+
+makeArgsImplicit : (xs: Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys: Vect l Arg ** All IsNamedArg ys)
+makeArgsImplicit xs @{ps} =
+  (makeImplicit <$> xs ** makeImplicitPreservesNames xs)
 
 ||| Create a binding application of aliased arguments
 ||| binding everything to `(_)
@@ -274,6 +292,7 @@ checkArgsUse (x :: xs) t = do
     then checkArgsUse xs t
     else throwError UnusedVarError
 
+export
 cleanupHoleAutoImplicitsImpl : TTImp -> TTImp
 cleanupHoleAutoImplicitsImpl (IAutoApp _ x (Implicit _ _)) = x
 cleanupHoleAutoImplicitsImpl (INamedApp _ x _ (Implicit _ _)) = x
@@ -541,7 +560,7 @@ parameters (t : SpecTask)
         let S _ = mcon.arty
         | _ => pure []
         let n = fromString "mInj\{show i}"
-        let (ourArgs ** prf) = hideExplicitArgs mcon.args
+        let (ourArgs ** prf) = makeArgsImplicit mcon.args
         (Element a1 ap1, am1) <- genArgAliases ourArgs
         (Element a2 ap2, am2) <- genArgAliases ourArgs
         let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
@@ -589,7 +608,7 @@ parameters (t : SpecTask)
         let S _ = mcon.arty
         | _ => pure []
         let n = fromString "mCong\{show i}"
-        let (ourArgs ** prf) = hideExplicitArgs mcon.args
+        let (ourArgs ** prf) = makeArgsImplicit mcon.args
         (Element a1 _, am1) <- genArgAliases ourArgs
         (Element a2 _, am2) <- genArgAliases ourArgs
         let lhsCon = mcon.invoke var $ mergeAliases ur.fullResult am1

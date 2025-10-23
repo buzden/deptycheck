@@ -19,6 +19,13 @@ appArgs : TTImp -> AppArgs a -> TTImp
 appArgs t (x :: xs) = appArgs (appArg t x) xs
 appArgs t []        = t
 
+||| Apply all arguments as specified in AppArgs to TTImp
+public export
+appArgs' : TTImp -> AppArgs a -> TTImp
+appArgs' t ((AutoApp (Implicit _ _)) :: xs) = appArgs' t xs
+appArgs' t (x :: xs) = appArgs (appArg t x) xs
+appArgs' t []        = t
+
 ||| Convert MissingInfo for compatibility with `cleanupNamedHoles`
 public export
 cleanupMissing : MissingInfo p -> MissingInfo (cleanupPiInfo p)

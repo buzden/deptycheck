@@ -15,6 +15,7 @@ import Language.Reflection.Expr
 import Language.Reflection.Logging
 import Language.Reflection.Syntax
 import Language.Reflection.Unify.Interface
+import Language.Reflection.VarSubst
 
 %default total
 
@@ -55,17 +56,24 @@ allMatchingHoles :
   FinSet freeVars
 allMatchingHoles h2Id t = execWriter $ mapMTTImp (aMHImpl h2Id) t
 
+fromPiInfo : Lazy t -> PiInfo t -> t
+fromPiInfo _ (DefImplicit x) = x
+fromPiInfo x _ = x
+
 ||| Generate a dependency map from unification output and hole-to-index mapping
 genDeps :
   {freeVars : Nat} ->
   Vect freeVars FVData ->
   SortedMap String (Fin freeVars) ->
-  Vect freeVars (FinSet freeVars, FinSet freeVars)
+  Vect freeVars $ FVDeps freeVars
 genDeps fvs h2Id =
   map
-    (\fv => MkPair (allMatchingHoles h2Id fv.type) $
-        fromMaybe empty $
-          allMatchingHoles h2Id <$> fv.value)
+    (\fv =>
+      MkFVDeps
+        (allMatchingHoles h2Id fv.type)
+        (fromMaybe empty $ allMatchingHoles h2Id <$> fv.value)
+        (fromPiInfo empty $ allMatchingHoles h2Id <$> fv.piInfo)
+    )
     fvs
 
 ||| Find free variables without value
@@ -97,8 +105,8 @@ canSub :
 canSub dg =
   flip difference dg.empties $
     foldl
-      (\s, (i, (n,n')) =>
-        if (flip difference dg.empties (union n n')) == empty
+      (\s, (i, deps) =>
+        if (flip difference dg.empties (mergeDeps deps)) == empty
            then insert i s
            else s)
       Fin.Set.empty
@@ -137,10 +145,11 @@ fvSubMatching :
 fvSubMatching dg canSub =
   { type $= subMatchingHoles dg canSub
   , value $= map $ subMatchingHoles dg canSub
+  , piInfo $= map $ subMatchingHoles dg canSub
   }
 
 valDepsOfVar : (dg : DependencyGraph) -> Fin dg.freeVars -> FinSet dg.freeVars
-valDepsOfVar dg id = snd $ index id dg.fvDeps
+valDepsOfVar dg id = valueDeps $ index id dg.fvDeps
 
 valDepsOfVars : (dg : DependencyGraph) -> FinSet dg.freeVars -> FinSet dg.freeVars
 valDepsOfVars dg vars = foldl (\a, b => union (valDepsOfVar dg b) a) empty (toList vars)
@@ -148,18 +157,22 @@ valDepsOfVars dg vars = foldl (\a, b => union (valDepsOfVar dg b) a) empty (toLi
 fvSubMatching' :
   (dg: DependencyGraph) ->
   FinSet dg.freeVars ->
-  (FVData, FinSet dg.freeVars, FinSet dg.freeVars) ->
-  (FVData, FinSet dg.freeVars, FinSet dg.freeVars)
-fvSubMatching' dg canSub (fvData, tyDeps, valDeps) = do
+  (FVData, FVDeps dg.freeVars) ->
+  (FVData, FVDeps dg.freeVars)
+fvSubMatching' dg canSub (fvData, MkFVDeps tyDeps valDeps piInfoDeps) = do
   let matchingHolesTy = allMatchingHoles dg.holeToId fvData.type
   let matchingHolesVal = fromMaybe empty $ allMatchingHoles dg.holeToId <$> fvData.value
+  let matchingHolesPiInfo = fromPiInfo empty $ allMatchingHoles dg.holeToId <$> fvData.piInfo
   let canSubTy = intersection matchingHolesTy canSub
   let canSubVal = intersection matchingHolesVal canSub
+  let canSubPiInfo = intersection matchingHolesPiInfo canSub
   let tyAddDeps = valDepsOfVars dg canSubTy
   let valAddDeps = valDepsOfVars dg canSubVal
+  let piInfoAddDeps = valDepsOfVars dg canSubPiInfo
   let newTyDeps = union tyAddDeps (difference tyDeps canSubTy)
   let newValDeps = union valAddDeps (difference valDeps canSubVal)
-  (fvSubMatching dg canSub fvData, newTyDeps, newValDeps)
+  let newPiInfoDeps = union piInfoAddDeps (difference piInfoDeps canSubPiInfo)
+  (fvSubMatching dg canSub fvData, MkFVDeps newTyDeps newValDeps newPiInfoDeps)
 
 
 ||| Substitute all free variables in set within dependency graph
@@ -295,6 +308,7 @@ unify' task = do
     cast $ pushIn task.rhsFreeVars task.rhsAreNamed
   (lhsNMap, lhsNames) <- genHoleNames snocLFV
   (rhsNMap, rhsNames) <- genHoleNames snocRFV
+  let hole2N = IHole EmptyFC <$> mergeLeft lhsNMap rhsNMap
   let allNames = lhsNames ++ rhsNames
   -- Assemble the type, the value of which is all our free variables + proof of equality
   let checkTargetType =
@@ -324,6 +338,7 @@ unify' task = do
   -- Generate dependency graph
   let allZipped = zip vectNames $ zip (task.lhsFreeVars ++ task.rhsFreeVars) uniResults
   let dg = genDG $ makeFVData <$> allZipped
+  let dg = {fvData $= map {piInfo $= map $ substituteVariables hole2N}} dg
   -- logPoint {level=DetailedTrace} "unifyWithCompiler" [] "InitialDG: \{show dg}"
   let dg = subEmpties dg
   -- logPoint {level=DetailedTrace} "unifyWithCompiler" [] "DG after subEmpties: \{show dg}"

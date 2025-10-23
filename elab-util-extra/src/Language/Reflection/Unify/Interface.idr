@@ -85,6 +85,39 @@ export
 makeFVData : (String, Arg, Name, TTImp, Maybe TTImp) -> FVData
 makeFVData (h, fv, n, t, v) = MkFVData n h fv.count fv.piInfo t v
 
+public export
+record FVDeps (freeVars : Nat) where
+  constructor MkFVDeps
+  typeDeps : FinSet freeVars
+  valueDeps : FinSet freeVars
+  piInfoDeps : FinSet freeVars
+
+%name FVDeps deps
+
+{freeVars : Nat} -> Show (FVDeps freeVars) where
+  showPrec p t =
+    showCon p "MkFVDeps" $
+      joinBy "" $
+        [ showArg t.typeDeps
+        , showArg t.valueDeps
+        , showArg t.piInfoDeps
+        ]
+
+{freeVars : Nat} -> Eq (FVDeps freeVars) where
+  (==) a b = a.typeDeps == b.typeDeps && a.valueDeps == b.valueDeps && a.piInfoDeps == b.piInfoDeps
+
+export
+mergeDeps : FVDeps fv -> FinSet fv
+mergeDeps (MkFVDeps typeDeps valueDeps piInfoDeps) = union typeDeps $ union valueDeps piInfoDeps
+
+export
+removeDeps : FinSet fv -> FVDeps fv -> FVDeps fv
+removeDeps d =
+  { typeDeps $= flip difference d
+  , valueDeps $= flip difference d
+  , piInfoDeps $= flip difference d
+  }
+
 ||| Free variable depenfdency graph
 public export
 record DependencyGraph where
@@ -94,7 +127,7 @@ record DependencyGraph where
   ||| Free variable data
   fvData : Vect freeVars FVData
   ||| Free variable dependency matrix
-  fvDeps : Vect freeVars $ (FinSet freeVars, FinSet freeVars)
+  fvDeps : Vect freeVars $ FVDeps freeVars
   ||| The set of all i: (Fin freeVars), where (index i fvData).value = None
   empties : FinSet freeVars
   ||| For all i : (Fin freeVars); (lookup (index i fvData).name nameToId) = i
@@ -183,9 +216,9 @@ data UnificationError : Type where
 leaves : (dg : DependencyGraph) -> FinSet dg.freeVars
 leaves dg =
   foldl
-    (\acc,(id, deps) => if deps == empty then insert id acc else acc)
+    (\acc,(id, deps) => if null deps then insert id acc else acc)
     empty $
-  zip (allFins dg.freeVars) (map (uncurry union) dg.fvDeps)
+  zip (allFins dg.freeVars) (map mergeDeps dg.fvDeps)
 
 ||| List all the free variables without a value that don't depend on any other free variables
 emptyLeaves : (dg : DependencyGraph) -> FinSet dg.freeVars
@@ -207,7 +240,7 @@ flattenEmpties dg = flattenEmpties' dg [<]
         (assert_smaller dg $ MkDG
           freeVars
           fvData
-          (mapHom (flip difference els) <$> fvDeps)
+          (removeDeps els <$> fvDeps)
           (assert_smaller empties $ flip difference els empties)
           nameToId
           holeToId)
