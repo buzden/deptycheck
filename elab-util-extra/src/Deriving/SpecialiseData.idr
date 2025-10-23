@@ -312,7 +312,7 @@ getTask resultName resultKind resultContent = with Prelude.(>>=) do
   -- Check for unused arguments
   checkArgsUse tqArgs $ usesVariables tqRet
   -- Extract name of polymorphic type
-  let (IVar _ typeName, _) = unApp tqRet
+  let (IVar _ typeName, _) = Expr.unAppAny tqRet
   | _ => throwError TaskTypeExtractionError
   -- Prove that all spec lambda arguments are named
   let Yes tqArgsNamed = all isNamedArg $ fromList tqArgs
