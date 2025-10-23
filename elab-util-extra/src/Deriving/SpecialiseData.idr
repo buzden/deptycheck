@@ -281,16 +281,15 @@ cleanupHoleAutoImplicitsImpl x = x
 
 ||| Get all the information needed for specialisation from task
 getTask :
-  TaskLambda l =>
   Monad m =>
   Elaboration m =>
   MonadError SpecialisationError m =>
-  (0 l' : l) ->
+  TTImp ->
+  TTImp ->
   Name ->
   m SpecTask
-getTask l' outputName = with Prelude.(>>=) do
-  -- Quote spec lambda
-  taskQuote : TTImp <- mapTTImp cleanupHoleAutoImplicitsImpl <$> cleanupNamedHoles <$> quote l'
+getTask taskType taskQuote outputName = with Prelude.(>>=) do
+
   let (tqArgs, tqRet) = unLambda taskQuote
   -- Check for unused arguments
   checkArgsUse tqArgs $ usesVariables tqRet
@@ -303,8 +302,7 @@ getTask l' outputName = with Prelude.(>>=) do
   -- Create aliases for spec lambda's arguments and perform substitution
   (Element tqArgs tqArgsNamed, tqAlias) <- genArgAliases (fromList tqArgs)
   let tqRet = substituteVariables (fromList $ mapSnd var <$> tqAlias) tqRet
-  -- Quote spec lambda type
-  taskType : TTImp <- mapTTImp cleanupHoleAutoImplicitsImpl <$> cleanupNamedHoles <$> quote l
+
   let (ttArgs, _) = unPi taskType
   -- Check for partial application in spec
   let True = (length tqArgs == length ttArgs)
@@ -975,21 +973,38 @@ parameters (t : SpecTask)
 
 ||| Perform a given specialisation
 export
-specialiseData :
-  TaskLambda l =>
+specialiseDataRaw :
   Monad m =>
   Elaboration m =>
   MonadError SpecialisationError m =>
-  (0 taskT : l) ->
+  TTImp ->
+  TTImp ->
   Name ->
   m (TypeInfo, List Decl)
-specialiseData taskT outputName = do
-  task <- getTask taskT outputName
+specialiseDataRaw taskType taskQuote outputName = do
+  task <- getTask taskType taskQuote outputName
   logPoint {level=DetailedTrace} "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
   uniResults <- sequence $ mapCons task $ \ci => runEitherT {m} $ unifyCon task ci
   let Element specTy specTyNamed = mkSpecTy task uniResults
   decls <- specDecls task uniResults specTy
   pure (specTy, decls)
+
+||| Perform a given specialisation
+export
+specialiseData :
+  TaskLambda l =>
+  Monad m =>
+  Elaboration m =>
+  MonadError SpecialisationError m =>
+  (0 task : l) ->
+  Name ->
+  m (TypeInfo, List Decl)
+specialiseData task outputName = do
+  -- Quote spec lambda type
+  taskType : TTImp <- mapTTImp cleanupHoleAutoImplicitsImpl <$> cleanupNamedHoles <$> quote l
+  -- Quote spec lambda
+  taskQuote : TTImp <- mapTTImp cleanupHoleAutoImplicitsImpl <$> cleanupNamedHoles <$> quote task
+  specialiseDataRaw taskType taskQuote outputName
 
 ||| Perform a given specialisation and return a list of declarations
 specialiseData'' : Elaboration m => TaskLambda l => (0 taskT: l) -> Name -> m $ List Decl
