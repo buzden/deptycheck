@@ -8,7 +8,7 @@ import Shared
 failing "Builtin.(===) is not a type"
   %runElab specialiseData' "EqNat" $ \x => x = Nat
 
--- Having a non-null type parameter in the
+-- Having a non-M0 type parameter in the lambda leads to our cast implementation not being covering. TODO: Investigate further?
 failing "pToMImpl is not covering."
   %runElab specialiseData' "EqNat2" $ \x : Type => Builtin.Equal x Nat
 
