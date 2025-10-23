@@ -284,9 +284,9 @@ getTask :
   Monad m =>
   Elaboration m =>
   MonadError SpecialisationError m =>
-  TTImp ->
-  TTImp ->
-  Name ->
+  (taskType : TTImp) ->
+  (TTImp : TTImp) ->
+  (outputName : Name) ->
   m SpecTask
 getTask taskType taskQuote outputName = with Prelude.(>>=) do
 
@@ -977,9 +977,9 @@ specialiseDataRaw :
   Monad m =>
   Elaboration m =>
   MonadError SpecialisationError m =>
-  TTImp ->
-  TTImp ->
-  Name ->
+  (taskType : TTImp) ->
+  (taskQuote : TTImp) ->
+  (outputName: Name) ->
   m (TypeInfo, List Decl)
 specialiseDataRaw taskType taskQuote outputName = do
   task <- getTask taskType taskQuote outputName
@@ -997,7 +997,7 @@ specialiseData :
   Elaboration m =>
   MonadError SpecialisationError m =>
   (0 task : l) ->
-  Name ->
+  (outputName : Name) ->
   m (TypeInfo, List Decl)
 specialiseData task outputName = do
   -- Quote spec lambda type
