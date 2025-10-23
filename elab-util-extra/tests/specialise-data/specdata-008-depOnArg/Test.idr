@@ -8,7 +8,7 @@ data X : (Nat -> Type) -> Type where
   X5 : t 5 -> X t
   Xn : t n -> X t
 
-%runElab specialiseData' (X Fin) "XFin"
+%runElab specialiseData' "XFin" $ X Fin
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 x0' = %runElab verifySpecialisation (X Fin) XFin
@@ -21,7 +21,7 @@ x0' = %runElab verifySpecialisation (X Fin) XFin
   , `(Xn (the (Fin 6) 3))
   ]
 
-%runElab specialiseData' (X (\n => Vect n Nat)) "XVNat"
+%runElab specialiseData' "XVNat" $ X (\n => Vect n Nat)
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 x1' = %runElab verifySpecialisation (X (\n => Vect n Nat)) XVNat
@@ -33,7 +33,7 @@ x1' = %runElab verifySpecialisation (X (\n => Vect n Nat)) XVNat
   ]
 
 
-%runElab specialiseData' (X (\n => Vect n $ Fin n)) "XVFin"
+%runElab specialiseData' "XVFin" $ X (\n => Vect n $ Fin n)
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 x2' = %runElab verifySpecialisation (X (\n => Vect n $ Fin n)) XVFin

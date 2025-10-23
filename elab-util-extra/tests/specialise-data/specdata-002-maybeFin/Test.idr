@@ -4,7 +4,7 @@ import Shared
 
 %language ElabReflection
 
-%runElab specialiseData' (\a => Maybe $ Fin a) "MFin"
+%runElab specialiseData' "MFin" $ \a => Maybe $ Fin a
 
 mFin0NoJust : MFin 0 -> Unit
 mFin0NoJust (Nothing) = MkUnit

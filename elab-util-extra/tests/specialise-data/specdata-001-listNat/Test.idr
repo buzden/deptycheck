@@ -4,7 +4,7 @@ import Shared
 
 %language ElabReflection
 
-%runElab specialiseData' (List Nat) "ListNat"
+%runElab specialiseData' "ListNat" $ List Nat
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 ln' = %runElab verifySpecialisation (List Nat) ListNat
@@ -26,7 +26,7 @@ failing "Can't find an implementation for FromString Nat"
   ln1 : ListNat
   ln1 = ["test"]
 
-%runElab specialiseData' (List (List String)) "ListListString"
+%runElab specialiseData' "ListListString" (List (List String))
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 lss' = %runElab verifySpecialisation (List (List String)) ListListString
@@ -45,7 +45,7 @@ lss'' = %runElab verifyInvalidConstructors (List (List String)) ListListString
   , `( [[1,2],[3,4]] )
   ]
 
-%runElab specialiseData' (List Type) "ListType"
+%runElab specialiseData' "ListType" (List Type)
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 lt' = %runElab verifySpecialisation (List Type) ListType

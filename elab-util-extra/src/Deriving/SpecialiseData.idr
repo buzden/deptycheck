@@ -98,7 +98,7 @@ record SpecTask where
   ||| Namespace in which specialiseData was called
   currentNs           : Namespace
   ||| Name of specialised type
-  outputName          : Name
+  resultName          : Name
   ||| Invocation of polymorphic type extracted from unification task
   fullInvocation      : TTImp
   ||| Polymorphic type's TypeInfo
@@ -114,7 +114,7 @@ Show SpecTask where
       , showArg t.tqRet
       , showArg t.ttArgs
       , showArg t.currentNs
-      , showArg t.outputName
+      , showArg t.resultName
       , showArg t.fullInvocation
       , showArg "<polyTy>"
       ]
@@ -146,7 +146,7 @@ inGenNS task n = do
     case n of
        (NS (MkNS subs) n) => subs
        n => []
-  NS (MkNS $ newNS ++ show task.outputName :: tns) $ dropNS n
+  NS (MkNS $ newNS ++ show task.resultName :: tns) $ dropNS n
 
 ||| Given a sequence of arguments, return list of argument name-BindVar pairs
 argsToBindMap : Foldable f => f Arg -> List (Name, TTImp)
@@ -284,13 +284,12 @@ getTask :
   Monad m =>
   Elaboration m =>
   MonadError SpecialisationError m =>
-  (taskType : TTImp) ->
-  (TTImp : TTImp) ->
-  (outputName : Name) ->
+  (resultName : Name) ->
+  (resultKind : TTImp) ->
+  (resultContent : TTImp) ->
   m SpecTask
-getTask taskType taskQuote outputName = with Prelude.(>>=) do
-
-  let (tqArgs, tqRet) = unLambda taskQuote
+getTask resultName resultKind resultContent = with Prelude.(>>=) do
+  let (tqArgs, tqRet) = unLambda resultContent
   -- Check for unused arguments
   checkArgsUse tqArgs $ usesVariables tqRet
   -- Extract name of polymorphic type
@@ -302,8 +301,7 @@ getTask taskType taskQuote outputName = with Prelude.(>>=) do
   -- Create aliases for spec lambda's arguments and perform substitution
   (Element tqArgs tqArgsNamed, tqAlias) <- genArgAliases (fromList tqArgs)
   let tqRet = substituteVariables (fromList $ mapSnd var <$> tqAlias) tqRet
-
-  let (ttArgs, _) = unPi taskType
+  let (ttArgs, _) = unPi resultKind
   -- Check for partial application in spec
   let True = (length tqArgs == length ttArgs)
   | _ => throwError PartialSpecError
@@ -326,7 +324,7 @@ getTask taskType taskQuote outputName = with Prelude.(>>=) do
     , ttArgs
     , ttArgsNamed
     , currentNs
-    , outputName
+    , resultName
     , fullInvocation = tqRet --- TODO: intelligent full invocation
     , polyTy
     , polyTyNamed
@@ -460,7 +458,7 @@ parameters (t : SpecTask)
     let Element cons consAreNamed =
       pullOut $ mapUCons (mkSpecCon t.ttArgs @{t.ttArgsNamed}) ur
     (Element (MkTypeInfo
-              { name = inGenNS t t.outputName
+              { name = inGenNS t t.resultName
               , arty = _
               , args = t.ttArgs
               , argNames = map (fromMaybe (UN Underscore) . name) t.ttArgs
@@ -955,7 +953,7 @@ parameters (t : SpecTask)
             , fromStringDecls
             , numDecls
             ]
-    pure $ singleton $ INamespace EmptyFC (MkNS [ show t.outputName ]) $
+    pure $ singleton $ INamespace EmptyFC (MkNS [ show t.resultName ]) $
       specTyDecl :: join
         [ mToPImplDecls
         , mToPDecls
@@ -971,51 +969,94 @@ parameters (t : SpecTask)
 --- DATA SPECIALISATION ---
 ---------------------------
 
-||| Perform a given specialisation
+||| Perform a specialisation for a given type name, kind and content expressions
+|||
+||| In order to generate a specialised type declaration equivalent to the following type alias:
+||| ```
+||| VF : Nat -> Type
+||| VF n = Fin n
+||| ```
+||| ...you may use this function as follows:
+||| ```
+||| specialiseDataRaw `{VF} `(Nat -> Type) `(\n => Fin n)
+||| ```
 export
 specialiseDataRaw :
   Monad m =>
   Elaboration m =>
   MonadError SpecialisationError m =>
-  (taskType : TTImp) ->
-  (taskQuote : TTImp) ->
-  (outputName: Name) ->
+  (resultName : Name) ->
+  (resultKind : TTImp) ->
+  (resultContent : TTImp) ->
   m (TypeInfo, List Decl)
-specialiseDataRaw taskType taskQuote outputName = do
-  task <- getTask taskType taskQuote outputName
+specialiseDataRaw resultName resultKind resultContent = do
+  let resultKind = mapTTImp cleanupHoleAutoImplicitsImpl $ cleanupNamedHoles resultKind
+  let resultContent = mapTTImp cleanupHoleAutoImplicitsImpl $ cleanupNamedHoles resultContent
+  task <- getTask resultName resultKind resultContent
   logPoint {level=DetailedTrace} "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
   uniResults <- sequence $ mapCons task $ \ci => runEitherT {m} $ unifyCon task ci
   let Element specTy specTyNamed = mkSpecTy task uniResults
   decls <- specDecls task uniResults specTy
   pure (specTy, decls)
 
-||| Perform a given specialisation
+||| Perform a specialisation for a given type name and content lambda
+|||
+||| In order to generate a specialised type declaration equivalent to the following type alias:
+||| ```
+||| VF : Nat -> Type
+||| VF n = Fin n
+||| ```
+||| ...you may use this function as follows:
+||| ```
+||| specialiseData `{VF} $ \n => Fin n
+||| ```
 export
 specialiseData :
-  TaskLambda l =>
+  TaskLambda taskT =>
   Monad m =>
   Elaboration m =>
   MonadError SpecialisationError m =>
-  (0 task : l) ->
-  (outputName : Name) ->
+  (resultName : Name) ->
+  (0 task : taskT) ->
   m (TypeInfo, List Decl)
-specialiseData task outputName = do
+specialiseData resultName task = do
   -- Quote spec lambda type
-  taskType : TTImp <- mapTTImp cleanupHoleAutoImplicitsImpl <$> cleanupNamedHoles <$> quote l
+  resultKind <- quote taskT
   -- Quote spec lambda
-  taskQuote : TTImp <- mapTTImp cleanupHoleAutoImplicitsImpl <$> cleanupNamedHoles <$> quote task
-  specialiseDataRaw taskType taskQuote outputName
+  resultContent <- quote task
+  specialiseDataRaw resultName resultKind resultContent
 
-||| Perform a given specialisation and return a list of declarations
-specialiseData'' : Elaboration m => TaskLambda l => (0 taskT: l) -> Name -> m $ List Decl
-specialiseData'' taskT outputName = do
+
+||| Perform a specialisation for a given type name and content lambda, returning a list of declarations
+|||
+||| In order to generate a specialised type declaration equivalent to the following type alias:
+||| ```
+||| VF : Nat -> Type
+||| VF n = Fin n
+||| ```
+||| ...you may use this function as follows:
+||| ```
+||| specialiseData'' `{VF} $ \n => Fin n
+||| ```
+specialiseData'' : Elaboration m => TaskLambda taskT => Name -> (0 task: taskT) -> m $ List Decl
+specialiseData'' resultName task = do
   Right (specTy, decls) <-
     runEitherT {m} {e=SpecialisationError} $
-      specialiseData taskT outputName
+      specialiseData resultName task
   | Left err => fail "Specialisation error: \{show err}"
   pure decls
 
-||| Perform a given specialisation and declare the results
+||| Perform a specialisation for a given type name and content lambda, declaring the results
+|||
+||| In order to declare a specialised type declaration equivalent to the following type alias:
+||| ```
+||| VF : Nat -> Type
+||| VF n = Fin n
+||| ```
+||| ...you may use this function as follows:
+||| ```
+||| %runElab specialiseData' `{VF} $ \n => Fin n
+||| ```
 export
-specialiseData' : Elaboration m => TaskLambda l => (0 taskT: l) -> Name -> m ()
-specialiseData' taskT outputName = specialiseData'' taskT outputName >>= declare
+specialiseData' : Elaboration m => TaskLambda taskT => Name -> (0 task: taskT) -> m ()
+specialiseData' resultName task = specialiseData'' resultName task >>= declare

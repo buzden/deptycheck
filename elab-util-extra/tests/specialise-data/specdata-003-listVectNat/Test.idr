@@ -4,7 +4,7 @@ import Shared
 
 %language ElabReflection
 
-%runElab specialiseData' (\a => List $ Vect a Nat) "ListVectNat"
+%runElab specialiseData' "ListVectNat" $ \a => List $ Vect a Nat
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 lvn0' = %runElab verifySpecialisation (List $ Vect 0 Nat) (ListVectNat 0)
