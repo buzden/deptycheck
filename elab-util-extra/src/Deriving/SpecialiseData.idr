@@ -30,37 +30,6 @@ import Syntax.IHateParens
 
 %default total
 
--------------------------------------
---- SPECIALISATION TASK INTERFACE ---
--------------------------------------
-
-||| Valid task lambda interface
-|||
-||| Auto-implemented by any Type or any function that returns Type.
-export
-interface TaskLambda (t : Type) where
-
-export
-TaskLambda Type
-
-export
-TaskLambda b => TaskLambda (a -> b)
-
-export
-TaskLambda b => TaskLambda (a => b)
-
-export
-TaskLambda b => TaskLambda ({_ : a} -> b)
-
-export
-TaskLambda b => TaskLambda ((0 _ : a) -> b)
-
-export
-TaskLambda b => TaskLambda ((0 _ : a) => b)
-
-export
-TaskLambda b => TaskLambda ({0 _ : a} -> b)
-
 ---------------------------------
 --- SPECIALISATION ERROR TYPE ---
 ---------------------------------
@@ -1012,6 +981,37 @@ parameters (t : SpecTask)
         , showDecls
         , eqDecls
         ] ++ onFull
+
+-------------------------------------
+--- SPECIALISATION TASK INTERFACE ---
+-------------------------------------
+
+||| Valid task lambda interface
+|||
+||| Auto-implemented by any Type or any function that returns Type.
+export
+interface TaskLambda (t : Type) where
+
+export
+TaskLambda Type
+
+export
+TaskLambda b => TaskLambda (a -> b)
+
+export
+TaskLambda b => TaskLambda (a => b)
+
+export
+TaskLambda b => TaskLambda ({_ : a} -> b)
+
+export
+TaskLambda b => TaskLambda ((0 _ : a) -> b)
+
+export
+TaskLambda b => TaskLambda ((0 _ : a) => b)
+
+export
+TaskLambda b => TaskLambda ({0 _ : a} -> b)
 
 ---------------------------
 --- DATA SPECIALISATION ---

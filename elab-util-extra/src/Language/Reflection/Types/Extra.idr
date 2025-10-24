@@ -28,7 +28,7 @@ appArgs' t []        = t
 
 ||| Convert MissingInfo for compatibility with `cleanupNamedHoles`
 public export
-cleanupMissing : MissingInfo p -> MissingInfo (cleanupPiInfo p)
+cleanupMissing : MissingInfo p -> MissingInfo (cleanupNamedHoles <$> p)
 cleanupMissing Auto = Auto
 cleanupMissing Implicit = Implicit
 cleanupMissing Deflt = Deflt
