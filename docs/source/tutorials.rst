@@ -14,6 +14,16 @@ You can read more in the `original framework <https://diataxis.fr/tutorials/>`_ 
   :maxdepth: 1
   :caption: Choose what to learn
 
-  tutorials/test-function
-  tutorials/generators
-  tutorials/derivation
+  tutorials/index
+  tutorials/00-installation-and-setup
+  tutorials/01-generator-monad
+  tutorials/02-handling-emptiness
+  tutorials/03-measuring-test-coverage
+  tutorials/04-automatic-generator-derivation
+  tutorials/05-derivegen-signatures
+  tutorials/06-beyond-fuel
+  tutorials/07-derivation-tuning
+  tutorials/08-under-the-hood-a-derivegen-like-macro
+  tutorials/09-mixing-manual-and-automatic
+  tutorials/10-generating-gadts-with-proofs
+  tutorials/11-real-world-example

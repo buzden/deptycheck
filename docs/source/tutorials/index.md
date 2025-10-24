@@ -1,0 +1,108 @@
+# DepTyCheck Tutorials
+
+Welcome to the DepTyCheck tutorial series! These tutorials follow the **Diataxis framework** — each lesson is designed to teach you through hands-on experience with concrete, achievable goals.
+
+## How to Use These Tutorials
+
+- **Start from the beginning** if you're new to DepTyCheck or property-based testing
+- **Jump to specific topics** if you need to learn a particular skill
+- **Complete the exercises** in each tutorial to reinforce learning
+
+---
+
+## Core Track — Essential Skills
+
+Everyone should complete this track to master DepTyCheck fundamentals.
+
+| # | Tutorial |
+|---|----------|
+| 0 | [Installation and First Steps](00-installation-and-setup.md) |
+| 1 | [The Generator Monad](01-generator-monad.md) |
+| 2 | [Handling Emptiness](02-handling-emptiness.md) |
+| 3 | [Measuring Coverage](03-measuring-test-coverage.md) |
+| 4 | [Automatic Derivation](04-automatic-generator-derivation.md) |
+| 5 | [DeriveGen Signatures](05-derivegen-signatures.md) |
+| 6 | [Beyond Fuel](06-beyond-fuel.md) |
+
+**Prerequisites:** Basic Idris 2 knowledge (data types, functions, REPL)
+
+---
+
+## Advanced Track — Deep Mastery
+
+Continue here after completing the Core Track.
+
+| # | Tutorial |
+|---|----------|
+| 7 | [Derivation Tuning](07-derivation-tuning.md) |
+| 8 | [Under the Hood](08-under-the-hood-a-derivegen-like-macro.md) |
+| 9 | [Mixing Manual and Automatic](09-mixing-manual-and-automatic.md) |
+| 10 | [Generating GADTs with Proofs](10-generating-gadts-with-proofs.md) |
+| 11 | [Real-World Example: DSL ASTs](11-real-world-example.md) |
+
+**Prerequisites:** Core Track completion
+
+---
+
+## Quick Reference — Find What You Need
+
+### "I want to..."
+
+|      |            |
+|------|------------|
+| Install DepTyCheck | [Tutorial 0](00-installation-and-setup.md) |
+| Generate simple data types | [Tutorial 1](01-generator-monad.md) |
+| Handle types that might be empty | [Tutorial 2](02-handling-emptiness.md) |
+| Check if my generators are biased | [Tutorial 3](03-measuring-test-coverage.md) |
+| Stop writing generators by hand | [Tutorial 4](04-automatic-generator-derivation.md) |
+| Control what deriveGen generates | [Tutorial 5](05-derivegen-signatures.md) |
+| Understand recursion performance | [Tutorial 6](06-beyond-fuel.md) |
+| Fix biased automatic generators | [Tutorial 7](07-derivation-tuning.md) |
+| Build custom derivation strategies | [Tutorial 8](08-under-the-hood-a-derivegen-like-macro.md) |
+| Use my custom generators with deriveGen | [Tutorial 9](09-mixing-manual-and-automatic.md) |
+| Generate types with proof arguments | [Tutorial 10](10-generating-gadts-with-proofs.md) |
+| Generate complete programs for a DSL | [Tutorial 11](11-real-world-example.md) |
+
+---
+
+## Tutorial Conventions
+
+Throughout these tutorials, you will see:
+
+- 🔍 **Notice:** — Important callouts highlighting key concepts
+- ```idris``` — Idris code blocks (copy-paste ready)
+- ```bash``` — Terminal commands
+- **Expected output:** — What you should see when running code
+- ✅ **Checklist items** — Skills you will acquire
+
+### Code Examples
+
+All code examples are tested and should work as written. If you encounter issues:
+
+1. Check your Idris version (`idris2 --version` should be 0.8.0+)
+2. Ensure DepTyCheck is installed (`pack list | grep deptycheck`)
+3. [Open an issue](https://github.com/buzden/deptycheck/issues) if problems persist
+
+---
+
+## After Completing the Tutorials
+
+Congratulations! You've mastered DepTyCheck. What's next?
+
+### Apply Your Skills
+
+- **Test your own projects:** Start using DepTyCheck for property-based testing
+- **Explore examples:** Browse the [examples/](https://github.com/buzden/deptycheck/tree/master/examples) directory in the repository
+- **Read the documentation:** Deepen your understanding with the Explanation and Reference sections
+
+### Contribute
+
+- **Share your generators:** Contribute examples back to the project
+- **Report issues:** Help improve the library by reporting bugs
+- **Extend the library:** Consider contributing new features
+
+### Continue Learning
+
+- **Property-based testing patterns:** Learn about shrinking, statistical testing
+- **Idris metaprogramming:** Explore elaborator reflection in depth
+- **Type-driven development:** Apply DepTyCheck skills to larger projects
