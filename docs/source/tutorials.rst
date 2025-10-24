@@ -17,3 +17,16 @@ You can read more in the `original framework <https://diataxis.fr/tutorials/>`_ 
   tutorials/test-function
   tutorials/generators
   tutorials/derivation
+  tutorials/01-simple-derivegen.md
+  tutorials/02-list-sorting-props.md
+  tutorials/03-recursive-data-fuel.md
+  tutorials/04-basic-combinators.md
+  tutorials/05-generator-emptiness.md
+  tutorials/06-probability-tuning.md
+  tutorials/07-arg-order-tuning.md
+  tutorials/08-gadt-constructors.md
+  tutorials/09-sorted-lists.md
+  tutorials/10-unique-lists.md
+  tutorials/11-pil-ast-generation.md
+  tutorials/12-handwritten-derivation-integration.md
+  tutorials/13-advanced-gen-composition.md
