@@ -9,7 +9,10 @@ This documentation is organised using the following principles.
 
 - Documentation is organised according to the `Diátaxis Framework <https://diataxis.fr/>`_
   with clear distinction between several parts according to the goals of
-  *learning*, *solving particular problems*, *referencing during programming* and *understanding the library*.
+  `learning <https://diataxis.fr/tutorials/>`_,
+  `solving particular problems <https://diataxis.fr/how-to-guides/>`_,
+  `referencing during programming <https://diataxis.fr/reference/>`_
+  and `understanding the library <https://diataxis.fr/explanation/>`_.
   You can watch a `wonderful talk by Daniele Procida <https://www.youtube.com/watch?v=t4vKPhjcMZg>`_ about such documentation organisation.
 
 - Documentation technically uses `Sphinx <https://www.sphinx-doc.org/>`_.
