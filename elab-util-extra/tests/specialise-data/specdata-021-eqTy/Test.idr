@@ -8,17 +8,21 @@ import Shared
 failing "Builtin.(===) is not a type"
   %runElab specialiseData' "EqNat" $ \x => x = Nat
 
--- Having a non-M0 type parameter in the lambda leads to our cast implementation not being covering. TODO: Investigate further?
-failing "pToMImpl is not covering."
-  %runElab specialiseData' "EqNat2" $ \x : Type => Builtin.Equal x Nat
-
-%runElab specialiseData' "EqNat" $ \0 x : Type => Builtin.Equal x Nat
+%runElab specialiseData' "EqNatMW" $ \x : Type => Builtin.Equal x Nat
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
-e1' = %runElab verifySpecialisation (Nat = Nat) (EqNat Nat) [`(Refl)]
+e0' = %runElab verifySpecialisation (Nat = Nat) (EqNatMW Nat) [`(Refl)]
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
-e1'' = %runElab verifyEmptyType (String === Nat) (EqNat String)
+e0'' = %runElab verifyEmptyType (String === Nat) (EqNatMW String)
+
+%runElab specialiseData' "EqNatM0" $ \0 x : Type => Builtin.Equal x Nat
+
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
+e1' = %runElab verifySpecialisation (Nat = Nat) (EqNatM0 Nat) [`(Refl)]
+
+--- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
+e1'' = %runElab verifyEmptyType (String === Nat) (EqNatM0 String)
 
 %runElab specialiseData' "EqNat2" $ Builtin.Equal Nat Nat
 

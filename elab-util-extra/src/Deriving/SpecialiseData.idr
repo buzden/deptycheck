@@ -219,7 +219,11 @@ hideExplicitArg a = { piInfo := if a.piInfo == ExplicitArg then ImplicitArg else
 
 ||| Make an argument omega implicit
 makeImplicit : Arg -> Arg
-makeImplicit a = { piInfo := ImplicitArg } a
+makeImplicit = { piInfo := ImplicitArg }
+
+||| Make a type argument zero-count
+makeTypeArgM0 : Arg -> Arg
+makeTypeArgM0 a = { count := if a.type == `(Type) then M0 else a.count } a
 
 ||| A tuple value of multiple repeating expressons
 tupleOfN : Nat -> TTImp -> TTImp
@@ -251,13 +255,20 @@ makeImplicitPreservesNames (x :: xs) @{(p :: ps)} with (x)
   makeImplicitPreservesNames (x :: xs) @{(p :: ps)} | (MkArg _ _ (Just n) _) =
     ItIsNamed :: makeImplicitPreservesNames xs
 
+||| Make all explicit arguments in vector implicit
 hideExplicitArgs : (xs: Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys: Vect l Arg ** All IsNamedArg ys)
 hideExplicitArgs xs @{ps} =
   (hideExplicitArg <$> xs ** hideExplicitArgPreservesNames xs)
 
+||| Make all arguments in vector implicit
 makeArgsImplicit : (xs: Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys: Vect l Arg ** All IsNamedArg ys)
 makeArgsImplicit xs @{ps} =
   (makeImplicit <$> xs ** makeImplicitPreservesNames xs)
+
+filterArgsNonM0 : {l : Nat} -> (xs : Vect l Arg) -> (0 _ : All IsNamedArg xs) => (l' : Nat ** Subset (Vect l' Arg) (All IsNamedArg))
+filterArgsNonM0 [] = (0 ** Element [] [])
+filterArgsNonM0 {l = S ll} ((MkArg M0 _ _ _) :: xs) @{p :: ps} = (ll ** Element xs ps)
+filterArgsNonM0 {l = S ll} (x :: xs) @{p :: ps} = (S ll ** Element (x :: xs) (p :: ps))
 
 ||| Create a binding application of aliased arguments
 ||| binding everything to `(_)
@@ -384,6 +395,7 @@ parameters (t : SpecTask)
   map2UConsN :
     (f : UnificationResult ->
          (mt: TypeInfo) ->
+         (0 _ : IsFullyNamedType mt) =>
          (con : t.Con) ->
          (0 _ : IsFullyNamedCon con) =>
          (mcon : mt.Con) ->
@@ -490,7 +502,7 @@ parameters (t : SpecTask)
 
   ||| Generate IPi with implicit type arguments and given return
   forallMTArgs : TTImp -> TTImp
-  forallMTArgs = flip (foldr pi) (hideExplicitArg <$> t.ttArgs)
+  forallMTArgs = flip (foldr pi) $ makeTypeArgM0 . hideExplicitArg <$> t.ttArgs
 
   ||| Generate specialised to polimorphic type conversion function signature
   mkMToPImplSig : UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => TTImp
@@ -502,18 +514,19 @@ parameters (t : SpecTask)
   mkMToPImplClause :
     UnificationResult ->
     (mt : TypeInfo) ->
+    (0 _ : IsFullyNamedType mt) =>
     (pCon : t.Con) ->
     (0 _ : IsFullyNamedCon pCon) =>
     (mCon : mt.Con) ->
     (0 _ : IsFullyNamedCon mCon) =>
     Nat ->
     Clause
-  mkMToPImplClause ur mt con mcon _ =
+  mkMToPImplClause ur mt @{mtp} con mcon _ =
     var "mToPImpl" .$
-      (mcon.invoke bindVar
+      mcon.invoke bindVar
         (substituteVariables
-          (fromList $ argsToBindMap $ toList mcon.args) <$> ur.fullResult))
-    .= (con.invoke var ur.fullResult)
+          (fromList $ argsToBindMap $ toList mcon.args) <$> ur.fullResult)
+      .= con.invoke var ur.fullResult
 
   ||| Generate specialised to polimorphic type conversion function declarations
   mkMToPImplDecls :
@@ -549,6 +562,7 @@ parameters (t : SpecTask)
     mkMultiInjDecl :
       UnificationResult ->
       (mt : TypeInfo) ->
+      (0 _ : IsFullyNamedType mt) =>
       (pCon : t.Con) ->
       (0 _ : IsFullyNamedCon pCon) =>
       (mCon : mt.Con) ->
@@ -597,6 +611,7 @@ parameters (t : SpecTask)
     mkMultiCongDecl :
       UnificationResult ->
       (mt : TypeInfo) ->
+      (0 _ : IsFullyNamedType mt) =>
       (pCon : t.Con) ->
       (0 _ : IsFullyNamedCon pCon) =>
       (mCon : mt.Con) ->
@@ -641,6 +656,7 @@ parameters (t : SpecTask)
     (n1, n2 : Name) ->
     UnificationResult ->
     (mt : TypeInfo) ->
+    (0 _ : IsFullyNamedType mt) =>
     (con : t.Con) ->
     (0 _ : IsFullyNamedCon con) =>
     (mcon : mt.Con) ->
@@ -696,7 +712,9 @@ parameters (t : SpecTask)
       let tyArgPairs = cast $ toList $ zip ti.argNames ti.argNames
       pure
         [ public' "castInjImpl" $
-            flip piAll (toList a1) $ flip piAll (toList a2) $ pi arg1 $ pi arg2 $ eqs
+            flip piAll (makeTypeArgM0 <$> toList a1) $
+              flip piAll (makeTypeArgM0 <$> toList a2) $
+                pi arg1 $ pi arg2 $ eqs
         , def "castInjImpl" castInjImplClauses
         , interfaceHint Public "castInj" $ forallMTArgs $
             `(Injective ~(aliasedApp tyArgPairs mToPImplVar))
@@ -816,6 +834,7 @@ parameters (t : SpecTask)
   mkPToMImplClause :
     UnificationResult ->
     (mt : TypeInfo) ->
+    (0 _ : IsFullyNamedType mt) =>
     (pCon : t.Con) ->
     (0 _ : IsFullyNamedCon pCon) =>
     (mCon : mt.Con) ->

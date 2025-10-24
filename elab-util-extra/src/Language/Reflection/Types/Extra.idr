@@ -120,7 +120,7 @@ public export
 namespace TypeInfoInvoke
   ||| Generate type invocation, substituting argument values
   public export
-  (.invoke) : (ti: TypeInfo) -> (0 _ : IsFullyNamedType ti) =>(Name -> TTImp) -> SortedMap Name TTImp -> TTImp
+  (.invoke) : (ti: TypeInfo) -> (0 _ : IsFullyNamedType ti) => (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
   (.invoke) t @{pt} f vals = do
     appArgs (var t.name) $ t.args.appArgs @{pt.argsAreNamed} f vals
 
