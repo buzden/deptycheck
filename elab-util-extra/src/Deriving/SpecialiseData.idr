@@ -133,15 +133,15 @@ UniResults = List $ Either UnificationError UnificationResult
 
 public export
 interface NamespaceProvider (0 m : Type -> Type) where
-  getCurrentNS : m Namespace
+  provideNS : m Namespace
 
 export
 [currentNS]
 Elaboration m => NamespaceProvider m where
-  getCurrentNS = do
-  NS nsn _ <- inCurrentNS ""
-  | _ => fail "Internal error: inCurrentNS did not return NS"
-  pure nsn
+  provideNS = do
+    NS nsn _ <- inCurrentNS ""
+    | _ => fail "Internal error: inCurrentNS did not return NS"
+    pure nsn
 
 ||| Prepend namespace into which everything is generated to name
 inGenNS : SpecTask -> Name -> Name
@@ -347,7 +347,7 @@ getTask resultName resultKind resultContent = with Prelude.(>>=) do
   -- Apply aliasing to spec lambda type's info
   let Element ttArgs ttArgsNamed = applyArgAliases (fromList ttArgs) tqAlias empty
   -- Get current namespace
-  currentNs <- getCurrentNS
+  currentNs <- provideNS
   -- Get polymorphic type's info
   polyTy <- cleanupTypeInfo <$> Types.getInfo' typeName
   -- Prove all its arguments/constructors/constructor arguments are named
