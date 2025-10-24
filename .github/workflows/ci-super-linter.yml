@@ -40,20 +40,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
 
+      - name: Load super-linter configuration
+        # Use grep inverse matching to exclude eventual comments in the .env file
+        # because the GitHub Actions command to set environment variables doesn't
+        # support comments.
+        run: grep -v '^#' .github/linters/super-linter.env >> "$GITHUB_ENV"
+
       - name: Lint Code Base
         uses: super-linter/super-linter/slim@v8
         env:
-          DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          IGNORE_GENERATED_FILES: true
-          SAVE_SUPER_LINTER_SUMMARY: true # Required for generating linting reports in PR
-
-          VALIDATE_PYTHON_BLACK: false # Avoid conflict: Ruff is preferred
-          VALIDATE_GIT_COMMITLINT: false
-
-          VALIDATE_MARKDOWN_PRETTIER: false # We use markdownlint
-          VALIDATE_YAML_PRETTIER: false # We use yamllint
-
-          # Disable Biome
-          VALIDATE_BIOME_FORMAT: false
-          VALIDATE_BIOME_LINT: false
