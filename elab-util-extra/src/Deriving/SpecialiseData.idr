@@ -133,15 +133,19 @@ UniResults = List $ Either UnificationError UnificationResult
 
 public export
 interface NamespaceProvider (0 m : Type -> Type) where
+  constructor MkNSProvider
   provideNS : m Namespace
 
 export
-[currentNS]
 Elaboration m => NamespaceProvider m where
   provideNS = do
     NS nsn _ <- inCurrentNS ""
     | _ => fail "Internal error: inCurrentNS did not return NS"
     pure nsn
+
+export
+inNS : Elaboration m => Namespace -> NamespaceProvider m
+inNS ns = MkNSProvider $ pure ns
 
 ||| Prepend namespace into which everything is generated to name
 inGenNS : SpecTask -> Name -> Name
@@ -1028,7 +1032,7 @@ export
 specialiseDataRaw :
   Monad m =>
   Elaboration m =>
-  {default currentNS nsProvider : NamespaceProvider m} ->
+  {auto nsProvider : NamespaceProvider m} ->
   MonadError SpecialisationError m =>
   (resultName : Name) ->
   (resultKind : TTImp) ->
@@ -1060,7 +1064,7 @@ specialiseData :
   TaskLambda taskT =>
   Monad m =>
   Elaboration m =>
-  {default currentNS nsProvider : NamespaceProvider m} ->
+  {auto nsProvider : NamespaceProvider m} ->
   MonadError SpecialisationError m =>
   (resultName : Name) ->
   (0 task : taskT) ->
@@ -1070,7 +1074,7 @@ specialiseData resultName task = do
   resultKind <- quote taskT
   -- Quote spec lambda
   resultContent <- quote task
-  specialiseDataRaw {nsProvider} resultName resultKind resultContent
+  specialiseDataRaw resultName resultKind resultContent
 
 
 ||| Perform a specialisation for a given type name and content lambda, returning a list of declarations
@@ -1084,9 +1088,10 @@ specialiseData resultName task = do
 ||| ```
 ||| specialiseData'' `{VF} $ \n => Fin n
 ||| ```
+export
 specialiseData'' :
   Elaboration m =>
-  {default currentNS nsProvider : NamespaceProvider $ EitherT SpecialisationError m} ->
+  {auto nsProvider : NamespaceProvider (EitherT SpecialisationError m)} ->
   TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
@@ -1094,7 +1099,7 @@ specialiseData'' :
 specialiseData'' resultName task = do
   Right (specTy, decls) <-
     runEitherT {m} {e=SpecialisationError} $
-      specialiseData {nsProvider} resultName task
+      specialiseData resultName task
   | Left err => fail "Specialisation error: \{show err}"
   pure decls
 
@@ -1112,10 +1117,10 @@ specialiseData'' resultName task = do
 export
 specialiseData' :
   Elaboration m =>
-  {default currentNS nsProvider : NamespaceProvider (EitherT SpecialisationError m)} ->
+  {auto nsProvider : NamespaceProvider (EitherT SpecialisationError m)} ->
   TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
   m ()
 specialiseData' resultName task =
-  specialiseData'' {nsProvider} resultName task >>= declare
+  specialiseData'' resultName task >>= declare
