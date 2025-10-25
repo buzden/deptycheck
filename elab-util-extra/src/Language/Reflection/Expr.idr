@@ -55,6 +55,11 @@ cleanupNamedHoles = mapTTImp $ \case
   IHole {} => implicitFalse
   e        => e
 
+||| Run `cleanupNamedHoles` over all `Arg`'s `TTImp`s
+public export
+cleanupArg : Arg -> Arg
+cleanupArg = { type $= cleanupNamedHoles, piInfo $= map cleanupNamedHoles }
+
 ----------------------------------------------
 --- Compiler-based `TTImp` transformations ---
 ----------------------------------------------
