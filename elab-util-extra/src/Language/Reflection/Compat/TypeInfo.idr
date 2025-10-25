@@ -1,5 +1,7 @@
 module Language.Reflection.Compat.TypeInfo
 
+import Data.List.Map
+import Data.List.Set
 import Data.SortedMap
 import Data.SortedSet
 
@@ -65,9 +67,9 @@ normaliseCons ty = for ty.cons normaliseCon <&> \cons' => {cons := cons'} ty
 export
 record NamesInfoInTypes where
   constructor Names
-  types : SortedMap Name TypeInfo
-  cons  : SortedMap Name (TypeInfo, Con)
-  namesInTypes : SortedMap TypeInfo $ SortedSet Name
+  types : ListMap Name TypeInfo
+  cons  : ListMap Name (TypeInfo, Con)
+  namesInTypes : ListMap TypeInfo $ SortedSet Name
 
 lookupByType : NamesInfoInTypes => Name -> Maybe $ SortedSet Name
 lookupByType @{tyi} = lookup' tyi.types >=> lookup' tyi.namesInTypes
@@ -88,7 +90,7 @@ lookupCon @{tyi} n = snd <$> lookup n tyi.cons
                  <|> typeCon <$> lookup n tyi.types
 
 export
-knownTypes : NamesInfoInTypes => SortedMap Name TypeInfo
+knownTypes : NamesInfoInTypes => ListMap Name TypeInfo
 knownTypes @{tyi} = tyi.types
 
 ||| Returns either resolved expression, or a non-unique name and the set of alternatives.
@@ -107,13 +109,20 @@ resolveNamesUniquely @{tyi} freeNames = do
                        const $ pure $ IVar fc resolved
     _ => id
 
+export
+[TypeInfoEqByName] Eq TypeInfo where
+  (==) = (==) `on` name
+
+export
+[TypeInfoOrdByName] Ord TypeInfo using TypeInfoEqByName where
+  compare = comparing name
+
 Semigroup NamesInfoInTypes where
   Names ts cs nit <+> Names ts' cs' nit' = Names (ts `mergeLeft` ts') (cs `mergeLeft` cs') (nit <+> nit')
 
 Monoid NamesInfoInTypes where
-  neutral = Names empty empty empty where
-    Eq TypeInfo where (==) = (==) `on` name
-    Ord TypeInfo where compare = comparing name
+  neutral = let _ = TypeInfoEqByName
+             in Names empty empty empty
 
 export
 hasNameInsideDeep : NamesInfoInTypes => Name -> TTImp -> Bool

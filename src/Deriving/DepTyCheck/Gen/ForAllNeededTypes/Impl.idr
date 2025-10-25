@@ -9,6 +9,7 @@ import public Control.Monad.Writer
 import public Control.Monad.RWS
 
 import public Data.DPair
+import public Data.List.Map
 import public Data.SortedMap
 import public Data.SortedMap.Extra
 import public Data.SortedSet
@@ -24,7 +25,7 @@ import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 ClosuringContext : (Type -> Type) -> Type
 ClosuringContext m =
   ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
-  , MonadState  (SortedMap GenSignature Name) m                         -- gens already asked to be derived
+  , MonadState  (ListMap GenSignature Name) m                         -- gens already asked to be derived
   , MonadState  (List (GenSignature, Name)) m                           -- queue of gens to be derived
   , MonadState  Bool m                                                  -- flag that there is a need to start derivation loop
   , MonadState  (SortedSet Name) m                                      -- type names that were asked for deriving their weighting function
@@ -66,14 +67,14 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
     internalGenName <- do
 
       -- look for existing (already derived) internals, use it if exists
-      let Nothing = SortedMap.lookup sig !get
+      let Nothing = List.Map.lookup sig !get
         | Just name => pure name
 
       -- nothing found, then derive! acquire the name
       let name = nameForGen sig
 
       -- remember that we're responsible for this signature derivation
-      modify $ insert sig name
+      modify $ List.Map.insert sig name
 
       -- remember the task to derive
       modify {stateType=List _} $ (::) (sig, name)
@@ -122,6 +123,6 @@ runCanonic exts calc = do
                          exts
                          (empty, empty, empty, True)
                          calc
-                         {s=(SortedMap GenSignature Name, List (GenSignature, Name), SortedSet Name, _)}
+                         {s=(ListMap GenSignature Name, List (GenSignature, Name), SortedSet Name, _)}
                          {w=(_, _)}
   pure (x, defs ++ bodies)
