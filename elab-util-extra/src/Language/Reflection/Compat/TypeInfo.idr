@@ -107,13 +107,20 @@ resolveNamesUniquely @{tyi} freeNames = do
                        const $ pure $ IVar fc resolved
     _ => id
 
+export
+[TypeInfoEqByName] Eq TypeInfo where
+  (==) = (==) `on` name
+
+export
+[TypeInfoOrdByName] Ord TypeInfo using TypeInfoEqByName where
+  compare = comparing name
+
 Semigroup NamesInfoInTypes where
   Names ts cs nit <+> Names ts' cs' nit' = Names (ts `mergeLeft` ts') (cs `mergeLeft` cs') (nit <+> nit')
 
 Monoid NamesInfoInTypes where
-  neutral = Names empty empty empty where
-    Eq TypeInfo where (==) = (==) `on` name
-    Ord TypeInfo where compare = comparing name
+  neutral = let _ = TypeInfoOrdByName
+             in Names empty empty empty
 
 export
 hasNameInsideDeep : NamesInfoInTypes => Name -> TTImp -> Bool
