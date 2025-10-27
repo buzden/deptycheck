@@ -144,7 +144,7 @@ Eq DependencyGraph where
   (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') with (decEq a a')
    (==) (MkDG a b c d e f) (MkDG a b' c' d' e' f') | Yes Refl =
     b == b' && c == c' && d == d' && e == e' && f == f'
-   (==) (MkDG _ _ _ _ _ _) (MkDG _ _ _ _ _ _)      | No _ = False
+   _                                               | No _ = False
 
 ||| Unification result
 public export
