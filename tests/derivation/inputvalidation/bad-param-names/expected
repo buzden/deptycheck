@@ -1,7 +1,18 @@
 1/1: Building ValidateInput (ValidateInput.idr)
-Error: While processing right hand side of genY_unnamed_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
+Warning: You may be unintentionally shadowing the following local bindings:
+  a
 
 ValidateInput:1
+ 21 | 
+ 22 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
+ 23 | genY_shadowed_by_auto_argument = deriveGen
+ 24 | 
+ 25 | genY_shadowed_by_other_argument : Fuel -> (a : Type) -> (b : Type) -> (a : Type) -> Gen MaybeEmpty $ Y a b
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: While processing right hand side of genY_unnamed_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
+
+ValidateInput:2
  10 |   MkY : Y Int String
  11 | 
  12 | --- Not all arguments are named ---
@@ -11,7 +22,7 @@ ValidateInput:1
 
 Error: While processing right hand side of gen_unnamed_fun. Error during reflection: Explicit argument must be named and must not shadow any other name
 
-ValidateInput:2
+ValidateInput:3
  13 | 
  14 | genY_unnamed_argument : Fuel -> (a, b : Type) -> Nat -> Gen MaybeEmpty $ Y a b
  15 | genY_unnamed_argument = deriveGen
@@ -21,7 +32,7 @@ ValidateInput:2
 
 Error: While processing right hand side of genY_shadowed_by_auto_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
 
-ValidateInput:3
+ValidateInput:4
  18 | gen_unnamed_fun = deriveGen
  19 | 
  20 | --- Arguments shadowing ---
@@ -31,7 +42,7 @@ ValidateInput:3
 
 Error: While processing right hand side of genY_shadowed_by_other_argument. Error during reflection: Explicit argument must be named and must not shadow any other name
 
-ValidateInput:4
+ValidateInput:5
  21 | 
  22 | genY_shadowed_by_auto_argument : DecEq a => Fuel -> (a : Type) -> (b : Type) -> Gen MaybeEmpty $ Y a b
  23 | genY_shadowed_by_auto_argument = deriveGen
