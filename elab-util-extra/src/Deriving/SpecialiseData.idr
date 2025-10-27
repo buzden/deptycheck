@@ -113,6 +113,10 @@ currentNS = MkNSProvider $ do
     pure nsn
 
 export
+Monad m => MonadTrans t => NamespaceProvider m => NamespaceProvider (t m) where
+  provideNS = lift provideNS
+
+export
 inNS : Elaboration m => Namespace -> NamespaceProvider m
 inNS ns = MkNSProvider $ pure ns
 
@@ -1032,7 +1036,7 @@ export
 specialiseDataRaw :
   Monad m =>
   Elaboration m =>
-  {auto nsProvider : NamespaceProvider m} ->
+  (nsProvider : NamespaceProvider m) =>
   MonadError SpecialisationError m =>
   (resultName : Name) ->
   (resultKind : TTImp) ->
@@ -1064,7 +1068,7 @@ specialiseData :
   TaskLambda taskT =>
   Monad m =>
   Elaboration m =>
-  {auto nsProvider : NamespaceProvider m} ->
+  (nsProvider : NamespaceProvider m) =>
   MonadError SpecialisationError m =>
   (resultName : Name) ->
   (0 task : taskT) ->
@@ -1091,7 +1095,7 @@ specialiseData resultName task = do
 export
 specialiseData'' :
   Elaboration m =>
-  {auto nsProvider : NamespaceProvider (EitherT SpecialisationError m)} ->
+  (nsProvider : NamespaceProvider m) =>
   TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
@@ -1117,7 +1121,7 @@ specialiseData'' resultName task = do
 export
 specialiseData' :
   Elaboration m =>
-  {auto nsProvider : NamespaceProvider (EitherT SpecialisationError m)} ->
+  (nsProvider : NamespaceProvider m) =>
   TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
