@@ -29,7 +29,7 @@ indent_size = 4
 indent_style = space
 indent_size = 2
 
-[{*.sh,run,.rename,.run-test-to-print,tar-pack,*.bat,.patch-*}]
+[{*.sh,run,.rename,.convert-run-to-print-tests,tar-pack,*.bat,.patch-*}]
 indent_style = space
 indent_size = 2
 shell_variant = posix
