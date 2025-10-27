@@ -25,7 +25,7 @@ import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 ClosuringContext : (Type -> Type) -> Type
 ClosuringContext m =
   ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
-  , MonadState  (ListMap GenSignature Name) m                         -- gens already asked to be derived
+  , MonadState  (ListMap GenSignature Name) m                           -- gens already asked to be derived
   , MonadState  (List (GenSignature, Name)) m                           -- queue of gens to be derived
   , MonadState  Bool m                                                  -- flag that there is a need to start derivation loop
   , MonadState  (SortedSet Name) m                                      -- type names that were asked for deriving their weighting function
