@@ -75,7 +75,6 @@ record SpecTask where
   ||| Proof that all the constructors of the polymorphic type are named
   {auto 0 polyTyNamed : IsFullyNamedType polyTy}
 
-export
 Show SpecTask where
   showPrec p t =
     showCon p "SpecTask" $ joinBy "" $
@@ -106,8 +105,8 @@ interface NamespaceProvider (0 m : Type -> Type) where
   provideNS : m Namespace
 
 export %defaulthint
-currentNS : Elaboration m => NamespaceProvider m
-currentNS = MkNSProvider $ do
+CurrentNS : Elaboration m => NamespaceProvider m
+CurrentNS = MkNSProvider $ do
     NS nsn _ <- inCurrentNS ""
     | _ => fail "Internal error: inCurrentNS did not return NS"
     pure nsn
@@ -285,7 +284,6 @@ checkArgsUse (x :: xs) t = do
     then checkArgsUse xs t
     else throwError UnusedVarError
 
-export
 cleanupHoleAutoImplicitsImpl : TTImp -> TTImp
 cleanupHoleAutoImplicitsImpl (IAutoApp _ x (Implicit _ _)) = x
 cleanupHoleAutoImplicitsImpl (INamedApp _ x _ (Implicit _ _)) = x
