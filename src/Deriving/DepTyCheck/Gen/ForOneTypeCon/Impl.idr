@@ -78,13 +78,13 @@ canonicConsBody sig name con = do
         renamedAppliedNames <- for appliedNames.asVect $ \(name, typeDetermined) =>
           if cast typeDetermined
             then pure $ const implicitTrue -- no need to match type-determined parameter by hand
-            else if contains name !get
+            else if SortedSet.contains name !get
             then do
               -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
               let substName = UN $ Basic $ "to_be_deceqed^^" ++ show name ++ show !getAndInc
-              modify $ insert (name, substName)
+              modify $ SortedSet.insert (name, substName)
               pure $ \alreadyMatchedRenames => bindVar $ if contains substName alreadyMatchedRenames then name else substName
-            else modify (insert name) $> const (bindVar name)
+            else modify (SortedSet.insert name) $> const (bindVar name)
         let _ : Vect appliedNames.length $ SortedSet Name -> TTImp = renamedAppliedNames
         pure $ \alreadyMatchedRenames => bindExprF $ \idx => index idx renamedAppliedNames $ alreadyMatchedRenames
   let bindExprs = \alreadyMatchedRenames => bindExprs <&> \f => f alreadyMatchedRenames
@@ -126,7 +126,7 @@ canonicConsBody sig name con = do
           let conNameToIdx : SortedMap _ $ Fin conArgNames.length := fromList $ mapI conArgNames $ flip (,)
           let [AsInCon] Ord (Name, Name) where
                 compare (origL, renL) (origR, renR) = comparing (lookup' conNameToIdx) origL origR <+> compare renL renR
-          Prelude.toList . foldl insert' (empty @{AsInCon})
+          Prelude.toList . foldl SortedSet.insert' (empty @{AsInCon})
 
   -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
