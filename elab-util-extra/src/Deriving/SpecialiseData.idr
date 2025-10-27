@@ -163,7 +163,7 @@ genAliases' @{_} (x :: xs) @{(p :: ps)} = do
 ||| and a list of aliases
 genArgAliases :
   Elaboration m =>
-  (as: Vect l Arg) ->
+  (as : Vect l Arg) ->
   (0 _ : All IsNamedArg as) =>
   m (Subset (Vect l Arg) (All IsNamedArg), List (Name, Name))
 genArgAliases as = do
@@ -237,12 +237,12 @@ makeImplicitPreservesNames (x :: xs) @{(p :: ps)} with (x)
     ItIsNamed :: makeImplicitPreservesNames xs
 
 ||| Make all explicit arguments in vector implicit
-hideExplicitArgs : (xs: Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys: Vect l Arg ** All IsNamedArg ys)
+hideExplicitArgs : (xs : Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys : Vect l Arg ** All IsNamedArg ys)
 hideExplicitArgs xs @{ps} =
   (hideExplicitArg <$> xs ** hideExplicitArgPreservesNames xs)
 
 ||| Make all arguments in vector implicit
-makeArgsImplicit : (xs: Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys: Vect l Arg ** All IsNamedArg ys)
+makeArgsImplicit : (xs : Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys : Vect l Arg ** All IsNamedArg ys)
 makeArgsImplicit xs @{ps} =
   (makeImplicit <$> xs ** makeImplicitPreservesNames xs)
 
@@ -375,7 +375,7 @@ parameters (t : SpecTask)
   ||| Run monadic operation on all pairs of specified and polymorphic constructors
   map2UConsN :
     (f : UnificationResult ->
-         (mt: TypeInfo) ->
+         (mt : TypeInfo) ->
          (0 _ : IsFullyNamedType mt) =>
          (con : t.Con) ->
          (0 _ : IsFullyNamedCon con) =>

@@ -40,7 +40,7 @@ isShadowed : Name -> ShadowingInfo -> Bool
 isShadowed n = contains n . shadowedNames
 
 parameters {auto _ : MonadReader ShadowingInfo m}
-           (f: TTOp m)
+           (f : TTOp m)
   mutual
     ||| Provide a ShadowingInfo for an operation on a TTImp over a PiInfo TTImp
     doPiInfo : PiInfo TTImp -> m $ PiInfo TTImp
@@ -79,7 +79,7 @@ record QuoteInfo where
 
 ||| Provide QuoteInfo for a monadic operation on a TTImp
 provideQI : MonadReader QuoteInfo m =>
-            (f: TTOp m) ->
+            (f : TTOp m) ->
             TTOp m
 provideQI f b@(IQuote fc t) newM = f b $ local {isQuote := True} newM
 provideQI f b@(IQuoteDecl fc decls) newM = f b $ local {isQuote := True} newM

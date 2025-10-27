@@ -142,44 +142,9 @@ record DependencyGraph where
 export
 Eq DependencyGraph where
   (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') with (decEq a a')
-   (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') | Yes p =
-    a == a' && b == (rewrite p in b') && c == (rewrite p in c') &&
-      d == (rewrite p in d') && e == (rewrite p in e') && f == (rewrite p in f')
-   (==) (MkDG a b c d e f) (MkDG a' b' c' d' e' f') | No _ = False
-
--- ||| Pretty print a DependencyGraph.fvDeps field
--- prettyDeps : (dg : DependencyGraph) -> FinSet dg.freeVars -> String
--- prettyDeps dg deps =
---   if deps == empty then
---     ""
---   else
---     " Depends on: \{show $ (name . flip index dg.fvData) <$> toList deps}\n"
---
--- ||| Pretty print a FVData in a dependency graph
--- prettyFV : (dg : DependencyGraph) -> FVData -> String
--- prettyFV dg fvd =
---   "\{show fvd.name} : \{show fvd.type}" ++
---     (case fvd.value of
---       Nothing => "\n"
---       Just val => " = \{show val}\n") ++
---     " n2Id : \{show $ lookup fvd.name dg.nameToId}; " ++
---     " h2Id : \{show $ lookup fvd.holeName dg.holeToId}\n"
---
---
--- ||| Pretty-print a dependency graph
--- public export
--- prettyDG : DependencyGraph -> String
--- prettyDG dg = joinBy ""
---   [ show dg.freeVars
---   , " free variables:\n"
---   , (joinBy "" $
---       (\(a,b) => prettyFV dg a ++ prettyDeps dg b) <$>
---         (toList $ zip dg.fvData dg.fvDeps))
---   , "===\n"
---   , "Empties: "
---   , show $ (name . flip index dg.fvData) <$> toList dg.empties
---   , "\n======"
---   ]
+   (==) (MkDG a b c d e f) (MkDG a b' c' d' e' f') | Yes Refl =
+    b == b' && c == c' && d == d' && e == e' && f == f'
+   (==) (MkDG _ _ _ _ _ _) (MkDG _ _ _ _ _ _)      | No _ = False
 
 ||| Unification result
 public export

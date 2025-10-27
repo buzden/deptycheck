@@ -79,7 +79,7 @@ verifySingleCast fromT toT from to = do
 
 ||| Verify that cast (cast specialisedValue) == specialisedValue
 verifyDoubleCast :
-  (polymorphicType, specialisedType : Type) -> (specialisedValue: TTImp) -> Elab ()
+  (polymorphicType, specialisedType : Type) -> (specialisedValue : TTImp) -> Elab ()
 verifyDoubleCast polyTy specTy val = do
   valNorm <- normaliseAs specTy val
   castNorm <- normaliseAs polyTy `(cast ~valNorm)
@@ -89,7 +89,7 @@ verifyDoubleCast polyTy specTy val = do
 ||| Run verifySingleCast for each pair of polymorphic and specialised value TTImps
 verifySingleCasts' :
   (polymorphicType, specialisedType : Type) ->
-  (valuePairs: List (TTImp, TTImp)) ->
+  (valuePairs : List (TTImp, TTImp)) ->
   Elab ()
 verifySingleCasts' polyTy specTy =
   traverse_ $ \(polyVal, specVal) => do
@@ -99,12 +99,12 @@ verifySingleCasts' polyTy specTy =
 
 ||| Run verifySingleCast for each value in list
 verifySingleCasts :
-  (polymorphicType, specialisedType : Type) -> (values: List TTImp) -> Elab ()
+  (polymorphicType, specialisedType : Type) -> (values : List TTImp) -> Elab ()
 verifySingleCasts polyTy specTy vals = verifySingleCasts' polyTy specTy $ zip vals vals
 
 ||| Run verifyDoubleCast for each value in list
 verifyDoubleCasts :
-  (polymorphicType, specialisedType : Type) -> (values: List TTImp) -> Elab ()
+  (polymorphicType, specialisedType : Type) -> (values : List TTImp) -> Elab ()
 verifyDoubleCasts polyTy specTy = traverse_ $ verifyDoubleCast polyTy specTy
 
 ||| Verify that DecEq implementations of polymorphicType and specialisedType
@@ -166,19 +166,19 @@ verifyNum polyTy specTy i = do
 
 ||| Run polymorphic and specialised `show` for every value in list
 verifyShows :
-  (polymorphicType, specialisedType : Type) -> (specialisedValues: List TTImp) -> Elab ()
+  (polymorphicType, specialisedType : Type) -> (specialisedValues : List TTImp) -> Elab ()
 verifyShows polyTy specTy = traverse_ $ verifyShow polyTy specTy
 
 ||| Verify correctness of DecEq for every possible pair of values from a given list
 verifyDecEqs :
-  (polymorphicType, specialisedType : Type) -> (specialisedValues: List TTImp) -> Elab ()
+  (polymorphicType, specialisedType : Type) -> (specialisedValues : List TTImp) -> Elab ()
 verifyDecEqs polyTy specTy vals = do
   for_ [| MkPair vals vals |] $ uncurry $ verifyDecEq polyTy specTy
 
 
 ||| Verify correctness of Eq for every possible pair of values from a given list
 verifyEqs :
-  (polymorphicType, specialisedType : Type) -> (specialisedValues: List TTImp) -> Elab ()
+  (polymorphicType, specialisedType : Type) -> (specialisedValues : List TTImp) -> Elab ()
 verifyEqs polyTy specTy vals = do
   for_ [| MkPair vals vals |] $ uncurry $ verifyEq polyTy specTy
 
