@@ -1,0 +1,76 @@
+#!/bin/sh
+
+if [ "$1" = "--force" ]; then
+  FORCE_REWRITE=1
+  shift
+else
+  FORCE_REWRITE=0
+fi
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+  echo "Usage: $0 [--force] <print-tests-dir> <run-test-dir1> [<run-test-dir2> ...]" >&2
+  exit 1
+fi
+
+PRINT_DIR="$1"
+shift
+
+if [ -e "$PRINT_DIR" ]; then
+  if [ ! -d "$PRINT_DIR" ]; then
+    echo "Given target '$PRINT_DIR' is not a directory" >&2
+    exit 2
+  fi
+else
+  echo "Creating a target dir '$PRINT_DIR'..."
+  mkdir -p "$PRINT_DIR"
+fi
+
+for i in "$@"; do
+  CURR=$(basename "$i")
+
+  if [ ! -e "$i"/run ]; then
+    echo "Ignoring '$CURR' since no 'run' file..."
+    continue
+  elif [ "$CURR" = "_common" ]; then
+    if [ ! -e "$PRINT_DIR/$CURR" ]; then
+      echo "Speial treatment for the '$CURR' dir..."
+      cp --no-dereference "$i" "$PRINT_DIR"
+    else
+      echo "Ignoring '$CURR' dir since it already exists in '$PRINT_DIR'"
+    fi
+    continue
+  fi
+
+  printf "Processing '%s'... " "$CURR"
+  TARGET="$PRINT_DIR/$CURR"
+
+  if [ -e "$TARGET" ]; then
+    printf "ALREADY EXISTS, "
+    if [ "$FORCE_REWRITE" = 1 ]; then
+      printf "REWRITING... "
+    else
+      echo "IGNORING"
+      continue
+    fi
+  fi
+
+  printf "creating target dir... "
+  mkdir -p "$TARGET"
+
+  printf "copying aux files... "
+  for j in "run" "derive.ipkg"; do
+    cp --no-dereference "$i/$j" "$TARGET"
+  done
+
+  printf "generating main file... "
+  {
+    sed -E \
+      -e 's/import RunDerivedGen/import Deriving.DepTyCheck.Gen/' \
+      -e 's/(%default total)/\1\n\n%language ElabReflection/' \
+      -e '/Show|checkedGen/,$d' \
+      "$i/DerivedGen.idr"
+    sed -nE 's/checkedGen :/%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $/p' "$i/DerivedGen.idr"
+  } > "$TARGET/DerivedGen.idr"
+
+  echo "done"
+done
