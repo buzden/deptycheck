@@ -225,7 +225,6 @@ emptyLeaves : (dg : DependencyGraph) -> FinSet dg.freeVars
 emptyLeaves dg = intersection dg.empties $ leaves dg
 
 ||| List all the free variables without a value in order of dependency
--- covering
 flattenEmpties : (dg : DependencyGraph) -> SnocList $ Fin dg.freeVars
 flattenEmpties dg = flattenEmpties' dg [<]
   where
@@ -258,7 +257,6 @@ filterEmpty = foldl myfun []
 
 ||| Calculate UnificationResult (var-to-value mappings and empty leaf dependency order)
 export
-covering
 finalizeDG : (task : UnificationTask) -> (dg : DependencyGraph) -> UnificationResult
 finalizeDG task dg = do
   let fvOrder = flattenEmpties dg
