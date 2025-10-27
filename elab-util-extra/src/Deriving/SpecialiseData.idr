@@ -105,9 +105,9 @@ interface NamespaceProvider (0 m : Type -> Type) where
   constructor MkNSProvider
   provideNS : m Namespace
 
-export
-Elaboration m => NamespaceProvider m where
-  provideNS = do
+export %defaulthint
+currentNS : Elaboration m => NamespaceProvider m
+currentNS = MkNSProvider $ do
     NS nsn _ <- inCurrentNS ""
     | _ => fail "Internal error: inCurrentNS did not return NS"
     pure nsn
