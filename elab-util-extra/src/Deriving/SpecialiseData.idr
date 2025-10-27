@@ -1079,7 +1079,8 @@ specialiseData resultName task = do
   specialiseDataRaw resultName resultKind resultContent
 
 
-||| Perform a specialisation for a given type name and content lambda, returning a list of declarations
+||| Perform a specialisation for a given type name and content lambda,
+||| returning a list of declarations and failing on error
 |||
 ||| In order to generate a specialised type declaration equivalent to the following type alias:
 ||| ```
@@ -1105,7 +1106,8 @@ specialiseData'' resultName task = do
   | Left err => fail "Specialisation error: \{show err}"
   pure decls
 
-||| Perform a specialisation for a given type name and content lambda, declaring the results
+||| Perform a specialisation for a given type name and content lambda,
+||| declaring the results and failing on error
 |||
 ||| In order to declare a specialised type declaration equivalent to the following type alias:
 ||| ```
