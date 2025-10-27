@@ -78,23 +78,12 @@ mergeCovGenInfos (MkCoverageGenInfo ts cns cis) (MkCoverageGenInfo ts' cns' cis'
 coverageGenInfo : Name -> Elab $ CoverageGenInfo x
 coverageGenInfo genTy = do
   involvedTypes <- allInvolvedTypes MW =<< getInfo' genTy
+  let _    = TypeInfoOrdByName
+  let _    = ConOrdByName
   let cov  = fromList $ involvedTypes <&> \ty => (ty, 0, fromList $ ty.cons <&> (, 0))
   let tys  = fromList $ involvedTypes <&> \ty => (show ty.name, ty)
   let cons = fromList $ (involvedTypes >>= \ty => (ty,) <$> ty.cons) <&> \(ty, co) => (show co.name, ty, co)
   pure $ MkCoverageGenInfo tys cons cov
-
-  where
-    Eq TypeInfo where
-      (==) = (==) `on` name
-
-    Ord TypeInfo where
-      compare = comparing name
-
-    Eq Con where
-      (==) = (==) `on` name
-
-    Ord Con where
-      compare = comparing name
 
 export %macro
 initCoverageInfo' : (n : Name) -> Elab $ CoverageGenInfo n

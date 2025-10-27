@@ -5,6 +5,8 @@ import public Control.Monad.Writer.Interface
 
 import public Data.Fin.Split
 import public Data.List.Ex
+import public Data.List.Map
+import public Data.List.Set
 import public Data.SortedSet
 import public Data.Vect.Ex
 

@@ -122,3 +122,11 @@ public export %inline
 public export %inline
 (.conArgs) : Con -> List Arg
 (.conArgs) = args
+
+export
+[ConEqByName] Eq Con where
+  (==) = (==) `on` name
+
+export
+[ConOrdByName] Ord Con using ConEqByName where
+  compare = comparing name
