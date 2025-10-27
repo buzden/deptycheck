@@ -301,7 +301,7 @@ getTask :
   (resultKind : TTImp) ->
   (resultContent : TTImp) ->
   m SpecTask
-getTask resultName resultKind resultContent = with Prelude.(>>=) do
+getTask resultName resultKind resultContent = do
   let (tqArgs, tqRet) = unLambda resultContent
   -- Check for unused arguments
   checkArgsUse tqArgs $ usesVariables tqRet
