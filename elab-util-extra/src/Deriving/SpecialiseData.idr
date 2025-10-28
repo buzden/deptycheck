@@ -562,7 +562,7 @@ parameters (t : SpecTask)
     var "mToPImpl" .$
       mcon.invoke bindVar
         (substituteVariables
-          (fromList $ argsToBindMap $ toList mcon.args) <$> ur.fullResult)
+          (fromList $ argsToBindMap mcon.args) <$> ur.fullResult)
       .= con.invoke var ur.fullResult
 
   ||| Generate specialised to polimorphic type conversion function declarations
@@ -622,9 +622,9 @@ parameters (t : SpecTask)
 
         let eqs = mkEqualsTuple a1 a2
         let sig =
-          flip piAll (toList a1) $
-            flip piAll (toList a2) $ `((~(lhsCon) ~=~ ~(rhsCon)) -> ~(eqs))
-        let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ `(Refl)
+          flip piAll a1 $
+            flip piAll a2 $ `((~(lhsCon) ~=~ ~(rhsCon)) -> ~(eqs))
+        let lhs = mkDoubleBinds (cast $ zip a1 a2) (var n) .$ `(Refl)
         pure
           [ public' n sig
           , def n $ singleton $ patClause lhs $ tupleOfN (length mcon.args) `(Refl)
@@ -669,8 +669,8 @@ parameters (t : SpecTask)
         let rhsCon = mcon.invoke var $ mergeAliases ur.fullResult am2
         let eqs = mkEqualsTuple a1 a2
         let sig =
-          flip piAll (toList a1) $ flip piAll (toList a2) $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
-        let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ tupleOfN (length mcon.args) `(Refl)
+          flip piAll a1 $ flip piAll a2 $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
+        let lhs = mkDoubleBinds (cast $ zip a1 a2) (var n) .$ tupleOfN (length mcon.args) `(Refl)
         pure
           [ public' n sig
           , def n $ singleton $ patClause lhs $ `(Refl)
@@ -748,12 +748,12 @@ parameters (t : SpecTask)
            ~(aliasedApp (cast am2) $ mToPImplVar .$ var yVar)) ->
             ~(var xVar) ~=~ ~(var yVar))
       castInjImplClauses <-
-        sequence $ map2UConsN (mkCastInjClause (toList a1, am1) (toList a2, am2) xVar yVar) ur ti
-      let tyArgPairs = cast $ toList $ zip ti.argNames ti.argNames
+        sequence $ map2UConsN (mkCastInjClause (a1, am1) (a2, am2) xVar yVar) ur ti
+      let tyArgPairs = cast $ zip ti.argNames ti.argNames
       pure
         [ public' "castInjImpl" $
-            flip piAll (makeTypeArgM0 <$> toList a1) $
-              flip piAll (makeTypeArgM0 <$> toList a2) $
+            flip piAll (makeTypeArgM0 <$> a1) $
+              flip piAll (makeTypeArgM0 <$> a2) $
                 pi arg1 $ pi arg2 $ eqs
         , def "castInjImpl" castInjImplClauses
         , interfaceHint Public "castInj" $ forallMTArgs $
@@ -884,7 +884,7 @@ parameters (t : SpecTask)
   mkPToMImplClause ur mt con mcon _ =
     var "pToMImpl" .$ con.invoke bindVar
       (substituteVariables
-        (fromList $ argsToBindMap $ toList con.args) <$> ur.fullResult)
+        (fromList $ argsToBindMap $ con.args) <$> ur.fullResult)
       .= mcon.invoke var ur.fullResult
 
   ||| Generate specialised to polimorphic type conversion function declarations
