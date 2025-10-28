@@ -37,7 +37,6 @@ import public Language.Reflection.Syntax.Ops
 import public Language.Reflection.TTImp
 import public Language.Reflection.TT
 import public Language.Reflection.Types
-import public Language.Reflection.Types.Extra
 import public Language.Reflection.Unify
 import public Language.Reflection.VarSubst
 

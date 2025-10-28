@@ -23,13 +23,9 @@ import Language.Reflection.Compat.Constr
 import Language.Reflection.Compat.TypeInfo
 import Language.Reflection.Expr
 import Language.Reflection.Logging
--- import Language.Reflection.Syntax.Ops
 import Language.Reflection.TT
 import Language.Reflection.TTImp
--- import Language.Reflection.Types.Extra
 import Language.Reflection.Unify
--- import Language.Reflection.Util
-
 import Language.Reflection.VarSubst
 import Syntax.IHateParens
 
@@ -352,48 +348,40 @@ getTask resultName resultKind resultContent = do
 (.tyArgsNamed) (TheyAllAreNamed at ct) = at
 
 %hint
-0 tyArgsNamed : (0 _ : AllTyArgsNamed t) => All IsNamedArg t.args
-tyArgsNamed @{TheyAllAreNamed at ct} = at
-
-%hint
 0 (.tyConArgsNamed) : (0 _ : AllTyArgsNamed t) -> All ConArgsNamed t.cons
 (.tyConArgsNamed) (TheyAllAreNamed at ct) = ct
-
-%hint
-0 tyConArgsNamed : (0 _ : AllTyArgsNamed t) => All ConArgsNamed t.cons
-tyConArgsNamed @{TheyAllAreNamed at ct} = ct
 
 %hint
 0 conArgsNamed : (0 _ : ConArgsNamed c) => All IsNamedArg c.args
 conArgsNamed @{TheyAreNamed p} = p
 
-||| Generate AppArg for given Arg, substituting names for values if present
-(.appArg) : (arg : Arg) -> (0 _ : IsNamedArg arg) => (Name -> TTImp) -> SortedMap Name TTImp -> AnyApp
-(.appArg) (MkArg count piInfo (Just n) type) f argVals = do
+||| Generate an AnyApp for given Arg, substituting names for values if present
+(.appWith) : (arg : Arg) -> (0 _ : IsNamedArg arg) => (Name -> TTImp) -> SortedMap Name TTImp -> AnyApp
+(.appWith) (MkArg count piInfo (Just n) type) f argVals = do
   let val = fromMaybe (f n) $ lookup n argVals
   case piInfo of
     ExplicitArg => PosApp val
     AutoImplicit => AutoApp val
     _ => NamedApp n val
 
-||| Generate AppArgs for given argument vector, substituting names for values
+||| Generate a List AnyApp for given argument List, substituting names for values
 ||| if present
-(.appArgs) : (args: List Arg) -> (0 _ : All IsNamedArg args) => (Name -> TTImp) -> SortedMap Name TTImp -> List AnyApp
-(.appArgs) [] f argVals = []
-(.appArgs) (x :: xs) @{p :: ps} f argVals = x.appArg f argVals :: xs.appArgs f argVals
+(.anyAppWith) : (args: List Arg) -> (0 _ : All IsNamedArg args) => (Name -> TTImp) -> SortedMap Name TTImp -> List AnyApp
+(.anyAppWith) [] f argVals = []
+(.anyAppWith) (x :: xs) @{p :: ps} f argVals = x.appWith f argVals :: xs.anyAppWith f argVals
 
 namespace TypeInfoInvoke
   ||| Generate type invocation, substituting argument values
   public export
   (.invoke) : (ti: TypeInfo) -> (0 _ : AllTyArgsNamed ti) => (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
   (.invoke) t @{pt} f vals = do
-    reAppAny (var t.name) $ t.args.appArgs @{pt.tyArgsNamed} f vals
+    reAppAny (var t.name) $ t.args.anyAppWith @{pt.tyArgsNamed} f vals
 
 namespace ConInvoke
   ||| Generate constructor invocation, substituting argument values
   public export
   (.invoke) : (con : Con) -> (0 cn : ConArgsNamed con) => (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
-  (.invoke) con @{conP} f vals = reAppAny (var con.name) $ con.args.appArgs f vals @{conArgsNamed}
+  (.invoke) con @{conP} f vals = reAppAny (var con.name) $ con.args.anyAppWith f vals @{conArgsNamed}
 
 argNames : (l : List Arg) -> (0 _ : All IsNamedArg l) => List Name
 argNames [] = []
@@ -401,24 +389,6 @@ argNames (x :: xs) @{p :: ps} = Expr.argName x :: argNames xs
 
 (.argNames) : (ti : TypeInfo) -> (0 _ : AllTyArgsNamed ti) => List Name
 (.argNames) ti @{tp} = argNames ti.args @{tp.tyArgsNamed}
-
-||| Given a type name to which constructor belongs, calculate its signature
-public export
-conSig : Con -> Name -> TTImp
-conSig con ty = piAll .| reAppAny (var ty) (snd $ unAppAny con.type) .| toList con.args
-
-||| Given a type name to which constructor belongs, calculate its ITy
-public export
-conITy : Name -> Con -> ITy
-conITy retTy con = mkTy .| dropNS con.name .| conSig con retTy
-
-||| Generate a declaration from TypeInfo
-(.decl) : TypeInfo -> Decl
-(.decl) ti =
-  iData Public ti.name tySig [] conITys
-  where
-    tySig = piAll type $ toList ti.args
-    conITys = toList $ conITy ti.name <$> ti.cons
 
 allL2V : (l : List t) -> (0 pr : All p l) => Subset (Vect (length l) t) (All p)
 allL2V [] @{pr} = Element [] []
@@ -543,7 +513,7 @@ parameters (t : SpecTask)
   mkSpecCon newArgs ur pCon = do
     let Element args allArgs =
       pullOut $ mkSpecArg ur <$> ur.order
-    let typeArgs = newArgs.appArgs var ur.fullResult
+    let typeArgs = newArgs.anyAppWith var ur.fullResult
     let tyRet = reAppAny (var t.resultName) typeArgs
     (Element (MkCon
       { name = inGenNS t $ dropNS pCon.name

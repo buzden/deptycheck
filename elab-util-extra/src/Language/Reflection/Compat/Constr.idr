@@ -99,3 +99,13 @@ itIsConstructor = do
     | (lhs, _) => fail "Can't get type name: \{show lhs}"
   ty <- getInfo' ty
   pure (ItIsCon ty con ** ItIsGenuine)
+
+||| Calculate constructor signature
+export
+(.sig) : Con -> TTImp
+con.sig = piAll con.type con.args
+
+||| Calculate constructor ITy
+export
+(.iTy) : Con -> ITy
+con.iTy = mkTy .| dropNS con.name .| con.sig

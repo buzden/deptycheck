@@ -177,3 +177,12 @@ getNamesInfoInTypes' expr = do
                        pure $ SortedSet.insert n $ flip concatMap ns $ \(n', ty) => insert n' $ allVarNames' ty
   tys <- map (mapMaybe id) $ for (Prelude.toList varsSecondOrder) $ catch . getInfo'
   concat <$> Prelude.for tys getNamesInfoInTypes
+
+||| Generate a declaration from TypeInfo
+export
+(.decl) : TypeInfo -> Decl
+(.decl) ti =
+  iData Public ti.name tySig [] conITys
+  where
+    tySig = piAll type ti.args
+    conITys = (.iTy) <$> ti.cons
