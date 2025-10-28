@@ -1,7 +1,10 @@
 module Deriving.SpecialiseData
 
 import Control.Monad.Either
+import Control.Monad.Error.Either
+import Control.Monad.Error.Interface
 import Control.Monad.Reader.Tuple
+import Control.Monad.Trans
 import Data.SnocList
 import Data.DPair
 import Data.List1
@@ -15,14 +18,18 @@ import Data.SortedMap.Dependent
 import Decidable.Equality
 import Derive.Prelude
 import Language.Mk
+import Language.Reflection.Compat
+import Language.Reflection.Compat.Constr
+import Language.Reflection.Compat.TypeInfo
 import Language.Reflection.Expr
 import Language.Reflection.Logging
-import Language.Reflection.Syntax.Ops
+-- import Language.Reflection.Syntax.Ops
 import Language.Reflection.TT
 import Language.Reflection.TTImp
-import Language.Reflection.Types.Extra
+-- import Language.Reflection.Types.Extra
 import Language.Reflection.Unify
-import Language.Reflection.Util
+-- import Language.Reflection.Util
+
 import Language.Reflection.VarSubst
 import Syntax.IHateParens
 
@@ -30,6 +37,7 @@ import Syntax.IHateParens
 
 %default total
 
+%hide Types.TypeInfo
 ---------------------------------
 --- SPECIALISATION ERROR TYPE ---
 ---------------------------------
@@ -56,13 +64,13 @@ data SpecialisationError : Type where
 record SpecTask where
   constructor MkSpecTask
   ||| Full unification task
-  {tqArty             : Nat}
-  tqArgs              : Vect tqArty Arg
+  -- {tqArty             : Nat}
+  tqArgs              : List Arg
   tqRet               : TTImp
   {auto 0 tqArgsNamed : All IsNamedArg tqArgs}
   ||| Unification task type
-  {ttArty             : Nat}
-  ttArgs              : Vect ttArty Arg
+  -- {ttArty             : Nat}
+  ttArgs              : List Arg
   {auto 0 ttArgsNamed : All IsNamedArg ttArgs}
   ||| Namespace in which specialiseData was called
   currentNs           : Namespace
@@ -73,7 +81,7 @@ record SpecTask where
   ||| Polymorphic type's TypeInfo
   polyTy              : TypeInfo
   ||| Proof that all the constructors of the polymorphic type are named
-  {auto 0 polyTyNamed : IsFullyNamedType polyTy}
+  {auto 0 polyTyNamed : AllTyArgsNamed polyTy}
 
 Show SpecTask where
   showPrec p t =
@@ -86,10 +94,6 @@ Show SpecTask where
       , showArg t.fullInvocation
       , showArg "<polyTy>"
       ]
-
-||| Polymorphic type's constructor
-(.Con) : SpecTask -> Type
-(.Con) task = Con task.polyTy.arty task.polyTy.args
 
 ||| Unification results for the whole type
 UniResults : Type
@@ -133,14 +137,14 @@ inGenNS task n = do
 argsToBindMap : Foldable f => f Arg -> List (Name, TTImp)
 argsToBindMap = foldMap $ toList . map (\y => (y, bindVar y)) . name
 
-||| Given a vect of arguments and a list of their aliases, apply aliases to then
+||| Given a list of arguments and a list of their aliases, apply aliases to then
 applyArgAliases :
-  (as : Vect l Arg) ->
+  (as : List Arg) ->
   (0 _ : All IsNamedArg as) =>
   List (Name, Name) ->
   SortedMap Name TTImp ->
-  Subset (Vect l Arg) (All IsNamedArg)
-applyArgAliases []        @{[]}      ns ins = (Element [] [])
+  Subset (List Arg) (All IsNamedArg)
+applyArgAliases []        @{[]}      ns ins = Element [] []
 applyArgAliases (x :: xs) @{p :: ps} ys ins = do
   let (newIns, newName, ys) : (SortedMap _ _, Name, List (Name, Name)) =
     case ys of
@@ -152,7 +156,7 @@ applyArgAliases (x :: xs) @{p :: ps} ys ins = do
     (ItIsNamed :: prec)
 
 ||| Given a list of arguments, generate a list of aliases for them
-genAliases' : Elaboration m => (as : Vect l Arg) -> (0 _ : All IsNamedArg as) => m $ List (Name, Name)
+genAliases' : Elaboration m => (as : List Arg) -> (0 _ : All IsNamedArg as) => m $ List (Name, Name)
 genAliases' [] = pure []
 genAliases' @{_} (x :: xs) @{(p :: ps)} = do
   MN _ gn <- genSym $ show $ Expr.argName x
@@ -163,9 +167,9 @@ genAliases' @{_} (x :: xs) @{(p :: ps)} = do
 ||| and a list of aliases
 genArgAliases :
   Elaboration m =>
-  (as : Vect l Arg) ->
+  (as : List Arg) ->
   (0 _ : All IsNamedArg as) =>
-  m (Subset (Vect l Arg) (All IsNamedArg), List (Name, Name))
+  m (Subset (List Arg) (All IsNamedArg), List (Name, Name))
 genArgAliases as = do
   aliases <- genAliases' as
   pure (applyArgAliases as aliases empty, aliases)
@@ -173,8 +177,8 @@ genArgAliases as = do
 ||| Given a list of aliased argument pairs, generate a list of equality type
 ||| for each pair
 mkEqualsTuple :
-  (v1 : Vect l Arg) ->
-  (v2 : Vect l Arg) ->
+  (v1 : List Arg) ->
+  (v2 : List Arg) ->
   (0 _ : All IsNamedArg v1) =>
   (0 _ : All IsNamedArg v2) =>
   TTImp
@@ -183,6 +187,7 @@ mkEqualsTuple [(a1)] [(a2)] @{a1p :: _} @{a2p :: _} =
   `(~(var $ argName a1) ~=~ ~(var $ argName a2))
 mkEqualsTuple (a1 :: a1s) (a2 :: a2s) @{a1p :: a1ps} @{a2p :: a2ps} =
   `(Pair (~(var $ argName a1) ~=~ ~(var $ argName a2)) ~(mkEqualsTuple a1s a2s))
+mkEqualsTuple _ _ = `(?internalError_EqualsTupleNEQL)
 
 ||| Given a list of aliased argument pairs [(a, b), ...], generate a series of
 ||| named applications: (... {a=a} {b=a})
@@ -218,7 +223,7 @@ mergeAliases m = mergeWith (Prelude.curry fst) m . fromList . map (mapSnd var)
 
 ||| Proof that hideExplicitArg doesn't affect namedness of arguments
 hideExplicitArgPreservesNames :
-  (args : Vect l Arg) ->
+  (args : List Arg) ->
   (0 _ : All IsNamedArg args) =>
   All IsNamedArg (SpecialiseData.hideExplicitArg <$> args)
 hideExplicitArgPreservesNames [] @{[]} = []
@@ -228,7 +233,7 @@ hideExplicitArgPreservesNames (x :: xs) @{(p :: ps)} with (x)
 
 ||| Proof that makeImplicit doesn't affect namedness of arguments
 makeImplicitPreservesNames :
-  (args : Vect l Arg) ->
+  (args : List Arg) ->
   (0 _ : All IsNamedArg args) =>
   All IsNamedArg (SpecialiseData.makeImplicit <$> args)
 makeImplicitPreservesNames [] @{[]} = []
@@ -236,13 +241,13 @@ makeImplicitPreservesNames (x :: xs) @{(p :: ps)} with (x)
   makeImplicitPreservesNames (x :: xs) @{(p :: ps)} | (MkArg _ _ (Just n) _) =
     ItIsNamed :: makeImplicitPreservesNames xs
 
-||| Make all explicit arguments in vector implicit
-hideExplicitArgs : (xs : Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys : Vect l Arg ** All IsNamedArg ys)
+||| Make all explicit arguments in list implicit
+hideExplicitArgs : (xs : List Arg) -> (0 _ : All IsNamedArg xs) => Subset (List Arg) (All IsNamedArg)
 hideExplicitArgs xs @{ps} =
-  (hideExplicitArg <$> xs ** hideExplicitArgPreservesNames xs)
+  Element (hideExplicitArg <$> xs) (hideExplicitArgPreservesNames xs)
 
-||| Make all arguments in vector implicit
-makeArgsImplicit : (xs : Vect l Arg) -> (0 _ : All IsNamedArg xs) => (ys : Vect l Arg ** All IsNamedArg ys)
+||| Make all arguments in list implicit
+makeArgsImplicit : (xs : List Arg) -> (0 _ : All IsNamedArg xs) => (ys : List Arg ** All IsNamedArg ys)
 makeArgsImplicit xs @{ps} =
   (makeImplicit <$> xs ** makeImplicitPreservesNames xs)
 
@@ -307,27 +312,28 @@ getTask resultName resultKind resultContent = do
   let (IVar _ typeName, _) = Expr.unAppAny tqRet
   | _ => throwError TaskTypeExtractionError
   -- Prove that all spec lambda arguments are named
-  let Yes tqArgsNamed = all isNamedArg $ fromList tqArgs
+  let Yes tqArgsNamed = all isNamedArg tqArgs
   | _ => fail "Internal error: lambda has unnamed arguments"
   -- Create aliases for spec lambda's arguments and perform substitution
-  (Element tqArgs tqArgsNamed, tqAlias) <- genArgAliases (fromList tqArgs)
+  (Element tqArgs tqArgsNamed, tqAlias) <- genArgAliases tqArgs
   let tqRet = substituteVariables (fromList $ mapSnd var <$> tqAlias) tqRet
   let (ttArgs, _) = unPi resultKind
   -- Check for partial application in spec
   let True = (length tqArgs == length ttArgs)
   | _ => throwError PartialSpecError
   -- Prove that all spec lambda type's arguments are named
-  let Yes ttArgsNamed = all isNamedArg $ fromList ttArgs
+  let Yes ttArgsNamed = all isNamedArg ttArgs
   | _ => fail "Internal error: lambda type has unnamed arguments"
   -- Apply aliasing to spec lambda type's info
-  let Element ttArgs ttArgsNamed = applyArgAliases (fromList ttArgs) tqAlias empty
+  let Element ttArgs ttArgsNamed = applyArgAliases ttArgs tqAlias empty
   -- Get current namespace
   currentNs <- provideNS
   -- Get polymorphic type's info
-  polyTy <- cleanupTypeInfo <$> Types.getInfo' typeName
+  polyTy <- Compat.getInfo' typeName
   -- Prove all its arguments/constructors/constructor arguments are named
-  let Yes polyTyNamed = isFullyNamedType polyTy
-  | _ => fail "Internal error: getInfo' returned a type with unnamed arguments or constructors."
+  polyTyNamed <- ensureTyArgsNamed polyTy
+  -- let Yes polyTyNamed = AllTyArgsNamed polyTy
+  -- | _ => fail "Internal error: getInfo' returned a type with unnamed arguments or constructors."
   pure $ MkSpecTask
     { tqArgs
     , tqRet
@@ -341,6 +347,84 @@ getTask resultName resultKind resultContent = do
     , polyTyNamed
     }
 
+%hint
+0 (.tyArgsNamed) : (0 _ : AllTyArgsNamed t) -> All IsNamedArg t.args
+(.tyArgsNamed) (TheyAllAreNamed at ct) = at
+
+%hint
+0 tyArgsNamed : (0 _ : AllTyArgsNamed t) => All IsNamedArg t.args
+tyArgsNamed @{TheyAllAreNamed at ct} = at
+
+%hint
+0 (.tyConArgsNamed) : (0 _ : AllTyArgsNamed t) -> All ConArgsNamed t.cons
+(.tyConArgsNamed) (TheyAllAreNamed at ct) = ct
+
+%hint
+0 tyConArgsNamed : (0 _ : AllTyArgsNamed t) => All ConArgsNamed t.cons
+tyConArgsNamed @{TheyAllAreNamed at ct} = ct
+
+%hint
+0 conArgsNamed : (0 _ : ConArgsNamed c) => All IsNamedArg c.args
+conArgsNamed @{TheyAreNamed p} = p
+
+||| Generate AppArg for given Arg, substituting names for values if present
+(.appArg) : (arg : Arg) -> (0 _ : IsNamedArg arg) => (Name -> TTImp) -> SortedMap Name TTImp -> AnyApp
+(.appArg) (MkArg count piInfo (Just n) type) f argVals = do
+  let val = fromMaybe (f n) $ lookup n argVals
+  case piInfo of
+    ExplicitArg => PosApp val
+    AutoImplicit => AutoApp val
+    _ => NamedApp n val
+
+||| Generate AppArgs for given argument vector, substituting names for values
+||| if present
+(.appArgs) : (args: List Arg) -> (0 _ : All IsNamedArg args) => (Name -> TTImp) -> SortedMap Name TTImp -> List AnyApp
+(.appArgs) [] f argVals = []
+(.appArgs) (x :: xs) @{p :: ps} f argVals = x.appArg f argVals :: xs.appArgs f argVals
+
+namespace TypeInfoInvoke
+  ||| Generate type invocation, substituting argument values
+  public export
+  (.invoke) : (ti: TypeInfo) -> (0 _ : AllTyArgsNamed ti) => (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
+  (.invoke) t @{pt} f vals = do
+    reAppAny (var t.name) $ t.args.appArgs @{pt.tyArgsNamed} f vals
+
+namespace ConInvoke
+  ||| Generate constructor invocation, substituting argument values
+  public export
+  (.invoke) : (con : Con) -> (0 cn : ConArgsNamed con) => (Name -> TTImp) -> SortedMap Name TTImp -> TTImp
+  (.invoke) con @{conP} f vals = reAppAny (var con.name) $ con.args.appArgs f vals @{conArgsNamed}
+
+argNames : (l : List Arg) -> (0 _ : All IsNamedArg l) => List Name
+argNames [] = []
+argNames (x :: xs) @{p :: ps} = Expr.argName x :: argNames xs
+
+(.argNames) : (ti : TypeInfo) -> (0 _ : AllTyArgsNamed ti) => List Name
+(.argNames) ti @{tp} = argNames ti.args @{tp.tyArgsNamed}
+
+||| Given a type name to which constructor belongs, calculate its signature
+public export
+conSig : Con -> Name -> TTImp
+conSig con ty = piAll .| reAppAny (var ty) (snd $ unAppAny con.type) .| toList con.args
+
+||| Given a type name to which constructor belongs, calculate its ITy
+public export
+conITy : Name -> Con -> ITy
+conITy retTy con = mkTy .| dropNS con.name .| conSig con retTy
+
+||| Generate a declaration from TypeInfo
+(.decl) : TypeInfo -> Decl
+(.decl) ti =
+  iData Public ti.name tySig [] conITys
+  where
+    tySig = piAll type $ toList ti.args
+    conITys = toList $ conITy ti.name <$> ti.cons
+
+allL2V : (l : List t) -> (0 pr : All p l) => Subset (Vect (length l) t) (All p)
+allL2V [] @{pr} = Element [] []
+allL2V (x :: xs) @{(p :: ps)} = do
+  let Element xs' ps' = allL2V xs @{ps}
+  Element (x :: xs') (p :: ps')
 
 parameters (t : SpecTask)
   ---------------------------
@@ -348,25 +432,25 @@ parameters (t : SpecTask)
   ---------------------------
   ||| Run monadic operation on all constructors of specialised type
   mapCons :
-    (f : (pCon : t.Con) ->
-         (0 _ : IsFullyNamedCon pCon) =>
+    (f : (pCon : Con) ->
+         (0 _ : ConArgsNamed pCon) =>
          r) ->
     List r
   mapCons f = do
-    let adp = pushIn t.polyTy.cons t.polyTyNamed.consAreNamed
+    let adp = pushIn t.polyTy.cons t.polyTyNamed.tyConArgsNamed
     map (\(Element c pc) => f c) adp
 
   ||| Map over all constructors for which unification succeeded
   mapUCons :
     (f : UnificationResult ->
-         (pCon : t.Con) ->
-         (0 _ : IsFullyNamedCon pCon) =>
+         (pCon : Con) ->
+         (0 _ : ConArgsNamed pCon) =>
          r) ->
     UniResults ->
     List r
   mapUCons f rs = do
-    let adp = pushIn t.polyTy.cons t.polyTyNamed.consAreNamed
-    let f' : List (Subset t.Con IsFullyNamedCon) -> UniResults -> List r
+    let adp = pushIn t.polyTy.cons t.polyTyNamed.tyConArgsNamed
+    let f' : List (Subset Con ConArgsNamed) -> UniResults -> List r
         f' (x :: xs) (Left _ :: ys) = f' xs ys
         f' (Element con prf :: xs) (Right res :: ys) = f res con :: f' xs ys
         f' _ _ = []
@@ -376,26 +460,26 @@ parameters (t : SpecTask)
   map2UConsN :
     (f : UnificationResult ->
          (mt : TypeInfo) ->
-         (0 _ : IsFullyNamedType mt) =>
-         (con : t.Con) ->
-         (0 _ : IsFullyNamedCon con) =>
-         (mcon : mt.Con) ->
-         (0 _ : IsFullyNamedCon mcon) =>
+         (0 _ : AllTyArgsNamed mt) =>
+         (con : Con) ->
+         (0 _ : ConArgsNamed con) =>
+         (mcon : Con) ->
+         (0 _ : ConArgsNamed mcon) =>
          Nat ->
          r) ->
     UniResults ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
+    (0 _ : AllTyArgsNamed mt) =>
     List r
   map2UConsN f rs mt @{mtp} = do
-    let p1 = pushIn t.polyTy.cons t.polyTyNamed.consAreNamed
-    let p2 = pushIn mt.cons mtp.consAreNamed
+    let p1 = pushIn t.polyTy.cons t.polyTyNamed.tyConArgsNamed
+    let p2 = pushIn mt.cons mtp.tyConArgsNamed
     f' 0 p1 p2 rs
     where
       f' :
         Nat ->
-        List (Subset t.Con IsFullyNamedCon) ->
-        List (Subset mt.Con IsFullyNamedCon) ->
+        List (Subset Con ConArgsNamed) ->
+        List (Subset Con ConArgsNamed) ->
         UniResults ->
         List r
       f' n (x                :: xs)                       ys  (Left _    :: zs) =
@@ -412,14 +496,17 @@ parameters (t : SpecTask)
   unifyCon :
     Elaboration m =>
     MonadError UnificationError m =>
-    (con : t.Con) ->
-    (0 conN : IsFullyNamedCon con) =>
+    (con : Con) ->
+    (0 conN : ConArgsNamed con) =>
     m UnificationResult
   unifyCon con = logBounds "specialiseData.unifyCon" [t.polyTy, con] $ do
-    let conRet = appArgs .| var t.polyTy.name .| con.typeArgs
+    let (_, typeArgs) = Expr.unAppAny con.type
+    let conRet = reAppAny .| var t.polyTy.name .| typeArgs
+    let Element ca can = allL2V con.args @{conArgsNamed}
+    let Element ta tan = allL2V t.tqArgs @{t.tqArgsNamed}
     let uniTask =
-      MkUniTask {lfv=_} con.args conRet
-                {rfv=_} t.tqArgs {rhsAreNamed=t.tqArgsNamed} t.fullInvocation
+      MkUniTask {lfv=_} ca conRet
+                {rfv=_} ta t.fullInvocation
     logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier task: \{show uniTask}"
     Right uniRes <- tryError $ unifyWithCompiler uniTask
     | Left err => do
@@ -450,32 +537,30 @@ parameters (t : SpecTask)
     (newArgs : _) ->
     (0 _ : All IsNamedArg newArgs) =>
     UnificationResult ->
-    (con : t.Con) ->
-    (0 _ : IsFullyNamedCon con) =>
-    Subset (Con _ newArgs) IsFullyNamedCon
+    (con : Con) ->
+    (0 _ : ConArgsNamed con) =>
+    Subset Con ConArgsNamed
   mkSpecCon newArgs ur pCon = do
     let Element args allArgs =
-      pullOut $ mkSpecArg ur <$> Vect.fromList ur.order
+      pullOut $ mkSpecArg ur <$> ur.order
     let typeArgs = newArgs.appArgs var ur.fullResult
+    let tyRet = reAppAny (var t.resultName) typeArgs
     (Element (MkCon
       { name = inGenNS t $ dropNS pCon.name
-      , arty = _
       , args
-      , typeArgs
-      }) allArgs)
+      , type = tyRet
+      }) $ TheyAreNamed allArgs)
 
   ||| Generate a specialised type
-  mkSpecTy : UniResults -> Subset TypeInfo IsFullyNamedType
+  mkSpecTy : UniResults -> Subset TypeInfo AllTyArgsNamed
   mkSpecTy ur = do
     let Element cons consAreNamed =
       pullOut $ mapUCons (mkSpecCon t.ttArgs @{t.ttArgsNamed}) ur
     (Element (MkTypeInfo
               { name = inGenNS t t.resultName
-              , arty = _
               , args = t.ttArgs
-              , argNames = map (fromMaybe (UN Underscore) . name) t.ttArgs
               , cons
-              }) (ItIsFullyNamed t.ttArgsNamed consAreNamed))
+              }) (TheyAllAreNamed t.ttArgsNamed consAreNamed))
 
   ------------------------------------
   --- POLY TO POLY CAST DERIVATION ---
@@ -485,8 +570,9 @@ parameters (t : SpecTask)
   forallMTArgs : TTImp -> TTImp
   forallMTArgs = flip (foldr pi) $ makeTypeArgM0 . hideExplicitArg <$> t.ttArgs
 
+
   ||| Generate specialised to polimorphic type conversion function signature
-  mkMToPImplSig : UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => TTImp
+  mkMToPImplSig : UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkMToPImplSig urs mt =
     forallMTArgs $ arg (mt.invoke var empty) .-> t.fullInvocation
 
@@ -495,11 +581,11 @@ parameters (t : SpecTask)
   mkMToPImplClause :
     UnificationResult ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
-    (pCon : t.Con) ->
-    (0 _ : IsFullyNamedCon pCon) =>
-    (mCon : mt.Con) ->
-    (0 _ : IsFullyNamedCon mCon) =>
+    (0 _ : AllTyArgsNamed mt) =>
+    (pCon : Con) ->
+    (0 _ : ConArgsNamed pCon) =>
+    (mCon : Con) ->
+    (0 _ : ConArgsNamed mCon) =>
     Nat ->
     Clause
   mkMToPImplClause ur mt @{mtp} con mcon _ =
@@ -513,7 +599,7 @@ parameters (t : SpecTask)
   mkMToPImplDecls :
     UniResults ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
+    (0 _ : AllTyArgsNamed mt) =>
     List Decl
   mkMToPImplDecls urs mt = do
     let sig = mkMToPImplSig urs mt
@@ -523,12 +609,12 @@ parameters (t : SpecTask)
     ]
 
   ||| Generate specialised to polimorphic cast signature
-  mkMToPSig : (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => TTImp
+  mkMToPSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkMToPSig mt = do
     forallMTArgs $ `(Cast ~(mt.invoke var empty) ~(t.fullInvocation))
 
   ||| Generate specialised to polimorphic cast declarations
-  mkMToPDecls : (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => List Decl
+  mkMToPDecls : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => List Decl
   mkMToPDecls mt =
     [ interfaceHint Public "mToP" $ mkMToPSig mt
     , def "mToP" [ (var "mToP") .= `(MkCast mToPImpl)]
@@ -543,18 +629,19 @@ parameters (t : SpecTask)
     mkMultiInjDecl :
       UnificationResult ->
       (mt : TypeInfo) ->
-      (0 _ : IsFullyNamedType mt) =>
-      (pCon : t.Con) ->
-      (0 _ : IsFullyNamedCon pCon) =>
-      (mCon : mt.Con) ->
-      (0 _ : IsFullyNamedCon mCon) =>
+      (0 _ : AllTyArgsNamed mt) =>
+      (pCon : Con) ->
+      (0 _ : ConArgsNamed pCon) =>
+      (mCon : Con) ->
+      (0 mn : ConArgsNamed mCon) =>
       Nat ->
       m $ List Decl
     mkMultiInjDecl ur mt con mcon i =
       logBounds "specialiseData.mkMultiInjDecl" [mt, mcon] $ do
-        let S _ = mcon.arty
+        let S _ = length mcon.args
         | _ => pure []
         let n = fromString "mInj\{show i}"
+        let 0 pp = conArgsNamed @{mn}
         let (ourArgs ** prf) = makeArgsImplicit mcon.args
         (Element a1 ap1, am1) <- genArgAliases ourArgs
         (Element a2 ap2, am2) <- genArgAliases ourArgs
@@ -570,13 +657,13 @@ parameters (t : SpecTask)
         let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ `(Refl)
         pure
           [ public' n sig
-          , def n $ singleton $ patClause lhs $ tupleOfN mcon.arty `(Refl)
+          , def n $ singleton $ patClause lhs $ tupleOfN (length mcon.args) `(Refl)
           ]
 
     ||| Derive multiinjectivity for all polymorphic constructors that have
     ||| a specialised equivalent
     mkMultiInjDecls :
-      UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
+      UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
     mkMultiInjDecls ur specTy =
       logBounds "specialiseData.mkMultiInjDecls" [specTy] $ do
         let s = map2UConsN mkMultiInjDecl ur specTy
@@ -592,18 +679,19 @@ parameters (t : SpecTask)
     mkMultiCongDecl :
       UnificationResult ->
       (mt : TypeInfo) ->
-      (0 _ : IsFullyNamedType mt) =>
-      (pCon : t.Con) ->
-      (0 _ : IsFullyNamedCon pCon) =>
-      (mCon : mt.Con) ->
-      (0 _ : IsFullyNamedCon mCon) =>
+      (0 _ : AllTyArgsNamed mt) =>
+      (pCon : Con) ->
+      (0 _ : ConArgsNamed pCon) =>
+      (mCon : Con) ->
+      (0 mn : ConArgsNamed mCon) =>
       Nat ->
       m $ List Decl
     mkMultiCongDecl ur mt _ mcon i =
       logBounds "specialiseData.mkMultiCongDecl" [mt, mcon] $ do
-        let S _ = mcon.arty
+        let S _ = length mcon.args
         | _ => pure []
         let n = fromString "mCong\{show i}"
+        let 0 pp = conArgsNamed @{mn}
         let (ourArgs ** prf) = makeArgsImplicit mcon.args
         (Element a1 _, am1) <- genArgAliases ourArgs
         (Element a2 _, am2) <- genArgAliases ourArgs
@@ -612,7 +700,7 @@ parameters (t : SpecTask)
         let eqs = mkEqualsTuple a1 a2
         let sig =
           flip piAll (toList a1) $ flip piAll (toList a2) $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
-        let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ tupleOfN mcon.arty `(Refl)
+        let lhs = mkDoubleBinds (cast $ toList $ zip a1 a2) (var n) .$ tupleOfN (length mcon.args) `(Refl)
         pure
           [ public' n sig
           , def n $ singleton $ patClause lhs $ `(Refl)
@@ -620,7 +708,7 @@ parameters (t : SpecTask)
 
     ||| Derive multicongruency for all specialised constructors
     mkMultiCongDecls :
-      UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
+      UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
     mkMultiCongDecls ur specTy =
       logBounds "specialiseData.mkMultiCongDecls" [specTy] $ do
         let s = map2UConsN mkMultiCongDecl ur specTy
@@ -637,15 +725,16 @@ parameters (t : SpecTask)
     (n1, n2 : Name) ->
     UnificationResult ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
-    (con : t.Con) ->
-    (0 _ : IsFullyNamedCon con) =>
-    (mcon : mt.Con) ->
-    (0 _ : IsFullyNamedCon mcon) =>
+    (0 _ : AllTyArgsNamed mt) =>
+    (con : Con) ->
+    (0 cn : ConArgsNamed con) =>
+    (mcon : Con) ->
+    (0 mcn : ConArgsNamed mcon) =>
     Nat ->
     m Clause
-  mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur mt _ con n =
+  mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur mt _ con n = do
     logBounds "specialiseData.mkCastInjClause" [mt, con] $ do
+      let 0 pp = conArgsNamed @{mcn}
       (Element a1 _, am1) <- genArgAliases con.args
       (Element a2 _, am2) <- genArgAliases con.args
       let am1' = fromList $ mapSnd (const `(_)) <$> am1
@@ -668,11 +757,11 @@ parameters (t : SpecTask)
     Elaboration m =>
     UniResults ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
+    (0 _ : AllTyArgsNamed mt) =>
     m $ List Decl
   mkCastInjDecls @{_} ur ti @{tip} =
     logBounds "specialiseData.mkCastInjDecls" [ti] $ do
-      let (prepArgs ** prf) = hideExplicitArgs ti.args @{tip.argsAreNamed}
+      let Element prepArgs prf = hideExplicitArgs ti.args @{tip.tyArgsNamed}
       ta1@(Element a1 _, am1) <- genArgAliases prepArgs
       ta2@(Element a2 _, am2) <- genArgAliases prepArgs
       xVar <- genSym "x"
@@ -708,7 +797,7 @@ parameters (t : SpecTask)
   -------------------------------------
 
   ||| Decidable equality signatures
-  mkDecEqImplSig : (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => TTImp
+  mkDecEqImplSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkDecEqImplSig ti =
     let tInv = ti.invoke var empty
     in forallMTArgs $
@@ -732,7 +821,7 @@ parameters (t : SpecTask)
     Elaboration m =>
     UniResults ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
+    (0 _ : AllTyArgsNamed mt) =>
     m $ List Decl
   mkDecEqDecls ur ti = do
     mkDecEq <- var <$> try (getMk DecEq) (fail "Internal specialiser error: getMk failed.")
@@ -753,7 +842,7 @@ parameters (t : SpecTask)
   mkShowDecls :
     UniResults ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
+    (0 _ : AllTyArgsNamed mt) =>
     List Decl
   mkShowDecls ur ti = do
     let mToPImpl = var $ inGenNS t "mToPImpl"
@@ -779,7 +868,7 @@ parameters (t : SpecTask)
   mkEqDecls :
     UniResults ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
+    (0 _ : AllTyArgsNamed mt) =>
     List Decl
   mkEqDecls ur ti = do
     let mToPImpl = var $ inGenNS t "mToPImpl"
@@ -805,7 +894,7 @@ parameters (t : SpecTask)
   mkPToMImplSig :
     UniResults ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
+    (0 _ : AllTyArgsNamed mt) =>
     TTImp
   mkPToMImplSig urs mt =
     forallMTArgs $ arg t.fullInvocation .-> mt.invoke var empty
@@ -815,11 +904,11 @@ parameters (t : SpecTask)
   mkPToMImplClause :
     UnificationResult ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
-    (pCon : t.Con) ->
-    (0 _ : IsFullyNamedCon pCon) =>
-    (mCon : mt.Con) ->
-    (0 _ : IsFullyNamedCon mCon) =>
+    (0 _ : AllTyArgsNamed mt) =>
+    (pCon : Con) ->
+    (0 _ : ConArgsNamed pCon) =>
+    (mCon : Con) ->
+    (0 _ : ConArgsNamed mCon) =>
     Nat ->
     Clause
   mkPToMImplClause ur mt con mcon _ =
@@ -832,7 +921,7 @@ parameters (t : SpecTask)
   mkPToMImplDecls :
     UniResults ->
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
+    (0 _ : AllTyArgsNamed mt) =>
     List Decl
   mkPToMImplDecls urs mt = do
     let sig = mkPToMImplSig urs mt
@@ -842,12 +931,12 @@ parameters (t : SpecTask)
     ]
 
   ||| Generate specialised to polimorphic cast signature
-  mkPToMSig : (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => TTImp
+  mkPToMSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkPToMSig mt = do
     forallMTArgs $ `(Cast ~(t.fullInvocation) ~(mt.invoke var empty))
 
   ||| Generate specialised to polimorphic cast declarations
-  mkPToMDecls : (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => List Decl
+  mkPToMDecls : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => List Decl
   mkPToMDecls mt =
     [ interfaceHint Public "pToM" $ mkPToMSig mt
     , def "pToM" [ (var "pToM") .= `(MkCast pToMImpl)]
@@ -859,7 +948,7 @@ parameters (t : SpecTask)
 
   mkFromStringDecls :
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
+    (0 _ : AllTyArgsNamed mt) =>
     List Decl
   mkFromStringDecls ti = do
     let pToMImpl = var $ inGenNS t "pToMImpl"
@@ -881,7 +970,7 @@ parameters (t : SpecTask)
 
   mkNumDecls :
     (mt : TypeInfo) ->
-    (0 _ : IsFullyNamedType mt) =>
+    (0 _ : AllTyArgsNamed mt) =>
     List Decl
   mkNumDecls ti = do
     let pToMImpl = var $ inGenNS t "pToMImpl"
@@ -922,7 +1011,7 @@ parameters (t : SpecTask)
   hasPostpone _ = False
 
   ||| Generate declarations for given task, unification results, and specialised type
-  specDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : IsFullyNamedType mt) => m $ List Decl
+  specDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
   specDecls uniResults specTy = do
     let specTyDecl = specTy.decl
     logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
