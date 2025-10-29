@@ -685,7 +685,7 @@ parameters (t : SpecTask)
     (0 mcn : ConArgsNamed mcon) =>
     Nat ->
     m Clause
-  mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur mt _ con n = do
+  mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur mt _ con n =
     logBounds "specialiseData.mkCastInjClause" [mt, con] $ do
       let 0 _ = conArgsNamed @{mcn}
       (Element a1 _, am1) <- genArgAliases con.args
