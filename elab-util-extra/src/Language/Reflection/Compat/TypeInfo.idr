@@ -16,6 +16,19 @@ import public Syntax.IHateParens.SortedSet
 typeCon : TypeInfo -> Con
 typeCon ti = MkCon ti.name ti.args type
 
+--------------------------------------------------------
+--- Acquiring special representations from type info ---
+--------------------------------------------------------
+
+||| Generate a declaration from TypeInfo
+export
+(.decl) : TypeInfo -> Decl
+(.decl) ti =
+  iData Public ti.name tySig [] conITys
+  where
+    tySig = piAll type ti.args
+    conITys = (.iTy) <$> ti.cons
+
 ---------------------------
 --- Analysing type info ---
 ---------------------------
@@ -52,6 +65,10 @@ ensureTyArgsNamed ty = do
   let Yes prf = areAllTyArgsNamed ty
     | No _ => fail "Type info for type `\{ty.name}` contains unnamed arguments"
   pure prf
+
+export
+(.argNames) : (ti : TypeInfo) -> (0 tiN : AllTyArgsNamed ti) => List Name
+(.argNames) ti = argNames ti.args @{tiN.tyArgsNamed}
 
 --------------------------
 --- Changing type info ---
@@ -178,11 +195,3 @@ getNamesInfoInTypes' expr = do
   tys <- map (mapMaybe id) $ for (Prelude.toList varsSecondOrder) $ catch . getInfo'
   concat <$> Prelude.for tys getNamesInfoInTypes
 
-||| Generate a declaration from TypeInfo
-export
-(.decl) : TypeInfo -> Decl
-(.decl) ti =
-  iData Public ti.name tySig [] conITys
-  where
-    tySig = piAll type ti.args
-    conITys = (.iTy) <$> ti.cons
