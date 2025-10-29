@@ -226,7 +226,7 @@ makeImplicitPreservesNames :
   (0 _ : All IsNamedArg args) =>
   All IsNamedArg (SpecialiseData.makeImplicit <$> args)
 makeImplicitPreservesNames [] @{[]} = []
-makeImplicitPreservesNames (x :: xs) @{_ :: _} with (x) -- This clause is necessary for this function to be recognized as covering
+makeImplicitPreservesNames (x :: xs) @{_ :: _} with (x) -- This `with` match is a workaround for coverage checking bug
   makeImplicitPreservesNames (x :: xs) @{_ :: _} | (MkArg _ _ (Just n) _) =
     ItIsNamed :: makeImplicitPreservesNames xs
 
