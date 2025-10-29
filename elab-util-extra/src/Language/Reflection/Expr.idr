@@ -66,8 +66,6 @@ argNames : (l : List Arg) -> (0 _ : All IsNamedArg l) => List Name
 argNames [] = []
 argNames (x :: xs) @{_ :: _} = Expr.argName x :: argNames xs
 
-
-
 ----------------------------------------------
 --- Compiler-based `TTImp` transformations ---
 ----------------------------------------------

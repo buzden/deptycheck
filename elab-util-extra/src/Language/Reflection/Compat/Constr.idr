@@ -109,4 +109,3 @@ itIsConstructor = do
     | (lhs, _) => fail "Can't get type name: \{show lhs}"
   ty <- getInfo' ty
   pure (ItIsCon ty con ** ItIsGenuine)
-
