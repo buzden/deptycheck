@@ -9,6 +9,7 @@ import Data.SnocList
 import Data.DPair
 import Data.List1
 import Data.Vect
+import Data.Vect.Quantifiers
 import Data.List
 import Data.List.Quantifiers
 import Data.Either
@@ -16,15 +17,13 @@ import Data.SortedMap
 import Data.SortedSet
 import Data.SortedMap.Dependent
 import Decidable.Equality
-import Derive.Prelude
+import Deriving.Show
 import Language.Mk
 import Language.Reflection.Compat
 import Language.Reflection.Compat.Constr
 import Language.Reflection.Compat.TypeInfo
 import Language.Reflection.Expr
 import Language.Reflection.Logging
-import Language.Reflection.TT
-import Language.Reflection.TTImp
 import Language.Reflection.Unify
 import Language.Reflection.VarSubst
 import Syntax.IHateParens
@@ -33,7 +32,6 @@ import Syntax.IHateParens
 
 %default total
 
-%hide Types.TypeInfo
 ---------------------------------
 --- SPECIALISATION ERROR TYPE ---
 ---------------------------------
@@ -50,7 +48,10 @@ data SpecialisationError : Type where
   ||| Partial specification
   PartialSpecError          : SpecialisationError
 
-%runElab derive "SpecialisationError" [Show]
+%hint
+export
+showSE : Show SpecialisationError
+showSE = %runElab derive
 
 -------------------------------
 --- SPECIALISAION TASK TYPE ---
@@ -60,12 +61,10 @@ data SpecialisationError : Type where
 record SpecTask where
   constructor MkSpecTask
   ||| Full unification task
-  -- {tqArty             : Nat}
   tqArgs              : List Arg
   tqRet               : TTImp
   {auto 0 tqArgsNamed : All IsNamedArg tqArgs}
   ||| Unification task type
-  -- {ttArty             : Nat}
   ttArgs              : List Arg
   {auto 0 ttArgsNamed : All IsNamedArg ttArgs}
   ||| Namespace in which specialiseData was called
@@ -352,27 +351,31 @@ getTask resultName resultKind resultContent = do
   x.appWith f argVals :: xs.anyAppWith f argVals
 
 namespace TypeInfoInvoke
-  ||| Invoke the type with argument values from `argValues`, generating them with `fallback` if not present
+  ||| Returns a full application of the given type constructor
+  ||| with argument values sourced from `argValues`
+  ||| or generated with `fallback` if not present
   export
-  (.invoke) :
+  (.apply) :
     (ti : TypeInfo) ->
     (0 tiN : AllTyArgsNamed ti) =>
     (fallback : Name -> TTImp) ->
     (argValues : SortedMap Name TTImp) ->
     TTImp
-  (.invoke) t f vals = do
+  (.apply) t f vals = do
     reAppAny (var t.name) $ t.args.anyAppWith @{tiN.tyArgsNamed} f vals
 
 namespace ConInvoke
-  ||| Invoke the constructor with argument values from `argValues`, generating them with `fallback` if not present
+  ||| Returns a full application of the given constructor
+  ||| with argument values sourced from `argValues`
+  ||| or generated with `fallback` if not present
   export
-  (.invoke) :
+  (.apply) :
     (con : Con) ->
     (0 _ : ConArgsNamed con) =>
     (fallback : Name -> TTImp) ->
     (argValues : SortedMap Name TTImp) ->
     TTImp
-  (.invoke) con f vals = reAppAny (var con.name) $ con.args.anyAppWith f vals @{conArgsNamed}
+  (.apply) con f vals = reAppAny (var con.name) $ con.args.anyAppWith f vals @{conArgsNamed}
 
 allL2V : (l : List t) -> (0 pr : All p l) => Subset (Vect (length l) t) (All p)
 allL2V [] = Element [] []
@@ -528,7 +531,7 @@ parameters (t : SpecTask)
   ||| Generate specialised to polimorphic type conversion function signature
   mkMToPImplSig : UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkMToPImplSig _ mt =
-    forallMTArgs $ arg (mt.invoke var empty) .-> t.fullInvocation
+    forallMTArgs $ arg (mt.apply var empty) .-> t.fullInvocation
 
   ||| Generate specialised to polimorphic type conversion function clause
   ||| for given constructor
@@ -544,10 +547,10 @@ parameters (t : SpecTask)
     Clause
   mkMToPImplClause ur _ con mcon _ =
     var "mToPImpl" .$
-      mcon.invoke bindVar
+      mcon.apply bindVar
         (substituteVariables
           (fromList $ argsToBindMap mcon.args) <$> ur.fullResult)
-      .= con.invoke var ur.fullResult
+      .= con.apply var ur.fullResult
 
   ||| Generate specialised to polimorphic type conversion function declarations
   mkMToPImplDecls :
@@ -565,7 +568,7 @@ parameters (t : SpecTask)
   ||| Generate specialised to polimorphic cast signature
   mkMToPSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkMToPSig mt = do
-    forallMTArgs $ `(Cast ~(mt.invoke var empty) ~(t.fullInvocation))
+    forallMTArgs $ `(Cast ~(mt.apply var empty) ~(t.fullInvocation))
 
   ||| Generate specialised to polimorphic cast declarations
   mkMToPDecls : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => List Decl
@@ -600,9 +603,9 @@ parameters (t : SpecTask)
         (Element a1 _, am1) <- genArgAliases ourArgs
         (Element a2 _, am2) <- genArgAliases ourArgs
         let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
-                      con.invoke var $ mergeAliases ur.fullResult am1
+                      con.apply var $ mergeAliases ur.fullResult am1
         let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $
-                      con.invoke var $ mergeAliases ur.fullResult am2
+                      con.apply var $ mergeAliases ur.fullResult am2
 
         let eqs = mkEqualsTuple $ zip (pushIn a1 %search) (pushIn a2 %search)
         let sig =
@@ -649,8 +652,8 @@ parameters (t : SpecTask)
         let Element ourArgs _ = makeArgsImplicit mcon.args
         (Element a1 _, am1) <- genArgAliases ourArgs
         (Element a2 _, am2) <- genArgAliases ourArgs
-        let lhsCon = mcon.invoke var $ mergeAliases ur.fullResult am1
-        let rhsCon = mcon.invoke var $ mergeAliases ur.fullResult am2
+        let lhsCon = mcon.apply var $ mergeAliases ur.fullResult am1
+        let rhsCon = mcon.apply var $ mergeAliases ur.fullResult am2
         let eqs = mkEqualsTuple $ zip (pushIn a1 %search) (pushIn a2 %search)
         let sig =
           flip piAll a1 $ flip piAll a2 $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
@@ -697,8 +700,8 @@ parameters (t : SpecTask)
       let ures2 = substituteVariables am2' <$> ur.fullResult
       let bta1 = aliasedAppBind (cast tam1) `(castInjImpl)
       let bta2 = aliasedAppBind (cast tam2) bta1
-      let lhsCon = con.invoke bindVar $ am1'
-      let rhsCon = con.invoke bindVar $ am1'
+      let lhsCon = con.apply bindVar $ am1'
+      let rhsCon = con.apply bindVar $ am1'
       let patRhs : TTImp
           patRhs = case (length a1) of
             0 => `(Refl)
@@ -723,9 +726,9 @@ parameters (t : SpecTask)
       let mToPVar = var $ inGenNS t "mToP"
       let mToPImplVar = var $ inGenNS t "mToPImpl"
       let arg1 = MkArg MW ImplicitArg (Just xVar) $
-                  ti.invoke var $ fromList $ mapSnd var <$> am1
+                  ti.apply var $ fromList $ mapSnd var <$> am1
       let arg2 = MkArg MW ImplicitArg (Just yVar) $
-                  ti.invoke var $ fromList $ mapSnd var <$> am2
+                  ti.apply var $ fromList $ mapSnd var <$> am2
       let eqs =
         `((~(aliasedApp (cast am1) mToPImplVar .$ var xVar)
            ~=~
@@ -753,7 +756,7 @@ parameters (t : SpecTask)
   ||| Decidable equality signatures
   mkDecEqImplSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkDecEqImplSig ti =
-    let tInv = ti.invoke var empty
+    let tInv = ti.apply var empty
     in forallMTArgs $
       piAll
         `(Dec (Equal {a = ~tInv} {b = ~tInv} x1 x2))
@@ -783,7 +786,7 @@ parameters (t : SpecTask)
       [ public' "decEqImpl" $ mkDecEqImplSig ti
       , def "decEqImpl" [ mkDecEqImplClause ]
       , interfaceHint Public "decEq'" $ forallMTArgs
-        `(DecEq ~(t.fullInvocation) => DecEq ~(ti.invoke var empty))
+        `(DecEq ~(t.fullInvocation) => DecEq ~(ti.apply var empty))
       , def "decEq'"
         [ `(decEq') .= `(~mkDecEq ~(var $ inGenNS t "decEqImpl")) ]
       ]
@@ -802,15 +805,15 @@ parameters (t : SpecTask)
     let mToPImpl = var $ inGenNS t "mToPImpl"
     [ public' "showImpl" $
       forallMTArgs
-        `(Show ~(t.fullInvocation) => ~(ti.invoke var empty) -> String)
+        `(Show ~(t.fullInvocation) => ~(ti.apply var empty) -> String)
     , def "showImpl" [ `(showImpl x) .= `(show $ ~mToPImpl x) ]
     , public' "showPrecImpl" $
       forallMTArgs
-        `(Show ~(t.fullInvocation) => Prec -> ~(ti.invoke var empty) -> String)
+        `(Show ~(t.fullInvocation) => Prec -> ~(ti.apply var empty) -> String)
     , def "showPrecImpl"
       [ `(showPrecImpl p x) .= `(showPrec p $ ~mToPImpl x) ]
     , interfaceHint Public "show'" $ forallMTArgs $
-      `(Show ~(t.fullInvocation) => Show ~(ti.invoke var empty))
+      `(Show ~(t.fullInvocation) => Show ~(ti.apply var empty))
     , def "show'" [ `(show') .= `(MkShow showImpl showPrecImpl) ]
     ]
 
@@ -826,7 +829,7 @@ parameters (t : SpecTask)
     List Decl
   mkEqDecls _ ti = do
     let mToPImpl = var $ inGenNS t "mToPImpl"
-    let tInv = ti.invoke var empty
+    let tInv = ti.apply var empty
     [ public' "eqImpl" $
       forallMTArgs
         `(Eq ~(t.fullInvocation) => ~tInv -> ~tInv -> Bool)
@@ -851,7 +854,7 @@ parameters (t : SpecTask)
     (0 _ : AllTyArgsNamed mt) =>
     TTImp
   mkPToMImplSig _ mt =
-    forallMTArgs $ arg t.fullInvocation .-> mt.invoke var empty
+    forallMTArgs $ arg t.fullInvocation .-> mt.apply var empty
 
   ||| Generate specialised to polimorphic type conversion function clause
   ||| for given constructor
@@ -866,10 +869,10 @@ parameters (t : SpecTask)
     Nat ->
     Clause
   mkPToMImplClause ur _ con mcon _ =
-    var "pToMImpl" .$ con.invoke bindVar
+    var "pToMImpl" .$ con.apply bindVar
       (substituteVariables
         (fromList $ argsToBindMap $ con.args) <$> ur.fullResult)
-      .= mcon.invoke var ur.fullResult
+      .= mcon.apply var ur.fullResult
 
   ||| Generate specialised to polimorphic type conversion function declarations
   mkPToMImplDecls :
@@ -887,7 +890,7 @@ parameters (t : SpecTask)
   ||| Generate specialised to polimorphic cast signature
   mkPToMSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkPToMSig mt = do
-    forallMTArgs $ `(Cast ~(t.fullInvocation) ~(mt.invoke var empty))
+    forallMTArgs $ `(Cast ~(t.fullInvocation) ~(mt.apply var empty))
 
   ||| Generate specialised to polimorphic cast declarations
   mkPToMDecls : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => List Decl
@@ -906,7 +909,7 @@ parameters (t : SpecTask)
     List Decl
   mkFromStringDecls ti = do
     let pToMImpl = var $ inGenNS t "pToMImpl"
-    let tInv = ti.invoke var empty
+    let tInv = ti.apply var empty
     [ public' "fromStringImpl" $
         forallMTArgs
           `(FromString ~(t.fullInvocation) => String -> ~tInv)
@@ -929,7 +932,7 @@ parameters (t : SpecTask)
   mkNumDecls ti = do
     let pToMImpl = var $ inGenNS t "pToMImpl"
     let mToPImpl = var $ inGenNS t "mToPImpl"
-    let tInv = ti.invoke var empty
+    let tInv = ti.apply var empty
     [ public' "numImpl" $
         forallMTArgs
           `(Num ~(t.fullInvocation) => Integer -> ~tInv)

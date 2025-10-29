@@ -12,13 +12,13 @@ import public Syntax.IHateParens.SortedSet
 
 %default total
 
-||| Returns a type constructor as `Con` by given type
-typeCon : TypeInfo -> Con
-typeCon ti = MkCon ti.name ti.args type
-
 --------------------------------------------------------
 --- Acquiring special representations from type info ---
 --------------------------------------------------------
+
+||| Returns a type constructor as `Con` by given type
+typeCon : TypeInfo -> Con
+typeCon ti = MkCon ti.name ti.args type
 
 ||| Generate a declaration from TypeInfo
 export
