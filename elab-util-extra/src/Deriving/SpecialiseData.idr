@@ -309,11 +309,9 @@ getTask resultName resultKind resultContent = do
   -- Get current namespace
   currentNs <- provideNS
   -- Get polymorphic type's info
-  polyTy <- Compat.getInfo' typeName
+  polyTy <- getInfo' typeName
   -- Prove all its arguments/constructors/constructor arguments are named
   polyTyNamed <- ensureTyArgsNamed polyTy
-  -- let Yes polyTyNamed = AllTyArgsNamed polyTy
-  -- | _ => fail "Internal error: getInfo' returned a type with unnamed arguments or constructors."
   pure $ MkSpecTask
     { tqArgs
     , tqRet
@@ -340,15 +338,15 @@ getTask resultName resultKind resultContent = do
 
 ||| Generate a List AnyApp for given argument List,
 ||| with arguments retrieved from the map if present or generated with `fallback`
-(.anyAppWith) :
+(.appsWith) :
   (args: List Arg) ->
   (0 _ : All IsNamedArg args) =>
   (fallback : Name -> TTImp) ->
   (argValues : SortedMap Name TTImp) ->
   List AnyApp
-(.anyAppWith) [] _ _ = []
-(.anyAppWith) (x :: xs) @{_ :: _} f argVals =
-  x.appWith f argVals :: xs.anyAppWith f argVals
+(.appsWith) [] _ _ = []
+(.appsWith) (x :: xs) @{_ :: _} f argVals =
+  x.appWith f argVals :: xs.appsWith f argVals
 
 namespace TypeInfoInvoke
   ||| Returns a full application of the given type constructor
@@ -362,7 +360,7 @@ namespace TypeInfoInvoke
     (argValues : SortedMap Name TTImp) ->
     TTImp
   (.apply) t f vals = do
-    reAppAny (var t.name) $ t.args.anyAppWith @{tiN.tyArgsNamed} f vals
+    reAppAny (var t.name) $ t.args.appsWith @{tiN.tyArgsNamed} f vals
 
 namespace ConInvoke
   ||| Returns a full application of the given constructor
@@ -375,7 +373,7 @@ namespace ConInvoke
     (fallback : Name -> TTImp) ->
     (argValues : SortedMap Name TTImp) ->
     TTImp
-  (.apply) con f vals = reAppAny (var con.name) $ con.args.anyAppWith f vals @{conArgsNamed}
+  (.apply) con f vals = reAppAny (var con.name) $ con.args.appsWith f vals @{conArgsNamed}
 
 allL2V : (l : List t) -> (0 pr : All p l) => Subset (Vect (length l) t) (All p)
 allL2V [] = Element [] []
@@ -457,12 +455,10 @@ parameters (t : SpecTask)
     (0 conN : ConArgsNamed con) =>
     m UnificationResult
   unifyCon con = logBounds "specialiseData.unifyCon" [t.polyTy, con] $ do
-    let (_, typeArgs) = Expr.unAppAny con.type
-    let conRet = reAppAny .| var t.polyTy.name .| typeArgs
     let Element ca _ = allL2V con.args @{conArgsNamed}
     let Element ta _ = allL2V t.tqArgs @{t.tqArgsNamed}
     let uniTask =
-      MkUniTask {lfv=_} ca conRet
+      MkUniTask {lfv=_} ca con.type
                 {rfv=_} ta t.fullInvocation
     logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier task: \{show uniTask}"
     Right uniRes <- tryError $ unifyWithCompiler uniTask
@@ -500,7 +496,7 @@ parameters (t : SpecTask)
   mkSpecCon newArgs ur pCon = do
     let Element args allArgs =
       pullOut $ mkSpecArg ur <$> ur.order
-    let typeArgs = newArgs.anyAppWith var ur.fullResult
+    let typeArgs = newArgs.appsWith var ur.fullResult
     let tyRet = reAppAny (var t.resultName) typeArgs
     MkCon
       { name = inGenNS t $ dropNS pCon.name
