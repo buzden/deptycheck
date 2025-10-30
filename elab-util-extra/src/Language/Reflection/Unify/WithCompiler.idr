@@ -160,12 +160,9 @@ fvSubMatching' :
   (FVData, FVDeps dg.freeVars) ->
   (FVData, FVDeps dg.freeVars)
 fvSubMatching' dg canSub (fvData, MkFVDeps tyDeps valDeps piInfoDeps) = do
-  let matchingHolesTy = allMatchingHoles dg.holeToId fvData.type
-  let matchingHolesVal = fromMaybe empty $ allMatchingHoles dg.holeToId <$> fvData.value
-  let matchingHolesPiInfo = fromPiInfo empty $ allMatchingHoles dg.holeToId <$> fvData.piInfo
-  let canSubTy = intersection matchingHolesTy canSub
-  let canSubVal = intersection matchingHolesVal canSub
-  let canSubPiInfo = intersection matchingHolesPiInfo canSub
+  let canSubTy = intersection tyDeps canSub
+  let canSubVal = intersection valDeps canSub
+  let canSubPiInfo = intersection piInfoDeps canSub
   let tyAddDeps = valDepsOfVars dg canSubTy
   let valAddDeps = valDepsOfVars dg canSubVal
   let piInfoAddDeps = valDepsOfVars dg canSubPiInfo
