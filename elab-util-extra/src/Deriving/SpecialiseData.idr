@@ -92,7 +92,7 @@ Show SpecTask where
 
 ||| Unification results for the whole type
 UniResults : Type
-UniResults = List $ Either UnificationError UnificationResult
+UniResults = List $ UnificationVerdict
 
 ------------------------
 --- HELPER FUNCTIONS ---
@@ -406,8 +406,8 @@ parameters (t : SpecTask)
   mapUCons f rs = do
     let adp = pushIn t.polyTy.cons t.polyTyNamed.tyConArgsNamed
     let f' : List (Subset Con ConArgsNamed) -> UniResults -> List r
-        f' (_ :: xs)             (Left _ :: ys) = f' xs ys
-        f' (Element con _ :: xs) (Right res :: ys) = f res con :: f' xs ys
+        f' (Element con _ :: xs) (Success res :: ys) = f res con :: f' xs ys
+        f' (_ :: xs)             (_ :: ys)           = f' xs ys
         f' _ _ = []
     f' adp rs
 
@@ -437,10 +437,10 @@ parameters (t : SpecTask)
         List (Subset Con ConArgsNamed) ->
         UniResults ->
         List r
-      f' n (_             :: xs)                       ys  (Left _    :: zs) =
-        f' n xs ys zs
-      f' n (Element con _ :: xs)    (Element mcon _ :: ys) (Right res :: zs) =
+      f' n (Element con _ :: xs) (Element mcon _ :: ys) (Success res :: zs) =
         f res mt con mcon n :: f' (S n) xs ys zs
+      f' n (_             :: xs)                    ys  (_:: zs) =
+        f' n xs ys zs
       f' _ _ _ _ = []
 
   -------------------------------
@@ -450,10 +450,10 @@ parameters (t : SpecTask)
   ||| Run unification for a given polymorphic constructor
   unifyCon :
     Elaboration m =>
-    MonadError UnificationError m =>
+    (unifier : Unify m) =>
     (con : Con) ->
     (0 conN : ConArgsNamed con) =>
-    m UnificationResult
+    m UnificationVerdict
   unifyCon con = logBounds "specialiseData.unifyCon" [t.polyTy, con] $ do
     let Element ca _ = allL2V con.args @{conArgsNamed}
     let Element ta _ = allL2V t.tqArgs @{t.tqArgsNamed}
@@ -461,11 +461,7 @@ parameters (t : SpecTask)
       MkUniTask {lfv=_} ca con.type
                 {rfv=_} ta t.fullInvocation
     logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier task: \{show uniTask}"
-    Right uniRes <- tryError $ unifyWithCompiler uniTask
-    | Left err => do
-      logPoint "specialiseData.unifyCon" [t.polyTy, con] "Unifier failed: \{show err}"
-      throwError err
-    logPoint "specialiseData.unifyCon" [t.polyTy, con] "Unifier succeeded"
+    uniRes <- unify uniTask
     logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier output: \{show uniRes}"
     pure uniRes
 
@@ -959,10 +955,6 @@ parameters (t : SpecTask)
   --- SPECIALISED TYPE DECLARATION ---
   ------------------------------------
 
-  hasPostpone : Either UnificationError _ -> Bool
-  hasPostpone (Left PostponeError) = True
-  hasPostpone _ = False
-
   ||| Generate declarations for given task, unification results, and specialised type
   specDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
   specDecls uniResults specTy = do
@@ -1006,7 +998,7 @@ parameters (t : SpecTask)
     logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "num : \{show numDecls}"
     let onFull : List Decl =
-      if any hasPostpone uniResults
+      if any isPostpone uniResults
           then []
           else join
             [ pToMImplDecls
@@ -1077,6 +1069,7 @@ specialiseDataRaw :
   Monad m =>
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
+  (unifier : Unify m) =>
   MonadError SpecialisationError m =>
   (resultName : Name) ->
   (resultKind : TTImp) ->
@@ -1087,7 +1080,7 @@ specialiseDataRaw resultName resultKind resultContent = do
   let resultContent = mapTTImp cleanupHoleAutoImplicitsImpl $ cleanupNamedHoles resultContent
   task <- getTask resultName resultKind resultContent
   logPoint {level=DetailedTrace} "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
-  uniResults <- sequence $ mapCons task $ \ci => runEitherT {m} $ unifyCon task ci
+  uniResults <- sequence $ mapCons task $ unifyCon task
   let Element specTy specTyNamed = mkSpecTy task uniResults
   decls <- specDecls task uniResults specTy
   pure (specTy, decls)
@@ -1109,6 +1102,7 @@ specialiseData :
   Monad m =>
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
+  (unifier : Unify m) =>
   MonadError SpecialisationError m =>
   (resultName : Name) ->
   (0 task : taskT) ->
@@ -1137,6 +1131,7 @@ export
 specialiseData'' :
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
+  (unifier : Unify m) =>
   TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
@@ -1164,6 +1159,7 @@ export
 specialiseData' :
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
+  (unifier : Unify m) =>
   TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->

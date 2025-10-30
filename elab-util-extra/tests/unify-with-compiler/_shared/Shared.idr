@@ -32,7 +32,7 @@ runUnifyWithCompiler lhsAs lhs rhsAs rhs = do
   let Yes rhsPs = all isNamedArg rhsAs
   | _ => do
     failAt !(getFC <$> quote rhsAs) "There are unnamed free variables in right-hand side."
-  Right res <- runEitherT {m=Elab} {e=UnificationError} $
+  Right res <- runEitherT {m=Elab} {e=Maybe UnificationError} $
     unifyWithCompiler' $ MkUniTask lhsAs lhs rhsAs rhs
   | Left err => fail "Unifier failed with: \{show err}"
   pure res

@@ -168,7 +168,6 @@ record UnificationResult where
 
 public export
 data UnificationError : Type where
-  PostponeError : UnificationError
   CatastrophicError : UnificationError
   InternalError : String -> UnificationError
   TargetTypeError : TTImp -> UnificationError
@@ -176,6 +175,44 @@ data UnificationError : Type where
   NoUnificationError : UnificationError
 
 %runElab derive "UnificationError" [Show, Eq]
+
+public export
+data UnificationVerdict : Type where
+  Success : UnificationResult -> UnificationVerdict
+  Postpone : UnificationVerdict
+  Fail : UnificationError -> UnificationVerdict
+
+%runElab derive "UnificationVerdict" [Show]
+
+export %inline
+isSuccess : UnificationVerdict -> Bool
+isSuccess (Success _) = True
+isSuccess _ = False
+
+export %inline
+isPostpone : UnificationVerdict -> Bool
+isPostpone Postpone = True
+isPostpone _ = False
+
+export %inline
+isFail : UnificationVerdict -> Bool
+isFail (Fail _) = True
+isFail _ = False
+
+export
+Cast (Either (Maybe UnificationError) UnificationResult) UnificationVerdict where
+  cast (Right s) = Success s
+  cast (Left Nothing) = Postpone
+  cast (Left $ Just e) = Fail e
+
+public export
+interface Unify (0 m : Type -> Type) where
+  constructor MkUnify
+  unify : UnificationTask -> m UnificationVerdict
+
+export
+Monad m => MonadTrans t => Unify m => Unify (t m) where
+  unify = lift . unify
 
 ||| List all free variables that don't depende on any other free variables
 leaves : (dg : DependencyGraph) -> FinSet dg.freeVars

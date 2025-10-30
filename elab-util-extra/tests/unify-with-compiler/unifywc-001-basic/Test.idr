@@ -8,7 +8,7 @@ import Shared
 
 %runElab runUnifyWithCompiler' [] `(1) [] `(1)
 
-failing "Unifier failed with: NoUnificationError"
+failing "Unifier failed with: Just NoUnificationError"
   %runElab runUnifyWithCompiler' [] `(0) [] `(1)
 
 %runElab runUnifyWithCompiler' [] `(Z) [] `(Z)
@@ -19,22 +19,22 @@ failing "Unifier failed with: NoUnificationError"
 
 %runElab runUnifyWithCompiler' [] `(the Nat 1) [] `(S Z)
 
-failing "Unifier failed with: NoUnificationError"
+failing "Unifier failed with: Just NoUnificationError"
   %runElab runUnifyWithCompiler' [] `(0) [] `(Z)
 
-failing "Unifier failed with: NoUnificationError"
+failing "Unifier failed with: Just NoUnificationError"
   %runElab runUnifyWithCompiler' [] `(1) [] `(S Z)
 
 %runElab runUnifyWithCompiler' [] `(the (List Nat) [1,2,3,4,5]) [] `(the (List Nat) [1,2,3,4,5])
 
-failing "Unifier failed with: TargetTypeError"
+failing "TargetTypeError"
   %runElab runUnifyWithCompiler' [] `([1,2,3,4,5]) [] `([1,2,3,4,5])
 
 %runElab runUnifyWithCompiler' [] `(the Nat (1 + 2)) [] `(the Nat 3)
 
 %runElab runUnifyWithCompiler' [] `(the String "Hello world!") [] `("Hello world!")
 
-failing "Unifier failed with: PostponeError"
+failing "Unifier failed with: Nothing"
   %runElab runUnifyWithCompiler' [] `("Hello world!") [] `("Hello world!")
 
 hw1 : String
@@ -59,7 +59,7 @@ hw2 = "Hello world!"
 
 %runElab runUnifyWithCompiler' [] `((\a => a)) [] `((\b => b))
 
-failing "Unifier failed with: PostponeError"
+failing "Unifier failed with: Nothing"
   %runElab runUnifyWithCompiler' [] `((\a, b => a + b)) [] `((\b, a => b + a))
 
 %runElab runUnifyWithCompiler'
@@ -70,7 +70,7 @@ failing "Unifier failed with: PostponeError"
   [] `((\a : Nat, b : Nat => a + b))
   [] `((+))
 
-failing "Unifier failed with: PostponeError"
+failing "Unifier failed with: Nothing"
   %runElab runUnifyWithCompiler' [] `((\a, b => a b)) [] `((\b, a => b a))
 
 %runElab runUnifyWithCompiler'

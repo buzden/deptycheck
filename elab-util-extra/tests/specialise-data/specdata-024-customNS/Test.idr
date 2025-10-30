@@ -5,7 +5,7 @@ import public Shared
 %language ElabReflection
 
 decls : List Decl
-decls = %runElab specialiseData'' {nsProvider = inNS $ MkNS ["Custom", "Test"]} "MyNat" Nat
+decls = %runElab specialiseData'' {nsProvider = inNS $ MkNS ["Custom", "Test"]} {unifier = UnifyWithCompiler} "MyNat" Nat
 
 namespace Custom
   %runElab declare decls
