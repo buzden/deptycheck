@@ -179,7 +179,7 @@ data UnificationError : Type where
 public export
 data UnificationVerdict : Type where
   Success : UnificationResult -> UnificationVerdict
-  Postpone : UnificationVerdict
+  Undecided : UnificationVerdict
   Fail : UnificationError -> UnificationVerdict
 
 %runElab derive "UnificationVerdict" [Show]
@@ -190,9 +190,9 @@ isSuccess (Success _) = True
 isSuccess _ = False
 
 export %inline
-isPostpone : UnificationVerdict -> Bool
-isPostpone Postpone = True
-isPostpone _ = False
+isUndecided : UnificationVerdict -> Bool
+isUndecided Undecided = True
+isUndecided _ = False
 
 export %inline
 isFail : UnificationVerdict -> Bool
@@ -202,16 +202,16 @@ isFail _ = False
 export
 Cast (Either (Maybe UnificationError) UnificationResult) UnificationVerdict where
   cast (Right s) = Success s
-  cast (Left Nothing) = Postpone
+  cast (Left Nothing) = Undecided
   cast (Left $ Just e) = Fail e
 
 public export
-interface Unify (0 m : Type -> Type) where
-  constructor MkUnify
+interface CanUnify (0 m : Type -> Type) where
+  constructor MkCanUnify
   unify : UnificationTask -> m UnificationVerdict
 
 export
-Monad m => MonadTrans t => Unify m => Unify (t m) where
+Monad m => MonadTrans t => CanUnify m => CanUnify (t m) where
   unify = lift . unify
 
 ||| List all free variables that don't depende on any other free variables

@@ -92,7 +92,7 @@ Show SpecTask where
 
 ||| Unification results for the whole type
 UniResults : Type
-UniResults = List $ UnificationVerdict
+UniResults = List UnificationVerdict
 
 ------------------------
 --- HELPER FUNCTIONS ---
@@ -450,7 +450,7 @@ parameters (t : SpecTask)
   ||| Run unification for a given polymorphic constructor
   unifyCon :
     Elaboration m =>
-    (unifier : Unify m) =>
+    (unifier : CanUnify m) =>
     (con : Con) ->
     (0 conN : ConArgsNamed con) =>
     m UnificationVerdict
@@ -998,7 +998,7 @@ parameters (t : SpecTask)
     logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
       "num : \{show numDecls}"
     let onFull : List Decl =
-      if any isPostpone uniResults
+      if any isUndecided uniResults
           then []
           else join
             [ pToMImplDecls
@@ -1069,7 +1069,7 @@ specialiseDataRaw :
   Monad m =>
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
-  (unifier : Unify m) =>
+  (unifier : CanUnify m) =>
   MonadError SpecialisationError m =>
   (resultName : Name) ->
   (resultKind : TTImp) ->
@@ -1102,7 +1102,7 @@ specialiseData :
   Monad m =>
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
-  (unifier : Unify m) =>
+  (unifier : CanUnify m) =>
   MonadError SpecialisationError m =>
   (resultName : Name) ->
   (0 task : taskT) ->
@@ -1131,7 +1131,7 @@ export
 specialiseData'' :
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
-  (unifier : Unify m) =>
+  (unifier : CanUnify m) =>
   TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
@@ -1159,7 +1159,7 @@ export
 specialiseData' :
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
-  (unifier : Unify m) =>
+  (unifier : CanUnify m) =>
   TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
