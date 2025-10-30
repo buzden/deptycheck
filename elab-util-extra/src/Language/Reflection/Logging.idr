@@ -60,7 +60,7 @@ DefaultElabLogLevels = I where
     defaultLogLevel = Trace
 
 public export
-interface MonadLog (0 m : Type -> Type) where
+interface Monad m => MonadLog (0 m : Type -> Type) where
   constructor MkMonadLog
   logPoint' : (ll : ElabLogLevels) =>
              {level : LogLevel} ->
@@ -70,8 +70,7 @@ interface MonadLog (0 m : Type -> Type) where
              m ()
 
 export
-logPoint : Monad m =>
-           MonadLog m =>
+logPoint : MonadLog m =>
            ElabLogLevels =>
            (ll : ElabLogLevels) =>
            {default defaultLogLevel level : LogLevel} ->
@@ -82,8 +81,7 @@ logPoint : Monad m =>
 logPoint = logPoint' {level}
 
 export
-logBounds : Monad m =>
-            MonadLog m =>
+logBounds : MonadLog m =>
             ElabLogLevels =>
             {default defaultLogLevel level : LogLevel} ->
             (topic : String) -> So (topic /= "") =>
