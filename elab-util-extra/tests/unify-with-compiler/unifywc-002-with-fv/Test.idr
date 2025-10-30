@@ -14,7 +14,7 @@ import Shared
     assertFV res "y" `(Prelude.Types.S x)
     assertOrder res ["x"]
 
-failing "Unifier failed with: PostponeError"
+failing "Unifier failed with: Nothing"
   %runElab showUnify' ["x" #: `(Nat)] `(S x) ["y" #: `(Nat)] `(y + 1)
 
 %runElab withUnify' ["x" #: `(Nat)] `(S (S x)) ["y" #: `(Nat)] `(2 + y)
@@ -43,11 +43,11 @@ failing "Unifier failed with: PostponeError"
     assertFV' ur "y" Type `(String)
     assertOrder ur []
 
-failing "Unifier failed with: NoUnificationError"
+failing "Unifier failed with: Just NoUnificationError"
   %runElab showUnify' ["x" #: `(Nat), "y" #: `(Type)] `(Vect (S $ S x) y)
                       []                              `(Vect 1     String)
 
-failing "Unifier failed with: PostponeError"
+failing "Unifier failed with: Nothing"
   %runElab showUnify' ["x" #: `(Nat), "y" #: `(Type), "z" #: `(Nat)]
                       `(Vect (x + z) y)
                       []                              `(Vect 1 String)
@@ -60,7 +60,7 @@ failing "Unifier failed with: PostponeError"
     assertFV' ur "y" Type `(String)
     assertOrder ur []
 
-failing "Unifier failed with: PostponeError"
+failing "Unifier failed with: Nothing"
   %runElab showUnify' ["x" #: `(Nat), "y" #: `(Type)] `(Vect (x + 1) y)
                       []                              `(Vect 1     String)
 
@@ -123,7 +123,7 @@ failing "Unifier failed with: PostponeError"
     assertFV' ur "b" Type `(Nat)
     assertOrder ur []
 
-failing "Unifier failed with: NoUnificationError"
+failing "Unifier failed with: Just NoUnificationError"
   %runElab withUnify'
     ["a" #: `(Nat)] `((\x => a))
     [] `(const 10)
