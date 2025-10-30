@@ -377,6 +377,4 @@ unifyWithCompiler' task = do
 export
 [UnifyWithCompiler]
 Elaboration m => CanUnify m where
-  unify task = do
-    u <- runEitherT {m} {e=Maybe UnificationError} $ unifyWithCompiler task
-    pure $ cast u
+  unify = map cast . runEitherT {m} {e=Maybe UnificationError} . unifyWithCompiler
