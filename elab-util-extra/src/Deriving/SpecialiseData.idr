@@ -115,7 +115,7 @@ Monad m => MonadTrans t => NamespaceProvider m => NamespaceProvider (t m) where
   provideNS = lift provideNS
 
 export
-inNS : Elaboration m => Namespace -> NamespaceProvider m
+inNS : Monad m => Namespace -> NamespaceProvider m
 inNS ns = MkNSProvider $ pure ns
 
 ||| Prepend namespace into which everything is generated to name
