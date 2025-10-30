@@ -7,6 +7,7 @@ import public Data.Cozippable -- public due to compiler's bug #2439
 import public Data.Fin.Set
 import public Data.Fin.ToFin -- public due to compiler's bug #2439
 import public Data.List.Ex -- public due to compiler's bug #2439
+import public Data.List.Quantifiers
 import public Data.SortedSet
 import public Data.These -- public due to compiler's bug #2439
 import public Data.Vect.Dependent
@@ -59,6 +60,11 @@ cleanupNamedHoles = mapTTImp $ \case
 public export
 cleanupArg : Arg -> Arg
 cleanupArg = { type $= cleanupNamedHoles, piInfo $= map cleanupNamedHoles }
+
+export
+argNames : (l : List Arg) -> (0 _ : All IsNamedArg l) => List Name
+argNames [] = []
+argNames (x :: xs) @{_ :: _} = Expr.argName x :: argNames xs
 
 ----------------------------------------------
 --- Compiler-based `TTImp` transformations ---

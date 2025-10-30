@@ -93,6 +93,10 @@ areConArgsNamed $ MkCon _ ars _ with (all isNamedArg ars)
   _ | No nars  = No $ \(TheyAreNamed ars') => nars ars'
 
 public export
+0 conArgsNamed : (0 _ : ConArgsNamed c) => All IsNamedArg c.args
+conArgsNamed @{TheyAreNamed p} = p
+
+public export
 data AllTyArgsNamed : TypeInfo -> Type where
   TheyAllAreNamed : All IsNamedArg ars -> All ConArgsNamed cns -> AllTyArgsNamed $ MkTypeInfo nm ars cns
 
@@ -102,6 +106,14 @@ areAllTyArgsNamed $ MkTypeInfo _ ars cns with (all isNamedArg ars, all areConArg
   _ | (Yes ars', Yes cns') = Yes $ TheyAllAreNamed ars' cns'
   _ | (No nars, _) = No $ \(TheyAllAreNamed ars' _) => nars ars'
   _ | (_, No ncns) = No $ \(TheyAllAreNamed _ cns') => ncns cns'
+
+public export
+0 (.tyArgsNamed) : (0 _ : AllTyArgsNamed t) -> All IsNamedArg t.args
+(.tyArgsNamed) (TheyAllAreNamed at ct) = at
+
+public export
+0 (.tyConArgsNamed) : (0 _ : AllTyArgsNamed t) -> All ConArgsNamed t.cons
+(.tyConArgsNamed) (TheyAllAreNamed at ct) = ct
 
 -------------------------------------
 --- Working around type inference ---

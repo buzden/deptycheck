@@ -1,13 +1,22 @@
 module Shared
 
 import public Control.Monad.Either
+import public Control.Monad.Error.Either
+import public Control.Monad.Error.Interface
 import public Control.Monad.Writer
 import public Control.Monad.Identity
+import public Control.Monad.Trans
+import public Control.Monad.Reader.Reader
+import public Control.Monad.Reader.Interface
+import public Control.Monad.Reader.Tuple
+import public Control.Monad.State
 import public Data.DPair
 import public Data.Either
 import public Data.List
 import public Data.List.Quantifiers
+import public Data.Maybe
 import public Data.SnocVect
+import public Data.SortedSet
 import public Data.SortedMap.Dependent
 import public Data.Vect
 import public Data.Vect.Quantifiers
@@ -15,17 +24,21 @@ import public Decidable.Decidable
 import public Decidable.Equality
 import public Derive.Prelude
 import public Deriving.SpecialiseData
+import public Language.Mk
 import public Language.Reflection
+import public Language.Reflection.Compat
+import public Language.Reflection.Compat.Constr
+import public Language.Reflection.Compat.TypeInfo
 import public Language.Reflection.Derive
 import public Language.Reflection.Expr
 import public Language.Reflection.Logging
 import public Language.Reflection.Syntax
 import public Language.Reflection.Syntax.Ops
+import public Language.Reflection.TTImp
+import public Language.Reflection.TT
 import public Language.Reflection.Types
-import public Language.Reflection.Types.Extra
 import public Language.Reflection.Unify
 import public Language.Reflection.VarSubst
-import public Language.Mk
 
 ||| Verify that all values in list check to a given type
 constructExprs : Type -> List TTImp -> Elab ()

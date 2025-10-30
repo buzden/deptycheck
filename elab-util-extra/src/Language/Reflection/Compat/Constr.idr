@@ -28,6 +28,16 @@ export
 conSubexprs : Con -> List TTImp
 conSubexprs con = map type con.args ++ map getExpr (snd $ unAppAny con.type)
 
+||| Calculate constructor signature
+export
+(.sig) : Con -> TTImp
+con.sig = piAll con.type con.args
+
+||| Calculate constructor ITy
+export
+(.iTy) : Con -> ITy
+con.iTy = mkTy .| dropNS con.name .| con.sig
+
 --------------------------------------
 --- Compile-time constructors info ---
 --------------------------------------

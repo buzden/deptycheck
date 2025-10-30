@@ -26,7 +26,6 @@ modules = Deriving.SpecialiseData
         , Language.Reflection.Expr
         , Language.Reflection.Expr.Interpolation
         , Language.Reflection.Logging
-        , Language.Reflection.Types.Extra
         , Language.Reflection.Unify
         , Language.Reflection.Unify.Interface
         , Language.Reflection.Unify.WithCompiler

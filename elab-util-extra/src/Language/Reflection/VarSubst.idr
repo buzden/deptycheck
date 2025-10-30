@@ -1,17 +1,16 @@
 module Language.Reflection.VarSubst
 
-import public Data.SortedSet
-import public Data.SortedMap
-import public Data.Maybe
-import public Language.Reflection
-import public Language.Reflection.Pretty
-import public Language.Reflection.TTImp
-import public Language.Reflection.TT
-import public Language.Reflection.Util
-import public Control.Monad.Identity
-import public Control.Monad.Reader
-import public Control.Monad.Reader.Tuple
-import public Control.Monad.State
+import Data.SortedSet
+import Data.SortedMap
+import Data.Maybe
+import Language.Reflection
+import Language.Reflection.TTImp
+import Language.Reflection.TT
+import Language.Reflection.Util
+import Control.Monad.Identity
+import Control.Monad.Reader
+import Control.Monad.Reader.Tuple
+import Control.Monad.State
 
 %default total
 
