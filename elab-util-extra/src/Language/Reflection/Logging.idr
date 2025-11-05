@@ -62,33 +62,32 @@ DefaultElabLogLevels = I where
 public export
 interface Monad m => MonadLog (0 m : Type -> Type) where
   constructor MkMonadLog
-  logPoint' : (ll : ElabLogLevels) =>
-             {level : LogLevel} ->
+  logPoint : (ll : ElabLogLevels) =>
+             (level : LogLevel) ->
              (topic : String) -> So (topic /= "") =>
              (positions : LogPositions) ->
              (desc : String) ->
              m ()
 
 export
-logPoint : MonadLog m =>
+logPoint' : MonadLog m =>
            ElabLogLevels =>
            (ll : ElabLogLevels) =>
-           {default defaultLogLevel level : LogLevel} ->
            (topic : String) -> So (topic /= "") =>
            (positions : LogPositions) ->
            (desc : String) ->
            m ()
-logPoint = logPoint' {level}
+logPoint' = logPoint defaultLogLevel
 
 export
 logBounds : MonadLog m =>
             ElabLogLevels =>
-            {default defaultLogLevel level : LogLevel} ->
+            (level : LogLevel) ->
             (topic : String) -> So (topic /= "") =>
             (positions : LogPositions) ->
             m a ->
             m a
-logBounds topic positions action = do
+logBounds level topic positions action = do
   let ticksCnt = (4 `minus` length positions) `max` 1
 
   let startFence = replicate ticksCnt '_'
@@ -97,7 +96,7 @@ logBounds topic positions action = do
   let endFence = replicate ticksCnt '^'
   let endMark = "\{endFence}  end  \{endFence}"
 
-  let lg = logPoint' {level} topic positions
+  let lg = logPoint level topic positions
 
   -- vertical monadic style seems to use much less memory than `lg startMark *> action <* lg endMark`
   lg startMark
@@ -106,12 +105,21 @@ logBounds topic positions action = do
   pure r
 
 export
+logBounds' : MonadLog m =>
+            ElabLogLevels =>
+            (topic : String) -> So (topic /= "") =>
+            (positions : LogPositions) ->
+            m a ->
+            m a
+logBounds' = logBounds defaultLogLevel
+
+export
 [ElabLog] Elaboration m => MonadLog m where
-  logPoint' topic positions desc = logMsg topic (toNatLevel level) "\{positions} \{desc}"
+  logPoint level topic positions desc = logMsg topic (toNatLevel level) "\{positions} \{desc}"
 
 export
 [WriterLog] MonadWriter String m => MonadLog m where
-  logPoint' topic positions desc = tell "\{topic} \{show $ toNatLevel level} \{positions} \{desc}\n"
+  logPoint level topic positions desc = tell "\{topic} \{show $ toNatLevel level} \{positions} \{desc}\n"
 
 export %defaulthint
 DefaultLog : Elaboration m => MonadLog m

@@ -454,15 +454,15 @@ parameters (t : SpecTask)
     (con : Con) ->
     (0 conN : ConArgsNamed con) =>
     m UnificationVerdict
-  unifyCon con = logBounds "specialiseData.unifyCon" [t.polyTy, con] $ do
+  unifyCon con = logBounds' "specialiseData.unifyCon" [t.polyTy, con] $ do
     let Element ca _ = allL2V con.args @{conArgsNamed}
     let Element ta _ = allL2V t.tqArgs @{t.tqArgsNamed}
     let uniTask =
       MkUniTask {lfv=_} ca con.type
                 {rfv=_} ta t.fullInvocation
-    logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier task: \{show uniTask}"
+    logPoint DetailedTrace "specialiseData.unifyCon" [t.polyTy, con] "Unifier task: \{show uniTask}"
     uniRes <- unify uniTask
-    logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier output: \{show uniRes}"
+    logPoint DetailedTrace "specialiseData.unifyCon" [t.polyTy, con] "Unifier output: \{show uniRes}"
     pure uniRes
 
   ---------------------------------
@@ -586,7 +586,7 @@ parameters (t : SpecTask)
       Nat ->
       m $ List Decl
     mkMultiInjDecl ur mt con mcon i =
-      logBounds "specialiseData.mkMultiInjDecl" [mt, mcon] $ do
+      logBounds' "specialiseData.mkMultiInjDecl" [mt, mcon] $ do
         let S _ = length mcon.args
         | _ => pure []
         let n = fromString "mInj\{show i}"
@@ -614,7 +614,7 @@ parameters (t : SpecTask)
     mkMultiInjDecls :
       UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
     mkMultiInjDecls ur specTy =
-      logBounds "specialiseData.mkMultiInjDecls" [specTy] $ do
+      logBounds' "specialiseData.mkMultiInjDecls" [specTy] $ do
         let s = map2UConsN mkMultiInjDecl ur specTy
         join <$> sequence s
 
@@ -636,7 +636,7 @@ parameters (t : SpecTask)
       Nat ->
       m $ List Decl
     mkMultiCongDecl ur mt _ mcon i =
-      logBounds "specialiseData.mkMultiCongDecl" [mt, mcon] $ do
+      logBounds' "specialiseData.mkMultiCongDecl" [mt, mcon] $ do
         let S _ = length mcon.args
         | _ => pure []
         let n = fromString "mCong\{show i}"
@@ -659,7 +659,7 @@ parameters (t : SpecTask)
     mkMultiCongDecls :
       UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
     mkMultiCongDecls ur specTy =
-      logBounds "specialiseData.mkMultiCongDecls" [specTy] $ do
+      logBounds' "specialiseData.mkMultiCongDecls" [specTy] $ do
         let s = map2UConsN mkMultiCongDecl ur specTy
         join <$> sequence s
 
@@ -682,7 +682,7 @@ parameters (t : SpecTask)
     Nat ->
     m Clause
   mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur mt _ con n =
-    logBounds "specialiseData.mkCastInjClause" [mt, con] $ do
+    logBounds' "specialiseData.mkCastInjClause" [mt, con] $ do
       let 0 _ = conArgsNamed @{mcn}
       (Element a1 _, am1) <- genArgAliases con.args
       (Element a2 _, am2) <- genArgAliases con.args
@@ -709,7 +709,7 @@ parameters (t : SpecTask)
     (0 mtp : AllTyArgsNamed mt) =>
     m $ List Decl
   mkCastInjDecls ur ti =
-    logBounds "specialiseData.mkCastInjDecls" [ti] $ do
+    logBounds' "specialiseData.mkCastInjDecls" [ti] $ do
       let Element prepArgs prf = hideExplicitArgs ti.args @{mtp.tyArgsNamed}
       ta1@(Element a1 _, am1) <- genArgAliases prepArgs
       ta2@(Element a2 _, am2) <- genArgAliases prepArgs
@@ -959,43 +959,43 @@ parameters (t : SpecTask)
   specDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
   specDecls uniResults specTy = do
     let specTyDecl = specTy.decl
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "specTyDecl : \{show specTyDecl}"
     let mToPImplDecls = mkMToPImplDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "mToPImplDecls : \{show mToPImplDecls}"
     let mToPDecls = mkMToPDecls specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "mToP : \{show mToPDecls}"
     multiInjDecls <- mkMultiInjDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "multiInj : \{show multiInjDecls}"
     multiCongDecls <- mkMultiCongDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "multiCong : \{show multiCongDecls}"
     castInjDecls <- mkCastInjDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "castInj : \{show castInjDecls}"
     decEqDecls <- mkDecEqDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "decEq : \{show decEqDecls}"
     let showDecls = mkShowDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "Show : \{show showDecls}"
     let eqDecls = mkEqDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "Eq : \{show eqDecls}"
     let pToMImplDecls = mkPToMImplDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "pToMImplDecls : \{show pToMImplDecls}"
     let pToMDecls = mkPToMDecls specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "pToM : \{show pToMDecls}"
     let fromStringDecls = mkFromStringDecls specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "fromString : \{show fromStringDecls}"
     let numDecls = mkNumDecls specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedTrace "specialiseData.specDecls" [specTy]
       "num : \{show numDecls}"
     let onFull : List Decl =
       if any isUndecided uniResults
@@ -1079,7 +1079,7 @@ specialiseDataRaw resultName resultKind resultContent = do
   let resultKind = mapTTImp cleanupHoleAutoImplicitsImpl $ cleanupNamedHoles resultKind
   let resultContent = mapTTImp cleanupHoleAutoImplicitsImpl $ cleanupNamedHoles resultContent
   task <- getTask resultName resultKind resultContent
-  logPoint {level=DetailedTrace} "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
+  logPoint DetailedTrace "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
   uniResults <- sequence $ mapCons task $ unifyCon task
   let Element specTy specTyNamed = mkSpecTy task uniResults
   decls <- specDecls task uniResults specTy
