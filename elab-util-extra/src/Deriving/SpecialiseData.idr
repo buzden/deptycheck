@@ -311,7 +311,7 @@ getTask resultName resultKind resultContent = do
   currentNs <- provideNS
   -- Get polymorphic type's info
   let Just polyTy = lookupType typeName
-  | _ => fail "Internal error: failed to get type info"
+  | _ => fail "Internal error: failed to get type info for \{show typeName}"
   -- Prove all its arguments/constructors/constructor arguments are named
   polyTyNamed <- ensureTyArgsNamed polyTy
   pure $ MkSpecTask
