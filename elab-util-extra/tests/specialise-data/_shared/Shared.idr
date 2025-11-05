@@ -13,6 +13,7 @@ import public Control.Monad.State
 import public Data.DPair
 import public Data.Either
 import public Data.List
+import public Data.List.Map
 import public Data.List.Quantifiers
 import public Data.Maybe
 import public Data.SnocVect

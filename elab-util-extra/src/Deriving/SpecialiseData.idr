@@ -280,6 +280,7 @@ getTask :
   Elaboration m =>
   NamespaceProvider m =>
   MonadError SpecialisationError m =>
+  NamesInfoInTypes =>
   (resultName : Name) ->
   (resultKind : TTImp) ->
   (resultContent : TTImp) ->
@@ -309,7 +310,8 @@ getTask resultName resultKind resultContent = do
   -- Get current namespace
   currentNs <- provideNS
   -- Get polymorphic type's info
-  polyTy <- getInfo' typeName
+  let Just polyTy = lookupType typeName
+  | _ => fail "Internal error: failed to get type info"
   -- Prove all its arguments/constructors/constructor arguments are named
   polyTyNamed <- ensureTyArgsNamed polyTy
   pure $ MkSpecTask
@@ -1065,6 +1067,7 @@ specialiseDataRaw :
   (nsProvider : NamespaceProvider m) =>
   (unifier : CanUnify m) =>
   MonadError SpecialisationError m =>
+  (namesInfo : NamesInfoInTypes) =>
   (resultName : Name) ->
   (resultKind : TTImp) ->
   (resultContent : TTImp) ->
@@ -1098,6 +1101,7 @@ specialiseData :
   (nsProvider : NamespaceProvider m) =>
   (unifier : CanUnify m) =>
   MonadError SpecialisationError m =>
+  (namesInfo : NamesInfoInTypes) =>
   (resultName : Name) ->
   (0 task : taskT) ->
   m (TypeInfo, List Decl)
@@ -1131,6 +1135,8 @@ specialiseData'' :
   (0 task: taskT) ->
   m $ List Decl
 specialiseData'' resultName task = do
+  tq <- quote task
+  nit <- getNamesInfoInTypes' tq
   Right (specTy, decls) <-
     runEitherT {m} {e=SpecialisationError} $
       specialiseData resultName task
