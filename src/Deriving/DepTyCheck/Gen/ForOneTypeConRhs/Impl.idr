@@ -313,8 +313,8 @@ export
     -- Compute determination map without weak determination information
     let determ = insertFrom' empty $ mapI (\i, ta => (i, ta.determ)) argsTypeApps
 
-    logPoint {level=Debug} "deptycheck.derive.least-effort" [sig, con] "- determ: \{determ}"
-    logPoint {level=Debug} "deptycheck.derive.least-effort" [sig, con] "- givs: \{givs}"
+    logPoint Debug "deptycheck.derive.least-effort" [sig, con] "- determ: \{determ}"
+    logPoint Debug "deptycheck.derive.least-effort" [sig, con] "- givs: \{givs}"
 
     -- Find user-imposed tuning of the order
     userImposed <- findUserImposedDeriveFirst
@@ -324,7 +324,7 @@ export
     let userImposed = enrichStrongDet nonDetermGivs userImposed
     let theOrder = userImposed ++ searchOrder (removeDeeply userImposed nonDetermGivs)
 
-    logPoint {level=FineDetails} "deptycheck.derive.least-effort" [sig, con] "- used final order: \{theOrder}"
+    logPoint FineDetails "deptycheck.derive.least-effort" [sig, con] "- used final order: \{theOrder}"
 
     --------------------------
     -- Producing the result --
@@ -357,7 +357,7 @@ export
         -- TODO to get rid of `believe_me` below
         let df = believe_me $ deriveFirst @{impl} (rewrite tyLen in Prelude.toList sig.givenParams) (rewrite conLen in Prelude.toList givs)
         let userImposed = filter (not . contains' givs) $ nub $ conArgIdx <$> df
-        logPoint {level=FineDetails} "deptycheck.derive.least-effort" [sig, con] "- user-imposed: \{userImposed}"
+        logPoint FineDetails "deptycheck.derive.least-effort" [sig, con] "- user-imposed: \{userImposed}"
         pure userImposed
 
 --||| Best effort non-obligatory tactic tries to use as much external generators as possible

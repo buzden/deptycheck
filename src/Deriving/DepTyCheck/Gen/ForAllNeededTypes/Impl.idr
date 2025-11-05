@@ -60,7 +60,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
     -- look for external gens, and call it if exists
     let Nothing = lookupLengthChecked sig !ask
       | Just (name, Element extSig lenEq) => do
-          logPoint {level=Details} "deptycheck.derive.closuring.external" [sig] "is used as an external generator"
+          logPoint Details "deptycheck.derive.closuring.external" [sig] "is used as an external generator"
           pure (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
 
     -- get the name of internal gen, derive if necessary
@@ -90,7 +90,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
       put True
 
     -- call the internal gen
-    logPoint {level=DetailedDebug} "deptycheck.derive.closuring.internal" [sig] "is used as an internal generator"
+    logPoint DetailedDebug "deptycheck.derive.closuring.internal" [sig] "is used as an internal generator"
     pure (callCanonic sig internalGenName fuel values, Nothing)
 
     where
@@ -100,7 +100,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
 
         -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
         let genFunClaim = export' name $ canonicSig sig
-        genFunBody <- logBounds {level=Info} "deptycheck.derive.type" [sig] $ def name <$> assert_total canonicBody sig name
+        genFunBody <- logBounds Info "deptycheck.derive.type" [sig] $ def name <$> assert_total canonicBody sig name
 
         -- remember the derived stuff
         tell ([genFunClaim], [genFunBody])

@@ -115,7 +115,7 @@ Monad m => MonadTrans t => NamespaceProvider m => NamespaceProvider (t m) where
   provideNS = lift provideNS
 
 export
-inNS : Elaboration m => Namespace -> NamespaceProvider m
+inNS : Monad m => Namespace -> NamespaceProvider m
 inNS ns = MkNSProvider $ pure ns
 
 ||| Prepend namespace into which everything is generated to name
@@ -454,15 +454,15 @@ parameters (t : SpecTask)
     (con : Con) ->
     (0 conN : ConArgsNamed con) =>
     m UnificationVerdict
-  unifyCon con = logBounds "specialiseData.unifyCon" [t.polyTy, con] $ do
+  unifyCon con = logBounds Debug "specialiseData.unifyCon" [t.polyTy, con] $ do
     let Element ca _ = allL2V con.args @{conArgsNamed}
     let Element ta _ = allL2V t.tqArgs @{t.tqArgsNamed}
     let uniTask =
       MkUniTask {lfv=_} ca con.type
                 {rfv=_} ta t.fullInvocation
-    logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier task: \{show uniTask}"
+    logPoint DetailedDebug "specialiseData.unifyCon" [t.polyTy, con] "Unifier task: \{show uniTask}"
     uniRes <- unify uniTask
-    logPoint {level=DetailedTrace} "specialiseData.unifyCon" [t.polyTy, con] "Unifier output: \{show uniRes}"
+    logPoint DetailedDebug "specialiseData.unifyCon" [t.polyTy, con] "Unifier output: \{show uniRes}"
     pure uniRes
 
   ---------------------------------
@@ -479,7 +479,7 @@ parameters (t : SpecTask)
     let fromLambda = finToNat fvId >= ur.task.lfv
     let rig = if fromLambda then M0 else fvData.rig
     let piInfo = if fromLambda && (fvData.piInfo == ExplicitArg) then ImplicitArg else fvData.piInfo
-    (Element (MkArg rig piInfo (Just fvData.name) fvData.type) ItIsNamed)
+    Element (MkArg rig piInfo (Just fvData.name) fvData.type) ItIsNamed
 
   ||| Generate a specialised constructor
   mkSpecCon :
@@ -585,38 +585,36 @@ parameters (t : SpecTask)
       (0 mn : ConArgsNamed mCon) =>
       Nat ->
       m $ List Decl
-    mkMultiInjDecl ur mt con mcon i =
-      logBounds "specialiseData.mkMultiInjDecl" [mt, mcon] $ do
-        let S _ = length mcon.args
-        | _ => pure []
-        let n = fromString "mInj\{show i}"
-        let 0 _ = conArgsNamed @{mn}
-        let Element ourArgs _ = makeArgsImplicit mcon.args
-        (Element a1 _, am1) <- genArgAliases ourArgs
-        (Element a2 _, am2) <- genArgAliases ourArgs
-        let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
-                      con.apply var $ mergeAliases ur.fullResult am1
-        let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $
-                      con.apply var $ mergeAliases ur.fullResult am2
+    mkMultiInjDecl ur mt con mcon i = do
+      let S _ = length mcon.args
+      | _ => pure []
+      let n = fromString "mInj\{show i}"
+      let 0 _ = conArgsNamed @{mn}
+      let Element ourArgs _ = makeArgsImplicit mcon.args
+      (Element a1 _, am1) <- genArgAliases ourArgs
+      (Element a2 _, am2) <- genArgAliases ourArgs
+      let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
+                    con.apply var $ mergeAliases ur.fullResult am1
+      let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $
+                    con.apply var $ mergeAliases ur.fullResult am2
 
-        let eqs = mkEqualsTuple $ zip (pushIn a1 %search) (pushIn a2 %search)
-        let sig =
-          flip piAll a1 $
-            flip piAll a2 $ `((~(lhsCon) ~=~ ~(rhsCon)) -> ~(eqs))
-        let lhs = mkDoubleBinds (cast $ zip a1 a2) (var n) .$ `(Refl)
-        pure
-          [ public' n sig
-          , def n $ singleton $ patClause lhs $ tupleOfN (length mcon.args) `(Refl)
-          ]
+      let eqs = mkEqualsTuple $ zip (pushIn a1 %search) (pushIn a2 %search)
+      let sig =
+        flip piAll a1 $
+          flip piAll a2 $ `((~(lhsCon) ~=~ ~(rhsCon)) -> ~(eqs))
+      let lhs = mkDoubleBinds (cast $ zip a1 a2) (var n) .$ `(Refl)
+      pure
+        [ public' n sig
+        , def n $ singleton $ patClause lhs $ tupleOfN (length mcon.args) `(Refl)
+        ]
 
     ||| Derive multiinjectivity for all polymorphic constructors that have
     ||| a specialised equivalent
     mkMultiInjDecls :
       UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
-    mkMultiInjDecls ur specTy =
-      logBounds "specialiseData.mkMultiInjDecls" [specTy] $ do
-        let s = map2UConsN mkMultiInjDecl ur specTy
-        join <$> sequence s
+    mkMultiInjDecls ur specTy = do
+      let s = map2UConsN mkMultiInjDecl ur specTy
+      join <$> sequence s
 
     ----------------------------------
     --- MULTICONGRUENCY DERIVATION ---
@@ -635,33 +633,31 @@ parameters (t : SpecTask)
       (0 mn : ConArgsNamed mCon) =>
       Nat ->
       m $ List Decl
-    mkMultiCongDecl ur mt _ mcon i =
-      logBounds "specialiseData.mkMultiCongDecl" [mt, mcon] $ do
-        let S _ = length mcon.args
-        | _ => pure []
-        let n = fromString "mCong\{show i}"
-        let 0 _ = conArgsNamed @{mn}
-        let Element ourArgs _ = makeArgsImplicit mcon.args
-        (Element a1 _, am1) <- genArgAliases ourArgs
-        (Element a2 _, am2) <- genArgAliases ourArgs
-        let lhsCon = mcon.apply var $ mergeAliases ur.fullResult am1
-        let rhsCon = mcon.apply var $ mergeAliases ur.fullResult am2
-        let eqs = mkEqualsTuple $ zip (pushIn a1 %search) (pushIn a2 %search)
-        let sig =
-          flip piAll a1 $ flip piAll a2 $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
-        let lhs = mkDoubleBinds (cast $ zip a1 a2) (var n) .$ tupleOfN (length mcon.args) `(Refl)
-        pure
-          [ public' n sig
-          , def n $ singleton $ patClause lhs $ `(Refl)
-          ]
+    mkMultiCongDecl ur mt _ mcon i = do
+      let S _ = length mcon.args
+      | _ => pure []
+      let n = fromString "mCong\{show i}"
+      let 0 _ = conArgsNamed @{mn}
+      let Element ourArgs _ = makeArgsImplicit mcon.args
+      (Element a1 _, am1) <- genArgAliases ourArgs
+      (Element a2 _, am2) <- genArgAliases ourArgs
+      let lhsCon = mcon.apply var $ mergeAliases ur.fullResult am1
+      let rhsCon = mcon.apply var $ mergeAliases ur.fullResult am2
+      let eqs = mkEqualsTuple $ zip (pushIn a1 %search) (pushIn a2 %search)
+      let sig =
+        flip piAll a1 $ flip piAll a2 $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
+      let lhs = mkDoubleBinds (cast $ zip a1 a2) (var n) .$ tupleOfN (length mcon.args) `(Refl)
+      pure
+        [ public' n sig
+        , def n $ singleton $ patClause lhs $ `(Refl)
+        ]
 
     ||| Derive multicongruency for all specialised constructors
     mkMultiCongDecls :
       UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
-    mkMultiCongDecls ur specTy =
-      logBounds "specialiseData.mkMultiCongDecls" [specTy] $ do
-        let s = map2UConsN mkMultiCongDecl ur specTy
-        join <$> sequence s
+    mkMultiCongDecls ur specTy = do
+      let s = map2UConsN mkMultiCongDecl ur specTy
+      join <$> sequence s
 
   -----------------------------------
   --- CAST INJECTIVITY DERIVATION ---
@@ -681,25 +677,24 @@ parameters (t : SpecTask)
     (0 mcn : ConArgsNamed mcon) =>
     Nat ->
     m Clause
-  mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur mt _ con n =
-    logBounds "specialiseData.mkCastInjClause" [mt, con] $ do
-      let 0 _ = conArgsNamed @{mcn}
-      (Element a1 _, am1) <- genArgAliases con.args
-      (Element a2 _, am2) <- genArgAliases con.args
-      let am1' = fromList $ mapSnd (const `(_)) <$> am1
-      let am2' = fromList $ mapSnd (const `(_)) <$> am2
-      let ures1 = substituteVariables am1' <$> ur.fullResult
-      let ures2 = substituteVariables am2' <$> ur.fullResult
-      let bta1 = aliasedAppBind (cast tam1) `(castInjImpl)
-      let bta2 = aliasedAppBind (cast tam2) bta1
-      let lhsCon = con.apply bindVar $ am1'
-      let rhsCon = con.apply bindVar $ am1'
-      let patRhs : TTImp
-          patRhs = case (length a1) of
-            0 => `(Refl)
-            _ => (var $ inGenNS t $ fromString $ "mCong\{show n}") .$
-                  ((var $ inGenNS t $ fromString $ "mInj\{show n}") .$ var "r")
-      pure $ bta2 .! (n1, lhsCon) .! (n2, rhsCon) .$ bindVar "r" .= patRhs
+  mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur mt _ con n = do
+    let 0 _ = conArgsNamed @{mcn}
+    (Element a1 _, am1) <- genArgAliases con.args
+    (Element a2 _, am2) <- genArgAliases con.args
+    let am1' = fromList $ mapSnd (const `(_)) <$> am1
+    let am2' = fromList $ mapSnd (const `(_)) <$> am2
+    let ures1 = substituteVariables am1' <$> ur.fullResult
+    let ures2 = substituteVariables am2' <$> ur.fullResult
+    let bta1 = aliasedAppBind (cast tam1) `(castInjImpl)
+    let bta2 = aliasedAppBind (cast tam2) bta1
+    let lhsCon = con.apply bindVar $ am1'
+    let rhsCon = con.apply bindVar $ am1'
+    let patRhs : TTImp
+        patRhs = case (length a1) of
+          0 => `(Refl)
+          _ => (var $ inGenNS t $ fromString $ "mCong\{show n}") .$
+                ((var $ inGenNS t $ fromString $ "mInj\{show n}") .$ var "r")
+    pure $ bta2 .! (n1, lhsCon) .! (n2, rhsCon) .$ bindVar "r" .= patRhs
 
   ||| Derive cast injectivity proof
   mkCastInjDecls :
@@ -708,38 +703,37 @@ parameters (t : SpecTask)
     (mt : TypeInfo) ->
     (0 mtp : AllTyArgsNamed mt) =>
     m $ List Decl
-  mkCastInjDecls ur ti =
-    logBounds "specialiseData.mkCastInjDecls" [ti] $ do
-      let Element prepArgs prf = hideExplicitArgs ti.args @{mtp.tyArgsNamed}
-      ta1@(Element a1 _, am1) <- genArgAliases prepArgs
-      ta2@(Element a2 _, am2) <- genArgAliases prepArgs
-      xVar <- genSym "x"
-      yVar <- genSym "y"
-      let mToPVar = var $ inGenNS t "mToP"
-      let mToPImplVar = var $ inGenNS t "mToPImpl"
-      let arg1 = MkArg MW ImplicitArg (Just xVar) $
-                  ti.apply var $ fromList $ mapSnd var <$> am1
-      let arg2 = MkArg MW ImplicitArg (Just yVar) $
-                  ti.apply var $ fromList $ mapSnd var <$> am2
-      let eqs =
-        `((~(aliasedApp (cast am1) mToPImplVar .$ var xVar)
-           ~=~
-           ~(aliasedApp (cast am2) $ mToPImplVar .$ var yVar)) ->
-            ~(var xVar) ~=~ ~(var yVar))
-      castInjImplClauses <-
-        sequence $ map2UConsN (mkCastInjClause (a1, am1) (a2, am2) xVar yVar) ur ti
-      let tyArgPairs = cast $ zip ti.argNames ti.argNames
-      pure
-        [ public' "castInjImpl" $
-            flip piAll (makeTypeArgM0 <$> a1) $
-              flip piAll (makeTypeArgM0 <$> a2) $
-                pi arg1 $ pi arg2 $ eqs
-        , def "castInjImpl" castInjImplClauses
-        , interfaceHint Public "castInj" $ forallMTArgs $
-            `(Injective ~(aliasedApp tyArgPairs mToPImplVar))
-        , def "castInj" $ singleton $
-            aliasedAppBind tyArgPairs `(castInj) .= `(MkInjective castInjImpl)
-        ]
+  mkCastInjDecls ur ti = do
+    let Element prepArgs prf = hideExplicitArgs ti.args @{mtp.tyArgsNamed}
+    ta1@(Element a1 _, am1) <- genArgAliases prepArgs
+    ta2@(Element a2 _, am2) <- genArgAliases prepArgs
+    xVar <- genSym "x"
+    yVar <- genSym "y"
+    let mToPVar = var $ inGenNS t "mToP"
+    let mToPImplVar = var $ inGenNS t "mToPImpl"
+    let arg1 = MkArg MW ImplicitArg (Just xVar) $
+                ti.apply var $ fromList $ mapSnd var <$> am1
+    let arg2 = MkArg MW ImplicitArg (Just yVar) $
+                ti.apply var $ fromList $ mapSnd var <$> am2
+    let eqs =
+      `((~(aliasedApp (cast am1) mToPImplVar .$ var xVar)
+          ~=~
+          ~(aliasedApp (cast am2) $ mToPImplVar .$ var yVar)) ->
+          ~(var xVar) ~=~ ~(var yVar))
+    castInjImplClauses <-
+      sequence $ map2UConsN (mkCastInjClause (a1, am1) (a2, am2) xVar yVar) ur ti
+    let tyArgPairs = cast $ zip ti.argNames ti.argNames
+    pure
+      [ public' "castInjImpl" $
+          flip piAll (makeTypeArgM0 <$> a1) $
+            flip piAll (makeTypeArgM0 <$> a2) $
+              pi arg1 $ pi arg2 $ eqs
+      , def "castInjImpl" castInjImplClauses
+      , interfaceHint Public "castInj" $ forallMTArgs $
+          `(Injective ~(aliasedApp tyArgPairs mToPImplVar))
+      , def "castInj" $ singleton $
+          aliasedAppBind tyArgPairs `(castInj) .= `(MkInjective castInjImpl)
+      ]
 
   -------------------------------------
   --- DECIDABLE EQUALITY DERIVATION ---
@@ -959,43 +953,43 @@ parameters (t : SpecTask)
   specDecls : Elaboration m => UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
   specDecls uniResults specTy = do
     let specTyDecl = specTy.decl
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "specTyDecl : \{show specTyDecl}"
     let mToPImplDecls = mkMToPImplDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "mToPImplDecls : \{show mToPImplDecls}"
     let mToPDecls = mkMToPDecls specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "mToP : \{show mToPDecls}"
     multiInjDecls <- mkMultiInjDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "multiInj : \{show multiInjDecls}"
     multiCongDecls <- mkMultiCongDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "multiCong : \{show multiCongDecls}"
     castInjDecls <- mkCastInjDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "castInj : \{show castInjDecls}"
     decEqDecls <- mkDecEqDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "decEq : \{show decEqDecls}"
     let showDecls = mkShowDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "Show : \{show showDecls}"
     let eqDecls = mkEqDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "Eq : \{show eqDecls}"
     let pToMImplDecls = mkPToMImplDecls uniResults specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "pToMImplDecls : \{show pToMImplDecls}"
     let pToMDecls = mkPToMDecls specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "pToM : \{show pToMDecls}"
     let fromStringDecls = mkFromStringDecls specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "fromString : \{show fromStringDecls}"
     let numDecls = mkNumDecls specTy
-    logPoint {level=DetailedTrace} "specialiseData.specDecls" [specTy]
+    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "num : \{show numDecls}"
     let onFull : List Decl =
       if any isUndecided uniResults
@@ -1079,7 +1073,7 @@ specialiseDataRaw resultName resultKind resultContent = do
   let resultKind = mapTTImp cleanupHoleAutoImplicitsImpl $ cleanupNamedHoles resultKind
   let resultContent = mapTTImp cleanupHoleAutoImplicitsImpl $ cleanupNamedHoles resultContent
   task <- getTask resultName resultKind resultContent
-  logPoint {level=DetailedTrace} "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
+  logPoint DetailedDebug "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
   uniResults <- sequence $ mapCons task $ unifyCon task
   let Element specTy specTyNamed = mkSpecTy task uniResults
   decls <- specDecls task uniResults specTy

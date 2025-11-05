@@ -71,9 +71,9 @@ verifyEmptyType polyTy specTy = do
 ||| Check type-level equality for two values
 checkEq : TTImp -> TTImp -> Elab ()
 checkEq a b = do
-  logPoint "verifySpecialisation.checkEq" [] $ show `(~a ~=~ ~b)
+  logPoint' "verifySpecialisation.checkEq" [] $ show `(~a ~=~ ~b)
   eqT : Type <- check `(~a = ~b)
-  logPoint "verifySpecialisation.checkEq" [] $ show !(quote eqT)
+  logPoint' "verifySpecialisation.checkEq" [] $ show !(quote eqT)
   _ : eqT <- check `(Refl)
   pure ()
 
@@ -220,7 +220,7 @@ verifyInterfaces polyTy specTy vals = traverse_ $ \(iface, verifyInterface) => d
   qInterface <- quote iface
   case (polyImpl, specImpl) of
       (Just _, Just _) => do
-        logPoint "verifySpecialisation" [] "\{show qInterface}: Ok"
+        logPoint' "verifySpecialisation" [] "\{show qInterface}: Ok"
         verifyInterface polyTy specTy vals
       (Nothing, Just _) => fail "Specialised type implements \{show qInterface}, while polymorhpic type doesn't"
       (Just _, Nothing) => fail "Polymorphic type implements \{show qInterface}, while specialised type doesn't"
@@ -234,13 +234,13 @@ verifySpecialisation' :
 verifySpecialisation' polyTy specTy pairs = do
   let (polyVals, specVals) = unzip pairs
   constructExprs specTy specVals
-  logPoint "verifySpecialisation" [] "Constructors: Ok"
+  logPoint' "verifySpecialisation" [] "Constructors: Ok"
   verifySingleCasts' polyTy specTy pairs
-  logPoint "verifySpecialisation" [] "Single casts: Ok"
+  logPoint' "verifySpecialisation" [] "Single casts: Ok"
   verifyDoubleCasts polyTy specTy specVals
-  logPoint "verifySpecialisation" [] "Double casts 1: Ok"
+  logPoint' "verifySpecialisation" [] "Double casts 1: Ok"
   verifyDoubleCasts specTy polyTy polyVals
-  logPoint "verifySpecialisation" [] "Double casts 2: Ok"
+  logPoint' "verifySpecialisation" [] "Double casts 2: Ok"
   verifyInterfaces polyTy specTy specVals
     [ (DecEq, verifyDecEqs)
     , (Show, verifyShows)
