@@ -1,6 +1,6 @@
 module Language.Reflection.Logging
 
-import public Control.Monad.Writer
+import Control.Monad.Writer
 import public Data.So
 import public Data.String -- public due to compiler's bug #2439
 
@@ -118,7 +118,7 @@ export
 
 export
 [WriterLog] MonadWriter String m => MonadLog m where
-  logPoint level topic positions desc = tell "\{topic} \{show $ toNatLevel level} \{positions} \{desc}\n"
+  logPoint level topic positions desc = tell "\{topic} \{show $ toNatLevel level}: \{positions} \{desc}\n"
 
 export %defaulthint
 DefaultLog : Elaboration m => MonadLog m
