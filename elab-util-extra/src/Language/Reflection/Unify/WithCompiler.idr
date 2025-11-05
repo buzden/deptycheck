@@ -318,8 +318,8 @@ unify' task = do
   let checkTarget =
     buildUpTarget (zip lhsNames snocLFV) $
       buildUpTarget (zip rhsNames snocRFV) `(Refl)
-  logPoint DetailedTrace "unifyWithCompiler" [] "Target type: \{show checkTargetType}"
-  logPoint DetailedTrace "unifyWithCompiler" [] "Target value: \{show checkTarget}"
+  logPoint DetailedDebug "unifyWithCompiler" [] "Target type: \{show checkTargetType}"
+  logPoint DetailedDebug "unifyWithCompiler" [] "Target value: \{show checkTarget}"
   -- Instantiate target type
   Just checkTargetType' : Maybe Type <-
     try (Just <$> check checkTargetType) (pure Nothing)
@@ -329,21 +329,21 @@ unify' task = do
     try (Just <$> check checkTarget) (pure Nothing)
   | _ => throwError $ Just NoUnificationError
   ctQuote <- quote checkTarget'
-  logPoint DetailedTrace "unifyWithCompiler" [] "Target value after quoting: \{show ctQuote}"
+  logPoint DetailedDebug "unifyWithCompiler" [] "Target value after quoting: \{show ctQuote}"
   let vectNames = cast allNames
   -- Extract unification results
   uniResults <-
     extractFVData checkTargetType' checkTarget' allFreeVars vectNames
-  logPoint DetailedTrace "unifyWithCompiler" [] "Raw unification results: \{show uniResults}"
+  logPoint DetailedDebug "unifyWithCompiler" [] "Raw unification results: \{show uniResults}"
   -- Generate dependency graph
   let allZipped = zip vectNames $ zip (task.lhsFreeVars ++ task.rhsFreeVars) uniResults
   let dg = genDG $ makeFVData <$> allZipped
   let dg = {fvData $= map {piInfo $= map $ substituteVariables hole2N}} dg
-  -- logPoint DetailedTrace "unifyWithCompiler" [] "InitialDG: \{show dg}"
+  logPoint DetailedDebug "unifyWithCompiler" [] "Initial DG: \{show dg}"
   let dg = subEmpties dg
-  -- logPoint DetailedTrace "unifyWithCompiler" [] "DG after subEmpties: \{show dg}"
+  logPoint DetailedDebug "unifyWithCompiler" [] "DG after subEmpties: \{show dg}"
   let solved = solveDG dg
-  -- logPoint DetailedTrace "unifyWithCompiler" [] "Solved DG: \{show solved}"
+  logPoint DetailedDebug "unifyWithCompiler" [] "Solved DG: \{show solved}"
   pure solved
 
 ||| Run unification in a try block
@@ -358,9 +358,8 @@ unifyWithCompiler task = do
   let err = pure {f=Elab} $ Left $ Just CatastrophicError
   rr <- try ret err
   dg <- liftEither rr
-  -- logPoint DetailedTrace "unifyWithCompiler" [] "DG after trying: \{show dg}"
   let ur = finalizeDG task dg
-  -- logPoint DetailedTrace "unifyWithCompiler" [] "Unification result: \{show ur}"
+  logPoint DetailedDebug "unifyWithCompiler" [] "Unification result: \{show ur}"
   pure ur
 
 ||| Run unification in a try block
