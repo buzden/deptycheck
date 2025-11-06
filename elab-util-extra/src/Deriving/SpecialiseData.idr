@@ -49,7 +49,7 @@ data SpecialisationError : Type where
   InternalError             : String -> SpecialisationError
   ||| Lambda has unnamed arguments
   UnnamedArgInLambdaError   : SpecialisationError
-  ||| Lambda has unnamed arguments
+  ||| Polymorphic type has unnamed arguments
   UnnamedArgInPolyTyError   : Name -> SpecialisationError
   ||| Failed to get TypeInfo
   |||
@@ -163,11 +163,10 @@ prependS : String -> Name -> Name
 prependS s n = UN $ Basic $ s ++ show n
 
 ||| Given a list of arguments, generate a list of aliases for them
-genAliases' : (f : Name -> Name) -> (as : List Arg) -> (0 _ : All IsNamedArg as) => List (Name, Name)
-genAliases' _ [] = []
-genAliases' f (x :: xs) @{_ :: _} = do
-  let gn = f $ Expr.argName x
-  (argName x, UN $ Basic $ show (Expr.argName x) ++ show gn) :: genAliases' f xs
+transformArgNames' : (f : Name -> Name) -> (as : List Arg) -> (0 _ : All IsNamedArg as) => List (Name, Name)
+transformArgNames' _ [] = []
+transformArgNames' f (x :: xs) @{_ :: _} =
+  (argName x, f $ Expr.argName x) :: transformArgNames' f xs
 
 ||| Given a list of arguments, generate a list of aliased arguments
 ||| and a list of aliases
@@ -176,8 +175,8 @@ genArgAliases :
   (as : List Arg) ->
   (0 _ : All IsNamedArg as) =>
   (Subset (List Arg) (All IsNamedArg), List (Name, Name))
-genArgAliases f as = do
-  let aliases = genAliases' f as
+transformArgNames f as = do
+  let aliases = transformArgNames' f as
   (applyArgAliases as aliases empty, aliases)
 
 ||| Given a list of aliased argument pairs, generate a list of equality type
@@ -306,7 +305,7 @@ getTask resultName resultKind resultContent = do
   let Yes tqArgsNamed = all isNamedArg tqArgs
   | _ => throwError UnnamedArgInLambdaError
   -- Create aliases for spec lambda's arguments and perform substitution
-  let (Element tqArgs tqArgsNamed, tqAlias) = genArgAliases (prependS "fv^") tqArgs
+  let (Element tqArgs tqArgsNamed, tqAlias) = transformArgNames (prependS "fv^") tqArgs
   let tqRet = substituteVariables (fromList $ mapSnd var <$> tqAlias) tqRet
   let (ttArgs, _) = unPi resultKind
   -- Check for partial application in spec
@@ -604,8 +603,8 @@ parameters (t : SpecTask)
     let n = fromString "mInj\{show i}"
     let 0 _ = conArgsNamed @{mn}
     let Element ourArgs _ = makeArgsImplicit mcon.args
-    let (Element a1 _, am1) = genArgAliases (prependS "lhs^") ourArgs
-    let (Element a2 _, am2) = genArgAliases (prependS "rhs^") ourArgs
+    let (Element a1 _, am1) = transformArgNames (prependS "lhs^") ourArgs
+    let (Element a2 _, am2) = transformArgNames (prependS "rhs^") ourArgs
     let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
                   con.apply var $ mergeAliases ur.fullResult am1
     let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $
@@ -650,8 +649,8 @@ parameters (t : SpecTask)
     let n = fromString "mCong\{show i}"
     let 0 _ = conArgsNamed @{mn}
     let Element ourArgs _ = makeArgsImplicit mcon.args
-    let (Element a1 _, am1) = genArgAliases (prependS "lhs^") ourArgs
-    let (Element a2 _, am2) = genArgAliases (prependS "rhs^") ourArgs
+    let (Element a1 _, am1) = transformArgNames (prependS "lhs^") ourArgs
+    let (Element a2 _, am2) = transformArgNames (prependS "rhs^") ourArgs
     let lhsCon = mcon.apply var $ mergeAliases ur.fullResult am1
     let rhsCon = mcon.apply var $ mergeAliases ur.fullResult am2
     let eqs = mkEqualsTuple $ zip (pushIn a1 %search) (pushIn a2 %search)
@@ -687,8 +686,8 @@ parameters (t : SpecTask)
     Clause
   mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur mt _ con n = do
     let 0 _ = conArgsNamed @{mcn}
-    let (Element a1 _, am1) = genArgAliases (prependS "lhs^") con.args
-    let (Element a2 _, am2) = genArgAliases (prependS "rhs^") con.args
+    let (Element a1 _, am1) = transformArgNames (prependS "lhs^") con.args
+    let (Element a2 _, am2) = transformArgNames (prependS "rhs^") con.args
     let am1' = fromList $ mapSnd (const `(_)) <$> am1
     let am2' = fromList $ mapSnd (const `(_)) <$> am2
     let ures1 = substituteVariables am1' <$> ur.fullResult
@@ -712,8 +711,8 @@ parameters (t : SpecTask)
     List Decl
   mkCastInjDecls ur ti = do
     let Element prepArgs prf = hideExplicitArgs ti.args @{mtp.tyArgsNamed}
-    let ta1@(Element a1 _, am1) = genArgAliases (prependS "lhs^") prepArgs
-    let ta2@(Element a2 _, am2) = genArgAliases (prependS "rhs^") prepArgs
+    let ta1@(Element a1 _, am1) = transformArgNames (prependS "lhs^") prepArgs
+    let ta2@(Element a2 _, am2) = transformArgNames (prependS "rhs^") prepArgs
     let xVar = "castInj^x"
     let yVar = "castInj^y"
     let mToPVar = var $ inGenNS t "mToP"
