@@ -12,4 +12,5 @@ import public Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface
 
 public export
 interface DeriveBodyRhsForCon where
-  consGenExpr : DerivationClosure m => GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
+  consGenExpr : DerivationClosure m => Elaboration m =>
+                GenSignature -> (con : Con) -> (given : SortedSet $ Fin con.args.length) -> (fuel : TTImp) -> m TTImp
