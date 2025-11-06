@@ -170,7 +170,7 @@ transformArgNames' f (x :: xs) @{_ :: _} =
 
 ||| Given a list of arguments, generate a list of aliased arguments
 ||| and a list of aliases
-genArgAliases :
+transformArgNames :
   (f : Name -> Name) ->
   (as : List Arg) ->
   (0 _ : All IsNamedArg as) =>
