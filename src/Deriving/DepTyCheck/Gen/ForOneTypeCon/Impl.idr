@@ -20,7 +20,7 @@ isSimpleBindVar $ IBindVar {} = True
 isSimpleBindVar _             = False
 
 export
-canonicConsBody : DeriveBodyRhsForCon => DerivationClosure m => GenSignature -> Name -> Con -> m $ List Clause
+canonicConsBody : DeriveBodyRhsForCon => DerivationClosure m => Elaboration m => GenSignature -> Name -> Con -> m $ List Clause
 canonicConsBody sig name con = do
 
   -- Get file position of the constructor definition (for better error reporting)
