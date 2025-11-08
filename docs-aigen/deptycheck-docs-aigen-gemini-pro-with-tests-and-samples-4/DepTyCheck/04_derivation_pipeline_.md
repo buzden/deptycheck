@@ -154,7 +154,7 @@ sequenceDiagram
     S1->>S2: New task: `Nat`. Let's work on it.
     S2-->>S1: `Gen Nat` is simple. Here's the code.
     S1-->>S4: Here's the `Gen Nat` code you asked for.
-    S4->>S4: Great. Now I can write the `(::)` code:<br>`do xs <- ...; x <- ...`
+    S4->>S4: Great. Now I can write the `(::)` code`
     S4-->>S2: Here's the finished code for `(::)`.
     S2-->>S1: Here's the finished code for `SortedList`.
     S1-->>DG: Your `Gen SortedList` is ready!

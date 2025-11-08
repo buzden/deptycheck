@@ -118,7 +118,7 @@ sequenceDiagram
     FOTC->>FANT: To build a `Cons`, I need a `Nat`. Can you get me a `Gen Nat`?
     FANT-->>FOTC: Sure, the user provided one via `auto` implicit. Use that.
     FOTC->>FOT: For the tail, I need to make a recursive call to `genListNat`.
-    FOTC-->>FOT: Here's the plan for `Cons`: `do n <- genNat; tail <- genListNat; pure (Cons n tail)`
+    FOTC-->>FOT: "Here's the plan for `Cons`: pure (Cons n tail)`
     FOT->>FOT: Great. I'll combine `Nil` and `Cons` using `frequency` and `Fuel` logic.
     FOT-->>FANT: The `genListNat` function is ready!
     FANT-->>DG: All tasks complete. Here is the final generated code.
