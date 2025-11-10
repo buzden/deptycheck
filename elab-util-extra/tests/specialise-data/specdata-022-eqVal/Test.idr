@@ -5,7 +5,7 @@ import Shared
 %language ElabReflection
 
 -- The specialiser in its current form does *not* support type aliases!
-failing "Internal error: failed to get type info"
+failing "MissingTypeInfoError Builtin.(===)"
   %runElab specialiseData' "Eq3" $ \x => x = 3
 
 %runElab specialiseData' "Eq3'" $ \x : Nat => Builtin.Equal x 3
