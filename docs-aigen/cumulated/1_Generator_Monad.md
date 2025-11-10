@@ -256,10 +256,10 @@ genNatVect : Gen1 (n : Nat ** Vect n Bool)
 genNatVect = do
   -- Step 1: Generate a random number from 1 to 5
   n <- choose (1, 5)
-  
+
   -- Step 2: Use that 'n' to generate a vector of booleans of that exact length
   vec <- vectOf n (elements [True, False])
-  
+
   -- Step 3: Package them together into the dependent pair
   pure (n ** vec)
 ```
@@ -448,7 +448,7 @@ main = do
   -- Run a guaranteed generator
   user <- pick1 genUser
   printLn user
-  
+
   -- Run a maybe-empty generator safely
   finResult <- pick (genFin 3)
   case finResult of
@@ -463,7 +463,7 @@ Let's try them with our previous examples:
 -- > pick1 genUser
 -- Result could be: MkUser 42 "Alice"
 
--- > pick1 genUser  
+-- > pick1 genUser
 -- Result could be: MkUser 18 "Charlie"
 ```
 
@@ -501,6 +501,151 @@ MkUser "Bob" 42
 ```
 
 Run it multiple times to see different random results!
+
+## Understanding Gen's Core Constructors
+
+Let's examine the building blocks that make `Gen` work. These constructors are the fundamental "LEGO bricks" for creating any generator:
+
+### Empty: The Generator That Produces Nothing
+
+```idris
+Empty : Gen MaybeEmpty a
+```
+
+- **What it does**: This generator never produces a value. It's only possible for generators with `MaybeEmpty` emptiness.
+- **Analogy**: It's like an empty LEGO box. No matter how much you shake it, no bricks will come out.
+- **When to use it**: When you explicitly know that for certain inputs, no valid values can be generated for a type. For example, a generator for `Fin 0` (finite sets of size zero) would always be `Empty`.
+
+### Pure: The Generator That Always Gives the Same Value
+
+```idris
+Pure : a -> Gen em a
+```
+
+- **What it does**: This generator always produces the exact same value `a` you give it. It doesn't use randomness.
+- **Analogy**: It's a LEGO set where you always get the same single, specific brick.
+- **When to use it**: When you need a constant value in your generated data. For example, `Pure 42` is a generator that always gives you the number `42`.
+
+### Raw: The Generator That Uses Pure Randomness
+
+```idris
+Raw : RawGen a -> Gen em a
+```
+
+- **What it does**: This constructor wraps a `RawGen a`. A `RawGen a` is basically a direct way to interact with the underlying random number generator (`MonadRandom`). It says, "just give me a random `a` from the system's randomness."
+- **Analogy**: You reach into a bag of assorted LEGOs and pull out a random piece.
+- **When to use it**: For fundamental random operations. `DepTyCheck` uses `Raw` for basic types like generating a random `Int` or `Char`.
+
+```idris
+-- A very simple generator for any Random type `a`
+chooseAny : Random a => Gen NonEmpty a
+chooseAny = Raw $ MkRawGen getRandom
+```
+
+### OneOf: Combining Multiple Generators
+
+```idris
+OneOf : GenAlternatives True em a -> Gen em a
+```
+
+- **What it does**: This combines several other generators. When `OneOf` is run, it randomly picks *one* of the generators you provided and then runs *that* chosen generator. `GenAlternatives` is a way to hold a list of generators, possibly with weights (frequencies).
+- **Analogy**: You have several different smaller LEGO sets. You randomly pick one of these sets, and then you build whatever that set tells you to build.
+- **When to use it**: When you want to model choices. For example, our `genTrafficLight` would internally use `OneOf` to choose between `Red`, `Yellow`, or `Green`.
+
+```idris
+-- An example of using OneOf
+genTrafficLight : Gen NonEmpty TrafficLight
+genTrafficLight = oneOf (altsFromList [Pure Red, Pure Yellow, Pure Green])
+```
+
+### Bind: Chaining Generators (Monadic Composition)
+
+```idris
+Bind : RawGen c -> (c -> Gen biem a) -> Gen em a
+```
+
+- **What it does**: This is the most powerful constructor, enabling sequential operations with generators. It first runs a `RawGen c` to produce a value `c`. Then, it takes that `c` and passes it to a *function* `(c -> Gen biem a)`, which in turn produces *another* generator that is then run. This is exactly what the `>>=` (bind) operator does for `Monad`s!
+- **Analogy**: You build one part of your LEGO project (get `c`), and *then*, based on what `c` turned out to be, you look up the *next* instruction manual (`c -> Gen biem a`) and build the rest of your project accordingly.
+- **When to use it**: When the generation of one part of your data depends on a randomly generated value from another part.
+
+```idris
+-- Example: Generating a list of random length
+genListOfRandomLength : Gen NonEmpty (List Int)
+genListOfRandomLength =
+  choose (0, 10) `Bind` \len => sequence (List.replicate len (choose (0, 100)))
+```
+
+## How Generators Compose: Functor, Applicative, Monad
+
+The `Gen` data type is not just a collection of constructors; it's designed to be composable. This is achieved by making it an instance of standard functional programming interfaces: `Functor`, `Applicative`, and `Monad`.
+
+### Functor: Transforming Generated Values
+
+```idris
+-- If genInt produces a random integer,
+-- then (+1) <$> genInt produces a random integer plus one.
+incrementedIntGen : Gen NonEmpty Int
+incrementedIntGen = (+1) <$> chooseAny
+```
+
+Allows you to `map` (transform) the values *inside* a generator without changing how they are generated.
+
+### Applicative: Combining Independent Generators
+
+```idris
+-- Combine generators to create structured data
+genPersonTuple : Gen NonEmpty (String, Int)
+genPersonTuple = (,) <$> genName <*> genAge
+
+-- Or using applicative do notation:
+genPersonTuple' : Gen NonEmpty (String, Int)
+genPersonTuple' = [| (name, age) |]
+  where
+    name = genName
+    age  = genAge
+```
+
+Useful for building structured data, like records or tuples, where each field is generated independently.
+
+### Monad: Dependent Generation Chains
+
+```idris
+-- If genLength makes a Nat, and genStringOfLength takes a Nat to make a String
+genRandomString : Gen NonEmpty String
+genRandomString = do
+  len <- genLength      -- Generate a random length
+  str <- genStringOfLength len -- Generate a string of that specific length
+  pure str            -- Return the string
+```
+
+Allows you to chain generators where the next generation step depends on the result of a previous one.
+
+These interfaces are crucial because they let you build generators from smaller pieces in a structured and intuitive way, much like how you logically combine operations in regular programming.
+
+## How Generators Actually Run
+
+Once you've built a `Gen` instance, you need a way to actually *get* values out of it. This is where functions like `unGen1` and `unGen` come in. These functions "run" the generator.
+
+```idris
+-- From src/Test/DepTyCheck/Gen.idr
+unGen1 : MonadRandom m => (labels : CanManageLabels m) => Gen1 a -> m a
+unGen1 (Pure x)         = pure x
+unGen1 (Raw sf)         = sf.unRawGen
+unGen1 (OneOf oo)       = ... pickWeighted ...  -- Weighted selection
+unGen1 (Bind first createNext) = do
+  c <- unGen1 first
+  unGen1 (createNext c)
+```
+
+**How `unGen1` works:**
+1. Takes a `Gen1 a` (guaranteed to produce a value) and returns an `m a`
+2. Pattern matches on the generator structure
+3. For `Pure x`: Just returns `x` wrapped in the monad
+4. For `Raw sf`: Delegates to the `unRawGen` field to get the random value
+5. For `OneOf`: Generates a random number, picks an alternative, and recursively calls `unGen1`
+6. For `Bind`: Runs the first generator, then uses its result to create and run the next generator
+
+This recursive nature is key! `unGen1` walks through the `Gen` data structure, performing the random operations, bindings, and picks as defined by its constructors, until it produces a final value `a`.
 
 ## How Generators Work Under the Hood
 
@@ -600,9 +745,9 @@ genLight = elements [Red, Amber, Green]
 ```idris
 -- Generate pairs where the second value depends on the first
 genDependentPair : Gen1 (n : Nat ** Fin n)
-genDependentPair = 
-  choose (1, 10) >>= \n => 
-    elements' (allFins (n-1)) >>= \f => 
+genDependentPair =
+  choose (1, 10) >>= \n =>
+    elements' (allFins (n-1)) >>= \f =>
       pure (n ** f)
 ```
 
@@ -610,8 +755,8 @@ genDependentPair =
 
 ```idris
 genRandomList : Gen1 (List Bool)
-genRandomList = 
-  choose (0, 10) >>= \length => 
+genRandomList =
+  choose (0, 10) >>= \length =>
     listOf length (elements [True, False])
 ```
 

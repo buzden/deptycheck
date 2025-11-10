@@ -27,9 +27,9 @@ Let's begin by understanding why this analysis is so important.
 Think of Deep Constructor Analysis as archaeological excavation 🧑‍🔬. Imagine you're exploring ancient ruins:
 
 ```idris
-data Treasure = 
-  GoldBar | 
-  JewelBox (List Gem) | 
+data Treasure =
+  GoldBar |
+  JewelBox (List Gem) |
   MysteryChest Treasure
 ```
 
@@ -137,7 +137,7 @@ isD e = do
 The analysis is designed to handle various edge cases properly:
 
 - **Type literals**: When it encounters `IType`, it returns `noFree e`
-- **Primitive values**: For `IPrimVal`, it also returns `noFree e`  
+- **Primitive values**: For `IPrimVal`, it also returns `noFree e`
 - **Invalid applications**: Throws appropriate errors for malformed expressions
 - **Free variables with arguments**: Throws error if a free variable has arguments applied
 
@@ -330,7 +330,7 @@ result2 <- analyseDeepConsApp True (fromList ["n'", "m'"]) `(plus (S n') m')
 **Analysis of `List (Maybe Int)`:**
 - Recognizes `List` as constructor
 - Analyzes argument `Maybe Int`
-- Recognizes `Maybe` as constructor  
+- Recognizes `Maybe` as constructor
 - Analyzes argument `Int` (primitive type)
 - Returns structure: `List` applied to (`Maybe` applied to `Int`)
 
@@ -392,10 +392,10 @@ Deep Constructor Analysis is integrated into `DepTyCheck`'s `canonicConsBody` fu
 
 ```idris
 -- From the derivation pipeline (simplified)
-let deepConsApps : Vect _ $ Either (String, TTImp, List Name) _ := 
+let deepConsApps : Vect _ $ Either (String, TTImp, List Name) _ :=
   sig.givenParams.asVect <&> \idx => do
     let argExpr = conRetTypeArg idx  -- GADT index expression like (n + m)
-    let (ei, fns) = runWriter $ runEitherT $ 
+    let (ei, fns) = runWriter $ runEitherT $
           analyseDeepConsApp True conArgNames argExpr
     -- ei contains analysis results, fns contains found free names
 ```
@@ -452,7 +452,7 @@ genVecOp = deriveGen
 
 **Without Deep Analysis (inefficient):**
 1. Generate random `m` (say, 10)
-2. Generate random `k` (say, 12)  
+2. Generate random `k` (say, 12)
 3. Check: 10 + 12 = 22 ≠ 5 ❌
 4. Try again... and again...
 
@@ -538,7 +538,7 @@ Let's practice analyzing complex GADT index expressions:
 -- 1. Analyze: S (n + m) where n and m are free variables
 result1 <- analyseDeepConsApp True (fromList ["n", "m"]) `(S (n + m))
 
--- 2. Analyze: n * k where n and k are free variables  
+-- 2. Analyze: n * k where n and k are free variables
 result2 <- analyseDeepConsApp True (fromList ["n", "k"]) `(n * k)
 
 -- 3. Analyze: Fin (S n) where n is a free variable
@@ -562,7 +562,7 @@ Here's what you should expect from each analysis:
 -- BindExprFun: Template for S (free0 + free1)
 
 -- For n * k:
--- appliedFreeNames: [("n", DeterminedByType), ("k", DeterminedByType)]  
+-- appliedFreeNames: [("n", DeterminedByType), ("k", DeterminedByType)]
 -- BindExprFun: Template for free0 * free1
 
 -- For Fin (S n):
@@ -681,6 +681,20 @@ Now that you understand Deep Constructor Analysis, you might want to explore:
 - Explore Idris documentation on GADTs and dependent types
 - Practice with more complex type examples to strengthen your understanding
 
----
+### 2. `DeepConsApp`: The Blueprint Scanner
 
-*You've successfully completed this tutorial on Deep Constructor Application Analysis! This knowledge will help you understand how `DepTyCheck` automatically generates correct generators for complex Idris types.*
+`DeepConsApp` is a powerful scanner that can read a type expression and break it down into its fundamental parts. Its main job is to figure out how a type is built from its constructors. The "Deep" in its name means it can look inside nested structures.
+
+For example, if it scans the type `Maybe (List Int)`, it won't just see `Maybe`. It will scan deeply and report back: "This type is built using the constructor `Maybe`, which is applied to another type built with the constructor `List`, which is applied to the type `Int`."
+
+```idris
+-- File: src/Deriving/DepTyCheck/Util/DeepConsApp.idr
+
+-- A very simplified idea of what DeepConsApp does.
+-- It takes an expression and tells you the names of constructors inside it.
+analyseDeepConsApp : (analysedExpr : TTImp) -> List Name
+```
+*   `TTImp` is the raw representation of a piece of Idris code.
+*   The function returns a `List Name` of all the constructors it found.
+
+This utility is how the engine understands dependencies. By scanning an argument's type, it can see if that type uses any of the *other* arguments as parameters, which tells the Planning Station that a `do` block is needed.

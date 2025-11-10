@@ -107,7 +107,7 @@
 - **Files**: 1, 2, 14
 - **Focus**: Fundamental generator creation and safety
 
-### Derivation Engine Group  
+### Derivation Engine Group
 - **Files**: 3, 4, 5, 6, 7
 - **Focus**: Internal mechanics of automatic derivation
 
@@ -131,7 +131,7 @@
 3. Learn **File 14** (Emptiness Tracking) for safety
 4. Practice with **File 8** (Coverage Tracking) for testing
 
-### Intermediate Path  
+### Intermediate Path
 1. Study **Files 3-7** to understand the derivation engine
 2. Apply knowledge with **File 10** (Data Structures)
 3. Learn tuning with **File 12** (Derivation Tuning)
@@ -148,3 +148,48 @@
 - **Coverage tracking**: Files 8-9 complement each other
 - **Label system**: File 13 builds on labeling concepts from File 8
 - **Emptiness concept**: File 14 provides foundation for safety in all files
+
+## Diátaxis Framework Assessment
+
+### Diátaxis Alignment Scores (0-10)
+
+**Excellent Alignment (8-10):**
+- **10_Data_Structures.md** - 9/10 - Strong hands-on approach with practical exercises
+- **14_Emptiness_Tracking.md** - 9/10 - Superb tutorial structure with clear learning objectives
+- **8_Coverage_Tracking.md** - 8/10 - Good practical workflow with step-by-step guidance
+- **12_Derivation_Tuning.md** - 8/10 - Clear practical applications and tuning examples
+
+**Good Alignment (6-7):**
+- **1_Generator_Monad.md** - 7/10 - Solid foundational tutorial with practical examples
+- **9_Model_Coverage.md** - 7/10 - Clear learning objectives and three-step process
+- **13_Label_Management.md** - 7/10 - Practical debugging focus with hands-on examples
+
+**Fair Alignment (4-5):**
+- **2_Automatic_Derivation.md** - 6/10 - Some technical over-explanation but good progression
+- **11_Primitive_Imperative_Language.md** - 6/10 - Real-world examples but could use more hands-on
+- **5_Signature_Analysis.md** - 5/10 - Mixed practical/theoretical approach
+
+**Poor Alignment (2-4):**
+- **3_Recursion_Analysis.md** - 4/10 - Overly technical with internal implementation focus
+- **7_Single_Type_Derivation.md** - 4/10 - Internal interface focus without clear learning objectives
+- **4_Deep_Constructor_Analysis.md** - 3/10 - Abstract implementation details dominate
+- **6_Derivation_Core_Engine.md** - 2/10 - No practical learning activities, reads like internal docs
+
+### Diátaxis Principles Assessment
+
+**Strongest Diátaxis Alignment:**
+- Files that focus on practical, hands-on activities with clear learning goals
+- Tutorials with immediate practice opportunities and concrete examples
+- Documents that maintain clear teacher-pupil relationship throughout
+
+**Areas for Improvement:**
+- Reduce internal implementation details in favor of user-facing concepts
+- Strengthen learning narratives and "feeling of doing" exercises
+- Increase consistency in applying Diátaxis principles across all tutorials
+
+**Recommended Learning Order (Diátaxis-Optimized):**
+1. **Start with high-scoring tutorials**: 1, 10, 14, 8, 12
+2. **Progress to intermediate**: 9, 13, 2, 11
+3. **Reference technical details**: 5, 3, 7, 4, 6 (as needed)
+
+This assessment helps identify which tutorials provide the best learning experience according to Diátaxis pedagogical principles.

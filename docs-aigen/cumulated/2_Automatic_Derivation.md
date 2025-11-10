@@ -573,10 +573,87 @@ flowchart TD
 - Determines constructor applicability based on given parameters
 
 #### Step 3: "Least Effort" Planning
-- For each constructor, figures out the easiest way to satisfy constraints
-- Uses default `LeastEffort` strategy to determine generation order
-- For `SortedList`: Determines generating `xs` before `x` is the path of least resistance
-- For `Uniq` vectors: Plans element generation to avoid duplicates
+
+The `LeastEffort` strategy analyzes constructor arguments to determine the optimal generation order by identifying dependencies between them.
+
+`LeastEffort` is the default "brain" or "manager" for the `deriveGen` factory. Its job is to figure out the simplest possible order to generate the fields of a data structure.
+
+**Dependency Analysis Example:**
+
+```idris
+data SizedMessage = MkMsg (len : Nat) (message : Vect len Char)
+```
+
+`LeastEffort` performs this analysis:
+
+1. **Examine `len : Nat`**: It sees that the type `Nat` doesn't depend on any other fields in the `MkMsg` constructor. It labels this as an "easy" field that can be generated first.
+2. **Examine `message : Vect len Char`**: It sees that its type mentions `len`, another field in the constructor. This means it *depends* on `len`. It labels this as a "harder" field that must be generated later.
+
+Based on this analysis, it creates a build plan: "Step 1: Generate `len`. Step 2: Generate `message`." This strategy of doing the easiest, most independent parts first is why it's called `LeastEffort`.
+
+When `deriveGen` asks for the generator body for `MkMsg`, `LeastEffort` does the following:
+
+1.  **Dependency Mapping:** It creates an internal data structure for each argument of the constructor. Let's call this a `DependencyInfo` record (the real name is `Determination`).
+
+    For `len : Nat`, the record would look like this:
+    ```
+    // Simplified DependencyInfo for 'len'
+    {
+      name: "len",
+      depends_on: [] // empty list!
+    }
+    ```
+
+    For `message : Vect len Char`, it would look like this:
+    ```
+    // Simplified DependencyInfo for 'message'
+    {
+      name: "message",
+      depends_on: ["len"] // depends on 'len'!
+    }
+    ```
+
+2.  **Searching for an Order:** It then runs an algorithm to find the generation order. The real function is called `searchOrder`. Conceptually, it works like this:
+
+    ```idris
+    -- A very simplified idea of the searchOrder logic
+    function searchOrder(remaining_fields):
+      -- Find all fields that have NO dependencies left in `remaining_fields`
+      let candidates = find_fields_with_zero_dependencies(remaining_fields);
+
+      if candidates is empty:
+        -- This means there's a circular dependency! Error.
+        return error;
+      else:
+        -- Pick the best candidate (LeastEffort just picks the first one it finds)
+        let chosen = pick_one(candidates);
+
+        // Recursively find the order for the rest of the fields
+        return [chosen] ++ searchOrder(remove(chosen, from: remaining_fields));
+    ```
+    It repeatedly finds an argument that has all of its dependencies met (or has no dependencies to begin with), adds it to the build plan, and then repeats the process until all arguments are planned. For `SizedMessage`, the process is:
+    *   **Round 1:** Find fields with 0 dependencies. Only `len` matches. **Plan: `[len]`**.
+    *   **Round 2:** Remove `len` from consideration. Now check `message`. Its dependency, `len`, has been planned. So `message` now has 0 *unplanned* dependencies. **Plan: `[len, message]`**.
+    *   Done! The final order is `len`, then `message`.
+
+This simple but robust algorithm is the heart of `LeastEffort`, allowing it to untangle even very complex dependency chains in your data types automatically.
+
+**Resulting Plan:**
+```idris
+-- Generated code follows this order:
+do
+  len <- genNat fuel        -- Generate length first
+  message <- genVect len    -- Then generate vector of that length
+  pure (MkMsg len message)
+```
+
+**Key Dependency Rules:**
+- Arguments with independent types (`Nat`, `String`, etc.) can be generated first
+- Arguments with dependent types must wait for their dependencies
+- The strategy minimizes "effort" by generating independent arguments first
+
+**For `SortedList`**: Determines generating `xs` before `x` is the path of least resistance
+**For `Uniq` vectors**: Plans element generation to avoid duplicates
 - Creates optimal generation strategy
 
 The `LeastEffort` strategy can be customized for advanced use cases.

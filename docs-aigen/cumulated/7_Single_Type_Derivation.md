@@ -1,12 +1,35 @@
-# Single Type Derivation
+# Single Type Derivation: The Final Assembly Line
 
 ## Introduction
 
-Single Type Derivation is the process where DepTyCheck generates a complete generator for a single data type. This is the core mechanism that converts a type's blueprint into working generator code, handling constructors, managing recursive calls, and integrating tuning parameters.
+Welcome to the final assembly line! Single Type Derivation is where DepTyCheck takes all the individual blueprints for a type's constructors and assembles them into a complete, working generator. Think of this as the factory's main control system that intelligently combines specialized assembly lines.
 
 ## What Problem Does Single Type Derivation Solve?
 
-Single Type Derivation addresses the fundamental challenge: **how does DepTyCheck take the blueprint of a single user-defined type and convert it into a complete, working generator function?**
+Let's consider a classic recursive type: `List`.
+
+```idris
+data List a = Nil | Cons a (List a)
+```
+
+The blueprint (`GenSignature`) tells the factory it needs to build a generator for `MyList`. A naive factory might be one single, monolithic machine trying to do everything. This would be hard to maintain, debug, and impossible to customize.
+
+`DepTyCheck` takes a smarter approach. It breaks the job down:
+1.  **Workstation 1 (The Dispatcher):** Its job is to look at `MyList` and see it has two constructors: `MyNil` and `MyCons`. It decides that the final generator must make a choice between these two. Its job isn't to build the `MyCons` part itself, just to set up the choice.
+2.  **Workstation 2 (The Parts Assembler):** When the Dispatcher needs to figure out how to handle `MyCons`, it sends an order to this workstation. This station's job is to build just the *body* of the `MyCons` generator. It sees that `MyCons` needs a `Nat` and another `MyList`, and it figures out how to generate those parts.
+
+The challenge: how do you design the factory's main control system to intelligently choose between these lines based on available resources?
+
+Single Type Derivation solves exactly this problem: **how does DepTyCheck combine constructor-specific generators into a single, cohesive generator that safely handles recursion?**
+
+A `List` has two "assembly lines":
+1. **Nil**: Simple, non-recursive
+2. **Cons**: Complex, recursive
+
+The problem: if we keep choosing `Cons`, we could end up in an infinite loop! We need an intelligent controller that:
+- Prevents infinite recursion
+- Makes smart choices based on available resources (fuel)
+- Combines both assembly lines into a single factory
 
 ### The Core Mission
 
@@ -16,11 +39,44 @@ When tasked with creating `genNat : Fuel -> Gen MaybeEmpty Nat` for:
 data Nat = Z | S Nat
 ```
 
-The derivation core must:
+The derivation core must act as the factory's intelligent controller:
 1. **Examine the Type**: Identify all constructors (`Z` and `S`)
 2. **Plan for Each Constructor**: Design generation logic for each
 3. **Combine the Plans**: Create a single generator that can produce either constructor
 4. **Manage Resources (Fuel)**: Handle recursion safely using fuel
+
+### The Assembly Strategy: Fuel-Based Decision Making
+
+The core strategy is brilliant in its simplicity: generate a `case` expression that switches on the `Fuel` parameter. This creates two distinct paths for the generator.
+
+Let's imagine we're asking `DepTyCheck` to build `genNat : Fuel -> Gen MaybeEmpty Nat`. The final assembled generator code will look conceptually like this:
+
+```idris
+genNat : Fuel -> Gen MaybeEmpty Nat
+genNat fuel =
+  case fuel of
+    Dry =>
+      -- Fuel is empty! We MUST choose a non-recursive path.
+      oneOf [ genZ ]  -- Only the 'Z' factory is available.
+
+    More subFuel =>
+      -- We have fuel to spare! We can choose either path.
+      frequency
+        [ (2, genZ)     -- Give 'Z' a higher weight (non-recursive)
+        , (1, genS subFuel) -- 'S' gets lower weight and the remaining fuel
+        ]
+```
+
+**Why This Strategy Works Brilliantly:**
+
+1. **Check the Fuel**: The entire logic is wrapped in a `case` statement on the `fuel` argument.
+2. **`Dry` Branch (Out of Gas)**: If the fuel is `Dry`, the generator is forced to choose a path that doesn't consume more fuel. It can only call the generator for `Z`, which is a "terminal" constructor (non-recursive). This guarantees the generation will eventually stop.
+3. **`More subFuel` Branch (Fuel to Spare)**: If the fuel is `More`, the generator has a choice. It can use `Z` *or* `S`.
+   - It uses `frequency` to make a weighted choice, favoring non-recursive cases
+   - If it picks `genZ`, it passes the original `fuel` (because `Z` doesn't spend any)
+   - If it picks `genS`, it crucially passes the *remaining* fuel, `subFuel`, to the recursive call
+
+This `case` statement is the "intelligent controller" that makes `DepTyCheck`'s generators both productive and safe from infinite loops.
 
 ### Constructor Combination Strategies
 
@@ -59,6 +115,10 @@ public export
 interface DeriveBodyForType where
   canonicBody : DerivationClosure m => GenSignature -> Name -> m $ List Clause
 ```
+
+This interface describes the main job: creating the overall body of the generator function for a given type. Its primary responsibility is to look at all the constructors of a data type and create the code that chooses between them.
+
+*   **What it does:** The key function is `canonicBody`. It takes the `GenSignature` blueprint and produces the high-level structure of our generator. For `List`, it would generate code that conceptually looks like this: `oneOf [genForNil, genForCons]`.
 
 ### Interface Components
 
@@ -281,6 +341,9 @@ interface DeriveBodyRhsForCon where
 ```
 
 This interface handles the detailed generation logic for individual constructors.
+This interface describes a more specialized job: building the generator for the "right-hand side" (RHS) of a *single* constructor.
+
+*   **What it does:** The `consGenExpr` function gets the blueprint and information about one specific constructor (like `MyCons`). Its job is to create the code that generates all the arguments for *that constructor*. For `MyCons Nat MyList`, it would produce code that is equivalent to `[| MyCons (deriveGen {for=Nat} ...) (deriveGen {for=MyList} ...) |]`. It assembles the parts.
 
 ### Implementation Example
 
@@ -599,4 +662,12 @@ myGen : Fuel -> Gen MyType
 myGen = deriveGen
 ```
 
-This completes our exploration of Single Type Derivation - the heart of DepTyCheck's automatic generator creation system.
+An implementation of `DeriveBodyForType` and `DeriveBodyRhsForCon` is called a **derivation strategy**.
+
+`DepTyCheck` comes with a default, built-in strategy called `LeastEffort`. It's a team of workers who follow a simple set of rules:
+*   `DeriveBodyForType`: "Give every constructor an equal chance."
+*   `DeriveBodyRhsForCon`: "For each argument, just call `deriveGen` on it."
+
+But what if you wanted a different strategy? What if you wanted a `Smart` strategy that gives a higher chance of picking the non-recursive `MyNil` constructor to create smaller lists more often?
+
+Because of the interface-based design, you could write your own `Smart` implementations of the interfaces and tell `DepTyCheck` to use them instead. Your `Smart` workers would plug right into the assembly line, no other changes needed!

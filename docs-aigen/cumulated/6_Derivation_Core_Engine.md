@@ -147,10 +147,10 @@ deriveAll : m ()
 deriveAll = do
   toDerive <- get {stateType=List _}  -- Get worklist
   put {stateType=List _} []           -- Clear worklist
-  
+
   -- Process each task
   for_ toDerive (\(sig, name) => deriveOne sig name)
-  
+
   -- Recursively process new dependencies
   when (not $ null toDerive) $ deriveAll
 ```
@@ -209,10 +209,10 @@ deriveAll : m ()
 deriveAll = do
   toDerive <- get {stateType=List _}  -- Get current queue
   put {stateType=List _} []           -- Clear queue for this iteration
-  
+
   -- Process each task
   for_ toDerive deriveOne
-  
+
   -- Check for new dependencies added during processing
   newTasks <- get {stateType=List _}
   when (not $ null newTasks) $ deriveAll  -- Recursively process
@@ -235,10 +235,10 @@ deriveAll = do
   -- Get snapshot of current worklist
   toDerive <- get {stateType=List _}
   put {stateType=List _} []  -- Clear worklist for this iteration
-  
+
   -- Process each task
   for_ toDerive deriveOne
-  
+
   -- Check if new dependencies were discovered
   newTasks <- get {stateType=List _}
   when (not $ null newTasks) $ assert_total deriveAll
@@ -270,12 +270,12 @@ callGen sig = do
   -- Check cache first
   let Nothing = SortedMap.lookup sig !get
     | Just name => pure (callExistingGen name)
-  
+
   -- New dependency detected
   let name = nameForGen sig
   modify $ insert sig name           -- Add to cache
   modify {stateType=List _} $ (::) (sig, name)  -- Add to worklist
-  
+
   pure (callFutureGen name)  -- Return placeholder
 ```
 
@@ -338,27 +338,27 @@ callGen sig fuel values = do
   -- Check loop initiation
   startLoop <- get {stateType=Bool}
   put False
-  
+
   -- Check external generators first
   let Nothing = lookupLengthChecked sig !ask
-    | Just (name, Element extSig lenEq) => 
+    | Just (name, Element extSig lenEq) =>
         pure (callExternalGen extSig name (var outmostFuelArg) ..., Just ...)
-  
+
   -- Handle internal generators
   internalGenName <- do
     -- Check if already started
     let Nothing = SortedMap.lookup sig !get
       | Just name => pure name
-    
+
     -- New generator: add to queues
     let name = nameForGen sig
     modify $ insert sig name           -- Add to started list
     modify {stateType=List _} $ (::) (sig, name)  -- Add to to-do list
     pure name
-  
+
   -- Process queue if initiating
   when startLoop $ deriveAll
-  
+
   pure (callCanonic sig internalGenName fuel values, Nothing)
 ```
 
@@ -371,10 +371,10 @@ deriveAll : m ()
 deriveAll = do
   toDerive <- get {stateType=List _}  -- Get current queue
   put {stateType=List _} []           -- Clear queue
-  
+
   -- Process each generator
   for_ toDerive deriveOne
-  
+
   -- Recursively process new dependencies
   when (not $ null toDerive) $ assert_total deriveAll
 ```
@@ -421,10 +421,10 @@ deriveAll : m ()
 deriveAll = do
   toDerive <- get {stateType=List _}  -- Get current task queue
   put {stateType=List _} []           -- Clear queue for this iteration
-  
+
   -- Process each task
   for_ toDerive deriveOne
-  
+
   -- Recursively process new dependencies
   when (not $ null toDerive) $ assert_total deriveAll
 ```
@@ -436,10 +436,10 @@ deriveOne : (GenSignature, Name) -> m ()
 deriveOne (sig, name) = do
   -- Generate type signature
   genFunClaim <- export' name $ canonicSig sig
-  
+
   -- Generate function body
   genFunBody <- def name <$> assert_total canonicBody sig name
-  
+
   -- Collect generated code
   tell ([genFunClaim], [genFunBody])
 ```
@@ -486,7 +486,7 @@ The final code generation is handled by the `consGenExpr` function, which uses d
 ```idris
 -- Dependency analysis for constructor arguments
 searchOrder : Map Arg (Set OtherArgs) -> List Arg
-searchOrder dependencies = 
+searchOrder dependencies =
   -- Perform topological sort based on dependencies
   -- Respect user-provided ordering hints
   -- Ensure valid generation sequence
@@ -503,6 +503,32 @@ do
 ```
 
 **Exercise Solution:** The engine detects mutual recursion by tracking which generators have been requested but not yet completed in the task queue. When it encounters a dependency that's already in the queue, it uses fuel-based recursion control rather than getting stuck in an infinite loop.
+
+### Example SortedBinTree
+
+Imagine you have the blueprint for a `SortedBinTree`. The rule for a `Node x l r` is that everything in the left tree `l` must be smaller than the root `x`, and everything in the right tree `r` must be larger.
+
+```idris
+data SortedBinTree : Type where
+  Empty : SortedBinTree
+  Node  : (x : Nat) -> (l, r : SortedBinTree) ->
+          AllLT x l => AllGT x r => SortedBinTree
+```
+
+When building a `Node`, what should `deriveGen` do first?
+-   Option A: Generate the left tree `l` first. But how does it know the upper bound for the values? It doesn't have `x` yet!
+-   Option B: Generate the root value `x` first. Now it has a reference point! It can generate a left tree `l` with values less than `x`, and a right tree `r` with values greater than `x`.
+
+Clearly, Option B is the only logical choice. The order of generation matters. `deriveGen` needs a strategy to figure out these dependencies automatically.
+
+### The Assembly Line Analogy
+
+Think of `deriveGen` as commissioning a factory to build a product (your generator). The factory has an assembly line with different stations, each with a specific job.
+
+*   **`ForAllNeededTypes` (The Factory Manager):** The manager gets the main order (e.g., "Build a `SortedBinTree` generator"). It keeps a master list of all the parts and sub-assemblies required, like a `Nat` generator and a `SortedBinTree` generator. It ensures no work is duplicated.
+*   **`ForOneType` (The Product Assembly Station):** A station dedicated to assembling one specific product, like `SortedBinTree`. It knows a `SortedBinTree` can be either `Empty` or a `Node`. It's responsible for deciding which version to build.
+*   **`ForOneTypeCon` (The Component Sub-Station):** A sub-station that knows how to build just one component, like a `Node`. It needs to gather all the required parts (`x`, `l`, and `r`).
+*   **`ForOneTypeConRhs` (`LeastEffort`) (The Master Blueprint):** This is the instruction manual for the component sub-station. It defines the *strategy* for assembling the component. The default strategy, `LeastEffort`, tells the `Node` sub-station the correct order to gather its parts: "Get `x` first, then `l`, then `r`."
 
 ## Advanced Topics
 
@@ -553,6 +579,35 @@ callGen sig fuel values = do
   -- Process queue recursively
 ```
 
+```idris
+-- From: src/Deriving/DepTyCheck/Gen/ForAllNeededTypes/Impl.idr
+
+-- A loop that processes the "to-do" list
+deriveAll : m ()
+deriveAll = do
+  -- Get the current list of tasks
+  toDerive <- get {stateType=List _}
+  put {stateType=List _} [] -- Clear the list
+
+  -- For each task, create the generator
+  for_ toDerive deriveOne
+
+  -- If new tasks were added during that process, loop again!
+  when (not $ null toDerive) $ assert_total $ deriveAll
+```
+
+**Job:** The Master Planner's job is to manage a "to-do" list of all the generators we need to build.
+
+This component, found in `src/Deriving/DepTyCheck/Gen/ForAllNeededTypes/Impl.idr`, is the entry point for the whole derivation process. Its job is to manage a queue of generators that need to be built.
+
+Its main logic can be simplified to this:
+1.  Receive a request to get a generator for a `Type A`.
+2.  Check its notebook: "Have I already built a generator for `Type A`?"
+3.  If yes, return the existing one.
+4.  If no, add "generate for `Type A`" to the to-do list, and start working on the list until it's empty.
+
+This prevents infinite loops in recursive data types and avoids re-deriving the same generator multiple times.
+
 #### Stage 2: ForOneType (Team Lead)
 
 Handles derivation for a single type by delegating to constructors:
@@ -566,6 +621,38 @@ canonicBody sig n = do
   pure (fuelDecisionExpr fuelArg consBodies)
 ```
 
+```idris
+-- From: src/Deriving/DepTyCheck/Gen/ForOneType/Impl.idr
+
+-- Generates the main body for a type's generator
+canonicBody sig n = do
+  -- ... checks and setup ...
+
+  -- Create a sub-generator for each constructor
+  consBodies <- for sig.targetType.cons $ \con =>
+    -- canonicConsBody comes from the next stage!
+    canonicConsBody sig (consGenName con) con
+
+  -- Create the main expression that chooses between constructors
+  let outmostRHS = fuelDecisionExpr fuelArg ...
+
+  pure [ ... .= local consBodies outmostRHS ]
+```
+
+The Master Planner sends a single task from its to-do list (e.g., "Make a `SortedList` generator") to this station.
+
+**Job:** To create the overall strategy for generating *one specific type*.
+
+This station looks at the type's definition and sees all its constructors. For `SortedList`, it sees `Nil` and `(::)`.
+
+Its job is to write the main body of the generator function. This function will usually be a `case` expression that decides which constructor to use. For example, it might decide to use non-recursive constructors (`Nil`) if it's running out of "fuel", or choose between all constructors if it has plenty of fuel.
+
+This station doesn't worry about the details of *how* to build a `(::)`. It just says, "Here's how you *choose* between `Nil` and `(::)`," and delegates the rest to the next station.
+
+Its main job is to generate the top-level dispatch logic. For a recursive type, this usually means checking the `Fuel`.
+
+It delegates the actual constructor-building logic to the `ForOneTypeCon` sub-stations.
+
 #### Stage 3: ForOneTypeCon (Constructor Specialist)
 
 Analyzes individual constructors and their dependencies:
@@ -576,6 +663,22 @@ canonicConsBody sig name con = do
   -- Determine dependencies between arguments
   -- Delegate to code assembler
 ```
+
+The Recipe Strategist sends a constructor (like `SortedList`'s `(::)`) to this station.
+
+**Job:** To analyze a single constructor and figure out its internal dependencies, especially for complex GADTs.
+
+Remember `SortedList`'s `(::)` constructor?
+
+```idris
+(::) : (x : Nat) -> (xs : SortedList) -> IsSorted x xs => SortedList
+```
+It inspects this signature and finds crucial evidence:
+- It sees the arguments `x` and `xs`.
+- Most importantly, it sees the proof `IsSorted x xs`. It knows this proof means `x`'s value depends on `xs`'s value.
+- It concludes: **You must generate `xs` *before* you can generate `x`.**
+
+This analysis is the key to `deriveGen`'s intelligence. It prevents it from making silly mistakes like generating a random `x` and then having no way to build the rest of the list.
 
 #### Stage 4: ForOneTypeConRhs (Component Assembler)
 
@@ -591,15 +694,80 @@ consGenExpr sig con givs fuel = do
     -- Build do-block expressions
 ```
 
+Finally, the plan from the Dependency Analyst ("generate `xs` first, then `x`") arrives at the last station.
+
+**Job:** To take the generation order and write the actual, runnable `do` block code for the generator.
+
+This is where the plan turns into reality. Knowing the order, this station writes an expression that looks like this:
+
+```idris
+-- This is the code that this stage *generates*
+do
+  -- Step 1: Generate the tail `xs` first
+  xs <- genSortedList fuel
+
+  -- Step 2: Now that we have `xs`, generate a valid head `x`
+  -- (The generator for `x` will be constrained to <= head of `xs`)
+  x <- genNatConstrained (getHead xs)
+
+  -- Step 3: We have all the parts, now build it!
+  pure (x :: xs)
+```
+This station's most important task is figuring out the best order to generate the arguments. It contains a function, `searchOrder`, that acts like a puzzle-solver to determine the most efficient sequence.
+
+##### The Blueprint: `LeastEffort` Strategy
+
+This is the real brains of the operation. The `LeastEffort` strategy is an implementation of the `DeriveBodyRhsForCon` interface. Its goal is to find the most logical order to generate a constructor's arguments.
+
+Its logic is implemented in `searchOrder` in `src/Deriving/DepTyCheck/Gen/ForOneTypeConRhs/Impl.idr`. You can think of its process like this:
+
+1.  **Analyze Dependencies:** Look at all the arguments for a constructor (like `x`, `l`, `r` for `Node`). Figure out which arguments depend on others. For `Node`, `l` and `r` depend on `x`.
+2.  **Assign Priorities:** Give a low "priority score" to arguments that many others depend on. Give a high score to arguments that depend on others.
+3.  **Find the Starting Point:** Find the argument with the lowest priority score that has no un-generated dependencies. This is the one to generate first. For `Node`, this is `x`.
+4.  **Recurse:** Mark `x` as "generated" and repeat the process. Now `l` and `r` have their dependencies met, so they can be generated.
+
+```idris
+-- From: src/Deriving/DepTyCheck/Gen/ForOneTypeConRhs/Impl.idr
+
+-- This function implements the strategy to find the best generation order.
+searchOrder : {con : _} ->
+              (left : FinMap ... $ Determination con) -> -- Arguments left to generate
+              List $ Fin con.args.length                  -- Returns an ordered list
+searchOrder left = do
+  -- 1. Find arguments with no dependencies from `left`.
+  -- 2. Choose the best one based on priority.
+  let Just (curr, _) = findFirstMax notDetermined
+    | Nothing => []
+
+  -- 3. Add it to our plan and remove it from the list of things to do.
+  curr :: searchOrder (assert_smaller left next)
+```
+This simple but powerful "least effort" heuristic correctly solves the dependency puzzle for a vast range of data types, from `SortedList` to the complex `PIL` language from the last chapter.
+
+###### Why Is This a Pluggable Strategy?
+
+You may have noticed we said `LeastEffort` *implements* the `DeriveBodyRhsForCon` interface.
+
+```idris
+-- From: src/Deriving/DepTyCheck/Gen/ForOneTypeConRhs/Interface.idr
+
+public export
+interface DeriveBodyRhsForCon where
+  consGenExpr : ... -> m TTImp
+```
+
+This interface-based design is very clever. It means that `LeastEffort` is the *default* strategy, but it's not the only one possible. If you had a special case where you needed a different assembly plan, you could (in theory) provide a different implementation of this interface.
+
+While `DepTyCheck` only comes with `LeastEffort` out of the box, this highlights a core design principle: the derivation process is not a rigid monolith, but a flexible, customizable system. We don't have to change the entire factory—just the blueprint at one station.
+
 ## Conclusion
 
 In this tutorial, we've explored the sophisticated derivation core engine that powers DepTyCheck's automatic generator derivation. The engine employs a multi-stage pipeline architecture with comprehensive dependency management, recursive type handling, and efficient code generation.
 
-**Key Takeaways:**
-- The four-stage pipeline breaks down complex derivation tasks
-- Dependency management ensures efficient processing
-- Recursive types are handled safely with fuel-based control
-- Generated code is well-structured and type-safe
+1.  **`ForAllNeededTypes`:** Plans all the generators that need to be built.
+2.  **`ForOneType`:** Creates the top-level strategy for one type by looking at its constructors.
+3.  **`ForOneTypeCon`:** Analyzes a single constructor to find dependencies.
+4.  **`ForOneTypeConRhs`:** Writes the final `do` block code based on that analysis.
 
 ## Exercises
 

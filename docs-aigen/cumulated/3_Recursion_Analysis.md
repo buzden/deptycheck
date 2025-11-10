@@ -742,6 +742,30 @@ longLists = genList (limitFuel 20)
 
 ## Common Patterns and Best Practices
 
+### 3. `ConsRecs`: The Recursion Analyst
+
+`ConsRecs` is the specialized analyst that checks for recursion. When the Derivation Engine looks at a `data` type, it sends each constructor to `ConsRecs` for inspection.
+
+`ConsRecs` answers the question: "Does this constructor build the part by using a smaller version of the same part?"
+
+-   For `data List a = Nil | Cons a (List a)`, it inspects `Cons`. It sees that the second argument is `List a`—the very type it belongs to! It flags `Cons` as **recursive**.
+-   For `data UserProfile = MkProfile String Nat`, it inspects `MkProfile`. It sees the arguments are `String` and `Nat`, neither of which is `UserProfile`. It flags `MkProfile` as **not recursive**.
+
+This information is stored in another record:
+
+```idris
+-- File: src/Deriving/DepTyCheck/Gen/ConsRecs.idr
+
+-- A simplified view of the information stored for each constructor.
+public export
+record ConWeightInfo where
+  constructor MkConWeightInfo
+  weight : Either Nat1 RecWeightInfo -- Either a simple weight...
+  -- ...or info about its recursiveness.
+```
+If a constructor is recursive (`RecWeightInfo`), this tells the engine that it must be careful and use `Fuel` to avoid an infinite generation loop. If it's not recursive (a simple `Nat1` weight), the engine knows it's safe to generate directly.
+
+
 ### When to Use Custom Tuning
 
 Consider tuning weights when:
