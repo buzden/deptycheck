@@ -19,6 +19,36 @@ While `deriveGen`'s automatic analysis works perfectly for most cases, sometimes
 
 ## GenOrderTuning: Controlling Generation Order
 
+`GenOrderTuning` allows you to tell `DepTyCheck`: "When generating a value for *this constructor*, please generate *these arguments first*, in *this order*." This is extremely useful for dependent types, where the value of one argument might constrain the possible values of another.
+
+Let's look at an example data type `X`:
+
+```idris
+data X : Nat -> Nat -> Type where
+  X1 : (n, m : Nat) -> n `LT` m => X n m
+  X2 : X n n
+```
+
+*   `X1 n m`: This constructor has two `Nat` arguments, `n` and `m`, AND a proof that `n` is strictly less than `m` (`n `LT` m`). If `DepTyCheck` generates `n` and `m` randomly *first*, it might generate `n=5, m=3`. Then it would try to find a proof that `5 < 3`, which is impossible! This would lead to an empty or failing generator.
+    Instead, it's better to generate `m` first, then generate `n` such that `n < m`.
+*   `X2 n n`: This constructor ensures that its two `Nat` parameters are equal.
+
+To make `DepTyCheck` generate `m` before `n` for `X1`, we use `GenOrderTuning`:
+
+```idris
+GenOrderTuning "X1".dataCon where
+  isConstructor = itIsConstructor
+  deriveFirst gt gc = [`{m}, `{n}] -- Generate `m` then `n`
+```
+
+1.  `GenOrderTuning "X1".dataCon`: This implements the `GenOrderTuning` interface *specifically for the constructor `X1`* of the type `X`. `"X1".dataCon` is how we refer to the constructor `X1`.
+2.  `isConstructor = itIsConstructor`: This is a boilerplate line. It's a special macro (`itIsConstructor`) that uses Idris's reflection capabilities to confirm that `"X1".dataCon` is indeed a constructor and to extract its details. If you typed `X3` here, it would fail to compile!
+3.  `deriveFirst gt gc = [`{m}, `{n}]`: This is where the magic happens!
+    *   `deriveFirst` is the function you implement. It takes `givenTyArgs` (arguments of the type `X`, which are `n` and `m` here) and `givenConArgs` (arguments of the constructor `X1`, and its proof `n `LT` m`). These `givenTyArgs` and `givenConArgs` can tell you what arguments might already be "known" or generated.
+    *   `[`{m}, `{n}]`: This is a list of constructor arguments that `DepTyCheck` should try to generate *first*. Here, we're explicitly saying: "First, generate the argument named `m`, then generate the argument named `n`." The `{}` syntax is for "name literals" in Idris, letting us refer to an argument by its name. We could also use indices, like `[1, 0]` for `m` (index 1) and `n` (index 0).
+
+With this `GenOrderTuning` instance, `DepTyCheck` will intelligently generate `m` first, then pick an `n` that satisfies `n < m`, making the generation of `X1` values much more robust.
+
 ### Purpose and Use Cases
 - Optimizing generation for dependent types
 - Resolving complex dependency constraints
@@ -125,6 +155,30 @@ GenOrderTuning `{MkSP}.dataCon where
 **Performance-optimized generation sequences**
 
 ## ProbabilityTuning: Adjusting Data Distribution
+
+`ProbabilityTuning` allows you to assign custom weights (probabilities) to constructors. By default, `DepTyCheck` tries to pick constructors with roughly an equal chance or applies some heuristic based on size. But you might want to force a specific distribution.
+
+Let's say we have a data type `Event`:
+
+```idris
+data Event = MouseClick | KeyPress | NetworkError
+```
+
+Normally, `MouseClick`, `KeyPress`, and `NetworkError` would be chosen with equal probability (1/3 each). But what if `NetworkError` is a very rare and important edge case that we want to test specifically, say, 5% of the time, while the others are 47.5% each?
+
+```idris
+ProbabilityTuning "NetworkError".dataCon where
+  isConstructor = itIsConstructor
+  tuneWeight = const 1 -- Assign a weight of 1 for NetworkError
+-- For MouseClick, KeyPress, leave default or tune separately
+```
+If other constructors have default weights, and you set `NetworkError` to `1`, and imagine if others had a default weight of `10`, then `NetworkError` would be picked `1 / (1 + 10 + 10) = 1/21` of the time. The `tuneWeight` function takes the default weight `(Nat1)` and returns the new weight `(Nat1)`. Here, `const 1` ignores the default weight and always makes it 1.
+
+1.  `ProbabilityTuning "NetworkError".dataCon`: This implements `ProbabilityTuning` for the `NetworkError` constructor.
+2.  `isConstructor = itIsConstructor`: Again, boilerplate to confirm it's a constructor.
+3.  `tuneWeight = const 1`: This is the custom tuning. `tuneWeight` is a function that takes the *default calculated weight* (of type `Nat1`, meaning "natural number starting from 1") and returns the *new custom weight*. Here, `const 1` means we ignore the default weight and assign a fixed weight of `1` to `NetworkError`.
+
+By implementing `ProbabilityTuning` for other constructors (`MouseClick` and `KeyPress`) with higher `tuneWeight` values, you can achieve the desired probability distribution.
 
 ### Purpose and Use Cases
 - Emphasizing specific constructor cases
@@ -527,6 +581,8 @@ Derivation Tuning provides essential control mechanisms for optimizing automatic
 - Tuning works *with* default strategies, not against them
 - User instructions take precedence over automatic analysis
 - Compile-time discovery ensures efficiency
+
+The Generator Tuning interfaces, `GenOrderTuning` and `ProbabilityTuning`, provide powerful control panels for users to fine-tune the automatic derivation of generators in `DepTyCheck`. By implementing these interfaces for specific constructors, you can precisely control the order in which arguments are generated (crucial for dependent types) and assign custom probabilities to constructor choices, allowing for more targeted and efficient property-based testing. This prevents common problems like generating impossible values and helps you focus your testing efforts on important or rare cases.
 
 ### The Power of Strategic Control
 

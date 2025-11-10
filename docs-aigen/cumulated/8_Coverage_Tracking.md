@@ -2,11 +2,17 @@
 
 ## Introduction
 
+But just because a factory is producing items that pass the "correctness" check, does that mean it's doing a good job? What if our candy factory, which is supposed to make red, green, and blue candies, ends up making 99% red candies and only a handful of the others? The candy is still valid, but the variety is terrible! This is the problem that distribution checking solves.
+
 In this tutorial, we will learn how to track and analyze the coverage of DepTyCheck generators. Coverage tracking helps ensure your generators test all data type constructors, identifying blind spots in your test data generation.
 
 **What we will accomplish:** We will create generators for data types, run them multiple times, and generate detailed reports showing which constructors were generated and how many times each appeared.
 
 ## 1. Understanding Coverage Tracking
+
+A generator that always produces an empty `SortedList` is technically correct, but it's not very useful for testing. We want our generators to produce a wide *variety* of data to catch as many edge cases as possible. We need a quality control inspector.
+
+This is where `DepTyCheck`'s **Distribution Checking Utilities** come in. These are not part of the core library you'd use every day, but are special testing tools used within the `DepTyCheck` project itself to ensure that the generators it derives are of high quality. They check if the generated values have a good statistical distribution.
 
 ### The Problem: Blind Spots in Test Data
 
@@ -18,6 +24,31 @@ data Monster = Slime | Goblin | Dragon
 
 You create a generator for `Monster`, but how do you know if it's actually generating all three monster types? Without coverage tracking, you might miss important edge cases.
 
+### Statistical Distribution Checking
+
+Beyond basic coverage, DepTyCheck provides statistical distribution checking to ensure generators produce balanced test data:
+
+**CoverageTest Records:**
+```idris
+record CoverageTest a where
+  constructor MkCoverage
+  predicate : a -> Bool
+  expected : Double  -- Expected probability (e.g., 0.1 for 10%)
+```
+
+**Example Usage:**
+```idris
+-- Check that lists of different lengths appear roughly equally
+listLengthTests : Vect 5 (CoverageTest (SortedList Nat))
+listLengthTests =
+  [ MkCoverage (\lst => length lst == 0) 0.1  -- Expect 10% empty lists
+  , MkCoverage (\lst => length lst == 1) 0.1  -- Expect 10% length 1
+  , MkCoverage (\lst => length lst == 2) 0.1  -- Expect 10% length 2
+  , MkCoverage (\lst => length lst == 3) 0.1  -- Expect 10% length 3
+  , MkCoverage (\lst => length lst == 4) 0.1  -- Expect 10% length 4
+  ]
+```
+
 ### The Solution: Automatic Coverage Tracking
 
 DepTyCheck provides automatic coverage tracking that:
@@ -25,6 +56,7 @@ DepTyCheck provides automatic coverage tracking that:
 - Counts how many times each appears
 - Generates readable reports
 - Helps identify untested code paths
+- Provides statistical validation of generator quality
 
 ## 2. Core Concepts
 
@@ -275,7 +307,7 @@ aggregateCoverage = do
   let runs = 100
   let seed = mkStdGen 42
   let results = take runs $ unGenTryAllD' seed (withCoverage shapeGen)
-  
+
   -- Combine all coverage reports
   pure $ foldr (\(mc, _) acc => mc <+> acc) neutral results
 ```
@@ -330,19 +362,19 @@ main : IO ()
 main = do
   -- Step 1: Initialize coverage structure
   initStruct <- runElab id $ initCoverageInfo (genPair 3)
-  
+
   -- Step 2: Get coverage-enabled generator
   gen <- runElab id $ coveredGenPair 3
-  
+
   -- Step 3: Run generator multiple times
   let results = unGenTryND 100 (mkStdGen 42) gen
-  
+
   -- Step 4: Aggregate coverage data
   let finalModelCoverage = foldl (\acc (mc, _) => acc <+> mc) neutral results
-  
+
   -- Step 5: Register coverage into structured report
   let finalCoverageInfo = registerCoverage finalModelCoverage initStruct
-  
+
   -- Step 6: Display results
   putStrLn $ show finalCoverageInfo
 ```
@@ -432,11 +464,11 @@ analyzeCoverage : IO ()
 analyzeCoverage = do
   initStruct <- runElab id $ initCoverageInfo genNested
   gen <- runElab id $ withCoverage genNested
-  
+
   let results = unGenTryND 50 (mkStdGen 456) gen
   let aggregated = foldl (\acc (mc, _) => acc <+> mc) neutral results
   let report = registerCoverage aggregated initStruct
-  
+
   putStrLn $ show report
 ```
 
@@ -491,7 +523,7 @@ import Test.DepTyCheck.Gen.Coverage
 
 -- Run 100 times and collect all coverage data
 allCoverageData : ModelCoverage
-allCoverageData = foldl (<+>) neutral $ 
+allCoverageData = foldl (<+>) neutral $
   map fst (unGenTryND 100 seed (genCovered fuel))
 ```
 
@@ -541,7 +573,7 @@ When you use `withCoverage`, the compiler generates wrapper code that:
 \fuel => do
   label "Main.TrafficLight[?]"  -- Type-level label
   val <- genTrafficLight fuel   -- Original generator
-  
+
   -- Constructor-specific labeling
   case val of
     Red   => label "Main.Red" $ pure val
@@ -581,10 +613,10 @@ analyzeVehicleCoverage = do
   let coveredGen = withCoverage genVehicle
   let results = unGenTryND 100 (mkStdGen 789) coveredGen
   let aggregated = foldl (\acc (mc, _) => acc <+> mc) neutral results
-  
+
   let template = initCoverageInfo genVehicle
   let report = registerCoverage aggregated template
-  
+
   putStrLn $ show report
 ```
 
@@ -704,7 +736,7 @@ sequenceDiagram
     participant LabelSys as Label System
     participant Map as Coverage Map
     participant Reporter
-    
+
     Gen->>LabelSys: Generated Cookie
     LabelSys->>LabelSys: Create Label "Dessert.Cookie"
     LabelSys->>Map: Report "Dessert.Cookie"
@@ -723,7 +755,7 @@ record ModelCoverage where
   coverage : SortedMap Label Nat
 
 -- Example coverage data
-MkModelCoverage $ fromList 
+MkModelCoverage $ fromList
   [ ("Dessert.Cake", 55)
   , ("Dessert.Cookie", 45)
   ]
@@ -751,10 +783,10 @@ analyzeTreeCoverage = do
   let coveredGen = withCoverage genTree
   let results = unGenTryND 200 (mkStdGen 999) coveredGen
   let aggregated = foldl (\acc (mc, _) => acc <+> mc) neutral results
-  
+
   let template = initCoverageInfo genTree
   let report = registerCoverage aggregated template
-  
+
   putStrLn $ show report
 ```
 
@@ -767,7 +799,7 @@ Establish minimum coverage requirements:
 ```idris
 -- Check if coverage meets threshold
 checkCoverage : CoverageGenInfo g -> Bool
-checkCoverage report = 
+checkCoverage report =
   let totalTypes = length $ keys report.coverageInfo
       coveredTypes = length $ filter (\case (_, cnt, _) => cnt > 0) $ values report.coverageInfo
   in coveredTypes >= totalTypes * 0.9  -- 90% coverage threshold
@@ -850,10 +882,10 @@ generateAndCollectCoverage n gen seed =
 main : IO ()
 main = do
   let (coverage, values) = generateAndCollectCoverage 100 genStoreData (mkStdGen 42)
-  
+
   putStrLn "Generated Values (first 5):"
   mapM_ print (take 5 values)
-  
+
   putStrLn "\nModel Coverage Results:"
   let coverageMap = toList coverage.unModelCoverage
   mapM_ (\(label, count) => putStrLn $"  - {show label}: {show count} times") coverageMap
@@ -954,10 +986,10 @@ analyzeInventoryCoverage = do
   let coveredGen = withCoverage genInventory
   let results = unGenTryND 150 (mkStdGen 333) coveredGen
   let aggregated = foldl (\acc (mc, _) => acc <+> mc) neutral results
-  
+
   let template = initCoverageInfo genInventory
   let report = registerCoverage aggregated template
-  
+
   putStrLn $ show report
 ```
 
@@ -1087,10 +1119,10 @@ analyzeLabeledCoverage = do
   let coveredGen = withCoverage genShapeWithLabels
   let results = unGenTryND 100 (mkStdGen 777) coveredGen
   let aggregated = foldl (\acc (mc, _) => acc <+> mc) neutral results
-  
+
   let template = initCoverageInfo genShapeWithLabels
   let report = registerCoverage aggregated template
-  
+
   putStrLn $ show report
 ```
 
@@ -1148,10 +1180,10 @@ testCoverage : IO ()
 testCoverage = do
   let results = unGenTryND 10 (mkStdGen 42) (dishGen 5)
   let coverage = foldl (\acc (mc, _) => acc <+> mc) neutral results
-  
+
   let template = initCoverageInfo dishGen
   let report = registerCoverage coverage template
-  
+
   putStrLn $ show report
 ```
 
@@ -1212,6 +1244,64 @@ Coverage tracking provides essential insights into your test data generation:
 3. **Thresholds**: Set realistic coverage goals (80-90%)
 4. **Monitoring**: Track coverage trends over time
 5. **Integration**: Include coverage checks in CI/CD
+
+## Statistical Distribution Checking
+
+Beyond basic coverage, DepTyCheck provides statistical distribution checking utilities to ensure generators produce balanced test data.
+
+### CoverageTest Records
+
+```idris
+record CoverageTest a where
+  constructor MkCoverage
+  predicate : a -> Bool
+  expected : Double  -- Expected probability (e.g., 0.1 for 10%)
+```
+
+### Practical Example: List Length Distribution
+
+```idris
+-- Check that lists of different lengths appear roughly equally
+listLengthTests : Vect 5 (CoverageTest (SortedList Nat))
+listLengthTests =
+  [ MkCoverage (\lst => length lst == 0) 0.1  -- Expect 10% empty lists
+  , MkCoverage (\lst => length lst == 1) 0.1  -- Expect 10% length 1
+  , MkCoverage (\lst => length lst == 2) 0.1  -- Expect 10% length 2
+  , MkCoverage (\lst => length lst == 3) 0.1  -- Expect 10% length 3
+  , MkCoverage (\lst => length lst == 4) 0.1  -- Expect 10% length 4
+  ]
+```
+
+### Distribution Validation Function
+
+```idris
+-- Validate that generator produces balanced distributions
+validateDistribution : CoverageGenInfo -> List (CoverageTest a) -> IO Bool
+validateDistribution info tests = do
+  results <- runCoverageTests info tests
+  printVerdict results
+  pure (allTestsPassed results)
+
+-- Example: Check that all monster types appear roughly equally
+monsterTests : List (CoverageTest Monster)
+monsterTests =
+  [ MkCoverage (== Slime) 0.33
+  , MkCoverage (== Goblin) 0.33
+  , MkCoverage (== Dragon) 0.33
+  ]
+```
+
+### Quality Control Integration
+
+Distribution checking acts as a quality control inspector for your generators:
+- **Identifies bias**: Detects if generators favor certain patterns
+- **Ensures variety**: Verifies balanced test data distribution
+- **Quantifies quality**: Provides statistical validation metrics
+- **Supports tuning**: Helps optimize generator parameters
+
+By combining coverage tracking with distribution checking, you ensure both comprehensive test coverage and high-quality, balanced test data generation.
+
+---
 
 By making coverage analysis a routine part of your testing process, you ensure comprehensive test coverage and catch potential issues before they reach production.
 
