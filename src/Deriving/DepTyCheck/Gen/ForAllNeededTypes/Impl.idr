@@ -100,12 +100,11 @@ specialiseIfNeeded :
   Vect sig.givenParams.size TTImp ->
   m $ Maybe (List Decl, TypeInfo, TTImp)
 specialiseIfNeeded sig specTaskToName fuel givenParamValues = do
-  let givenIdxVals = (Prelude.toList sig.givenParams) `zipV` givenParamValues
   -- Check if there are any given type args, if not return Nothing
   let True = any (\a => snd (unPi a.type) == `(Type)) $ index' sig.targetType.args <$> Prelude.toList sig.givenParams
     | False => pure Nothing
-  let argsWithIdx = withIndex sig.targetType.args
-  let (lambdaRet, fvArgs, givenSubst) = processArgs sig argsWithIdx givenIdxVals
+  let givenIdxVals = (Prelude.toList sig.givenParams) `zipV` givenParamValues
+  let (lambdaRet, fvArgs, givenSubst) = processArgs sig (withIndex sig.targetType.args) givenIdxVals
   (lambdaTy, lambdaBody) <- normaliseTask fvArgs lambdaRet
   let specName = specTaskToName lambdaBody
   (specTy, specDecls) : (TypeInfo, List Decl) <- case lookupType specName of
