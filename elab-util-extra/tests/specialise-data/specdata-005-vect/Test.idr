@@ -4,7 +4,7 @@ import Shared
 
 %language ElabReflection
 
-%runElab specialiseData' "MyVect" $ \n, a => Vect n a
+%runElab specialiseDataLam' "MyVect" $ \n, a => Vect n a
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 v0' = %runElab verifySpecialisation (Vect 0 Nat) (MyVect 0 Nat) [`([])]
@@ -26,7 +26,7 @@ v2' = %runElab verifySpecialisation (Vect 1 String) (MyVect 1 String)
   ]
 
 
-%runElab specialiseData' "FlipVect" $ \a, n => Vect n a
+%runElab specialiseDataLam' "FlipVect" $ \a, n => Vect n a
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 fv0' = %runElab verifySpecialisation (Vect 0 Nat) (FlipVect Nat 0) [`([])]
