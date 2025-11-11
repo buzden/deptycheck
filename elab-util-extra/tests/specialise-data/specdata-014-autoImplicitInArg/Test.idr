@@ -7,7 +7,7 @@ import Shared
 data Y : (Type -> Type) -> Type where
   MkY : Functor f => f Nat -> Y f
 
-%runElab specialiseData' "Y'" $ Y List
+%runElab specialiseDataLam' "Y'" $ Y List
 
 y0 : Y'
 y0 = MkY []
