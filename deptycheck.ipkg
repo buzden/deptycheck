@@ -26,6 +26,7 @@ modules = Deriving.DepTyCheck.Gen
         , Deriving.DepTyCheck.Util.ArgsPerm
         , Deriving.DepTyCheck.Util.DeepConsApp
         , Deriving.DepTyCheck.Util.Primitives
+        , Deriving.DepTyCheck.Util.Specialisation
         , Test.DepTyCheck.Gen
         , Test.DepTyCheck.Gen.Coverage
         , Test.DepTyCheck.Gen.Emptiness
