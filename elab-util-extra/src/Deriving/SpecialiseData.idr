@@ -1081,6 +1081,29 @@ specialiseDataRaw resultName resultKind resultContent = do
   decls <- specDecls task uniResults specTy
   pure (specTy, decls)
 
+export
+normaliseTask : Elaboration m => List Arg -> TTImp -> m (TTImp, TTImp)
+normaliseTask fvs ret = do
+  lamTy : Type <- check $ piAll `(Type) fvs
+  lam <- normaliseAs lamTy $ foldr lam ret fvs
+  lamTy' <- quote lamTy
+  pure (lamTy', lam)
+
+export
+specialiseDataArgs :
+  Elaboration m =>
+  (nsProvider : NamespaceProvider m) =>
+  (unifier : CanUnify m) =>
+  MonadLog m =>
+  MonadError SpecialisationError m =>
+  (namesInfo : NamesInfoInTypes) =>
+  (resultName : Name) ->
+  (lambdaArgs : List Arg) ->
+  (lambdaRHS : TTImp) ->
+  m (TypeInfo, List Decl)
+specialiseDataArgs resultName fvArgs lambdaRHS =
+  uncurry (specialiseDataRaw resultName) =<< normaliseTask fvArgs lambdaRHS
+
 ||| Perform a specialisation for a given type name and content lambda
 |||
 ||| In order to generate a specialised type declaration equivalent to the following type alias:
@@ -1093,7 +1116,7 @@ specialiseDataRaw resultName resultKind resultContent = do
 ||| specialiseData `{VF} $ \n => Fin n
 ||| ```
 export
-specialiseData :
+specialiseDataLam :
   TaskLambda taskT =>
   Monad m =>
   Elaboration m =>
@@ -1104,7 +1127,7 @@ specialiseData :
   (resultName : Name) ->
   (0 task : taskT) ->
   m (TypeInfo, List Decl)
-specialiseData resultName task = do
+specialiseDataLam resultName task = do
   -- Quote spec lambda type
   resultKind <- quote taskT
   -- Quote spec lambda
@@ -1122,10 +1145,10 @@ specialiseData resultName task = do
 ||| ```
 ||| ...you may use this function as follows:
 ||| ```
-||| specialiseData'' `{VF} $ \n => Fin n
+||| specialiseDataLam'' `{VF} $ \n => Fin n
 ||| ```
 export
-specialiseData'' :
+specialiseDataLam'' :
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
   (unifier : CanUnify m) =>
@@ -1133,12 +1156,12 @@ specialiseData'' :
   Name ->
   (0 task: taskT) ->
   m $ List Decl
-specialiseData'' resultName task = do
+specialiseDataLam'' resultName task = do
   tq <- quote task
   nit <- getNamesInfoInTypes' tq
   Right (specTy, decls) <-
     runEitherT {m} {e=SpecialisationError} $
-      specialiseData resultName task
+      specialiseDataLam resultName task
   | Left err => fail "Specialisation error: \{show err}"
   pure decls
 
@@ -1152,10 +1175,10 @@ specialiseData'' resultName task = do
 ||| ```
 ||| ...you may use this function as follows:
 ||| ```
-||| %runElab specialiseData' `{VF} $ \n => Fin n
+||| %runElab specialiseDataLam' `{VF} $ \n => Fin n
 ||| ```
 export
-specialiseData' :
+specialiseDataLam' :
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
   (unifier : CanUnify m) =>
@@ -1163,5 +1186,5 @@ specialiseData' :
   Name ->
   (0 task: taskT) ->
   m ()
-specialiseData' resultName task =
-  specialiseData'' resultName task >>= declare
+specialiseDataLam' resultName task =
+  specialiseDataLam'' resultName task >>= declare
