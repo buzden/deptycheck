@@ -1,31 +1,33 @@
 module Deriving.SpecialiseData
 
 import Control.Monad.Either
-import Control.Monad.Error.Either
-import Control.Monad.Error.Interface
-import Control.Monad.Reader.Tuple
 import Control.Monad.Trans
-import Data.SnocList
 import Data.DPair
+import Data.Either
+import Data.Fin.Set
+import Data.List
+import public Data.List.Map -- workaround for compiler bug
+import Data.List.Quantifiers
 import Data.List1
+import Data.Maybe
+import Data.SnocList
+import Data.SortedMap
+import Data.SortedMap.Dependent
+import Data.SortedSet
 import Data.Vect
 import Data.Vect.Quantifiers
-import Data.List
-import Data.List.Quantifiers
-import Data.Either
-import Data.SortedMap
-import Data.SortedSet
-import Data.SortedMap.Dependent
-import Decidable.Equality
+import public Decidable.Decidable
+import public Decidable.Equality
 import Deriving.Show
 import public Language.Mk
 import Language.Reflection.Compat
 import Language.Reflection.Compat.Constr
-import Language.Reflection.Compat.TypeInfo
+import public Language.Reflection.Compat.TypeInfo -- workaround for compiler bug
 import Language.Reflection.Expr
+import Language.Reflection.Syntax
 import Language.Reflection.Logging
-import Language.Reflection.Unify
-import Language.Reflection.VarSubst
+import public Language.Reflection.Unify.Interface
+import public Language.Reflection.VarSubst -- workaround for compiler bug
 import Syntax.IHateParens
 
 %language ElabReflection
@@ -331,7 +333,7 @@ getTask resultName resultKind resultContent = do
     , ttArgs
     , ttArgsNamed
     , currentNs
-    , resultName
+    , resultName = snd $ unNS resultName
     , fullInvocation = tqRet --- TODO: intelligent full invocation
     , polyTy
     , polyTyNamed
