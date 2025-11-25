@@ -1,0 +1,4 @@
+1/2: Building Shared (Shared.idr)
+2/2: Building Test (Test.idr)
+LOG deptycheck.test.utils.specialise:0:  Expanded e: Data.Vect.Vect _ Prelude.Types.Nat
+LOG deptycheck.test.utils.specialise:0: Test.VectNat.VectNat[] CallGen params: []
