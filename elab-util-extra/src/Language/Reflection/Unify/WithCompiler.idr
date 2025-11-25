@@ -1,20 +1,20 @@
 module Language.Reflection.Unify.WithCompiler
 
-import Control.Monad.Either
-import Control.Monad.Writer
-import Control.Monad.Identity
+import public Control.Monad.Either -- workaround for compiler bug
+import public Control.Monad.Writer  -- workaround for compiler bug
+import public Control.Monad.Identity  -- workaround for compiler bug
 import Data.DPair
 import Data.Fin.Set
 import Data.Vect
-import Data.Vect.Quantifiers
-import Data.SnocVect
+import public Data.Vect.Quantifiers  -- workaround for compiler bug
+import public Data.SnocVect  -- workaround for compiler bug
 import Data.SortedMap
-import Decidable.Equality
+import public Decidable.Equality  -- workaround for compiler bug
 import Language.Reflection
-import Language.Reflection.Expr
-import Language.Reflection.Logging
+import public Language.Reflection.Expr  -- workaround for compiler bug
+import public Language.Reflection.Logging  -- workaround for compiler bug
 import Language.Reflection.Syntax
-import Language.Reflection.Unify.Interface
+import public Language.Reflection.Unify.Interface
 import Language.Reflection.VarSubst
 
 %default total
