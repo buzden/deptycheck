@@ -212,17 +212,18 @@ subEmpties dg = {fvData $= map $ subEmptiesFV dg} dg
 
 ||| Solve dependency graph
 solveDG :
+  Monad m =>
   (dg : DependencyGraph) ->
-  DependencyGraph
+  m DependencyGraph
 solveDG dg = do
   let cs = canSub dg
   let False = null cs
-  | _ => dg
-  let ds = doSub dg cs
+  | _ => pure dg
+  ds <- pure $ doSub dg cs
   -- DG <= DS because cs is non-empty, and every doSub may shrink the set of possibly substitutable variables
   -- If doSub can't shrink it, the dependency graph stays the same
   if ds == dg
-     then dg
+     then pure dg
      else solveDG $ assert_smaller dg ds
 
 ArgDPair : Type
@@ -339,7 +340,7 @@ unify' task = do
   logPoint DetailedDebug "unifyWithCompiler" [] "Initial DG: \{show dg}"
   let dg = subEmpties dg
   logPoint DetailedDebug "unifyWithCompiler" [] "DG after subEmpties: \{show dg}"
-  let solved = solveDG dg
+  solved <- solveDG dg
   logPoint DetailedDebug "unifyWithCompiler" [] "Solved DG: \{show solved}"
   pure solved
 
@@ -355,7 +356,7 @@ unifyWithCompiler task = do
   let err = pure {f=Elab} $ Left $ Just CatastrophicError
   rr <- try ret err
   dg <- liftEither rr
-  let ur = finalizeDG task dg
+  ur <- pure $ finalizeDG task dg
   logPoint DetailedDebug "unifyWithCompiler" [] "Unification result: \{show ur}"
   pure ur
 
