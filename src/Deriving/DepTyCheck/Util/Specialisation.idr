@@ -28,32 +28,76 @@ singleArg a n v = do
   let n : Name = fromString "lam^\{show n}"
   (IVar EmptyFC n, [(MkArg a.count a.piInfo (Just n) $ allQuestions a.type, v)])
 
-processArg : MonadLog m => NamesInfoInTypes => Arg -> Maybe TTImp -> Nat -> m (TTImp, List (Arg, Maybe TTImp))
+record AllApps where
+  constructor MkAllApps
+  explicitArgs : List TTImp
+  autoArgs : List TTImp
+  namedArgs : SortedMap Name TTImp
 
-processArgs' : MonadLog m => NamesInfoInTypes => List Arg -> List (Maybe TTImp) -> Nat -> m (List AnyApp, List (Arg, Maybe TTImp))
-processArgs' [] mss k = pure ([], [])
-processArgs' (x :: xs) [] k = pure ([], [])
-processArgs' (x :: xs) (y :: ys) k = do
-  (aT, l) <- assert_total $ processArg x y k
-  (recAA, l') <- processArgs' xs ys (k + length l)
+addApp' : AnyApp -> AllApps -> AllApps
+addApp' (PosApp s) = {explicitArgs $= (s ::)}
+addApp' (NamedApp nm s) = {namedArgs $= insert nm s}
+addApp' (AutoApp s) = {autoArgs $= (s ::)}
+addApp' (WithApp s) = {explicitArgs $= (s ::)}
+
+mkAllApps : List AnyApp -> AllApps
+mkAllApps laa = foldl (flip addApp') (MkAllApps [] [] empty) $ reverse laa
+
+getNamed : Maybe Name -> AllApps -> (Maybe TTImp, AllApps)
+getNamed Nothing ap = (Nothing, ap)
+getNamed (Just x) ap =
+  case lookup x ap.namedArgs of
+    Nothing => (Nothing, ap)
+    Just t => (Just t, {namedArgs $= delete x} ap)
+
+getGiven : Arg -> AllApps -> (Maybe TTImp, AllApps)
+getGiven (MkArg _ ImplicitArg name type) ap = getNamed name ap
+getGiven (MkArg _ ExplicitArg name type) (MkAllApps (x :: xs) autoArgs namedArgs) = (Just x, MkAllApps xs autoArgs namedArgs)
+getGiven (MkArg _ ExplicitArg name type) ap = getNamed name ap
+getGiven (MkArg _ AutoImplicit name type) (MkAllApps explicitArgs (x :: xs) namedArgs) = (Just x, MkAllApps explicitArgs xs namedArgs)
+getGiven (MkArg _ AutoImplicit name type) ap = getNamed name ap
+getGiven (MkArg _ (DefImplicit x) Nothing type) ap = (Just x, ap)
+getGiven (MkArg _ (DefImplicit x) (Just n) type) ap =
+  case lookup n ap.namedArgs of
+    Nothing => (Just x, ap)
+    Just t => (Just t , {namedArgs $= delete n} ap)
+
+getGivens : List Arg -> AllApps -> List (Maybe TTImp)
+getGivens [] aa = []
+getGivens (x :: xs) aa = do
+  let (mr, aa) = getGiven x aa
+  mr :: getGivens xs aa
+
+export
+getGivens' : NamesInfoInTypes => TTImp -> Maybe (List (Arg, Maybe TTImp))
+getGivens' t = do
+  let (IVar _ tyName, aTerms) = unAppAny t
+    | _ => Nothing
+  let Just tyInfo = lookupType tyName
+    | _ => Nothing
+  Just $ zip tyInfo.args $ getGivens tyInfo.args (mkAllApps aTerms)
+
+
+f : (a : Nat) -> String -> Nat
+
+processArg : MonadLog m => NamesInfoInTypes => Nat -> Arg -> Maybe TTImp -> m (TTImp, List (Arg, Maybe TTImp))
+
+processArgs' : MonadLog m => NamesInfoInTypes => Nat -> List (Arg, Maybe TTImp) -> m (List AnyApp, List (Arg, Maybe TTImp))
+processArgs' k [] = pure ([], [])
+processArgs' k ((x, y) :: xs) = do
+  (aT, l) <- assert_total $ processArg k x y
+  (recAA, l') <- processArgs' (k + length l) xs
   pure (appArg x aT :: recAA, l ++ l')
 
-processArg arg Nothing argIdx = do
+processArg argIdx arg Nothing = do
   -- logPoint DetailedDebug "deptycheck.util.specialisation.processArg" [] "Processing non-given \{show arg.name}"
   pure $ singleArg arg argIdx Nothing
-processArg arg (Just x) argIdx = do
+processArg argIdx arg (Just x) = do
   -- logPoint DetailedDebug "deptycheck.util.specialisation.processArg" [] "Processing \{show arg.name} = \{show x}"
   let (appLhs, appTerms) = unAppAny x
-  case (snd $ unPi arg.type, appLhs) of
-    (IType _, IVar _ tyName) => case lookupType tyName of
-      Just tyInfo => do
-        map (mapFst (reAppAny appLhs)) $ processArgs' tyInfo.args (map (Just . getExpr) appTerms) argIdx
-      _ => do
-        -- logPoint DetailedDebug "deptycheck.util.specialisation.processArg" [] "Can't find type \{show tyName}"
-        pure $ singleArg arg argIdx (Just x)
-    _ => do
-      -- logPoint DetailedDebug "deptycheck.util.specialisation.processArg" [] "Either non-type arg or wrong appLhs: \{show arg.type}; \{show appLhs}"
-      pure $ singleArg arg argIdx (Just x)
+  case getGivens' x of
+    Just givens => map (mapFst $ reAppAny appLhs) $ processArgs' argIdx $ takeWhile (isJust . snd) givens
+    _ => pure $ singleArg arg argIdx (Just x)
 
 mkArgs :
   NamesInfoInTypes =>
@@ -76,9 +120,8 @@ processArgs :
   List (Fin sig.targetType.args.length, TTImp) ->
   m (TTImp, List Arg, List $ Maybe TTImp)
 processArgs sig args givens = do
-  let (args', givens') = unzip $ mkArgs sig args givens
-  (argVals, fvArgs) <- processArgs' args' givens' 0
-  pure (reAppAny (IVar EmptyFC sig.targetType.name) argVals, unzip fvArgs)
+  map (bimap (reAppAny $ IVar EmptyFC sig.targetType.name) unzip) $
+    processArgs' 0 $ mkArgs sig args givens
 
 export
 formGivenVals : Vect l _ -> List TTImp -> Vect l TTImp
