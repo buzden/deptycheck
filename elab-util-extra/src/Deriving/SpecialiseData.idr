@@ -762,7 +762,7 @@ parameters (t : SpecTask)
   mkDecEqImplClause =
     let mToPImpl = var $ inGenNS t "mToPImpl"
     in `(decEqImpl x1 x2)
-        .= `(decEqInj {f = ~mToPImpl} $ decEq (~mToPImpl x1) (~mToPImpl x2))
+        .= `(decEqInj {f = ~mToPImpl} $ let x1' : ~(t.fullInvocation); x1' = (~mToPImpl x1); x2' : ~(t.fullInvocation); x2' = (~mToPImpl x2); in decEq x1' x2')
 
 
   ||| Derive decidable equality
