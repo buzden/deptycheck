@@ -4,4 +4,6 @@ import Shared
 
 %language ElabReflection
 
-%runElab runSIN Nothing False (const "VectNat") `(Vect _ Nat)
+%logging "deptycheck.util.specialisation" 20
+
+%runElab runSIN Nothing True (const "VectNat") `(Vect _ Nat)
