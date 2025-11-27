@@ -16,18 +16,6 @@ import public Language.Reflection.Unify
 
 %default total
 
-allQImpl : Monad m => TTImp -> m TTImp -> m TTImp
-allQImpl pi@(IPi _ _ _ _ _ _) r = r
-allQImpl _ _ = pure `(?)
-
-allQuestions : TTImp -> TTImp
-allQuestions t = runIdentity $ mapATTImp' allQImpl t
-
-singleArg : Arg -> Nat -> Maybe TTImp -> (TTImp, List (Arg, Maybe TTImp))
-singleArg a n v = do
-  let n : Name = fromString "lam^\{show n}"
-  (IVar EmptyFC n, [(MkArg a.count a.piInfo (Just n) $ allQuestions a.type, v)])
-
 record AllApps where
   constructor MkAllApps
   explicitArgs : List TTImp
@@ -51,13 +39,13 @@ getNamed (Just x) ap =
     Just t => (Just t, {namedArgs $= delete x} ap)
 
 getGiven : Arg -> AllApps -> (Maybe TTImp, AllApps)
-getGiven (MkArg _ ImplicitArg name type) ap = getNamed name ap
-getGiven (MkArg _ ExplicitArg name type) (MkAllApps (x :: xs) autoArgs namedArgs) = (Just x, MkAllApps xs autoArgs namedArgs)
-getGiven (MkArg _ ExplicitArg name type) ap = getNamed name ap
-getGiven (MkArg _ AutoImplicit name type) (MkAllApps explicitArgs (x :: xs) namedArgs) = (Just x, MkAllApps explicitArgs xs namedArgs)
-getGiven (MkArg _ AutoImplicit name type) ap = getNamed name ap
-getGiven (MkArg _ (DefImplicit x) Nothing type) ap = (Just x, ap)
-getGiven (MkArg _ (DefImplicit x) (Just n) type) ap =
+getGiven (MkArg _ ImplicitArg name _) ap = getNamed name ap
+getGiven (MkArg _ ExplicitArg name _) (MkAllApps (x :: xs) autoArgs namedArgs) = (Just x, MkAllApps xs autoArgs namedArgs)
+getGiven (MkArg _ ExplicitArg name _) ap = getNamed name ap
+getGiven (MkArg _ AutoImplicit name _) (MkAllApps explicitArgs (x :: xs) namedArgs) = (Just x, MkAllApps explicitArgs xs namedArgs)
+getGiven (MkArg _ AutoImplicit name _) ap = getNamed name ap
+getGiven (MkArg _ (DefImplicit x) Nothing _) ap = (Just x, ap)
+getGiven (MkArg _ (DefImplicit x) (Just n) _) ap =
   case lookup n ap.namedArgs of
     Nothing => (Just x, ap)
     Just t => (Just t , {namedArgs $= delete n} ap)
@@ -78,7 +66,17 @@ getGivens' t = do
   Just $ zip tyInfo.args $ getGivens tyInfo.args (mkAllApps aTerms)
 
 
-f : (a : Nat) -> String -> Nat
+allQImpl : Monad m => TTImp -> m TTImp -> m TTImp
+allQImpl pi@(IPi _ _ _ _ _ _) r = r
+allQImpl _ _ = pure `(?)
+
+allQuestions : TTImp -> TTImp
+allQuestions t = runIdentity $ mapATTImp' allQImpl t
+
+singleArg : Arg -> Nat -> Maybe TTImp -> (TTImp, List (Arg, Maybe TTImp))
+singleArg a n v = do
+  let n : Name = fromString "lam^\{show n}"
+  (IVar EmptyFC n, [(MkArg a.count a.piInfo (Just n) $ allQuestions a.type, v)])
 
 processArg : MonadLog m => NamesInfoInTypes => Nat -> Arg -> Maybe TTImp -> m (TTImp, List (Arg, Maybe TTImp))
 
