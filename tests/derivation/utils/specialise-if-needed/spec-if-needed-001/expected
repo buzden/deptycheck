@@ -1,4 +1,10 @@
 1/2: Building Shared (Shared.idr)
 2/2: Building Test (Test.idr)
 LOG deptycheck.test.utils.specialise:0:  Expanded e: Data.Vect.Vect _ Prelude.Types.Nat
+LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Task before normalisation: \ lam^0 => Data.Vect.Vect lam^0 Prelude.Types.Nat
+LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] NormaliseTask returned: lambdaTy = (lam^0 : Prelude.Types.Nat) -> Type;
+LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)]                         lambdaBody = \ lam^0 => Data.Vect.Vect lam^0 Prelude.Types.Nat;
+LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Specialised type name: Test.VectNat.VectNat
+LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Specialised type not found, deriving...
+LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Found or derived Test.VectNat.VectNat
 LOG deptycheck.test.utils.specialise:0: Test.VectNat.VectNat[] CallGen params: []

@@ -1,0 +1,10 @@
+1/2: Building Shared (Shared.idr)
+2/2: Building Test (Test.idr)
+LOG deptycheck.test.utils.specialise:0:  Expanded e: Test.X Prelude.Types.Nat Data.Fin.Fin
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Task before normalisation: Test.X Prelude.Types.Nat Data.Fin.Fin
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] NormaliseTask returned: lambdaTy = Type;
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1]                         lambdaBody = Test.X Prelude.Types.Nat Data.Fin.Fin;
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type name: Test.SpecX.SpecX
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type not found, deriving...
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Found or derived Test.SpecX.SpecX
+LOG deptycheck.test.utils.specialise:0: Test.SpecX.SpecX[] CallGen params: []

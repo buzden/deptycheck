@@ -58,14 +58,17 @@ runSIN namesInfo declareSpec mkName e = do
     case namesInfo of
       Nothing    => getNamesInfoInTypes' e
       Just nInfo => getNamesInfoInTypes' e <&> (<+> nInfo)
+  -- logPoint Warning "deptycheck.test.utils.specialise" [] "Types in namesInfo: \{show $ keys knownTypes}"
 
-  let (IVar _ tn, rs) = unApp e
+  let (IVar _ tn, rs) = unAppAny e
     | _ => fail "Failed to extract type name from invocation"
   let Just ti = lookupType tn
     | _ => fail "Failed to get type info"
   let Yes atin = areAllTyArgsNamed ti
     | No _ => fail "Type info has unnamed arguments"
-  let filtered = filter ((`(_) /=) . snd) $ zip (withIndex ti.args) rs
+  let True = length ti.args == length rs
+    | _ => fail "Not all arguments have been given parameters"
+  let filtered = filter ((`(_) /=) . snd) $ zip (withIndex ti.args) $ map getExpr rs
   let givenSet = SortedSet.fromList $ (fst . fst) <$> filtered
   let givenVals = formGivenVals (Vect.fromList (Prelude.toList givenSet)) $ snd <$> filtered
   let dc = PrintDC @{%search}
