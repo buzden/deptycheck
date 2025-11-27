@@ -1,31 +1,33 @@
 module Deriving.SpecialiseData
 
 import Control.Monad.Either
-import Control.Monad.Error.Either
-import Control.Monad.Error.Interface
-import Control.Monad.Reader.Tuple
 import Control.Monad.Trans
-import Data.SnocList
 import Data.DPair
+import Data.Either
+import Data.Fin.Set
+import Data.List
+import public Data.List.Map -- workaround for compiler bug
+import Data.List.Quantifiers
 import Data.List1
+import Data.Maybe
+import Data.SnocList
+import Data.SortedMap
+import Data.SortedMap.Dependent
+import Data.SortedSet
 import Data.Vect
 import Data.Vect.Quantifiers
-import Data.List
-import Data.List.Quantifiers
-import Data.Either
-import Data.SortedMap
-import Data.SortedSet
-import Data.SortedMap.Dependent
-import Decidable.Equality
+import public Decidable.Decidable
+import public Decidable.Equality
 import Deriving.Show
 import public Language.Mk
 import Language.Reflection.Compat
 import Language.Reflection.Compat.Constr
-import Language.Reflection.Compat.TypeInfo
+import public Language.Reflection.Compat.TypeInfo -- workaround for compiler bug
 import Language.Reflection.Expr
+import Language.Reflection.Syntax
 import Language.Reflection.Logging
-import Language.Reflection.Unify
-import Language.Reflection.VarSubst
+import public Language.Reflection.Unify.Interface
+import public Language.Reflection.VarSubst -- workaround for compiler bug
 import Syntax.IHateParens
 
 %language ElabReflection
@@ -331,7 +333,7 @@ getTask resultName resultKind resultContent = do
     , ttArgs
     , ttArgsNamed
     , currentNs
-    , resultName
+    , resultName = snd $ unNS resultName
     , fullInvocation = tqRet --- TODO: intelligent full invocation
     , polyTy
     , polyTyNamed
@@ -760,7 +762,13 @@ parameters (t : SpecTask)
   mkDecEqImplClause =
     let mToPImpl = var $ inGenNS t "mToPImpl"
     in `(decEqImpl x1 x2)
-        .= `(decEqInj {f = ~mToPImpl} $ decEq (~mToPImpl x1) (~mToPImpl x2))
+        .=
+        `(decEqInj {f = ~mToPImpl} $
+          let x1' : ~(t.fullInvocation);
+              x1' = (~mToPImpl x1);
+              x2' : ~(t.fullInvocation);
+              x2' = (~mToPImpl x2);
+          in decEq x1' x2')
 
 
   ||| Derive decidable equality
@@ -1081,6 +1089,29 @@ specialiseDataRaw resultName resultKind resultContent = do
   decls <- specDecls task uniResults specTy
   pure (specTy, decls)
 
+export
+normaliseTask : Elaboration m => List Arg -> TTImp -> m (TTImp, TTImp)
+normaliseTask fvs ret = do
+  lamTy : Type <- check $ piAll `(Type) fvs
+  lam <- normaliseAs lamTy $ foldr lam ret fvs
+  lamTy' <- quote lamTy
+  pure (lamTy', lam)
+
+export
+specialiseDataArgs :
+  Elaboration m =>
+  (nsProvider : NamespaceProvider m) =>
+  (unifier : CanUnify m) =>
+  MonadLog m =>
+  MonadError SpecialisationError m =>
+  (namesInfo : NamesInfoInTypes) =>
+  (resultName : Name) ->
+  (lambdaArgs : List Arg) ->
+  (lambdaRHS : TTImp) ->
+  m (TypeInfo, List Decl)
+specialiseDataArgs resultName fvArgs lambdaRHS =
+  uncurry (specialiseDataRaw resultName) =<< normaliseTask fvArgs lambdaRHS
+
 ||| Perform a specialisation for a given type name and content lambda
 |||
 ||| In order to generate a specialised type declaration equivalent to the following type alias:
@@ -1093,7 +1124,7 @@ specialiseDataRaw resultName resultKind resultContent = do
 ||| specialiseData `{VF} $ \n => Fin n
 ||| ```
 export
-specialiseData :
+specialiseDataLam :
   TaskLambda taskT =>
   Monad m =>
   Elaboration m =>
@@ -1104,7 +1135,7 @@ specialiseData :
   (resultName : Name) ->
   (0 task : taskT) ->
   m (TypeInfo, List Decl)
-specialiseData resultName task = do
+specialiseDataLam resultName task = do
   -- Quote spec lambda type
   resultKind <- quote taskT
   -- Quote spec lambda
@@ -1122,10 +1153,10 @@ specialiseData resultName task = do
 ||| ```
 ||| ...you may use this function as follows:
 ||| ```
-||| specialiseData'' `{VF} $ \n => Fin n
+||| specialiseDataLam'' `{VF} $ \n => Fin n
 ||| ```
 export
-specialiseData'' :
+specialiseDataLam'' :
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
   (unifier : CanUnify m) =>
@@ -1133,12 +1164,12 @@ specialiseData'' :
   Name ->
   (0 task: taskT) ->
   m $ List Decl
-specialiseData'' resultName task = do
+specialiseDataLam'' resultName task = do
   tq <- quote task
   nit <- getNamesInfoInTypes' tq
   Right (specTy, decls) <-
     runEitherT {m} {e=SpecialisationError} $
-      specialiseData resultName task
+      specialiseDataLam resultName task
   | Left err => fail "Specialisation error: \{show err}"
   pure decls
 
@@ -1152,10 +1183,10 @@ specialiseData'' resultName task = do
 ||| ```
 ||| ...you may use this function as follows:
 ||| ```
-||| %runElab specialiseData' `{VF} $ \n => Fin n
+||| %runElab specialiseDataLam' `{VF} $ \n => Fin n
 ||| ```
 export
-specialiseData' :
+specialiseDataLam' :
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
   (unifier : CanUnify m) =>
@@ -1163,5 +1194,5 @@ specialiseData' :
   Name ->
   (0 task: taskT) ->
   m ()
-specialiseData' resultName task =
-  specialiseData'' resultName task >>= declare
+specialiseDataLam' resultName task =
+  specialiseDataLam'' resultName task >>= declare

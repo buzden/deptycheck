@@ -134,6 +134,7 @@ export
 [TypeInfoOrdByName] Ord TypeInfo using TypeInfoEqByName where
   compare = comparing name
 
+export
 Semigroup NamesInfoInTypes where
   Names ts cs nit <+> Names ts' cs' nit' = Names (ts `mergeLeft` ts') (cs `mergeLeft` cs') (nit <+> nit')
 

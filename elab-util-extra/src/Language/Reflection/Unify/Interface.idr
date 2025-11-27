@@ -5,12 +5,11 @@ import Data.Either
 import Data.Fin.Set
 import Data.SortedMap
 import Data.Vect
+import Data.Vect.Quantifiers
 import Decidable.Equality
-import Derive.Prelude
+import Deriving.Show
 import Language.Reflection
 import Language.Reflection.Expr
-import Language.Reflection.TTImp
-import Language.Reflection.TT
 import Language.Reflection.Syntax
 
 %language ElabReflection
@@ -38,9 +37,24 @@ record UnificationTask where
 
 %name UnificationTask task
 
-%runElab derive "Count" [Show]
-%runElab derive "PiInfo" [Show]
-%runElab derive "Syntax.Arg" [Show]
+sCount : Show Count
+sCount = %runElab derive
+
+Show Count where
+  show = show @{sCount}
+
+sPiInfo : Show a => Show (PiInfo a)
+sPiInfo = %runElab derive
+
+Show a => Show (PiInfo a) where
+  show = show @{sPiInfo}
+
+sArg : Show Arg
+sArg = %runElab derive
+
+Show Arg where
+  show = show @{sArg}
+
 
 export
 Show UnificationTask where
@@ -74,7 +88,17 @@ record FVData where
 
 %name FVData fv, fvData
 
-%runElab derive "FVData" [Show, Eq]
+sFVData : Show FVData
+sFVData = %runElab derive
+
+export
+Show FVData where
+  show = show @{sFVData}
+
+export
+Eq FVData where
+  (MkFVData name holeName rig piInfo type value) == (MkFVData name' holeName' rig' piInfo' type' value') =
+    name == name' && holeName == holeName' && rig == rig' && piInfo == piInfo' && type == type' && value == value'
 
 export
 Interpolation FVData where
@@ -137,7 +161,18 @@ record DependencyGraph where
 
 %name DependencyGraph dg, depGraph
 
-%runElab derive "DependencyGraph" [Show]
+export
+Show DependencyGraph where
+  showPrec p t =
+    showCon p "MkDG" $
+      joinBy "" $
+        [ showArg t.freeVars
+        , showArg t.fvData
+        , showArg t.fvDeps
+        , showArg t.empties
+        , showArg t.nameToId
+        , showArg t.holeToId
+        ]
 
 export
 Eq DependencyGraph where
@@ -164,7 +199,18 @@ record UnificationResult where
   ||| (specialised constructor arguments)
   order : List $ Fin uniDg.freeVars
 
-%runElab derive "UnificationResult" [Show]
+export
+Show UnificationResult where
+  showPrec p t =
+    showCon p "MkUR" $
+      joinBy "" $
+        [ showArg t.task
+        , showArg t.uniDg
+        , showArg t.lhsResult
+        , showArg t.rhsResult
+        , showArg t.fullResult
+        , showArg t.order
+        ]
 
 public export
 data UnificationError : Type where
@@ -174,7 +220,21 @@ data UnificationError : Type where
   ExtractionError : TTImp -> UnificationError
   NoUnificationError : UnificationError
 
-%runElab derive "UnificationError" [Show, Eq]
+sUE : Show UnificationError
+sUE = %runElab derive
+
+export
+Show UnificationError where
+  show = show @{sUE}
+
+export
+Eq UnificationError where
+  CatastrophicError == CatastrophicError = True
+  InternalError s == InternalError s' = s == s'
+  TargetTypeError t == TargetTypeError t' = t == t'
+  ExtractionError t == ExtractionError t' = t == t'
+  NoUnificationError == NoUnificationError = True
+  _ == _ = False
 
 public export
 data UnificationVerdict : Type where
@@ -182,7 +242,12 @@ data UnificationVerdict : Type where
   Undecided : UnificationVerdict
   Fail : UnificationError -> UnificationVerdict
 
-%runElab derive "UnificationVerdict" [Show]
+sUV : Show UnificationVerdict
+sUV = %runElab derive
+
+export
+Show UnificationVerdict where
+  show = show @{sUV}
 
 export %inline
 isSuccess : UnificationVerdict -> Bool
