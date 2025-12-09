@@ -45,8 +45,8 @@ expandNames : Elaboration m => TTImp -> m TTImp
 expandNames = mapMTTImp queryVar
 
 export
-runSIN : Elaboration m => Maybe NamesInfoInTypes -> Bool -> (TTImp -> Name) -> TTImp -> m ()
-runSIN namesInfo declareSpec mkName e = do
+runSIN : Elaboration m => Maybe NamesInfoInTypes -> Bool -> TTImp -> m ()
+runSIN namesInfo declareSpec e = do
   e <- expandNames e
   logPoint Warning "deptycheck.test.utils.specialise" [] "Expanded e: \{show e}"
   MkNS nsNames <- provideNS
@@ -73,7 +73,7 @@ runSIN namesInfo declareSpec mkName e = do
   let givenVals = formGivenVals (Vect.fromList (Prelude.toList givenSet)) $ snd <$> filtered
   let dc = PrintDC @{%search}
 
-  r <- specialiseIfNeeded (MkGenSignature ti givenSet) (modName . mkName) `(?fuel) givenVals
+  r <- specialiseIfNeeded (MkGenSignature ti givenSet) `(?fuel) givenVals
   case r of
     Nothing => logMsg "" 0 "sIN returned nothing."
     Just (sdecls, stype, retExpr) => do
@@ -83,8 +83,8 @@ export
 runSIN' :
   Elaboration m =>
   MonadWriter (Maybe CallGen) m =>
-  Maybe NamesInfoInTypes -> Bool -> (TTImp -> Name) -> TTImp -> m $ Maybe TTImp
-runSIN' namesInfo declareSpec mkName e = do
+  Maybe NamesInfoInTypes -> Bool -> TTImp -> m $ Maybe TTImp
+runSIN' namesInfo declareSpec e = do
   e <- expandNames e
   logPoint Warning "deptycheck.test.utils.specialise" [] "Expanded e: \{show e}"
   MkNS nsNames <- provideNS
@@ -108,7 +108,7 @@ runSIN' namesInfo declareSpec mkName e = do
   let givenVals = formGivenVals (Vect.fromList (Prelude.toList givenSet)) $ snd <$> filtered
   let dc = WriterDC @{%search}
 
-  r <- specialiseIfNeeded (MkGenSignature ti givenSet) (modName . mkName) `(?fuel) givenVals
+  r <- specialiseIfNeeded (MkGenSignature ti givenSet) `(?fuel) givenVals
   case r of
     Nothing => pure Nothing
     Just (sdecls, stype, retExpr) => do
@@ -119,6 +119,6 @@ runSIN' namesInfo declareSpec mkName e = do
 export
 runSIN'' :
   Elaboration m =>
-  Maybe NamesInfoInTypes -> Bool -> (TTImp -> Name) -> TTImp -> m (Maybe TTImp, Maybe CallGen)
-runSIN'' namesInfo declareSpec mkName e =
-  runWriterT {w=Maybe CallGen} {m} $ runSIN' namesInfo declareSpec mkName e
+  Maybe NamesInfoInTypes -> Bool -> TTImp -> m (Maybe TTImp, Maybe CallGen)
+runSIN'' namesInfo declareSpec e =
+  runWriterT {w=Maybe CallGen} {m} $ runSIN' namesInfo declareSpec e
