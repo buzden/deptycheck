@@ -5,6 +5,12 @@
 [install]
 whitelist = [ "deptycheck-docs", "pil-fun", "pil-dyn" ]
 
+[custom.all.hashable-derive]
+type = "github"
+url = "https://github.com//uartman/hashable-derive"
+commit = "9c1788178848f5718cc1ddd3135bed463cb121d8"
+ipkg = "hashable-derive.ipkg"
+
 #######################
 ### Elab-util-extra ###
 #######################

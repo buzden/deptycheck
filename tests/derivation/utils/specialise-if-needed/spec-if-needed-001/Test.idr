@@ -6,4 +6,4 @@ import Shared
 
 %logging "deptycheck.util.specialisation" 20
 
-%runElab runSIN Nothing True (const "VectNat") `(Vect _ Nat)
+%runElab runSIN Nothing True `(Vect _ Nat)

@@ -10,4 +10,4 @@ data X : (t : Type) -> (t -> Nat) -> Type where
 
 data Y = MkY (X Nat S)
 
-%runElab runSIN Nothing True (const "SpecX") `(X Nat S)
+%runElab runSIN Nothing True `(X Nat S)

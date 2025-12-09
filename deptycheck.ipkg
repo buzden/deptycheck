@@ -36,6 +36,8 @@ depends = ansi
         , best-alternative
         , dependent-vect
         , elab-util-extra
+        , hashable
+        , hashable-derive
         , i-hate-parens
         , if-unsolved-implicit
         , mtl-tuple-impls
