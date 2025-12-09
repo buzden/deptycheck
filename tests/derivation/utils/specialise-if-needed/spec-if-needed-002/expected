@@ -4,7 +4,7 @@ LOG deptycheck.test.utils.specialise:0:  Expanded e: Test.X Prelude.Types.Nat Pr
 LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Task before normalisation: \ lam^0 => Test.X Prelude.Types.Nat lam^0
 LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] NormaliseTask returned: lambdaTy = (lam^0 : ({arg:1} : Prelude.Types.Nat) -> Prelude.Types.Nat) -> Type;
 LOG deptycheck.util.specialisation:20: Test.X[0(t), 1]                         lambdaBody = \ lam^0 => Test.X Prelude.Types.Nat lam^0;
-LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type name: Test.SpecX.SpecX
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type name: X^15319567236415762791
 LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type not found, deriving...
-LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Found or derived Test.SpecX.SpecX
-LOG deptycheck.test.utils.specialise:0: Test.SpecX.SpecX[0(fv^lam^0)] CallGen params: [Prelude.Types.S]
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Found or derived Test.X^15319567236415762791.X^15319567236415762791
+LOG deptycheck.test.utils.specialise:0: Test.X^15319567236415762791.X^15319567236415762791[0(fv^lam^0)] CallGen params: [Prelude.Types.S]

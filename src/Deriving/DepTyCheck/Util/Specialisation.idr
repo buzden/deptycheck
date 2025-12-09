@@ -14,6 +14,9 @@ import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 import public Deriving.SpecialiseData
 import public Language.Reflection.Unify
 
+import public Data.Hashable
+import public Data.Hashable.Base
+
 %default total
 
 record AllApps where
@@ -134,6 +137,28 @@ genGivens l = do
   let gv = formGivenVals (Vect.fromList $ Prelude.toList s) l1
   (s ** gv)
 
+specTaskToName : TTImp -> Name
+specTaskToName t = do
+  let (_, lamBody) = unLambda t
+  let (callee, _) = unAppAny lamBody
+  let vname =
+    case callee of
+         (IVar _ n) => show $ snd $ unNS n
+         x => show x
+  fromString "\{vname}^\{show $ hash t}"
+
+-- Using the monadic trick makes the performance *much* better.
+specTaskToName' : Monad m => TTImp -> m Name
+specTaskToName' t = do
+  let (_, lamBody) = unLambda t
+  let (callee, _) = unAppAny lamBody
+  let vname =
+    case callee of
+         (IVar _ n) => show $ snd $ unNS n
+         x => show x
+  hash <- pure $ show $ hash t
+  pure $ fromString "\{vname}^\{hash}"
+
 export %tcinline
 specialiseIfNeeded :
   Monad m =>
@@ -141,11 +166,10 @@ specialiseIfNeeded :
   NamesInfoInTypes =>
   DerivationClosure m =>
   (sig : GenSignature) ->
-  (specTaskToName : TTImp -> Name) ->
   (fuel : TTImp) ->
   Vect sig.givenParams.size TTImp ->
   m $ Maybe (List Decl, TypeInfo, TTImp)
-specialiseIfNeeded sig specTaskToName fuel givenParamValues = do
+specialiseIfNeeded sig fuel givenParamValues = do
   -- Check if there are any given type args, if not return Nothing
   let True = any (\a => snd (unPi a.type) == `(Type)) $ index' sig.targetType.args <$> Prelude.toList sig.givenParams
     | False => pure Nothing
@@ -156,7 +180,7 @@ specialiseIfNeeded sig specTaskToName fuel givenParamValues = do
   (lambdaTy, lambdaBody) <- normaliseTask fvArgs lambdaRet
   logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "NormaliseTask returned: lambdaTy = \{show lambdaTy};"
   logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "                        lambdaBody = \{show lambdaBody};"
-  let specName = specTaskToName lambdaBody
+  specName <- specTaskToName' lambdaBody
   logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Specialised type name: \{show specName}"
   (specTy, specDecls) : (TypeInfo, List Decl) <- case lookupType specName of
     Nothing => do
