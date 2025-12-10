@@ -114,7 +114,8 @@ interface NamespaceProvider (0 m : Type -> Type) where
   constructor MkNSProvider
   provideNS : m Namespace
 
-export %defaulthint
+export
+-- %defaulthint
 CurrentNS : Elaboration m => NamespaceProvider m
 CurrentNS = MkNSProvider $ do
     NS nsn _ <- inCurrentNS ""
@@ -128,6 +129,11 @@ Monad m => MonadTrans t => NamespaceProvider m => NamespaceProvider (t m) where
 export
 inNS : Monad m => Namespace -> NamespaceProvider m
 inNS ns = MkNSProvider $ pure ns
+
+export
+%defaulthint
+NoNS : Monad m => NamespaceProvider m
+NoNS = inNS (MkNS [])
 
 ||| Prepend namespace into which everything is generated to name
 inGenNS : SpecTask -> Name -> Name
