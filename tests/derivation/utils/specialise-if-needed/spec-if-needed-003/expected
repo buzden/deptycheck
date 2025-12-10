@@ -6,5 +6,5 @@ LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] NormaliseTask returned: l
 LOG deptycheck.util.specialisation:20: Test.X[0(t), 1]                         lambdaBody = Test.X Prelude.Types.Nat Data.Fin.Fin;
 LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type name: X^16134534282501286198
 LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type not found, deriving...
-LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Found or derived Test.X^16134534282501286198.X^16134534282501286198
-LOG deptycheck.test.utils.specialise:0: Test.X^16134534282501286198.X^16134534282501286198[] CallGen params: []
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Found or derived X^16134534282501286198.X^16134534282501286198
+LOG deptycheck.test.utils.specialise:0: X^16134534282501286198.X^16134534282501286198[] CallGen params: []
