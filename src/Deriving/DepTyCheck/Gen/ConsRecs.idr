@@ -87,6 +87,13 @@ record ConsRecs where
   constructor MkConsRecs
   consRecs : SortedMap Name TyConsRec
 
+Semigroup ConsRecs where
+  MkConsRecs cw <+> MkConsRecs cw' = MkConsRecs $ cw `mergeLeft` cw'
+
+-------------------------------------
+--- Getting (deriving) `ConsRecs` ---
+-------------------------------------
+
 -- This is a workaround of some bad and not yet understood behaviour, leading to both compile- and runtime errors
 removeNamedApps, workaroundFromNat : TTImp -> TTImp
 removeNamedApps = mapTTImp $ \case INamedApp _ lhs _ _ => lhs; e => e
@@ -167,10 +174,10 @@ weightableTyArgs : (consRecs : SortedMap Name (TypeInfo, Bool, List ConRec)) -> 
 weightableTyArgs consRecs ti = fromList $ flip List.mapMaybe ti.args.withIdx $ \(idx, ar) =>
   getAppVar ar.type >>= lookup' consRecs >>= \(wti, weightable, _) => guard weightable >> (idx, wti,) <$> ar.name
 
-export
-getConsRecs : Elaboration m => NamesInfoInTypes => m ConsRecs
-getConsRecs = do
-  consRecs <- for (toSortedMap knownTypes) $ \targetType => logBounds DetailedTrace "deptycheck.derive.consRec" [targetType] $ do
+-- Builds `ConsRecs` only for the given types, assuming that given `NamesInfoInTypes` contains info for them and their dependencies
+getConsRecsFor : NamesInfoInTypes => Elaboration m => (desiredTypes : ListMap Name TypeInfo) -> m ConsRecs
+getConsRecsFor desiredTypes = do
+  consRecs <- for (toSortedMap desiredTypes) $ \targetType => logBounds DetailedTrace "deptycheck.derive.consRec" [targetType] $ do
     crsForTy <- for targetType.cons $ \con => do
       tuneImpl <- search $ ProbabilityTuning con.name
       w : Either Nat1 (TTImp -> TTImp, SortedSet $ Fin con.args.length) <- case isRecursive {containingType=Just targetType} con of
@@ -196,6 +203,10 @@ getConsRecs = do
     MkTyConsRec ti wbl (weightableTyArgs consRecs ti) cons
 
 export
+getConsRecs : NamesInfoInTypes => Elaboration m => m ConsRecs
+getConsRecs = getConsRecsFor knownTypes
+
+export
 lookupConsWithWeight : ConsRecs => NamesInfoInTypes => GenSignature -> Maybe $ List (Con, ConWeightInfo)
 lookupConsWithWeight @{MkConsRecs crs} sig = do
   cr <- lookup sig.targetType.name crs
@@ -205,3 +216,12 @@ lookupConsWithWeight @{MkConsRecs crs} sig = do
 export
 deriveWeightingFun : ConsRecs => TypeInfo -> Maybe (Decl, Decl)
 deriveWeightingFun @{MkConsRecs crs} ti = lookup ti.name crs >>= deriveW
+
+-- Having a `ConsRecs` being built from the given `NamesInfoInTypes`,
+-- it'll get the updated `NamesInfoInTypes` and a `ConsRecs` equivalent to those being built from this `NamesInfoInTypes`, but more effective.
+export
+updateNamesAndConsRecs : NamesInfoInTypes => ConsRecs => Elaboration m => TypeInfo -> m (NamesInfoInTypes, ConsRecs)
+updateNamesAndConsRecs @{niit} @{crs} ti = do
+  newNiit <- enrichNamesInfoInTypes [ti] niit
+  crDiff <- getConsRecsFor @{newNiit} $ singleton ti.name ti
+  pure (newNiit, crs <+> crDiff)
