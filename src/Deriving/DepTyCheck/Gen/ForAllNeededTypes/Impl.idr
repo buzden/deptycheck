@@ -63,12 +63,12 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
           logPoint Details "deptycheck.derive.closuring.external" [sig] "is used as an external generator"
           pure (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
 
-    -- get the name of internal gen, derive if necessary
-    internalGenName <- do
+    -- get the expression of calling the internal gen, derive if necessary
+    internalGenCall <- do
 
       -- look for existing (already derived) internals, use it if exists
       let Nothing = List.Map.lookup sig !get
-        | Just name => pure name
+        | Just name => pure $ callCanonic sig name fuel values
 
       -- nothing found, then derive! acquire the name
       let name = nameForGen sig
@@ -80,7 +80,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
       modify {stateType=List _} $ (::) (sig, name)
 
       -- return the name of the newly derived generator
-      pure name
+      pure $ callCanonic sig name fuel values
 
     -- if we were first to start the derivation loop, then...
     when startLoop $ do
@@ -91,7 +91,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
 
     -- call the internal gen
     logPoint DetailedDebug "deptycheck.derive.closuring.internal" [sig] "is used as an internal generator"
-    pure (callCanonic sig internalGenName fuel values, Nothing)
+    pure (internalGenCall, Nothing)
 
     where
 
