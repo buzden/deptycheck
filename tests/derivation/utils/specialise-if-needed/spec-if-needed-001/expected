@@ -6,5 +6,5 @@ LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] NormaliseTask ret
 LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)]                         lambdaBody = \ lam^0 => Data.Vect.Vect lam^0 Prelude.Types.Nat;
 LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Specialised type name: Vect^17613086623960416996
 LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Specialised type not found, deriving...
-LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Found or derived Test.Vect^17613086623960416996.Vect^17613086623960416996
-LOG deptycheck.test.utils.specialise:0: Test.Vect^17613086623960416996.Vect^17613086623960416996[] CallGen params: []
+LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Found or derived Vect^17613086623960416996.Vect^17613086623960416996
+LOG deptycheck.test.utils.specialise:0: Vect^17613086623960416996.Vect^17613086623960416996[] CallGen params: []
