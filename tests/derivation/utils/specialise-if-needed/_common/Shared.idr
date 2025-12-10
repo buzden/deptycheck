@@ -83,7 +83,7 @@ export
 runSIN' :
   Elaboration m =>
   MonadWriter (Maybe CallGen) m =>
-  Maybe NamesInfoInTypes -> Bool -> TTImp -> m $ Maybe TTImp
+  Maybe NamesInfoInTypes -> Bool -> TTImp -> m $ Maybe (TTImp, TypeInfo)
 runSIN' namesInfo declareSpec e = do
   e <- expandNames e
   logPoint Warning "deptycheck.test.utils.specialise" [] "Expanded e: \{show e}"
@@ -113,12 +113,12 @@ runSIN' namesInfo declareSpec e = do
     Nothing => pure Nothing
     Just (sdecls, stype, retExpr) => do
       when declareSpec $ declare sdecls
-      pure $ Just retExpr
+      pure $ Just (retExpr, stype)
 
 
 export
 runSIN'' :
   Elaboration m =>
-  Maybe NamesInfoInTypes -> Bool -> TTImp -> m (Maybe TTImp, Maybe CallGen)
+  Maybe NamesInfoInTypes -> Bool -> TTImp -> m (Maybe (TTImp, TypeInfo), Maybe CallGen)
 runSIN'' namesInfo declareSpec e =
   runWriterT {w=Maybe CallGen} {m} $ runSIN' namesInfo declareSpec e
