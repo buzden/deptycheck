@@ -12,6 +12,7 @@ main = goldenRunner $
   , "Derivation utils: canonic signature" `atDir` "derivation/utils/canonicsig"
   , "Derivation utils: constructors analysis" `atDir` "derivation/utils/cons-analysis"
   , "Derivation utils: order tuning" `atDir` "derivation/utils/order-tuning"
+  , "Derivation utils: specialise if needed" `atDir` "derivation/utils/specialise-if-needed"
   , "Derivation: input validation" `atDir` "derivation/inputvalidation"
   , "Derivation: running harness" `atDir` "derivation/infra"
   , [ "Derivation: least effort (\{p}, \{w})" `atDir` "derivation/least-effort/\{p}/\{w}"
