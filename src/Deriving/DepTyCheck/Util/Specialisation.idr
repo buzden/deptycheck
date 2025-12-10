@@ -157,7 +157,7 @@ specTaskToName' t = do
          (IVar _ n) => show $ snd $ unNS n
          x => show x
   hash <- pure $ show $ hash t
-  pure $ fromString "\{vname}^\{hash}"
+  pure $ fromString "\{vname}^\{hash}.\{vname}^\{hash}"
 
 export %tcinline
 specialiseIfNeeded :
@@ -187,9 +187,12 @@ specialiseIfNeeded sig fuel givenParamValues = do
       logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Specialised type not found, deriving..."
       Right (specTy, specDecls) <- runEitherT {m} {e=SpecialisationError} $ specialiseDataRaw specName lambdaTy lambdaBody
       | Left err => fail "INTERNAL ERROR: Specialisation \{show lambdaBody} failed with error \{show err}."
+      logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Derived \{show specTy.name}"
       pure (specTy, specDecls)
-    Just specTy => pure (specTy, [])
-  logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Found or derived \{show specTy.name}"
+    Just specTy => do
+      logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Found \{show specTy.name}"
+      pure (specTy, [])
+  -- logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Found or derived \{show specTy.name}"
   let Yes stNamed = areAllTyArgsNamed specTy
     | No _ => fail "INTERNAL ERROR: Specialised type \{show specTy.name} does not have fully named arguments and constructors."
   let (newGP ** newGVals) = genGivens $ mapMaybe (\(a,b) => map (,b) a) $ zip givenSubst $ withIndex specTy.args

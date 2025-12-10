@@ -114,13 +114,13 @@ interface NamespaceProvider (0 m : Type -> Type) where
   constructor MkNSProvider
   provideNS : m Namespace
 
-export
+-- export
 -- %defaulthint
-CurrentNS : Elaboration m => NamespaceProvider m
-CurrentNS = MkNSProvider $ do
-    NS nsn _ <- inCurrentNS ""
-    | _ => fail "Internal error: inCurrentNS did not return NS"
-    pure nsn
+-- CurrentNS : Elaboration m => NamespaceProvider m
+-- CurrentNS = MkNSProvider $ do
+--     NS nsn _ <- inCurrentNS ""
+--     | _ => fail "Internal error: inCurrentNS did not return NS"
+--     pure nsn
 
 export
 Monad m => MonadTrans t => NamespaceProvider m => NamespaceProvider (t m) where
