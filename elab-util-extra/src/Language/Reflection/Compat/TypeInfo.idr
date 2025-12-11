@@ -134,6 +134,7 @@ export
 [TypeInfoOrdByName] Ord TypeInfo using TypeInfoEqByName where
   compare = comparing name
 
+export
 Semigroup NamesInfoInTypes where
   Names ts cs nit <+> Names ts' cs' nit' = Names (ts `mergeLeft` ts') (cs `mergeLeft` cs') (nit <+> nit')
 
@@ -164,26 +165,27 @@ isRecursiveConstructor : NamesInfoInTypes => Name -> Maybe Bool
 isRecursiveConstructor @{tyi} n = lookup' tyi.cons n <&> \(ty, con) => isRecursive {containingType=Just ty} con
 
 export
+enrichNamesInfoInTypes : Elaboration m => List TypeInfo -> NamesInfoInTypes -> m NamesInfoInTypes
+enrichNamesInfoInTypes []         tyi = pure tyi
+enrichNamesInfoInTypes (ti::rest) tyi = do
+  ti <- normaliseCons ti
+  let subes = concatMap allVarNames' $ subexprs ti
+  new <- map join $ for (Prelude.toList subes) $ \n =>
+           if isNothing $ lookupByType n
+             then map toList $ catch $ getInfo' n
+             else pure []
+  let next = { types $= insert ti.name ti
+             , namesInTypes $= insert ti subes
+             , cons $= mergeLeft $ fromList $ ti.cons <&> \con => (con.name, ti, con)
+             } tyi
+  assert_total $ enrichNamesInfoInTypes (new ++ rest) next
+  where
+    subexprs : TypeInfo -> List TTImp
+    subexprs ty = map type ty.args ++ (ty.cons >>= conSubexprs)
+
+export
 getNamesInfoInTypes : Elaboration m => TypeInfo -> m NamesInfoInTypes
-getNamesInfoInTypes ty = go neutral [ty] where
-
-  subexprs : TypeInfo -> List TTImp
-  subexprs ty = map type ty.args ++ (ty.cons >>= conSubexprs)
-
-  go : NamesInfoInTypes -> List TypeInfo -> m NamesInfoInTypes
-  go tyi []         = pure tyi
-  go tyi (ti::rest) = do
-    ti <- normaliseCons ti
-    let subes = concatMap allVarNames' $ subexprs ti
-    new <- map join $ for (Prelude.toList subes) $ \n =>
-             if isNothing $ lookupByType n
-               then map toList $ catch $ getInfo' n
-               else pure []
-    let next = { types $= insert ti.name ti
-               , namesInTypes $= insert ti subes
-               , cons $= mergeLeft $ fromList $ ti.cons <&> \con => (con.name, ti, con)
-               } tyi
-    assert_total $ go next (new ++ rest)
+getNamesInfoInTypes ty = enrichNamesInfoInTypes [ty] neutral
 
 export
 getNamesInfoInTypes' : Elaboration m => TTImp -> m NamesInfoInTypes

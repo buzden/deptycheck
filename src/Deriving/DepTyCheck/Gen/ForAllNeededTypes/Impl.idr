@@ -25,8 +25,10 @@ import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 ClosuringContext : (Type -> Type) -> Type
 ClosuringContext m =
   ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
-  , MonadState  (ListMap GenSignature Name) m                         -- gens already asked to be derived
+  , MonadState  (ListMap GenSignature Name) m                           -- gens already asked to be derived
   , MonadState  (List (GenSignature, Name)) m                           -- queue of gens to be derived
+  , MonadState  NamesInfoInTypes m                                      -- current known types
+  , MonadState  ConsRecs m                                              -- recursiveness and consturctor weights for current known types
   , MonadState  Bool m                                                  -- flag that there is a need to start derivation loop
   , MonadState  (SortedSet Name) m                                      -- type names that were asked for deriving their weighting function
   , MonadWriter (List Decl, List Decl) m                                -- function declarations and bodies
@@ -44,10 +46,11 @@ lookupLengthChecked intSig m = lookup intSig m >>= \(extSig, name) => (name,) <$
                                     Yes prf => Just $ Element extSig prf
                                     No _    => Nothing
 
-DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => ConsRecs => DerivationClosure m where
+DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m where
 
   needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
     modify $ insert ty.name
+    _ : ConsRecs <- get
     whenJust (deriveWeightingFun ty) $ tell . mapHom singleton
 
   callGen sig fuel values = do
@@ -63,12 +66,12 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
           logPoint Details "deptycheck.derive.closuring.external" [sig] "is used as an external generator"
           pure (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
 
-    -- get the name of internal gen, derive if necessary
-    internalGenName <- do
+    -- get the expression of calling the internal gen, derive if necessary
+    internalGenCall <- do
 
       -- look for existing (already derived) internals, use it if exists
       let Nothing = List.Map.lookup sig !get
-        | Just name => pure name
+        | Just name => pure $ callCanonic sig name fuel values
 
       -- nothing found, then derive! acquire the name
       let name = nameForGen sig
@@ -80,7 +83,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
       modify {stateType=List _} $ (::) (sig, name)
 
       -- return the name of the newly derived generator
-      pure name
+      pure $ callCanonic sig name fuel values
 
     -- if we were first to start the derivation loop, then...
     when startLoop $ do
@@ -91,7 +94,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
 
     -- call the internal gen
     logPoint DetailedDebug "deptycheck.derive.closuring.internal" [sig] "is used as an internal generator"
-    pure (callCanonic sig internalGenName fuel values, Nothing)
+    pure (internalGenCall, Nothing)
 
     where
 
@@ -100,6 +103,8 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => NamesInfoInTypes => 
 
         -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
         let genFunClaim = export' name $ canonicSig sig
+        _ : NamesInfoInTypes <- get
+        _ : ConsRecs <- get
         genFunBody <- logBounds Info "deptycheck.derive.type" [sig] $ def name <$> assert_total canonicBody sig name
 
         -- remember the derived stuff
@@ -121,8 +126,8 @@ runCanonic exts calc = do
   let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
   (x, defs, bodies) <- evalRWST
                          exts
-                         (empty, empty, empty, True)
+                         (empty, empty, empty, %search, %search, True)
                          calc
-                         {s=(ListMap GenSignature Name, List (GenSignature, Name), SortedSet Name, _)}
+                         {s=(ListMap GenSignature Name, List (GenSignature, Name), SortedSet Name, NamesInfoInTypes, ConsRecs, _)}
                          {w=(_, _)}
   pure (x, defs ++ bodies)
