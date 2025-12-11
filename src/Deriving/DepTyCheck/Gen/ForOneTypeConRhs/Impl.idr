@@ -224,9 +224,6 @@ export
 [LeastEffort] DeriveBodyRhsForCon where
   consGenExpr sig con givs fuel = do
 
-    -- Prepare local search context
-    let _ : NamesInfoInTypes = %search    -- I don't why it won't be found without this
-
     -------------------------------------------------------------
     -- Prepare intermediate data and functions using this data --
     -------------------------------------------------------------
