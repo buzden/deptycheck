@@ -78,7 +78,6 @@ weightableTy = any weightableCon where
 record TyConsRec where
   constructor MkTyConsRec
   typeInfo         : TypeInfo
-  weightableItself : Bool -- well, this piece is redundant, since it always equals to `weightableTy constructors`
   weightableTyArgs : SortedMap (Fin typeInfo.args.length) (TypeInfo, Name)
   constructors     : List ConRec
 
@@ -109,8 +108,8 @@ interimNamesWrapper n = UN $ Basic "inter^<\{show n}>"
 
 -- This function is moved out from `getConsRecs` to reduce the closure of the returned function
 deriveW : TyConsRec -> Maybe (Decl, Decl)
-deriveW $ MkTyConsRec ty weightable _ cons = do
-  guard weightable -- continue only when this type has structurally decreasing argument
+deriveW $ MkTyConsRec ty _ cons = do
+  guard $ weightableTy cons -- continue only when this type has structurally decreasing argument
   let weightFunName = weightFunName ty
 
   let inTyArg = arg $ foldl (\f, n => namedApp f n $ var n) .| var ty.name .| mapMaybe name ty.args
@@ -146,7 +145,7 @@ finCR : NamesInfoInTypes =>
         (tyCR : TyConsRec) ->
         (givenTyArgs : SortedSet $ Fin tyCR.typeInfo.args.length) ->
         List (Con, ConWeightInfo)
-finCR (MkTyConsRec ti _ wTyArgs cons) givenTyArgs = do
+finCR (MkTyConsRec ti wTyArgs cons) givenTyArgs = do
   let wTyArgs = wTyArgs `intersectionMap` givenTyArgs
   cons <&> \(MkConRec con e) => (con,) $ MkConWeightInfo $ e <&> \(wMod, directRecConArgs) => do
     let conRetTyArgs = snd $ unAppAny con.type
@@ -170,9 +169,9 @@ finCR (MkTyConsRec ti _ wTyArgs cons) givenTyArgs = do
           var (weightFunName weightTy) .$ var (interimNamesWrapper weightArgName)
     pure $ StructurallyDecreasing decrTy $ wMod weightExpr
 
-weightableTyArgs : (consRecs : SortedMap Name (TypeInfo, Bool, List ConRec)) -> (ti : TypeInfo) -> SortedMap (Fin ti.args.length) (TypeInfo, Name)
+weightableTyArgs : (consRecs : SortedMap Name (TypeInfo, List ConRec)) -> (ti : TypeInfo) -> SortedMap (Fin ti.args.length) (TypeInfo, Name)
 weightableTyArgs consRecs ti = fromList $ flip List.mapMaybe ti.args.withIdx $ \(idx, ar) =>
-  getAppVar ar.type >>= lookup' consRecs >>= \(wti, weightable, _) => guard weightable >> (idx, wti,) <$> ar.name
+  getAppVar ar.type >>= lookup' consRecs >>= \(wti, cons) => guard (weightableTy cons) >> (idx, wti,) <$> ar.name
 
 -- Builds `ConsRecs` only for the given types, assuming that given `NamesInfoInTypes` contains info for them and their dependencies
 getConsRecsFor : NamesInfoInTypes => Elaboration m => (desiredTypes : ListMap Name TypeInfo) -> m ConsRecs
@@ -196,11 +195,11 @@ getConsRecsFor desiredTypes = do
               "- directly recursive args: \{show $ finToNat <$> directlyRecArgs}"
           pure (fuelWeightExpr, fromList directlyRecArgs)
       pure $ MkConRec con w
-    pure (targetType, weightableTy crsForTy, crsForTy)
-  let 0 _ : SortedMap Name (TypeInfo, Bool, List ConRec) := consRecs
+    pure (targetType, crsForTy)
+  let 0 _ : SortedMap Name (TypeInfo, List ConRec) := consRecs
 
-  pure $ MkConsRecs $ mapWithKey' consRecs $ \tyName, (ti, wbl, cons) => do
-    MkTyConsRec ti wbl (weightableTyArgs consRecs ti) cons
+  pure $ MkConsRecs $ mapWithKey' consRecs $ \tyName, (ti, cons) => do
+    MkTyConsRec ti (weightableTyArgs consRecs ti) cons
 
 export
 getConsRecs : NamesInfoInTypes => Elaboration m => m ConsRecs
