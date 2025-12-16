@@ -63,6 +63,9 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
     -- check if we are the first, then we need to start the loop, and say that no one needs any more startups, we are in charge
     startLoop <- get <* put False
 
+    -- update names info in types and cons recs if the asked type is not there
+    considerNewType sig.targetType
+
     -- get the expression of calling the internal gen, derive if necessary
     internalGenCall <- do
 
@@ -94,6 +97,12 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
       (internalGenCall, Nothing)
 
     where
+
+      considerNewType : TypeInfo -> m ()
+      considerNewType ty = do
+        _ : (NamesInfoInTypes, ConsRecs) <- get
+        let False = isTypeKnown ty | True => pure ()
+        updateNamesAndConsRecs sig.targetType >>= put
 
       deriveOne : (GenSignature, Name) -> m ()
       deriveOne (sig, name) = do
