@@ -216,6 +216,10 @@ export
 deriveWeightingFun : ConsRecs => TypeInfo -> Maybe (Decl, Decl)
 deriveWeightingFun @{MkConsRecs crs} ti = lookup ti.name crs >>= deriveW
 
+export
+isTypeKnown : ConsRecs => TypeInfo -> Bool
+isTypeKnown @{MkConsRecs crs} ti = isJust $ lookup ti.name crs
+
 -- Having a `ConsRecs` being built from the given `NamesInfoInTypes`,
 -- it'll get the updated `NamesInfoInTypes` and a `ConsRecs` equivalent to those being built from this `NamesInfoInTypes`, but more effective.
 export
