@@ -221,6 +221,6 @@ deriveWeightingFun @{MkConsRecs crs} ti = lookup ti.name crs >>= deriveW
 export
 updateNamesAndConsRecs : NamesInfoInTypes => ConsRecs => Elaboration m => TypeInfo -> m (NamesInfoInTypes, ConsRecs)
 updateNamesAndConsRecs @{niit} @{crs} ti = do
-  newNiit <- enrichNamesInfoInTypes [ti] niit
-  crDiff <- getConsRecsFor @{newNiit} $ singleton ti.name ti
-  pure (newNiit, crs <+> crDiff)
+  newNiit <- logBounds Trace "deptycheck.derive.namesInfo.update" [ti] $ enrichNamesInfoInTypes [ti] niit
+  newCr <- logBounds Trace "deptycheck.derive.consRec.update" [ti] $ map (crs <+>) $ getConsRecsFor @{newNiit} $ singleton ti.name ti
+  pure (newNiit, newCr)
