@@ -71,12 +71,32 @@ interface Monad m => MonadLog (0 m : Type -> Type) where
 
 export
 logPoint' : MonadLog m =>
+            ElabLogLevels =>
+            (topic : String) -> So (topic /= "") =>
+            (positions : LogPositions) ->
+            (desc : String) ->
+            m ()
+logPoint' = logPoint defaultLogLevel
+
+export %inline
+withLogPoint : MonadLog m =>
+               ElabLogLevels =>
+               (level : LogLevel) ->
+               (topic : String) -> So (topic /= "") =>
+               (positions : LogPositions) ->
+               (desc : String) ->
+               m a -> m a
+withLogPoint l t p d x = logPoint l t p d >> x
+
+export %inline
+logValue : MonadLog m =>
            ElabLogLevels =>
+           (level : LogLevel) ->
            (topic : String) -> So (topic /= "") =>
            (positions : LogPositions) ->
            (desc : String) ->
-           m ()
-logPoint' = logPoint defaultLogLevel
+           a -> m a
+logValue l t p d x = logPoint l t p d $> x
 
 export
 logBounds : MonadLog m =>
@@ -105,11 +125,11 @@ logBounds level topic positions action = do
 
 export
 logBounds' : MonadLog m =>
-            ElabLogLevels =>
-            (topic : String) -> So (topic /= "") =>
-            (positions : LogPositions) ->
-            m a ->
-            m a
+             ElabLogLevels =>
+             (topic : String) -> So (topic /= "") =>
+             (positions : LogPositions) ->
+             m a ->
+             m a
 logBounds' = logBounds defaultLogLevel
 
 export

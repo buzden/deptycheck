@@ -354,8 +354,7 @@ export
         -- TODO to get rid of `believe_me` below
         let df = believe_me $ deriveFirst @{impl} (rewrite tyLen in Prelude.toList sig.givenParams) (rewrite conLen in Prelude.toList givs)
         let userImposed = filter (not . contains' givs) $ nub $ conArgIdx <$> df
-        logPoint FineDetails "deptycheck.derive.least-effort" [sig, con] "- user-imposed: \{userImposed}"
-        pure userImposed
+        logValue FineDetails "deptycheck.derive.least-effort" [sig, con] "- user-imposed: \{userImposed}" userImposed
 
 --||| Best effort non-obligatory tactic tries to use as much external generators as possible
 --||| but discards some there is a conflict between them.

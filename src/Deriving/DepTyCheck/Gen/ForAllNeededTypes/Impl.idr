@@ -54,16 +54,14 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
 
   callGen sig fuel values = do
 
-    -- check if we are the first, then we need to start the loop
-    startLoop <- get {stateType=Bool}
-    -- say that no one needs any more startups, we are in charge
-    put False
-
     -- look for external gens, and call it if exists
     let Nothing = lookupLengthChecked sig !ask
-      | Just (name, Element extSig lenEq) => do
-          logPoint Details "deptycheck.derive.closuring.external" [sig] "is used as an external generator"
-          pure (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
+      | Just (name, Element extSig lenEq) =>
+          logValue Details "deptycheck.derive.closuring.external" [sig] "is used as an external generator" $
+            (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
+
+    -- check if we are the first, then we need to start the loop, and say that no one needs any more startups, we are in charge
+    startLoop <- get <* put False
 
     -- get the expression of calling the internal gen, derive if necessary
     internalGenCall <- do
@@ -92,8 +90,8 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
       put True
 
     -- call the internal gen
-    logPoint DetailedDebug "deptycheck.derive.closuring.internal" [sig] "is used as an internal generator"
-    pure (internalGenCall, Nothing)
+    logValue DetailedDebug "deptycheck.derive.closuring.internal" [sig] "is used as an internal generator"
+      (internalGenCall, Nothing)
 
     where
 
