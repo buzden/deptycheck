@@ -122,6 +122,7 @@ This index organizes all markdown tutorial files by their specific technical sub
 - `deptycheck-docs-aigen-3/DepTyCheck/08_coverage_tracking_.md` - Explains coverage tracking techniques
 - `deptycheck-docs-aigen-gemini-f-3/DepTyCheck/05_modelcoverage_.md` - Details model coverage mechanisms
 - `deptycheck-docs-aigen-gemini-f-3/DepTyCheck/04_ctlabel__compile_time_label__.md` - Explains compile-time label tracking
+- `deptycheck-docs-aigen-4/DepTyCheck/09_coverage_tracking_.md` - Explains coverage tracking approaches
 
 ### Model Coverage - Advanced Analysis
 **Files covering model-based coverage analysis:**
@@ -133,7 +134,6 @@ This index organizes all markdown tutorial files by their specific technical sub
 - `deptycheck-docs-aigen-gemini-pro-4/DepTyCheck/09_coverage_analysis_.md` - Explains coverage analysis patterns
 - `deptycheck-docs-aigen-gemini-pro-3/DepTyCheck/07_coverage_analysis_.md` - Details coverage analysis utilities
 - `deptycheck-docs-aigen-gemini-pro-with-tests-and-samples-2/DepTyCheck/06_runtime_model_coverage_.md` - Covers runtime model coverage
-- `deptycheck-docs-aigen-4/DepTyCheck/09_coverage_tracking_.md` - Explains coverage tracking approaches
 
 ## Practical Examples & Applications
 
@@ -158,18 +158,6 @@ This index organizes all markdown tutorial files by their specific technical sub
 - `deptycheck-docs-aigen-gemini-pro-with-samples-5/DepTyCheck/08_pil_fun_pretty_printer_.md` - Covers PIL pretty printer generation
 
 ## Technical Infrastructure
-
-### Type Primitives & Utilities - Built-in Support
-**Files covering type generator utilities:**
-- `deptycheck-docs-aigen-gemini-f-5/DepTyCheck/11_type_primitives_utility_.md` - Details type primitive utility functions
-- `deptycheck-docs-aigen-3/DepTyCheck/09_primitive_type_handling_.md` - Explains primitive type handling
-- `deptycheck-docs-aigen-4/DepTyCheck/05_constructor_handling_.md` - Covers constructor handling techniques
-
-### Argument Permutation - Generation Optimization
-**Files covering argument ordering optimization:**
-- `deptycheck-docs-aigen-gemini-f-5/DepTyCheck/12_argument_permutation_utility_.md` - Details argument permutation utilities
-- `deptycheck-docs-aigen-4/DepTyCheck/10_argument_permutation_.md` - Explains argument permutation techniques
-- `deptycheck-docs-aigen-3/DepTyCheck/05_argument_permutation_.md` - Covers argument permutation patterns
 
 ### Derivation Tuning - Performance Optimization
 **Files covering performance tuning interfaces:**
@@ -197,8 +185,6 @@ This index organizes all markdown tutorial files by their specific technical sub
 - `deptycheck-docs-aigen-gemini-pro-with-samples-5/DepTyCheck/06_distribution_checking_utilities_.md` - Details distribution checking utilities
 - `deptycheck-docs-aigen-gemini-pro-with-samples-5/DepTyCheck/05_statistical_distribution_checking_.md` - Covers statistical distribution checking
 - `deptycheck-docs-aigen-gemini-pro-3/DepTyCheck/05_derivation_code_analysis_utilities_.md` - Explains derivation code analysis utilities
-- `deptycheck-docs-aigen-gemini-pro-2/DepTyCheck/05_derivation_order___field_dependency_analysis_.md` - Details field dependency analysis
-- `deptycheck-docs-aigen-gemini-pro-with-tests-1/DepTyCheck/06_argument_and_constructor_analysis_utilities_.md` - Covers argument analysis utilities
 - `deptycheck-docs-aigen-gemini-pro-with-tests-2/DepTyCheck/05_type_and_signature_analysis_utilities_.md` - Explains type signature analysis utilities
 
 ### Emptiness Tracking - Type Safety
@@ -210,7 +196,6 @@ This index organizes all markdown tutorial files by their specific technical sub
 
 ### Derivation Framework - Overall Architecture
 **Files covering the complete derivation framework:**
-- `deptycheck-docs-aigen-3/DepTyCheck/01_derivation_framework_.md` - Details complete derivation framework architecture
 - `deptycheck-docs-aigen-gemini-pro-with-tests-1/DepTyCheck/04_derivation_pipeline_interfaces_.md` - Explains derivation pipeline interfaces
 - `deptycheck-docs-aigen-gemini-pro-with-tests-and-samples-4/DepTyCheck/04_derivation_pipeline_.md` - Covers derivation pipeline mechanics
 - `deptycheck-docs-aigen-gemini-pro-with-tests-and-samples-1/DepTyCheck/05_derivation_core___strategy.md` - Details derivation core strategy
