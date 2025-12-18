@@ -12,15 +12,27 @@ import public Deriving.DepTyCheck.Gen.Signature
 public export
 interface Monad m => DerivationClosure m where
   needWeightFun : TypeInfo -> m ()
-  callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m (TTImp, Maybe (gend ** Vect gend $ Fin gend))
-  --                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  --                                                                   this is a permutation of generated arguments --/
-  --                                                                   actually, `gend` can be calculated from `sig`, but we simplify things here
+  callGen' : (typeIsNew : Bool) ->
+             (sig : GenSignature) ->
+             (fuel : TTImp) ->
+             Vect sig.givenParams.size TTImp ->
+             m (TTImp, Maybe (gend ** Vect gend $ Fin gend))
+  --                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  -- this is a permutation of generated arguments --/
+  -- actually, `gend` can be calculated from `sig`, but we simplify things here
+
+public export %inline
+callGen : DerivationClosure m =>
+          (sig : GenSignature) ->
+          (fuel : TTImp) ->
+          Vect sig.givenParams.size TTImp ->
+          m (TTImp, Maybe (gend ** Vect gend $ Fin gend))
+callGen = callGen' False
 
 export
 DerivationClosure m => MonadTrans t => Monad (t m) => DerivationClosure (t m) where
   needWeightFun = lift . needWeightFun
-  callGen sig fuel params = lift $ callGen sig fuel params
+  callGen' tis sig fuel params = lift $ callGen' tis sig fuel params
 
 -------------------
 --- Conventions ---

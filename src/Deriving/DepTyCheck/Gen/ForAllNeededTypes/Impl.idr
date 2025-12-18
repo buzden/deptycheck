@@ -52,7 +52,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
     _ : (NamesInfoInTypes, ConsRecs) <- get
     whenJust (deriveWeightingFun ty) $ tell . mapHom singleton
 
-  callGen sig fuel values = do
+  callGen' typeIsNew sig fuel values = do
 
     -- look for external gens, and call it if exists
     let Nothing = lookupLengthChecked sig !ask
@@ -64,7 +64,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
     startLoop <- get <* put False
 
     -- update names info in types and cons recs if the asked type is not there
-    considerNewType sig.targetType
+    when typeIsNew $ considerNewType sig.targetType
 
     -- get the expression of calling the internal gen, derive if necessary
     internalGenCall <- do
