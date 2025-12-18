@@ -220,6 +220,9 @@ jobs:
       - name: Untar the `pack` dir
         run: .github/tar-pack restore "${{ env.pack_dir_file }}"
 
+      - name: Sleep a random bit
+        run: sleep "$(shuf -i 0-10 -n 1)"
+
       - run: pack test deptycheck "${{matrix.test_set}}"
 
   #################
@@ -266,6 +269,9 @@ jobs:
           name: built-deptycheck
       - name: Untar the `pack` dir
         run: .github/tar-pack restore "${{ env.pack_dir_file }}"
+
+      - name: Sleep a random bit
+        run: sleep "$(shuf -i 0-10 -n 1)"
 
       - run: pack build "${{matrix.example}}"
       - run: pack test "${{matrix.example}}"
