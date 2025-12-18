@@ -27,8 +27,7 @@ ClosuringContext m =
   ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m -- external gens
   , MonadState  (ListMap GenSignature Name) m                           -- gens already asked to be derived
   , MonadState  (List (GenSignature, Name)) m                           -- queue of gens to be derived
-  , MonadState  NamesInfoInTypes m                                      -- current known types
-  , MonadState  ConsRecs m                                              -- recursiveness and consturctor weights for current known types
+  , MonadState  (NamesInfoInTypes, ConsRecs) m                          -- current known types and their recursiveness and consturctor weights
   , MonadState  Bool m                                                  -- flag that there is a need to start derivation loop
   , MonadState  (SortedSet Name) m                                      -- type names that were asked for deriving their weighting function
   , MonadWriter (List Decl, List Decl) m                                -- function declarations and bodies
@@ -49,8 +48,8 @@ lookupLengthChecked intSig m = lookup intSig m >>= \(extSig, name) => (name,) <$
 DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m where
 
   needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
-    modify $ insert ty.name
-    _ : ConsRecs <- get
+    modify {stateType=SortedSet Name} $ insert ty.name
+    _ : (NamesInfoInTypes, ConsRecs) <- get
     whenJust (deriveWeightingFun ty) $ tell . mapHom singleton
 
   callGen sig fuel values = do
@@ -103,8 +102,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
 
         -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
         let genFunClaim = export' name $ canonicSig sig
-        _ : NamesInfoInTypes <- get
-        _ : ConsRecs <- get
+        _ : (NamesInfoInTypes, ConsRecs) <- get
         genFunBody <- logBounds Info "deptycheck.derive.type" [sig] $ def name <$> assert_total canonicBody sig name
 
         -- remember the derived stuff
@@ -126,8 +124,8 @@ runCanonic exts calc = do
   let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
   (x, defs, bodies) <- evalRWST
                          exts
-                         (empty, empty, empty, %search, %search, True)
+                         ((%search, %search), empty, empty, empty, True)
                          calc
-                         {s=(ListMap GenSignature Name, List (GenSignature, Name), SortedSet Name, NamesInfoInTypes, ConsRecs, _)}
+                         {s=((NamesInfoInTypes, ConsRecs), ListMap GenSignature Name, List (GenSignature, Name), SortedSet Name, _)}
                          {w=(_, _)}
   pure (x, defs ++ bodies)
