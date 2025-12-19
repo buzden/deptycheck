@@ -13,7 +13,7 @@ import public Decidable.Equality
 
 import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 
-import Deriving.DepTyCheck.Util.Specialisation
+import public Deriving.DepTyCheck.Util.Specialisation
 
 %default total
 
