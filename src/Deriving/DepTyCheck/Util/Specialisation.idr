@@ -161,7 +161,6 @@ specTaskToName' t = do
 
 export %tcinline
 specialiseIfNeeded :
-  Monad m =>
   Elaboration m =>
   NamesInfoInTypes =>
   DerivationClosure m =>
