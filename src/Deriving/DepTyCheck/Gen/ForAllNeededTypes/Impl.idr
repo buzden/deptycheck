@@ -64,7 +64,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
     startLoop <- get <* put False
 
     -- update names info in types and cons recs if the asked type is not there
-    considerNewType sig.targetType
+    _ <- considerNewType sig.targetType
 
     -- get the expression of calling the internal gen, derive if necessary
     internalGenCall <- do
@@ -98,11 +98,11 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
 
     where
 
-      considerNewType : TypeInfo -> m ()
+      considerNewType : TypeInfo -> m (NamesInfoInTypes, ConsRecs)
       considerNewType ty = do
-        _ : (NamesInfoInTypes, ConsRecs) <- get
-        let False = isTypeKnown ty | True => pure ()
-        updateNamesAndConsRecs sig.targetType >>= put
+        nc : (NamesInfoInTypes, ConsRecs) <- get
+        let False = isTypeKnown ty | True => pure nc
+        updateNamesAndConsRecs sig.targetType >>= \x => put x $> x
 
       deriveOne : (GenSignature, Name) -> m ()
       deriveOne (sig, name) = do
