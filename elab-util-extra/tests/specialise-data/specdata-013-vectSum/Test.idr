@@ -9,7 +9,7 @@ import Shared
 --- This is not the desired beaviour. Once we implement unifyManually and fording,
 --- It should be possible to represent such constructors using condition auto-implicits.
 
-%runElab specialiseData' "VectSum" $ \a,b => Vect (a + b) Nat
+%runElab specialiseDataLam' "VectSum" $ \a,b => Vect (a + b) Nat
 
 failing "x _ is not a valid impossible case."
   x : Vect (a + b) Nat -> Nat
