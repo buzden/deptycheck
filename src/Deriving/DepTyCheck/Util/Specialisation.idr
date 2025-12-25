@@ -159,6 +159,16 @@ specTaskToName' t = do
   hash <- pure $ show $ hash t
   pure $ fromString "\{vname}^\{hash}.\{vname}^\{hash}"
 
+nameUnambigAndVis : Elaboration m => Name -> m Bool
+nameUnambigAndVis n = do
+  [(_, vis)] <- getVis n
+    | _ => pure False
+  pure $ vis /= Private
+
+allConstructorsVisible : Elaboration m => TypeInfo -> m Bool
+allConstructorsVisible ti = do
+  all id <$> traverse nameUnambigAndVis (name <$> ti.cons)
+
 export %tcinline
 specialiseIfNeeded :
   Elaboration m =>
@@ -172,6 +182,8 @@ specialiseIfNeeded sig fuel givenParamValues = do
   -- Check if there are any given type args, if not return Nothing
   let True = any (\a => snd (unPi a.type) == `(Type)) $ index' sig.targetType.args <$> Prelude.toList sig.givenParams
     | False => pure Nothing
+  True <- allConstructorsVisible sig.targetType
+    | False => pure Nothing
   let givenIdxVals = Prelude.toList sig.givenParams `zipV` givenParamValues
   (lambdaRet, fvArgs, givenSubst) <- processArgs sig (withIndex sig.targetType.args) givenIdxVals
   let preNorm = foldr lam lambdaRet fvArgs
@@ -183,11 +195,18 @@ specialiseIfNeeded sig fuel givenParamValues = do
   logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Specialised type name: \{show specName}"
   (specTy, specDecls) : (TypeInfo, List Decl) <- case lookupType specName of
     Nothing => do
-      logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Specialised type not found, deriving..."
-      Right (specTy, specDecls) <- runEitherT {m} {e=SpecialisationError} $ specialiseDataRaw specName lambdaTy lambdaBody
-      | Left err => fail "INTERNAL ERROR: Specialisation \{show lambdaBody} failed with error \{show err}."
-      logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Derived \{show specTy.name}"
-      pure (specTy, specDecls)
+      info <- try (Just <$> getInfo' specName) (pure Nothing)
+      case info of
+        Nothing => do
+          logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Specialised type not found, deriving..."
+          Right (specTy, specDecls) <- runEitherT {m} {e=SpecialisationError} $ specialiseDataRaw specName lambdaTy lambdaBody
+            | Left err => fail "INTERNAL ERROR: Specialisation \{show lambdaBody} failed with error \{show err}."
+          logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Derived \{show specTy.name}"
+          declare specDecls
+          pure (specTy, [])
+        Just specTy => do
+          logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Found \{show specTy.name}"
+          pure (specTy, [])    
     Just specTy => do
       logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Found \{show specTy.name}"
       pure (specTy, [])
