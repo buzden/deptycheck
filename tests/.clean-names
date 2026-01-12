@@ -1,4 +1,4 @@
-#!/bin/awk -f
+#!/usr/bin/env -S awk -f
 
 # consistently replace numbers to make golden tests more stable. Currently handles:
 #   arg:NNN
