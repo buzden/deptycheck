@@ -7,6 +7,7 @@ LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0]                   
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Specialised type name: List^4779069909474151191.List^4779069909474151191
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Specialised type not found, deriving...
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Derived List^4779069909474151191.List^4779069909474151191
+LOG deptycheck.util.specialisation:10: Prelude.Basics.List[0] Declared specialised type: Prelude.Basics.List Prelude.Types.Nat
 LOG 0: List^4779069909474151191.List^4779069909474151191
 LOG 0: [Prelude.Types.Nat, Prelude.Basics.List, List^4779069909474151191.List^4779069909474151191]
 LOG deptycheck.test.utils.specialise:0:  Expanded e: Prelude.Basics.List Prelude.Types.Nat
