@@ -1,12 +1,88 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `a` in Builtin.Refl
-
-DerivedGen:1
- 15 |   show (X0 b1 b2 _) = "X0 \{show b1} \{show b2} Refl"
- 16 |   show X1           = "X1"
- 17 | 
- 18 | checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen MaybeEmpty (X b1 b2)
- 19 | checkedGen = deriveGen
-                   ^^^^^^^^^
-
+LOG deptycheck.util.specialisation:10: Builtin.Equal[0(a), 1(b), 2, 3] Declared specialised type: Builtin.Equal {a = Prelude.Basics.Bool} {b = Prelude.Basics.Bool} lam^0 lam^1
+Generated values:
+-----
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+-----
+X1
+-----
+X0 True True Refl
+-----
+X0 True True Refl
+-----
+X0 True True Refl
+-----
+X0 True True Refl
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+-----
+X1
+-----
+X0 False False Refl
+-----
+X0 False False Refl
+-----
+X0 False False Refl
+-----
+X0 False False Refl
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
+-----
+X1
