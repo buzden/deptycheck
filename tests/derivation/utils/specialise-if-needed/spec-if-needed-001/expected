@@ -7,4 +7,5 @@ LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)]                  
 LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Specialised type name: Vect^9686363643684445030.Vect^9686363643684445030
 LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Specialised type not found, deriving...
 LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Derived Vect^9686363643684445030.Vect^9686363643684445030
+LOG deptycheck.util.specialisation:10: Data.Vect.Vect[1(elem)] Declared specialised type: Data.Vect.Vect lam^0 Prelude.Types.Nat
 LOG deptycheck.test.utils.specialise:0: Vect^9686363643684445030.Vect^9686363643684445030[] CallGen params: []
