@@ -262,6 +262,7 @@ specialiseIfNeeded sig fuel givenParamValues = do
           logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Derived \{show specTy.name}"
           -- Declare derived type
           declare specDecls
+          logPoint Trace "deptycheck.util.specialisation" [sig] "Declared specialised type: \{show lambdaRet}"
           pure (specTy, [])
         Just specTy => do
           logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Found \{show specTy.name}"
