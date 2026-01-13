@@ -7,4 +7,5 @@ LOG deptycheck.util.specialisation:20: Test.X[0(t), 1]                         l
 LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type name: X^8135581006587252120.X^8135581006587252120
 LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type not found, deriving...
 LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Derived X^8135581006587252120.X^8135581006587252120
+LOG deptycheck.util.specialisation:10: Test.X[0(t), 1] Declared specialised type: Test.X Prelude.Types.Nat Data.Fin.Fin
 LOG deptycheck.test.utils.specialise:0: X^8135581006587252120.X^8135581006587252120[] CallGen params: []
