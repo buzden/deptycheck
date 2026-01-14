@@ -1,12 +1,25 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `ty` in Prelude.Types.Just
-
-DerivedGen:1
- 13 | XShow = %runElab derive
- 14 | 
- 15 | export
- 16 | checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty X
- 17 | checkedGen = deriveGen
-                   ^^^^^^^^^
-
+LOG deptycheck.util.specialisation:10: Prelude.Types.Maybe[0(ty)] Declared specialised type: Prelude.Types.Maybe String
+Generated values:
+-----
+-----
+MkX (Just "")
+-----
+MkX Nothing
+-----
+MkX Nothing
+-----
+MkX Nothing
+-----
+MkX (Just "a")
+-----
+MkX (Just "")
+-----
+MkX (Just "a")
+-----
+MkX Nothing
+-----
+MkX Nothing
+-----
+MkX (Just "")
