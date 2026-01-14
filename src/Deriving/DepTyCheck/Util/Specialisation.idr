@@ -159,7 +159,10 @@ processArg argIdx ga with (ga.given)
     let (appLhs, appTerms) = unAppAny x
     case getGivens' x of
       Just givens => map (mapFst $ reAppAny appLhs) $ processArgs' argIdx $ takeWhile (.isGiven) givens
-      _ => pure $ singleArg argIdx ga
+      _ => pure $
+        if (snd (unPi ga.arg.type) == `(Type))
+          then (x, [])
+          else singleArg argIdx ga
 
 processArgs :
   MonadLog m =>
@@ -224,6 +227,7 @@ specialiseIfNeeded :
   Vect sig.givenParams.size TTImp ->
   m $ Maybe (List Decl, TypeInfo, TTImp)
 specialiseIfNeeded sig fuel givenParamValues = do
+  logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Checking specialisation need for \{show givenParamValues}..."
   -- Check if there are any given type args, if not return Nothing
   let True = any (\a => snd (unPi a.type) == `(Type)) $ index' sig.targetType.args <$> Prelude.toList sig.givenParams
     | False => pure Nothing
