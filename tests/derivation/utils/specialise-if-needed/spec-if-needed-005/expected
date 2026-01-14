@@ -1,6 +1,8 @@
 1/2: Building Shared (Shared.idr)
 2/2: Building Test (Test.idr)
 LOG deptycheck.test.utils.specialise:0:  Expanded e: Prelude.Basics.List Prelude.Types.Nat
+LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Checking specialisation need for [Prelude.Types.Nat]...
+LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Prelude.Basics.List ({arg:1} := Prelude.Types.Nat) Given a type invocation, traversing arguments: []
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Task before normalisation: Prelude.Basics.List Prelude.Types.Nat
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] NormaliseTask returned: lambdaTy = Type;
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0]                         lambdaBody = Prelude.Basics.List Prelude.Types.Nat;
@@ -11,6 +13,8 @@ LOG deptycheck.util.specialisation:10: Prelude.Basics.List[0] Declared specialis
 LOG 0: List^4779069909474151191.List^4779069909474151191
 LOG 0: [Prelude.Types.Nat, Prelude.Basics.List, List^4779069909474151191.List^4779069909474151191]
 LOG deptycheck.test.utils.specialise:0:  Expanded e: Prelude.Basics.List Prelude.Types.Nat
+LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Checking specialisation need for [Prelude.Types.Nat]...
+LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Prelude.Basics.List ({arg:1} := Prelude.Types.Nat) Given a type invocation, traversing arguments: []
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Task before normalisation: Prelude.Basics.List Prelude.Types.Nat
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] NormaliseTask returned: lambdaTy = Type;
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0]                         lambdaBody = Prelude.Basics.List Prelude.Types.Nat;
