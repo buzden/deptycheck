@@ -165,7 +165,8 @@ processArg sig ty argIdx ga with (ga.given)
     let (appLhs, appTerms) = unAppAny x
     case getGivens' x of
       Just (travTy, givens) => do
-        logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ty, ga] "Given a type invocation, traversing arguments: \{show $ map (fromMaybe "" . name . arg) givens}"
+        logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ty, ga]
+          "Given a type invocation, traversing arguments: \{show $ map (fromMaybe "" . name . arg) givens}"
         map (mapFst $ reAppAny appLhs) $ processArgs' sig travTy argIdx $ takeWhile (.isGiven) givens
       _ =>
         if (snd (unPi ga.arg.type) == `(Type))
