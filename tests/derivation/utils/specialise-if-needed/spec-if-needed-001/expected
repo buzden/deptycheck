@@ -2,8 +2,8 @@
 2/2: Building Test (Test.idr)
 LOG deptycheck.test.utils.specialise:0:  Expanded e: Data.Vect.Vect _ Prelude.Types.Nat
 LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Checking specialisation need for [Prelude.Types.Nat]...
-LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Data.Vect.Vect len No given value, passing through
-LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Data.Vect.Vect (elem := Prelude.Types.Nat) Given a type invocation, traversing arguments: []
+LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] len No given value, passing through
+LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] (elem := Prelude.Types.Nat) Given a type invocation, traversing arguments: []
 LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] Task before normalisation: \ lam^0 => Data.Vect.Vect lam^0 Prelude.Types.Nat
 LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)] NormaliseTask returned: lambdaTy = (lam^0 : Prelude.Types.Nat) -> Type;
 LOG deptycheck.util.specialisation:20: Data.Vect.Vect[1(elem)]                         lambdaBody = \ lam^0 => Data.Vect.Vect lam^0 Prelude.Types.Nat;

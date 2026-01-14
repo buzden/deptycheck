@@ -121,13 +121,13 @@ unGA (x :: xs) = let (ys, zs) = unGA xs in (x.arg :: ys, x.given :: zs)
 
 ||| Extracts given values of arguments from a type invocation expression
 export
-getGivens' : NamesInfoInTypes => TTImp -> Maybe (TypeInfo, List GenArg)
+getGivens' : NamesInfoInTypes => TTImp -> Maybe (List GenArg)
 getGivens' t = do
   let (IVar _ tyName, aTerms) = unAppAny t
     | _ => Nothing
   let Just tyInfo = lookupType tyName
     | _ => Nothing
-  Just $ (tyInfo, map (uncurry MkGenArg) $ zip tyInfo.args $ getGivens tyInfo.args (mkAllApps aTerms))
+  Just $ map (uncurry MkGenArg) $ zip tyInfo.args $ getGivens tyInfo.args (mkAllApps aTerms)
 
 ||| Assemble a list of arguments and their given values from `callGen` inputs
 mkArgs :
@@ -148,33 +148,33 @@ singleArg n (MkGenArg a v) = do
   let n : Name = fromString "lam^\{show n}"
   (IVar EmptyFC n, [MkGenArg (MkArg a.count a.piInfo (Just n) $ allQuestions a.type) v])
 
-processArg : MonadLog m => NamesInfoInTypes => GenSignature -> TypeInfo -> Nat -> GenArg -> m (TTImp, List GenArg)
+processArg : MonadLog m => NamesInfoInTypes => GenSignature -> Nat -> GenArg -> m (TTImp, List GenArg)
 
-processArgs' : MonadLog m => NamesInfoInTypes => GenSignature -> TypeInfo -> Nat -> List GenArg -> m (List AnyApp, List GenArg)
-processArgs' sig ty k [] = pure ([], [])
-processArgs' sig ty k (x :: xs) = do
-  (aT, l) <- assert_total $ processArg sig ty k x
-  (recAA, l') <- processArgs' sig ty (k + length l) xs
+processArgs' : MonadLog m => NamesInfoInTypes => GenSignature -> Nat -> List GenArg -> m (List AnyApp, List GenArg)
+processArgs' sig k [] = pure ([], [])
+processArgs' sig k (x :: xs) = do
+  (aT, l) <- assert_total $ processArg sig k x
+  (recAA, l') <- processArgs' sig (k + length l) xs
   pure (appArg x.arg aT :: recAA, l ++ l')
 
-processArg sig ty argIdx ga with (ga.given)
-  processArg sig ty argIdx ga | Nothing = do
-    logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ty, ga] "No given value, passing through"
+processArg sig argIdx ga with (ga.given)
+  processArg sig argIdx ga | Nothing = do
+    logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "No given value, passing through"
     pure $ singleArg argIdx ga
-  processArg sig ty argIdx ga | Just x = do
+  processArg sig argIdx ga | Just x = do
     let (appLhs, appTerms) = unAppAny x
     case getGivens' x of
-      Just (travTy, givens) => do
-        logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ty, ga]
+      Just givens => do
+        logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga]
           "Given a type invocation, traversing arguments: \{show $ map (fromMaybe "" . name . arg) givens}"
-        map (mapFst $ reAppAny appLhs) $ processArgs' sig travTy argIdx $ takeWhile (.isGiven) givens
+        map (mapFst $ reAppAny appLhs) $ processArgs' sig argIdx $ takeWhile (.isGiven) givens
       _ =>
         if (snd (unPi ga.arg.type) == `(Type))
           then do
-            logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ty, ga] "Given a type invocation w/o arguments, specialising"
+            logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "Given a type invocation w/o arguments, specialising"
             pure (x, [])
           else do
-            logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ty, ga] "Given a non-type expr, passing through"
+            logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "Given a non-type expr, passing through"
             pure $ singleArg argIdx ga
 
 processArgs :
@@ -183,7 +183,7 @@ processArgs :
   (sig : GenSignature) ->
   List GenArg ->
   m (TTImp, List Arg, List $ Maybe TTImp)
-processArgs sig ga = map (bimap (reAppAny $ IVar EmptyFC sig.targetType.name) unGA) $ processArgs' sig sig.targetType 0 ga
+processArgs sig ga = map (bimap (reAppAny $ IVar EmptyFC sig.targetType.name) unGA) $ processArgs' sig 0 ga
 
 export
 formGivenVals : Vect l _ -> List TTImp -> Vect l TTImp
