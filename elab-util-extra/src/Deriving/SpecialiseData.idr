@@ -529,7 +529,7 @@ parameters (t : SpecTask)
       pullOut $ mkSpecArg ur <$> ur.order
     let typeArgs = newArgs.appsWith var ur.fullResult
     let tyRet = reAppAny (var t.resultName) typeArgs
-    let n = if params.eraseConNames then fromString "Con^\{show cIdx}" else dropNS pCon.name
+    let n = if params.eraseConNames then fromString "\{t.resultName}^Con^\{show cIdx}" else dropNS pCon.name
     MkCon
       { name = inGenNS t $ n
       , args
