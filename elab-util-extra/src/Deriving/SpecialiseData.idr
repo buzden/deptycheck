@@ -110,6 +110,18 @@ UniResults = List UnificationVerdict
 ------------------------
 
 public export
+record SpecialisationParams where
+  constructor MkSpecParams
+  eraseConNames : Bool
+
+public export
+%defaulthint
+SpecialisationDefaults : SpecialisationParams
+SpecialisationDefaults = MkSpecParams
+  { eraseConNames = False
+  }
+
+public export
 interface NamespaceProvider (0 m : Type -> Type) where
   constructor MkNSProvider
   provideNS : m Namespace
@@ -420,16 +432,17 @@ parameters (t : SpecTask)
     (f : UnificationResult ->
          (pCon : Con) ->
          (0 _ : ConArgsNamed pCon) =>
+         Nat ->
          r) ->
     UniResults ->
     List r
   mapUCons f rs = do
     let adp = pushIn t.polyTy.cons t.polyTyNamed.tyConArgsNamed
-    let f' : List (Subset Con ConArgsNamed) -> UniResults -> List r
-        f' (Element con _ :: xs) (Success res :: ys) = f res con :: f' xs ys
-        f' (_ :: xs)             (_ :: ys)           = f' xs ys
-        f' _ _ = []
-    f' adp rs
+    let f' : List (Subset Con ConArgsNamed) -> UniResults -> Nat -> List r
+        f' (Element con _ :: xs) (Success res :: ys) n = f res con n :: f' xs ys (S n)
+        f' (_ :: xs)             (_ :: ys)           n = f' xs ys n
+        f' _ _ _ = []
+    f' adp rs 0
 
   ||| Run monadic operation on all pairs of specified and polymorphic constructors
   map2UConsN :
@@ -503,28 +516,31 @@ parameters (t : SpecTask)
 
   ||| Generate a specialised constructor
   mkSpecCon :
+    (params : SpecialisationParams) =>
     (newArgs : _) ->
     (0 _ : All IsNamedArg newArgs) =>
     UnificationResult ->
     (con : Con) ->
     (0 _ : ConArgsNamed con) =>
+    Nat ->
     Subset Con ConArgsNamed
-  mkSpecCon newArgs ur pCon = do
+  mkSpecCon newArgs ur pCon cIdx = do
     let Element args allArgs =
       pullOut $ mkSpecArg ur <$> ur.order
     let typeArgs = newArgs.appsWith var ur.fullResult
     let tyRet = reAppAny (var t.resultName) typeArgs
+    let n = if params.eraseConNames then fromString "Con^\{show cIdx}" else dropNS pCon.name
     MkCon
-      { name = inGenNS t $ dropNS pCon.name
+      { name = inGenNS t $ n
       , args
       , type = tyRet
       } `Element` TheyAreNamed allArgs
 
   ||| Generate a specialised type
-  mkSpecTy : UniResults -> Subset TypeInfo AllTyArgsNamed
+  mkSpecTy : SpecialisationParams => UniResults -> Subset TypeInfo AllTyArgsNamed
   mkSpecTy ur = do
     let Element cons consAreNamed =
-      pullOut $ mapUCons (mkSpecCon t.ttArgs @{t.ttArgsNamed}) ur
+      pullOut $ mapUCons (mkSpecCon @{%search} t.ttArgs @{t.ttArgsNamed}) ur
     MkTypeInfo
       { name = inGenNS t t.resultName
       , args = t.ttArgs
@@ -1081,6 +1097,7 @@ specialiseDataRaw :
   MonadLog m =>
   MonadError SpecialisationError m =>
   (namesInfo : NamesInfoInTypes) =>
+  SpecialisationParams =>
   (resultName : Name) ->
   (resultKind : TTImp) ->
   (resultContent : TTImp) ->
@@ -1111,6 +1128,7 @@ specialiseDataArgs :
   MonadLog m =>
   MonadError SpecialisationError m =>
   (namesInfo : NamesInfoInTypes) =>
+  SpecialisationParams =>
   (resultName : Name) ->
   (lambdaArgs : List Arg) ->
   (lambdaRHS : TTImp) ->
@@ -1138,6 +1156,7 @@ specialiseDataLam :
   (unifier : CanUnify m) =>
   MonadError SpecialisationError m =>
   (namesInfo : NamesInfoInTypes) =>
+  SpecialisationParams =>
   (resultName : Name) ->
   (0 task : taskT) ->
   m (TypeInfo, List Decl)
@@ -1166,6 +1185,7 @@ specialiseDataLam'' :
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
   (unifier : CanUnify m) =>
+  SpecialisationParams =>
   TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
@@ -1196,6 +1216,7 @@ specialiseDataLam' :
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
   (unifier : CanUnify m) =>
+  SpecialisationParams =>
   TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
