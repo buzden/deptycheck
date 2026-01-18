@@ -1,0 +1,25 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.util.specialisation:10: Data.Vect.Vect[0(len), 1(elem)] Declared specialised type: Data.Vect.Vect lam^0 (Data.Fin.Fin lam^1)
+Generated values:
+-----
+-----
+MkX (MkY [0, 2, 0])
+-----
+MkX (MkY [2, 2, 0])
+-----
+MkX (MkY [2, 2, 1])
+-----
+MkX (MkY [1, 2, 2])
+-----
+MkX (MkY [2, 1, 2])
+-----
+MkX (MkY [2, 2, 1])
+-----
+MkX (MkY [2, 0, 1])
+-----
+MkX (MkY [2, 2, 2])
+-----
+MkX (MkY [2, 2, 1])
+-----
+MkX (MkY [2, 2, 2])
