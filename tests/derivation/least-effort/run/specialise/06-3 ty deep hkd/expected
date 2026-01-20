@@ -1,0 +1,28 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.util.specialisation:10: DerivedGen.Y[0, 1] Declared specialised type DerivedGen.Y^6741950274054397085.Y^6741950274054397085: DerivedGen.Y DerivedGen.Z Prelude.Types.Nat
+LOG deptycheck.util.specialisation:10: Prelude.Types.Either[0(a), 1(b)] Declared specialised type DerivedGen.Either^8529713418737914198.Either^8529713418737914198: Prelude.Types.Either (DerivedGen.Z Prelude.Types.Nat) Prelude.Types.Nat
+LOG deptycheck.util.specialisation:10: DerivedGen.Z[0] Declared specialised type DerivedGen.Z^4772972569107533783.Z^4772972569107533783: DerivedGen.Z Prelude.Types.Nat
+LOG deptycheck.util.specialisation:10: Prelude.Types.Either[0(a), 1(b)] Declared specialised type DerivedGen.Either^13682636983817606971.Either^13682636983817606971: Prelude.Types.Either Prelude.Types.Nat Prelude.Types.Nat
+Generated values:
+-----
+-----
+MkX (MkY (Right 16))
+-----
+MkX (MkY (Left (MkZ (Left 3))))
+-----
+MkX (MkY (Left (MkZ (Left 17))))
+-----
+MkX (MkY (Left (MkZ (Right 10))))
+-----
+MkX (MkY (Left (MkZ (Left 8))))
+-----
+MkX (MkY (Right 17))
+-----
+MkX (MkY (Right 12))
+-----
+MkX (MkY (Right 12))
+-----
+MkX (MkY (Left (MkZ (Right 7))))
+-----
+MkX (MkY (Left (MkZ (Right 3))))
