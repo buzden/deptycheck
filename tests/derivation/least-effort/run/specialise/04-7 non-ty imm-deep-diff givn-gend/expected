@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-LOG deptycheck.util.specialisation:10: Data.Vect.Vect[0(len), 1(elem)] Declared specialised type: Data.Vect.Vect lam^0 (Data.Fin.Fin lam^1)
+LOG deptycheck.util.specialisation:10: Data.Vect.Vect[0(len), 1(elem)] Declared specialised type DerivedGen.Vect^1863907217212445550.Vect^1863907217212445550: Data.Vect.Vect lam^0 (Data.Fin.Fin lam^1)
 Generated values:
 -----
 -----

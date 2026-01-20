@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-LOG deptycheck.util.specialisation:10: Builtin.Equal[0(a), 1(b), 2, 3] Declared specialised type: Builtin.Equal {a = Prelude.Basics.Bool} {b = Prelude.Basics.Bool} lam^0 lam^1
+LOG deptycheck.util.specialisation:10: Builtin.Equal[0(a), 1(b), 2, 3] Declared specialised type DerivedGen.Equal^17761735534830529519.Equal^17761735534830529519: Builtin.Equal {a = Prelude.Basics.Bool} {b = Prelude.Basics.Bool} lam^0 lam^1
 Generated values:
 -----
 -----
