@@ -1,6 +1,5 @@
 module DerivedGen
 
-import Data.Fin
 import Deriving.DepTyCheck.Gen
 
 %default total
@@ -13,4 +12,4 @@ data Y : Type -> Type where
 data X : Type where
   MkX : Either Nat (Y $ Either (Fin 5) String) -> X
 
-%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty X
+%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> Gen MaybeEmpty String => Gen MaybeEmpty X

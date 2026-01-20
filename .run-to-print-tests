@@ -2,13 +2,13 @@
 
 if [ "$1" = "--force" ]; then
   FORCE_REWRITE=1
+  shift
 else
   FORCE_REWRITE=0
 fi
-shift
 
 if [ -z "$1" ] || [ -z "$2" ] ; then
-  echo "Usage: $0 <print-tests-dir> [--force] <run-test-dir1> [<run-test-dir2> ...]" >&2
+  echo "Usage: $0 [--force] <print-tests-dir> <run-test-dir1> [<run-test-dir2> ...]" >&2
   exit 1
 fi
 
