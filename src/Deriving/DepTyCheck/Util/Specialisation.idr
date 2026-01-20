@@ -230,6 +230,20 @@ allConstructorsVisible : Elaboration m => TypeInfo -> m Bool
 allConstructorsVisible ti = do
   all id <$> traverse nameUnambigAndVis (name <$> ti.cons)
 
+mkDPairHelper : Nat -> (Name -> TTImp) -> TTImp -> TTImp
+mkDPairHelper 0 _ t = t
+mkDPairHelper (S n) helper t = do
+  let nn = fromString $ "dph^\{show n}"
+  `(MkDPair ~(helper nn) ~(mkDPairHelper n helper t))
+
+dPairHelper : Nat -> TTImp
+dPairHelper 0 = `(?)
+dPairHelper (S n) = `(DPair ? ~(dPairHelper n))
+
+inSameNS : Name -> Name -> Name
+inSameNS (NS ns _) n = NS ns n
+inSameNS _ n = n
+
 export %tcinline
 specialiseIfNeeded :
   Elaboration m =>
@@ -294,9 +308,16 @@ specialiseIfNeeded sig fuel givenParamValues = do
   let (newGP ** newGVals) = genGivens $ mapMaybe (\(a,b) => map (,b) a) $ zip givenSubst $ withIndex specTy.args
   -- Obtain the specialised generator call
   (inv, cg_rhs) <- callGen (MkGenSignature specTy newGP) fuel newGVals
-  let inv = case cg_rhs of
+  let inv : TTImp = case cg_rhs of
         Nothing => inv
         Just (n ** perm) => reorderGend False perm inv
   -- Use derived cast to convert result back to polymorphic type
-  let inv = `(map cast $ ~inv)
+  let generateds = sig.targetType.args.length `minus` sig.givenParams.size
+  let inv : TTImp =
+    if generateds == 0
+        then `(map (cast @{~(var $ inSameNS specTy.name "mToP")}) $ ~inv)
+        else
+          `(the (Gen MaybeEmpty ~(dPairHelper generateds)) $ map (\invv =>
+            case invv of
+              ~(mkDPairHelper generateds bindVar (bindVar "inv")) => ~(mkDPairHelper generateds var `(cast @{~(var $ inSameNS specTy.name "mToP")} inv))) ~inv)
   pure $ Just (specDecls, specTy, inv)
