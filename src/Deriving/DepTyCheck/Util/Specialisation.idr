@@ -164,6 +164,9 @@ processArg sig argIdx ga with (ga.given)
   processArg sig argIdx ga | Just x = do
     let (appLhs, appTerms) = unAppAny x
     let IVar _ tyName = appLhs
+      | IPrimVal _ (PrT _) => do
+            logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "Given a primitive type invocation, specialising"
+            pure (x, [])
       | _ => do
         logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "Given value head is not a variable, passing through"
         pure $ singleArg argIdx ga
@@ -232,9 +235,9 @@ specTaskToName' t = do
 
 nameUnambigAndVis : Elaboration m => Name -> m Bool
 nameUnambigAndVis n = do
-  [(_, vis)] <- getVis n
-    | _ => pure False
-  pure $ vis /= Private
+  try (do
+    _ : Unit <- check `(let x = ~(var n) in ())
+    pure True) (pure False)
 
 allConstructorsVisible : Elaboration m => TypeInfo -> m Bool
 allConstructorsVisible ti = do
@@ -267,17 +270,23 @@ specialiseIfNeeded sig fuel givenParamValues = do
   logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Checking specialisation need for \{show givenParamValues}..."
   -- Check if there are any given type args, if not return Nothing
   let True = any (\a => snd (unPi a.type) == `(Type)) $ index' sig.targetType.args <$> Prelude.toList sig.givenParams
-    | False => pure Nothing
+    | False => do
+      logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Not found any given type args, specialisation not needed."
+      pure Nothing
   -- Check if all of the generated type's constructors are visible, if not return Nothing
   True <- allConstructorsVisible sig.targetType
-    | False => pure Nothing
+    | False => do
+      logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "\{sig.targetType.name} has invisible constructors, specialisation impossible."
+      pure Nothing
   -- Assemble the `GenArg`s from `GenSignature` and given values
   let givenIdxVals = Prelude.toList sig.givenParams `zipV` givenParamValues
   let genArgs = mkArgs sig (withIndex sig.targetType.args) givenIdxVals
   -- Check if at least one `GenArg` can be specialised upon (i.e. is a type argument and has a non-passthrough given value)
   specable <- traverse (.isSpecialising) genArgs
   let True = any id specable
-    | False => pure Nothing
+    | False => do
+      logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Not found any type arguments that can be specialised upon, specialisation not impossible."
+      pure Nothing
   -- Generate specialisation rhs, arguments, and given values
   (lambdaRet, fvArgs, givenSubst) <- processArgs sig genArgs
   let preNorm = foldr lam lambdaRet fvArgs
@@ -298,7 +307,11 @@ specialiseIfNeeded sig fuel givenParamValues = do
         Nothing => do
         -- If not found at all, derive specialised type
           logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Specialised type not found, deriving..."
-          Right (specTy, specDecls) <- runEitherT {m} {e=SpecialisationError} $ specialiseDataRaw specName lambdaTy lambdaBody
+          thisNS <- do
+            NS nsn _ <- inCurrentNS ""
+            | _ => fail "Internal error: inCurrentNS did not return NS"
+            pure nsn
+          Right (specTy, specDecls) <- runEitherT {m} {e=SpecialisationError} $ specialiseDataRaw {nsProvider = inNS thisNS} specName lambdaTy lambdaBody
             | Left err => fail "INTERNAL ERROR: Specialisation \{show lambdaBody} failed with error \{show err}."
           logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Derived \{show specTy.name}"
           -- Declare derived type
