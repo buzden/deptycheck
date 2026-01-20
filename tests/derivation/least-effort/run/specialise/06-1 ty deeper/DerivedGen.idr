@@ -16,8 +16,8 @@ Show a => Show (Y a) where
 Show X where
   showPrec d $ MkX xs = showCon d "MkX" $ showArg xs
 
-checkedGen : Gen MaybeEmpty String => Fuel -> Gen MaybeEmpty X
+checkedGen : Fuel -> Gen MaybeEmpty String => Gen MaybeEmpty X
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO Unit
-main = runGs [ G checkedGen ]
+main = runGs [ G $ \fl => checkedGen fl ]
