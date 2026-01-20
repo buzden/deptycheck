@@ -163,16 +163,26 @@ processArg sig argIdx ga with (ga.given)
     pure $ singleArg argIdx ga
   processArg sig argIdx ga | Just x = do
     let (appLhs, appTerms) = unAppAny x
-    case getGivens' x of
-      Just givens => do
+    let IVar _ tyName = appLhs
+      | _ => do
+        logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "Given value head is not a variable, passing through"
+        pure $ singleArg argIdx ga
+    case lookupType tyName of
+      Just tyInfo => do
+        let (_ :: _) = appTerms
+          | [] => do
+            logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "Given a type invocation w/o arguments, specialising"
+            pure (x, [])
+        let givens = map (uncurry MkGenArg) $ zip tyInfo.args $ getGivens tyInfo.args (mkAllApps appTerms)
         logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga]
           "Given a type invocation, traversing arguments: \{show $ map (fromMaybe "" . name . arg) givens}"
         map (mapFst $ reAppAny appLhs) $ processArgs' sig argIdx $ takeWhile (.isGiven) givens
-      _ =>
+      Nothing => do
         if (snd (unPi ga.arg.type) == `(Type))
           then do
-            logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "Given a type invocation w/o arguments, specialising"
-            pure (x, [])
+            logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "Given a non-global type expr, passing through"
+            -- pure (x, [])
+            pure $ singleArg argIdx ga
           else do
             logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "Given a non-type expr, passing through"
             pure $ singleArg argIdx ga
@@ -293,7 +303,7 @@ specialiseIfNeeded sig fuel givenParamValues = do
           logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Derived \{show specTy.name}"
           -- Declare derived type
           declare specDecls
-          logPoint Trace "deptycheck.util.specialisation" [sig] "Declared specialised type: \{show lambdaRet}"
+          logPoint Trace "deptycheck.util.specialisation" [sig] "Declared specialised type \{show specTy.name}: \{show lambdaRet}"
           pure (specTy, [])
         Just specTy => do
           logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Found \{show specTy.name}"
