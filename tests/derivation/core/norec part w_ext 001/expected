@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-LOG deptycheck.util.specialisation:10: Prelude.Types.Maybe[0(ty)] Declared specialised type: Prelude.Types.Maybe String
+LOG deptycheck.util.specialisation:10: Prelude.Types.Maybe[0(ty)] Declared specialised type DerivedGen.Maybe^13367506090110851422.Maybe^13367506090110851422: Prelude.Types.Maybe String
 Generated values:
 -----
 -----
