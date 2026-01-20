@@ -1,0 +1,27 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.util.specialisation:10: Prelude.Types.Either[0(a), 1(b)] Declared specialised type DerivedGen.Either^4289176107705670177.Either^4289176107705670177: Prelude.Types.Either Prelude.Types.Nat (DerivedGen.Y Prelude.Types.Nat)
+LOG deptycheck.util.specialisation:10: DerivedGen.Y[0] Declared specialised type DerivedGen.Y^11712255676025100806.Y^11712255676025100806: DerivedGen.Y Prelude.Types.Nat
+LOG deptycheck.util.specialisation:10: Prelude.Types.Either[0(a), 1(b)] Declared specialised type DerivedGen.Either^13682636983817606971.Either^13682636983817606971: Prelude.Types.Either Prelude.Types.Nat Prelude.Types.Nat
+Generated values:
+-----
+-----
+MkX (Right (MkY (Left 16)))
+-----
+MkX (Left 4)
+-----
+MkX (Left 17)
+-----
+MkX (Left 10)
+-----
+MkX (Left 8)
+-----
+MkX (Right (MkY (Right 17)))
+-----
+MkX (Right (MkY (Left 11)))
+-----
+MkX (Right (MkY (Left 11)))
+-----
+MkX (Left 10)
+-----
+MkX (Left 4)
