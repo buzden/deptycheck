@@ -285,7 +285,8 @@ specialiseIfNeeded sig fuel givenParamValues = do
   specable <- traverse (.isSpecialising) genArgs
   let True = any id specable
     | False => do
-      logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Not found any type arguments that can be specialised upon, specialisation not impossible."
+      logPoint DetailedDebug "deptycheck.util.specialisation" [sig]
+        "Not found any type arguments that can be specialised upon, specialisation impossible."
       pure Nothing
   -- Generate specialisation rhs, arguments, and given values
   (lambdaRet, fvArgs, givenSubst) <- processArgs sig genArgs
@@ -311,7 +312,8 @@ specialiseIfNeeded sig fuel givenParamValues = do
             NS nsn _ <- inCurrentNS ""
             | _ => fail "Internal error: inCurrentNS did not return NS"
             pure nsn
-          Right (specTy, specDecls) <- runEitherT {m} {e=SpecialisationError} $ specialiseDataRaw {nsProvider = inNS thisNS} specName lambdaTy lambdaBody
+          Right (specTy, specDecls) <- runEitherT {m} {e=SpecialisationError} $
+              specialiseDataRaw {nsProvider = inNS thisNS} specName lambdaTy lambdaBody
             | Left err => fail "INTERNAL ERROR: Specialisation \{show lambdaBody} failed with error \{show err}."
           logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Derived \{show specTy.name}"
           -- Declare derived type
@@ -342,5 +344,6 @@ specialiseIfNeeded sig fuel givenParamValues = do
         else
           `(the (Gen MaybeEmpty ~(dPairHelper generateds)) $ map (\invv =>
             case invv of
-              ~(mkDPairHelper generateds bindVar (bindVar "inv")) => ~(mkDPairHelper generateds var `(cast @{~(var $ inSameNS specTy.name "mToP")} inv))) ~inv)
+              ~(mkDPairHelper generateds bindVar (bindVar "inv")) =>
+                  ~(mkDPairHelper generateds var `(cast @{~(var $ inSameNS specTy.name "mToP")} inv))) ~inv)
   pure $ Just (specDecls, specTy, inv)
