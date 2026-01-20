@@ -10,4 +10,4 @@ import Deriving.DepTyCheck.Gen
 data X : Nat -> Type where
   MkX : Vect n String -> X n
 
-%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (n : _) -> Gen MaybeEmpty $ X n
+%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (Fuel -> Gen MaybeEmpty String) => (n : _) -> Gen MaybeEmpty $ X n

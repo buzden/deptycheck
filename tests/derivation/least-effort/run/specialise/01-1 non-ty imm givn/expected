@@ -1,0 +1,67 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.util.specialisation:10: Data.Vect.Vect[0(len), 1(elem)] Declared specialised type: Data.Vect.Vect lam^0 String
+Generated values:
+-----
+-----
+MkX []
+-----
+MkX []
+-----
+MkX []
+-----
+MkX []
+-----
+MkX []
+-----
+MkX []
+-----
+MkX []
+-----
+MkX []
+-----
+MkX []
+-----
+MkX []
+-----
+-----
+MkX [""]
+-----
+MkX ["a"]
+-----
+MkX [""]
+-----
+MkX ["bc"]
+-----
+MkX [""]
+-----
+MkX ["a"]
+-----
+MkX ["a"]
+-----
+MkX [""]
+-----
+MkX ["a"]
+-----
+MkX ["bc"]
+-----
+-----
+MkX ["a", "a", ""]
+-----
+MkX ["bc", "a", "a"]
+-----
+MkX ["a", "a", "a"]
+-----
+MkX ["", "a", "a"]
+-----
+MkX ["", "a", "a"]
+-----
+MkX ["bc", "a", "a"]
+-----
+MkX ["bc", "", "a"]
+-----
+MkX ["bc", "bc", "bc"]
+-----
+MkX ["bc", "", "bc"]
+-----
+MkX ["", "bc", ""]
