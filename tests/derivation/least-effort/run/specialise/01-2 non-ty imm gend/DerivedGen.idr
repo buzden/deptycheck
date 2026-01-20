@@ -11,8 +11,8 @@ data X : Nat -> Type where
 Show (X n) where
   showPrec d $ MkX xs = showCon d "MkX" $ showArg xs
 
-checkedGen : Fuel -> Gen MaybeEmpty (n ** X n)
+checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (n ** X n)
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO Unit
-main = runGs [ G checkedGen ]
+main = runGs [ G $ \fl => checkedGen fl @{smallStrs} ]

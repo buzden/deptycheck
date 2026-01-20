@@ -11,12 +11,12 @@ data X : Nat -> Type where
 Show (X n) where
   showPrec d $ MkX xs = showCon d "MkX" $ showArg xs
 
-checkedGen : Fuel -> (n : _) -> Gen MaybeEmpty $ X n
+checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty String) => (n : _) -> Gen MaybeEmpty $ X n
 checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
 
 main : IO Unit
 main = runGs
-  [ G $ \fl => checkedGen fl 0
-  , G $ \fl => checkedGen fl 1
-  , G $ \fl => checkedGen fl 3
+  [ G $ \fl => checkedGen @{smallStrs} fl 0
+  , G $ \fl => checkedGen @{smallStrs} fl 1
+  , G $ \fl => checkedGen @{smallStrs} fl 3
   ]
