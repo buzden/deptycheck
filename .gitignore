@@ -2,3 +2,6 @@ build/
 .build/
 **/tests/**/failures
 **/tests/**/output
+
+# MacOS
+.DS_Store
