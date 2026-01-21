@@ -1,5 +1,0 @@
-package specdata-shared
-
-depends = elab-util-extra
-
-modules = Shared
