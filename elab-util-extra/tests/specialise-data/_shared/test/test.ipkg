@@ -2,5 +2,5 @@ package test
 
 opts = "--no-color --console-width 0"
 
-depends = specdata-shared, elab-util-extra
+depends = elab-util-extra
 
