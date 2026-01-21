@@ -325,7 +325,7 @@ getTask resultName resultKind resultContent = do
   let Yes tqArgsNamed = all isNamedArg tqArgs
   | _ => throwError UnnamedArgInLambdaError
   -- Create aliases for spec lambda's arguments and perform substitution
-  let (Element tqArgs tqArgsNamed, tqAlias) = transformArgNames (prependS "fv^") tqArgs
+  let (Element tqArgs tqArgsNamed, tqAlias) = transformArgNames (prependS "fv^\{resultName}^") tqArgs
   let tqRet = substituteVariables (fromList $ mapSnd var <$> tqAlias) tqRet
   let (ttArgs, _) = unPi resultKind
   -- Check for partial application in spec
