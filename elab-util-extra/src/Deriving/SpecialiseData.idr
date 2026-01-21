@@ -1050,29 +1050,65 @@ parameters (t : SpecTask)
 ||| Valid task lambda interface
 |||
 ||| Auto-implemented by any Type or any function that returns Type.
-export
-interface TaskLambda (t : Type) where
+-- export
+-- interface TaskLambda (t : Type) where
+--
+-- export
+-- TaskLambda Type
+--
+-- %hint
+-- export
+-- tlImplTy : (a : Type) -> TaskLambda a
+--
+-- export
+-- TaskLambda b => TaskLambda (a -> b)
+--
+-- export
+-- TaskLambda b => TaskLambda (a => b)
+--
+-- export
+-- TaskLambda b => TaskLambda ({_ : a} -> b)
+--
+-- export
+-- {x : _} -> TaskLambda b => TaskLambda ({default x _ : a} -> b)
+--
+-- export
+-- TaskLambda b => TaskLambda ((0 _ : a) -> b)
+--
+-- export
+-- TaskLambda b => TaskLambda ((0 _ : a) => b)
+--
+-- export
+-- TaskLambda b => TaskLambda ({0 _ : a} -> b)
+--
+-- export
+-- {0 x : _} -> TaskLambda b => TaskLambda ({default x 0 _ : a} -> b)
+--
+-- %hint
+-- export
+-- tlImpl0 : {a : Type} -> {0 f : a -> Type} -> (x : a) => TaskLambda (f x) => TaskLambda ((x : a) -> f x)
+--
+-- export
+-- {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda (a => f a)
+--
+-- export
+-- {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ({_: a} -> f a)
+--
+-- export
+-- {x : _} -> {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ({default x _: a} -> f a)
+--
+-- export
+-- {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ((0 _ : a) -> f a)
+--
+-- export
+-- {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ((0 _ : a) => f a)
+--
+-- export
+-- {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ({0 _: a} -> f a)
+--
+-- export
+-- {0 x : _} -> {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ({default x 0 _: a} -> f a)
 
-export
-TaskLambda Type
-
-export
-TaskLambda b => TaskLambda (a -> b)
-
-export
-TaskLambda b => TaskLambda (a => b)
-
-export
-TaskLambda b => TaskLambda ({_ : a} -> b)
-
-export
-TaskLambda b => TaskLambda ((0 _ : a) -> b)
-
-export
-TaskLambda b => TaskLambda ((0 _ : a) => b)
-
-export
-TaskLambda b => TaskLambda ({0 _ : a} -> b)
 
 ---------------------------
 --- DATA SPECIALISATION ---
@@ -1149,7 +1185,7 @@ specialiseDataArgs resultName fvArgs lambdaRHS =
 ||| ```
 export
 specialiseDataLam :
-  TaskLambda taskT =>
+  -- TaskLambda taskT =>
   Monad m =>
   Elaboration m =>
   (nsProvider : NamespaceProvider m) =>
@@ -1186,7 +1222,7 @@ specialiseDataLam'' :
   (nsProvider : NamespaceProvider m) =>
   (unifier : CanUnify m) =>
   SpecialisationParams =>
-  TaskLambda taskT =>
+  -- TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
   m $ List Decl
@@ -1217,7 +1253,7 @@ specialiseDataLam' :
   (nsProvider : NamespaceProvider m) =>
   (unifier : CanUnify m) =>
   SpecialisationParams =>
-  TaskLambda taskT =>
+  -- TaskLambda taskT =>
   Name ->
   (0 task: taskT) ->
   m ()
