@@ -514,6 +514,51 @@ parameters (t : SpecTask)
     let piInfo = if fromLambda && (fvData.piInfo == ExplicitArg) then ImplicitArg else fvData.piInfo
     Element (MkArg rig piInfo (Just fvData.name) fvData.type) ItIsNamed
 
+  0 snocLengthEqS : (prev : List a) -> (new : a) -> length (snoc prev new) = S (length prev)
+  snocLengthEqS [] _ = Refl
+  snocLengthEqS (x :: xs) y = rewrite snocLengthEqS xs y in Refl
+
+  0 snocAll : {0 prev : Vect _ _} -> All IsNamedArg prev -> (new : Arg) -> IsNamedArg new -> All IsNamedArg (snoc prev new)
+  snocAll [] new y = [y]
+  snocAll (y :: ys) new z = y :: snocAll ys new z
+
+  findRecursiveApps :
+    Monad m =>
+    (unifier : CanUnify m) =>
+    (SortedMap Name TTImp, (p : List Bool ** Subset (Vect (length p) Arg) (All IsNamedArg))) ->
+    (Subset Arg IsNamedArg) ->
+    m (SortedMap Name TTImp, (p : List Bool ** Subset (Vect (length p) Arg) (All IsNamedArg)))
+  findRecursiveApps (substCast, (prev ** Element prevArgs prevNamed)) (Element thisArg thisArgNamed) = do
+    let Element ta _ = allL2V t.tqArgs @{t.tqArgsNamed}
+    let uniTask = MkUniTask {lfv=_} prevArgs thisArg.type {rfv=_} ta t.fullInvocation
+    ur <- unify uniTask
+    case ur of
+      Success ur => do
+        let typeArgs = t.ttArgs.appsWith @{t.ttArgsNamed} var ur.fullResult
+        let tyRet = reAppAny (var t.resultName) typeArgs
+        let mToP = var $ inGenNS t "mToP"
+        pure
+          ( substCast
+          , ( snoc prev True **
+              rewrite snocLengthEqS prev True
+                in Element (snoc prevArgs ?newArg) ?snocAllRhs
+            )
+          )
+      _ => do
+        pure $
+          (substCast
+          , ( snoc prev False **
+              rewrite snocLengthEqS prev False
+                in Element (snoc prevArgs thisArg)
+                           (snocAll prevNamed thisArg thisArgNamed)
+            )
+          )
+
+  -- record ConExt where
+  --   constructor MkConExt
+  --   con : Con
+  --   isArgRecursive
+
   ||| Generate a specialised constructor
   mkSpecCon :
     (params : SpecialisationParams) =>
