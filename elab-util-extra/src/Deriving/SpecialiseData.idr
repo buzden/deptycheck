@@ -554,11 +554,6 @@ parameters (t : SpecTask)
             )
           )
 
-  -- record ConExt where
-  --   constructor MkConExt
-  --   con : Con
-  --   isArgRecursive
-
   ||| Generate a specialised constructor
   mkSpecCon :
     (params : SpecialisationParams) =>
@@ -591,6 +586,21 @@ parameters (t : SpecTask)
       , args = t.ttArgs
       , cons
       } `Element` TheyAllAreNamed t.ttArgsNamed consAreNamed
+
+  ||| Data declaration.
+  |||
+  ||| This merges constructors `IData` and `MkData`.
+  public export
+  iDataLater :
+       (vis   : Visibility)
+    -> (name  : Name)
+    -> (tycon : TTImp)
+    -> Decl
+  iDataLater v n tycon =
+    IData EmptyFC (specified v) Nothing (MkLater EmptyFC n tycon)
+
+  mkSpecTySig : Decl
+  mkSpecTySig = iDataLater Public (inGenNS t t.resultName) (piAll type t.ttArgs)
 
   ------------------------------------
   --- POLY TO POLY CAST DERIVATION ---
@@ -1028,6 +1038,7 @@ parameters (t : SpecTask)
   ||| Generate declarations for given task, unification results, and specialised type
   specDecls : MonadLog m => UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
   specDecls uniResults specTy = do
+    let specTySig = mkSpecTySig
     let specTyDecl = specTy.decl
     logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "specTyDecl : \{show specTyDecl}"
@@ -1077,7 +1088,7 @@ parameters (t : SpecTask)
             , numDecls
             ]
     pure $ singleton $ INamespace EmptyFC (MkNS [ show t.resultName ]) $
-      specTyDecl :: join
+      specTySig :: specTyDecl :: join
         [ mToPImplDecls
         , mToPDecls
         , multiInjDecls
@@ -1304,3 +1315,10 @@ specialiseDataLam' :
   m ()
 specialiseDataLam' resultName task =
   specialiseDataLam'' resultName task >>= declare
+
+xx : List Decl
+xx = `[
+  data X : Nat -> Type
+
+  data Y : Nat -> Type
+]
