@@ -84,6 +84,8 @@ record SpecTask where
   resultName          : Name
   ||| Invocation of polymorphic type extracted from unification task
   fullInvocation      : TTImp
+  ||| Invocation of specialised type given default arguents
+  specInvocation      : TTImp
   ||| Polymorphic type's TypeInfo
   polyTy              : TypeInfo
   ||| Proof that all the constructors of the polymorphic type are named
@@ -147,15 +149,17 @@ export
 NoNS : Monad m => NamespaceProvider m
 NoNS = inNS (MkNS [])
 
-||| Prepend namespace into which everything is generated to name
-inGenNS : SpecTask -> Name -> Name
-inGenNS task n = do
-  let MkNS tns = task.currentNs
+inGenNSImpl : Namespace -> Name -> Name -> Name
+inGenNSImpl (MkNS strs) p n = do
   let newNS =
     case n of
-       (NS (MkNS subs) n) => subs
-       n => []
-  NS (MkNS $ newNS ++ show task.resultName :: tns) $ dropNS n
+        (NS (MkNS subs) n) => subs
+        n => []
+  NS (MkNS $ newNS ++ show p :: strs) $ dropNS n
+
+||| Prepend namespace into which everything is generated to name
+inGenNS : SpecTask -> Name -> Name
+inGenNS task = inGenNSImpl task.currentNs task.resultName
 
 ||| Given a sequence of arguments, return list of argument name-BindVar pairs
 argsToBindMap : Foldable f => f Arg -> List (Name, TTImp)
@@ -304,6 +308,30 @@ cleanupHoleAutoImplicitsImpl (IAutoApp _ x (Implicit _ _)) = x
 cleanupHoleAutoImplicitsImpl (INamedApp _ x _ (Implicit _ _)) = x
 cleanupHoleAutoImplicitsImpl x = x
 
+||| Generate an AnyApp for given Arg, with the argument value either
+||| retrieved from the map if present or generated with `fallback`
+(.appWith) :
+  (arg : Arg) ->
+  (0 _ : IsNamedArg arg) =>
+  (fallback : Name -> TTImp) ->
+  (argValues : SortedMap Name TTImp) ->
+  AnyApp
+(.appWith) arg@(MkArg _ _ (Just n) _) f argVals =
+  appArg arg $ fromMaybe (f n) $ lookup n argVals
+
+||| Generate a List AnyApp for given argument List,
+||| with arguments retrieved from the map if present or generated with `fallback`
+(.appsWith) :
+  (args: List Arg) ->
+  (0 _ : All IsNamedArg args) =>
+  (fallback : Name -> TTImp) ->
+  (argValues : SortedMap Name TTImp) ->
+  List AnyApp
+(.appsWith) [] _ _ = []
+(.appsWith) (x :: xs) @{_ :: _} f argVals =
+  x.appWith f argVals :: xs.appsWith f argVals
+
+
 ||| Get all the information needed for specialisation from task
 getTask :
   Monad m =>
@@ -344,6 +372,7 @@ getTask resultName resultKind resultContent = do
   -- Prove all its arguments/constructors/constructor arguments are named
   let Yes polyTyNamed = areAllTyArgsNamed polyTy
     | No _ => throwError $ UnnamedArgInPolyTyError polyTy.name
+  let specInvocation = reAppAny (var (inGenNSImpl currentNs resultName resultName)) $ ttArgs.appsWith @{ttArgsNamed} var empty
   pure $ MkSpecTask
     { tqArgs
     , tqRet
@@ -353,32 +382,10 @@ getTask resultName resultKind resultContent = do
     , currentNs
     , resultName = snd $ unNS resultName
     , fullInvocation = tqRet --- TODO: intelligent full invocation
+    , specInvocation
     , polyTy
     , polyTyNamed
     }
-
-||| Generate an AnyApp for given Arg, with the argument value either
-||| retrieved from the map if present or generated with `fallback`
-(.appWith) :
-  (arg : Arg) ->
-  (0 _ : IsNamedArg arg) =>
-  (fallback : Name -> TTImp) ->
-  (argValues : SortedMap Name TTImp) ->
-  AnyApp
-(.appWith) arg@(MkArg _ _ (Just n) _) f argVals =
-  appArg arg $ fromMaybe (f n) $ lookup n argVals
-
-||| Generate a List AnyApp for given argument List,
-||| with arguments retrieved from the map if present or generated with `fallback`
-(.appsWith) :
-  (args: List Arg) ->
-  (0 _ : All IsNamedArg args) =>
-  (fallback : Name -> TTImp) ->
-  (argValues : SortedMap Name TTImp) ->
-  List AnyApp
-(.appsWith) [] _ _ = []
-(.appsWith) (x :: xs) @{_ :: _} f argVals =
-  x.appWith f argVals :: xs.appsWith f argVals
 
 namespace TypeInfoInvoke
   ||| Returns a full application of the given type constructor
@@ -587,9 +594,9 @@ parameters (t : SpecTask)
       , cons
       } `Element` TheyAllAreNamed t.ttArgsNamed consAreNamed
 
-  ||| Data declaration.
+  ||| Data claim.
   |||
-  ||| This merges constructors `IData` and `MkData`.
+  ||| This merges constructors `IData` and `MkLater`.
   public export
   iDataLater :
        (vis   : Visibility)
@@ -614,7 +621,7 @@ parameters (t : SpecTask)
   ||| Generate specialised to polimorphic type conversion function signature
   mkMToPImplSig : UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkMToPImplSig _ mt =
-    forallMTArgs $ arg (mt.apply var empty) .-> t.fullInvocation
+    forallMTArgs $ arg t.specInvocation .-> t.fullInvocation
 
   ||| Generate specialised to polimorphic type conversion function clause
   ||| for given constructor
@@ -651,7 +658,7 @@ parameters (t : SpecTask)
   ||| Generate specialised to polimorphic cast signature
   mkMToPSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkMToPSig mt = do
-    forallMTArgs $ `(Cast ~(mt.apply var empty) ~(t.fullInvocation))
+    forallMTArgs $ `(Cast ~(t.specInvocation) ~(t.fullInvocation))
 
   ||| Generate specialised to polimorphic cast declarations
   mkMToPDecls : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => List Decl
@@ -825,7 +832,7 @@ parameters (t : SpecTask)
   ||| Decidable equality signatures
   mkDecEqImplSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkDecEqImplSig ti =
-    let tInv = ti.apply var empty
+    let tInv = t.specInvocation
     in forallMTArgs $
       piAll
         `(Dec (Equal {a = ~tInv} {b = ~tInv} x1 x2))
@@ -858,7 +865,7 @@ parameters (t : SpecTask)
     [ public' "decEqImpl" $ mkDecEqImplSig ti
     , def "decEqImpl" [ mkDecEqImplClause ]
     , interfaceHint Public "decEq'" $ forallMTArgs
-      `(DecEq ~(t.fullInvocation) => DecEq ~(ti.apply var empty))
+      `(DecEq ~(t.fullInvocation) => DecEq ~(t.specInvocation))
     , def "decEq'"
       [ `(decEq') .= `((Mk DecEq) ~(var $ inGenNS t "decEqImpl")) ]
     ]
@@ -877,15 +884,15 @@ parameters (t : SpecTask)
     let mToPImpl = var $ inGenNS t "mToPImpl"
     [ public' "showImpl" $
       forallMTArgs
-        `(Show ~(t.fullInvocation) => ~(ti.apply var empty) -> String)
+        `(Show ~(t.fullInvocation) => ~(t.specInvocation) -> String)
     , def "showImpl" [ `(showImpl x) .= `(show $ ~mToPImpl x) ]
     , public' "showPrecImpl" $
       forallMTArgs
-        `(Show ~(t.fullInvocation) => Prec -> ~(ti.apply var empty) -> String)
+        `(Show ~(t.fullInvocation) => Prec -> ~(t.specInvocation) -> String)
     , def "showPrecImpl"
       [ `(showPrecImpl p x) .= `(showPrec p $ ~mToPImpl x) ]
     , interfaceHint Public "show'" $ forallMTArgs $
-      `(Show ~(t.fullInvocation) => Show ~(ti.apply var empty))
+      `(Show ~(t.fullInvocation) => Show ~(t.specInvocation))
     , def "show'" [ `(show') .= `(MkShow showImpl showPrecImpl) ]
     ]
 
@@ -901,7 +908,7 @@ parameters (t : SpecTask)
     List Decl
   mkEqDecls _ ti = do
     let mToPImpl = var $ inGenNS t "mToPImpl"
-    let tInv = ti.apply var empty
+    let tInv = t.specInvocation
     [ public' "eqImpl" $
       forallMTArgs
         `(Eq ~(t.fullInvocation) => ~tInv -> ~tInv -> Bool)
@@ -926,7 +933,7 @@ parameters (t : SpecTask)
     (0 _ : AllTyArgsNamed mt) =>
     TTImp
   mkPToMImplSig _ mt =
-    forallMTArgs $ arg t.fullInvocation .-> mt.apply var empty
+    forallMTArgs $ arg t.fullInvocation .-> t.specInvocation
 
   ||| Generate specialised to polimorphic type conversion function clause
   ||| for given constructor
@@ -962,7 +969,7 @@ parameters (t : SpecTask)
   ||| Generate specialised to polimorphic cast signature
   mkPToMSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkPToMSig mt = do
-    forallMTArgs $ `(Cast ~(t.fullInvocation) ~(mt.apply var empty))
+    forallMTArgs $ `(Cast ~(t.fullInvocation) ~(t.specInvocation))
 
   ||| Generate specialised to polimorphic cast declarations
   mkPToMDecls : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => List Decl
@@ -981,7 +988,7 @@ parameters (t : SpecTask)
     List Decl
   mkFromStringDecls ti = do
     let pToMImpl = var $ inGenNS t "pToMImpl"
-    let tInv = ti.apply var empty
+    let tInv = t.specInvocation
     [ public' "fromStringImpl" $
         forallMTArgs
           `(FromString ~(t.fullInvocation) => String -> ~tInv)
@@ -1004,7 +1011,7 @@ parameters (t : SpecTask)
   mkNumDecls ti = do
     let pToMImpl = var $ inGenNS t "pToMImpl"
     let mToPImpl = var $ inGenNS t "mToPImpl"
-    let tInv = ti.apply var empty
+    let tInv = t.specInvocation
     [ public' "numImpl" $
         forallMTArgs
           `(Num ~(t.fullInvocation) => Integer -> ~tInv)
@@ -1316,9 +1323,5 @@ specialiseDataLam' :
 specialiseDataLam' resultName task =
   specialiseDataLam'' resultName task >>= declare
 
-xx : List Decl
-xx = `[
-  data X : Nat -> Type
-
-  data Y : Nat -> Type
-]
+il : TTImp
+il = local [ iData Public "X.Y" `(Type) [] [], claim MW Public [] "X.z" `(Nat), def "X.z" [ var "X.z" .= `(10) ] ] `(X.z)
