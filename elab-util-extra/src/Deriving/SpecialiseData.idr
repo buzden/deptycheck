@@ -607,21 +607,121 @@ parameters (t : SpecTask)
     IData EmptyFC (specified v) Nothing (MkLater EmptyFC n tycon)
 
   mkSpecTySig : Decl
-  mkSpecTySig = iDataLater Public (inGenNS t t.resultName) (piAll type t.ttArgs)
+  mkSpecTySig = iDataLater Public t.resultName (piAll type t.ttArgs)
+
+  ------------------------
+  --- CLAIM DERIVATION ---
+  ------------------------
+  ||| Generate IPi with implicit type arguments and given return
+  forallMTArgs : TTImp -> TTImp
+  forallMTArgs = flip (foldr pi) $ makeTypeArgM0 . hideExplicitArg <$> t.ttArgs
+
+  ||| Generate specialised to polimorphic type conversion function signature
+  mkMToPImplClaim : Decl
+  mkMToPImplClaim = public' "mToPImpl" $ forallMTArgs $ arg t.specInvocation .-> t.fullInvocation
+
+  ||| Generate specialised to polimorphic cast signature
+  mkMToPClaim : Decl
+  mkMToPClaim = interfaceHint Public "mToP" $ forallMTArgs $ `(Cast ~(t.specInvocation) ~(t.fullInvocation))
+
+  ||| Decidable equality signatures
+  mkDecEqImplClaim : Decl
+  mkDecEqImplClaim =
+    let tInv = t.specInvocation
+    in public' "decEqImpl" $ forallMTArgs $
+      piAll
+        `(Dec (Equal {a = ~tInv} {b = ~tInv} x1 x2))
+        [ MkArg MW AutoImplicit Nothing `(DecEq ~(t.fullInvocation))
+        , MkArg MW ExplicitArg (Just "x1") tInv
+        , MkArg MW ExplicitArg (Just "x2") tInv
+        ]
+
+  mkDecEqClaim : Decl
+  mkDecEqClaim = interfaceHint Public "decEq'" $ forallMTArgs `(DecEq ~(t.fullInvocation) => DecEq ~(t.specInvocation))
+
+  mkShowClaims : List Decl
+  mkShowClaims =
+    [ public' "showImpl" $
+      forallMTArgs
+        `(Show ~(t.fullInvocation) => ~(t.specInvocation) -> String)
+    , public' "showPrecImpl" $
+      forallMTArgs
+        `(Show ~(t.fullInvocation) => Prec -> ~(t.specInvocation) -> String)
+    , interfaceHint Public "show'" $ forallMTArgs $
+      `(Show ~(t.fullInvocation) => Show ~(t.specInvocation))
+    ]
+
+  mkEqClaims : List Decl
+  mkEqClaims = do
+    let tInv = t.specInvocation
+    [ public' "eqImpl" $ forallMTArgs
+        `(Eq ~(t.fullInvocation) => ~tInv -> ~tInv -> Bool)
+    , public' "neqImpl" $ forallMTArgs
+        `(Eq ~(t.fullInvocation) => ~tInv -> ~tInv -> Bool)
+    , interfaceHint Public "eq'" $ forallMTArgs $
+        `(Eq ~(t.fullInvocation) => Eq ~tInv)
+    ]
+
+  ||| Generate specialised to polimorphic type conversion function signature
+  mkPToMImplClaim : Decl
+  mkPToMImplClaim = public' "pToMImpl" $ forallMTArgs $ arg t.fullInvocation .-> t.specInvocation
+
+  ||| Generate specialised to polimorphic cast signature
+  mkPToMClaim : Decl
+  mkPToMClaim =
+    interfaceHint Public "pToM" $ forallMTArgs $ `(Cast ~(t.fullInvocation) ~(t.specInvocation))
+
+  mkFromStringClaims : List Decl
+  mkFromStringClaims = do
+    let tInv = t.specInvocation
+    [ public' "fromStringImpl" $
+        forallMTArgs
+          `(FromString ~(t.fullInvocation) => String -> ~tInv)
+    , interfaceHint Public "fromString'" $
+        forallMTArgs `(FromString ~(t.fullInvocation) => FromString ~tInv)
+    ]
+
+  mkNumClaims : List Decl
+  mkNumClaims = do
+    let tInv = t.specInvocation
+    [ public' "numImpl" $
+        forallMTArgs
+          `(Num ~(t.fullInvocation) => Integer -> ~tInv)
+    , public' "plusImpl" $
+        forallMTArgs
+          `(Num ~(t.fullInvocation) => ~tInv -> ~tInv -> ~tInv)
+    , public' "starImpl" $
+        forallMTArgs
+          `(Num ~(t.fullInvocation) => ~tInv -> ~tInv -> ~tInv)
+    , interfaceHint Public "num'" $
+        forallMTArgs `(Num ~(t.fullInvocation) => Num ~tInv)
+    ]
+
+  standardClaims : List Decl
+  standardClaims =
+    [ mkMToPImplClaim
+    , mkMToPClaim
+    , mkDecEqImplClaim
+    , mkDecEqClaim
+    ] ++ join
+      [ mkShowClaims
+      , mkEqClaims
+      ]
+
+  decidedClaims : List Decl
+  decidedClaims =
+    [ mkPToMImplClaim
+    , mkPToMClaim
+    ] ++ join
+      [ mkFromStringClaims
+      , mkNumClaims
+      ]
 
   ------------------------------------
   --- POLY TO POLY CAST DERIVATION ---
   ------------------------------------
 
-  ||| Generate IPi with implicit type arguments and given return
-  forallMTArgs : TTImp -> TTImp
-  forallMTArgs = flip (foldr pi) $ makeTypeArgM0 . hideExplicitArg <$> t.ttArgs
 
-
-  ||| Generate specialised to polimorphic type conversion function signature
-  mkMToPImplSig : UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
-  mkMToPImplSig _ mt =
-    forallMTArgs $ arg t.specInvocation .-> t.fullInvocation
 
   ||| Generate specialised to polimorphic type conversion function clause
   ||| for given constructor
@@ -649,22 +749,14 @@ parameters (t : SpecTask)
     (0 _ : AllTyArgsNamed mt) =>
     List Decl
   mkMToPImplDecls urs mt = do
-    let sig = mkMToPImplSig urs mt
     let clauses = map2UConsN mkMToPImplClause urs mt
-    [ public' "mToPImpl" sig
-    , def "mToPImpl" clauses
+    [ def "mToPImpl" clauses
     ]
-
-  ||| Generate specialised to polimorphic cast signature
-  mkMToPSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
-  mkMToPSig mt = do
-    forallMTArgs $ `(Cast ~(t.specInvocation) ~(t.fullInvocation))
 
   ||| Generate specialised to polimorphic cast declarations
   mkMToPDecls : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => List Decl
   mkMToPDecls mt =
-    [ interfaceHint Public "mToP" $ mkMToPSig mt
-    , def "mToP" [ (var "mToP") .= `(MkCast mToPImpl)]
+    [ def "mToP" [ (var "mToP") .= `(MkCast mToPImpl)]
     ]
 
   -----------------------------------
@@ -829,18 +921,6 @@ parameters (t : SpecTask)
   --- DECIDABLE EQUALITY DERIVATION ---
   -------------------------------------
 
-  ||| Decidable equality signatures
-  mkDecEqImplSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
-  mkDecEqImplSig ti =
-    let tInv = t.specInvocation
-    in forallMTArgs $
-      piAll
-        `(Dec (Equal {a = ~tInv} {b = ~tInv} x1 x2))
-        [ MkArg MW AutoImplicit Nothing `(DecEq ~(t.fullInvocation))
-        , MkArg MW ExplicitArg (Just "x1") tInv
-        , MkArg MW ExplicitArg (Just "x2") tInv
-        ]
-
   ||| Decidable equality clause
   mkDecEqImplClause : Clause
   mkDecEqImplClause =
@@ -854,7 +934,6 @@ parameters (t : SpecTask)
               x2' = (~mToPImpl x2);
           in decEq x1' x2')
 
-
   ||| Derive decidable equality
   mkDecEqDecls :
     UniResults ->
@@ -862,10 +941,7 @@ parameters (t : SpecTask)
     (0 _ : AllTyArgsNamed mt) =>
     List Decl
   mkDecEqDecls _ ti = do
-    [ public' "decEqImpl" $ mkDecEqImplSig ti
-    , def "decEqImpl" [ mkDecEqImplClause ]
-    , interfaceHint Public "decEq'" $ forallMTArgs
-      `(DecEq ~(t.fullInvocation) => DecEq ~(t.specInvocation))
+    [ def "decEqImpl" [ mkDecEqImplClause ]
     , def "decEq'"
       [ `(decEq') .= `((Mk DecEq) ~(var $ inGenNS t "decEqImpl")) ]
     ]
@@ -882,17 +958,9 @@ parameters (t : SpecTask)
     List Decl
   mkShowDecls _ ti = do
     let mToPImpl = var $ inGenNS t "mToPImpl"
-    [ public' "showImpl" $
-      forallMTArgs
-        `(Show ~(t.fullInvocation) => ~(t.specInvocation) -> String)
-    , def "showImpl" [ `(showImpl x) .= `(show $ ~mToPImpl x) ]
-    , public' "showPrecImpl" $
-      forallMTArgs
-        `(Show ~(t.fullInvocation) => Prec -> ~(t.specInvocation) -> String)
+    [ def "showImpl" [ `(showImpl x) .= `(show $ ~mToPImpl x) ]
     , def "showPrecImpl"
       [ `(showPrecImpl p x) .= `(showPrec p $ ~mToPImpl x) ]
-    , interfaceHint Public "show'" $ forallMTArgs $
-      `(Show ~(t.fullInvocation) => Show ~(t.specInvocation))
     , def "show'" [ `(show') .= `(MkShow showImpl showPrecImpl) ]
     ]
 
@@ -908,32 +976,14 @@ parameters (t : SpecTask)
     List Decl
   mkEqDecls _ ti = do
     let mToPImpl = var $ inGenNS t "mToPImpl"
-    let tInv = t.specInvocation
-    [ public' "eqImpl" $
-      forallMTArgs
-        `(Eq ~(t.fullInvocation) => ~tInv -> ~tInv -> Bool)
-    , def "eqImpl" [ `(eqImpl x y) .= `((~mToPImpl x) == (~mToPImpl y)) ]
-    , public' "neqImpl" $
-      forallMTArgs
-        `(Eq ~(t.fullInvocation) => ~tInv -> ~tInv -> Bool)
+    [ def "eqImpl" [ `(eqImpl x y) .= `((~mToPImpl x) == (~mToPImpl y)) ]
     , def "neqImpl" [ `(neqImpl x y) .= `((~mToPImpl x) /= (~mToPImpl y)) ]
-    , interfaceHint Public "eq'" $ forallMTArgs $
-      `(Eq ~(t.fullInvocation) => Eq ~tInv)
     , def "eq'" [ `(eq') .= `(MkEq eqImpl neqImpl) ]
     ]
 
   ------------------------------------
   --- POLY TO POLY CAST DERIVATION ---
   ------------------------------------
-
-  ||| Generate specialised to polimorphic type conversion function signature
-  mkPToMImplSig :
-    UniResults ->
-    (mt : TypeInfo) ->
-    (0 _ : AllTyArgsNamed mt) =>
-    TTImp
-  mkPToMImplSig _ mt =
-    forallMTArgs $ arg t.fullInvocation .-> t.specInvocation
 
   ||| Generate specialised to polimorphic type conversion function clause
   ||| for given constructor
@@ -960,22 +1010,14 @@ parameters (t : SpecTask)
     (0 _ : AllTyArgsNamed mt) =>
     List Decl
   mkPToMImplDecls urs mt = do
-    let sig = mkPToMImplSig urs mt
     let clauses = map2UConsN mkPToMImplClause urs mt
-    [ public' "pToMImpl" sig
-    , def "pToMImpl" clauses
+    [ def "pToMImpl" clauses
     ]
-
-  ||| Generate specialised to polimorphic cast signature
-  mkPToMSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
-  mkPToMSig mt = do
-    forallMTArgs $ `(Cast ~(t.fullInvocation) ~(t.specInvocation))
 
   ||| Generate specialised to polimorphic cast declarations
   mkPToMDecls : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => List Decl
   mkPToMDecls mt =
-    [ interfaceHint Public "pToM" $ mkPToMSig mt
-    , def "pToM" [ (var "pToM") .= `(MkCast pToMImpl)]
+    [ def "pToM" [ (var "pToM") .= `(MkCast pToMImpl)]
     ]
 
   -----------------------------
@@ -988,14 +1030,8 @@ parameters (t : SpecTask)
     List Decl
   mkFromStringDecls ti = do
     let pToMImpl = var $ inGenNS t "pToMImpl"
-    let tInv = t.specInvocation
-    [ public' "fromStringImpl" $
-        forallMTArgs
-          `(FromString ~(t.fullInvocation) => String -> ~tInv)
-    , def "fromStringImpl"
+    [ def "fromStringImpl"
       [ `(fromStringImpl @{fs} s) .= `(~pToMImpl $ fromString @{fs} s) ]
-    , interfaceHint Public "fromString'" $
-        forallMTArgs `(FromString ~(t.fullInvocation) => FromString ~tInv)
     , def "fromString'"
         [ `(fromString' @{fs}) .= `(MkFromString $ ~(var $ inGenNS t "fromStringImpl") @{fs}) ]
     ]
@@ -1011,24 +1047,12 @@ parameters (t : SpecTask)
   mkNumDecls ti = do
     let pToMImpl = var $ inGenNS t "pToMImpl"
     let mToPImpl = var $ inGenNS t "mToPImpl"
-    let tInv = t.specInvocation
-    [ public' "numImpl" $
-        forallMTArgs
-          `(Num ~(t.fullInvocation) => Integer -> ~tInv)
-    , def "numImpl"
+    [ def "numImpl"
       [ `(numImpl @{fs} s) .= `(~pToMImpl $ Num.fromInteger @{fs} s) ]
-    , public' "plusImpl" $
-        forallMTArgs
-          `(Num ~(t.fullInvocation) => ~tInv -> ~tInv -> ~tInv)
     , def "plusImpl"
         [ `(plusImpl @{fs} a b ) .= `(~pToMImpl $ (+) @{fs} (~mToPImpl a) (~mToPImpl b)) ]
-    , public' "starImpl" $
-        forallMTArgs
-          `(Num ~(t.fullInvocation) => ~tInv -> ~tInv -> ~tInv)
     , def "starImpl"
         [ `(starImpl @{fs} a b ) .= `(~pToMImpl $ (*) @{fs} (~mToPImpl a) (~mToPImpl b)) ]
-    , interfaceHint Public "num'" $
-        forallMTArgs `(Num ~(t.fullInvocation) => Num ~tInv)
     , def "num'"
         [ `(num' @{fs}) .=
             `(MkNum
@@ -1045,7 +1069,6 @@ parameters (t : SpecTask)
   ||| Generate declarations for given task, unification results, and specialised type
   specDecls : MonadLog m => UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => m $ List Decl
   specDecls uniResults specTy = do
-    let specTySig = mkSpecTySig
     let specTyDecl = specTy.decl
     logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "specTyDecl : \{show specTyDecl}"
@@ -1085,18 +1108,25 @@ parameters (t : SpecTask)
     let numDecls = mkNumDecls specTy
     logPoint DetailedDebug "specialiseData.specDecls" [specTy]
       "num : \{show numDecls}"
+    let anyUndecided = any isUndecided uniResults
+    let claims = standardClaims ++ if anyUndecided then [] else decidedClaims
+    let decidedDecls =
+      [ pToMImplDecls
+      , pToMDecls
+      , fromStringDecls
+      , numDecls
+      ]
     let onFull : List Decl =
-      if any isUndecided uniResults
+      if anyUndecided
           then []
-          else join
-            [ pToMImplDecls
-            , pToMDecls
-            , fromStringDecls
-            , numDecls
-            ]
+          else join decidedDecls
+
     pure $ singleton $ INamespace EmptyFC (MkNS [ show t.resultName ]) $
-      specTySig :: specTyDecl :: join
-        [ mToPImplDecls
+      join
+        [ [ mkSpecTySig ]
+        , claims
+        , [ specTyDecl ]
+        , mToPImplDecls
         , mToPDecls
         , multiInjDecls
         , multiCongDecls
@@ -1104,7 +1134,8 @@ parameters (t : SpecTask)
         , decEqDecls
         , showDecls
         , eqDecls
-        ] ++ onFull
+        , onFull
+        ]
 
 -------------------------------------
 --- SPECIALISATION TASK INTERFACE ---
