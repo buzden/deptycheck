@@ -9,6 +9,7 @@ import public Control.Monad.Writer
 import public Control.Monad.RWS
 
 import public Data.DPair
+import public Data.List.Ex
 import public Data.List.Map
 import public Data.SortedMap
 import public Data.SortedMap.Extra
@@ -17,6 +18,8 @@ import public Data.SortedSet
 import public Decidable.Equality
 
 import public Deriving.DepTyCheck.Gen.ForOneType.Interface
+
+import public Deriving.DepTyCheck.Util.Specialisation
 
 %default total
 
@@ -72,6 +75,10 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
       -- look for existing (already derived) internals, use it if exists
       let Nothing = List.Map.lookup sig !get
         | Just name => pure $ callCanonic sig name fuel values
+
+      -- look for the need of specialisation
+      Nothing <- assert_total specialiseIfNeeded sig fuel values
+        | Just (specDecls, callingExpr) => tell (specDecls, Prelude.Nil) $> snd callingExpr
 
       -- nothing found, then derive! acquire the name
       let name = nameForGen sig

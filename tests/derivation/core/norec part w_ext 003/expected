@@ -1,12 +1,26 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Usupported applications to a non-concrete type `a` in Builtin.MkPair
-
-DerivedGen:1
- 13 | XShow = %runElab derive
- 14 | 
- 15 | export
- 16 | checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty String) => (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty X
- 17 | checkedGen = deriveGen
-                   ^^^^^^^^^
-
+LOG deptycheck.util.specialisation:10: Builtin.Pair[0, 1] Declared specialised type DerivedGen.Pair^11732935965551223900.Pair^11732935965551223900: Builtin.Pair String (Builtin.Pair Prelude.Types.Nat String)
+LOG deptycheck.util.specialisation:10: Builtin.Pair[0, 1] Declared specialised type DerivedGen.Pair^1493320044233062328.Pair^1493320044233062328: Builtin.Pair Prelude.Types.Nat String
+Generated values:
+-----
+-----
+MkX ("", (10, ""))
+-----
+MkX ("a", (0, ""))
+-----
+MkX ("", (10, "a"))
+-----
+MkX ("bc", (10, "a"))
+-----
+MkX ("bc", (0, ""))
+-----
+MkX ("a", (10, "a"))
+-----
+MkX ("", (10, ""))
+-----
+MkX ("a", (0, "a"))
+-----
+MkX ("bc", (0, ""))
+-----
+MkX ("a", (10, "bc"))

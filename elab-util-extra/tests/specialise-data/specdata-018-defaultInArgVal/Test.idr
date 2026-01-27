@@ -7,7 +7,7 @@ import Shared
 data W : Type where
   MkW : (0 n : Nat) -> (k : Fin (S n)) -> {default k p : Fin (S n)} -> W
 
-%runElab specialiseData' "W'" W
+%runElab specialiseDataLam' "W'" W
 
 w0 : W'
 w0 = MkW 10 5

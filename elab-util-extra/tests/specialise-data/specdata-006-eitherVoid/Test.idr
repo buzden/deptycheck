@@ -4,7 +4,7 @@ import Shared
 
 %language ElabReflection
 
-%runElab specialiseData' "EitherVoid" $ \a => Either Void a
+%runElab specialiseDataLam' "EitherVoid" $ \a => Either Void a
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 e0' = %runElab verifySpecialisation (Either Void Nat) (EitherVoid Nat)

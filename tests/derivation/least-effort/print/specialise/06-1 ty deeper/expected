@@ -1,0 +1,687 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> {auto conArg : ((arg : Fuel) -> Gen MaybeEmpty String)} -> Gen MaybeEmpty X
+LOG deptycheck.derive.least-effort:7: DerivedGen.X[] MkX - used final order: [#0]
+LOG deptycheck.util.specialisation:10: Prelude.Types.Either[0(a), 1(b)] Declared specialised type DerivedGen.Either^17089122808763292221.Either^17089122808763292221: Prelude.Types.Either Prelude.Types.Nat (DerivedGen.Y (Prelude.Types.Either (Data.Fin.Fin lam^0) String))
+LOG deptycheck.derive.least-effort:7: DerivedGen.Either^17089122808763292221.Either^17089122808763292221[0(fv^lam^0)] Either^17089122808763292221^Con^0 - used final order: [#0 (x)]
+LOG deptycheck.derive.least-effort:7: DerivedGen.Either^17089122808763292221.Either^17089122808763292221[0(fv^lam^0)] Either^17089122808763292221^Con^1 - used final order: [#1 (x)]
+LOG deptycheck.util.specialisation:10: DerivedGen.Y[0] Declared specialised type DerivedGen.Y^7167106520753982886.Y^7167106520753982886: DerivedGen.Y (Prelude.Types.Either (Data.Fin.Fin lam^0) String)
+LOG deptycheck.derive.least-effort:7: DerivedGen.Y^7167106520753982886.Y^7167106520753982886[0(fv^lam^0)] Y^7167106520753982886^Con^0 - used final order: [#1]
+LOG deptycheck.util.specialisation:10: Prelude.Types.Either[0(a), 1(b)] Declared specialised type DerivedGen.Either^5595291053177582713.Either^5595291053177582713: Prelude.Types.Either Prelude.Types.Nat (Prelude.Types.Either (Data.Fin.Fin lam^0) String)
+LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] Z - used final order: []
+LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: [#0]
+LOG deptycheck.derive.least-effort:7: DerivedGen.Either^5595291053177582713.Either^5595291053177582713[0(fv^lam^0)] Either^5595291053177582713^Con^0 - used final order: [#0 (x)]
+LOG deptycheck.derive.least-effort:7: DerivedGen.Either^5595291053177582713.Either^5595291053177582713[0(fv^lam^0)] Either^5595291053177582713^Con^1 - used final order: [#1 (x)]
+LOG deptycheck.util.specialisation:10: Prelude.Types.Either[0(a), 1(b)] Declared specialised type DerivedGen.Either^13748098436294604892.Either^13748098436294604892: Prelude.Types.Either (Data.Fin.Fin lam^0) String
+LOG deptycheck.derive.least-effort:7: DerivedGen.Either^13748098436294604892.Either^13748098436294604892[0(fv^lam^0)] Either^13748098436294604892^Con^0 - used final order: [#1 (x)]
+LOG deptycheck.derive.least-effort:7: DerivedGen.Either^13748098436294604892.Either^13748098436294604892[0(fv^lam^0)] Either^13748098436294604892^Con^1 - used final order: [#0 (x)]
+LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FZ - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: [#1]
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg
+      MW
+      AutoImplicit
+      (Just "external^<^prim^.String>[]")
+      (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fuel.Fuel")
+       .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ primVal (PrT StringType))
+.=> local
+      { decls =
+          [ IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<DerivedGen.X>[]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "DerivedGen.X"
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<DerivedGen.Either^17089122808763292221.Either^17089122808763292221>[0]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "DerivedGen.Either^17089122808763292221.Either^17089122808763292221" .$ var "fv^lam^0")
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<DerivedGen.Y^7167106520753982886.Y^7167106520753982886>[0]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "DerivedGen.Y^7167106520753982886.Y^7167106520753982886" .$ var "fv^lam^0")
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Prelude.Types.Nat>[]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<DerivedGen.Either^5595291053177582713.Either^5595291053177582713>[0]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "DerivedGen.Either^5595291053177582713.Either^5595291053177582713" .$ var "fv^lam^0")
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<DerivedGen.Either^13748098436294604892.Either^13748098436294604892>[0]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "DerivedGen.Either^13748098436294604892.Either^13748098436294604892" .$ var "fv^lam^0")
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<Data.Fin.Fin>[0]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "Data.Fin.Fin" .$ var "n")
+                       }
+                 })
+          , IDef
+              emptyFC
+              "<DerivedGen.X>[]"
+              [    var "<DerivedGen.X>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.MkX>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "DerivedGen.X"
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.MkX>>"
+                             [    var "<<DerivedGen.MkX>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.MkX (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (   var "map"
+                                          .$ (var "cast" .@ var "DerivedGen.Either^17089122808763292221.mToP")
+                                          .$ (   var "<DerivedGen.Either^17089122808763292221.Either^17089122808763292221>[0]"
+                                              .$ var "^outmost-fuel^"
+                                              .$ (   var "Prelude.Types.S"
+                                                  .$ (   var "Prelude.Types.S"
+                                                      .$ (   var "Prelude.Types.S"
+                                                          .$ (var "Prelude.Types.S" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z")))))))
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:2}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "DerivedGen.MkX" .$ var "{arg:2}")))
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.X[] (non-spending)"))
+                         .$ (var "<<DerivedGen.MkX>>" .$ var "^fuel_arg^")
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<DerivedGen.Either^17089122808763292221.Either^17089122808763292221>[0]"
+              [    var "<DerivedGen.Either^17089122808763292221.Either^17089122808763292221>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<fv^lam^0>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^0>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.Either^17089122808763292221.Either^17089122808763292221" .$ var "fv^lam^0")
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^1>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.Either^17089122808763292221.Either^17089122808763292221" .$ var "fv^lam^0")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^0>>"
+                             [       var "<<DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^0>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ bindVar "fv^lam^0"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (   var "fromString"
+                                      .$ primVal (Str "DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^0 (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "x") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^0"
+                                                  .$ var "x"
+                                                  .! ("fv^lam^0", var "fv^lam^0"))))
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^1>>"
+                             [       var "<<DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^1>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ bindVar "fv^lam^0"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (   var "fromString"
+                                      .$ primVal (Str "DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^1 (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (   var "map"
+                                          .$ (var "cast" .@ var "DerivedGen.Y^7167106520753982886.mToP")
+                                          .$ (   var "<DerivedGen.Y^7167106520753982886.Y^7167106520753982886>[0]"
+                                              .$ var "^outmost-fuel^"
+                                              .$ var "fv^lam^0"))
+                                      .$ (    MkArg MW ExplicitArg (Just "x") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^1"
+                                                  .! ("fv^lam^0", implicitTrue)
+                                                  .$ var "x")))
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (   var "fromString"
+                             .$ primVal (Str "DerivedGen.Either^17089122808763292221.Either^17089122808763292221[0(fv^lam^0)] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.oneOf"
+                             .! ("em", var "MaybeEmpty")
+                             .$ (   var "::"
+                                 .$ (   var "<<DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^0>>"
+                                     .$ var "^fuel_arg^"
+                                     .$ var "inter^<fv^lam^0>")
+                                 .$ (   var "::"
+                                     .$ (   var "<<DerivedGen.Either^17089122808763292221.Either^17089122808763292221^Con^1>>"
+                                         .$ var "^fuel_arg^"
+                                         .$ var "inter^<fv^lam^0>")
+                                     .$ var "Nil")))
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<DerivedGen.Y^7167106520753982886.Y^7167106520753982886>[0]"
+              [    var "<DerivedGen.Y^7167106520753982886.Y^7167106520753982886>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<fv^lam^0>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.Y^7167106520753982886.Y^7167106520753982886^Con^0>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.Y^7167106520753982886.Y^7167106520753982886" .$ var "fv^lam^0")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.Y^7167106520753982886.Y^7167106520753982886^Con^0>>"
+                             [    var "<<DerivedGen.Y^7167106520753982886.Y^7167106520753982886^Con^0>>" .$ bindVar "^cons_fuel^" .$ bindVar "fv^lam^0"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.Y^7167106520753982886.Y^7167106520753982886^Con^0 (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (   var "map"
+                                          .$ (var "cast" .@ var "DerivedGen.Either^5595291053177582713.mToP")
+                                          .$ (   var "<DerivedGen.Either^5595291053177582713.Either^5595291053177582713>[0]"
+                                              .$ var "^outmost-fuel^"
+                                              .$ var "fv^lam^0"))
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:3}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "DerivedGen.Y^7167106520753982886.Y^7167106520753982886^Con^0"
+                                                  .! ("fv^lam^0", implicitTrue)
+                                                  .$ var "{arg:3}")))
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y^7167106520753982886.Y^7167106520753982886[0(fv^lam^0)] (non-spending)"))
+                         .$ (var "<<DerivedGen.Y^7167106520753982886.Y^7167106520753982886^Con^0>>" .$ var "^fuel_arg^" .$ var "inter^<fv^lam^0>")
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<Prelude.Types.Nat>[]"
+              [    var "<Prelude.Types.Nat>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Prelude.Types.Z>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ var "Prelude.Types.Nat"
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Prelude.Types.S>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ var "Prelude.Types.Nat"
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Prelude.Types.Z>>"
+                             [    var "<<Prelude.Types.Z>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Prelude.Types.Z (orders)"))
+                                  .$ (var "Prelude.pure" .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue) .$ var "Prelude.Types.Z")
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Prelude.Types.S>>"
+                             [    var "<<Prelude.Types.S>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:4}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Prelude.Types.S" .$ var "{arg:4}")))
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (dry fuel)"))
+                                    .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (non-dry fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Prelude.Types.S>>" .$ var "^sub^fuel_arg^"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<DerivedGen.Either^5595291053177582713.Either^5595291053177582713>[0]"
+              [    var "<DerivedGen.Either^5595291053177582713.Either^5595291053177582713>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<fv^lam^0>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^0>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.Either^5595291053177582713.Either^5595291053177582713" .$ var "fv^lam^0")
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^1>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.Either^5595291053177582713.Either^5595291053177582713" .$ var "fv^lam^0")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^0>>"
+                             [       var "<<DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^0>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ bindVar "fv^lam^0"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (   var "fromString"
+                                      .$ primVal (Str "DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^0 (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "x") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^0"
+                                                  .$ var "x"
+                                                  .! ("fv^lam^0", var "fv^lam^0"))))
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^1>>"
+                             [       var "<<DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^1>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ bindVar "fv^lam^0"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (   var "fromString"
+                                      .$ primVal (Str "DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^1 (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (   var "map"
+                                          .$ (var "cast" .@ var "DerivedGen.Either^13748098436294604892.mToP")
+                                          .$ (   var "<DerivedGen.Either^13748098436294604892.Either^13748098436294604892>[0]"
+                                              .$ var "^outmost-fuel^"
+                                              .$ var "fv^lam^0"))
+                                      .$ (    MkArg MW ExplicitArg (Just "x") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^1"
+                                                  .! ("fv^lam^0", implicitTrue)
+                                                  .$ var "x")))
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (   var "fromString"
+                             .$ primVal (Str "DerivedGen.Either^5595291053177582713.Either^5595291053177582713[0(fv^lam^0)] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.oneOf"
+                             .! ("em", var "MaybeEmpty")
+                             .$ (   var "::"
+                                 .$ (   var "<<DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^0>>"
+                                     .$ var "^fuel_arg^"
+                                     .$ var "inter^<fv^lam^0>")
+                                 .$ (   var "::"
+                                     .$ (   var "<<DerivedGen.Either^5595291053177582713.Either^5595291053177582713^Con^1>>"
+                                         .$ var "^fuel_arg^"
+                                         .$ var "inter^<fv^lam^0>")
+                                     .$ var "Nil")))
+                     }
+              ]
+          , IDef
+              emptyFC
+              "<DerivedGen.Either^13748098436294604892.Either^13748098436294604892>[0]"
+              [    var "<DerivedGen.Either^13748098436294604892.Either^13748098436294604892>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<fv^lam^0>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^0>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.Either^13748098436294604892.Either^13748098436294604892" .$ var "fv^lam^0")
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^1>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "fv^lam^0") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "DerivedGen.Either^13748098436294604892.Either^13748098436294604892" .$ var "fv^lam^0")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^0>>"
+                             [       var "<<DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^0>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ bindVar "fv^lam^0"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (   var "fromString"
+                                      .$ primVal (Str "DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^0 (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.Fin.Fin>[0]" .$ var "^outmost-fuel^" .$ var "fv^lam^0")
+                                      .$ (    MkArg MW ExplicitArg (Just "x") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^0"
+                                                  .! ("fv^lam^0", implicitTrue)
+                                                  .$ var "x")))
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^1>>"
+                             [       var "<<DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^1>>"
+                                  .$ bindVar "^cons_fuel^"
+                                  .$ bindVar "fv^lam^0"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (   var "fromString"
+                                      .$ primVal (Str "DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^1 (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "external^<^prim^.String>[]" .$ var "^outmost-fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "x") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (   var "DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^1"
+                                                  .$ var "x"
+                                                  .! ("fv^lam^0", var "fv^lam^0"))))
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (   var "fromString"
+                             .$ primVal (Str "DerivedGen.Either^13748098436294604892.Either^13748098436294604892[0(fv^lam^0)] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.oneOf"
+                             .! ("em", var "MaybeEmpty")
+                             .$ (   var "::"
+                                 .$ (   var "<<DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^0>>"
+                                     .$ var "^fuel_arg^"
+                                     .$ var "inter^<fv^lam^0>")
+                                 .$ (   var "::"
+                                     .$ (   var "<<DerivedGen.Either^13748098436294604892.Either^13748098436294604892^Con^1>>"
+                                         .$ var "^fuel_arg^"
+                                         .$ var "inter^<fv^lam^0>")
+                                     .$ var "Nil")))
+                     }
+              ]
+          , IDef
+              emptyFC
+              "weight^Prelude.Types.Nat"
+              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
+              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
+                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
+              ]
+          , IDef
+              emptyFC
+              "<Data.Fin.Fin>[0]"
+              [    var "<Data.Fin.Fin>[0]" .$ bindVar "^fuel_arg^" .$ bindVar "inter^<n>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.Fin.FZ>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "Data.Fin.Fin" .$ var "n")
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Data.Fin.FS>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "Data.Fin.Fin" .$ var "n")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Data.Fin.FZ>>"
+                             [    var "<<Data.Fin.FZ>>" .$ bindVar "^cons_fuel^" .$ (var "Prelude.Types.S" .$ bindVar "k")
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.Fin.FZ (orders)"))
+                                  .$ (   var "Prelude.pure"
+                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                      .$ (var "Data.Fin.FZ" .! ("k", var "k")))
+                             , var "<<Data.Fin.FZ>>" .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Data.Fin.FS>>"
+                             [    var "<<Data.Fin.FS>>" .$ bindVar "^cons_fuel^" .$ (var "Prelude.Types.S" .$ bindVar "k")
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Data.Fin.FS (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Data.Fin.Fin>[0]" .$ var "^cons_fuel^" .$ var "k")
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:5}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ var "{arg:5}")))
+                             , var "<<Data.Fin.FS>>" .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "Data.Fin.Fin[0(n)] (non-spending)"))
+                         .$ (   var "Test.DepTyCheck.Gen.frequency"
+                             .$ (   var "::"
+                                 .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Data.Fin.FZ>>" .$ var "^fuel_arg^" .$ var "inter^<n>"))
+                                 .$ (   var "::"
+                                     .$ (   var "Builtin.MkPair"
+                                         .$ (var "weight^Prelude.Types.Nat" .$ var "inter^<n>")
+                                         .$ (var "<<Data.Fin.FS>>" .$ var "^fuel_arg^" .$ var "inter^<n>"))
+                                     .$ var "Nil")))
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.X>[]" .$ var "^outmost-fuel^"
+      }
+

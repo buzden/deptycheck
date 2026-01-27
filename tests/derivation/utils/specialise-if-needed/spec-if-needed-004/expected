@@ -1,0 +1,34 @@
+1/2: Building Shared (Shared.idr)
+2/2: Building Test (Test.idr)
+LOG deptycheck.test.utils.specialise:0:  Expanded e: Test.Y {a = Prelude.Types.Nat} Test.Nn (Test.X Test.Nt (fromInteger 5) Test.Nn)
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] Checking specialisation need for [Prelude.Types.Nat, Test.Nn, Test.X Test.Nt (fromInteger 5) Test.Nn]...
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] (a := Prelude.Types.Nat) Given a type invocation w/o arguments, specialising
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] ({arg:1} := Test.Nn) Given a non-type expr, passing through
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] ({arg:2} := Test.X Test.Nt (fromInteger 5) Test.Nn) Given a type invocation, traversing arguments: [f, n, {arg:3}]
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] (f := Test.Nt) Given a non-global type expr, passing through
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] (n := fromInteger 5) Given a non-type expr, passing through
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] ({arg:3} := Test.Nn) Given a non-type expr, passing through
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] Task before normalisation: \ lam^0 => \ lam^1 => \ lam^2 => \ lam^3 => Test.Y {a = Prelude.Types.Nat} lam^0 (Test.X lam^1 lam^2 lam^3)
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] NormaliseTask returned: lambdaTy = (lam^0 : ({arg:4} : Prelude.Types.Nat) -> Prelude.Types.Nat) -> (lam^1 : ({arg:5} : Prelude.Types.Nat) -> Type) -> (lam^2 : Prelude.Types.Nat) -> (lam^3 : ({arg:6} : lam^1 lam^2) -> Prelude.Types.Nat) -> Type;
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2]                         lambdaBody = \ lam^0 => \ lam^1 => \ lam^2 => \ lam^3 => Test.Y {a = Prelude.Types.Nat} lam^0 (Test.X lam^1 lam^2 lam^3);
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] Specialised type name: Y^14421981371219706324.Y^14421981371219706324
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] Specialised type not found, deriving...
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] Derived Test.Y^14421981371219706324.Y^14421981371219706324
+LOG deptycheck.util.specialisation:10: Test.Y[0(a), 1, 2] Declared specialised type Test.Y^14421981371219706324.Y^14421981371219706324: Test.Y {a = Prelude.Types.Nat} lam^0 (Test.X lam^1 lam^2 lam^3)
+LOG deptycheck.test.utils.specialise:0: Test.Y^14421981371219706324.Y^14421981371219706324[0(fv^Y^14421981371219706324.Y^14421981371219706324^lam^0), 1(fv^Y^14421981371219706324.Y^14421981371219706324^lam^1), 2(fv^Y^14421981371219706324.Y^14421981371219706324^lam^2), 3(fv^Y^14421981371219706324.Y^14421981371219706324^lam^3)] CallGen params: [Test.Nn, Test.Nt, fromInteger 5, Test.Nn]
+LOG deptycheck.test.utils.specialise:0:  Expanded e: Test.Y {a = Prelude.Types.Nat} Test.Nn' (Test.X Data.Fin.Fin (fromInteger 5) Test.Nn')
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] Checking specialisation need for [Prelude.Types.Nat, Test.Nn', Test.X Data.Fin.Fin (fromInteger 5) Test.Nn']...
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] (a := Prelude.Types.Nat) Given a type invocation w/o arguments, specialising
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] ({arg:1} := Test.Nn') Given a non-type expr, passing through
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] ({arg:2} := Test.X Data.Fin.Fin (fromInteger 5) Test.Nn') Given a type invocation, traversing arguments: [f, n, {arg:3}]
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] (f := Data.Fin.Fin) Given a type invocation w/o arguments, specialising
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] (n := fromInteger 5) Given a non-type expr, passing through
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] ({arg:3} := Test.Nn') Given a non-type expr, passing through
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] Task before normalisation: \ lam^0 => \ lam^1 => \ lam^2 => Test.Y {a = Prelude.Types.Nat} lam^0 (Test.X Data.Fin.Fin lam^1 lam^2)
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] NormaliseTask returned: lambdaTy = (lam^0 : ({arg:4} : Prelude.Types.Nat) -> Prelude.Types.Nat) -> (lam^1 : Prelude.Types.Nat) -> (lam^2 : ({arg:6} : Data.Fin.Fin lam^1) -> Prelude.Types.Nat) -> Type;
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2]                         lambdaBody = \ lam^0 => \ lam^1 => \ lam^2 => Test.Y {a = Prelude.Types.Nat} lam^0 (Test.X Data.Fin.Fin lam^1 lam^2);
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] Specialised type name: Y^17936145782101774282.Y^17936145782101774282
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] Specialised type not found, deriving...
+LOG deptycheck.util.specialisation:20: Test.Y[0(a), 1, 2] Derived Test.Y^17936145782101774282.Y^17936145782101774282
+LOG deptycheck.util.specialisation:10: Test.Y[0(a), 1, 2] Declared specialised type Test.Y^17936145782101774282.Y^17936145782101774282: Test.Y {a = Prelude.Types.Nat} lam^0 (Test.X Data.Fin.Fin lam^1 lam^2)
+LOG deptycheck.test.utils.specialise:0: Test.Y^17936145782101774282.Y^17936145782101774282[0(fv^Y^17936145782101774282.Y^17936145782101774282^lam^0), 1(fv^Y^17936145782101774282.Y^17936145782101774282^lam^1), 2(fv^Y^17936145782101774282.Y^17936145782101774282^lam^2)] CallGen params: [Test.Nn', fromInteger 5, Test.Nn']

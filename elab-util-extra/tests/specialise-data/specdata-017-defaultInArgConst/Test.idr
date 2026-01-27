@@ -7,7 +7,7 @@ import Shared
 data V : Type where
   MkV : (0 n : Nat) -> {default 0 p : Fin (S n)} -> V
 
-%runElab specialiseData' "V'" V
+%runElab specialiseDataLam' "V'" V
 
 v0 : V'
 v0 = MkV 10

@@ -1,0 +1,5 @@
+1/2: Building Shared (Shared.idr)
+2/2: Building Test (Test.idr)
+LOG deptycheck.test.utils.specialise:0:  Expanded e: Prelude.Basics.List a
+LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Checking specialisation need for [a]...
+LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Not found any type arguments that can be specialised upon, specialisation impossible.
