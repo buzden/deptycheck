@@ -2,4 +2,4 @@ package test
 
 main = CheckDistribution
 
-depends = deptycheck, sorted-list-so-comp, summary-stat
+depends = deptycheck, sorted-list-so-full, summary-stat
