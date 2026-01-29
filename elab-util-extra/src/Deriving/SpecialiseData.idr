@@ -11,6 +11,7 @@ import Data.List.Quantifiers
 import Data.List1
 import Data.Maybe
 import Data.SnocList
+import Data.SnocList.Quantifiers
 import Data.SortedMap
 import Data.SortedMap.Dependent
 import Data.SortedSet
@@ -420,6 +421,13 @@ allL2V (x :: xs) @{p :: ps} = do
   let Element xs' ps' = allL2V xs @{ps}
   Element (x :: xs') (p :: ps')
 
+record RecursionSearchState where
+  constructor MkRSS
+  castRenames : SortedMap Name TTImp
+  areArgsRecursive : SnocList Bool
+  argsForUnifier : Subset (Vect (length areArgsRecursive) Arg) (All IsNamedArg)
+  argsOutput : Subset (SnocList Arg) (All IsNamedArg)
+
 parameters (t : SpecTask)
   ---------------------------
   --- CONSTRUCTOR MAPPING ---
@@ -529,66 +537,88 @@ parameters (t : SpecTask)
   snocAll [] new y = [y]
   snocAll (y :: ys) new z = y :: snocAll ys new z
 
+  0 snocAllL : {0 prev : List _} -> All IsNamedArg prev -> (new : Arg) -> IsNamedArg new -> All IsNamedArg (snoc prev new)
+  snocAllL [] new y = [y]
+  snocAllL (y :: ys) new z = y :: snocAllL ys new z
+
   findRecursiveApps :
     Monad m =>
-    (unifier : CanUnify m) =>
-    (SortedMap Name TTImp, (p : List Bool ** Subset (Vect (length p) Arg) (All IsNamedArg))) ->
-    (Subset Arg IsNamedArg) ->
-    m (SortedMap Name TTImp, (p : List Bool ** Subset (Vect (length p) Arg) (All IsNamedArg)))
-  findRecursiveApps (substCast, (prev ** Element prevArgs prevNamed)) (Element thisArg thisArgNamed) = do
+    CanUnify m =>
+    RecursionSearchState -> Subset Arg IsNamedArg -> m RecursionSearchState
+  findRecursiveApps rss (Element thisArg thisArgNamed) = do
+    let (MkRSS cRenames areArgsRec (Element argsForUni _) (Element argsOut _)) = rss
     let Element ta _ = allL2V t.tqArgs @{t.tqArgsNamed}
-    let uniTask = MkUniTask {lfv=_} prevArgs thisArg.type {rfv=_} ta t.fullInvocation
+    let uniTask = MkUniTask {lfv=_} argsForUni thisArg.type {rfv=_} ta t.fullInvocation
     ur <- unify uniTask
     case ur of
       Success ur => do
         let typeArgs = t.ttArgs.appsWith @{t.ttArgsNamed} var ur.fullResult
         let tyRet = reAppAny (var t.resultName) typeArgs
         let mToP = var $ inGenNS t "mToP"
-        pure
-          ( substCast
-          , ( snoc prev True **
-              rewrite snocLengthEqS prev True
-                in Element (snoc prevArgs ?newArg) ?snocAllRhs
-            )
-          )
-      _ => do
+        let outPiInfo = (\x => `(cast ~x)) . substituteVariables cRenames <$> thisArg.piInfo
+        let outType = substituteVariables cRenames tyRet
+        let Element outArg outArgNamed =
+            Element (MkArg thisArg.count outPiInfo (Just $ argName thisArg) outType) ItIsNamed
         pure $
-          (substCast
-          , ( snoc prev False **
-              rewrite snocLengthEqS prev False
-                in Element (snoc prevArgs thisArg)
-                           (snocAll prevNamed thisArg thisArgNamed)
-            )
-          )
+          MkRSS
+            (insert (argName thisArg) `(~mToP ~(var $ argName thisArg)) cRenames)
+            (areArgsRec :< True)
+            (Element (snoc argsForUni thisArg) (snocAll %search thisArg thisArgNamed))
+            (Element (argsOut :< outArg) (%search :< outArgNamed))
+      _ => do
+        let outPiInfo = substituteVariables cRenames <$> thisArg.piInfo
+        let outType = substituteVariables cRenames thisArg.type
+        let Element outArg outArgNamed =
+            Element (MkArg thisArg.count outPiInfo (Just $ argName thisArg) outType) ItIsNamed
+        pure $
+          MkRSS
+            cRenames
+            (areArgsRec :< False)
+            (Element (snoc argsForUni thisArg) (snocAll %search thisArg thisArgNamed))
+            (Element (argsOut :< outArg) (%search :< outArgNamed))
+
+  snocAll2L : (sl : SnocList Arg) -> (0 _ : All IsNamedArg sl) -> Subset (List Arg) (All IsNamedArg)
+  snocAll2L [<] [<] = Element [] []
+  snocAll2L (sx :< x) (sy :< y) = do
+    let Element xs ys = snocAll2L sx sy
+    Element (snoc xs x) (snocAllL ys x y)
 
   ||| Generate a specialised constructor
   mkSpecCon :
+    Monad m =>
+    CanUnify m =>
     (params : SpecialisationParams) =>
-    (newArgs : _) ->
+    (newArgs : List Arg) ->
     (0 _ : All IsNamedArg newArgs) =>
     UnificationResult ->
     (con : Con) ->
     (0 _ : ConArgsNamed con) =>
     Nat ->
-    Subset Con ConArgsNamed
+    m $ Subset Con ConArgsNamed
   mkSpecCon newArgs ur pCon cIdx = do
+    let specArgs = mkSpecArg ur <$> ur.order
     let Element args allArgs =
-      pullOut $ mkSpecArg ur <$> ur.order
+      pullOut specArgs
     let typeArgs = newArgs.appsWith var ur.fullResult
     let tyRet = reAppAny (var t.resultName) typeArgs
     let n = if params.eraseConNames then fromString "\{t.resultName}^Con^\{show cIdx}" else dropNS pCon.name
-    MkCon
+    rssRhs <- foldlM findRecursiveApps (MkRSS empty [<] (Element [] []) (Element [<] [<])) specArgs
+    let (MkRSS cRename argsAreRecursive' _ (Element outArgs' outArgsNamed')) = rssRhs
+    let Element outArgs outArgsNamed = snocAll2L outArgs' outArgsNamed'
+    pure $ MkCon
       { name = inGenNS t $ n
-      , args
-      , type = tyRet
-      } `Element` TheyAreNamed allArgs
+      , args = outArgs
+      , type = substituteVariables cRename tyRet
+      } `Element` TheyAreNamed outArgsNamed
 
   ||| Generate a specialised type
-  mkSpecTy : SpecialisationParams => UniResults -> Subset TypeInfo AllTyArgsNamed
+  mkSpecTy : Monad m => CanUnify m => SpecialisationParams => UniResults -> m $ Subset TypeInfo AllTyArgsNamed
   mkSpecTy ur = do
-    let Element cons consAreNamed =
-      pullOut $ mapUCons (mkSpecCon @{%search} t.ttArgs @{t.ttArgsNamed}) ur
-    MkTypeInfo
+    let 0 _ = t.ttArgsNamed
+    let muc = mapUCons (mkSpecCon t.ttArgs) ur
+    specCons <- traverse id muc
+    let Element cons consAreNamed = pullOut specCons
+    pure $ MkTypeInfo
       { name = inGenNS t t.resultName
       , args = t.ttArgs
       , cons
@@ -1257,7 +1287,7 @@ specialiseDataRaw resultName resultKind resultContent = do
   task <- getTask resultName resultKind resultContent
   logPoint DetailedDebug "specialiseData" [task.polyTy] "Specialisation task: \{show task}"
   uniResults <- sequence $ mapCons task $ unifyCon task
-  let Element specTy specTyNamed = mkSpecTy task uniResults
+  Element specTy specTyNamed <- mkSpecTy task uniResults
   decls <- specDecls task uniResults specTy
   pure (specTy, decls)
 
