@@ -442,21 +442,45 @@ snocAll2L (sx :< x) (sy :< y) = do
 record RecursionSearchState where
   constructor MkRSS
   castRenames : SortedMap Name TTImp
+  pToMRenames : SortedMap Name TTImp
   areArgsRecursive : SnocList Bool
   argsForUnifier : Subset (Vect (length areArgsRecursive) Arg) (All IsNamedArg)
   argsOutput : Subset (SnocList Arg) (All IsNamedArg)
 
 record ArgMeta where
   constructor MkAMeta
-  isResursive : Bool
+  isResursiveArg : Bool
+
+-- Workaround for possible compiler bug
+isRA : ArgMeta -> Bool
+isRA (MkAMeta True) = True
+isRA (MkAMeta False) = False
 
 record ConMeta where
   constructor MkCMeta
   argMeta : List ArgMeta
+  mToPRenames : SortedMap Name TTImp
+  pToMRenames : SortedMap Name TTImp
+
+hasRecursiveArgs : ConMeta -> Bool
+hasRecursiveArgs = any isRA . argMeta
+
+countRecursiveArgs : ConMeta -> Nat
+countRecursiveArgs = count isRA . argMeta
+
+recursiveArgNames : Con -> ConMeta -> List Name
+recursiveArgNames con meta = do
+  let recursiveArgPairs = List.filter (isRA . snd) $ zip con.args meta.argMeta
+  fromMaybe "" . name . fst <$> recursiveArgPairs
 
 record TypeMeta where
   constructor MkTyMeta
   conMeta : List ConMeta
+
+tupleOf : List TTImp -> TTImp
+tupleOf [] = `(())
+tupleOf [x] = x
+tupleOf (x :: xs) = `(MkPair ~x ~(tupleOf xs))
 
 parameters (t : SpecTask)
   ---------------------------
@@ -562,27 +586,51 @@ parameters (t : SpecTask)
     let piInfo = if fromLambda && (fvData.piInfo == ExplicitArg) then ImplicitArg else fvData.piInfo
     Element (MkArg rig piInfo (Just fvData.name) fvData.type) ItIsNamed
 
+  getVar : TTImp -> Maybe Name
+  getVar (IVar _ n) = Just n
+  getVar _ = Nothing
+
   findRecursiveApps :
     Monad m =>
     CanUnify m =>
+    MonadLog m =>
+    NamesInfoInTypes =>
     RecursionSearchState -> Subset Arg IsNamedArg -> m RecursionSearchState
   findRecursiveApps rss (Element thisArg thisArgNamed) = do
-    let (MkRSS cRenames areArgsRec (Element argsForUni _) (Element argsOut _)) = rss
+    let (MkRSS cRenames pToMRenames areArgsRec (Element argsForUni _) (Element argsOut _)) = rss
+    let (aLhs, aa) = unAppAny thisArg.type
+    let True = (length aa /= 0) || (isJust $ lookupType =<< getVar aLhs)
+      | False => do
+        let outPiInfo = substituteVariables cRenames <$> thisArg.piInfo
+        let outType = substituteVariables cRenames thisArg.type
+        let Element outArg outArgNamed =
+            Element (MkArg thisArg.count outPiInfo (Just $ argName thisArg) outType) ItIsNamed
+        pure $
+          MkRSS
+            cRenames
+            pToMRenames
+            (areArgsRec :< False)
+            (Element (snoc argsForUni thisArg) (snocAll %search thisArg thisArgNamed))
+            (Element (argsOut :< outArg) (%search :< outArgNamed))
     let Element ta _ = allL2V t.tqArgs @{t.tqArgsNamed}
     let uniTask = MkUniTask {lfv=_} argsForUni thisArg.type {rfv=_} ta t.fullInvocation
     ur <- unify uniTask
     case ur of
       Success ur => do
         let typeArgs = t.ttArgs.appsWith @{t.ttArgsNamed} var ur.fullResult
+        logPoint DetailedDebug "specialiseData.fra" [] $ show ur.fullResult
         let tyRet = reAppAny (var t.resultName) typeArgs
-        let mToP = var $ inGenNS t "mToP"
+        logPoint DetailedDebug "specialiseData.fra" [] $ show tyRet
+        let mToPImpl = var $ inGenNS t "mToPImpl"
+        let pToMImpl = var $ inGenNS t "pToMImpl"
         let outPiInfo = (\x => `(cast ~x)) . substituteVariables cRenames <$> thisArg.piInfo
         let outType = substituteVariables cRenames tyRet
         let Element outArg outArgNamed =
             Element (MkArg thisArg.count outPiInfo (Just $ argName thisArg) outType) ItIsNamed
         pure $
           MkRSS
-            (insert (argName thisArg) `(~mToP ~(var $ argName thisArg)) cRenames)
+            (insert (argName thisArg) `(~mToPImpl ~(var $ argName thisArg)) cRenames)
+            (insert (argName thisArg) `(~pToMImpl ~(var $ argName thisArg)) pToMRenames)
             (areArgsRec :< True)
             (Element (snoc argsForUni thisArg) (snocAll %search thisArg thisArgNamed))
             (Element (argsOut :< outArg) (%search :< outArgNamed))
@@ -594,6 +642,7 @@ parameters (t : SpecTask)
         pure $
           MkRSS
             cRenames
+            pToMRenames
             (areArgsRec :< False)
             (Element (snoc argsForUni thisArg) (snocAll %search thisArg thisArgNamed))
             (Element (argsOut :< outArg) (%search :< outArgNamed))
@@ -602,6 +651,8 @@ parameters (t : SpecTask)
   mkSpecCon :
     Monad m =>
     CanUnify m =>
+    MonadLog m =>
+    NamesInfoInTypes =>
     (params : SpecialisationParams) =>
     (newArgs : List Arg) ->
     (0 _ : All IsNamedArg newArgs) =>
@@ -617,10 +668,10 @@ parameters (t : SpecTask)
     let typeArgs = newArgs.appsWith var ur.fullResult
     let tyRet = reAppAny (var t.resultName) typeArgs
     let n = if params.eraseConNames then fromString "\{t.resultName}^Con^\{show cIdx}" else dropNS pCon.name
-    rssRhs <- foldlM findRecursiveApps (MkRSS empty [<] (Element [] []) (Element [<] [<])) specArgs
-    let (MkRSS cRename argsAreRecursive' _ (Element outArgs' outArgsNamed')) = rssRhs
+    rssRhs <- foldlM findRecursiveApps (MkRSS empty empty [<] (Element [] []) (Element [<] [<])) specArgs
+    let (MkRSS cRename pToMRenames argsAreRecursive' _ (Element outArgs' outArgsNamed')) = rssRhs
     let Element outArgs outArgsNamed = snocAll2L outArgs' outArgsNamed'
-    let conMeta = MkCMeta (MkAMeta <$> toList argsAreRecursive')
+    let conMeta = MkCMeta (MkAMeta <$> toList argsAreRecursive') cRename pToMRenames
     pure $ (MkCon
       { name = inGenNS t $ n
       , args = outArgs
@@ -628,7 +679,10 @@ parameters (t : SpecTask)
       } `Element` TheyAreNamed outArgsNamed, conMeta)
 
   ||| Generate a specialised type
-  mkSpecTy : Monad m => CanUnify m => SpecialisationParams => UniResults -> m $ (Subset TypeInfo AllTyArgsNamed, TypeMeta)
+  mkSpecTy :
+    Monad m => CanUnify m => MonadLog m =>
+    SpecialisationParams => NamesInfoInTypes =>
+    UniResults -> m $ (Subset TypeInfo AllTyArgsNamed, TypeMeta)
   mkSpecTy ur = do
     let 0 _ = t.ttArgsNamed
     let muc = mapUCons (mkSpecCon t.ttArgs) ur
@@ -776,7 +830,7 @@ parameters (t : SpecTask)
       mcon.apply bindVar
         (substituteVariables
           (fromList $ argsToBindMap mcon.args) <$> ur.fullResult)
-      .= con.apply var ur.fullResult
+      .= (substituteVariables meta.mToPRenames $ con.apply var ur.fullResult)
 
   ||| Generate specialised to polymorphic type conversion function declarations
   mkMToPImplDecls :
@@ -802,96 +856,84 @@ parameters (t : SpecTask)
     ]
 
   -----------------------------------
-  --- MULTIINJECTIVITY DERIVATION ---
-  -----------------------------------
-
-  ||| Derive multiinjectivity for a polymorphic constructor that has a
-  ||| specialised equivalent
-  mkMultiInjDecl :
-    UnificationResult ->
-    (mt : TypeInfo) ->
-    (0 _ : AllTyArgsNamed mt) =>
-    (pCon : Con) ->
-    (0 _ : ConArgsNamed pCon) =>
-    (mCon : Con) ->
-    (0 mn : ConArgsNamed mCon) =>
-    ConMeta ->
-    Nat ->
-    List Decl
-  mkMultiInjDecl ur mt con mcon meta i = do
-    let S _ = length mcon.args
-    | _ => []
-    let n = fromString "mInj\{show i}"
-    let 0 _ = conArgsNamed @{mn}
-    let Element ourArgs _ = makeArgsImplicit mcon.args
-    let (Element a1 _, am1) = transformArgNames (prependS "lhs^") ourArgs
-    let (Element a2 _, am2) = transformArgNames (prependS "rhs^") ourArgs
-    let lhsCon = substituteVariables (fromList $ mapSnd var <$> am1) $
-                  con.apply var $ mergeAliases ur.fullResult am1
-    let rhsCon = substituteVariables (fromList $ mapSnd var <$> am2) $
-                  con.apply var $ mergeAliases ur.fullResult am2
-
-    let eqs = mkEqualsTuple $ zip (pushIn a1 %search) (pushIn a2 %search)
-    let sig =
-      flip piAll a1 $
-        flip piAll a2 $ `((~(lhsCon) ~=~ ~(rhsCon)) -> ~(eqs))
-    let lhs = mkDoubleBinds (cast $ zip a1 a2) (var n) .$ `(Refl)
-    [ public' n sig
-    , def n $ singleton $ patClause lhs $ tupleOfN (length mcon.args) `(Refl)
-    ]
-
-  ||| Derive multiinjectivity for all polymorphic constructors that have
-  ||| a specialised equivalent
-  mkMultiInjDecls :
-    UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TypeMeta -> List Decl
-  mkMultiInjDecls ur specTy meta = do
-    join $ map2UConsN mkMultiInjDecl ur specTy meta
-
-  ----------------------------------
-  --- MULTICONGRUENCY DERIVATION ---
-  ----------------------------------
-
-  ||| Derive multicongruency for a specialised constructor
-  |||
-  ||| mCongN : forall argsN, argsN'; conN argsN === conN argsN'
-  mkMultiCongDecl :
-    UnificationResult ->
-    (mt : TypeInfo) ->
-    (0 _ : AllTyArgsNamed mt) =>
-    (pCon : Con) ->
-    (0 _ : ConArgsNamed pCon) =>
-    (mCon : Con) ->
-    (0 mn : ConArgsNamed mCon) =>
-    ConMeta ->
-    Nat ->
-    List Decl
-  mkMultiCongDecl ur mt _ mcon meta i = do
-    let S _ = length mcon.args
-    | _ => []
-    let n = fromString "mCong\{show i}"
-    let 0 _ = conArgsNamed @{mn}
-    let Element ourArgs _ = makeArgsImplicit mcon.args
-    let (Element a1 _, am1) = transformArgNames (prependS "lhs^") ourArgs
-    let (Element a2 _, am2) = transformArgNames (prependS "rhs^") ourArgs
-    let lhsCon = mcon.apply var $ mergeAliases ur.fullResult am1
-    let rhsCon = mcon.apply var $ mergeAliases ur.fullResult am2
-    let eqs = mkEqualsTuple $ zip (pushIn a1 %search) (pushIn a2 %search)
-    let sig =
-      flip piAll a1 $ flip piAll a2 $ `(~(eqs) -> (~(lhsCon) ~=~ ~(rhsCon)))
-    let lhs = mkDoubleBinds (cast $ zip a1 a2) (var n) .$ tupleOfN (length mcon.args) `(Refl)
-    [ public' n sig
-    , def n $ singleton $ patClause lhs $ `(Refl)
-    ]
-
-  ||| Derive multicongruency for all specialised constructors
-  mkMultiCongDecls :
-    UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TypeMeta -> List Decl
-  mkMultiCongDecls ur specTy meta = do
-    join $ map2UConsN mkMultiCongDecl ur specTy meta
-
-  -----------------------------------
   --- CAST INJECTIVITY DERIVATION ---
   -----------------------------------
+
+  recCastInj : Name -> Name -> TTImp
+  recCastInj p1 p2 = `(~(var $ inGenNS t $ "castInjImpl") $ trans ~(var p1) $ sym ~(var p2))
+
+  amrContent : Arg -> ArgMeta -> (Name -> Name) -> TTImp
+  amrContent a (MkAMeta False) _ = `(_)
+  amrContent a (MkAMeta True) alias = bindVar $ alias $ fromMaybe "" a.name
+
+  argMaybeRecursive : (Name -> Name) -> (Arg, ArgMeta) -> AnyApp
+  argMaybeRecursive alias (a@(MkArg count ImplicitArg name type), am) = NamedApp (fromMaybe "" name) $ amrContent a am alias
+  argMaybeRecursive alias (a@(MkArg count ExplicitArg name type), am) = PosApp $ amrContent a am alias
+  argMaybeRecursive alias (a@(MkArg count AutoImplicit name type), am) = NamedApp (fromMaybe "" name) $ amrContent a am alias
+  argMaybeRecursive alias (a@(MkArg count (DefImplicit x) name type), am) = NamedApp (fromMaybe "" name) $ amrContent a am alias
+
+  conOnlyRecursivesAliased : Con -> ConMeta -> (Name -> Name) -> TTImp
+  conOnlyRecursivesAliased con meta alias =
+    reAppAny (var con.name) $ argMaybeRecursive alias <$> zip con.args meta.argMeta
+
+  mkArgWithClause : Name -> TTImp -> Clause -> Clause
+  mkArgWithClause argName existingLhs inner = do
+    let mToPImpl = var $ inGenNS t "mToPImpl"
+    let lhsArg = var $ fromString "lhs^\{argName}"
+    let rhsArg = var $ fromString "rhs^\{argName}"
+    let p1 = Just (MW, fromString "\{argName}^p1")
+    let p2 = Just (MW, fromString "\{argName}^p2")
+    withClause existingLhs MW `(~mToPImpl ~lhsArg) p1 [] [
+      withClause `(~existingLhs | _) MW `(~mToPImpl ~rhsArg) p2 [] [inner]
+    ]
+
+  withManyUnders : Nat -> TTImp -> TTImp
+  withManyUnders 0 x = x
+  withManyUnders (S n) x = withManyUnders n `(~x | _)
+
+  mkFinalClause : (con : Con) -> (0 _ : ConArgsNamed con) => ConMeta -> Clause
+  mkFinalClause con meta = do
+    let emptyCon = con.apply (\_ => `(_)) empty
+    let recArgAmount = countRecursiveArgs meta
+    let initialLhs = withManyUnders (2 * recArgAmount) $
+      var "castInjImpl" .! ("castInj^x", emptyCon) .! ("castInj^y", emptyCon) .$ var "Refl"
+    let recNames = recursiveArgNames con meta
+    let recFns = (\n => recCastInj (fromString "\{n}^p1") (fromString "\{n}^p2")) <$> recNames
+    withClause initialLhs MW (tupleOf recFns) Nothing [] [
+      `(~initialLhs | ~(tupleOfN recArgAmount `(Refl))) .= `(Refl)
+    ]
+
+  mkInitialLhs : Con -> ConMeta -> TTImp
+  mkInitialLhs con meta = do
+    let lhsCon = conOnlyRecursivesAliased con meta $ prependS "lhs^"
+    let rhsCon = conOnlyRecursivesAliased con meta $ prependS "rhs^"
+    var "castInjImpl" .! ("castInj^x", lhsCon) .! ("castInj^y", rhsCon) .$ bindVar "prf"
+
+  mkRecArgClauses : List Name -> TTImp -> Clause -> Clause
+  mkRecArgClauses [] exLhs inner = inner
+  mkRecArgClauses (x :: xs) exLhs inner = mkArgWithClause x exLhs $ mkRecArgClauses xs `(~exLhs | _ | _) inner
+
+  mkCastInjClause' :
+    UnificationResult ->
+    (mt : TypeInfo) ->
+    (0 _ : AllTyArgsNamed mt) =>
+    (con : Con) ->
+    (0 cn : ConArgsNamed con) =>
+    (mcon : Con) ->
+    (0 mcn : ConArgsNamed mcon) =>
+    ConMeta ->
+    Nat ->
+    Clause
+  mkCastInjClause' ur mt _ con meta n = do
+    if not (hasRecursiveArgs meta)
+      then do
+        let emptyCon = con.apply (\_ => `(_)) empty
+        (var "castInjImpl") .! ("castInj^x", emptyCon) .! ("castInj^y", emptyCon) .$ `(Refl) .= `(Refl)
+      else do
+        let finalClause = mkFinalClause con meta
+        let recNames = recursiveArgNames con meta
+        let initLhs = mkInitialLhs con meta
+        mkRecArgClauses recNames initLhs finalClause
 
   ||| Make a clause for the cast injectivity proof
   mkCastInjClause :
@@ -934,33 +976,26 @@ parameters (t : SpecTask)
     TypeMeta ->
     List Decl
   mkCastInjDecls ur ti meta = do
-    let Element prepArgs prf = hideExplicitArgs ti.args @{mtp.tyArgsNamed}
-    let ta1@(Element a1 _, am1) = transformArgNames (prependS "lhs^") prepArgs
-    let ta2@(Element a2 _, am2) = transformArgNames (prependS "rhs^") prepArgs
     let xVar = "castInj^x"
     let yVar = "castInj^y"
     let mToPVar = var $ inGenNS t "mToP"
     let mToPImplVar = var $ inGenNS t "mToPImpl"
     let arg1 = MkArg MW ImplicitArg (Just xVar) $
-                ti.apply var $ fromList $ mapSnd var <$> am1
+                ti.apply var empty
     let arg2 = MkArg MW ImplicitArg (Just yVar) $
-                ti.apply var $ fromList $ mapSnd var <$> am2
+                ti.apply var empty
     let eqs =
-      `((~(aliasedApp (cast am1) mToPImplVar .$ var xVar)
+      `((~(mToPImplVar .$ var xVar)
           ~=~
-          ~(aliasedApp (cast am2) $ mToPImplVar .$ var yVar)) ->
+          ~(mToPImplVar .$ var yVar)) ->
           ~(var xVar) ~=~ ~(var yVar))
-    let castInjImplClauses = map2UConsN (mkCastInjClause (a1, am1) (a2, am2) xVar yVar) ur ti meta
-    let tyArgPairs = cast $ zip ti.argNames ti.argNames
-    [ public' "castInjImpl" $
-        flip piAll (makeTypeArgM0 <$> a1) $
-          flip piAll (makeTypeArgM0 <$> a2) $
-            pi arg1 $ pi arg2 $ eqs
+    let castInjImplClauses = map2UConsN (mkCastInjClause') ur ti meta
+    [ claim M0 Public [] "castInjImpl" $ forallMTArgs $ pi arg1 $ pi arg2 $ eqs
     , def "castInjImpl" castInjImplClauses
-    , interfaceHint Public "castInj" $ forallMTArgs $
-        `(Injective ~(aliasedApp tyArgPairs mToPImplVar))
+    , claim M0 Public [Hint False] "castInj" $ forallMTArgs $
+        `(Injective ~(mToPImplVar))
     , def "castInj" $ singleton $
-        aliasedAppBind tyArgPairs `(castInj) .= `(MkInjective castInjImpl)
+        `(castInj) .= `(MkInjective castInjImpl)
     ]
 
   -------------------------------------
@@ -1057,7 +1092,7 @@ parameters (t : SpecTask)
     var "pToMImpl" .$ con.apply bindVar
       (substituteVariables
         (fromList $ argsToBindMap $ con.args) <$> ur.fullResult)
-      .= mcon.apply var ur.fullResult
+      .= (substituteVariables meta.pToMRenames $ mcon.apply var ur.fullResult)
 
   ||| Generate specialised to polymorphic type conversion function declarations
   mkPToMImplDecls :
@@ -1132,46 +1167,30 @@ parameters (t : SpecTask)
   specDecls : MonadLog m => UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TypeMeta -> m $ List Decl
   specDecls uniResults specTy specMeta = do
     let specTyDecl = specTy.decl
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "specTyDecl : \{show specTyDecl}"
+    logPoint DetailedDebug "specialiseData.specDecls.specTy" [specTy] $ show specTyDecl
     let mToPImplDecls = mkMToPImplDecls uniResults specTy specMeta
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "mToPImplDecls : \{show mToPImplDecls}"
+    logPoint DetailedDebug "specialiseData.specDecls.mToPImpl" [specTy] $ show mToPImplDecls
     let mToPDecls = mkMToPDecls specTy
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "mToP : \{show mToPDecls}"
-    let multiInjDecls = mkMultiInjDecls uniResults specTy specMeta
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "multiInj : \{show multiInjDecls}"
-    let multiCongDecls = mkMultiCongDecls uniResults specTy specMeta
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "multiCong : \{show multiCongDecls}"
+    logPoint DetailedDebug "specialiseData.specDecls.mToP" [specTy] $ show mToPDecls
     let castInjDecls = mkCastInjDecls uniResults specTy specMeta
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "castInj : \{show castInjDecls}"
+    logPoint DetailedDebug "specialiseData.specDecls.castInj" [specTy] $ show castInjDecls
     let decEqDecls = mkDecEqDecls uniResults specTy
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "decEq : \{show decEqDecls}"
+    logPoint DetailedDebug "specialiseData.specDecls.decEq" [specTy] $ show decEqDecls
     let showDecls = mkShowDecls uniResults specTy
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "Show : \{show showDecls}"
+    logPoint DetailedDebug "specialiseData.specDecls.show" [specTy] $ show showDecls
     let eqDecls = mkEqDecls uniResults specTy
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "Eq : \{show eqDecls}"
+    logPoint DetailedDebug "specialiseData.specDecls.eq" [specTy] $ show eqDecls
     let pToMImplDecls = mkPToMImplDecls uniResults specTy specMeta
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "pToMImplDecls : \{show pToMImplDecls}"
+    logPoint DetailedDebug "specialiseData.specDecls.pToMImpl" [specTy] $ show pToMImplDecls
     let pToMDecls = mkPToMDecls specTy
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "pToM : \{show pToMDecls}"
+    logPoint DetailedDebug "specialiseData.specDecls.pToM" [specTy] $ show pToMDecls
     let fromStringDecls = mkFromStringDecls specTy
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "fromString : \{show fromStringDecls}"
+    logPoint DetailedDebug "specialiseData.specDecls.fromString" [specTy] $ show fromStringDecls
     let numDecls = mkNumDecls specTy
-    logPoint DetailedDebug "specialiseData.specDecls" [specTy]
-      "num : \{show numDecls}"
+    logPoint DetailedDebug "specialiseData.specDecls.num" [specTy] $ show numDecls
     let anyUndecided = any isUndecided uniResults
     let claims = standardClaims ++ if anyUndecided then [] else decidedClaims
+    logPoint DetailedDebug "specialiseData.specDecls.claims" [specTy] $ show claims
     let decidedDecls =
       [ pToMImplDecls
       , pToMDecls
@@ -1190,8 +1209,6 @@ parameters (t : SpecTask)
         , [ specTyDecl ]
         , mToPImplDecls
         , mToPDecls
-        , multiInjDecls
-        , multiCongDecls
         , castInjDecls
         , decEqDecls
         , showDecls
@@ -1415,6 +1432,3 @@ specialiseDataLam' :
   m ()
 specialiseDataLam' resultName task =
   specialiseDataLam'' resultName task >>= declare
-
-il : TTImp
-il = local [ iData Public "X.Y" `(Type) [] [], claim MW Public [] "X.z" `(Nat), def "X.z" [ var "X.z" .= `(10) ] ] `(X.z)
