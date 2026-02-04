@@ -705,6 +705,11 @@ parameters (t : SpecTask)
   forallMTArgs : TTImp -> TTImp
   forallMTArgs = flip (foldr pi) $ makeTypeArgM0 . hideExplicitArg <$> t.ttArgs
 
+  applyMTArgs : TTImp -> TTImp
+  applyMTArgs =
+    flip (foldl (\x,arg => x .! (fromMaybe "" arg.name, var $ fromMaybe "" arg.name))) $
+      makeTypeArgM0 . hideExplicitArg <$> t.ttArgs
+
   ||| Generate specialised to polimorphic type conversion function signature
   mkMToPImplClaim : Decl
   mkMToPImplClaim = public' "mToPImpl" $ forallMTArgs $ arg t.specInvocation .-> t.fullInvocation
@@ -979,7 +984,7 @@ parameters (t : SpecTask)
     let xVar = "castInj^x"
     let yVar = "castInj^y"
     let mToPVar = var $ inGenNS t "mToP"
-    let mToPImplVar = var $ inGenNS t "mToPImpl"
+    let mToPImplVar = applyMTArgs $ var $ inGenNS t "mToPImpl"
     let arg1 = MkArg MW ImplicitArg (Just xVar) $
                 ti.apply var empty
     let arg2 = MkArg MW ImplicitArg (Just yVar) $
