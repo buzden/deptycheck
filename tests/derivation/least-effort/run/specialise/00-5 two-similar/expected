@@ -1,0 +1,26 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.util.specialisation:10: Prelude.Basics.List[0] Declared specialised type DerivedGen.List^8984676908526435328.List^8984676908526435328: Prelude.Basics.List String
+LOG deptycheck.util.specialisation:10: Prelude.Basics.List[0] Declared specialised type DerivedGen.List^4779069909474151191.List^4779069909474151191: Prelude.Basics.List Prelude.Types.Nat
+Generated values:
+-----
+-----
+MkX ["a", "a", "b", "cc", "b", "c", "cc", "c", "b", "b"] [4, 17, 10, 8, 17, 12, 11, 10, 4]
+-----
+MkX ["cc", "cc", "cc", "a", "a", "cc", "cc", "cc", "a", "b", "cc", "b", "b", "b", "a", "b"] [14, 7, 1, 6, 0, 15, 17, 17, 13, 17, 19, 12]
+-----
+MkX ["a", "c", "c", "a", "c", "cc", "c", "c", "b", "b", "c", "c", "cc", "a", "b", "b", "c", "b"] [3, 10, 14, 16, 16, 11, 1, 2, 2, 6, 12, 17, 20, 7, 3, 15, 6, 12, 15]
+-----
+MkX ["a", "b", "c", "a", "a", "c", "a", "b", "a", "a", "a", "b", "c", "a", "c", "c", "b"] [15, 0, 6]
+-----
+MkX ["c", "b", "a", "c", "b", "b", "a", "a", "c", "a", "a", "a", "a", "cc", "cc", "c", "b", "cc", "cc"] [6, 18, 12, 3]
+-----
+MkX ["b", "b"] [13, 16, 20, 3, 0, 13, 8, 4]
+-----
+MkX ["a", "b", "c", "b"] [3, 6, 5, 16, 2, 4, 2, 5, 10, 10, 1, 10, 8, 13, 19, 15]
+-----
+MkX ["c", "a", "cc", "a", "cc", "c", "a", "a", "cc", "c", "cc", "cc", "c", "b", "b", "cc"] [17, 1, 13, 8, 6, 20, 13, 2, 17, 13, 6, 19, 19, 13, 8]
+-----
+MkX ["c", "cc", "c", "b", "c", "c", "a", "b", "c", "cc", "c", "cc", "c", "a", "b", "cc", "a", "a"] [8, 19, 17, 0, 11, 20, 14, 1, 0, 2, 18]
+-----
+MkX ["c", "b", "cc", "a", "cc", "c", "c", "cc", "cc", "c", "cc"] [12, 3, 4, 15, 5]

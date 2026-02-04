@@ -1,0 +1,26 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.util.specialisation:10: Prelude.Basics.List[0] Declared specialised type DerivedGen.List^8984676908526435328.List^8984676908526435328: Prelude.Basics.List String
+LOG deptycheck.util.specialisation:10: Prelude.Basics.List[0] Declared specialised type DerivedGen.List^12757670414100080037.List^12757670414100080037: Prelude.Basics.List (Data.Fin.Fin lam^0)
+Generated values:
+-----
+-----
+MkX ["", "", "a", "", "bc", "", "a", "a", "", "", "a"] [8, 10, 15, 5, 4, 11]
+-----
+MkX ["", "bc", "bc", "bc", "", "bc", "bc", "bc", ""] [6, 12, 4, 5, 5, 9, 0, 14, 2, 14, 1, 13, 10, 13, 14, 14, 1]
+-----
+MkX [] [12, 9, 13, 15, 15, 11, 1, 2, 2, 9, 11, 17, 17, 16, 4, 15, 5, 11, 14]
+-----
+MkX ["", "a", "bc", "", "", "bc", "", "a", "", "", "", "a", "bc", "", "bc", "bc", "a"] [0, 6]
+-----
+MkX ["bc", "a", "", "bc", "a", "a", "", "", "bc", "", "", "", "", "bc", "bc", "bc", "a", "bc", "a", "bc"] [5, 5, 5, 2, 4, 4, 3, 0]
+-----
+MkX ["a", ""] [0, 2, 2, 2, 0, 1, 2, 1, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 0]
+-----
+MkX ["", "bc", "", "bc", "a", "", "a", "a", "", "", "", "", "a", "a"] []
+-----
+MkX ["a", "bc", "a"] [1, 1, 3, 0, 3, 0, 3, 3, 1, 0, 3]
+-----
+MkX ["", "a"] [4, 3, 0]
+-----
+MkX ["a", "", "a", "", "a", "", ""] [9, 10, 5, 10, 10, 7]
