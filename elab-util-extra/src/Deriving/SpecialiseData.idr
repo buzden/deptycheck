@@ -101,6 +101,7 @@ Show SpecTask where
       , showArg t.currentNs
       , showArg t.resultName
       , showArg t.fullInvocation
+      , showArg t.specInvocation
       , showArg "<polyTy>"
       ]
 
@@ -204,25 +205,6 @@ transformArgNames f as = do
   let aliases = transformArgNames' f as
   (applyArgAliases as aliases empty, aliases)
 
-||| Given a list of aliased argument pairs, generate a list of equality type
-||| for each pair
-mkEqualsTuple : List (Subset Arg IsNamedArg, Subset Arg IsNamedArg) -> TTImp
-mkEqualsTuple [] = `(MkUnit)
-mkEqualsTuple [(Element a1 _, Element a2 _)] =
-  `(~(var $ argName a1) ~=~ ~(var $ argName a2))
-mkEqualsTuple ((Element a1 _, Element a2 _) :: as) =
-  `(Pair (~(var $ argName a1) ~=~ ~(var $ argName a2)) ~(mkEqualsTuple as))
-
-||| Given a list of aliased argument pairs [(a, b), ...], generate a series of
-||| named applications: (... {a=a} {b=a})
-mkDoubleBinds : SnocList (Arg, Arg) -> TTImp -> TTImp
-mkDoubleBinds [<] t = t
-mkDoubleBinds (as :< (a1, a2)) t =
-  case (a1.name, a2.name) of
-    (Just a1n, Just a2n) =>
-      mkDoubleBinds as t .! (a1n, bindVar a1n) .! (a2n, bindVar a1n)
-    _ => mkDoubleBinds as t
-
 ||| Make an argument omega implicit if it is explicit
 hideExplicitArg : Arg -> Arg
 hideExplicitArg a = { piInfo := if a.piInfo == ExplicitArg then ImplicitArg else a.piInfo } a
@@ -241,9 +223,10 @@ tupleOfN 0 _ = `(Unit)
 tupleOfN 1 t = t
 tupleOfN (S n) t = `(MkPair ~(t) ~(tupleOfN n t))
 
-||| Map all unmapped variables from the list to their aliases
-mergeAliases : SortedMap Name TTImp -> List (Name, Name) -> SortedMap Name TTImp
-mergeAliases m = mergeWith (Prelude.curry fst) m . fromList . map (mapSnd var)
+tupleOf : List TTImp -> TTImp
+tupleOf [] = `(())
+tupleOf [x] = x
+tupleOf (x :: xs) = `(MkPair ~x ~(tupleOf xs))
 
 ||| Proof that hideExplicitArg doesn't affect namedness of arguments
 hideExplicitArgPreservesNames :
@@ -479,10 +462,17 @@ record TypeMeta where
   constructor MkTyMeta
   conMeta : List ConMeta
 
-tupleOf : List TTImp -> TTImp
-tupleOf [] = `(())
-tupleOf [x] = x
-tupleOf (x :: xs) = `(MkPair ~x ~(tupleOf xs))
+amrContent : Arg -> ArgMeta -> (Name -> Name) -> TTImp
+amrContent a (MkAMeta False) _ = `(_)
+amrContent a (MkAMeta True) alias = bindVar $ alias $ fromMaybe "" a.name
+
+argMaybeRecursive : (Name -> Name) -> (Arg, ArgMeta) -> AnyApp
+argMaybeRecursive alias (a@(MkArg count ExplicitArg name type), am) = PosApp $ amrContent a am alias
+argMaybeRecursive alias (a@(MkArg count _ name type), am) = NamedApp (fromMaybe "" name) $ amrContent a am alias
+
+conOnlyRecursivesAliased : Con -> ConMeta -> (Name -> Name) -> TTImp
+conOnlyRecursivesAliased con meta alias =
+  reAppAny (var con.name) $ argMaybeRecursive alias <$> zip con.args meta.argMeta
 
 parameters (t : SpecTask)
   ---------------------------
@@ -866,23 +856,11 @@ parameters (t : SpecTask)
   --- CAST INJECTIVITY DERIVATION ---
   -----------------------------------
 
+  ||| Emit a recursive call to castInjImpl constructing the proof from given names
   recCastInj : Name -> Name -> TTImp
   recCastInj p1 p2 = `(~(var $ inGenNS t $ "castInjImpl") $ trans ~(var p1) $ sym ~(var p2))
 
-  amrContent : Arg -> ArgMeta -> (Name -> Name) -> TTImp
-  amrContent a (MkAMeta False) _ = `(_)
-  amrContent a (MkAMeta True) alias = bindVar $ alias $ fromMaybe "" a.name
-
-  argMaybeRecursive : (Name -> Name) -> (Arg, ArgMeta) -> AnyApp
-  argMaybeRecursive alias (a@(MkArg count ImplicitArg name type), am) = NamedApp (fromMaybe "" name) $ amrContent a am alias
-  argMaybeRecursive alias (a@(MkArg count ExplicitArg name type), am) = PosApp $ amrContent a am alias
-  argMaybeRecursive alias (a@(MkArg count AutoImplicit name type), am) = NamedApp (fromMaybe "" name) $ amrContent a am alias
-  argMaybeRecursive alias (a@(MkArg count (DefImplicit x) name type), am) = NamedApp (fromMaybe "" name) $ amrContent a am alias
-
-  conOnlyRecursivesAliased : Con -> ConMeta -> (Name -> Name) -> TTImp
-  conOnlyRecursivesAliased con meta alias =
-    reAppAny (var con.name) $ argMaybeRecursive alias <$> zip con.args meta.argMeta
-
+  ||| Generate a with-clause corresponding to a single recursive argument
   mkArgWithClause : Name -> TTImp -> Clause -> Clause
   mkArgWithClause argName existingLhs inner = do
     let mToPImpl = var $ inGenNS t "mToPImpl"
@@ -894,10 +872,12 @@ parameters (t : SpecTask)
       withClause `(~existingLhs | _) MW `(~mToPImpl ~rhsArg) p2 [] [inner]
     ]
 
+  ||| Wrap a term into a number of `IAppWith`s with underscores
   withManyUnders : Nat -> TTImp -> TTImp
   withManyUnders 0 x = x
   withManyUnders (S n) x = withManyUnders n `(~x | _)
 
+  ||| Generate a final with-clause that matches all equality proofs to `Refl`s
   mkFinalClause : (con : Con) -> (0 _ : ConArgsNamed con) => ConMeta -> Clause
   mkFinalClause con meta = do
     let emptyCon = con.apply (\_ => `(_)) empty
@@ -910,17 +890,20 @@ parameters (t : SpecTask)
       `(~initialLhs | ~(tupleOfN recArgAmount `(Refl))) .= `(Refl)
     ]
 
+  ||| Generate a left-hand-side for recursive argument with-clauses
   mkInitialLhs : Con -> ConMeta -> TTImp
   mkInitialLhs con meta = do
     let lhsCon = conOnlyRecursivesAliased con meta $ prependS "lhs^"
     let rhsCon = conOnlyRecursivesAliased con meta $ prependS "rhs^"
     var "castInjImpl" .! ("castInj^x", lhsCon) .! ("castInj^y", rhsCon) .$ bindVar "prf"
 
+  ||| Wrap a clause in with-clauses for all given names
   mkRecArgClauses : List Name -> TTImp -> Clause -> Clause
   mkRecArgClauses [] exLhs inner = inner
   mkRecArgClauses (x :: xs) exLhs inner = mkArgWithClause x exLhs $ mkRecArgClauses xs `(~exLhs | _ | _) inner
 
-  mkCastInjClause' :
+  ||| Derive a single cast injectivity clause
+  mkCastInjClause :
     UnificationResult ->
     (mt : TypeInfo) ->
     (0 _ : AllTyArgsNamed mt) =>
@@ -931,7 +914,7 @@ parameters (t : SpecTask)
     ConMeta ->
     Nat ->
     Clause
-  mkCastInjClause' ur mt _ con meta n = do
+  mkCastInjClause ur mt _ con meta n = do
     if not (hasRecursiveArgs meta)
       then do
         let emptyCon = con.apply (\_ => `(_)) empty
@@ -941,39 +924,6 @@ parameters (t : SpecTask)
         let recNames = recursiveArgNames con meta
         let initLhs = mkInitialLhs con meta
         mkRecArgClauses recNames initLhs finalClause
-
-  ||| Make a clause for the cast injectivity proof
-  mkCastInjClause :
-    (tal1, tal2 : (List Arg, List (Name, Name))) ->
-    (n1, n2 : Name) ->
-    UnificationResult ->
-    (mt : TypeInfo) ->
-    (0 _ : AllTyArgsNamed mt) =>
-    (con : Con) ->
-    (0 cn : ConArgsNamed con) =>
-    (mcon : Con) ->
-    (0 mcn : ConArgsNamed mcon) =>
-    ConMeta ->
-    Nat ->
-    Clause
-  mkCastInjClause (ta1, tam1) (ta2, tam2) n1 n2 ur mt _ con meta n = do
-    let 0 _ = conArgsNamed @{mcn}
-    let (Element a1 _, am1) = transformArgNames (prependS "lhs^") con.args
-    let (Element a2 _, am2) = transformArgNames (prependS "rhs^") con.args
-    let am1' = fromList $ mapSnd (const `(_)) <$> am1
-    let am2' = fromList $ mapSnd (const `(_)) <$> am2
-    let ures1 = substituteVariables am1' <$> ur.fullResult
-    let ures2 = substituteVariables am2' <$> ur.fullResult
-    let bta1 = aliasedAppBind (cast tam1) `(castInjImpl)
-    let bta2 = aliasedAppBind (cast tam2) bta1
-    let lhsCon = con.apply bindVar $ am1'
-    let rhsCon = con.apply bindVar $ am1'
-    let patRhs : TTImp
-        patRhs = case (length a1) of
-          0 => `(Refl)
-          _ => (var $ inGenNS t $ fromString $ "mCong\{show n}") .$
-                ((var $ inGenNS t $ fromString $ "mInj\{show n}") .$ var "r")
-    bta2 .! (n1, lhsCon) .! (n2, rhsCon) .$ bindVar "r" .= patRhs
 
   ||| Derive cast injectivity proof
   mkCastInjDecls :
@@ -996,7 +946,7 @@ parameters (t : SpecTask)
           ~=~
           ~(mToPImplVar .$ var yVar)) ->
           ~(var xVar) ~=~ ~(var yVar))
-    let castInjImplClauses = map2UConsN (mkCastInjClause') ur ti meta
+    let castInjImplClauses = map2UConsN mkCastInjClause ur ti meta
     [ claim M0 Public [] "castInjImpl" $ forallMTArgs $ pi arg1 $ pi arg2 $ eqs
     , def "castInjImpl" castInjImplClauses
     , claim M0 Public [Hint False] "castInj" $ forallMTArgs $
@@ -1222,73 +1172,6 @@ parameters (t : SpecTask)
         , eqDecls
         , onFull
         ]
-
--------------------------------------
---- SPECIALISATION TASK INTERFACE ---
--------------------------------------
-
-||| Valid task lambda interface
-|||
-||| Auto-implemented by any Type or any function that returns Type.
--- export
--- interface TaskLambda (t : Type) where
---
--- export
--- TaskLambda Type
---
--- %hint
--- export
--- tlImplTy : (a : Type) -> TaskLambda a
---
--- export
--- TaskLambda b => TaskLambda (a -> b)
---
--- export
--- TaskLambda b => TaskLambda (a => b)
---
--- export
--- TaskLambda b => TaskLambda ({_ : a} -> b)
---
--- export
--- {x : _} -> TaskLambda b => TaskLambda ({default x _ : a} -> b)
---
--- export
--- TaskLambda b => TaskLambda ((0 _ : a) -> b)
---
--- export
--- TaskLambda b => TaskLambda ((0 _ : a) => b)
---
--- export
--- TaskLambda b => TaskLambda ({0 _ : a} -> b)
---
--- export
--- {0 x : _} -> TaskLambda b => TaskLambda ({default x 0 _ : a} -> b)
---
--- %hint
--- export
--- tlImpl0 : {a : Type} -> {0 f : a -> Type} -> (x : a) => TaskLambda (f x) => TaskLambda ((x : a) -> f x)
---
--- export
--- {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda (a => f a)
---
--- export
--- {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ({_: a} -> f a)
---
--- export
--- {x : _} -> {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ({default x _: a} -> f a)
---
--- export
--- {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ((0 _ : a) -> f a)
---
--- export
--- {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ((0 _ : a) => f a)
---
--- export
--- {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ({0 _: a} -> f a)
---
--- export
--- {0 x : _} -> {0 f : _ -> _} -> TaskLambda (f a) => TaskLambda ({default x 0 _: a} -> f a)
-
 
 ---------------------------
 --- DATA SPECIALISATION ---
