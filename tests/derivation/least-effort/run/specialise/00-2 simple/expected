@@ -1,0 +1,25 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.util.specialisation:10: Prelude.Basics.List[0] Declared specialised type DerivedGen.List^8984676908526435328.List^8984676908526435328: Prelude.Basics.List String
+Generated values:
+-----
+-----
+MkX ["a", "a", "b", "cc", "b", "c", "cc", "c", "b", "b"]
+-----
+MkX ["a", "b", "a", "b", "cc", "b", "cc", "b", "cc", "cc", "c", "b", "a", "cc", "c", "c", "a", "c", "a", "a"]
+-----
+MkX ["a", "c", "b", "a", "b", "cc", "a", "b", "cc", "a", "cc", "a", "cc", "b", "cc", "b", "a", "c", "b", "b"]
+-----
+MkX ["c", "cc", "b", "cc"]
+-----
+MkX ["a", "b", "c", "b", "b", "a"]
+-----
+MkX ["cc", "a", "c", "b", "a", "c", "c", "c", "a"]
+-----
+MkX ["cc", "cc", "cc", "a", "a", "cc", "cc", "cc", "a", "b", "cc", "b", "b", "b", "a", "b"]
+-----
+MkX ["cc", "cc", "b", "c", "c", "b", "a", "b", "c", "a", "b", "b"]
+-----
+MkX ["a", "b"]
+-----
+MkX ["c", "a", "cc", "b", "b"]

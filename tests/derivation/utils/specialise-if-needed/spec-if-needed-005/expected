@@ -11,7 +11,7 @@ LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Specialised type n
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Derived Test.List^4779069909474151191.List^4779069909474151191
 LOG deptycheck.util.specialisation:10: Prelude.Basics.List[0] Declared specialised type Test.List^4779069909474151191.List^4779069909474151191: Prelude.Basics.List Prelude.Types.Nat
 LOG 0: Test.List^4779069909474151191.List^4779069909474151191
-LOG 0: [Prelude.Types.Nat, Prelude.Basics.List, Test.List^4779069909474151191.List^4779069909474151191]
+LOG 0: [Prelude.Types.Nat, Test.List^4779069909474151191.List^4779069909474151191]
 LOG deptycheck.test.utils.specialise:0:  Expanded e: Prelude.Basics.List Prelude.Types.Nat
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] Checking specialisation need for [Prelude.Types.Nat]...
 LOG deptycheck.util.specialisation:20: Prelude.Basics.List[0] ({arg:1} := Prelude.Types.Nat) Given a type invocation w/o arguments, specialising
