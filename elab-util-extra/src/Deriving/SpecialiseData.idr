@@ -373,7 +373,9 @@ getTask resultName resultKind resultContent = do
   -- Prove all its arguments/constructors/constructor arguments are named
   let Yes polyTyNamed = areAllTyArgsNamed polyTy
     | No _ => throwError $ UnnamedArgInPolyTyError polyTy.name
-  let specInvocation = reAppAny (var (inGenNSImpl currentNs (snd $ unNS $ resultName) (snd $ unNS $ resultName))) $ ttArgs.appsWith @{ttArgsNamed} var empty
+  let specInvocation = reAppAny
+          (var (inGenNSImpl currentNs (snd $ unNS $ resultName) (snd $ unNS $ resultName))) $
+            ttArgs.appsWith @{ttArgsNamed} var empty
   pure $ MkSpecTask
     { tqArgs
     , tqRet
