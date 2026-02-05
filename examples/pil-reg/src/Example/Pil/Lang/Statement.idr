@@ -45,7 +45,7 @@ data Statement : (preV  : Variables) -> (preR  : Registers rc) ->
 
   Block : Statement preV preR insideV postR -> Statement preV preR preV postR
 
-  Print : Show (idrTypeOf ty) => Expression vars regs ty -> Statement vars regs vars regs
+  Print : Expression vars regs ty -> Statement vars regs vars regs
 
 public export %inline
 nop  : Statement vars regs vars regs
@@ -73,7 +73,7 @@ block : Statement preV preR insideV postR -> Statement preV preR preV postR
 block = Block
 
 public export %inline
-print : Show (idrTypeOf ty) => Expression vars regs ty -> Statement vars regs vars regs
+print : Expression vars regs ty -> Statement vars regs vars regs
 print = Print
 
 public export %inline
