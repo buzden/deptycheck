@@ -131,50 +131,25 @@ Show (Registers rc) where
 export infix 0 =%=
 
 -- Extensional equality regarding to the `index` function for any possible indexing argument.
+-- NOTICE: `x =%= x` when `x` is `Base` can be either using `EquivByRefl` or using `EquivSquashed`, which may be not so good
 public export
 data (=%=) : Registers rc -> Registers rc -> Type where
-  EquivByIndex : {0 l, r : Registers rc} -> ((i : Fin rc) -> index i l = index i r) -> l =%= r
+  EquivByRefl : x =%= x
+  EquivMergeIdemp : Merge x x =%= x
+  EquivMergeComm : x `Merge` y =%= y `Merge` x
+  EquivMergeAssoc1 : (a `Merge` b) `Merge` c =%= a `Merge` (b `Merge` c)
+  EquivMergeAssoc2 : a `Merge` (b `Merge` c) =%= (a `Merge` b) `Merge` c
+  EquivSquashed : Base (squash x) =%= x
+  EquivWithed : {j : _} -> x `With` (j, index j x) =%= x
 
-public export %inline
-(.ieq) : x =%= y -> (i : _) -> index i x = index i y
-(.ieq) (EquivByIndex f) = f
-
-export %hint
-index_equiv_refl : x =%= x
-index_equiv_refl = EquivByIndex $ \_ => Refl
-
-export %hint
-index_equiv_sym : x =%= y -> y =%= x
-index_equiv_sym xy = EquivByIndex $ \i => sym $ xy.ieq i
-
-export %hint
-index_equiv_trans : x =%= y -> y =%= z -> x =%= z
-index_equiv_trans xy yz = EquivByIndex $ \i => trans (xy.ieq i) (yz.ieq i)
-
---- Equivalence properties of `Merge` ---
-
-export %hint
-merge_commutative : {l, r : _} -> Merge l r =%= Merge r l
-merge_commutative = EquivByIndex $ \i => mergeSame_commutative _ _
-
-export %hint
-merge_associative : {a, b, c : _} -> (a `Merge` b) `Merge` c =%= a `Merge` (b `Merge` c)
-merge_associative = EquivByIndex $ \i => mergeSame_associative _ _ _
-
-export %hint
-merge_idempotent : {x : _} -> Merge x x =%= x
-merge_idempotent = EquivByIndex $ \i => mergeSame_idempotent _
-
---- Equivalence properties of `With` ---
-
-export %hint
-withed_with_same_equiv : {x : _} -> {j : _} -> x `With` (j, index j x) =%= x
-withed_with_same_equiv = EquivByIndex $ \i => case decEq i j of
-                           Yes Refl => rewrite decEqSelfIsYes {x=j} in Refl
-                           No co => rewrite snd $ decEqContraIsNo co in Refl
-
---- Equivalence properties of `squash` ---
-
-export %hint
-squashed_regs_equiv : {x : _} -> Base (squash x) =%= x
-squashed_regs_equiv = EquivByIndex $ \i => squash_preserves_index i x
+public export
+(.ieq) : {y : _} -> x =%= y -> (i : _) -> Registers.index i x = index i y
+(.ieq) EquivByRefl i = Refl
+(.ieq) EquivMergeIdemp i = mergeSame_idempotent _
+(.ieq) EquivMergeComm i = mergeSame_commutative _ _
+(.ieq) EquivMergeAssoc1 i = mergeSame_associative _ _ _
+(.ieq) EquivMergeAssoc2 i = sym $ mergeSame_associative _ _ _
+(.ieq) EquivSquashed i = squash_preserves_index _ _
+(.ieq) (EquivWithed {j}) i = case decEq i j of
+  Yes Refl => rewrite decEqSelfIsYes {x=j} in Refl
+  No co    => rewrite snd $ decEqContraIsNo co in Refl

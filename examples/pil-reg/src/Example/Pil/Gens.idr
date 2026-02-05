@@ -165,23 +165,23 @@ namespace Equal_registers
 
 namespace Equal_registers -- implementations
 
-  refl _ regs = pure (_ ** index_equiv_refl)
+  refl _ regs = pure (_ ** EquivByRefl)
 
-  merge_idemp _ regs = pure (_ ** merge_idempotent)
+  merge_idemp _ regs = pure (_ ** EquivMergeIdemp)
 
-  merge_comm _ $ r1 `Merge` r2 = pure (_ ** merge_commutative)
+  merge_comm _ $ r1 `Merge` r2 = pure (_ ** EquivMergeComm)
   merge_comm _ _ = empty
 
-  merge_assoc _ $ a `Merge` (b `Merge` c) = pure (_ ** merge_associative)
+  merge_assoc _ $ a `Merge` (b `Merge` c) = pure (_ ** EquivMergeAssoc1)
   merge_assoc _ _ = empty
 
-  merge_assoc' _ $ (a `Merge` b) `Merge` c = pure (_ ** index_equiv_sym merge_associative)
+  merge_assoc' _ $ (a `Merge` b) `Merge` c = pure (_ ** EquivMergeAssoc2)
   merge_assoc' _ _ = empty
 
-  squashed _ $ Base _ = empty -- just to not to repeat `refl` since squash of `Base` is the same
-  squashed _ _ = pure (_ ** squashed_regs_equiv)
+--  squashed _ $ Base _ = empty -- just to not to repeat `refl` since squash of `Base` is the same
+  squashed _ _ = pure (_ ** EquivSquashed)
 
-  withed _ _ = pure (_ ** withed_with_same_equiv {j = !external_gen})
+  withed _ _ = pure (_ ** EquivWithed {j = !external_gen})
 
   -- TODO to think of reverse `squashed` and `withed`, i.e. those which
   --   - by a `rs@(Base xs)` generates those that squash to `rs` and
