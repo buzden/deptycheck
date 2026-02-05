@@ -17,20 +17,21 @@ makeFuncName : String -> String
 makeFuncName = pack . map (\k => if isAlphaNum k then k else '_') . unpack
 
 export
-Show (Expression vars regs a) where
+Show (Expression ops vars regs a) where
   show (C' {ty=Bool'}   x) = show x
   show (C' {ty=Int'}    x) = show x
   show (C' {ty=String'} x) = show x
   show (V n)              = show n
   show (R r)              = "[[" ++ show (finToNat r) ++ "]]"
-  show (U {opName} _ e)   = opName ++ "(" ++ show e ++ ")"
-  show (B {opName} _ l r) = if looksLikeInfixOperator opName
+  show (U @{lk} e)   = let opName = fst lk.reveal in opName ++ "(" ++ show e ++ ")"
+  show (B @{lk} l r) = let opName = fst lk.reveal in
+    if looksLikeInfixOperator opName
       then wr l ++ " " ++ opName ++ " " ++ wr r
       else makeFuncName opName ++ "(" ++ show l ++ ", " ++ show r ++ ")"
     where
-    wr : Expression vars regs x -> String
-    wr e@(B _ _ _) = "(" ++ show e ++ ")"
-    wr e           = show e
+    wr : Expression ops vars regs x -> String
+    wr e@(B _ _) = "(" ++ show e ++ ")"
+    wr e         = show e
 
 --- Statements ---
 
@@ -39,7 +40,7 @@ Show Type' where
   show Int'    = "int"
   show String' = "char *"
 
-isNopDeeply : Statement preV preR postV postR -> Bool
+isNopDeeply : Statement ops preV preR postV postR -> Bool
 isNopDeeply Nop      = True
 isNopDeeply (x >> y) = isNopDeeply x && isNopDeeply y
 isNopDeeply _        = False
@@ -48,7 +49,7 @@ isNopDeeply _        = False
 n : Nat -> Nat
 n = (+ 2)
 
-showInd : (indent : Nat) -> Statement preV preR postV postR -> String
+showInd : (indent : Nat) -> Statement ops preV preR postV postR -> String
 showInd i Nop = ""
 showInd i (ty . n) = indent i $ show ty ++ " " ++ show n ++ ";"
 showInd i (n #= v) = indent i $ show n ++ " = " ++ show v ++ ";"
@@ -82,5 +83,5 @@ showInd i (Block x) = indent i "{\n" ++ showInd (n i) x ++ "\n" ++ indent i "}"
 showInd i (Print x) = indent i $ "puts(" ++ show x ++ ");"
 
 export
-Show (Statement preV preR postV postR) where
+Show (Statement ops preV preR postV postR) where
   show = showInd 0

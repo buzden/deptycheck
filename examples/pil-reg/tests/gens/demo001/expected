@@ -1,21 +1,73 @@
 1/1: Building DemoGen (DemoGen.idr)
+{
+  [0] = False;
+  puts(as_str(-99));
+  if (False && (21 < -75)) {
+    puts("f");
+    [1] = True;
+    [0] = -25;
+  } else {
+    [1] = True;
+  }
+  {
+    [0] = 41;
+    [0] = 64;
+  }
+  puts("iab");
+  [1] = 98;
+  [1] = -85;
+  [1] = "bd";
+  [1] = "aj";
+  [0] = "zeq";
+  [1] = "m";
+  [1] = 82;
+  [1] = 99;
+  [0] = concat(concat("aj", "hdh"), as_str(62));
+  [1] = concat("on", "t");
+  [0] = "a";
+  [1] = as_str(inc(70));
+  puts("g");
+  int no;
+  puts("oj");
+  no = no;
+  [1] = no;
+  [0] = "mve";
+  no = 54;
+  no = 80;
+  int m;
+  m = no;
+  no = m;
+  [0] = False;
+  [0] = !(False);
+  [0] = no;
+  [0] = "jak";
+  [1] = "evq";
+  no = -56;
+  m = m;
+}
+bool htu;
+htu = !(inc(-73) <= (inc(inc(inc(-14)) + -69) * inc(inc(inc(38)) + inc(inc(-47)))));
+[0] = concat("ml", concat(as_str(inc(inc(31))), as_str(-26)));
+htu = htu;
+htu = (inc(inc((-87 + -84) + (66 * 27))) * inc((inc(-2) * (-57 * -15)) + (inc(19) * -27))) < inc(inc(inc(inc(-32 + -60))));
+htu = !(htu);
 [0] = True;
-// regs ty after: [Bool, -]
+// regs ty after: [Bool, String]
 
 ----
 
 [0] = "s";
-[1] = ((-28 <= 17) || (-85 < 79)) || ((False || False) || (True || True));
+[1] = !(54 <= inc(-62));
 // regs ty after: [String, Bool]
 
 ----
 
-puts(as_str(-47 + (89 * -60)));
+puts(as_str(-29));
 // regs ty after: [-, -]
 
 ----
 
-[1] = 84 + (42 * 86);
+[1] = -96 + 42;
 // regs ty after: [-, Int]
 
 ----
@@ -40,14 +92,18 @@ bool z;
 ----
 
 int k;
-[0] = as_str(-31 + (-95 + 46));
+[0] = as_str(31 * inc(k));
 [1] = k;
-[1] = as_str((-41 * 13) + -87);
+[1] = as_str(inc(-41 * k) + k);
 k = k;
-k = ((77 * k) + inc(k)) * (-14 * -93);
-k = inc(74) + inc(-6);
+k = -41;
+[0] = concat(as_str(76), as_str(47 + inc(k + -100)));
+[0] = ((k * 50) + inc(k)) + inc(k);
+k = inc(inc(-35 + 12) * (-57 * k));
+k = inc(k);
+k = k;
 [0] = True;
-k = inc(inc(k));
+char * uo;
 // regs ty after: [Bool, String]
 
 ----
@@ -57,12 +113,10 @@ k = inc(inc(k));
 
 ----
 
-{
-  [1] = inc(inc(-88) + inc(-11));
-  [1] = (inc(33) + (68 + 70)) + (75 + -60);
-}
-[0] = concat(as_str(12 + 76), concat("fr", as_str(-62)));
-// regs ty after: [String, Int]
+[1] = !(False);
+[0] = !(False);
+[1] = 0;
+// regs ty after: [Bool, Int]
 
 ----
 
