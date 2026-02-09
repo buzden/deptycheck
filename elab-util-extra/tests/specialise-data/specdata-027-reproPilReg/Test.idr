@@ -15,11 +15,20 @@ public export
 data Type' = Bool' | Int' | String'
 
 
-%runElab specialiseDataLam' "Y" $
+
+%runElab do
+  let task =
     \ x =>
-      \ y =>
-        Lookup
-          {b = Builtin.Pair String (Type', Type')}
-          {a = Type'}
-          x
-          y
+        \ y =>
+          Lookup
+            {b = Builtin.Pair String (Type', Type')}
+            {a = Type'}
+            x
+            y
+  qtask <- quote task
+  let (lArgs, lRhs) = unLambda qtask
+  (nlt', nl') <- normaliseTask lArgs lRhs
+  nlt : Type <- check nlt'
+  nl : nlt <- check nl'
+  specialiseDataLam' "Y" nl
+
