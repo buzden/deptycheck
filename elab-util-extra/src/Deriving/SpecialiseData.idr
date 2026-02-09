@@ -1211,14 +1211,6 @@ specialiseDataRaw resultName resultKind resultContent = do
   decls <- specDecls task uniResults specTy specMeta
   pure (specTy, decls)
 
--- export
--- normaliseTask : Elaboration m => List Arg -> TTImp -> m (TTImp, TTImp)
--- normaliseTask fvs ret = do
---   lamTy : Type <- check $ piAll `(Type) fvs
---   lam <- normaliseAs lamTy $ foldr lam ret fvs
---   lamTy' <- quote lamTy
---   pure (lamTy', lam)
-
 typeDPair : List Arg -> TTImp
 typeDPair [] = `(Type)
 typeDPair (x :: xs) = do
@@ -1228,18 +1220,33 @@ typeDPair (x :: xs) = do
   let tyVar = var aTyName
   let valArg = MkArg MW ExplicitArg (Just aName) tyVar
   `(DPair Type ~(lam tyArg `(DPair ~tyVar ~(lam valArg $ typeDPair xs))))
-  -- lam tyArg $ lam valArg $ typeDPair xs
 
-valDPair : List Arg -> TTImp -> TTImp
-valDPair [] x = x
-valDPair (x :: xs) y = do
+valDPair : SortedMap Name String ->  List Arg -> TTImp -> TTImp
+valDPair n2s [] x = x
+valDPair n2s (x :: xs) y = do
   let aName = fromMaybe "" x.name
   let aTyName = fromString "\{aName}^ty"
   let tyVar = var aTyName
   let valVar = var aName
-  `(MkDPair ? ~(iLet MW aName `(?) `(?) `(MkDPair ~valVar ~(valDPair xs y))))
+  let valHole = fromMaybe `(?) $ hole <$> lookup aName n2s
+  `(MkDPair ~(x.type) ~(iLet MW aName x.type valHole `(MkDPair ~valVar ~(valDPair n2s xs y))))
 
+unholeImpl : SortedMap String Name -> TTImp -> TTImp
+unholeImpl s2n (IHole fc holeName) =
+  case lookup holeName s2n of
+      Just vn => var vn
+      Nothing => IHole fc holeName
+unholeImpl s2n t = t
 
+unhole : SortedMap String Name -> TTImp -> TTImp
+unhole s2n = mapTTImp (unholeImpl s2n)
+
+unBadHoleImpl : TTImp -> TTImp
+unBadHoleImpl (IHole fc "_") = Implicit fc False
+unBadHoleImpl t = t
+
+unBadHole : TTImp -> TTImp
+unBadHole = mapTTImp unBadHoleImpl
 
 unMkDPair : TTImp -> List TTImp
 unMkDPair (IApp _ (IApp _ (INamedApp _ (INamedApp _ (IVar _ "Builtin.DPair.MkDPair") _ _) _ _) dl) dr) =
@@ -1251,13 +1258,27 @@ decodeDPair [] _ = pure []
 decodeDPair (a :: as) (aT :: _ :: ts) = pure $ ({type := aT} a) :: !(decodeDPair as ts)
 decodeDPair _ _ = fail "INTERNAL ERROR: Failed during lambda normalisation"
 
+genAliases : Elaboration m => List Arg -> m (SortedMap Name String, SortedMap String Name)
+genAliases = foldlM genAImpl (empty, empty)
+  where
+    genAImpl :
+      (SortedMap Name String, SortedMap String Name) ->
+      Arg ->
+      m (SortedMap Name String, SortedMap String Name)
+    genAImpl (n2s, s2n) a = do
+      randN <- genSym "lamArg"
+      let s = show randN
+      let n = fromMaybe "" a.name
+      pure (insert n s n2s, insert s n s2n)
+
 export
 normaliseTask : Elaboration m => List Arg -> TTImp -> m (TTImp, TTImp)
 normaliseTask lamArgs lamRhs = do
-  nT : Type <- check $ typeDPair lamArgs
-  nV : nT <- check $ valDPair lamArgs lamRhs
+  (n2s, s2n) <- genAliases lamArgs
+  nT : Type <- check $ unBadHole $ typeDPair lamArgs
+  nV : nT <- check $ unBadHole $ valDPair n2s lamArgs lamRhs
   nVQ <- quote nV
-  newArgs <- decodeDPair lamArgs $ unMkDPair nVQ
+  newArgs <- decodeDPair lamArgs $ unMkDPair $ unBadHole $ unhole s2n nVQ
   let newLamTy = piAll `(Type) newArgs
   let newLam = foldr lam lamRhs newArgs
   pure (newLamTy, newLam)
