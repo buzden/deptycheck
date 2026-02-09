@@ -1,4 +1,2 @@
 1/2: Building Shared (Shared.idr)
 2/2: Building Test (Test.idr)
-Error: Error during reflection: Mismatch between: Type' -> List (Type', (String, (Type', Type'))) -> Type and (fv^Y^x : Type') -> ?_ -> Type.
-
