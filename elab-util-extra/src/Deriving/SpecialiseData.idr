@@ -1211,13 +1211,56 @@ specialiseDataRaw resultName resultKind resultContent = do
   decls <- specDecls task uniResults specTy specMeta
   pure (specTy, decls)
 
+-- export
+-- normaliseTask : Elaboration m => List Arg -> TTImp -> m (TTImp, TTImp)
+-- normaliseTask fvs ret = do
+--   lamTy : Type <- check $ piAll `(Type) fvs
+--   lam <- normaliseAs lamTy $ foldr lam ret fvs
+--   lamTy' <- quote lamTy
+--   pure (lamTy', lam)
+
+typeDPair : List Arg -> TTImp
+typeDPair [] = `(Type)
+typeDPair (x :: xs) = do
+  let aName = fromMaybe "" x.name
+  let aTyName = fromString "\{aName}^ty"
+  let tyArg = MkArg MW ExplicitArg (Just aTyName) `(Type)
+  let tyVar = var aTyName
+  let valArg = MkArg MW ExplicitArg (Just aName) tyVar
+  `(DPair Type ~(lam tyArg `(DPair ~tyVar ~(lam valArg $ typeDPair xs))))
+  -- lam tyArg $ lam valArg $ typeDPair xs
+
+valDPair : List Arg -> TTImp -> TTImp
+valDPair [] x = x
+valDPair (x :: xs) y = do
+  let aName = fromMaybe "" x.name
+  let aTyName = fromString "\{aName}^ty"
+  let tyVar = var aTyName
+  let valVar = var aName
+  `(MkDPair ? ~(iLet MW aName `(?) `(?) `(MkDPair ~valVar ~(valDPair xs y))))
+
+
+
+unMkDPair : TTImp -> List TTImp
+unMkDPair (IApp _ (IApp _ (INamedApp _ (INamedApp _ (IVar _ "Builtin.DPair.MkDPair") _ _) _ _) dl) dr) =
+  dl :: unMkDPair dr
+unMkDPair _ = []
+
+decodeDPair : Elaboration m => List Arg -> List TTImp -> m (List Arg)
+decodeDPair [] _ = pure []
+decodeDPair (a :: as) (aT :: _ :: ts) = pure $ ({type := aT} a) :: !(decodeDPair as ts)
+decodeDPair _ _ = fail "INTERNAL ERROR: Failed during lambda normalisation"
+
 export
 normaliseTask : Elaboration m => List Arg -> TTImp -> m (TTImp, TTImp)
-normaliseTask fvs ret = do
-  lamTy : Type <- check $ piAll `(Type) fvs
-  lam <- normaliseAs lamTy $ foldr lam ret fvs
-  lamTy' <- quote lamTy
-  pure (lamTy', lam)
+normaliseTask lamArgs lamRhs = do
+  nT : Type <- check $ typeDPair lamArgs
+  nV : nT <- check $ valDPair lamArgs lamRhs
+  nVQ <- quote nV
+  newArgs <- decodeDPair lamArgs $ unMkDPair nVQ
+  let newLamTy = piAll `(Type) newArgs
+  let newLam = foldr lam lamRhs newArgs
+  pure (newLamTy, newLam)
 
 export
 specialiseDataArgs :
