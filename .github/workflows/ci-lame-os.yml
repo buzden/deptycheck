@@ -32,3 +32,5 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
