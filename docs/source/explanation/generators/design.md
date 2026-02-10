@@ -45,7 +45,7 @@ semGens x y = (<>) <$> x <*> y
 
 In its turn, `Arbitrary` is a typeclass.
 There is a single such definition for a type (unless you go with incoherency magic).
-In a sense, it is a *canonic generator* for a type.
+In a sense, it is a _canonic generator_ for a type.
 :::{note} QuickCheck's `Arbitrary` has also a function of shrinking explained [above](sect-gen-general-design).
 :::
 So, there is no need to pass it explicitly down to functions, once it is present in the signature.
@@ -69,7 +69,7 @@ In Idris 2, though, there is no need of distinction like above because implement
 of usual implicit parameters (`auto`-parameters) thus they are first-class citizens too.
 
 So, we can pass generators both explicitly or as `auto`-parameters.
-DepTyCheck's type `Gen` plays roles of both *just generators* and *canonical generators* being passed as
+DepTyCheck's type `Gen` plays roles of both _just generators_ and _canonical generators_ being passed as
 an ordinary or an `auto`-parameter respectively.
 
 Consider functions, analogues to above QuickCheck-based ones, but using DepTyCheck:

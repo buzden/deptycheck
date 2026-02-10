@@ -646,7 +646,7 @@ We considered at least the following variants to be useful.
   "Non-obligatory" means that some present external generator of some type
   may be ignored even if its type is really used in a generated data constructor.
 
-  - Least-effort non-obligatory tactic is one which *does not use externals* during taking a decision on the order.
+  - Least-effort non-obligatory tactic is one which _does not use externals_ during taking a decision on the order.
     It uses externals if decided order happens to be given by an external generator, but is not obliged to use any.
     It is seemingly most simple to implement, maybe the fastest and
     fits well when external generators are provided for non-dependent types
@@ -671,14 +671,16 @@ We considered at least the following variants to be useful.
   is considered to be a generator for the type `C`.
   The problem with obligatory generators is that some external generators may be incompatible.
 
-    E.g. once we have `(a : _) -> (b ** C a b)` and `(a ** b ** C a b)` at the same time,
-    once `C` is used in the same constructor, we cannot guarantee that we will use both external generators.
+  :::{note}
+  E.g. once we have `(a : _) -> (b ** C a b)` and `(a ** b ** C a b)` at the same time,
+  once `C` is used in the same constructor, we cannot guarantee that we will use both external generators.
 
-    The same problem is present once we have external generators for `(a : _) -> (b : T ** C a b)` and `(b : T ** D b)` at the same time,
-    and both `C` and `D` are used in the same constructor with the same parameter of type `T`,
-    i.e. when constructor have something like `C a b -> D b -> ...`.
+  The same problem is present once we have external generators for `(a : _) -> (b : T ** C a b)` and `(b : T ** D b)` at the same time,
+  and both `C` and `D` are used in the same constructor with the same parameter of type `T`,
+  i.e. when constructor have something like `C a b -> D b -> ...`.
 
-    Notice, that this problem does not arise in constructors of type `C a b1 -> D b2 -> ...`
+  Notice, that this problem does not arise in constructors of type `C a b1 -> D b2 -> ...`
+  :::
 
   In this case, we cannot decide in general which value of type `T` to be used for generation is we have to use both generators.
   We can either fail to generate a value for such constructor (`FailFast`),

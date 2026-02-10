@@ -1,5 +1,19 @@
-first-line-h1: false
-blanks-around-fences: false
-MD013:
+headings:
+  style: atx
+ul-style:
+  style: dash
+no-hard-tabs:
+  spaces_per_tab: 2
+first-line-h1:
+  allow_preamble: true
+line-length:
   line_length: 152
   code_block_line_length: 152
+code-block-style:
+  style: fenced
+code-fence-style:
+  style: backtick
+emphasis-style:
+  style: underscore
+strong-style:
+  style: asterisk

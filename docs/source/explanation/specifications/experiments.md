@@ -14,14 +14,14 @@ import Deriving.DepTyCheck.Gen
 deriveGen : a
 -->
 
-<!-- The code block below uses ```<space>idris intentionally, now this code does not compile and it's okay -->
-``` idris
+<!-- Now this code does not compile and it's okay -->
+::: {code} idris
 %language ElabReflection
 
 %hint
 UsedConstructorDerivator : ConstructorDerivator
 UsedConstructorDerivator = LeastEffort {simplificationHack = True}
-```
+:::
 
 The version of the compiler used is `https://github.com/buzden/Idris2/commit/9ab96dacd4f855674028d68de0a013ac7926c73d`.
 

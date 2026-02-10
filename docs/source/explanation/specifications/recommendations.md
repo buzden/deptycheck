@@ -71,6 +71,7 @@ data Add : Nat -> Nat -> Nat -> Type where
 ```
 
 Or represent the fact that some number is even:
+
 ```idris
 data IsEven : Nat -> Type where
   ZeroEven : IsEven 0

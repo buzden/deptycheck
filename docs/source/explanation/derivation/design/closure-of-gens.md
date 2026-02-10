@@ -93,8 +93,8 @@ namely that the type that is value of the "runtime" (i.e. observable) argument,
 cannot have non-runtime (i.e. erased) arguments.
 You can see some discussion in the compiler's [issue #2021](https://github.com/idris-lang/Idris2/pull/2021).
 The digested idea is that the current {math}`\{0, 1, \omega\}` semiring which is selected as the parameter of QTT in Idris,
-is not sufficient for a language with metaprogramming facility, because *erased* parameters notion splits into two:
-one is for values that *must not* be present at runtime, the other is for values that are available only at the compile-time.
+is not sufficient for a language with metaprogramming facility, because _erased_ parameters notion splits into two:
+one is for values that _must not_ be present at runtime, the other is for values that are available only at the compile-time.
 The first one cannot be exposed to runtime by elaboration script, the second can.
 
 So, there is a need of research on more appropriate semiring that covers metaprogramming cases too.

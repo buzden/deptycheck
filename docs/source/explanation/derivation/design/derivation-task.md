@@ -10,10 +10,10 @@ import Explanation.Derivation.Design
 
 # Derivation task
 
-We call an information given to a request of a DepTyCheck library user for derivation of a generator a *derivation task*.
+We call an information given to a request of a DepTyCheck library user for derivation of a generator a _derivation task_.
 Technically this request is done through a call to [a macro function](ref-deriveGen) or to [an elaboration script](ref-deriveGenExpr).
 This information is technically given through a type signature of the macro result type or an explicit parameter of the elaboration script.
-But *semantically* this information contains the following:
+But _semantically_ this information contains the following:
 
 - the target, i.e. type or type constructor for which a generator is derived;
 - if the target is a type constructor, then for each of its type arguments,

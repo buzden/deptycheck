@@ -1,6 +1,6 @@
 # Examples of DepTyCheck usage
 
-Currently, all examples of DepTyCheck library usage are examples of *generation* of values of some types.
+Currently, all examples of DepTyCheck library usage are examples of _generation_ of values of some types.
 Examples of properties and other stuff are to be added as soon as corresponding functionality is implemented in the library.
 
 ## Data structures and their generators
