@@ -115,9 +115,9 @@ checkTypeIsGen checkSide origsig@sig = do
   -- check out applications types
   let targetTypeArgs = targetTypeArgs <&> getExpr
 
-  ------------------------------------------
-  -- Working with the target type familly --
-  ------------------------------------------
+  -----------------------------------------
+  -- Working with the target type family --
+  -----------------------------------------
 
   -- acquire `TypeInfo` out of the target type `TTImp` expression
   targetType <- case targetType of
@@ -263,7 +263,7 @@ nameForGen : ExternalGenSignature -> Name
 nameForGen sig = let (ty, givs) = characteristics sig in UN $ Basic $ "external^<\{ty}>\{show givs}"
 -- I'm using `UN` but containing chars that cannot be present in the code parsed from the Idris frontend.
 
--- this is a workarond for Idris compiler bug #2983
+-- this is a workaround for Idris compiler bug #2983
 nameMod : Name -> Name
 nameMod n = UN $ Basic "outer^<\{show n}>"
 

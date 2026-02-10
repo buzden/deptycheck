@@ -88,7 +88,7 @@ exprGen (More f) = oneOf $ alternativesOf nonRec_exprGen ++
   -- Let's call this type as `X_c_d_Gen`.
   -- It generates an instance of `X` with some `c` and `d` parameters being given `a` and `b` set.
 
-  -- To control recustion, we should also have a `Fuel` parameter in the type `X_c_d_Gen`.
+  -- To control recursion, we should also have a `Fuel` parameter in the type `X_c_d_Gen`.
   -- This is needed because the current `Test.DepTyCheck.Gen` supports only finite generators.
 
   -- Create a namespace `Xs_given_a_b` at the module level.
@@ -117,7 +117,7 @@ exprGen (More f) = oneOf $ alternativesOf nonRec_exprGen ++
   --
   --   If there is not such a generator, then the whole generation process should be repeated for this type from the beginning on this methodology.
   --
-  -- For external data generators, we use `!external_gen` expression to call the generator (somethimes with explicit setting of the desired type).
+  -- For external data generators, we use `!external_gen` expression to call the generator (sometimes with explicit setting of the desired type).
   -- For non-external data generators, we use the `do`-notation and generate appropriate value (or dependent pair of values)
   -- and then use them for generation.
   --
@@ -201,7 +201,7 @@ namespace Equal_registers -- implementations
   --   - by a `rs@(Base xs)` generates those that squash to `rs` and
   --   - by a `rs `With` (i, index i rs)` returns `rs`.
 
-  -- TODO to think of recusrive application of these generators.
+  -- TODO to think of recursive application of these generators.
 
 namespace Statements_given_preV_preR_postV_postR
 

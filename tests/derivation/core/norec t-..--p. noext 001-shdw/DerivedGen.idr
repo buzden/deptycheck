@@ -7,7 +7,7 @@ import RunDerivedGen
 %language ElabReflection
 
 -- same as test `001`, but
--- names inside consturctor are the same as in the type itself;
+-- names inside constructor are the same as in the type itself;
 -- this exploits a bug of bad renaming during the `quote` of a type
 data X : (b1 : Bool) -> (b2 : Bool) -> Type where
   MkX : (b1 : Bool) -> (b2 : Bool) -> X b1 b2

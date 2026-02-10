@@ -85,7 +85,7 @@ DeriveBodyRhsForCon => DeriveBodyForType where
 
       -- check if there are any non-recursive constructors
       let Nothing = for consRecs $ \(con, w) => (con,) <$> getLeft w
-          -- only constantly weighted constructors (usually, non-recusrive), thus just call all without spending fuel
+          -- only constantly weighted constructors (usually, non-recursive), thus just call all without spending fuel
         | Just consRecs => callConstFreqs "\{logPosition sig} (non-spending)".label (var fuelAr) consRecs
 
       -- pattern match on the fuel argument

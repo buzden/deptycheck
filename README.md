@@ -297,7 +297,7 @@ but pragmatically, `genFin` and `genAnyFin` both generate elements of type `Fin 
 but the first one takes `n` as a given value,
 and the second one generates value for the type argument along with the main value.
 
-You can read more on the design of generators in [documentation](https://deptycheck.readthedocs.io/en/lastest/explanation/generators/).
+You can read more on the design of generators in [documentation](https://deptycheck.readthedocs.io/en/latest/explanation/generators/).
 
 ## Derivation of generators
 
@@ -355,4 +355,4 @@ The main `pack`'s collection we test the library against is the one mentioned in
 Also, we test against the latest pack collection nightly.
 Here is the status of the latest such run:
 ![Nightly](https://github.com/buzden/deptycheck/actions/workflows/ci-deptycheck.yml/badge.svg?branch=master&event=schedule).
-We try to use as fresh version of the Idris 2 compiler and thirdparty libraries as possible.
+We try to use as fresh version of the Idris 2 compiler and third-party libraries as possible.

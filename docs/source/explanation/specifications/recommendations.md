@@ -9,7 +9,7 @@ However, reading this could give you some thoughts and ideas regarding writing s
 
 The programming language specification is expressed as a set of (indexed) types that model the constructs of the language,
 with additional semantic restrictions (and, possibly, some helper types used to ensure that restrictions hold).
-Most of the language constructs exist withing certain context
+Most of the language constructs exist within certain context
 (the set of available class definitions, the list of accessible variables, whether type of expression is inferrable, etc.).
 This context can be represented as a set of indices of a type.
 Then the changes to these contexts can be defined as applying constructors to the indices,
@@ -144,7 +144,7 @@ It would be useful to compare both derivation and runtime performance of specifi
 ## Other thoughts and questions
 
 - It seems that generators with less given parameters tend to be more efficient in some cases, due to bigger value range.
-  This should be explored and, if it holds, these generators should be prefered.
+  This should be explored and, if it holds, these generators should be preferred.
 - Currently, the derivation is performed constructor-wise.
   Can we have a less-local derivation approach where, in case some given parameter is known at derivation time,
   it would statically prune all the empty branches?

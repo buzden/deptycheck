@@ -1,4 +1,4 @@
-### This script should be POSIX-shell compilant ###
+### This script should be POSIX-shell compliant ###
 
 # Pre-cleanup
 rm -rf build src docs.ipkg

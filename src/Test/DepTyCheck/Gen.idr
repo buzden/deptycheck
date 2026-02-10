@@ -539,7 +539,7 @@ namespace GenAlternatives
          Lazy (Gen lem a) -> Lazy (GenAlternatives e rem a) -> GenAlternatives ne em a
   x :: xs = MkGenAlts $ (1, relax x) :: mapTaggedLazy relax xs.unGenAlts
 
-  -- This concatenation breaks relative proportions in frequences of given alternative lists
+  -- This concatenation breaks relative proportions in frequencies of given alternative lists
   public export %inline
   (++) : (0 _ : lem `NoWeaker` em) =>
          (0 _ : rem `NoWeaker` em) =>
@@ -663,7 +663,7 @@ elements' xs = elements $ fromList $ toList xs
 |||
 ||| If the given generator is made by one of `oneOf`, `frequency` or `elements`,
 ||| this function returns alternatives which this generators contains.
-||| Otherwise it retuns a single-element alternative list containing given generator.
+||| Otherwise it returns a single-element alternative list containing given generator.
 |||
 ||| In a sense, this function is a reverse function of `oneOf`, i.g.
 ||| `oneOf $ alternativesOf g` must be equivalent to `g` and
