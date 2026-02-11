@@ -238,7 +238,8 @@ jobs:
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
 
-      - run: pack test deptycheck "${TEST_SET}"
+      - name: Run tests for ${{ matrix.test_set }}
+        run: pack test deptycheck "${TEST_SET}"
         env:
           TEST_SET: ${{ matrix.test_set }}
 
@@ -296,5 +297,7 @@ jobs:
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
 
-      - run: pack build "${EXAMPLE_NAME}"
-      - run: pack test "${EXAMPLE_NAME}"
+      - name: Build ${{ matrix.example }}
+        run: pack build "${EXAMPLE_NAME}"
+      - name: Test ${{ matrix.example }}
+        run: pack test "${EXAMPLE_NAME}"
