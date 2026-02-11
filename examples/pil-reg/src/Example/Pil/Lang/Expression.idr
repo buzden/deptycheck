@@ -9,40 +9,44 @@ import public Example.Pil.Lang.Aspects.Registers
 %default total
 
 public export
-data Expression : (vars : Variables) -> (regs : Registers rc) -> (res : Type') -> Type where
+record Ops where
+  constructor MkOps
+  unary  : List (Type', String, Type')
+  binary : List (Type', String, Type', Type')
+
+public export
+data Expression : Ops -> (vars : Variables) -> (regs : Registers rc) -> (res : Type') -> Type where
   -- Constant expression
-  C' : {ty : Type'} -> (x : idrTypeOf ty) -> Expression vars regs ty
+  C' : {ty : Type'} -> ValueOf ty -> Expression ops vars regs ty
 
   -- Value of the variable
-  V : (n : Name) -> (0 lk : Lookup n vars) => Expression vars regs lk.reveal
+  V : (n : Name) -> (0 lk : Lookup n vars) => Expression ops vars regs lk.reveal
 
   -- Value of the register
-  R : (r : Fin rc) -> (0 _ : IsJust $ index r regs) => Expression vars regs $ fromJust $ index r regs
+  R : (r : Fin rc) -> (0 _ : IsJust $ index r regs) => Expression ops vars regs $ fromJust $ index r regs
 
   -- Unary operation over the result of another expression
-  U : {default "?func" opName : String} ->
-      (f : idrTypeOf a -> idrTypeOf b) ->
-      Expression vars regs a -> Expression vars regs b
+  U : (lk : Lookup res ops.unary) =>
+      Expression ops vars regs (snd lk.reveal) -> Expression ops vars regs res
 
   -- Binary operation over the results of two another expressions
-  B : {default "??" opName : String} ->
-      (f : idrTypeOf a -> idrTypeOf b -> idrTypeOf c) ->
-      Expression vars regs a -> Expression vars regs b -> Expression vars regs c
+  B : (lk : Lookup res ops.binary) =>
+      Expression ops vars regs (fst $ snd lk.reveal) -> Expression ops vars regs (snd $ snd lk.reveal) -> Expression ops vars regs res
 
 namespace Int
 
   public export %inline
-  C : Int -> Expression vars regs Int'
-  C x = C' x
+  C : Int -> Expression ops vars regs Int'
+  C x = C' $ IntVal x
 
 namespace Bool
 
   public export %inline
-  C : Bool -> Expression vars regs Bool'
-  C x = C' x
+  C : Bool -> Expression ops vars regs Bool'
+  C x = C' $ BoolVal x
 
 namespace String
 
   public export %inline
-  C : String -> Expression vars regs String'
-  C x = C' x
+  C : String -> Expression ops vars regs String'
+  C x = C' $ StringVal x

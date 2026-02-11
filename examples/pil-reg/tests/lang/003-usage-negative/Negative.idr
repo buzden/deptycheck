@@ -7,23 +7,23 @@ import Common
 
 -- Simple tests --
 
-bad_ass_no_var : Statement vars regs vars regs
+bad_ass_no_var : Statement TestOps vars regs vars regs
 bad_ass_no_var = do
   "x" #= C' 42
 
-bad_ass_type_mismatch : Statement vars regs (("x", Int')::vars) regs
+bad_ass_type_mismatch : Statement TestOps vars regs (("x", Int')::vars) regs
 bad_ass_type_mismatch = do
   Int'. "x"
   "x" #= C "foo"
 
-bad_ass_var_to_var_type_mismatch : Statement vars regs (("y", Bool')::("x", Int')::vars) regs
+bad_ass_var_to_var_type_mismatch : Statement TestOps vars regs (("y", Bool')::("x", Int')::vars) regs
 bad_ass_var_to_var_type_mismatch = do
   Int'. "x"
   "x" #= C 42
   Bool'. "y"
   "y" #= V "x"
 
-bad_block_local_vars : Statement vars regs vars regs
+bad_block_local_vars : Statement TestOps vars regs vars regs
 bad_block_local_vars = do
   block $ do
     Int'. "x"
@@ -31,7 +31,7 @@ bad_block_local_vars = do
 
 --- Example statements ---
 
-bad_for : Statement vars regs vars regs
+bad_for : Statement TestOps vars regs vars regs
 bad_for = for (do Int'. "x" #= C 0; Int'. "y" #= C 0)
                 (V "y")
                   ("x" #= V "x" + C 1) $ do
@@ -39,31 +39,31 @@ bad_for = for (do Int'. "x" #= C 0; Int'. "y" #= C 0)
 
 -- Registers-related --
 
-bad_read_reg_base : Statement vars (Base [Nothing, Nothing, Just Int', Nothing]) vars (Base [Nothing, Nothing, Just Int', Nothing])
+bad_read_reg_base : Statement TestOps vars (Base [Nothing, Nothing, Just Int', Nothing]) vars (Base [Nothing, Nothing, Just Int', Nothing])
 bad_read_reg_base = block $ do
   Int'. "x" !#= R 1
 
-bad_read_reg_undef_with : Statement vars (AllUndefined {rc=4} `With` (3, Just Int'))
+bad_read_reg_undef_with : Statement TestOps vars (AllUndefined {rc=4} `With` (3, Just Int'))
                                     vars (AllUndefined {rc=4} `With` (3, Just Int'))
 bad_read_reg_undef_with = block $ do
   Int'. "x" !#= R 2
 
-bad_read_reg_with : {0 regs : Registers 5} -> Statement vars (regs `With` (3, Just Int')) vars (regs `With` (3, Just Int'))
+bad_read_reg_with : {0 regs : Registers 5} -> Statement TestOps vars (regs `With` (3, Just Int')) vars (regs `With` (3, Just Int'))
 bad_read_reg_with = block $ do
   Int'. "x" !#= R 2 + C 0
 
-bad_registers_ass : {0 regs : Registers 5} -> Statement vars regs vars $ regs `With` (3, Just Int')
+bad_registers_ass : {0 regs : Registers 5} -> Statement TestOps vars regs vars $ regs `With` (3, Just Int')
 bad_registers_ass = block $ do
   Int'. "x" !#= C 0
   6 %= V "x"
 
-bad_registers_infer_nothing : Statement vars (AllUndefined {rc=4}) vars (AllUndefined {rc=4})
+bad_registers_infer_nothing : Statement TestOps vars (AllUndefined {rc=4}) vars (AllUndefined {rc=4})
 bad_registers_infer_nothing = block $ do
   "x" ?#= R 0
 
 -- Basic if statement tests --
 
-bad_if_access_local : {cond : Expression vars regs Bool'} -> Statement vars regs vars $ regs `Merge` regs
+bad_if_access_local : {cond : Expression TestOps vars regs Bool'} -> Statement TestOps vars regs vars $ regs `Merge` regs
 bad_if_access_local = block $ do
   if__ cond (Int'. "x" !#= C 1) (Int'. "x" !#= C 2)
   Int'. "y" !#= V "x"
@@ -72,8 +72,8 @@ bad_if_access_local = block $ do
 
 bad_if_taints_register :
   {0 regs : Registers 5} ->
-  {cond : Expression vars (regs `With` (3, Just Int')) Bool'} ->
-  Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
+  {cond : Expression TestOps vars (regs `With` (3, Just Int')) Bool'} ->
+  Statement TestOps vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just Int')) `Merge` ((regs `With` (3, Just Int')) `With` (3, Just Bool'))
 bad_if_taints_register = block $ do
   3 %= C 1
   if__ cond (3 %= C 2) (3 %= C True)
@@ -81,8 +81,8 @@ bad_if_taints_register = block $ do
 
 bad_if_single_branch_taint :
   {0 regs : Registers 5} ->
-  {cond : Expression vars (regs `With` (3, Just Int')) Bool'} ->
-  Statement vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
+  {cond : Expression TestOps vars (regs `With` (3, Just Int')) Bool'} ->
+  Statement TestOps vars regs vars $ ((regs `With` (3, Just Int')) `With` (3, Just String')) `Merge` (regs `With` (3, Just Int'))
 bad_if_single_branch_taint = block $ do
   3 %= C 1
   if__ cond (3 %= C "foo") nop

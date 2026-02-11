@@ -5,47 +5,63 @@ import Example.Pil.Lang
 
 %default total
 
+public export
+TestOps : Ops
+TestOps = MkOps
+  {unary = [ (String', "show", Int')
+           ]}
+  {binary = [ (Int', "+", Int', Int')
+            , (Int', "/", Int', Int')
+            , (Int', "%", Int', Int')
+            , (Bool', "<", Int', Int')
+            , (Bool', ">", Int', Int')
+            , (Bool', "==", Int', Int')
+            , (Bool', "/=", Int', Int')
+            , (Bool', "&&", Bool', Bool')
+            , (String', "concat", String', String')
+            ]}
+
 --- Functions lifted to the expression level ---
 
 export %inline
-(+) : Expression vars regs Int' -> Expression vars regs Int' -> Expression vars regs Int'
-(+) = B (+) {opName="+"}
+(+) : Expression TestOps vars regs Int' -> Expression TestOps vars regs Int' -> Expression TestOps vars regs Int'
+(+) = B @{Here _}
 
 export %inline
-div : Expression vars regs Int' -> Expression vars regs Int' -> Expression vars regs Int'
-div = B div {opName="/"}
+div : Expression TestOps vars regs Int' -> Expression TestOps vars regs Int' -> Expression TestOps vars regs Int'
+div = B @{There $ Here _}
 
 export %inline
-mod : Expression vars regs Int' -> Expression vars regs Int' -> Expression vars regs Int'
-mod = B mod {opName="%"}
+mod : Expression TestOps vars regs Int' -> Expression TestOps vars regs Int' -> Expression TestOps vars regs Int'
+mod = B @{There $ There $ Here _}
 
 export %inline
-(<) : Expression vars regs Int' -> Expression vars regs Int' -> Expression vars regs Bool'
-(<) = B (<) {opName="<"}
+(<) : Expression TestOps vars regs Int' -> Expression TestOps vars regs Int' -> Expression TestOps vars regs Bool'
+(<) = B @{There $ There $ There $ Here _}
 
 export %inline
-(>) : Expression vars regs Int' -> Expression vars regs Int' -> Expression vars regs Bool'
-(>) = B (>) {opName=">"}
+(>) : Expression TestOps vars regs Int' -> Expression TestOps vars regs Int' -> Expression TestOps vars regs Bool'
+(>) = B @{There $ There $ There $ There $ Here _}
 
 export %inline
-(==) : Eq (idrTypeOf a) => Expression vars regs a -> Expression vars regs a -> Expression vars regs Bool'
-(==) = B (==) {opName="=="}
+(==) : Expression TestOps vars regs ? -> Expression TestOps vars regs ? -> Expression TestOps vars regs Bool'
+(==) = B @{There $ There $ There $ There $ There $ Here _}
 
 export %inline
-(/=) : Eq (idrTypeOf a) => Expression vars regs a -> Expression vars regs a -> Expression vars regs Bool'
-(/=) = B (/=) {opName="!="}
+(/=) : Expression TestOps vars regs ? -> Expression TestOps vars regs ? -> Expression TestOps vars regs Bool'
+(/=) = B @{There $ There $ There $ There $ There $ There $ Here _}
 
 export %inline
-(&&) : Expression vars regs Bool' -> Expression vars regs Bool' -> Expression vars regs Bool'
-(&&) = B (\a, b => a && b) {opName="&&"} -- recoded because of laziness
+(&&) : Expression TestOps vars regs Bool' -> Expression TestOps vars regs Bool' -> Expression TestOps vars regs Bool'
+(&&) = B @{There $ There $ There $ There $ There $ There $ There $ Here _}
 
 export %inline
-(++) : Expression vars regs String' -> Expression vars regs String' -> Expression vars regs String'
-(++) = B (++) {opName="??concat??"}
+(++) : Expression TestOps vars regs String' -> Expression TestOps vars regs String' -> Expression TestOps vars regs String'
+(++) = B @{There $ There $ There $ There $ There $ There $ There $ There $ Here _}
 
 export %inline
-show : Show (idrTypeOf ty) => Expression vars regs ty -> Expression vars regs String'
-show = U show {opName="toString"}
+show : Expression TestOps vars regs Int' -> Expression TestOps vars regs String'
+show = U
 
 public export %inline
 Exists2 : (a -> b -> Type) -> Type

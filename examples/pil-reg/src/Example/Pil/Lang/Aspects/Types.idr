@@ -10,10 +10,10 @@ public export
 data Type' = Bool' | Int' | String'
 
 public export
-idrTypeOf : Type' -> Type
-idrTypeOf Bool'   = Bool
-idrTypeOf Int'    = Int
-idrTypeOf String' = String
+data ValueOf : Type' -> Type where
+  BoolVal   : Bool -> ValueOf Bool'
+  IntVal    : Int  -> ValueOf Int'
+  StringVal : String -> ValueOf String'
 
 public export
 DecEq Type' where
