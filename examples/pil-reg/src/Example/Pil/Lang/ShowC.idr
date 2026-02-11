@@ -18,9 +18,9 @@ makeFuncName = pack . map (\k => if isAlphaNum k then k else '_') . unpack
 
 export
 Show (Expression ops vars regs a) where
-  show (C' {ty=Bool'}   x) = show x
-  show (C' {ty=Int'}    x) = show x
-  show (C' {ty=String'} x) = show x
+  show (C' {ty=Bool'}   $ BoolVal   x) = show x
+  show (C' {ty=Int'}    $ IntVal    x) = show x
+  show (C' {ty=String'} $ StringVal x) = show x
   show (V n)              = show n
   show (R r)              = "[[" ++ show (finToNat r) ++ "]]"
   show (U @{lk} e)   = let opName = fst lk.reveal in opName ++ "(" ++ show e ++ ")"

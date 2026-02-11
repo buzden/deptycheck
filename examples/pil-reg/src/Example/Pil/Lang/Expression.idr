@@ -17,7 +17,7 @@ record Ops where
 public export
 data Expression : Ops -> (vars : Variables) -> (regs : Registers rc) -> (res : Type') -> Type where
   -- Constant expression
-  C' : {ty : Type'} -> (x : idrTypeOf ty) -> Expression ops vars regs ty
+  C' : {ty : Type'} -> ValueOf ty -> Expression ops vars regs ty
 
   -- Value of the variable
   V : (n : Name) -> (0 lk : Lookup n vars) => Expression ops vars regs lk.reveal
@@ -37,16 +37,16 @@ namespace Int
 
   public export %inline
   C : Int -> Expression ops vars regs Int'
-  C x = C' x
+  C x = C' $ IntVal x
 
 namespace Bool
 
   public export %inline
   C : Bool -> Expression ops vars regs Bool'
-  C x = C' x
+  C x = C' $ BoolVal x
 
 namespace String
 
   public export %inline
   C : String -> Expression ops vars regs String'
-  C x = C' x
+  C x = C' $ StringVal x

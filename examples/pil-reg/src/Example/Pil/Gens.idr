@@ -49,9 +49,9 @@ nonRec_exprGen : Gen0 Int => Gen0 String =>
                  {ops : Ops} -> {a : Type'} -> {vars : Variables} -> {regs : Registers rc} -> Gen0 $ Expression ops vars regs a
 nonRec_exprGen = do
   let g = case a of
-            Bool'   => elements {em=MaybeEmpty} [True, False]
-            Int'    => %search
-            String' => %search
+            Bool'   => BoolVal   <$> elements {em=MaybeEmpty} [True, False]
+            Int'    => IntVal    <$> %search
+            String' => StringVal <$> %search
   oneOf $ [| C' g |] :: alternativesOf varExprGen
   -- TODO to add the register access expression
 
