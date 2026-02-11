@@ -73,14 +73,24 @@ getGivens (x :: xs) aa = do
   let (mr, aa) = getGiven x aa
   mr :: getGivens xs aa
 
-allQImpl : Monad m => TTImp -> m TTImp -> m TTImp
+allQImpl : Monad m => NamesInfoInTypes => TTImp -> m TTImp -> m TTImp
 allQImpl pi@(IPi _ _ _ _ _ _) r = r
+allQImpl app@(IApp _ _ _) r = do
+  IApp _ procL _ <- r
+    | _ => pure `(?)
+  case procL of
+    Implicit _ _ => pure `(?)
+    _ => r
+allQImpl v@(IVar _ n) _ =
+  case lookupType n of
+    Just _ => pure v
+    Nothing => pure `(?)
 allQImpl _ _ = pure `(?)
 
 ||| Replace every non-function sub-expression with a question mark
 |||
 ||| (x -> (y -> z) -> q) becomes (? -> (? -> ?) -> ?)
-allQuestions : TTImp -> TTImp
+allQuestions : NamesInfoInTypes => TTImp -> TTImp
 allQuestions t = runIdentity $ mapATTImp' allQImpl t
 
 ||| An abstract "argument" of a generator
@@ -143,7 +153,7 @@ mkArgs sig ((i1, x) :: xs) g@((i2, y) :: ys) =
     then MkGenArg x (Just y) :: mkArgs sig xs ys
     else MkGenArg x Nothing  :: mkArgs sig xs g
 
-singleArg : Nat -> GenArg -> (TTImp, List GenArg)
+singleArg : NamesInfoInTypes => Nat -> GenArg -> (TTImp, List GenArg)
 singleArg n (MkGenArg a v) = do
   let n : Name = fromString "lam^\{show n}"
   (IVar EmptyFC n, [MkGenArg (MkArg a.count a.piInfo (Just n) $ allQuestions a.type) v])

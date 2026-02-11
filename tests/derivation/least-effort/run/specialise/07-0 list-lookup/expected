@@ -1,0 +1,25 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.util.specialisation:10: DerivedGen.Lookup[0(b), 1(a), 2, 3] Declared specialised type DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048: DerivedGen.Lookup {b = Builtin.Pair Prelude.Basics.Bool (Builtin.Pair Prelude.Basics.Bool Prelude.Basics.Bool)} {a = Prelude.Basics.Bool} lam^0 lam^1
+Generated values:
+-----
+-----
+UL (Here (True, (True, True)))
+-----
+UL (Here (True, (True, True)))
+-----
+UL (Here (True, (True, True)))
+-----
+UL (Here (True, (True, True)))
+-----
+UL (Here (True, (True, True)))
+-----
+UL (Here (True, (True, True)))
+-----
+UL (Here (True, (True, True)))
+-----
+UL (Here (True, (True, True)))
+-----
+UL (Here (True, (True, True)))
+-----
+UL (Here (True, (True, True)))
