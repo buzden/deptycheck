@@ -1,6 +1,8 @@
 module Data.SortedBinTree
 
 import public Data.Nat
+import Data.Primitives.Interpolation
+import Data.String
 
 %default total
 
@@ -35,3 +37,17 @@ export
 toList : SortedBinTree -> List Nat
 toList Empty               = []
 toList $ Node x left right = toList left ++ [x] ++ toList right
+
+export
+Interpolation SortedBinTree where
+  interpolate Empty = "*"
+  interpolate $ Node x l r = """
+    \{show x}
+    \{ind "|" $ interpolate l}
+    \{ind " " $ interpolate r}
+    """
+    where
+      ind : (pref : String) -> String -> String
+      ind k s = do
+        let f::fs = lines s | [] => ""
+        joinBy "\n" $ "|" :: ("|- " ++ f) :: (("\{k}  " ++) <$> fs)
