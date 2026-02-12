@@ -4,9 +4,9 @@ name: Lame
 on:
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - '**'
+      - "**"
   pull_request:
     branches:
       - main

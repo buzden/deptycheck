@@ -4,9 +4,9 @@ name: DepTyCheck
 on:
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - '**'
+      - "**"
   pull_request:
     branches:
       - main
@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
   schedule:
     # We want to run in the beginning of the day, right after the `pack` collection is built at the end of the previous day.
-    - cron: '0 1 * * *'
+    - cron: "0 1 * * *"
 
 permissions: read-all
 
@@ -148,7 +148,7 @@ jobs:
       - run: pack install deptycheck
 
       - name: Tar the `pack` dir
-        run:  .github/tar-pack save-pack "${{ env.pack_dir_file }}"
+        run: .github/tar-pack save-pack "${{ env.pack_dir_file }}"
       - name: Tar built TTC files
         run: find "$(pwd)" -name '*.tt[cm]' | .github/tar-pack save-stdin "${{ env.pack_dir_file }}"
       - name: Save built DepTyCheck
