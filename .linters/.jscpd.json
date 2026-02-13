@@ -1,5 +1,8 @@
 {
   "threshold": 1,
   "noSymlinks": true,
-  "ignore": ["**/thirdparty/**"]
+  "ignore": ["**/tests/**"],
+  "formatsExts": {
+    "haskell": ["idr"]
+  }
 }
