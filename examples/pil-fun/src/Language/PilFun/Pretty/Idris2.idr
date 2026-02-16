@@ -38,7 +38,7 @@ printTy : Ty -> Doc opts
 printTy Int' = "Int"
 printTy Bool' = "Bool"
 
-printMaybeTy : MaybeTy -> Doc opts
+printMaybeTy : Maybe Ty -> Doc opts
 printMaybeTy Nothing   = "()"
 printMaybeTy $ Just ty = printTy ty
 
@@ -58,8 +58,8 @@ data ArgStruct : LayoutOpts -> Type where
   ManyArgs : {opts : _} -> List (Doc opts) -> ArgStruct opts
   NoArgs : {opts : _} -> ArgStruct opts
 
-getArgs : {from' : SnocListTy} ->
-          {to' : MaybeTy} ->
+getArgs : {from' : SnocList Ty} ->
+          {to' : Maybe Ty} ->
           (argFs : Funs ** argVs : Vars ** argNms : UniqNames Idris2 argFs argVs ** ExprsSnocList argFs argVs from') ->
           {fs : Funs} ->
           {vs : Vars} ->
@@ -166,7 +166,7 @@ printStmts fl $ NewF ([< a, b ] ==> maybeRet) body cont = do
   (nm ** _) <- genNewName fl nameGen _ _ names
   rest <- printStmts @{NewFun nm {isInfix} @{names}} fl cont
   let infixAwareName : Doc opts = if isInfix then "(" <+> line nm <+> ")" else line nm
-  let processedInputTypes : Doc opts = hsep $ (snocListTyToList [< a, b ]) <&> (\ty => printTy ty <++> "->")
+  let processedInputTypes : Doc opts = hsep $ (toList [< a, b ]) <&> (\ty => printTy ty <++> "->")
   let processedOutputType = "IO" <++> printMaybeTy maybeRet
   let idrisTypeSignature = processedInputTypes <++> processedOutputType
   (namesInside, funArgs) <- newVars fl alphaNames [< a, b ] (JustNew @{names} nm)
@@ -183,7 +183,7 @@ printStmts fl $ NewF (typesFrom ==> maybeRet) body cont = do
   (nm ** _) <- genNewName fl alphaNames _ _ names
   rest <- printStmts @{NewFun nm {isInfix} @{names}} fl cont
   let funName = line nm
-  let processedInputTypes : Doc opts = hsep $ (snocListTyToList typesFrom) <&> (\ty => printTy ty <++> "->")
+  let processedInputTypes : Doc opts = hsep $ (toList typesFrom) <&> (\ty => printTy ty <++> "->")
   let processedOutputType = "IO" <++> printMaybeTy maybeRet
   let idrisTypeSignature = processedInputTypes <++> processedOutputType
   (namesInside, funArgs) <- newVars fl alphaNames _ (JustNew @{names} nm)
