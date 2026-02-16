@@ -67,7 +67,7 @@ failing "Can't find an implementation for AtIndex"
     1 #= F Plus [< V 0, V 0]
     Nop
 
-failing #"Can't find an implementation for LTE 3 (length ([<Int'] Mutable))"#
+failing #"Can't find an implementation for LTE 3 (length [<(Int', Mutable)])"#
   bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' {- 0 -} Mutable $ C 0
@@ -75,7 +75,7 @@ failing #"Can't find an implementation for LTE 3 (length ([<Int'] Mutable))"#
     2 #= V 0
     Nop
 
-failing #"Can't find an implementation for LTE 3 (length ([<Int'] Mutable))"#
+failing #"Can't find an implementation for LTE 3 (length [<(Int', Mutable)])"#
   bad : Stmts StdF [<] Nothing
   bad = do
     NewV Int' {- 0 -} Mutable $ C 0
