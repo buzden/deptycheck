@@ -219,6 +219,8 @@ jobs:
       - get-test-sets
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    env:
+      NUM_THREADS: 2
     strategy:
       fail-fast: false # all test cases are more or less independent
       matrix:
