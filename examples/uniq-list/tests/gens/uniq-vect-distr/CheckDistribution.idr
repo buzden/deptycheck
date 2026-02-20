@@ -22,7 +22,7 @@ mainFor len strsCnt = printVerdict (genUniqStrVect @{const $ strs strsCnt} (limi
                         [ coverWith (ratio 1 (S strsCnt)) ((== n) . index idx) | n <- show <$> [0 .. strsCnt], idx <- allFins len ]
 
 -- NOTE: A separate test is when for this derived generator we pass `depth` test.
---       Now, since we still spend fuel even when `given` argument descreases, when we set high `len` > `depth`,
+--       Now, since we still spend fuel even when `given` argument decreases, when we set high `len` > `depth`,
 --       no statistics can be searched for.
 
 main : IO ()

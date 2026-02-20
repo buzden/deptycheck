@@ -4,9 +4,9 @@ name: Lint
 on:
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - '**'
+      - "**"
   pull_request:
     branches:
       - main
@@ -15,7 +15,9 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read
   statuses: write
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}@${{ github.ref }}
@@ -36,10 +38,22 @@ jobs:
           # Full git history is needed to get a proper
           # list of changed files within `super-linter`
           fetch-depth: 0
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
 
       - name: Lint Code Base
-        uses: super-linter/super-linter/slim@v6
+        uses: super-linter/super-linter/slim@v8
         env:
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IGNORE_GENERATED_FILES: true
+          SAVE_SUPER_LINTER_SUMMARY: true # Required for generating linting reports in PR
+
+          VALIDATE_PYTHON_BLACK: false # Avoid conflict: Ruff is preferred
+          VALIDATE_GIT_COMMITLINT: false
+
+          VALIDATE_MARKDOWN_PRETTIER: false # We use markdownlint
+          VALIDATE_YAML_PRETTIER: false # We use yamllint
+
+          # Disable Biome
+          VALIDATE_BIOME_FORMAT: false
+          VALIDATE_BIOME_LINT: false

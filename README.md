@@ -28,10 +28,10 @@ A library for property-based testing with dependent types and automatic derivati
 🚧 The library is under heavy construction 🚧
 
 For now, it lacks most of things required for normal property-based testing,
-like support for *properties* and fancy testing operations.
-Also, for now we do not support such important thing as *shrinking*.
+like support for _properties_ and fancy testing operations.
+Also, for now we do not support such important thing as _shrinking_.
 
-The current focus for now is on *test data generators* and *automatic derivation* of them.
+The current focus for now is on _test data generators_ and _automatic derivation_ of them.
 
 ## Generators
 
@@ -91,7 +91,7 @@ thanks to `alternativesOf` function.
 
 > [!NOTE]\
 > If we were not using `alternativesOf` at all (say, with expression `[| genA :: genListsN genA n |]`),
-> probability of getting a list of length `n+1` would be 2 times *less* than getting a list of length `n`.
+> probability of getting a list of length `n+1` would be 2 times _less_ than getting a list of length `n`.
 
 Generators can be combined with operations from `Applicative` interface:
 
@@ -297,7 +297,7 @@ but pragmatically, `genFin` and `genAnyFin` both generate elements of type `Fin 
 but the first one takes `n` as a given value,
 and the second one generates value for the type argument along with the main value.
 
-You can read more on the design of generators in [documentation](https://deptycheck.readthedocs.io/en/lastest/explanation/generators/).
+You can read more on the design of generators in [documentation](https://deptycheck.readthedocs.io/en/latest/explanation/generators/).
 
 ## Derivation of generators
 
@@ -319,8 +319,8 @@ genNat = deriveGen
 
 It uses very powerful metaprogramming facility of Idris 2 programming language
 for analysing the data structure which generator is derived for and producing code of the asked generator at compile time.
-This facility is called *elaborator reflection*, and you can find some kind of tutorial for this
-[here](https://github.com/stefan-hoeck/idris2-elab-util/blob/main/src/Doc/Index.md).
+This facility is called _elaborator reflection_, more information can be found in the
+[elaborator reflection tutorial](https://github.com/stefan-hoeck/idris2-elab-util/blob/main/src/Doc/Index.md).
 To enable it, you have to add `%language ElabReflection` to the source code before the first call to the macro.
 
 However, beware of possible high resources consumption of this stage.
@@ -355,4 +355,4 @@ The main `pack`'s collection we test the library against is the one mentioned in
 Also, we test against the latest pack collection nightly.
 Here is the status of the latest such run:
 ![Nightly](https://github.com/buzden/deptycheck/actions/workflows/ci-deptycheck.yml/badge.svg?branch=master&event=schedule).
-We try to use as fresh version of the Idris 2 compiler and thirdparty libraries as possible.
+We try to use as fresh version of the Idris 2 compiler and third-party libraries as possible.

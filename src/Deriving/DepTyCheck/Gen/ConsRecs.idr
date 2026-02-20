@@ -101,7 +101,7 @@ workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1
 weightFunName : TypeInfo -> Name
 weightFunName ty = fromString "weight^\{show ty.name}"
 
--- this is a workarond for Idris compiler bug #2983
+-- this is a workaround for Idris compiler bug #2983
 export
 interimNamesWrapper : Name -> Name
 interimNamesWrapper n = UN $ Basic "inter^<\{show n}>"

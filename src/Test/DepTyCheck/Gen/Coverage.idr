@@ -191,7 +191,7 @@ toString col cgi = (++ "\n") $ joinBy "\n\n" $
   let cntAddition = \cnt : Nat => " (\{show cnt} time\{if cnt /= 1 then "s" else ""})"
   let tyCovStr = joinBy ", " $
                    (if tyCovCnt /= 0 && noConsCovered then [c BrightYellow "mentioned" ++ cntAddition tyCovCnt]
-                    else if tyCovCnt == 0 && (not anyCons || not noConsCovered) then [c BrightYellow "not menioned"]
+                    else if tyCovCnt == 0 && (not anyCons || not noConsCovered) then [c BrightYellow "not mentioned"]
                     else []) ++
                    (if not anyCons then [c Cyan "no constructors"]
                     else if allConsCovered then [c BrightGreen "covered fully" ++ cntAddition tyCovCnt]

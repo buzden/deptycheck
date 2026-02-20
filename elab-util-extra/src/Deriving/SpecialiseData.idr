@@ -210,7 +210,7 @@ makeImplicit = { piInfo := ImplicitArg }
 makeTypeArgM0 : Arg -> Arg
 makeTypeArgM0 a = { count := if a.type == `(Type) then M0 else a.count } a
 
-||| A tuple value of multiple repeating expressons
+||| A tuple value of multiple repeating expressions
 tupleOfN : Nat -> TTImp -> TTImp
 tupleOfN 0 _ = `(Unit)
 tupleOfN 1 t = t
@@ -532,12 +532,12 @@ parameters (t : SpecTask)
   forallMTArgs = flip (foldr pi) $ makeTypeArgM0 . hideExplicitArg <$> t.ttArgs
 
 
-  ||| Generate specialised to polimorphic type conversion function signature
+  ||| Generate specialised to polymorphic type conversion function signature
   mkMToPImplSig : UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkMToPImplSig _ mt =
     forallMTArgs $ arg (mt.apply var empty) .-> t.fullInvocation
 
-  ||| Generate specialised to polimorphic type conversion function clause
+  ||| Generate specialised to polymorphic type conversion function clause
   ||| for given constructor
   mkMToPImplClause :
     UnificationResult ->
@@ -556,7 +556,7 @@ parameters (t : SpecTask)
           (fromList $ argsToBindMap mcon.args) <$> ur.fullResult)
       .= con.apply var ur.fullResult
 
-  ||| Generate specialised to polimorphic type conversion function declarations
+  ||| Generate specialised to polymorphic type conversion function declarations
   mkMToPImplDecls :
     UniResults ->
     (mt : TypeInfo) ->
@@ -569,12 +569,12 @@ parameters (t : SpecTask)
     , def "mToPImpl" clauses
     ]
 
-  ||| Generate specialised to polimorphic cast signature
+  ||| Generate specialised to polymorphic cast signature
   mkMToPSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkMToPSig mt = do
     forallMTArgs $ `(Cast ~(mt.apply var empty) ~(t.fullInvocation))
 
-  ||| Generate specialised to polimorphic cast declarations
+  ||| Generate specialised to polymorphic cast declarations
   mkMToPDecls : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => List Decl
   mkMToPDecls mt =
     [ interfaceHint Public "mToP" $ mkMToPSig mt
@@ -834,7 +834,7 @@ parameters (t : SpecTask)
   --- POLY TO POLY CAST DERIVATION ---
   ------------------------------------
 
-  ||| Generate specialised to polimorphic type conversion function signature
+  ||| Generate specialised to polymorphic type conversion function signature
   mkPToMImplSig :
     UniResults ->
     (mt : TypeInfo) ->
@@ -843,7 +843,7 @@ parameters (t : SpecTask)
   mkPToMImplSig _ mt =
     forallMTArgs $ arg t.fullInvocation .-> mt.apply var empty
 
-  ||| Generate specialised to polimorphic type conversion function clause
+  ||| Generate specialised to polymorphic type conversion function clause
   ||| for given constructor
   mkPToMImplClause :
     UnificationResult ->
@@ -861,7 +861,7 @@ parameters (t : SpecTask)
         (fromList $ argsToBindMap $ con.args) <$> ur.fullResult)
       .= mcon.apply var ur.fullResult
 
-  ||| Generate specialised to polimorphic type conversion function declarations
+  ||| Generate specialised to polymorphic type conversion function declarations
   mkPToMImplDecls :
     UniResults ->
     (mt : TypeInfo) ->
@@ -874,12 +874,12 @@ parameters (t : SpecTask)
     , def "pToMImpl" clauses
     ]
 
-  ||| Generate specialised to polimorphic cast signature
+  ||| Generate specialised to polymorphic cast signature
   mkPToMSig : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TTImp
   mkPToMSig mt = do
     forallMTArgs $ `(Cast ~(t.fullInvocation) ~(mt.apply var empty))
 
-  ||| Generate specialised to polimorphic cast declarations
+  ||| Generate specialised to polymorphic cast declarations
   mkPToMDecls : (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => List Decl
   mkPToMDecls mt =
     [ interfaceHint Public "pToM" $ mkPToMSig mt

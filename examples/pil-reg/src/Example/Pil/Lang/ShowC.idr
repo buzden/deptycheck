@@ -45,7 +45,7 @@ isNopDeeply Nop      = True
 isNopDeeply (x >> y) = isNopDeeply x && isNopDeeply y
 isNopDeeply _        = False
 
-||| Next identation
+||| Next indentation
 n : Nat -> Nat
 n = (+ 2)
 

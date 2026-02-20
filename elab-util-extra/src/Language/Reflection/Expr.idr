@@ -208,7 +208,7 @@ unNS (NS (MkNS revNSs) nm) = mapFst (reverse revNSs ++) $ unNS nm
 unNS (DN _ nm)             = unNS nm
 unNS nm                    = ([], nm)
 
-||| Returns all names that are suffixes of a given name (incuding the original name itself).
+||| Returns all names that are suffixes of a given name (including the original name itself).
 |||
 ||| For example, for the name `Data.Vect.Vect` suffixes set would include
 ||| `Data.Vect.Vect`, `Vect.Vect` and `Vect`.

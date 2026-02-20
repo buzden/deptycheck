@@ -29,7 +29,7 @@ mainFor len depth = printVerdict (vectNats @{nats} (limit depth) len) $ fromList
                       [ coverWith (ratio 1 (S depth)) ((== n) . index idx) | n <- [0 .. depth], idx <- allFins len ]
 
 -- NOTE: A separate test is when for this derived generator we pass `depth` test.
---       Now, since we still spend fuel even when `given` argument descreases, when we set high `len` > `depth`,
+--       Now, since we still spend fuel even when `given` argument decreases, when we set high `len` > `depth`,
 --       no statistics can be searched for.
 
 main : IO ()

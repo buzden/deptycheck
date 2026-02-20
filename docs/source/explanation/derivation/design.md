@@ -13,7 +13,7 @@ DeriveBodyForType where
 
 # Design of derivation
 
-By *derivation* we mean automatic creation of a generator given a datatype definition and,
+By _derivation_ we mean automatic creation of a generator given a datatype definition and,
 possibly, some configuration and additional stuff.
 
 :::{todo}

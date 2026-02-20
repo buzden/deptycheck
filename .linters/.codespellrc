@@ -1,0 +1,5 @@
+[codespell]
+# Skip Idris 2 source files as they contain many names
+# that cause false positives (e.g., `runN`, `IndexIn`, `fromT`)
+skip = *.idr,*/expected
+ignore-words-list = inferrable,ND

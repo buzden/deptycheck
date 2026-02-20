@@ -65,7 +65,7 @@ getTypeApps con = do
                                    -- we haven't found, failing, there are at least two reasons
                                    failAt (getFC lhs) $ if isNamespaced lhsName
                                      then "Data type `\{lhsName}` is unavailable at the site of derivation (forgotten import?)"
-                                     else "Usupported applications to a non-concrete type `\{lhsName}` in \{show con.name}"
+                                     else "Unsupported applications to a non-concrete type `\{lhsName}` in \{show con.name}"
           IPrimVal _ (PrT t) => pure $ typeInfoForPrimType t
           IType _            => pure typeInfoForTypeOfTypes
           lhs@(IPi {})       => failAt (getFC lhs) "Fields with function types are not supported in constructors, like in \{show con.name}"
@@ -126,7 +126,7 @@ refineBasePri ps = snd $ execState (Fin.Set.empty {n=con.args.length}, ps) $ tra
       pris <- get @{pris}
       pure $ foldl (\curr => maybe curr ((curr+) . snd) . lookup' pris) currPri unvisitedDeps
 
-    -- update the priority of the currenly managed argument
+    -- update the priority of the currently managed argument
     modify $ updateExisting (mapSnd $ const newPri) curr
 
 propagateStrongDet, propagateDep : Ord a => FinMap con.args.length (Determination con, a) -> FinMap con.args.length (Determination con, a)
@@ -184,7 +184,7 @@ searchOrder : {con : _} ->
               List $ Fin con.args.length
 searchOrder left = do
 
-  -- find all arguments that are not stongly determined by anyone, among them find all that are not determined even weakly, if any
+  -- find all arguments that are not strongly determined by anyone, among them find all that are not determined even weakly, if any
   let notDetermined = filter (\(idx, det, _) => null det.stronglyDeterminingArgs) $ kvList $ assignPriorities left
 
   -- choose the one from the variants

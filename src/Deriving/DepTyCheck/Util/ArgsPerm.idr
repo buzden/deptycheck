@@ -57,7 +57,7 @@ reorder'' (Just (n ** perm)) xs = do
 
 ||| Produces expression returning a mkdpair in a different order, if needed
 |||
-||| Direct means that given expression which returns acending order, result is permutated; non-direct means vice versa.
+||| Direct means that given expression which returns ascending order, result is permutated; non-direct means vice versa.
 export
 reorderGend : (direct : Bool) -> {n : _} -> (perm : Vect n $ Fin n) -> TTImp -> TTImp
 reorderGend direct perm e = do

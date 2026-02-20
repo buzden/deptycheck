@@ -12,7 +12,7 @@ import Explanation.Derivation.Design
 
 ## Distinction between the two
 
-Not a surprise, datatypes can have *type arguments*.
+Not a surprise, datatypes can have _type arguments_.
 Consider an `Either` datatype with two of them:
 
 <!-- idris
@@ -23,7 +23,7 @@ Consider an `Either` datatype with two of them:
 data Either a b = Left a | Right b
 ```
 
-This has a lot of use in *generic programming*; you can have *polymorphic functions* that act on data disregarding particular type arguments.
+This has a lot of use in _generic programming_; you can have _polymorphic functions_ that act on data disregarding particular type arguments.
 For example, you can map over values inside the `Either`:
 
 ```idris
@@ -32,11 +32,11 @@ bimap f _ (Left x)  = Left  (f x)
 bimap _ g (Right y) = Right (g y)
 ```
 
-Such type of type arguments is called *type parameters*.
-Such data and functions are *parametric* on these parameters,
+Such type of type arguments is called _type parameters_.
+Such data and functions are _parametric_ on these parameters,
 because they behave in the same way given any types for the parameters.
 
-However, in richer type systems (which support dependent types or at least GADTs) types can be *indexed*.
+However, in richer type systems (which support dependent types or at least GADTs) types can be _indexed_.
 Consider a classical example of constant-size vectors:
 
 <!-- idris
@@ -50,7 +50,7 @@ data Vect : Nat -> Type -> Type where
 ```
 
 In this case, the second type argument is still a parameter, it is same in all constructors.
-However, the first type argument is an *index*.
+However, the first type argument is an _index_.
 Depending on the value of this index, the set of available constructors can differ.
 
 For example, once you known that the size of the vector is greater than zero,

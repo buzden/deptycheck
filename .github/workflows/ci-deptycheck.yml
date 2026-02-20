@@ -4,9 +4,9 @@ name: DepTyCheck
 on:
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - '**'
+      - "**"
   pull_request:
     branches:
       - main
@@ -15,9 +15,10 @@ on:
   workflow_dispatch:
   schedule:
     # We want to run in the beginning of the day, right after the `pack` collection is built at the end of the previous day.
-    - cron: '0 1 * * *'
+    - cron: "0 1 * * *"
 
-permissions: read-all
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}@${{ github.ref }}
@@ -61,6 +62,8 @@ jobs:
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
 
       - run: pack update-db
       - name: Switch to appropriate `pack` collection
@@ -82,6 +85,8 @@ jobs:
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore state of `pack`
         uses: actions/download-artifact@v4
         with:
@@ -115,6 +120,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built thirdparties
         uses: actions/download-artifact@v4
         with:
@@ -137,6 +144,8 @@ jobs:
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built thirdparties
         uses: actions/download-artifact@v4
         with:
@@ -148,7 +157,7 @@ jobs:
       - run: pack install deptycheck
 
       - name: Tar the `pack` dir
-        run:  .github/tar-pack save-pack "${{ env.pack_dir_file }}"
+        run: .github/tar-pack save-pack "${{ env.pack_dir_file }}"
       - name: Tar built TTC files
         run: find "$(pwd)" -name '*.tt[cm]' | .github/tar-pack save-stdin "${{ env.pack_dir_file }}"
       - name: Save built DepTyCheck
@@ -168,6 +177,8 @@ jobs:
     container: sphinxdoc/sphinx:latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Install dependencies
         run: pip3 install -r docs/requirements.txt
       - run: alias sh=bash
@@ -187,6 +198,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Get test sets
         id: get-test-sets
         run: |
@@ -213,6 +226,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v4
         with:
@@ -223,7 +238,10 @@ jobs:
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
 
-      - run: pack test deptycheck "${{matrix.test_set}}"
+      - name: Run tests for ${{ matrix.test_set }}
+        run: pack test deptycheck "${TEST_SET}"
+        env:
+          TEST_SET: ${{ matrix.test_set }}
 
   #################
   # Test examples #
@@ -238,6 +256,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Get examples
         id: get-examples
         run: |
@@ -261,8 +281,12 @@ jobs:
       fail-fast: false # all test cases are more or less independent
       matrix:
         example: ${{ fromJSON(needs.get-examples.outputs.examples) }}
+    env:
+      EXAMPLE_NAME: ${{ matrix.example }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built DepTyCheck
         uses: actions/download-artifact@v4
         with:
@@ -273,5 +297,7 @@ jobs:
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
 
-      - run: pack build "${{matrix.example}}"
-      - run: pack test "${{matrix.example}}"
+      - name: Build ${{ matrix.example }}
+        run: pack build "${EXAMPLE_NAME}"
+      - name: Test ${{ matrix.example }}
+        run: pack test "${EXAMPLE_NAME}"
