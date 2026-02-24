@@ -5,7 +5,7 @@ Error: While processing right hand side of checkedGen. Error during reflection: 
 DerivedGen:1
  12 | XShow : Show X
  13 | XShow = %runElab derive
- 14 | 
+ 14 |
  15 | checkedGen : Fuel -> Gen MaybeEmpty X
  16 | checkedGen = deriveGen
                    ^^^^^^^^^

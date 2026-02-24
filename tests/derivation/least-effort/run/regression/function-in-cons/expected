@@ -5,9 +5,9 @@ Possible error:
     Error during reflection: Fields with function types are not supported in constructors, like in DerivedGen.MkX
 
     DerivedGen:1
-     4 | 
+     4 |
      5 | %default total
-     6 | 
+     6 |
      7 | data X : Type where
      8 |   MkX : (Unit -> Unit) -> X
                   ^^^^^^^^^^^^
@@ -16,9 +16,9 @@ Possible error:
     Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
 
     DerivedGen:2
-     12 | 
+     12 |
      13 | %language ElabReflection
-     14 | 
+     14 |
      15 | checkedGen : Fuel -> Gen MaybeEmpty X
      16 | checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
                        ^^^^^^^^^

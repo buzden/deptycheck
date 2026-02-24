@@ -4,7 +4,7 @@ Error: While processing right hand side of genX_wrong_giv_order_autoimpl_rep. Er
 ValidateInput:1
  25 | genX_wrong_giv_order_autoimpl : Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
  26 | genX_wrong_giv_order_autoimpl = deriveGen
- 27 | 
+ 27 |
  28 | genX_wrong_giv_order_autoimpl_rep :
  29 |   Fuel -> (Fuel -> (b, a : Type) -> Gen MaybeEmpty $ Y a b) => (Fuel -> (a, b : Type) -> Gen MaybeEmpty $ Y a b) => Gen MaybeEmpty X
                                                                                                                 ^^^^^
@@ -14,7 +14,7 @@ Error: While processing right hand side of genX_wrong_gened_order_autoimpl_rep. 
 ValidateInput:2
  38 | genX_wrong_gened_order_autoimpl : Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => Gen MaybeEmpty X
  39 | genX_wrong_gened_order_autoimpl = deriveGen
- 40 | 
+ 40 |
  41 | genX_wrong_gened_order_autoimpl_rep :
  42 |   Fuel -> (Fuel -> Gen MaybeEmpty (b : Type ** a : Type ** Y a b)) => (Fuel -> Gen MaybeEmpty (a : Type ** b : Type ** Y a b)) => Gen MaybeEmpty X
                                                                                                                              ^^^^^
@@ -22,7 +22,7 @@ ValidateInput:2
 Error: While processing right hand side of genX_two_mngf. Error during reflection: Repetition of an auto-implicit external generator
 
 ValidateInput:3
- 87 | 
+ 87 |
  88 | -- should fail
  89 | genX_two_mngf : Fuel ->
  90 |                 (Fuel -> {m : Nat} -> {n : Nat} -> (g : Fin m) -> (f : Fin n) -> Gen MaybeEmpty $ Z f g) =>
@@ -32,7 +32,7 @@ ValidateInput:3
 Error: While processing right hand side of genX_mgnf_mngf. Error during reflection: Repetition of an auto-implicit external generator
 
 ValidateInput:4
- 94 | 
+ 94 |
  95 | -- should fail
  96 | genX_mgnf_mngf : Fuel ->
  97 |                  (Fuel -> {m : Nat} -> (g : Fin m) -> {n : Nat} -> (f : Fin n) -> Gen MaybeEmpty $ Z f g) =>

@@ -3,9 +3,9 @@
 Error: While processing right hand side of checkedGen. Error during reflection: No constructors found for the type `Builtin.Void`
 
 DerivedGen:1
- 06 | 
+ 06 |
  07 | %language ElabReflection
- 08 | 
+ 08 |
  09 | checkedGen : Fuel -> Gen MaybeEmpty Void
  10 | checkedGen = deriveGen
                    ^^^^^^^^^

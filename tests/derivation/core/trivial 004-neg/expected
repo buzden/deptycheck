@@ -5,7 +5,7 @@ Error: While processing right hand side of checkedGen. Error during reflection: 
 DerivedGen:1
  09 | Show (Gen em x) where
  10 |   show _ = "a generator"
- 11 | 
+ 11 |
  12 | checkedGen : Fuel -> (em : _) -> (a : Type) -> Gen MaybeEmpty $ Gen em a
  13 | checkedGen = deriveGen
                    ^^^^^^^^^

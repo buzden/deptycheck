@@ -3,19 +3,19 @@ Error: While processing right hand side of genY_Int. Error during reflection: Ta
 
 ValidateInput:1
  10 |   MkY : Y Int String
- 11 | 
+ 11 |
  12 | --- Non-variable arguments of the target type ---
- 13 | 
+ 13 |
  14 | genY_Int : Fuel -> (a : Type) -> Gen MaybeEmpty $ Y a Int
                                                             ^^^
 
 Error: While processing right hand side of genY_same_param. Error during reflection: All arguments of the target type must be different
 
 ValidateInput:2
- 13 | 
+ 13 |
  14 | genY_Int : Fuel -> (a : Type) -> Gen MaybeEmpty $ Y a Int
  15 | genY_Int = deriveGen
- 16 | 
+ 16 |
  17 | genY_same_param : Fuel -> (a : Type) -> Gen MaybeEmpty $ Y a a
                                                                ^^^^^
 

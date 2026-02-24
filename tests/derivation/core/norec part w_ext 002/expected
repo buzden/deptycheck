@@ -4,7 +4,7 @@ Error: While processing right hand side of checkedGen. Error during reflection: 
 
 DerivedGen:1
  13 | XShow = %runElab derive
- 14 | 
+ 14 |
  15 | export
  16 | checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty String) => (Fuel -> Gen MaybeEmpty Nat) => Gen MaybeEmpty X
  17 | checkedGen = deriveGen

@@ -3,7 +3,7 @@
 Error: While processing right hand side of checkedGen. Error during reflection: Argument #0 of DerivedGen.X2 with given type arguments [0] is not supported, argument expression: DerivedGen.boolToNat x, reason: name `DerivedGen.boolToNat` is not a constructor
 
 DerivedGen:1
- 12 | 
+ 12 |
  13 | data X : Nat -> Type where
  14 |   X0 : X 0
  15 |   X1 : Bool -> X 1

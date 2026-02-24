@@ -6,7 +6,7 @@ Possible error:
     ValidateInput:1
      09 | data X : Fin n -> Fin n -> Type where
      10 |   MkX : X {n=10} 5 6
-     11 | 
+     11 |
      12 | n_is_fully_out : Fuel -> (a, b : _) -> Gen MaybeEmpty $ X a b
      13 | n_is_fully_out = deriveGen @{MainCoreDerivator @{LeastEffort}}
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -17,7 +17,7 @@ Possible error:
     ValidateInput:2
      09 | data X : Fin n -> Fin n -> Type where
      10 |   MkX : X {n=10} 5 6
-     11 | 
+     11 |
      12 | n_is_fully_out : Fuel -> (a, b : _) -> Gen MaybeEmpty $ X a b
      13 | n_is_fully_out = deriveGen @{MainCoreDerivator @{LeastEffort}}
                            ^^^^^^^^^
@@ -29,7 +29,7 @@ Possible error:
     ValidateInput:3
      12 | n_is_fully_out : Fuel -> (a, b : _) -> Gen MaybeEmpty $ X a b
      13 | n_is_fully_out = deriveGen @{MainCoreDerivator @{LeastEffort}}
-     14 | 
+     14 |
      15 | n_mentioned_in_wrong_place : Fuel -> (a, b : Fin n) -> Gen MaybeEmpty $ X a b
      16 | n_mentioned_in_wrong_place = deriveGen @{MainCoreDerivator @{LeastEffort}}
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -40,7 +40,7 @@ Possible error:
     ValidateInput:4
      12 | n_is_fully_out : Fuel -> (a, b : _) -> Gen MaybeEmpty $ X a b
      13 | n_is_fully_out = deriveGen @{MainCoreDerivator @{LeastEffort}}
-     14 | 
+     14 |
      15 | n_mentioned_in_wrong_place : Fuel -> (a, b : Fin n) -> Gen MaybeEmpty $ X a b
      16 | n_mentioned_in_wrong_place = deriveGen @{MainCoreDerivator @{LeastEffort}}
                                        ^^^^^^^^^

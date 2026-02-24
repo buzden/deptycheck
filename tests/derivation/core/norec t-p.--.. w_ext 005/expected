@@ -5,7 +5,7 @@ Error: While processing right hand side of checkedGen. Error during reflection: 
 DerivedGen:1
  11 | Show a => Show (X a) where
  12 |   show (MkX m) = "MkX \{show m}"
- 13 | 
+ 13 |
  14 | checkedGen : Fuel -> (Fuel -> Gen MaybeEmpty a) => Gen MaybeEmpty (X a)
  15 | checkedGen = deriveGen
       ^^^^^^^^^^^^^^^^^^^^^^
