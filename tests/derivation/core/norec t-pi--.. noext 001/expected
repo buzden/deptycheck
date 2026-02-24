@@ -4,9 +4,9 @@ Error: While processing right hand side of checkedGen. Error during reflection: 
 
 DerivedGen:1
  5 | %default total
- 6 | 
+ 6 |
  7 | %language ElabReflection
- 8 | 
+ 8 |
  9 | checkedGen : Fuel -> (a, b : Bool) -> Gen MaybeEmpty (a = b)
                                   ^^^^
 

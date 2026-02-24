@@ -4,7 +4,7 @@ Error: While processing right hand side of bad_ass_no_var. Can't find an impleme
 
 Negative:12:3--12:15
  08 | -- Simple tests --
- 09 | 
+ 09 |
  10 | bad_ass_no_var : Statement TestOps vars regs vars regs
  11 | bad_ass_no_var = do
  12 |   "x" #= C' 42
@@ -13,7 +13,7 @@ Negative:12:3--12:15
 Error: While processing right hand side of bad_ass_type_mismatch. Can't find an implementation for FromString Int.
 
 Negative:17:12--17:17
- 13 | 
+ 13 |
  14 | bad_ass_type_mismatch : Statement TestOps vars regs (("x", Int')::vars) regs
  15 | bad_ass_type_mismatch = do
  16 |   Int'. "x"
@@ -55,9 +55,9 @@ and:
 Mismatch between: Type' and ?b -> ?c.
 
 Negative:35:19--35:23
- 31 | 
+ 31 |
  32 | --- Example statements ---
- 33 | 
+ 33 |
  34 | bad_for : Statement TestOps vars regs vars regs
  35 | bad_for = for (do Int'. "x" #= C 0; Int'. "y" #= C 0)
                         ^^^^
@@ -66,7 +66,7 @@ Error: While processing right hand side of bad_read_reg_base. Can't find an impl
 
 Negative:44:17--44:20
  40 | -- Registers-related --
- 41 | 
+ 41 |
  42 | bad_read_reg_base : Statement TestOps vars (Base [Nothing, Nothing, Just Int', Nothing]) vars (Base [Nothing, Nothing, Just Int', Nothing])
  43 | bad_read_reg_base = block $ do
  44 |   Int'. "x" !#= R 1
@@ -75,7 +75,7 @@ Negative:44:17--44:20
 Error: While processing right hand side of bad_read_reg_undef_with. Can't find an implementation for IsJust (index (natToFinLT 2) (With AllUndefined (FS (FS (FS FZ)), Just Int'))).
 
 Negative:49:17--49:20
- 45 | 
+ 45 |
  46 | bad_read_reg_undef_with : Statement TestOps vars (AllUndefined {rc=4} `With` (3, Just Int'))
  47 |                                     vars (AllUndefined {rc=4} `With` (3, Just Int'))
  48 | bad_read_reg_undef_with = block $ do
@@ -86,7 +86,7 @@ Error: While processing right hand side of bad_read_reg_with. Can't find an impl
 
 Negative:53:17--53:20
  49 |   Int'. "x" !#= R 2
- 50 | 
+ 50 |
  51 | bad_read_reg_with : {0 regs : Registers 5} -> Statement TestOps vars (regs `With` (3, Just Int')) vars (regs `With` (3, Just Int'))
  52 | bad_read_reg_with = block $ do
  53 |   Int'. "x" !#= R 2 + C 0
@@ -100,7 +100,7 @@ Mismatch between: FS (natToFinLT 2) and FZ.
 
 Negative:57:3--57:20
  53 |   Int'. "x" !#= R 2 + C 0
- 54 | 
+ 54 |
  55 | bad_registers_ass : {0 regs : Registers 5} -> Statement TestOps vars regs vars $ regs `With` (3, Just Int')
  56 | bad_registers_ass = block $ do
  57 |   Int'. "x" !#= C 0
@@ -110,7 +110,7 @@ Error: While processing right hand side of bad_registers_infer_nothing. Can't fi
 
 Negative:62:11--62:14
  58 |   6 %= V "x"
- 59 | 
+ 59 |
  60 | bad_registers_infer_nothing : Statement TestOps vars (AllUndefined {rc=4}) vars (AllUndefined {rc=4})
  61 | bad_registers_infer_nothing = block $ do
  62 |   "x" ?#= R 0
@@ -119,7 +119,7 @@ Negative:62:11--62:14
 Error: While processing right hand side of bad_if_access_local. Can't find an implementation for Lookup (MkName "x") ((Int' . MkName "y") :: vars).
 
 Negative:69:17--69:22
- 65 | 
+ 65 |
  66 | bad_if_access_local : {cond : Expression TestOps vars regs Bool'} -> Statement TestOps vars regs vars $ regs `Merge` regs
  67 | bad_if_access_local = block $ do
  68 |   if__ cond (Int'. "x" !#= C 1) (Int'. "x" !#= C 2)

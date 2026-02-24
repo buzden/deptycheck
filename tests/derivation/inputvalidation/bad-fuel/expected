@@ -3,59 +3,59 @@ Error: While processing right hand side of genY_noFuel_given. Error during refle
 
 ValidateInput:1
  12 |   MkY : Y Int String
- 13 | 
+ 13 |
  14 | --- No fuel argument ---
- 15 | 
+ 15 |
  16 | genY_noFuel_given : (a, b : Type) -> Gen MaybeEmpty $ Y a b
                                   ^^^^
 
 Error: While processing right hand side of genY_noFuel_given'. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
 ValidateInput:2
- 15 | 
+ 15 |
  16 | genY_noFuel_given : (a, b : Type) -> Gen MaybeEmpty $ Y a b
  17 | genY_noFuel_given = deriveGen
- 18 | 
+ 18 |
  19 | genY_noFuel_given' : Int -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
                            ^^^
 
 Error: While processing right hand side of genY_noFuel_given''. Error during reflection: The first argument must be of type `Fuel`
 
 ValidateInput:3
- 18 | 
+ 18 |
  19 | genY_noFuel_given' : Int -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
  20 | genY_noFuel_given' = deriveGen
- 21 | 
+ 21 |
  22 | genY_noFuel_given'' : X -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
                             ^
 
 Error: While processing right hand side of genY_noFuel_mid. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
 ValidateInput:4
- 21 | 
+ 21 |
  22 | genY_noFuel_given'' : X -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
  23 | genY_noFuel_given'' = deriveGen
- 24 | 
+ 24 |
  25 | genY_noFuel_mid : (b : Type) -> Gen MaybeEmpty (a ** Y a b)
                              ^^^^
 
 Error: While processing right hand side of genY_noFuel_mid'. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
 ValidateInput:5
- 24 | 
+ 24 |
  25 | genY_noFuel_mid : (b : Type) -> Gen MaybeEmpty (a ** Y a b)
  26 | genY_noFuel_mid = deriveGen
- 27 | 
+ 27 |
  28 | genY_noFuel_mid' : (b : Type) -> Gen MaybeEmpty $ DPair {a = Type, p = \a => Y a b}
                               ^^^^
 
 Error: While processing right hand side of genY_noFuel_gened. Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
 
 ValidateInput:6
- 27 | 
+ 27 |
  28 | genY_noFuel_mid' : (b : Type) -> Gen MaybeEmpty $ DPair {a = Type, p = \a => Y a b}
  29 | genY_noFuel_mid' = deriveGen
- 30 | 
+ 30 |
  31 | genY_noFuel_gened : Gen MaybeEmpty (a ** b ** Y a b)
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -63,19 +63,19 @@ Error: While processing right hand side of genY_missplFuel_aft. Error during ref
 
 ValidateInput:7
  32 | genY_noFuel_gened = deriveGen
- 33 | 
+ 33 |
  34 | --- Misplaced fuel argument ---
- 35 | 
+ 35 |
  36 | genY_missplFuel_aft : (a, b : Type) -> Fuel -> Gen MaybeEmpty $ Y a b
                                     ^^^^
 
 Error: While processing right hand side of genY_missplFuel_mid. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
 ValidateInput:8
- 35 | 
+ 35 |
  36 | genY_missplFuel_aft : (a, b : Type) -> Fuel -> Gen MaybeEmpty $ Y a b
  37 | genY_missplFuel_aft = deriveGen
- 38 | 
+ 38 |
  39 | genY_missplFuel_mid : (a : Type) -> Fuel -> (b : Type) -> Gen MaybeEmpty $ Y a b
                                  ^^^^
 
@@ -83,29 +83,29 @@ Error: While processing right hand side of genY_missplFuel_aft_imp. Error during
 
 ValidateInput:9
  46 | -- because even explicit setting type argument of `deriveGen` makes two signatures incompatible.
- 47 | 
+ 47 |
  48 | --- Misplaced + implicit fuel argument ---
- 49 | 
+ 49 |
  50 | genY_missplFuel_aft_imp : (a, b : Type) -> {_ : Fuel} -> Gen MaybeEmpty $ Y a b
                                         ^^^^
 
 Error: While processing right hand side of genY_missplFuel_mid_imp. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
 ValidateInput:10
- 49 | 
+ 49 |
  50 | genY_missplFuel_aft_imp : (a, b : Type) -> {_ : Fuel} -> Gen MaybeEmpty $ Y a b
  51 | genY_missplFuel_aft_imp = deriveGen
- 52 | 
+ 52 |
  53 | genY_missplFuel_mid_imp : (a : Type) -> {_ : Fuel} -> (b : Type) -> Gen MaybeEmpty $ Y a b
                                      ^^^^
 
 Error: While processing right hand side of genY_missplFuel_aft_autoimpl_imp. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
 ValidateInput:11
- 52 | 
+ 52 |
  53 | genY_missplFuel_mid_imp : (a : Type) -> {_ : Fuel} -> (b : Type) -> Gen MaybeEmpty $ Y a b
  54 | genY_missplFuel_mid_imp = deriveGen
- 55 | 
+ 55 |
  56 | genY_missplFuel_aft_autoimpl_imp : Gen MaybeEmpty X => {_ : Fuel} -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
                                                                                    ^^^^
 
@@ -113,49 +113,49 @@ Error: While processing right hand side of genY_unnamed_imp_fuel. Error during r
 
 ValidateInput:12
  57 | genY_missplFuel_aft_autoimpl_imp = deriveGen
- 58 | 
+ 58 |
  59 | --- Implicit fuel argument ---
- 60 | 
+ 60 |
  61 | genY_unnamed_imp_fuel : {_ : Fuel} -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
                                                     ^^^^
 
 Error: While processing right hand side of genY_named_imp_fuel. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
 ValidateInput:13
- 60 | 
+ 60 |
  61 | genY_unnamed_imp_fuel : {_ : Fuel} -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
  62 | genY_unnamed_imp_fuel = deriveGen
- 63 | 
+ 63 |
  64 | genY_named_imp_fuel : {f : Fuel} -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
                                                   ^^^^
 
 Error: While processing right hand side of genY_autoimp_fuel. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
 ValidateInput:14
- 63 | 
+ 63 |
  64 | genY_named_imp_fuel : {f : Fuel} -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
  65 | genY_named_imp_fuel = deriveGen
- 66 | 
+ 66 |
  67 | genY_autoimp_fuel : Fuel => (a, b : Type) -> Gen MaybeEmpty $ Y a b
                                           ^^^^
 
 Error: While processing right hand side of genY_defaulted_fuel. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
 ValidateInput:15
- 66 | 
+ 66 |
  67 | genY_autoimp_fuel : Fuel => (a, b : Type) -> Gen MaybeEmpty $ Y a b
  68 | genY_autoimp_fuel = deriveGen
- 69 | 
+ 69 |
  70 | genY_defaulted_fuel : {default Dry fuel : Fuel} -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
                                                                  ^^^^
 
 Error: While processing right hand side of genY_defaulted_fuel'. Error during reflection: The first argument must be explicit, unnamed, present at runtime and of type `Fuel`
 
 ValidateInput:16
- 69 | 
+ 69 |
  70 | genY_defaulted_fuel : {default Dry fuel : Fuel} -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
  71 | genY_defaulted_fuel = deriveGen
- 72 | 
+ 72 |
  73 | genY_defaulted_fuel' : {default (limit 120) fuel : Fuel} -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
                                                                           ^^^^
 
@@ -163,9 +163,9 @@ Error: While processing right hand side of genY_exp_named_fuel. Error during ref
 
 ValidateInput:17
  74 | genY_defaulted_fuel' = deriveGen
- 75 | 
+ 75 |
  76 | --- Named explicit fuel ---
- 77 | 
+ 77 |
  78 | genY_exp_named_fuel : (fuel : Fuel) -> (a, b : Type) -> Gen MaybeEmpty $ Y a b
                                     ^^^^
 
