@@ -64,13 +64,13 @@ deriveAll = do
       -- remember the derived stuff
       tell ([genFunClaim], [genFunBody])
 
-DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m where
+Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.DerivationClosure m = (DeriveBodyForType, Monad m, Elaboration m, ClosuringContext m)
 
-  needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
+Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
     modify {stateType=SortedSet Name} $ insert ty.name
     whenJust (deriveWeightingFun ty) $ tell . mapHom singleton
 
-  callGen sig fuel values = do
+Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.callGen sig fuel values = do
 
     -- look for external gens, and call it if exists
     let Nothing = lookupLengthChecked sig !ask
