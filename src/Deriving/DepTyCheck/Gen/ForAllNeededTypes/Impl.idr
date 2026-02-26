@@ -50,14 +50,14 @@ considerNewType ty = do
   _ : (NamesInfoInTypes, ConsRecs) <- get
   when .| not (isTypeKnown ty) .| updateNamesAndConsRecs ty >>= put
 
-DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m where
+Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.DerivationClosure m = (DeriveBodyForType, Monad m, Elaboration m, ClosuringContext m)
 
-  needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
+Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
     modify {stateType=SortedSet Name} $ insert ty.name
     _ : (NamesInfoInTypes, ConsRecs) <- get
     whenJust (deriveWeightingFun ty) $ tell . mapHom singleton
 
-  callGen sig fuel values = do
+Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.callGen sig fuel values = do
 
     -- look for external gens, and call it if exists
     let Nothing = lookupLengthChecked sig !ask

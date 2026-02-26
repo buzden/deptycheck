@@ -287,7 +287,7 @@ export
           let subfuel = if mutRec then fuel else var outmostFuelArg
 
           -- Form an expression to call the subgen
-          (subgenCall, reordering) <- callGen subsig subfuel $ snd <$> subgivens
+          (subgenCall, reordering) <- lift $ callGen {m} subsig subfuel $ snd <$> subgivens
 
           -- Form an expression of binding the result of subgen
           let genedArg:::subgeneratedArgs = genedArg:::subgeneratedArgs <&> bindVar . flip Vect.index bindNames
