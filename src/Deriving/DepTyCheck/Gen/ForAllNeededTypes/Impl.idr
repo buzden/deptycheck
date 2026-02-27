@@ -45,6 +45,11 @@ lookupLengthChecked intSig m = lookup intSig m >>= \(extSig, name) => (name,) <$
                                     Yes prf => Just $ Element extSig prf
                                     No _    => Nothing
 
+considerNewType : Elaboration m => ClosuringContext m => TypeInfo -> m ()
+considerNewType ty = do
+  _ : (NamesInfoInTypes, ConsRecs) <- get
+  when .| not (isTypeKnown ty) .| updateNamesAndConsRecs ty >>= put
+
 DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m where
 
   needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
@@ -64,7 +69,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
     startLoop <- get <* put False
 
     -- update names info in types and cons recs if the asked type is not there
-    _ <- considerNewType sig.targetType
+    considerNewType sig.targetType
 
     -- get the expression of calling the internal gen, derive if necessary
     internalGenCall <- do
@@ -97,12 +102,6 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m 
       (internalGenCall, Nothing)
 
     where
-
-      considerNewType : TypeInfo -> m (NamesInfoInTypes, ConsRecs)
-      considerNewType ty = do
-        nc : (NamesInfoInTypes, ConsRecs) <- get
-        let False = isTypeKnown ty | True => pure nc
-        updateNamesAndConsRecs sig.targetType >>= \x => put x $> x
 
       deriveOne : (GenSignature, Name) -> m ()
       deriveOne (sig, name) = do
