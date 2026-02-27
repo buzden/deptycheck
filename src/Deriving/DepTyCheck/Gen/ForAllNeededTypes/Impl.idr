@@ -67,49 +67,49 @@ deriveAll = do
 Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.DerivationClosure m = (DeriveBodyForType, Monad m, Elaboration m, ClosuringContext m)
 
 Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
-    modify {stateType=SortedSet Name} $ insert ty.name
-    whenJust (deriveWeightingFun ty) $ tell . mapHom singleton
+  modify {stateType=SortedSet Name} $ insert ty.name
+  whenJust (deriveWeightingFun ty) $ tell . mapHom singleton
 
 Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.callGen sig fuel values = do
 
-    -- look for external gens, and call it if exists
-    let Nothing = lookupLengthChecked sig !ask
-      | Just (name, Element extSig lenEq) =>
-          logValue Details "deptycheck.derive.closuring.external" [sig] "is used as an external generator" $
-            (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
+  -- look for external gens, and call it if exists
+  let Nothing = lookupLengthChecked sig !ask
+    | Just (name, Element extSig lenEq) =>
+        logValue Details "deptycheck.derive.closuring.external" [sig] "is used as an external generator" $
+          (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
 
-    -- check if we are the first, then we need to start the loop, and say that no one needs any more startups, we are in charge
-    startLoop <- get <* put False
+  -- check if we are the first, then we need to start the loop, and say that no one needs any more startups, we are in charge
+  startLoop <- get <* put False
 
-    -- get the expression of calling the internal gen, derive if necessary
-    internalGenCall <- do
+  -- get the expression of calling the internal gen, derive if necessary
+  internalGenCall <- do
 
-      -- look for existing (already derived) internals, use it if exists
-      let Nothing = List.Map.lookup sig !get
-        | Just name => pure $ callCanonic sig name fuel values
+    -- look for existing (already derived) internals, use it if exists
+    let Nothing = List.Map.lookup sig !get
+      | Just name => pure $ callCanonic sig name fuel values
 
-      -- nothing found, then derive! acquire the name
-      let name = nameForGen sig
+    -- nothing found, then derive! acquire the name
+    let name = nameForGen sig
 
-      -- remember that we're responsible for this signature derivation
-      modify $ List.Map.insert sig name
+    -- remember that we're responsible for this signature derivation
+    modify $ List.Map.insert sig name
 
-      -- remember the task to derive
-      modify {stateType=(List _, List _)} $ if isTypeKnown sig.targetType then mapFst $ (::) (sig, name) else mapSnd $ (::) (sig, name)
+    -- remember the task to derive
+    modify {stateType=(List _, List _)} $ if isTypeKnown sig.targetType then mapFst $ (::) (sig, name) else mapSnd $ (::) (sig, name)
 
-      -- return the name of the newly derived generator
-      pure $ callCanonic sig name fuel values
+    -- return the name of the newly derived generator
+    pure $ callCanonic sig name fuel values
 
-    -- if we were first to start the derivation loop, then...
-    when startLoop $ do
-      -- start the derivation loop itself
-      assert_total deriveAll
-      -- we now are not in charge of the derivation loop, so reset the flag
-      put True
+  -- if we were first to start the derivation loop, then...
+  when startLoop $ do
+    -- start the derivation loop itself
+    assert_total deriveAll
+    -- we now are not in charge of the derivation loop, so reset the flag
+    put True
 
-    -- call the internal gen
-    logValue DetailedDebug "deptycheck.derive.closuring.internal" [sig] "is used as an internal generator"
-      (internalGenCall, Nothing)
+  -- call the internal gen
+  logValue DetailedDebug "deptycheck.derive.closuring.internal" [sig] "is used as an internal generator"
+    (internalGenCall, Nothing)
 
 --- Canonic-dischagring function ---
 
