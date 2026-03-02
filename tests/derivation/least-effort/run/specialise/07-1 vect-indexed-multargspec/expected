@@ -1,0 +1,27 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.util.specialisation:10: Data.Vect.AtIndex.AtIndex[0(type), 1(n), 4(x)] Declared specialised type DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525: Data.Vect.AtIndex.AtIndex {type = Prelude.Types.Maybe Prelude.Basics.Bool} {n = lam^0} lam^1 lam^2 lam^3
+LOG deptycheck.util.specialisation:10: Data.Vect.Vect[0(len), 1(elem)] Declared specialised type DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186: Data.Vect.Vect lam^0 (Prelude.Types.Maybe Prelude.Basics.Bool)
+LOG deptycheck.util.specialisation:10: Prelude.Types.Maybe[0(ty)] Declared specialised type DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926: Prelude.Types.Maybe Prelude.Basics.Bool
+Generated values:
+-----
+-----
+([Just True, Nothing, Just True] ** Read 2 "@{There (There Here)}")
+-----
+([Nothing, Just False, Just True] ** Read 2 "@{There (There Here)}")
+-----
+([Just False, Just True, Just True] ** Read 2 "@{There (There Here)}")
+-----
+([Nothing, Just False, Just True] ** Read 2 "@{There (There Here)}")
+-----
+([Just False, Just True, Just True] ** Read 2 "@{There (There Here)}")
+-----
+([Nothing, Just True, Just True] ** Read 2 "@{There (There Here)}")
+-----
+([Nothing, Just False, Just True] ** Read 2 "@{There (There Here)}")
+-----
+([Nothing, Nothing, Just True] ** Read 2 "@{There (There Here)}")
+-----
+([Nothing, Nothing, Just True] ** Read 2 "@{There (There Here)}")
+-----
+([Just True, Nothing, Just False] ** Read 0 "@{Here}")
