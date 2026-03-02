@@ -261,7 +261,7 @@ mkDPairHelper (S n) helper t = do
 
 dPairHelper : Nat -> TTImp
 dPairHelper 0 = `(?)
-dPairHelper (S n) = `(DPair ? ~(dPairHelper n))
+dPairHelper (S n) = `(DPair ? $ \_ => ~(dPairHelper n))
 
 inSameNS : Name -> Name -> Name
 inSameNS (NS ns _) n = NS ns n
