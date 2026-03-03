@@ -37,6 +37,3 @@ if [ -e docs.ipkg ]; then
   flock "$1" pack -q install-deps docs.ipkg && \
   idris2 --build docs.ipkg
 fi
-
-# Post-cleanup
-rm -rf build src docs.ipkg
