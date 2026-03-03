@@ -16,13 +16,13 @@ Everyone should complete this track to master DepTyCheck fundamentals.
 
 | # | Tutorial |
 |---|----------|
-| 0 | [Installation and First Steps](00-installation-and-setup.md) |
-| 1 | [The Generator Monad](01-generator-monad.md) |
-| 2 | [Handling Emptiness](02-handling-emptiness.md) |
-| 3 | [Measuring Coverage](03-measuring-test-coverage.md) |
-| 4 | [Automatic Derivation](04-automatic-generator-derivation.md) |
-| 5 | [DeriveGen Signatures](05-derivegen-signatures.md) |
-| 6 | [Beyond Fuel](06-beyond-fuel.md) |
+| 0 | [Installation and First Steps](t00-installation-and-setup.md) |
+| 1 | [The Generator Monad](t01-generator-monad.md) |
+| 2 | [Handling Emptiness](t02-handling-emptiness.md) |
+| 3 | [Measuring Coverage](t03-measuring-test-coverage.md) |
+| 4 | [Automatic Derivation](t04-automatic-generator-derivation.md) |
+| 5 | [DeriveGen Signatures](t05-derivegen-signatures.md) |
+| 6 | [Beyond Fuel](t06-beyond-fuel.md) |
 
 **Prerequisites:** Basic Idris 2 knowledge (data types, functions, REPL)
 
@@ -34,11 +34,11 @@ Continue here after completing the Core Track.
 
 | # | Tutorial |
 |---|----------|
-| 7 | [Derivation Tuning](07-derivation-tuning.md) |
-| 8 | [Under the Hood](08-under-the-hood-a-derivegen-like-macro.md) |
-| 9 | [Mixing Manual and Automatic](09-mixing-manual-and-automatic.md) |
-| 10 | [Generating GADTs with Proofs](10-generating-gadts-with-proofs.md) |
-| 11 | [Real-World Example: DSL ASTs](11-real-world-example.md) |
+| 7 | [Derivation Tuning](t07-derivation-tuning.md) |
+| 8 | [Under the Hood](t08-under-the-hood-a-derivegen-like-macro.md) |
+| 9 | [Mixing Manual and Automatic](t09-mixing-manual-and-automatic.md) |
+| 10 | [Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md) |
+| 11 | [Real-World Example: DSL ASTs](t11-real-world-example.md) |
 
 **Prerequisites:** Core Track completion
 
@@ -50,18 +50,18 @@ Continue here after completing the Core Track.
 
 |      |            |
 |------|------------|
-| Install DepTyCheck | [Tutorial 0](00-installation-and-setup.md) |
-| Generate simple data types | [Tutorial 1](01-generator-monad.md) |
-| Handle types that might be empty | [Tutorial 2](02-handling-emptiness.md) |
-| Check if my generators are biased | [Tutorial 3](03-measuring-test-coverage.md) |
-| Stop writing generators by hand | [Tutorial 4](04-automatic-generator-derivation.md) |
-| Control what deriveGen generates | [Tutorial 5](05-derivegen-signatures.md) |
-| Understand recursion performance | [Tutorial 6](06-beyond-fuel.md) |
-| Fix biased automatic generators | [Tutorial 7](07-derivation-tuning.md) |
-| Build custom derivation strategies | [Tutorial 8](08-under-the-hood-a-derivegen-like-macro.md) |
-| Use my custom generators with deriveGen | [Tutorial 9](09-mixing-manual-and-automatic.md) |
-| Generate types with proof arguments | [Tutorial 10](10-generating-gadts-with-proofs.md) |
-| Generate complete programs for a DSL | [Tutorial 11](11-real-world-example.md) |
+| Install DepTyCheck | [Tutorial 0](t00-installation-and-setup.md) |
+| Generate simple data types | [Tutorial 1](t01-generator-monad.md) |
+| Handle types that might be empty | [Tutorial 2](t02-handling-emptiness.md) |
+| Check if my generators are biased | [Tutorial 3](t03-measuring-test-coverage.md) |
+| Stop writing generators by hand | [Tutorial 4](t04-automatic-generator-derivation.md) |
+| Control what deriveGen generates | [Tutorial 5](t05-derivegen-signatures.md) |
+| Understand recursion performance | [Tutorial 6](t06-beyond-fuel.md) |
+| Fix biased automatic generators | [Tutorial 7](t07-derivation-tuning.md) |
+| Build custom derivation strategies | [Tutorial 8](t08-under-the-hood-a-derivegen-like-macro.md) |
+| Use my custom generators with deriveGen | [Tutorial 9](t09-mixing-manual-and-automatic.md) |
+| Generate types with proof arguments | [Tutorial 10](t10-generating-gadts-with-proofs.md) |
+| Generate complete programs for a DSL | [Tutorial 11](t11-real-world-example.md) |
 
 ---
 

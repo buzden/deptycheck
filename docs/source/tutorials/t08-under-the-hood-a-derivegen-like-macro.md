@@ -23,7 +23,7 @@ In this tutorial, we will implement our own versions of both of these experts.
 ## Prerequisites
 
 -   A good understanding of Idris's interfaces (type classes).
--   Completion of all previous tutorials, especially [Advanced Derivation Tuning](07-derivation-tuning.md).
+-   Completion of all previous tutorials, especially [Advanced Derivation Tuning](t07-derivation-tuning.md).
 
 
 ---

@@ -15,7 +15,7 @@ In this tutorial, we will use a single, running exampleâ€”a file system `Entry`â
 
 ## Prerequisites
 
--   Completion of [Installation and First Steps](00-installation-and-setup.md) and the tutorials on [manual generation](01-generator-monad.md), [emptiness](02-handling-emptiness.md), and [coverage analysis](03-measuring-test-coverage.md).
+-   Completion of [Installation and First Steps](t00-installation-and-setup.md) and the tutorials on [manual generation](t01-generator-monad.md), [emptiness](t02-handling-emptiness.md), and [coverage analysis](t03-measuring-test-coverage.md).
 
 ---
 
@@ -187,6 +187,6 @@ This powerful pattern allows you to create highly flexible generators that adapt
 
 Now that you know how to automatically generate data and provide hints, you are ready for more advanced topics:
 
-*   **Want to learn how to control what gets generated?** Continue to **[DeriveGen Signatures](05-derivegen-signatures.md)** to learn how to use given vs generated parameters and dependent pairs in signatures.
-*   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel](06-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
-*   **How do I fix a biased generator or control generation order?** The default derivation strategy is smart, but sometimes needs more specific guidance. Continue to **[Derivation Tuning](07-derivation-tuning.md)** to learn how to use `instance` declarations to control constructor probabilities and argument generation order.
+*   **Want to learn how to control what gets generated?** Continue to **[DeriveGen Signatures](t05-derivegen-signatures.md)** to learn how to use given vs generated parameters and dependent pairs in signatures.
+*   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel](t06-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
+*   **How do I fix a biased generator or control generation order?** The default derivation strategy is smart, but sometimes needs more specific guidance. Continue to **[Derivation Tuning](t07-derivation-tuning.md)** to learn how to use `instance` declarations to control constructor probabilities and argument generation order.

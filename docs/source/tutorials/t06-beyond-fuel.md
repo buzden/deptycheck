@@ -15,7 +15,7 @@ You will learn why this happens, how to recognize the difference between **`Spen
 
 ## Prerequisites
 
--   All previous tutorials, especially [Automatic Generator Derivation](04-automatic-generator-derivation.md).
+-   All previous tutorials, especially [Automatic Generator Derivation](t04-automatic-generator-derivation.md).
 
 ---
 
@@ -191,6 +191,6 @@ This is the core optimization: when the type system guarantees termination throu
 
 Now that you understand how `deriveGen` handles recursion, you are ready for more advanced topics:
 
-*   **Want to fix biased generators?** Continue to **[Derivation Tuning](07-derivation-tuning.md)** to learn how to use `ProbabilityTuning` and `GenOrderTuning` instances.
-*   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](09-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
-*   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](10-generating-gadts-with-proofs.md)** to see how `deriveGen` handles auto-implicit proof arguments.
+*   **Want to fix biased generators?** Continue to **[Derivation Tuning](t07-derivation-tuning.md)** to learn how to use `ProbabilityTuning` and `GenOrderTuning` instances.
+*   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t09-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
+*   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md)** to see how `deriveGen` handles auto-implicit proof arguments.

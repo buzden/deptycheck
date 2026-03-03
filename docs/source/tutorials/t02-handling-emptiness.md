@@ -1,6 +1,6 @@
 # 2. Handling Emptiness: When a Type Has No Values
 
-In the [first tutorial](01-generator-monad.md), we used `Gen1`, which is a guarantee—a promise—that a value can always be generated. This works perfectly for types like `Nat` or `String` that always have inhabitants.
+In the [first tutorial](t01-generator-monad.md), we used `Gen1`, which is a guarantee—a promise—that a value can always be generated. This works perfectly for types like `Nat` or `String` that always have inhabitants.
 
 But what happens when a type might be **uninhabited** (have no values at all) under certain conditions?
 
@@ -28,7 +28,7 @@ Nothing : Maybe (Fin 0)
 
 ## Prerequisites
 
-This tutorial assumes you have completed [Installation and First Steps](00-installation-and-setup.md) and the first tutorial, ["The Generator Monad"](01-generator-monad.md).
+This tutorial assumes you have completed [Installation and First Steps](t00-installation-and-setup.md) and the first tutorial, ["The Generator Monad"](t01-generator-monad.md).
 
 ---
 
@@ -163,4 +163,4 @@ This demonstrates another critical aspect of `Gen0`: it allows for speculative g
 
 Now that you've mastered manual generation for both simple and complex types, it's time to see how `DepTyCheck` can do this work for you automatically.
 
-*   **Next Tutorial:** Continue to **[Measuring Your Test Coverage](03-measuring-test-coverage.md)** to learn how to analyze the quality of your generated data.
+*   **Next Tutorial:** Continue to **[Measuring Your Test Coverage](t03-measuring-test-coverage.md)** to learn how to analyze the quality of your generated data.

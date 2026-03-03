@@ -20,7 +20,7 @@ MkProfile "Alice" 37 : UserProfile
 
 ## Prerequisites
 
-This tutorial assumes you have completed [Installation and First Steps](00-installation-and-setup.md) and have a working Idris 2 installation with DepTyCheck configured.
+This tutorial assumes you have completed [Installation and First Steps](t00-installation-and-setup.md) and have a working Idris 2 installation with DepTyCheck configured.
 
 ---
 
@@ -225,5 +225,5 @@ Finally, let's generate a list of test users. You can use the `listOf` combinato
 
 You've mastered the basics. Where you go next depends on your needs:
 
-*   **Want to handle types that might be empty?** Continue to [Handling Emptiness](02-handling-emptiness.md) to learn about `Gen0`, `empty`, and `pick`.
-*   **Ready to have `DepTyCheck` do the work for you?** Continue to [Automatic Generator Derivation](04-automatic-generator-derivation.md) to learn about `deriveGen`.
+*   **Want to handle types that might be empty?** Continue to [Handling Emptiness](t02-handling-emptiness.md) to learn about `Gen0`, `empty`, and `pick`.
+*   **Ready to have `DepTyCheck` do the work for you?** Continue to [Automatic Generator Derivation](t04-automatic-generator-derivation.md) to learn about `deriveGen`.

@@ -15,7 +15,7 @@ By the end, you will:
 
 ## Prerequisites
 
--   Completion of [Tutorial 5: DeriveGen Signatures](05-derivegen-signatures.md)
+-   Completion of [Tutorial 5: DeriveGen Signatures](t05-derivegen-signatures.md)
 -   Understanding of dependent pairs and indexed types
 
 ---
@@ -194,5 +194,5 @@ The `{auto prf : n `LT` limit}` constraint ensures that only values less than th
 
 Now that you can generate proof-carrying data, you are ready for more advanced topics:
 
-*   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](09-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
-*   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](08-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
+*   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t09-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
+*   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t08-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.

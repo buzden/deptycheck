@@ -16,7 +16,7 @@ This will give you a deep understanding of how to use signatures to control `der
 
 ## Prerequisites
 
--   All previous tutorials, especially [Measuring Your Test Coverage](03-measuring-test-coverage.md).
+-   All previous tutorials, especially [Measuring Your Test Coverage](t03-measuring-test-coverage.md).
 
 ---
 
@@ -154,5 +154,5 @@ Let's combine the patterns we've learned. Our final generator will be the most f
 
 Now that you know how to control `deriveGen` through signatures, you are ready for more advanced topics:
 
-*   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel: Structural Recursion](06-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
-*   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](10-generating-gadts-with-proofs.md)** to see how `deriveGen` handles types like `SortedList`.
+*   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel: Structural Recursion](t06-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
+*   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md)** to see how `deriveGen` handles types like `SortedList`.

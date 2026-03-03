@@ -17,7 +17,7 @@ TrafficLight covered fully (1000 times)
 
 ## Prerequisites
 
-This tutorial assumes you have completed [Installation and First Steps](00-installation-and-setup.md) and the first two tutorials on [basic generation](01-generator-monad.md) and [emptiness handling](02-handling-emptiness.md).
+This tutorial assumes you have completed [Installation and First Steps](t00-installation-and-setup.md) and the first two tutorials on [basic generation](t01-generator-monad.md) and [emptiness handling](t02-handling-emptiness.md).
 
 ---
 
@@ -163,4 +163,4 @@ Besides aggregated reports, labels are also an invaluable tool for debugging. Yo
 
 Now that you can write, run, and measure generators manually, it's time to learn how `DepTyCheck` can do all of this for you automatically.
 
-*   **Next Tutorial:** Continue to **[Automatic Generator Derivation](04-automatic-generator-derivation.md)** to learn how to use `deriveGen`.
+*   **Next Tutorial:** Continue to **[Automatic Generator Derivation](t04-automatic-generator-derivation.md)** to learn how to use `deriveGen`.

@@ -195,4 +195,4 @@ Green : TrafficLight
 
 Now that you have a working setup, you are ready to learn the fundamentals of generator creation:
 
-*   **Continue to Tutorial 1:** [The Generator Monad](01-generator-monad.md) to learn how to create generators manually using `pure`, `elements`, `choose`, and other combinators.
+*   **Continue to Tutorial 1:** [The Generator Monad](t01-generator-monad.md) to learn how to create generators manually using `pure`, `elements`, `choose`, and other combinators.

@@ -419,9 +419,9 @@ Now that you can generate complex ASTs, you're ready for real-world applications
 
 *   **Test an interpreter:** Use your generated PIL programs to test a language interpreter with property-based testing.
 *   **Add more language features:** Extend the language with functions, arrays, or I/O operations.
-*   **Integrate custom generators:** Continue to **[Mixing Manual and Automatic](09-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
-*   **Control distribution:** Continue to **[Derivation Tuning](07-derivation-tuning.md)** to learn how to fine-tune constructor probabilities for more realistic program distributions.
-*   **Understand the internals:** Continue to **[Under the Hood](08-under-the-hood-a-derivegen-like-macro.md)** to see how `deriveGen` works internally.
+*   **Integrate custom generators:** Continue to **[Mixing Manual and Automatic](t09-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
+*   **Control distribution:** Continue to **[Derivation Tuning](t07-derivation-tuning.md)** to learn how to fine-tune constructor probabilities for more realistic program distributions.
+*   **Understand the internals:** Continue to **[Under the Hood](t08-under-the-hood-a-derivegen-like-macro.md)** to see how `deriveGen` works internally.
 
 The complete `PILTutorial.idr` file is available for reference. You can find it in the DepTyCheck examples or build it step-by-step following this tutorial.
 

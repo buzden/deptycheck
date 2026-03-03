@@ -1,6 +1,6 @@
 # 9. Mixing Manual and Automatic Generation
 
-In the [previous tutorial](05-derivegen-signatures.md), we saw how to control what `deriveGen` generates by crafting function signatures. We also saw how to give it "hints" for primitive types like `String` using the `=>` syntax.
+In the [previous tutorial](t05-derivegen-signatures.md), we saw how to control what `deriveGen` generates by crafting function signatures. We also saw how to give it "hints" for primitive types like `String` using the `=>` syntax.
 
 But what if you have a custom data type that needs a special, handwritten generator? `DepTyCheck` provides a powerful, "magic" feature: if you define a generator for a type, `deriveGen` will automatically find it and use it.
 
@@ -10,7 +10,7 @@ We will define a `SpecialString` newtype and write a custom generator for it. We
 
 ## Prerequisites
 
-This tutorial assumes you have completed [Tutorial 5: DeriveGen Signatures](05-derivegen-signatures.md).
+This tutorial assumes you have completed [Tutorial 5: DeriveGen Signatures](t05-derivegen-signatures.md).
 
 ---
 
@@ -81,4 +81,4 @@ It works! `deriveGen` automatically found and used our `genSpecialString` functi
 
 ## Next Steps
 
-*   **Continue to the next tutorial:** [Generating GADTs with Proofs](10-generating-gadts-with-proofs.md) to see how these techniques apply to even more advanced types.
+*   **Continue to the next tutorial:** [Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md) to see how these techniques apply to even more advanced types.
