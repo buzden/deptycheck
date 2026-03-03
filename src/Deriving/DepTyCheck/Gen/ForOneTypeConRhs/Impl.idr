@@ -48,15 +48,14 @@ record TypeApp (0 con : Con) where
   argHeadType : TypeInfo
   {auto 0 argHeadTypeGood : AllTyArgsNamed argHeadType}
   argApps : Vect argHeadType.args.length .| Either (Fin con.args.length) TTImp
-  determ  : Determination con
 
-getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length $ TypeApp con
+getTypeApps : Elaboration m => NamesInfoInTypes => (con : Con) -> m $ Vect con.args.length (TypeApp con, Determination con)
 getTypeApps con = do
   let conArgIdxs = SortedMap.fromList $ mapI con.args $ \idx, arg => (argName' arg, idx)
 
   -- Analyse that we can do subgeneration for each constructor argument
   -- Fails using `Elaboration` if the given expression is not an application to a type constructor
-  let analyseTypeApp : TTImp -> m $ TypeApp con
+  let analyseTypeApp : TTImp -> m (TypeApp con, Determination con)
       analyseTypeApp expr = do
         let (lhs, args) = unAppAny expr
         ty <- case lhs of
@@ -80,7 +79,7 @@ getTypeApps con = do
         let strongDeterminationWeight = concatMap @{Additive} (max 1 . length) strongDetermination -- we add 1 for constant givens
         let stronglyDeterminedBy = fromList $ join strongDetermination
         let argsDependsOn = fromList (lefts as.asList) `difference` stronglyDeterminedBy
-        pure $ MkTypeApp ty as $ MkDetermination stronglyDeterminedBy argsDependsOn $ argsDependsOn.size + strongDeterminationWeight
+        pure (MkTypeApp ty as, MkDetermination stronglyDeterminedBy argsDependsOn $ argsDependsOn.size + strongDeterminationWeight)
 
   for con.args.asVect $ analyseTypeApp . type
 
@@ -229,7 +228,7 @@ export
     -------------------------------------------------------------
 
     -- Compute left-to-right need of generation when there are non-trivial types at the left
-    argsTypeApps <- getTypeApps con
+    (argsTypeApps, argsDeterms) <- unzip <$> getTypeApps con
 
     -- Decide how constructor arguments would be named during generation
     let bindNames = argName' <$> fromList con.args
@@ -252,7 +251,7 @@ export
         genForOrder order = map (foldr apply callCons) $ evalStateT givs $ for order $ \genedArg => do
 
           -- Get info for the `genedArg`
-          let MkTypeApp typeOfGened argsOfTypeOfGened _ = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
+          let MkTypeApp typeOfGened argsOfTypeOfGened = index genedArg $ the (Vect _ $ TypeApp con) argsTypeApps
 
           -- Acquire the set of arguments that are already present
           presentArguments <- get
@@ -308,7 +307,7 @@ export
     --------------------------------------------
 
     -- Compute determination map without weak determination information
-    let determ = insertFrom' empty $ mapI (\i, ta => (i, ta.determ)) argsTypeApps
+    let determ = insertFrom' empty $ withIndex argsDeterms
 
     logPoint Debug "deptycheck.derive.least-effort" [sig, con] "- determ: \{determ}"
     logPoint Debug "deptycheck.derive.least-effort" [sig, con] "- givs: \{givs}"
