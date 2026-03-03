@@ -159,18 +159,6 @@ This demonstrates another critical aspect of `Gen0`: it allows for speculative g
 
 ---
 
-## Congratulations!
-
-You can now write safe, robust generators for complex dependent types and are prepared to handle the full range of data-generating scenarios.
-
-In this tutorial, you learned how to:
-
-*   ✅ Identify types that can be uninhabited (empty).
-*   ✅ Use `Gen0` to define a generator that might not produce a value.
-*   ✅ Use `empty` to explicitly mark a generation path as impossible.
-*   ✅ Use `pick` to safely run a `Gen0` and handle the resulting `Maybe` value.
-*   ✅ Create filtered generators with `suchThat` and understand why they must also be `Gen0`.
-
 ## Next Steps
 
 Now that you've mastered manual generation for both simple and complex types, it's time to see how `DepTyCheck` can do this work for you automatically.

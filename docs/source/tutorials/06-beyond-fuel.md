@@ -187,16 +187,6 @@ This is the core optimization: when the type system guarantees termination throu
 
 ---
 
-## Congratulations!
-
-You now understand the sophisticated, two-pronged approach `deriveGen` uses to handle recursion safely and efficiently. This knowledge will help you design data types that can be generated more effectively and to reason about the performance of your generators.
-
-In this tutorial, you learned:
-
-*   ✅ **`SpendingFuel` Recursion:** The default behavior for simple recursive types like `PNat` or `List`, where each recursive step consumes one unit of fuel.
-*   ✅ **`StructurallyDecreasing` Recursion:** An advanced optimization for indexed types like `Fin` or `Vect`, where `deriveGen` proves termination from type indices and doesn't spend fuel.
-*   ✅ **Under the Hood:** How `deriveGen` translates to manual Fuel pattern matching, and why the two recursion types generate different code.
-
 ## Next Steps
 
 Now that you understand how `deriveGen` handles recursion, you are ready for more advanced topics:

@@ -77,9 +77,7 @@ It works! `deriveGen` automatically found and used our `genSpecialString` functi
 2.  **Explicit (`=>` syntax):** As seen in Tutorial 4, you can add a `(Fuel -> Gen MaybeEmpty String) =>` constraint to the signature.
     *   **When to use:** This is best when you want to provide a generator for a *primitive* or *built-in* type (like `String`, `Nat`, `List`), or when you want the caller to be able to supply *different* generators in different contexts.
 
-## Congratulations!
-
-You've learned how to seamlessly mix automatic and manual generation, giving you the perfect balance of convenience and control.
+---
 
 ## Next Steps
 

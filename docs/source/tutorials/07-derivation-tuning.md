@@ -143,19 +143,6 @@ data LtPair : Type where
 
 ---
 
-## Congratulations!
-
-You have now learned the true, advanced methods for controlling `DepTyCheck`'s derivation engine. By implementing the tuning interfaces, you can provide expert guidance to the compiler, resulting in efficient and well-distributed test data for any data type.
-
-In this tutorial, you learned how to:
-
-*   ✅ **Prove Bias:** Use coverage analysis to find and prove when a default generator is not producing a good data distribution.
-*   ✅ **Tune Probabilities:** Implement the `ProbabilityTuning` interface to fix biases by giving a constructor a new `Weight`.
-*   ✅ **Tune Generation Order:** Implement the `GenOrderTuning` interface to tell `deriveGen` which arguments to generate first, making generation for constrained dependent types more efficient.
-*   ✅ Use advanced Idris features like `instance` declarations and `Name` literals to apply these tuning rules.
-
-This completes the advanced derivation tuning tutorial! You now have the tools to control `deriveGen`'s behavior for any data type.
-
 ## Next Steps
 
 *   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](09-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.

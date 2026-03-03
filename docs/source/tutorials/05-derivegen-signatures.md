@@ -150,18 +150,6 @@ Let's combine the patterns we've learned. Our final generator will be the most f
 
 ---
 
-## Congratulations!
-
-You have learned to 'speak' to `deriveGen` through its most powerful interface: the type signature. You are no longer just asking it to generate a type; you are giving it a precise blueprint of your intent.
-
-By crafting the signature, you can control what `deriveGen` does:
-
-*   ✅ **Given Parameters (`(n : Nat) -> ...`):** Arguments before `Fuel` are treated as fixed runtime inputs.
-*   ✅ **Generated Parameters (`... -> Gen (n ** Vect n a)`):** Using `**` in the return type tells `deriveGen` to invent a value for that parameter for you.
-*   ✅ **External Generator Hints (`(...) => ...`):** A constraint tells `deriveGen` to use a generator you provide for a specific type.
-
-Mastering these three patterns gives you the power to create flexible, reusable, and precise automatic generators for indexed types like `Vect` and `Fin`.
-
 ## Next Steps
 
 Now that you know how to control `deriveGen` through signatures, you are ready for more advanced topics:

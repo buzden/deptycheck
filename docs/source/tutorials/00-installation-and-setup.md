@@ -191,18 +191,6 @@ Green : TrafficLight
 
 ---
 
-## Congratulations!
-
-You have successfully set up Idris 2 and DepTyCheck, created your first project, and run an automatic generator.
-
-In this tutorial, you learned:
-
-*   ✅ How to install Idris 2 and DepTyCheck
-*   ✅ How to create a project with the correct dependencies
-*   ✅ How to define a data type and derive a generator
-*   ✅ How to build and run a DepTyCheck project
-*   ✅ How to use the REPL for interactive testing
-
 ## Next Steps
 
 Now that you have a working setup, you are ready to learn the fundamentals of generator creation:

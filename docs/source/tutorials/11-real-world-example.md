@@ -253,7 +253,7 @@ Now let's generate complete programs with multiple statements.
     Expected output:
     ```
     --- Generating a random program (5 statements) ---
-    MkProgram 
+    MkProgram
       [ Assign "x" (Lit 5)
       , If (Lt (Var "x") (Lit 10)) (Assign "y" (Lit 10)) Skip
       , Seq Skip (Assign "z" (Lit 7))
@@ -378,11 +378,11 @@ Let's verify that our generated programs have certain properties.
       replicate 10 $ do
         Just prog <- pick1 (genProgram 3 (limit 3))
           | Nothing => putStrLn "Generation failed"
-        
+
         let hasAnyAssign = any hasAssign (case prog of MkProgram stmts => stmts)
         let hasAnyLoop = any hasLoop (case prog of MkProgram stmts => stmts)
         let count = stmtCount prog
-        
+
         putStrLn $ "Program with " ++ show count ++ " statements"
         putStrLn $ "  Has assignment: " ++ show hasAnyAssign
         putStrLn $ "  Has loop: " ++ show hasAnyLoop
@@ -413,19 +413,6 @@ Let's verify that our generated programs have certain properties.
 
 ---
 
-## Congratulations!
-
-You have built a complete AST generator for a simple imperative language!
-
-In this tutorial, you learned:
-
-*   ✅ How to define expression and statement types for a domain-specific language
-*   ✅ How to create both automatic (`deriveGen`) and hand-written generators
-*   ✅ How to control program size and complexity with Fuel
-*   ✅ How to generate complete programs with multiple statements
-*   ✅ How to add type safety with indexed types (optional advanced step)
-*   ✅ How to test properties of generated programs
-
 ## Next Steps
 
 Now that you can generate complex ASTs, you're ready for real-world applications:
@@ -436,8 +423,5 @@ Now that you can generate complex ASTs, you're ready for real-world applications
 *   **Control distribution:** Continue to **[Derivation Tuning](07-derivation-tuning.md)** to learn how to fine-tune constructor probabilities for more realistic program distributions.
 *   **Understand the internals:** Continue to **[Under the Hood](08-under-the-hood-a-derivegen-like-macro.md)** to see how `deriveGen` works internally.
 
----
-
-### Complete File Reference
-
 The complete `PILTutorial.idr` file is available for reference. You can find it in the DepTyCheck examples or build it step-by-step following this tutorial.
+

@@ -100,11 +100,11 @@ Now we need to create the manager that understands the `Simple` type as a whole.
         -- Get constructor info: B first (non-recursive), then A (recursive)
         let [conB, conA] = sig.targetType.cons
         let emptyGivs = empty  -- No given constructor arguments for Simple
-        
+
         -- Get the code for the two constructor bodies using our named strategies
         b_body <- consGenExpr @{MyStrategy} sig conB emptyGivs (var "fuel")
         a_body <- consGenExpr @{MyStrategy} sig conA emptyGivs (var "fuel")
-        
+
         -- Our biased logic!
         let body = `(case fuel of
                        Dry => ~b_body -- Out of fuel, MUST choose B
@@ -125,7 +125,7 @@ We have now defined a complete, custom derivation pipeline. All that's left is t
 
 ## Step 4: Create the Top-Level Macro
 
-Users don't interact with `DeriveBodyForType` directly. They use the `deriveGen` macro. The `deriveGen` function takes an optional `@` argument providing the core derivation logic. By default, this is `MainCoreDerivator @{LeastEffort}`. 
+Users don't interact with `DeriveBodyForType` directly. They use the `deriveGen` macro. The `deriveGen` function takes an optional `@` argument providing the core derivation logic. By default, this is `MainCoreDerivator @{LeastEffort}`.
 
 We will create our own macro, `myDeriveGen`, that simply calls `deriveGen` but passes our custom `MyTypeStrategy` instead.
 
@@ -243,17 +243,6 @@ main = do
 🔍 **Notice:** You can copy this complete file to `MyDerive.idr` and run it with `idris2 --build MyDerive.idr && ./build/exec/MyDerive`.
 
 ---
-
-## Congratulations!
-
-You have built a working derivation macro from scratch. You now understand the fundamental architecture of `DepTyCheck`'s derivation engine and have seen that it is not magic, but a well-structured system of extensible interfaces. This is the deepest level of `DepTyCheck` mastery.
-
-In this tutorial, you learned:
-
-*   ✅ The core interfaces of the derivation engine: `DeriveBodyForType` and `DeriveBodyRhsForCon`.
-*   ✅ How the "Type Expert" delegates work to "Constructor Experts".
-*   ✅ How to implement these interfaces to create a custom derivation strategy.
-*   ✅ How to wrap up your custom logic in a top-level macro that acts just like `deriveGen`.
 
 ## Path to Contribution
 

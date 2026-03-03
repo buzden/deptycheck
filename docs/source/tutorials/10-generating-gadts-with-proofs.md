@@ -190,18 +190,6 @@ The `{auto prf : n `LT` limit}` constraint ensures that only values less than th
 
 ---
 
-## Congratulations!
-
-You have learned how to generate GADTs with proof constraints using `deriveGen`. This is one of the most powerful features of DepTyCheck — it can automatically handle complex dependent types with minimal manual intervention.
-
-In this tutorial, you learned:
-
-*   ✅ How to define a GADT with auto-implicit proof arguments
-*   ✅ How to derive a generator with a single `deriveGen` call
-*   ✅ How `deriveGen` automatically searches for values that satisfy proof constraints
-*   ✅ How fuel affects the depth of recursive generation
-*   ✅ How to verify that generated data satisfies the constraints
-
 ## Next Steps
 
 Now that you can generate proof-carrying data, you are ready for more advanced topics:

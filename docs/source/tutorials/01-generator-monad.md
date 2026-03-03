@@ -221,21 +221,6 @@ Finally, let's generate a list of test users. You can use the `listOf` combinato
 
 ---
 
-## Congratulations!
-
-You've learned the fundamentals of creating test data generators with `DepTyCheck`.
-
-You now know how to:
-*   ✅ Create a simple, constant generator with `pure`.
-*   ✅ Generate random numbers and pick from lists with `choose` and `elements`.
-*   ✅ Combine simple recipes into complex ones using `<$>` and `<*>`.
-*   ✅ Create weighted and unweighted choices with `frequency` and `oneOf`.
-*   ✅ Create dependent values using `do` notation.
-*   ✅ Generate a collection of random data with `listOf`.
-*   ✅ Run any generator to see the result using `pick1`.
-
-This pattern of building small, simple recipes and combining them into larger ones is the core of `DepTyCheck`.
-
 ## Next Steps
 
 You've mastered the basics. Where you go next depends on your needs:

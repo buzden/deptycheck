@@ -157,16 +157,7 @@ Besides aggregated reports, labels are also an invaluable tool for debugging. Yo
     ```
     In the first run, the label `"Red"` was printed to the console the moment the corresponding generator was executed. In the second run, no labels were printed. For a deeply nested generator, this trace allows you to understand exactly which path was taken to produce a specific problematic value.
 
-## Congratulations!
-
-You can now generate, analyze, and debug your test generators using labels.
-
-In this tutorial, you learned how to:
-
-*   ✅ Use `label` to instrument different paths in your generator.
-*   ✅ **Aggregate Constructor Coverage:** Use `initCoverageInfo`, `unGenTryND`, and `registerCoverage` to produce a report on which constructors were hit.
-*   ✅ **Debug Single Runs:** Use `PrintAllLabels` with `pick1` to trace the execution of a single generator run.
-*   ✅ Understand that runners like `pick1` use a default `IgnoreLabels` implementation that can be overridden with the `@{...}` syntax.
+---
 
 ## Next Steps
 

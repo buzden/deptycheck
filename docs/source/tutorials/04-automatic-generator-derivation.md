@@ -183,16 +183,6 @@ This powerful pattern allows you to create highly flexible generators that adapt
 
 ---
 
-## Congratulations!
-
-You have now unlocked the core power of `DepTyCheck`. You can say goodbye to writing boilerplate generators and let the compiler do the work for you, while still providing guidance when needed.
-
-In this tutorial, you learned:
-
-*   ✅ How to replace a complex, manual recursive generator with a single `deriveGen` macro.
-*   ✅ How to provide a **custom generator** for a base type like `String` by adding a `=>` constraint to the signature.
-*   ✅ How to pass **runtime arguments** to a derived generator to make it more flexible and context-aware.
-
 ## Next Steps
 
 Now that you know how to automatically generate data and provide hints, you are ready for more advanced topics:
