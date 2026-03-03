@@ -1,0 +1,11 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+Error: DerivedGen.case block in $resolved1 is not accessible in this context.
+
+DerivedGen:1
+ 5 | %default total
+ 6 |
+ 7 | %language ElabReflection
+ 8 |
+ 9 | data X : (b : Bool) -> (if b then Unit else Nat) -> Type where
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+

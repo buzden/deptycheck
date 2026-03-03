@@ -1,0 +1,24 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Generated values:
+-----
+-----
+X being applied to Z is: 17
+-----
+X being applied to Z is: 5
+-----
+X being applied to Z is: 18
+-----
+X being applied to Z is: 11
+-----
+X being applied to Z is: 11
+-----
+X being applied to Z is: 18
+-----
+X being applied to Z is: 6
+-----
+X being applied to Z is: 5
+-----
+X being applied to Z is: 13
+-----
+X being applied to Z is: 12
