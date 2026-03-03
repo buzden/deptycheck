@@ -17,44 +17,36 @@ By the end, you will:
 
 -   Completion of [Tutorial 5: DeriveGen Signatures](t05-derivegen-signatures.md)
 -   Understanding of dependent pairs and indexed types
+-   Idris2 source file `./src/Playground.idr` with the header:
 
----
+```idris
+import Deriving.DepTyCheck.Gen
+import System.Random.Pure.StdGen
+```
 
 ## Step 1: Define a SortedList Type
 
 First, let's define a list type that is guaranteed to be sorted. The key is that the `SCons` constructor requires a proof that adding a new element maintains sortedness.
 
-1.  **Create a new file** named `SortedListTutorial.idr`.
+```idris
+isSorted : List Nat -> Bool
+isSorted [] = True
+isSorted [_] = True
+isSorted (x :: y :: xs) = x <= y && isSorted (y :: xs)
 
-2.  **Add the following code.**
+mutual
+  data SortedList : Type where
+    SNil : SortedList
+    SCons : (x : Nat) -> (xs : SortedList) -> {auto prf : So $ isSorted (x :: toList xs)} -> SortedList
 
-    ```idris
-    module SortedListTutorial
+  toList : SortedList -> List Nat
+  toList SNil = []
+  toList (SCons x xs) = x :: toList xs
+```
 
-    import Deriving.DepTyCheck.Gen
-    import Data.Fuel
-
-    import Test.DepTyCheck.Gen
-    import Test.DepTyCheck.Runner
-    import System.Random.Pure.StdGen
-
-    data SortedList : Type where
-      SNil : SortedList
-      SCons : (x : Nat) -> (xs : SortedList) -> {auto prf : isSorted (x :: toList xs)} -> SortedList
-
-    toList : SortedList -> List Nat
-    toList SNil = []
-    toList (SCons x xs prf) = x :: toList xs
-
-    isSorted : List Nat -> Bool
-    isSorted [] = True
-    isSorted [_] = True
-    isSorted (x :: y :: xs) = x <= y && isSorted (y :: xs)
-    ```
-
-    The `SCons` constructor has an **auto-implicit** argument `{auto prf : isSorted (x :: toList xs)}`. This means:
-    -   To construct an `SCons`, Idris must find a proof that the list is sorted.
-    -   The `auto` keyword tells Idris to search for this proof automatically.
+The `SCons` constructor has an **auto-implicit** argument `{auto prf : isSorted (x :: toList xs)}`. This means:
+-   To construct an `SCons`, Idris must find a proof that the list is sorted.
+-   The `auto` keyword tells Idris to search for this proof automatically.
 
 ---
 
@@ -62,18 +54,18 @@ First, let's define a list type that is guaranteed to be sorted. The key is that
 
 Now comes the magic. We derive a generator for `SortedList` with a single line.
 
-1.  **Add the derived generator.**
+### Add the derived generator
 
-    ```idris
-    genSortedList : Fuel -> Gen MaybeEmpty SortedList
-    genSortedList = deriveGen
-    ```
+```idris
+genSortedList : Fuel -> Gen MaybeEmpty SortedList
+genSortedList = deriveGen
+```
 
-    That's it! No manual logic, no special handling for the proof argument. `deriveGen` will:
-    1.  Generate a candidate `x : Nat`
-    2.  Recursively generate `xs : SortedList`
-    3.  Check if `isSorted (x :: toList xs)` can be proven
-    4.  If yes, construct the `SCons`; if no, try another `x`
+That's it! No manual logic, no special handling for the proof argument. `deriveGen` will:
+1.  Generate a candidate `x : Nat`
+2.  Recursively generate `xs : SortedList`
+3.  Check if `isSorted (x :: toList xs)` can be proven
+4.  If yes, construct the `SCons`; if no, try another `x`
 
 ---
 
@@ -81,40 +73,38 @@ Now comes the magic. We derive a generator for `SortedList` with a single line.
 
 Let's test the generator and verify that all output is sorted.
 
-1.  **Add a `main` function.**
+```idris
+testList : HasIO io => io ()
+testList = do
+  putStrLn "--- Generating 5 sorted lists ---"
+  for_ (the (List Int) [1..5]) $ \_ => do
+    Just sl <- pick (genSortedList (limit 5))
+      | Nothing => printLn "Generation failed"
+    let asList = toList sl
+    putStrLn $ "Generated: " ++ show asList
+    putStrLn $ "Is sorted: " ++ show (isSorted asList)
+```
 
-    ```idris
-    main : IO ()
-    main = do
-      putStrLn "--- Generating 5 sorted lists ---"
-      replicate 5 $ do
-        Just sl <- pick1 (genSortedList (limit 20))
-          | Nothing => printLn "Generation failed"
-        let asList = toList sl
-        putStrLn $ "Generated: " ++ show asList
-        putStrLn $ "Is sorted: " ++ show (isSorted asList)
-    ```
-
-2.  **Compile and run.**
+### Compile and run
 
     ```bash
-    idris2 --build SortedListTutorial.idr
-    ./build/exec/SortedListTutorial
+    echo -e ':exec testList' | rlwrap pack repl ./src/Playground.idr
     ```
 
-3.  **Analyze the output.**
+### Analyze the output
 
     ```
-    --- Generating 5 sorted lists ---
-    Generated: [0, 3, 5, 12, 42]
+    ...
+    Main> --- Generating 5 sorted lists ---
+    Generated: [2, 3, 3, 4, 4]
     Is sorted: True
-    Generated: [8, 8, 9, 15, 21, 33]
+    Generated: [2, 2]
     Is sorted: True
-    Generated: []
+    Generated: [3, 4]
     Is sorted: True
-    Generated: [2, 7, 19]
+    Generated: [2]
     Is sorted: True
-    Generated: [1, 1, 4, 10, 10, 15]
+    Generated: [4]
     Is sorted: True
     ```
 
@@ -126,7 +116,7 @@ Let's test the generator and verify that all output is sorted.
 
 How does `deriveGen` solve the proof constraint? The key is in the **search order** and **backtracking**.
 
-When `deriveGen` encounters `{auto prf : isSorted (x :: toList xs)}`, it:
+When `deriveGen` encounters `{auto prf : So $ isSorted (x :: toList xs)}`, it:
 
 1.  **Generates candidates** for `x` from the default `Nat` generator
 2.  **Recursively generates** `xs : SortedList` (which is already sorted by construction)
@@ -135,30 +125,39 @@ When `deriveGen` encounters `{auto prf : isSorted (x :: toList xs)}`, it:
 
 This is why the generator may be slower for complex constraints — it may need multiple attempts to find valid values.
 
-### The Role of Fuel
-
-The `Fuel` parameter controls how deep the recursion can go. With more fuel, `deriveGen` can generate longer sorted lists:
+The `Fuel` parameter controls how deep the recursion can go, so, with more fuel, `deriveGen` can generate longer sorted lists:
 
 ```idris
 -- Add to main:
-putStrLn "\n--- With small fuel (limit 3) ---"
-Just sl1 <- pick1 (genSortedList (limit 3))
-  | Nothing => printLn "Failed"
-printLn $ toList sl1
+testFuel : IO ()
+testFuel = do
+  putStrLn "\n--- With small fuel (limit 3) ---"
+  Just sl1 <- pick (genSortedList (limit 3))
+    | Nothing => printLn "Generation failed"
+  printLn $ toList sl1
 
-putStrLn "\n--- With large fuel (limit 10) ---"
-Just sl2 <- pick1 (genSortedList (limit 10))
-  | Nothing => printLn "Failed"
-printLn $ toList sl2
+  putStrLn "\n--- With large fuel (limit 8) ---"
+  Just sl2 <- pick (genSortedList (limit 8))
+    | Nothing => printLn "Generation failed"
+  printLn $ toList sl2
 ```
 
-Output:
-```
---- With small fuel (limit 3) ---
-[2, 5, 8]
+Run it:
 
---- With large fuel (limit 10) ---
-[0, 1, 3, 7, 12, 15, 20, 25, 30, 42]
+```bash
+echo -e ':exec testFuel' | rlwrap pack repl ./src/Playground.idr
+...
+Main> --- Generating 5 sorted lists ---
+Generated: [2, 3, 3, 4, 4]
+Is sorted: True
+Generated: [2, 2]
+Is sorted: True
+Generated: [3, 4]
+Is sorted: True
+Generated: [2]
+Is sorted: True
+Generated: [4]
+Is sorted: True
 ```
 
 ---
@@ -168,22 +167,33 @@ Output:
 Let's see another example of proof-carrying data. Consider a type that represents numbers bounded by a given limit:
 
 ```idris
--- Add to SortedListTutorial.idr
+data BoundedNat : (limit' : Nat) -> Type where
+  MkBounded : (n : Nat) -> {auto prf : n `LT` limit'} -> BoundedNat limit'
 
-data BoundedNat : (limit : Nat) -> Type where
-  MkBounded : (n : Nat) -> {auto prf : n `LT` limit} -> BoundedNat limit
-
-genBoundedNat : (limit : Nat) -> Fuel -> Gen MaybeEmpty (BoundedNat limit)
-genBoundedNat limit = deriveGen
+genBoundedNat : Fuel -> (limit' : Nat) -> Gen MaybeEmpty (BoundedNat limit')
+genBoundedNat = deriveGen
 
 testBounded : IO ()
 testBounded = do
-  putStrLn "--- Generating BoundedNat with limit 5 ---"
-  replicate 5 $ do
-    Just bn <- pick1 (genBoundedNat 5 (limit 10))
+  putStrLn "--- Generating BoundedNat with limit'=5 ---"
+  for_ (the (List Int) [1..5]) $ \_ => do
+    Just bn <- pick (genBoundedNat (limit 10) 5)
       | Nothing => printLn "Failed"
     case bn of
       MkBounded n => putStrLn $ "Generated: " ++ show n ++ " (< 5)"
+```
+
+Run it:
+
+```bash
+echo -e ':exec testBounded' | rlwrap pack repl ./src/Playground.idr
+...
+Main> --- Generating BoundedNat with limit'=5 ---
+Generated: 4 (< 5)
+Generated: 1 (< 5)
+Generated: 1 (< 5)
+Generated: 3 (< 5)
+Generated: 4 (< 5)
 ```
 
 The `{auto prf : n `LT` limit}` constraint ensures that only values less than the limit are generated. `deriveGen` will automatically search for valid `n` values.
@@ -196,3 +206,11 @@ Now that you can generate proof-carrying data, you are ready for more advanced t
 
 *   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t09-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
 *   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t08-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
+
+<!-- idris
+main : IO ()
+main = do
+  testList
+  testFuel
+  testBounded
+-->
