@@ -36,9 +36,7 @@ canonicDefaultRHS = canonicDefaultRHS' id
 --- Derivation functions ---
 ----------------------------
 
-export
-DeriveBodyRhsForCon => DeriveBodyForType where
-  canonicBody sig n = do
+Deriving.DepTyCheck.Gen.ForOneType.Interface.canonicBody sig n = do
 
     -- check that there is at least one constructor
     Prelude.when .| null sig.targetType.cons .| fail "No constructors found for the type `\{show sig.targetType.name}`"
@@ -107,7 +105,3 @@ DeriveBodyRhsForCon => DeriveBodyForType where
 
         callConsGen : (fuel : TTImp) -> Con -> TTImp
         callConsGen fuel con = canonicDefaultRHS' interimNamesWrapper sig .| consGenName con .| fuel
-
-export
-MainCoreDerivator : DeriveBodyRhsForCon => DeriveBodyForType
-MainCoreDerivator = %search

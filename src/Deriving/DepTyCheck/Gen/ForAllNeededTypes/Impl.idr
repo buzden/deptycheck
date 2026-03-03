@@ -50,7 +50,7 @@ considerNewType ty = do
   _ : (NamesInfoInTypes, ConsRecs) <- get
   when .| not (isTypeKnown ty) .| updateNamesAndConsRecs ty >>= put
 
-Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.DerivationClosure m = (DeriveBodyForType, Monad m, Elaboration m, ClosuringContext m)
+Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.DerivationClosure m = (Monad m, Elaboration m, ClosuringContext m)
 
 Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.needWeightFun ty = when (not !(gets $ contains ty.name)) $ do
   modify {stateType=SortedSet Name} $ insert ty.name
@@ -124,7 +124,7 @@ Deriving.DepTyCheck.Gen.ForAllNeededTypes.Interface.callGen sig fuel values = do
 --- Canonic-dischagring function ---
 
 export
-runCanonic : DeriveBodyForType => NamesInfoInTypes => ConsRecs =>
+runCanonic : NamesInfoInTypes => ConsRecs =>
              SortedMap ExternalGenSignature Name -> (forall m. DerivationClosure m => m a) -> Elab (a, List Decl)
 runCanonic exts calc = do
   let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)

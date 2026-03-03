@@ -9,6 +9,5 @@ import public Deriving.DepTyCheck.Gen.Signature
 --- Deriving body of a generator for a single type ---
 ------------------------------------------------------
 
-public export
-interface DeriveBodyForType where
-  canonicBody : DerivationClosure m => Elaboration m => NamesInfoInTypes => ConsRecs => GenSignature -> Name -> m $ List Clause
+export
+canonicBody : DerivationClosure m => Elaboration m => NamesInfoInTypes => ConsRecs => GenSignature -> Name -> m $ List Clause

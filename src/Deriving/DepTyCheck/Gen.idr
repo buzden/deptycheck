@@ -297,7 +297,7 @@ wrapFuel fuelArg = lam $ MkArg MW ExplicitArg (Just fuelArg) `(Data.Fuel.Fuel)
 ------------------------------
 
 export
-deriveGenExpr : DeriveBodyForType => (signature : TTImp) -> Elab TTImp
+deriveGenExpr : (signature : TTImp) -> Elab TTImp
 deriveGenExpr signature = do
   checkResult@(signature ** externals ** _) <- checkTypeIsGen DerivationTask signature
   let externalsSigToName = fromList $ externals.externals <&> \(sig, _) => (sig, nameForGen sig)
@@ -345,7 +345,7 @@ deriveGenExpr signature = do
 |||
 |||
 export %macro
-deriveGen : DeriveBodyForType => Elab a
+deriveGen : Elab a
 deriveGen = do
   Just signature <- goal
      | Nothing => fail "The goal signature is not found. Generators derivation must be used only for fully defined signatures"
@@ -365,7 +365,7 @@ deriveGen = do
 |||   genX = deriveGenFor $ Fuel -> (Fuel -> Gen Y) => (a : A) -> (c : C) -> Gen (b ** X a b c)
 |||   ```
 export %macro
-deriveGenFor : DeriveBodyForType => (0 a : Type) -> Elab a
+deriveGenFor : (0 a : Type) -> Elab a
 deriveGenFor a = do
   sig <- quote a
   tt <- deriveGenExpr sig
@@ -376,7 +376,7 @@ deriveGenFor a = do
 ||| Caution! When `logDerivation` is set to `True`, this function would change the global logging state
 ||| and wouldn't turn it back.
 export
-deriveGenPrinter : {default True printTTImp : _} -> {default True logDerivation : _} -> DeriveBodyForType => Type -> Elab Unit
+deriveGenPrinter : {default True printTTImp : _} -> {default True logDerivation : _} -> Type -> Elab Unit
 deriveGenPrinter ty = do
   ty <- quote ty
   when logDerivation $ declare `[%logging "deptycheck.derive.print" 5; %logging "deptycheck.derive.least-effort" 7]
@@ -391,12 +391,3 @@ deriveGenPrinter ty = do
       putStr $ if ~printTTImp then interpolate ~expr else show ~expr
       putStrLn ""
   ]
-
------------------------
---- Global defaults ---
------------------------
-
-%defaulthint %inline
-public export
-DefaultConstructorDerivator : DeriveBodyRhsForCon
-DefaultConstructorDerivator = LeastEffort
