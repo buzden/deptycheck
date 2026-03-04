@@ -4,246 +4,211 @@ In the previous tutorials, we wielded the power of `deriveGen` and even learned 
 
 > **Disclaimer: This is a very Advanced Tutorial.** We will be interacting directly with the core interfaces of `DepTyCheck`'s derivation engine and using compile-time reflection (`ElabReflection`). This tutorial is for those who are not just users, but are curious about the mechanics of the library itself, or may even wish to contribute.
 
-## Our Goal: A Custom Derivation Strategy
+## Our Goal: Understanding Constructor Generation
 
-The default strategy for `deriveGen` is called `LeastEffort`. It gives all constructors a roughly equal chance. We are going to build a new, custom strategy called `MyStrategy` for a simple data type. Our strategy will be intentionally "stupid" to prove that it's working: it will be heavily biased and will always prefer one constructor over another.
+`deriveGen` automatically generates values for each constructor. But how does it work internally? We will create a custom derivation strategy that shows exactly what arguments each constructor receives.
 
-By building a new derivation strategy from the ground up, you will understand the core components of the `DepTyCheck` engine.
+By building a custom strategy from scratch, you will understand the core components of the `DepTyCheck` engine and how to extend it.
 
 ## The Architecture of Derivation
 
-`DepTyCheck`'s derivation is a multi-stage pipeline. For our purposes, we can think of it as a two-level hierarchy of experts:
+`DepTyCheck`'s derivation is a two-level hierarchy:
 
-1.  **The "Type Expert" (`DeriveBodyForType`):** Its job is to know about a *whole type*. It looks at all the constructors (e.g., `A` and `B` for our `Simple` type) and generates the top-level code that *chooses* between them. This is where `case fuel of` logic lives.
+### The "Type Expert" (`DeriveBodyForType`)
 
-2.  **The "Constructor Expert" (`DeriveBodyRhsForCon`):** Its job is to know how to build *one specific constructor*. The Type Expert delegates to this expert, asking, "How do I build an `A`?" or "How do I build a `B`?"
+Its job is to know about a *whole type*. It looks at all the constructors and generates the top-level code that *chooses* between them. This is where `Fuel` fuel management happens.
 
-In this tutorial, we will implement our own versions of both of these experts.
+### The "Constructor Expert" (`DeriveBodyRhsForCon`)
+
+It knows how to build *one specific constructor*. For each constructor, it generates the code that produces the constructor's arguments.
+
+In this tutorial, we will implement our own Constructor Expert that uses custom logic for generating arguments.
 
 ## Prerequisites
 
 -   A good understanding of Idris's interfaces (type classes).
 -   Completion of all previous tutorials, especially [Advanced Derivation Tuning](t07-derivation-tuning.md).
 
-
 ---
 
 ## Step 1: The Setup
 
-First, let's set up our file and define the simple data type we'll be working with. Our goal is to create a custom macro, `myDeriveGen`, that will automatically derive a generator for this `Simple` type, but using our own custom logic instead of the default `LeastEffort` strategy.
+First, let's set up our file and define a data type where we want custom argument generation.
 
-1.  **Create a new file** named `MyDerive.idr`.
+### Create a new file
 
-2.  **Add the necessary setup.** We need a host of imports to interact with the derivation engine's internal interfaces.
+Create a new file named `CustomGen.idr`.
 
-    ```idris
-    %language ElabReflection
+### Add the necessary setup
 
-    module MyDerive
-
-    import Deriving.DepTyCheck.Gen -- The main entrypoint
-    import Deriving.DepTyCheck.Gen.ForOneType.Interface
-    import Deriving.DepTyCheck.Gen.ForOneType.Implementation
-    import Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Interface
-    import Deriving.DepTyCheck.Gen.ConsRecs
-
-    import Test.DepTyCheck.Gen
-    import Test.DepTyCheck.Runner
-    import Data.Fuel
-
-    -- The simple type we will derive a generator for
-    data Simple = A Nat | B
-    ```
-
----
-
-## Step 2: Implement the "Constructor Experts"
-
-Our first task is to write the logic for each individual constructor. In the `DepTyCheck` architecture, this is done by providing an implementation of the `DeriveBodyRhsForCon` interface. We will create two: one for `A` and one for `B`.
-
-1.  **Create the logic for the `A` constructor.** This implementation simply generates the code `` `(A <$> deriveGen fuel)``, which means "call `deriveGen` to get a `Nat`, then apply the `A` constructor to it."
-
-    ```idris
-    [MyLogicFor_A] DeriveBodyRhsForCon where
-      consGenExpr sig con givs fuel = pure `(A <$> deriveGen fuel)
-    ```
-
-2.  **Create the logic for the `B` constructor.** This one is even simpler. It just generates the code ` `(pure B)`.`
-    ```idris
-    [MyLogicFor_B] DeriveBodyRhsForCon where
-      consGenExpr sig con givs fuel = pure `(pure B)
-    ```
-
-We have now created two named implementations (`MyLogicFor_A` and `MyLogicFor_B`) that act as specialists. `MyLogicFor_A` knows how to build the body of a generator for the `A` constructor, and `MyLogicFor_B` knows how to do it for `B`. In the next step, we'll create the "Type Expert" that knows to use these specialists.
-
----
-
-## Step 3: Implement the "Type Expert"
-
-Now we need to create the manager that understands the `Simple` type as a whole. Its job is to generate the main body of the generator function, deciding *when* to call the logic for `A` and when to call the logic for `B`. We do this by creating a mapping from constructor names to our named implementations from Step 2, and then writing our main strategy.
-
-1.  **Create the Strategy Map.** This `instance` tells `DepTyCheck` that when it is operating under our custom strategy (`MyStrategy`), it should use `MyLogicFor_A` for the `A` constructor and `MyLogicFor_B` for the `B` constructor.
-
-    ```idris
-    [MyStrategy] DeriveBodyRhsForCon "MyDerive.A".dataCon where
-      consGen = MyLogicFor_A
-
-    [MyStrategy] DeriveBodyRhsForCon "MyDerive.B".dataCon where
-      consGen = MyLogicFor_B
-    ```
-
-2.  **Implement the Type Expert.** Now we write the main logic. `MyTypeStrategy` implements `DeriveBodyForType` and is where we define our custom behavior. Instead of the default balanced `frequency`, we will create a heavily biased generator that *always* prefers the recursive `A` constructor when it has fuel.
-
-    ```idris
-    [MyTypeStrategy] DeriveBodyForType where
-      canonicBody sig n = do
-        -- Get constructor info: B first (non-recursive), then A (recursive)
-        let [conB, conA] = sig.targetType.cons
-        let emptyGivs = empty  -- No given constructor arguments for Simple
-
-        -- Get the code for the two constructor bodies using our named strategies
-        b_body <- consGenExpr @{MyStrategy} sig conB emptyGivs (var "fuel")
-        a_body <- consGenExpr @{MyStrategy} sig conA emptyGivs (var "fuel")
-
-        -- Our biased logic!
-        let body = `(case fuel of
-                       Dry => ~b_body -- Out of fuel, MUST choose B
-                       More recFuel => ~a_body -- Always choose A if there is fuel
-                   )
-        pure [ callCanonic sig n [var "fuel"] `((let fuel = var "fuel" in ~body)) ]
-    ```
-
-    🔍 **Notice:**
-    -   `sig.targetType.cons` gives us the list of constructors for our type
-    -   `emptyGivs` is used because our `Simple` type has no given parameters
-    -   We use `<-` because `consGenExpr` returns a monadic result (`m TTImp`)
-    -   The `~` symbol splices the generated code into the quotation
-
-We have now defined a complete, custom derivation pipeline. All that's left is to wrap it in a user-facing macro.
-
----
-
-## Step 4: Create the Top-Level Macro
-
-Users don't interact with `DeriveBodyForType` directly. They use the `deriveGen` macro. The `deriveGen` function takes an optional `@` argument providing the core derivation logic. By default, this is `MainCoreDerivator @{LeastEffort}`.
-
-We will create our own macro, `myDeriveGen`, that simply calls `deriveGen` but passes our custom `MyTypeStrategy` instead.
+We need imports to interact with the derivation engine's internal interfaces.
 
 ```idris
-MyDerivator : DeriveBodyForType
-MyDerivator = MainCoreDerivator @{MyTypeStrategy}
-
-myDeriveGen : Elab a
-myDeriveGen = deriveGen @{MyDerivator}
-```
-
----
-
-## Step 5: Putting It All Together
-
-We now have all the pieces. Let's use our custom macro to derive a generator for `Simple` and see our biased strategy in action.
-
-1.  **Define the generator.** We define `genSimple` just like any other derived generator, but we set it equal to our custom macro.
-
-    ```idris
-    genSimple : Fuel -> Gen MaybeEmpty Simple
-    genSimple = myDeriveGen
-    ```
-
-2.  **Test it!** Let's run it with a low fuel limit and see what happens. With `limit 2`, it should be forced to terminate quickly.
-
-    ```idris
-    main : IO ()
-    main = do
-      putStrLn "--- Running with custom 'A-biased' strategy ---"
-      replicate 5 $ do
-        Just s <- pick1 (genSimple (limit 2))
-          | Nothing => printLn "Generation failed"
-        printLn s
-    ```
-
-3.  **Analyze the output.** As expected, our biased strategy always picks `A` until it runs out of fuel, at which point it is forced to pick `B` to terminate. The output will look like `A (A (B))`.
-
-    ```
-    --- Running with custom 'A-biased' strategy ---
-    A (A B)
-    A (A B)
-    A (A B)
-    A (A B)
-    A (A B)
-    ```
-
-We have successfully built and used a custom derivation macro!
-
----
-
-## Complete File Reference
-
-Here's the complete `MyDerive.idr` file for reference:
-
-```idris
-%language ElabReflection
-
-module MyDerive
-
 import Deriving.DepTyCheck.Gen
 import Deriving.DepTyCheck.Gen.ForOneType.Interface
-import Deriving.DepTyCheck.Gen.ForOneType.Implementation
+import Deriving.DepTyCheck.Gen.ForOneType.Impl
 import Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Interface
 import Deriving.DepTyCheck.Gen.ConsRecs
 
 import Test.DepTyCheck.Gen
-import Test.DepTyCheck.Runner
 import Data.Fuel
+import System.Random.Pure.StdGen
 
-data Simple = A Nat | B
+%language ElabReflection
 
-[MyLogicFor_A] DeriveBodyRhsForCon where
-  consGenExpr sig con givs fuel = pure `(A <$> deriveGen fuel)
+-- A simple type with two non-recursive constructors for demonstration purposes
+data UserStatus = Active String | Inactive String
 
-[MyLogicFor_B] DeriveBodyRhsForCon where
-  consGenExpr sig con givs fuel = pure `(pure B)
+Show UserStatus where
+  show (Active name) = "Active \{show name}"
+  show (Inactive reason) = "Inactive \{show reason}"
+```
 
-[MyStrategy] DeriveBodyRhsForCon "MyDerive.A".dataCon where
-  consGen = MyLogicFor_A
+Both constructors are non-recursive (only contain `String`), so `MainCoreDerivator` will choose between them randomly. Our custom logic will control the **arguments** they receive.
 
-[MyStrategy] DeriveBodyRhsForCon "MyDerive.B".dataCon where
-  consGen = MyLogicFor_B
+---
 
-[MyTypeStrategy] DeriveBodyForType where
-  canonicBody sig n = do
-    let [conB, conA] = sig.targetType.cons
-    let emptyGivs = empty
-    b_body <- consGenExpr @{MyStrategy} sig conB emptyGivs (var "fuel")
-    a_body <- consGenExpr @{MyStrategy} sig conA emptyGivs (var "fuel")
-    let body = `(case fuel of
-                   Dry => ~b_body
-                   More recFuel => ~a_body
-               )
-    pure [ callCanonic sig n [var "fuel"] `((let fuel = var "fuel" in ~body)) ]
+## Step 2: Implement the Constructor Logic
 
-MyDerivator : DeriveBodyForType
-MyDerivator = MainCoreDerivator @{MyTypeStrategy}
+Our task is to write a custom strategy for how constructors generate their arguments. We'll create a named implementation of `DeriveBodyRhsForCon` that gives us full control.
 
-myDeriveGen : Elab a
-myDeriveGen = deriveGen @{MyDerivator}
+### Create a custom constructor generator
 
-genSimple : Fuel -> Gen MaybeEmpty Simple
-genSimple = myDeriveGen
+We'll generate `Active` with predefined usernames and `Inactive` with predefined reasons.
 
+```idris
+[CustomStatusGen] DeriveBodyRhsForCon where
+  consGenExpr sig con givs fuel = do
+    -- Check which constructor we're generating for
+    logMsg "tutorial.consGenExpr" 1 "con.name: \{show con.name}"
+    pure $ if (dropNS con.name) == `{Active}
+      then `(Active <$> elements ["Alice", "Bob", "Charlie"])
+      else `(Inactive <$> elements ["vacation", "sick", "offline"])
+```
+
+🔍 **Notice:**
+-   One named implementation handles **all** constructors for the type
+-   We use `con.name` to check which constructor we're generating
+-   We don't call `deriveGen` recursively - we generate arguments **directly**
+-   `elements` is a generator from `Test.DepTyCheck.Gen` that picks from a list
+-   We return Idris code templates using quotation syntax `` `( ... ) ``
+
+This shows the key insight: `consGenExpr` returns **code templates** (TTImp), not values. We're building the generator at compile time!
+
+To watch logging messages you need force Idris2 to recompile the module completely because after the compile time it will no show any logs, for example: `rlwrap pack --extra-args="--log 1" repl ./src/CustomGen.idr`
+
+---
+
+## Step 3: Create the Type Derivator
+
+Now we wrap our constructor strategy into a complete derivation pipeline using `MainCoreDerivator`.
+
+### Wrap the strategy
+
+```idris
+-- Wrap our strategy into a full type derivator
+CustomDerivator : DeriveBodyForType
+CustomDerivator = MainCoreDerivator @{CustomStatusGen}
+```
+
+🔍 **Notice:**
+-   `MainCoreDerivator` adapts `DeriveBodyRhsForCon` → `DeriveBodyForType`
+-   The `@{CustomStatusGen}` syntax passes our named implementation
+-   `MainCoreDerivator` handles fuel management and constructor selection automatically
+
+---
+
+## Step 4: Use the Custom Derivator
+
+Now we can use our custom derivator with `deriveGen`.
+
+### Define the generator
+
+```idris
+-- The generator that uses our custom derivator
+genUserStatus : Fuel -> Gen MaybeEmpty UserStatus
+genUserStatus = deriveGen @{CustomDerivator}
+```
+
+🔍 **Notice:**
+-   Same signature as any derived generator: `Fuel -> Gen MaybeEmpty UserStatus`
+-   We pass our derivator using the `@{...}` syntax
+-   No need for a separate "macro" - `deriveGen` works directly!
+
+---
+
+## Step 5: Test It
+
+Let's run it and see that our custom argument generation works.
+
+```idris
 main : IO ()
 main = do
-  putStrLn "--- Running with custom 'A-biased' strategy ---"
-  replicate 5 $ do
-    Just s <- pick1 (genSimple (limit 2))
+  putStrLn "--- Testing custom derivation ---"
+  for_ (the (List Int) [1..15]) $ \_ => do
+    Just s <- pick (genUserStatus (limit 20))
       | Nothing => printLn "Generation failed"
     printLn s
 ```
 
-🔍 **Notice:** You can copy this complete file to `MyDerive.idr` and run it with `idris2 --build MyDerive.idr && ./build/exec/MyDerive`.
+### Run and analyze
+
+```bash
+echo -e ':exec main' | rlwrap pack repl ./src/CustomGen.idr
+```
+
+Expected output will show both constructors with our custom arguments:
+
+```
+--- Testing custom derivation ---
+Active "Alice"
+Inactive "vacation"
+Active "Bob"
+Active "Charlie"
+Inactive "sick"
+Active "Alice"
+Inactive "offline"
+Active "Bob"
+Inactive "vacation"
+Active "Charlie"
+Active "Alice"
+Inactive "sick"
+Active "Bob"
+Inactive "offline"
+Active "Charlie"
+```
+
+You'll see both `Active` and `Inactive` constructors (chosen randomly by `MainCoreDerivator`), each with our custom predefined values. This proves our custom constructor logic is working!
+
+---
+
+## Understanding the Architecture
+
+Let's recap what we built:
+
+1.  **Constructor Logic** (`DeriveBodyRhsForCon`): Decides **what arguments** each constructor receives. We used direct generators like `elements` instead of recursive `deriveGen`.
+
+2.  **Type Derivator** (`DeriveBodyForType`): Handles **which constructor** to call and manages fuel. `MainCoreDerivator` does this automatically, choosing randomly between non-recursive constructors.
+
+3.  **User API** (`deriveGen`): Combines everything into a usable generator.
+
+The key insight is that `consGenExpr` generates **code templates**, not values. This code runs at compile time and produces the generator function that runs at runtime.
+
+---
+
+## What About Bias?
+
+You might wonder: "What if I want to control **which constructor** is chosen, not just its arguments?"
+
+For that, you would need to implement `DeriveBodyForType` directly, with custom logic for constructor selection. This is more advanced - see the `AlternativeCore` module in the test suite for examples like `[CallSelf]` that control fuel-based recursion patterns.
+
+Our approach with `DeriveBodyRhsForCon` is perfect when:
+-   You want to customize how constructor arguments are generated
+-   You're happy with `MainCoreDerivator`'s default constructor selection
+-   You want to integrate external generators or custom logic for specific fields
 
 ---
 
 ## Path to Contribution
 
-Understanding these internal APIs is the first step to extending `DepTyCheck`. If you find a new, useful derivation pattern or a more advanced strategy, you now have the foundational knowledge to implement it and contribute back to the project.
+Understanding these internal APIs is the first step to extending `DepTyCheck`. If you find a new, useful derivation pattern or want to optimize certain cases, you now have the foundational knowledge to implement it and contribute back to the project.
