@@ -6,79 +6,155 @@ But what if you have a custom data type that needs a special, handwritten genera
 
 ## Our Goal
 
-We will define a `SpecialString` newtype and write a custom generator for it. We will then create a larger `User` type that contains a `SpecialString` and see how `deriveGen` automatically discovers and integrates our manual generator without any special syntax.
+In this tutorial, you will:
 
-## Prerequisites
+1. Define a custom type with a handwritten generator
+2. Mark that generator with `%hint` for automatic discovery
+3. See `deriveGen` automatically find and use your generator without explicit passing
+4. Compare implicit (`%hint`) vs explicit (`@{...}`) generator passing
 
-This tutorial assumes you have completed [Tutorial 5: DeriveGen Signatures](t05-derivegen-signatures.md).
+You will see output like:
+
+```text
+--- Testing mixed generation ---
+MkUser (MkSpecialString "root") 5
+```
 
 ---
 
-## Step 1: A Type That Needs a Custom Generator
+## Prerequisites
+
+-   Completion of [Tutorial 5: DeriveGen Signatures](t05-derivegen-signatures.md)
+-   Understanding of the `=>` syntax for explicit generator constraints
+-   Idris2 source file `./src/Mixed.idr` with the header:
+
+```idris
+import Test.DepTyCheck.Gen
+import Data.Fuel
+import Deriving.DepTyCheck.Gen
+import System.Random.Pure.StdGen
+
+%language ElabReflection
+```
+
+---
+
+## Step 1: Define Types and a Handwritten Generator
 
 Imagine we have a `SpecialString` type that should only ever contain specific, predefined values (e.g., usernames with special privileges). A fully random `String` generator is not appropriate here.
 
-1.  **Create a new file** named `Mixed.idr`.
+### Create a new file named `Mixed.idr`.
 
-2.  **Define the types and a handwritten generator.**
+### Define the `SpecialString` type with a `%hint` generator.
 
-    ```idris
-    module Mixed
+```idris
+-- A type that needs special generation
+data SpecialString = MkSpecialString String
 
-    import Test.DepTyCheck.Gen
-    import Test.DepTyCheck.Runner
-    import Data.Fuel
+Show SpecialString where
+  show (MkSpecialString s) = "MkSpecialString \{show s}"
 
-    -- A type that needs special generation
-    data SpecialString = MkSpecialString String
+-- A handwritten generator for SpecialString
+%hint
+genSpecialString : Gen MaybeEmpty SpecialString
+genSpecialString = map MkSpecialString (elements ["admin", "root", "system"])
+```
 
-    -- Standard domain types
-    data User = MkUser SpecialString Nat
+### Define the `User` type that contains `SpecialString`.
 
-    -- A handwritten generator for SpecialString
-    genSpecialString : Fuel -> Gen MaybeEmpty SpecialString
-    genSpecialString _ = map MkSpecialString (elements ["admin", "root", "system"])
-    ```
-    We have defined `genSpecialString` to only produce three possible values. Notice it has the standard `Fuel -> Gen MaybeEmpty ...` signature.
+```idris
+-- Standard domain types
+data User = MkUser SpecialString Nat
 
-## Step 2: Automatic Derivation Finds the Manual Generator
+Show User where
+  show (MkUser s i) = "MkUser (\{show s}) \{show i}"
+```
+
+🔍 **Notice:**
+
+- Signature `Gen MaybeEmpty SpecialString` (no `Fuel ->`) is used for manually defined generators
+- The `%hint` pragma marks `genSpecialString` for **auto-implicit search** in Idris 2. It makes this function a candidate for automatic insertion - no explicit `@{genSpecialString}` required!
+
+From Idris 2 docs: `%hint` marks functions for auto search, similar to unnamed type class instances. The compiler prioritizes these hints during unification when explicit arguments are absent.
+
+---
+
+## Step 2: Create the Derived Generator
 
 Now, let's define a generator for `User` using `deriveGen`. A `User` contains a `SpecialString` and a `Nat`. `deriveGen` knows how to generate a `Nat` by default. What will it do for `SpecialString`?
 
-1.  **Add the derived generator** to `Mixed.idr`.
+### Add the derived generator to `Mixed.idr`.
 
-    ```idris
-    %language ElabReflection
+```idris
+-- Add deriveGen for the User
+genUser : Fuel -> (Fuel -> Gen MaybeEmpty SpecialString) => Gen MaybeEmpty User
+genUser = deriveGen
+```
 
-    -- Add deriveGen for the User
-    genUser : Fuel -> Gen MaybeEmpty User
-    genUser = deriveGen
-    ```
+🔍 **Notice:**
 
-2.  **Test it in the REPL.** Load your `Mixed.idr` file.
+- Automatic derivation by `deriveGen` requires `Fuel ->`
+- The constraint `(Fuel -> Gen MaybeEmpty SpecialString) =>` tells `deriveGen` it needs a generator for `SpecialString`
+- Normally, you'd pass it explicitly: `genUser @{genSpecialString} fuel`. But `%hint` enables automatic resolution - Idris finds and inserts `genSpecialString` automatically!
 
-    ```idris
-    :exec pick1 (genUser (limit 10))
-    -- MkUser (MkSpecialString "root") 5 : User
+---
 
-    :exec pick1 (genUser (limit 10))
-    -- MkUser (MkSpecialString "admin") 12 : User
-    ```
+## Step 3: Test the Generator
 
-It works! `deriveGen` automatically found and used our `genSpecialString` function when it needed to produce a `SpecialString`. It did this simply by looking for a function in the current scope with the required type signature (`... -> Gen ... SpecialString`).
+Let's create a main function to see our automatic discovery in action.
 
-## When to Use Implicit vs. Explicit (`=>`) Generation
+### Add a test function to `Mixed.idr`.
 
-`DepTyCheck` now offers two ways to combine generators:
+```idris
+main : IO ()
+main = do
+  putStrLn "--- Testing mixed generation ---"
+  Just u <- pick (genUser (limit 10))
+    | Nothing => putStrLn "Generation failed"
+  printLn u
+```
 
-1.  **Implicit (this tutorial):** `deriveGen` automatically finds a generator in scope for a specific custom type (`SpecialString`).
-    *   **When to use:** This is the best method when you have a custom data type and you *always* want to use one specific generator for it.
+### Compile and run.
 
-2.  **Explicit (`=>` syntax):** As seen in Tutorial 4, you can add a `(Fuel -> Gen MaybeEmpty String) =>` constraint to the signature.
-    *   **When to use:** This is best when you want to provide a generator for a *primitive* or *built-in* type (like `String`, `Nat`, `List`), or when you want the caller to be able to supply *different* generators in different contexts.
+```bash
+pack build Mixed && pack exec Mixed
+```
+
+Expected output (will vary):
+
+```text
+--- Testing mixed generation ---
+MkUser (MkSpecialString "root") 5
+```
+
+---
+
+## When to Use %hint?
+
+`Constraint + %hint` approach is recommended for custom types.
+
+**Pattern:** Mark your generator with `%hint`, add constraint to derived generator:
+
+  ```idris
+  %hint
+  genMyType : Gen MaybeEmpty MyType
+  genMyType = map MkMyType (elements ["a", "b"])
+
+  genContainer : Fuel -> (Gen MaybeEmpty MyType) => Gen MaybeEmpty Container
+  genContainer = deriveGen
+  ```
+
+**Call site:**
+  ```idris
+  pick (genContainer fuel)  -- No @{...} needed!
+  ```
+
+**Best for:** Custom types where you want automatic discovery with explicit dependencies in the signature.
 
 ---
 
 ## Next Steps
 
-*   **Continue to the next tutorial:** [Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md) to see how these techniques apply to even more advanced types.
+*   **Continue to the next tutorial:** [Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md) to see how these techniques apply to even more advanced types with proof constraints.
+*   **Experiment:** Try creating your own custom type with a `%hint` generator and see if `deriveGen` finds it automatically.
+*   **Read more:** Check out the Idris 2 documentation on `%hint` for advanced auto-implicit search patterns.
