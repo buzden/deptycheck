@@ -13,8 +13,8 @@ In this tutorial, you will build a complete AST generator for a simple imperativ
 3.  Generated valid random programs with control flow structures
 
 You will see output like:
-```idris
-Seq (Assign "x" (Lit 5)) (If (Add (Var "x") (Lit 3)) (Assign "y" (Lit 10)) Skip) : Stmt
+```text
+Seq (Assign "x" (Lit 5)) (If (Add (Var "x") (Lit 3)) (Assign "y" (Lit 10)) Skip)
 ```
 
 **Expected time:** 30-40 minutes
