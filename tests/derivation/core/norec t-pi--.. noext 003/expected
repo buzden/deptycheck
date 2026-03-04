@@ -1,12 +1,7 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Unsupported applications to a non-concrete type `a` in Builtin.Refl
+Error: While processing right hand side of checkedGen. Error during reflection: While processing right hand side of $resolved1,<Builtin.Equal>[0, 1, 2, 3]. While processing right hand side of $resolved1,<Builtin.Equal>[0, 1, 2, 3],<<Builtin.Refl>>. Can't find an implementation for DecEq Type.
 
-DerivedGen:1
- 13 | Show (X b1 b2) where
- 14 |   show (MkX b1 b2 _) = "MkX \{show b1} \{show b2} Refl"
- 15 |
- 16 | checkedGen : Fuel -> (b1 : Bool) -> (b2 : Bool) -> Gen MaybeEmpty (X b1 b2)
- 17 | checkedGen = deriveGen
-                   ^^^^^^^^^
+Deriving.DepTyCheck.Gen.ForOneTypeCon.Impl:1
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
