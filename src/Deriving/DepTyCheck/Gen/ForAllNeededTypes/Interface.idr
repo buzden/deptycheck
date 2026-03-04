@@ -11,8 +11,9 @@ import public Deriving.DepTyCheck.Gen.Signature
 
 public export
 interface Monad m => DerivationClosure m where
-  needWeightFun : TypeInfo -> m ()
-  callGen : (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m (TTImp, Maybe (gend ** Vect gend $ Fin gend))
+  needWeightFun : ConsRecs => TypeInfo -> m ()
+  callGen : NamesInfoInTypes => ConsRecs =>
+            (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m (TTImp, Maybe (gend ** Vect gend $ Fin gend))
   --                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   --                                                                   this is a permutation of generated arguments --/
   --                                                                   actually, `gend` can be calculated from `sig`, but we simplify things here
