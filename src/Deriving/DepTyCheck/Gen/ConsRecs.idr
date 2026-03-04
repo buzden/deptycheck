@@ -223,8 +223,8 @@ isTypeKnown @{MkConsRecs crs} ti = isJust $ lookup ti.name crs
 -- Having a `ConsRecs` being built from the given `NamesInfoInTypes`,
 -- it'll get the updated `NamesInfoInTypes` and a `ConsRecs` equivalent to those being built from this `NamesInfoInTypes`, but more effective.
 export
-updateNamesAndConsRecs : NamesInfoInTypes => ConsRecs => Elaboration m => TypeInfo -> m (NamesInfoInTypes, ConsRecs)
-updateNamesAndConsRecs @{niit} @{crs} ti = do
-  newNiit <- logBounds Trace "deptycheck.derive.namesInfo.update" [ti] $ enrichNamesInfoInTypes [ti] niit
-  newCr <- logBounds Trace "deptycheck.derive.consRec.update" [ti] $ map (crs <+>) $ getConsRecsFor @{newNiit} $ singleton ti.name ti
+updateNamesAndConsRecs : NamesInfoInTypes => ConsRecs => Elaboration m => List TypeInfo -> m (NamesInfoInTypes, ConsRecs)
+updateNamesAndConsRecs @{niit} @{crs} tis = do
+  newNiit <- logBounds Trace "deptycheck.derive.namesInfo.update" [] $ enrichNamesInfoInTypes tis niit
+  newCr <- logBounds Trace "deptycheck.derive.consRec.update" [] $ map (crs <+>) $ getConsRecsFor @{newNiit} $ fromList $ tis <&> \ti => (ti.name, ti)
   pure (newNiit, newCr)
