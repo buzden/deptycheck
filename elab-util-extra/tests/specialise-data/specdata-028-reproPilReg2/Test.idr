@@ -6,8 +6,12 @@ import Shared
 
 public export
 data Lookup : a -> List (a, b) -> Type where
-  Here : {0 type_of_x : Type} -> {0 x : type_of_x} -> {0 b : Type} -> {0 xys : List (type_of_x, b)} -> (y : b) -> Lookup {b} {a = type_of_x} x ((::) {a = (type_of_x, b)} (MkPair {a = type_of_x} {b} x y) xys)
-  There : {0 b : Type} -> {0 a : Type} -> {0 x : a} -> {0 y : b} -> {0 z : a} -> {0 xys : List (a, b)} -> Lookup {b} {a} z xys -> Lookup {b} {a} z ((::) {a = (a, b)} (MkPair {a} {b} x y) xys)
+  Here : {0 type_of_x : Type} -> {0 x : type_of_x} -> {0 b : Type} ->
+         {0 xys : List (type_of_x, b)} -> (y : b) ->
+         Lookup {b} {a = type_of_x} x ((::) {a = (type_of_x, b)} (MkPair {a = type_of_x} {b} x y) xys)
+  There : {0 b : Type} -> {0 a : Type} -> {0 x : a} -> {0 y : b} -> {0 z : a} ->
+          {0 xys : List (a, b)} -> Lookup {b} {a} z xys ->
+          Lookup {b} {a} z ((::) {a = (a, b)} (MkPair {a} {b} x y) xys)
 
 public export
 data IsReveal : Lookup {a} {b} x xys -> b -> Type where
