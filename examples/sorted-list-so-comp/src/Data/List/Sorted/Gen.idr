@@ -10,6 +10,10 @@ import Deriving.DepTyCheck.Gen
 %logging "deptycheck.derive" 5
 %logging "deptycheck.derive.least-effort" 7
 
+GenOrderTuning "SomeHead".dataCon where
+  isConstructor = itIsConstructor
+  deriveFirst _ _ = [4]
+
 export
 genSortedList : Fuel -> Gen MaybeEmpty SortedList
 genSortedList = deriveGen
