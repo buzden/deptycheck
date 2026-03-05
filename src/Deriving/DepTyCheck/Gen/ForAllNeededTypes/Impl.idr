@@ -24,8 +24,7 @@ import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 
 ClosuringContext : (Type -> Type) -> Type
 ClosuringContext m =
-  ( MonadReader (SortedMap GenSignature (ExternalGenSignature, Name)) m  -- external gens
-  , MonadState  (ListMap GenSignature Name) m                            -- gens already asked to be derived
+  ( MonadState  (ListMap GenSignature Name) m                            -- gens already asked to be derived
   , MonadState  (List (GenSignature, Name), List (GenSignature, Name)) m -- two queues of gens to be derived, one for known types, one the unknown ones
   , MonadState  (SortedSet TypeInfo) m                                   -- type names that were asked for deriving their weighting function
   )
@@ -63,14 +62,14 @@ deriveAll = do
       genFunBody <- logBounds Info "deptycheck.derive.type" [sig] $ def name <$> canonicBody sig name
       pure (genFunClaim, genFunBody)
 
-DeriveBodyForType => ClosuringContext m => Elaboration m => DerivationClosure m where
+DeriveBodyForType => ClosuringContext m => Elaboration m => SortedMap GenSignature (ExternalGenSignature, Name) => DerivationClosure m where
 
   needWeightFun = modify . SortedSet.insert
 
   callGen sig fuel values = do
 
     -- look for external gens, and call it if exists
-    let Nothing = lookupLengthChecked sig !ask
+    let Nothing = lookupLengthChecked sig %search
       | Just (name, Element extSig lenEq) =>
           logValue Details "deptycheck.derive.closuring.external" [sig] "is used as an external generator" $
             (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
@@ -107,12 +106,10 @@ runCanonic : DeriveBodyForType => NamesInfoInTypes => ConsRecs =>
              SortedMap ExternalGenSignature Name -> (forall m. DerivationClosure m => m a) -> Elab (a, List Decl)
 runCanonic exts calc = do
   let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
-  ((x, derived), (_, _, weightingFuns), _) : ((_, _), (_, _, _), _) <- runRWST
-                         exts
+  ((_, _, weightingFuns), (x, derived)) <- runStateT
                          (empty, (empty, empty), empty @{TypeInfoOrdByName})
                          [| (calc, deriveAll) |]
-                         {s=(ListMap GenSignature Name, (List (GenSignature, Name), List (GenSignature, Name)), SortedSet TypeInfo)}
-                         {w=()}
+                         {stateType=(ListMap GenSignature Name, (List (GenSignature, Name), List (GenSignature, Name)), SortedSet TypeInfo)}
                          {m=Elab}
   let (defs, bodies) = unzip $ mapMaybe deriveWeightingFun (Prelude.toList weightingFuns) ++ derived
   pure (x, defs ++ bodies)
