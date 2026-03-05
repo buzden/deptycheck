@@ -13,14 +13,6 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 
                  , vis = Export
                  , opts = []
                  , type =
-                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
-                 })
-          , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
                      mkTy
                        { name = "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]"
                        , type =
@@ -42,13 +34,14 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 
                                                    .$ var "{arg:1}")))
                        }
                  })
-          , IDef
-              emptyFC
-              "weight^Prelude.Types.Nat"
-              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
-              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
-                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
-              ]
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
+                 })
           , IDef
               emptyFC
               "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]"
@@ -195,6 +188,13 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.VectMaybeAnyType.AtIndex[0(n), 
                                              .$ var "inter^<{arg:1}>"))
                                      .$ var "Nil")))
                      }
+              ]
+          , IDef
+              emptyFC
+              "weight^Prelude.Types.Nat"
+              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
+              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
+                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
               ]
           ]
       , scope = var "<DerivedGen.VectMaybeAnyType.AtIndex>[0, 3]" .$ var "^outmost-fuel^" .$ var "outer^<n>" .$ var "outer^<v>"
