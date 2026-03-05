@@ -271,6 +271,7 @@ export %tcinline
 specialiseIfNeeded :
   Elaboration m =>
   NamesInfoInTypes =>
+  ConsRecs =>
   DerivationClosure m =>
   (sig : GenSignature) ->
   (fuel : TTImp) ->
