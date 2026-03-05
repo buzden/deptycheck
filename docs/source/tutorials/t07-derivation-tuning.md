@@ -8,8 +8,8 @@ In the last tutorial, we saw how to use `deriveGen` and provide it with custom g
 
 We will tackle two common problems that cannot be solved with external generators alone:
 
-1.  **Fixing Bias:** We will prove that a default generator is biased and then implement the `ProbabilityTuning` interface to change the frequency of a specific constructor.
-2.  **Fixing Inefficiency:** We will show how a naive generator for a constrained type is inefficient and then implement the `GenOrderTuning` interface to guide the derivation logic and make it robust.
+### Fixing Bias: We will prove that a default generator is biased and then implement the `ProbabilityTuning` interface to change the frequency of a specific constructor.
+### Fixing Inefficiency: We will show how a naive generator for a constrained type is inefficient and then implement the `GenOrderTuning` interface to guide the derivation logic and make it robust.
 
 ## Prerequisites
 
@@ -22,55 +22,52 @@ We will tackle two common problems that cannot be solved with external generator
 
 Let's start by defining a simple, recursive data type where the default `deriveGen` strategy will produce a biased result.
 
-1.  **Create a new file** named `TuningTutorial.idr`.
+### Create a new file named `TuningTutorial.idr`.
 
-2.  **Add the following code.**
+### Add the following code.
 
-    ```idris
-    module TuningTutorial
+```idris
+import Deriving.DepTyCheck.Gen
+import Deriving.DepTyCheck.Gen.Tuning -- For the tuning interfaces
+import Data.Fuel
+import Data.So
 
-    import Deriving.DepTyCheck.Gen
-    import Deriving.DepTyCheck.Gen.Tuning -- For the tuning interfaces
-    import Data.Fuel
-    import Data.So
+-- From previous tutorials
+import Test.DepTyCheck.Gen
+import Test.DepTyCheck.Gen.Coverage
+import System.Random.Pure.StdGen
 
-    -- From previous tutorials
-    import Test.DepTyCheck.Gen
-    import Test.DepTyCheck.Gen.Coverage
-    import Test.DepTyCheck.Runner
-    import System.Random.Pure.StdGen
+%language ElabReflection
 
-    %language ElabReflection
+data Entry = File String | Directory (List Entry)
 
-    data Entry = File String | Directory (List Entry)
+-- A generator for Entry that takes an external String generator
+genEntry : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty Entry
+genEntry = deriveGen
+```
 
-    -- A generator for Entry that takes an external String generator
-    genEntry : (Fuel -> Gen MaybeEmpty String) => Fuel -> Gen MaybeEmpty Entry
-    genEntry = deriveGen
-    ```
+### Add a simple `String` generator and the coverage analysis `main` function.
 
-3.  **Add a simple `String` generator** and the coverage analysis `main` function.
+```idris
+genAnyString : Fuel -> Gen MaybeEmpty String
+genAnyString _ = elements ["a", "b", "c"]
 
-    ```idris
-    genAnyString : Fuel -> Gen MaybeEmpty String
-    genAnyString _ = elements ["a", "b", "c"]
+main : IO ()
+main = do
+  let reportTemplate = initCoverageInfo (genEntry @{genAnyString})
+  let rawCoverageRuns = unGenTryND 1000 someStdGen (genEntry @{genAnyString} (limit 10))
+  let allRawCoverage = concatMap fst rawCoverageRuns
+  let finalReport = registerCoverage allRawCoverage reportTemplate
+  putStrLn $ show finalReport
+```
 
-    main : IO ()
-    main = do
-      let reportTemplate = initCoverageInfo (genEntry @{genAnyString})
-      let rawCoverageRuns = unGenTryND 1000 someStdGen (genEntry @{genAnyString} (limit 10))
-      let allRawCoverage = concatMap fst rawCoverageRuns
-      let finalReport = registerCoverage allRawCoverage reportTemplate
-      putStrLn $ show finalReport
-    ```
+### Analyze the report. The results will be starkly imbalanced because `deriveGen` prefers the non-recursive `File` constructor.
 
-4.  **Analyze the report.** The results will be starkly imbalanced because `deriveGen` prefers the non-recursive `File` constructor.
-
-    ```
+```text
     Entry covered fully (1000 times)
       - File: covered (909 times)
       - Directory: covered (91 times)
-    ```
+```
     This is the problem we need to solve.
 
 ---
@@ -79,27 +76,28 @@ Let's start by defining a simple, recursive data type where the default `deriveG
 
 To fix the bias, we must implement the `ProbabilityTuning` interface for the `Directory` constructor. This tells `deriveGen` to override its default weight.
 
-1.  **Define the `instance`.** Place this `instance` declaration at the top level of your file. It targets the `Directory` constructor by its full name.
+### Define the `instance`. Place this `instance` declaration at the top level of your file. It targets the `Directory` constructor by its full name.
 
-    ```idris
-    instance ProbabilityTuning "TuningTutorial.Directory".dataCon where
-      isConstructor = itIsConstructor
-      tuneWeight _ = 10
-    ```
+```idris
+instance ProbabilityTuning "TuningTutorial.Directory".dataCon where
+  isConstructor = itIsConstructor
+  tuneWeight _ = 10
+```
+
     - `instance ProbabilityTuning ... where`: We are defining a specific implementation of this interface.
     - `"TuningTutorial.Directory".dataCon`: This is a `Name` literal that refers to the `Directory` constructor inside the `TuningTutorial` module.
     - `isConstructor = itIsConstructor`: This is a required line of reflection boilerplate that confirms we have targeted a valid constructor.
     - `tuneWeight _ = 10`: We implement the `tuneWeight` function. It takes the default weight `_` and we ignore it, always returning our new, higher weight of `10`.
 
-2.  **Re-run the coverage analysis.** The `deriveGen` call in `genEntry` does not change. The compiler will now automatically find and apply our `instance`. Simply recompile and run.
+### Re-run the coverage analysis. The `deriveGen` call in `genEntry` does not change. The compiler will now automatically find and apply our `instance`. Simply recompile and run.
 
-3.  **Analyze the new report.** The distribution will now be much closer to a 50/50 balance, proving we have successfully tuned the probability.
+### Analyze the new report. The distribution will now be much closer to a 50/50 balance, proving we have successfully tuned the probability.
 
-    ```
+```text
     Entry covered fully (1000 times)
       - File: covered (526 times)
       - Directory: covered (474 times)
-    ```
+```
 
 ---
 
@@ -109,36 +107,36 @@ Probability isn't the only thing we can tune. For some dependent types, the *ord
 
 ```idris
 data LtPair : Type where
-  MkLtPair : (n : Nat) -> (m : Nat) -> (prf : So (n < m)) -> LtPair
+  MkLtPair : (n : Nat) -> (m : Nat) -> (prf : So $ n < m) -> LtPair
 ```
 
 `deriveGen`'s default strategy might randomly pick `n=10` and `m=5`, then fail because it can't prove `10 < 5`. This is very inefficient. We can tell it to generate `m` first, making it much easier to pick a valid `n`.
 
-1.  **Define the generator and the tuning `instance`** in your `TuningTutorial.idr` file.
+### Define the generator and the tuning `instance` in your `TuningTutorial.idr` file.
 
-    ```idris
-    genLtPair : Fuel -> Gen MaybeEmpty LtPair
-    genLtPair = deriveGen
+```idris
+genLtPair : Fuel -> Gen MaybeEmpty LtPair
+genLtPair = deriveGen
 
-    instance GenOrderTuning "TuningTutorial.MkLtPair".dataCon where
-      isConstructor = itIsConstructor
-      deriveFirst _ _ = [`{m}]
-    ```
+instance GenOrderTuning `{MkLtPair}.dataCon where
+  isConstructor = itIsConstructor
+  deriveFirst _ _ = [`{m}]
+```
     - `GenOrderTuning ... where`: We implement the ordering interface for the `MkLtPair` constructor.
     - `deriveFirst _ _ = [`{m}]`: We implement `deriveFirst` to return a list of arguments that must be generated first. Here, we specify the argument named `m` using a name literal `` `{m}``.
 
-2.  **Test It.** With this instance in scope, `deriveGen` will now follow our instructions. When generating an `LtPair`, it will generate `m` first, and then be smart enough to only generate values for `n` that are less than `m`.
+### Test It. With this instance in scope, `deriveGen` will now follow our instructions. When generating an `LtPair`, it will generate `m` first, and then be smart enough to only generate values for `n` that are less than `m`.
 
-    ```idris
-    -- A main function to test the LtPair generator
-    main_lt : IO ()
-    main_lt = do
-      putStrLn "--- Generating 5 pairs where n < m ---"
-      replicate 5 $ do
-        Just p <- pick1 (genLtPair (limit 10))
-          | Nothing => printLn "Generation failed"
-        printLn p
-    ```
+```idris
+-- A main function to test the LtPair generator
+main_lt : IO ()
+main_lt = do
+  putStrLn "--- Generating 5 pairs where n < m ---"
+  for_ (the (List Int) [1..5]) $ \_ => do
+    Just p <- pick (genLtPair (limit 10))
+      | Nothing => printLn "Generation failed"
+    printLn p
+```
     You will see that this generator efficiently produces valid pairs like `MkLtPair 5 10 True` every time, without the wasteful failures of the naive approach.
 
 ---
