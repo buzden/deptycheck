@@ -23,57 +23,57 @@ You will learn why this happens, how to recognize the difference between **`Spen
 
 Let's start by examining the type of recursion we are already familiar with. We will create a simple Peano number type, where `deriveGen` must spend fuel on every recursive call to guarantee termination.
 
-1.  **Create a new file** named `RecursionTutorial.idr`.
+### Create a new file named `RecursionTutorial.idr`
 
-2.  **Add the following code.** This defines our `PNat` (Peano Natural) type and a standard derived generator for it.
+```idris
+import Deriving.DepTyCheck.Gen
+import Data.Fuel
+import Data.Fin
 
-    ```idris
-    %language ElabReflection
+import Test.DepTyCheck.Gen
+import System.Random.Pure.StdGen
 
-    module RecursionTutorial
+%language ElabReflection
+```
 
-    import Deriving.DepTyCheck.Gen
-    import Data.Fuel
+### Add the following code. This defines our `PNat` (Peano Natural) type and a standard derived generator for it.
 
-    import Test.DepTyCheck.Gen
-    import Test.DepTyCheck.Runner
-    import System.Random.Pure.StdGen
+```idris
+data PNat = PZ | PS PNat
 
-    data PNat = PZ | PS PNat
+genPNat : Fuel -> Gen MaybeEmpty PNat
+genPNat = deriveGen
+```
 
-    genPNat : Fuel -> Gen MaybeEmpty PNat
-    genPNat = deriveGen
-    ```
+### The Experiment. Now, let's write a `main` function to call this generator twice: once with a generous fuel budget (`limit 10`) and once with a very small one (`limit 3`).
 
-3.  **The Experiment.** Now, let's write a `main` function to call this generator twice: once with a generous fuel budget (`limit 10`) and once with a very small one (`limit 3`).
+```idris
+runPeano : IO ()
+runPeano = do
+  putStrLn "--- Generating with a large fuel budget (10) ---"
+  Just p_large <- pick (genPNat (limit 10))
+  | Nothing => printLn "Generation failed"
+  printLn p_large
 
-    ```idris
-    main : IO ()
-    main = do
-      putStrLn "--- Generating with a large fuel budget (10) ---"
-      Just p_large <- pick1 (genPNat (limit 10))
-        | Nothing => printLn "Generation failed"
-      printLn p_large
+  putStrLn "--- Generating with a small fuel budget (3) ---"
+  Just p_small <- pick (genPNat (limit 3))
+  | Nothing => printLn "Generation failed"
+  printLn p_small
+```
 
-      putStrLn "--- Generating with a small fuel budget (3) ---"
-      Just p_small <- pick1 (genPNat (limit 3))
-        | Nothing => printLn "Generation failed"
-      printLn p_small
-    ```
+### Compile, run, and observe.
 
-4.  **Compile, run, and observe.**
-
-    ```bash
-    idris2 --build RecursionTutorial.idr
-    ./build/exec/RecursionTutorial
-    ```
+```bash
+idris2 --build RecursionTutorial.idr
+./build/exec/RecursionTutorial
+```
     Your output will be random, but it will follow a strict pattern:
-    ```
-    --- Generating with a large fuel budget (10) ---
-    PS (PS (PS (PS (PS PZ))))
-    --- Generating with a small fuel budget (3) ---
-    PS (PS PZ)
-    ```
+```text
+--- Generating with a large fuel budget (10) ---
+PS (PS (PS (PS (PS PZ))))
+--- Generating with a small fuel budget (3) ---
+PS (PS PZ)
+```
     Notice that the generator with more fuel produced a larger number. The number of `PS` constructors is strictly limited by the fuel you provide. This is because `deriveGen` identifies the `PS` constructor as **`SpendingFuel`**. For each `PS` it generates, it must consume one unit of fuel from the budget. This is the default, safe behavior for simple recursive types.
 
 ---
@@ -84,35 +84,33 @@ Must `deriveGen` *always* spend fuel on recursion? No. If it can prove that a re
 
 A perfect example is `Fin n`, the type of numbers from `0` to `n-1`.
 
-1.  **Add the `Fin` generator** to your `RecursionTutorial.idr` file.
-    ```idris
-    import Data.Fin
+### Add the `Fin` generator to your `RecursionTutorial.idr` file.
+```idris
+genFin : (n : Nat) -> Fuel -> Gen MaybeEmpty (Fin n)
+genFin = deriveGen
+```
 
-    genFin : (n : Nat) -> Fuel -> Gen MaybeEmpty (Fin n)
-    genFin = deriveGen
-    ```
+### The Counter-Intuitive Experiment. Now, let's try to generate a `Fin 100`. This would require 100 recursive calls to `FS`. According to our last experiment, this should require at least `limit 100` fuel. But what happens if we only give it `limit 3`?
 
-2.  **The Counter-Intuitive Experiment.** Now, let's try to generate a `Fin 100`. This would require 100 recursive calls to `FS`. According to our last experiment, this should require at least `limit 100` fuel. But what happens if we only give it `limit 3`?
+```idris
+runFin : IO ()
+runFin = do
+  putStrLn "--- Generating a large Fin with a tiny fuel budget (3) ---"
+  -- We ask for a Fin up to 100, but only provide fuel for 3 steps!
+  Just fin <- pick (genFin 100 (limit 3))
+    | Nothing => printLn "Generation failed"
+  printLn fin
+```
 
-    ```idris
-    main_fin : IO ()
-    main_fin = do
-      putStrLn "--- Generating a large Fin with a tiny fuel budget (3) ---"
-      -- We ask for a Fin up to 100, but only provide fuel for 3 steps!
-      Just fin <- pick1 (genFin 100 (limit 3))
-        | Nothing => printLn "Generation failed"
-      printLn fin
-    ```
+### Run the experiment and observe the surprising result.
 
-3.  **Run the experiment** (rename `main_fin` to `main` temporarily) and observe the surprising result.
-
-    ```
+```
     --- Generating a large Fin with a tiny fuel budget (3) ---
     97
-    ```
+```
     It works! Even with a tiny fuel budget, it successfully generated a very large `Fin` value. It did not fail or run out of fuel.
 
-4.  **The Explanation.** This is not magic. `deriveGen` is smart enough to analyze the `Fin` type and its `FS` constructor.
+### The Explanation. This is not magic. `deriveGen` is smart enough to analyze the `Fin` type and its `FS` constructor.
 
     `FS : Fin k -> Fin (S k)`
 
@@ -128,7 +126,7 @@ This optimization allows `deriveGen` to generate values for indexed, recursive d
 
 `deriveGen` generates code that follows a simple pattern: a `case` split on the `Fuel` parameter.
 
-```idris
+```text
 genSomething : Fuel -> Gen MaybeEmpty Something
 genSomething Dry      = -- Base case: no fuel, choose non-recursive constructors
 genSomething (More f) = -- Recursive case: spend fuel or use optimization
@@ -148,29 +146,29 @@ But the key insight is: **deriveGen doesn't always spend fuel on recursion**. It
 For a type like `PNat`, the generated code looks like this:
 
 ```idris
-genPNat : Fuel -> Gen MaybeEmpty PNat
-genPNat Dry      = pure PZ  -- Must choose non-recursive constructor
-genPNat (More f) = frequency
+genPNat' : Fuel -> Gen MaybeEmpty PNat
+genPNat' Dry      = pure PZ  -- Must choose non-recursive constructor
+genPNat' (More f) = frequency
   [ (1, pure PZ)           -- Non-recursive option
-  , (1, PS <$> genPNat f)  -- Recursive: spends fuel (calls with f, not More f)
+  , (1, PS <$> genPNat' f)  -- Recursive: spends fuel (calls with f, not More f)
   ]
 ```
 
-**Notice:** When generating `PS`, we call `genPNat f` — we pass the **smaller** fuel value. Each recursive step consumes one unit of fuel.
+**Notice:** When generating `PS`, we call `genPNat' f` — we pass the **smaller** fuel value. Each recursive step consumes one unit of fuel.
 
 ### StructurallyDecreasing: Manual Implementation
 
-For `Fin`, the generated code is different:
+For `Fin`, the generated code would be different:
 
 ```idris
-genFin : (n : Nat) -> Fuel -> Gen MaybeEmpty (Fin n)
-genFin Z     _    = empty  -- No values for Fin 0
-genFin (S k) fuel = frequency
+genFin' : (n : Nat) -> Fuel -> Gen MaybeEmpty (Fin n)
+genFin' Z     _    = empty  -- No values for Fin 0
+genFin' (S k) fuel = frequency
   [ (1, pure FZ)                  -- Base constructor
-  , (1, FS <$> genFin k fuel) ]   -- Recursive: SAME fuel!
+  , (1, FS <$> genFin' k fuel) ]   -- Recursive: SAME fuel!
 ```
 
-**Notice:** When generating `FS`, we call `genFin k fuel` — with the **same** fuel value!
+**Notice:** When generating `FS`, we call `genFin' k fuel` — with the **same** fuel value!
 
 Why is this safe? Because the **type index** decreases (`S k` → `k`), guaranteeing termination even without spending fuel. The index itself acts as the termination measure.
 

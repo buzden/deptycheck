@@ -36,27 +36,24 @@ This tutorial assumes you have completed [Installation and First Steps](t00-inst
 
 Let's start by trying to write a generator for `Fin n` using only the tools we know from the first tutorial.
 
-1.  **Create a new file** named `EmptyTutorial.idr`.
+### Create a new file named `EmptyTutorial.idr`.
 
-2.  **Add the following code** to it. We need to import `Data.Fin` along with our usual testing modules.
+### Add the following code to it. We need to import `Data.Fin` along with our usual testing modules.
 
-    ```idris
-    module EmptyTutorial
-
-    import Test.DepTyCheck.Gen
-    import Test.DepTyCheck.Runner
-    import Data.Fin
-    import Data.Vect
-    ```
+```idris
+import Test.DepTyCheck.Gen
+import Data.Fin
+import Data.Vect
+```
 
 3.  Now, **try to write a `Gen1` generator** for `Fin n`. We can handle the case where `n` is greater than zero, but the `Z` (zero) case presents a major problem.
 
-    ```idris
-    -- This is an INTENTIONALLY INCORRECT generator to show the problem
-    genFinIncorrect : (n : Nat) -> Gen1 (Fin n)
-    genFinIncorrect (S k) = elements' (allFins k)
-    genFinIncorrect Z     = ? -- What could we possibly write here?
-    ```
+```idris
+-- This is an INTENTIONALLY INCORRECT generator to show the problem
+genFinIncorrect : (n : Nat) -> Gen1 (Fin n)
+genFinIncorrect (S k) = elements' (allFins k)
+genFinIncorrect Z     = ? -- What could we possibly write here?
+```
 
     We have a problem. In the `(S k)` case, we can list all possible values of `Fin (S k)` and use `elements'` to create a generator. But in the `Z` case, what can we do?
 
@@ -75,14 +72,14 @@ This is the problem `DepTyCheck` is designed to solve. We need a way to tell the
 
 Let's use these to fix our incorrect generator.
 
-1.  **Add the correct `genFin` generator** to your `EmptyTutorial.idr` file.
+### Add the correct `genFin` generator to your `EmptyTutorial.idr` file.
 
-    ```idris
-    -- A correct, safe generator for Fin n
-    genFin : (n : Nat) -> Gen0 (Fin n)
-    genFin Z     = empty
-    genFin (S k) = elements' (allFins k)
-    ```
+```idris
+-- A correct, safe generator for Fin n
+genFin : (n : Nat) -> Gen0 (Fin n)
+genFin Z     = empty
+genFin (S k) = elements' (allFins k)
+```
 
     The changes are small but critical:
     - The return type is now `Gen0 (Fin n)`, which signals that the result may be empty.
@@ -93,32 +90,32 @@ Let's use these to fix our incorrect generator.
 
 ## Step 3: Running a `Gen0` Generator
 
-Because a `Gen0` generator might not produce a value, we can't use `pick1` (which promises to return one value). Instead, we must use `pick`, which safely handles the possibility of emptiness.
+Because a `Gen0` generator might not produce a value, we can't use `pick` (which promises to return one value). Instead, we must use `pick`, which safely handles the possibility of emptiness.
 
-- `pick1 gen` returns `a`
+- `pick gen` returns `a`
 - `pick gen` returns `Maybe a`
 
 Let's see this in action.
 
-1.  **Run `genFin` for both an inhabited case (`Fin 3`) and an empty case (`Fin 0`)** in your REPL.
+### Run `genFin` for both an inhabited case (`Fin 3`) and an empty case (`Fin 0`) in your REPL.
 
     First, the inhabited case:
-    ```idris
-    :exec pick (genFin 3)
-    ```
+```text
+:exec pick (genFin 3)
+```
     The result will be a `Fin 3` value wrapped in a `Just`, because a value could be generated:
-    ```idris
-    Just 1 : Maybe (Fin 3)
-    ```
+```text
+Just 1 : Maybe (Fin 3)
+```
 
 2.  Now, run the empty case:
-    ```idris
-    :exec pick (genFin 0)
-    ```
+```text
+:exec pick (genFin 0)
+```
     Because we used `empty` in our definition for `genFin Z`, `DepTyCheck` knows this generator can't produce a value, and `pick` safely returns `Nothing`:
-    ```idris
-    Nothing : Maybe (Fin 0)
-    ```
+```text
+Nothing : Maybe (Fin 0)
+```
 
 This is the core of safe, dependently-typed testing. The type system allows us to model that some generations are impossible, and the runner (`pick`) allows us to handle those cases gracefully at runtime without any crashes.\n\n---\n\n## Step 4: Filtering with `suchThat`
 
@@ -128,32 +125,32 @@ A type can also be effectively "empty" if we filter its values so much that none
 
 Because the condition might never be met, `suchThat` always returns a `Gen0`.
 
-1.  **Add these two generators** to your `EmptyTutorial.idr` file.
+### Add these two generators to your `EmptyTutorial.idr` file.
 
-    ```idris
-    isEven : Nat -> Bool
-    isEven n = n `mod` 2 == 0
+```idris
+isEven : Nat -> Bool
+isEven n = n `mod` 2 == 0
 
-    -- A generator that tries to find an even number between 0 and 10.
-    -- This will sometimes succeed and sometimes fail (if `choose` picks an odd number).
-    genEven : Gen0 Nat
-    genEven = choose (0, 10) `suchThat` isEven
+-- A generator that tries to find an even number between 0 and 10.
+-- This will sometimes succeed and sometimes fail (if `choose` picks an odd number).
+genEven : Gen0 Nat
+genEven = choose (0, 10) `suchThat` isEven
 
-    -- A generator that tries to find a number greater than 10 in a range where none exist.
-    -- This recipe is impossible and will always be empty.
-    genImpossible : Gen0 Int
-    genImpossible = choose (1, 10) `suchThat` (> 10)
-    ```
+-- A generator that tries to find a number greater than 10 in a range where none exist.
+-- This recipe is impossible and will always be empty.
+genImpossible : Gen0 Int
+genImpossible = choose (1, 10) `suchThat` (> 10)
+```
 
-2.  **Run them both in the REPL** using `pick`.
+### Run them both in the REPL using `pick`.
 
-    ```idris
-    -- This might return Just 4, Just 8, or Nothing
-    :exec pick genEven
+```text
+-- This might return Just 4, Just 8, or Nothing
+:exec pick genEven
 
-    -- This will ALWAYS return Nothing
-    :exec pick genImpossible
-    ```
+-- This will ALWAYS return Nothing
+:exec pick genImpossible
+```
 
 This demonstrates another critical aspect of `Gen0`: it allows for speculative generation that might fail, giving you a powerful way to define complex properties.
 

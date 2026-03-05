@@ -52,40 +52,43 @@ This is a lot of work to get right. Now, let's do it the easy way.
 
 We can replace all of that manual logic with a single line.
 
-1.  **Create a new file** named `DeriveTutorial.idr`.
+### Create a new file named `DeriveTutorial.idr`.
 
-2.  **Add the necessary setup.** We need the `%language ElabReflection` pragma to enable compile-time macros, and the correct imports.
+```idris
+import Deriving.DepTyCheck.Gen -- For the deriveGen macro
+import Data.Fuel
 
-    ```idris
-    %language ElabReflection
+import Test.DepTyCheck.Gen
+import System.Random.Pure.StdGen
+```
 
-    module DeriveTutorial
+### Add the necessary setup.
 
-    import Deriving.DepTyCheck.Gen -- For the deriveGen macro
-    import Data.Fuel
+We need the `%language ElabReflection` pragma to enable compile-time elaboration which will automatically write code for defined generators by their types.
 
-    import Test.DepTyCheck.Gen
-    import Test.DepTyCheck.Runner
-    import System.Random.Pure.StdGen
+```idris
+%language ElabReflection
+```
 
-    data Entry = File String | Directory (List Entry)
-    ```
+### Define the generator
 
-3.  **Define the generator.** That's it. The `deriveGen` macro will now inspect the `Entry` type and write a generator that handles recursion, fuel, choices, and even includes a default generator for `String`. It also automatically adds the coverage labels we learned about in the last tutorial!
+That's it. The `deriveGen` macro will now inspect the `Entry` type and write a generator that handles recursion, fuel, choices, and even includes a default generator for `String`. It also automatically adds the coverage labels we learned about in the last tutorial!
 
-    ```idris
-    genEntryDefault : Fuel -> Gen MaybeEmpty Entry
-    genEntryDefault = deriveGen
-    ```
+```idris
+data Entry = File String | Directory (List Entry)
 
-4.  **Test It!** You can immediately generate a random file system structure.
-    ```idris
-    main : IO ()
-    main = do
-      Just e <- pick1 (genEntryDefault (limit 10))
-        | Nothing => printLn "Generation failed"
-      printLn e
-    ```
+genEntryDefault : Fuel -> Gen MaybeEmpty Entry
+genEntryDefault = deriveGen
+```
+
+### Test It! You can immediately generate a random file system structure.
+```idris
+runEntryDefault : IO ()
+runEntryDefault = do
+  Just e <- pick (genEntryDefault (limit 10))
+    | Nothing => printLn "Generation failed"
+  printLn e
+```
     Running this might produce output like: `Directory [File "a", Directory [File "b"]]`.
 
 ---
@@ -94,42 +97,50 @@ We can replace all of that manual logic with a single line.
 
 The default generator is powerful, but the `String`s it produces are random nonsense. To generate meaningful data, we can provide `deriveGen` with a "hint" in the form of an external generator.
 
-1.  **Write a custom `String` generator.** This generator will produce realistic filenames.
+### Write a custom `String` generator
 
-    ```idris
-    genFilename : Fuel -> Gen MaybeEmpty String
-    genFilename _ = elements ["config.yml", "main.idr", "README.md"]
-    ```
+This generator will produce realistic filenames.
 
-2.  **Modify the generator signature.** To tell `deriveGen` to use our custom generator, we add it as a constraint to the signature. This is `deriveGen`'s way of asking for help: "When you need a `String`, you must provide me with a generator for it."
+```idris
+genFilename : Fuel -> Gen MaybeEmpty String
+genFilename _ = elements ["config.yml", "main.idr", "README.md"]
+```
 
-    ```idris
-    genEntryWithHint : (Fuel -> Gen MaybeEmpty String) => Fuel -> Gen MaybeEmpty Entry
-    genEntryWithHint = deriveGen
-    ```
+### Modify the generator signature
 
-3.  **Call the new generator.** When we call `genEntryWithHint`, we now use the `@{...}` syntax to pass our `genFilename` function to satisfy the constraint.
+To tell `deriveGen` to use our custom generator, we add it as a constraint to the signature. This is `deriveGen`'s way of asking for help: "When you need a `String`, you must provide me with a generator for it."
 
-    ```idris
-    main_hint : IO ()
-    main_hint = do
-      putStrLn "--- Generating Entries with a custom String generator ---"
-      replicate 5 $ do
-        Just e <- pick1 (genEntryWithHint @{genFilename} (limit 5))
-          | Nothing => printLn "Generation failed"
-        printLn e
-    ```
+```idris
+genEntryWithHint : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty Entry
+genEntryWithHint = deriveGen
+```
 
-4.  **Analyze the output.** You will see that `deriveGen` still handles the `Directory` and `List` logic automatically, but every `File` now contains one of your hand-picked filenames.
+### Call the new generator
 
-    ```
-    --- Generating Entries with a custom String generator ---
-    Directory [File "main.idr"]
-    File "config.yml"
-    Directory []
-    File "README.md"
-    Directory [Directory [File "config.yml"]]
-    ```
+When we call `genEntryWithHint`, we now use the `@{...}` syntax to pass our `genFilename` function to satisfy the constraint.
+
+```idris
+runEntryWithHint : IO ()
+runEntryWithHint = do
+  putStrLn "--- Generating Entries with a custom String generator ---"
+  for_ (the (List Int) [1..5]) $ \_ => do
+    Just e <- pick (genEntryWithHint @{genFilename} (limit 5))
+      | Nothing => printLn "Generation failed"
+    printLn e
+```
+
+### Analyze the output
+
+You will see that `deriveGen` still handles the `Directory` and `List` logic automatically, but every `File` now contains one of your hand-picked filenames.
+
+```
+--- Generating Entries with a custom String generator ---
+Directory [File "main.idr"]
+File "config.yml"
+Directory []
+File "README.md"
+Directory [Directory [File "config.yml"]]
+```
 
 ---
 
@@ -139,46 +150,54 @@ Sometimes, a generator needs more context than `Fuel`. For example, what if we w
 
 Any arguments that appear in the signature *before* the `Fuel` parameter are treated as regular inputs. `deriveGen` is smart enough to thread these arguments through its recursive calls.
 
-1.  **Write a context-aware `String` generator.** This generator takes a `path` prefix as an argument and changes its output accordingly.
+### Write a context-aware `String` generator
 
-    ```idris
-    genContextAwareFilename : String -> Fuel -> Gen MaybeEmpty String
-    genContextAwareFilename path _ =
-        if path == "src"
-           then elements ["main.idr", "lib.idr"]
-           else if path == "doc"
-           then elements ["tutorial.md", "README.md"]
-           else elements ["file.txt"]
-    ```
+This generator takes a `path` prefix as an argument and changes its output accordingly.
 
-2.  **Define a generator that accepts the `path` argument.** The `path : String` argument comes before `Fuel`. `deriveGen` now knows that when it needs a `String`, it should look for a generator of type `String -> Fuel -> Gen MaybeEmpty String` in the context.
+```idris
+genContextAwareFilename : String -> Fuel -> Gen MaybeEmpty String
+genContextAwareFilename path _ =
+  if path == "src"
+      then elements ["main.idr", "lib.idr"]
+      else if path == "doc"
+      then elements ["tutorial.md", "README.md"]
+      else elements ["file.txt"]
+```
 
-    ```idris
-    data CtxEntry = CtxFile String | CtxDir String (List CtxEntry)
+### Define a generator that accepts the `path` argument
 
-    genCtxEntry : (path : String) -> (String -> Fuel -> Gen MaybeEmpty String) => Fuel -> Gen MaybeEmpty CtxEntry
-    genCtxEntry path = deriveGen
-    ```
+The `path : String` argument comes before `Fuel`. `deriveGen` now knows that when it needs a `String`, it should look for a generator of type `String -> Fuel -> Gen MaybeEmpty String` in the context.
 
-3.  **Test it!** To call `genCtxEntry`, we provide the initial path, and our context-aware generator. The `deriveGen` engine will handle passing the `path` argument down to `genContextAwareFilename` during any recursive calls.
+```idris
+data CtxEntry = CtxFile String | CtxDir String (List CtxEntry)
 
-    ```idris
-    main_args : IO ()
-    main_args = do
-      putStrLn "--- Generating files in `src` directory ---"
-      -- We pass the initial path "src" and the context-aware generator
-      let srcGen = genCtxEntry "src" @{genContextAwareFilename}
-      Just e <- pick1 (srcGen (limit 4))
-        | Nothing => printLn "Generation Failed"
-      printLn e
-    ```
+genCtxEntry : (path : String) -> (String -> Fuel -> Gen MaybeEmpty String) => Fuel -> Gen MaybeEmpty CtxEntry
+genCtxEntry path = deriveGen
+```
 
-4.  **Analyze the output.** You will see that files generated have names appropriate for the `src` directory, because our custom generator was called with `path = "src"`.
+### Test it!
 
-    ```
-    --- Generating files in `src` directory ---
-    CtxDir "src" [CtxFile "lib.idr", CtxFile "main.idr"]
-    ```
+To call `genCtxEntry`, we provide the initial path, and our context-aware generator. The `deriveGen` engine will handle passing the `path` argument down to `genContextAwareFilename` during any recursive calls.
+
+```idris
+runCtxEntry : IO ()
+runCtxEntry = do
+  putStrLn "--- Generating files in `src` directory ---"
+  -- We pass the initial path "src" and the context-aware generator
+  let srcGen = genCtxEntry "src" @{genContextAwareFilename}
+  Just e <- pick (srcGen (limit 4))
+    | Nothing => printLn "Generation Failed"
+  printLn e
+```
+
+### Analyze the output.
+
+You will see that files generated have names appropriate for the `src` directory, because our custom generator was called with `path = "src"`.
+
+```
+--- Generating files in `src` directory ---
+CtxDir "src" [CtxFile "lib.idr", CtxFile "main.idr"]
+```
 This powerful pattern allows you to create highly flexible generators that adapt their behavior based on runtime context.
 
 ---

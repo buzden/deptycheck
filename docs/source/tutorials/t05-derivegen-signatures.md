@@ -24,23 +24,20 @@ This will give you a deep understanding of how to use signatures to control `der
 
 First, let's create our file and add the necessary imports. We will be using `Vect` throughout this tutorial.
 
-1.  **Create a new file** named `DeriveTutorial.idr`.
+### Create a new file named `DeriveTutorial.idr`.
 
-2.  **Add the following boilerplate.** This includes the `ElabReflection` pragma and all the modules we will need.
+### Add the following boilerplate. This includes the `ElabReflection` pragma and all the modules we will need.
 
-    ```idris
-    %language ElabReflection
+```idris
+import Deriving.DepTyCheck.Gen
+import Data.Vect
+import Data.Fuel
 
-    module DeriveTutorial
+import Test.DepTyCheck.Gen
+import System.Random.Pure.StdGen
 
-    import Deriving.DepTyCheck.Gen
-    import Data.Vect
-    import Data.Fuel
-
-    import Test.DepTyCheck.Gen
-    import Test.DepTyCheck.Runner
-    import System.Random.Pure.StdGen
-    ```
+%language ElabReflection
+```
 
 ---
 
@@ -50,32 +47,32 @@ _Note: For the following steps, you can put all the code in the same `DeriveTuto
 
 Our first goal is to create a generator that produces a `Vect` of a specific length that we provide as an argument. To do this, we simply place the argument *before* the `Fuel` parameter in the signature.
 
-1.  **Define the generator.** The signature `(n : Nat) -> Fuel -> Gen MaybeEmpty (Vect n String)` tells `deriveGen`: "You will be *given* a `Nat` named `n`. Your job is to produce a `Vect` of that exact length."
+### Define the generator. The signature `(n : Nat) -> Fuel -> Gen MaybeEmpty (Vect n String)` tells `deriveGen`: "You will be *given* a `Nat` named `n`. Your job is to produce a `Vect` of that exact length."
 
-    ```idris
-    genVectOfLen : (n : Nat) -> Fuel -> Gen MaybeEmpty (Vect n String)
-    genVectOfLen = deriveGen
-    ```
+```idris
+genVectOfLen : (n : Nat) -> Fuel -> Gen MaybeEmpty (Vect n String)
+genVectOfLen = deriveGen
+```
 
-2.  **Test it.** Let's write a `main` function to call our generator, providing `5` as the length.
+### Test it. Let's write a `main` function to call our generator, providing `5` as the length.
 
-    ```idris
-    main_A : IO ()
-    main_A = do
-      putStrLn "--- Generating a Vect of a given length (5) ---"
-      Just v <- pick1 (genVectOfLen 5 (limit 10))
-        | Nothing => printLn "Generation failed"
-      printLn v
-      printLn $ "The length is: " ++ show (length v)
-    ```
+```idris
+runVect : IO ()
+runVect = do
+  putStrLn "--- Generating a Vect of a given length (5) ---"
+  Just v <- pick (genVectOfLen 5 (limit 10))
+    | Nothing => printLn "Generation failed"
+  printLn v
+  printLn $ "The length is: " ++ show (length v)
+```
 
-3.  **Compile and run.** The output will show a `Vect` that always has exactly 5 elements, filled with random strings from the default `String` generator.
+### Compile and run. The output will show a `Vect` that always has exactly 5 elements, filled with random strings from the default `String` generator.
 
-    ```
-    --- Generating a Vect of a given length (5) ---
-    ["a", "b", "c", "d", "e"]
-    The length is: 5
-    ```
+```text
+--- Generating a Vect of a given length (5) ---
+["a", "b", "c", "d", "e"]
+The length is: 5
+```
 
 By placing `n` before `Fuel`, you have successfully commanded `deriveGen` to use it as a fixed input.
 
@@ -85,33 +82,37 @@ By placing `n` before `Fuel`, you have successfully commanded `deriveGen` to use
 
 What if we don't want to provide a specific length? What if we want the generator itself to invent a random length? To do this, we use a **dependent pair** in the return type.
 
-1.  **Define the generator.** The signature `Fuel -> Gen MaybeEmpty (n ** Vect n String)` tells `deriveGen`: "Your job is to first generate a random `Nat` (which you will call `n`), and then generate a `Vect` of that length. When you are done, give me back both `n` and the `Vect`."
+### Define the generator
 
-    ```idris
-    genRandomVect : Fuel -> Gen MaybeEmpty (n ** Vect n String)
-    genRandomVect = deriveGen
-    ```
+The signature `Fuel -> Gen MaybeEmpty (n ** Vect n String)` tells `deriveGen`: "Your job is to first generate a random `Nat` (which you will call `n`), and then generate a `Vect` of that length. When you are done, give me back both `n` and the `Vect`."
 
-2.  **Test It.** This time, when we call the generator, we don't provide a length. The generator will produce a pair containing the length it chose and the vector it created.
+```idris
+genRandomVect : Fuel -> Gen MaybeEmpty (n ** Vect n String)
+genRandomVect = deriveGen
+```
 
-    ```idris
-    main_B : IO ()
-    main_B = do
-      putStrLn "--- Generating a Vect of a random length ---"
-      replicate 3 $ do
-        Just (n ** v) <- pick1 (genRandomVect (limit 10))
-          | Nothing => printLn "Generation failed"
-        printLn $ "Got a Vect of length " ++ show n ++ ": " ++ show v
-    ```
+### Test It
 
-3.  **Compile and run.** You will see vectors of different, random lengths each time you run it.
+This time, when we call the generator, we don't provide a length. The generator will produce a pair containing the length it chose and the vector it created.
 
-    ```
-    --- Generating a Vect of a random length ---
-    Got a Vect of length 3: ["a", "b", "c"]
-    Got a Vect of length 0: []
-    Got a Vect of length 5: ["d", "e", "f", "g", "h"]
-    ```
+```idris
+runRandomVect : IO ()
+runRandomVect = do
+  putStrLn "--- Generating a Vect of a random length ---"
+  for_ (the (List Int) [1..3]) $ \_ => do
+    Just (n ** v) <- pick (genRandomVect (limit 10))
+      | Nothing => printLn "Generation failed"
+    printLn $ "Got a Vect of length " ++ show n ++ ": " ++ show v
+```
+
+### Compile and run. You will see vectors of different, random lengths each time you run it.
+
+```text
+--- Generating a Vect of a random length ---
+Got a Vect of length 3: ["a", "b", "c"]
+Got a Vect of length 0: []
+Got a Vect of length 5: ["d", "e", "f", "g", "h"]
+```
 
 By moving the parameter `n` from an input to a **generated** part of the output using the `**` syntax, you have completely changed `deriveGen`'s behavior.
 
@@ -121,32 +122,38 @@ By moving the parameter `n` from an input to a **generated** part of the output 
 
 Let's combine the patterns we've learned. Our final generator will be the most flexible: it will take a `Nat` as a *given* input, but it will also take an *external generator* hint for the element type using the `=>` syntax.
 
-1.  **Define the generator.** The signature `(n : Nat) -> (Fuel -> Gen MaybeEmpty a) => Fuel -> Gen MaybeEmpty (Vect n a)` tells `deriveGen`: "You will be *given* `n` and a generator for the elements of type `a`. Your job is to use them to produce a `Vect` of the correct length and type."
+### Define the generator
 
-    ```idris
-    genFlexiVect : (n : Nat) -> (Fuel -> Gen MaybeEmpty a) => Fuel -> Gen MaybeEmpty (Vect n a)
-    genFlexiVect = deriveGen
-    ```
+The signature `(n : Nat) -> (Fuel -> Gen MaybeEmpty a) => Fuel -> Gen MaybeEmpty (Vect n a)` tells `deriveGen`: "You will be *given* `n` and a generator for the elements of type `a`. Your job is to use them to produce a `Vect` of the correct length and type."
 
-2.  **Test It.** To call this generator, we must provide both the length `n` and an element generator via the `@` syntax.
+```idris
+genFlexiVect : (n : Nat) -> (Fuel -> Gen MaybeEmpty a) => Fuel -> Gen MaybeEmpty (Vect n a)
+genFlexiVect = deriveGen
+```
 
-    ```idris
-    main_C : IO ()
-    main_C = do
-      putStrLn "--- Generating a Vect of length 7 with custom Nat elements ---"
-      let myNatGen = choose (100, 200) -- Our custom generator for the elements
+### Test It
 
-      Just v <- pick1 (genFlexiVect 7 @{myNatGen} (limit 10))
-        | Nothing => printLn "Generation failed"
-      printLn v
-    ```
+To call this generator, we must provide both the length `n` and an element generator via the `@` syntax.
 
-3.  **Compile, run, and observe.** You will see a `Vect` of length 7, filled with numbers between 100 and 200, proving that `deriveGen` correctly used both your given length and your external generator.
+```idris
+runFlexi : IO ()
+runFlexi = do
+  putStrLn "--- Generating a Vect of length 7 with custom Nat elements ---"
+  let myNatGen = choose (100, 200) -- Our custom generator for the elements
 
-    ```
-    --- Generating a Vect of length 7 with custom Nat elements ---
-    [158, 112, 199, 101, 134, 186, 177]
-    ```
+  Just v <- pick (genFlexiVect 7 @{myNatGen} (limit 10))
+    | Nothing => printLn "Generation failed"
+  printLn v
+```
+
+### Compile, run, and observe
+
+You will see a `Vect` of length 7, filled with numbers between 100 and 200, proving that `deriveGen` correctly used both your given length and your external generator.
+
+```
+--- Generating a Vect of length 7 with custom Nat elements ---
+[158, 112, 199, 101, 134, 186, 177]
+```
 
 ---
 

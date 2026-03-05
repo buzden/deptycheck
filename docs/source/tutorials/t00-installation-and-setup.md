@@ -53,12 +53,12 @@ Expected output:
 
 Now that Idris 2 is installed, let's add the DepTyCheck library.
 
-1.  **Update the package database:**
+### Update the package database
 ```bash
 pack update-db
 ```
 
-2.  **Install DepTyCheck:**
+### Install DepTyCheck
 ```bash
 pack install deptycheck
 ```
@@ -75,13 +75,13 @@ Successfully installed deptycheck
 
 ## Step 3: Create Your First Project
 
-1.  **Create a project directory:**
+### Create a project directory
 ```bash
 mkdir deptycheck-tutorial
 cd deptycheck-tutorial
 ```
 
-2.  **Create a project file** named `tutorial.ipkg`:
+### Create a project file named `tutorial.ipkg`
 ```
 package tutorial
 
@@ -101,21 +101,20 @@ depends = deptycheck
 
 ## Step 4: Write Your First Generator
 
-1.  **Create the source directory:**
+### Create the source directory
 ```bash
 mkdir src
 ```
 
-2.  **Create a file** `src/Main.idr` with the following code:
+### Create a file `src/Main.idr` with the following code
 
 ```idris
-module Main
+
 
 %language ElabReflection
 
 import Data.Fuel
 import Deriving.DepTyCheck.Gen
-import Test.DepTyCheck.Runner
 
 data TrafficLight = Red | Yellow | Green
 
@@ -124,7 +123,7 @@ genTrafficLight = deriveGen
 
 main : IO ()
 main = do
-  Just light <- pick1 (genTrafficLight (limit 10))
+  Just light <- pick (genTrafficLight (limit 10))
     | Nothing => putStrLn "Generation failed"
   putStrLn $ show light ++ " : TrafficLight"
 ```
@@ -132,13 +131,13 @@ main = do
 🔍 **Notice:**
 -   `%language ElabReflection` enables the metaprogramming features needed for `deriveGen`
 -   `deriveGen` automatically creates a generator for `TrafficLight`
--   `pick1` runs the generator and extracts one value
+-   `pick` runs the generator and extracts one value
 
 ---
 
 ## Step 5: Build and Run
 
-1.  **Build the project:**
+### Build the project
 ```bash
 pack build tutorial
 ```
@@ -149,7 +148,7 @@ Building tutorial...
 Build succeeded
 ```
 
-2.  **Run the executable:**
+### Run the executable
 ```bash
 pack exec tutorial
 ```
@@ -167,14 +166,14 @@ Red : TrafficLight
 
 You can also test your generator interactively:
 
-1.  **Start the REPL:**
+### Start the REPL
 ```bash
 pack repl tutorial
 ```
 
-2.  **Run the generator:**
+### Run the generator
 ```idris
-:exec pick1 (genTrafficLight (limit 10))
+:exec pick (genTrafficLight (limit 10))
 ```
 
 Expected output:
@@ -182,10 +181,10 @@ Expected output:
 Green : TrafficLight
 ```
 
-3.  **Run it multiple times** to see different colors.
+### Run it multiple times to see different colors
 
-4.  **Exit the REPL:**
-```idris
+### Exit the REPL:
+```text
 :quit
 ```
 
