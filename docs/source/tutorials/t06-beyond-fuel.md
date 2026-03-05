@@ -36,16 +36,27 @@ import System.Random.Pure.StdGen
 %language ElabReflection
 ```
 
-### Add the following code. This defines our `PNat` (Peano Natural) type and a standard derived generator for it.
+### Add the following code.
+
+This defines our `PNat` (Peano Natural) type and a standard derived generator for it.
 
 ```idris
 data PNat = PZ | PS PNat
+
+Show PNat where
+  show n = show (the Integer (pnatToInteger n))
+    where
+      pnatToInteger : PNat -> Integer
+      pnatToInteger PZ = 0
+      pnatToInteger (PS k) = 1 + pnatToInteger k
 
 genPNat : Fuel -> Gen MaybeEmpty PNat
 genPNat = deriveGen
 ```
 
-### The Experiment. Now, let's write a `main` function to call this generator twice: once with a generous fuel budget (`limit 10`) and once with a very small one (`limit 3`).
+### The Experiment.
+
+Now, let's write a `main` function to call this generator twice: once with a generous fuel budget (`limit 10`) and once with a very small one (`limit 3`).
 
 ```idris
 runPeano : IO ()
@@ -86,18 +97,20 @@ A perfect example is `Fin n`, the type of numbers from `0` to `n-1`.
 
 ### Add the `Fin` generator to your `RecursionTutorial.idr` file.
 ```idris
-genFin : (n : Nat) -> Fuel -> Gen MaybeEmpty (Fin n)
+genFin : Fuel -> (n : Nat) -> Gen MaybeEmpty (Fin n)
 genFin = deriveGen
 ```
 
-### The Counter-Intuitive Experiment. Now, let's try to generate a `Fin 100`. This would require 100 recursive calls to `FS`. According to our last experiment, this should require at least `limit 100` fuel. But what happens if we only give it `limit 3`?
+### The Counter-Intuitive Experiment.
+
+Now, let's try to generate a `Fin 100`. This would require 100 recursive calls to `FS`. According to our last experiment, this should require at least `limit 100` fuel. But what happens if we only give it `limit 3`?
 
 ```idris
 runFin : IO ()
 runFin = do
   putStrLn "--- Generating a large Fin with a tiny fuel budget (3) ---"
   -- We ask for a Fin up to 100, but only provide fuel for 3 steps!
-  Just fin <- pick (genFin 100 (limit 3))
+  Just fin <- pick (genFin (limit 3) 100)
     | Nothing => printLn "Generation failed"
   printLn fin
 ```
