@@ -3,6 +3,7 @@ module Shared
 import public Control.Monad.Writer
 import public Control.Monad.Either
 import public Deriving.DepTyCheck.Util.Specialisation
+import public Deriving.DepTyCheck.Gen.ConsRecs
 import public Language.Reflection.Unify
 
 %language ElabReflection
@@ -16,7 +17,7 @@ record CallGen where
 
 export
 [PrintDC]
-Monad m => Elaboration m => NamesInfoInTypes => DerivationClosure m where
+Monad m => Elaboration m => DerivationClosure m where
   needWeightFun ti = do
     logMsg "" 0 "needWeightFun \{show ti}"
     pure ()
@@ -26,7 +27,7 @@ Monad m => Elaboration m => NamesInfoInTypes => DerivationClosure m where
 
 export
 [WriterDC]
-Monad m => Elaboration m => MonadWriter (Maybe CallGen) m => NamesInfoInTypes => DerivationClosure m where
+Monad m => Elaboration m => MonadWriter (Maybe CallGen) m => DerivationClosure m where
   needWeightFun ti = pure ()
   callGen sig fuel params = do
     tell $ Just $ MkCallGen sig fuel params
@@ -73,6 +74,7 @@ runSIN namesInfo declareSpec e = do
   let givenVals = formGivenVals (Vect.fromList (Prelude.toList givenSet)) $ snd <$> filtered
   let dc = PrintDC @{%search}
 
+  _ <- getConsRecs
   r <- specialiseIfNeeded (MkGenSignature ti givenSet) `(?fuel) givenVals
   case r of
     Nothing => logMsg "" 0 "sIN returned nothing."
@@ -108,6 +110,7 @@ runSIN' namesInfo declareSpec e = do
   let givenVals = formGivenVals (Vect.fromList (Prelude.toList givenSet)) $ snd <$> filtered
   let dc = WriterDC @{%search}
 
+  _ <- getConsRecs
   r <- specialiseIfNeeded (MkGenSignature ti givenSet) `(?fuel) givenVals
   case r of
     Nothing => pure Nothing

@@ -2,10 +2,10 @@
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty (n : Nat ** X n)
 LOG deptycheck.derive.least-effort:7: DerivedGen.X[] MkX - used final order: [#0 (n), #1]
 LOG deptycheck.util.specialisation:10: Prelude.Basics.List[0] Declared specialised type DerivedGen.List^12757670414100080037.List^12757670414100080037: Prelude.Basics.List (Data.Fin.Fin lam^0)
-LOG deptycheck.derive.least-effort:7: DerivedGen.List^12757670414100080037.List^12757670414100080037[0(fv^List^12757670414100080037.List^12757670414100080037^lam^0)] List^12757670414100080037^Con^0 - used final order: []
-LOG deptycheck.derive.least-effort:7: DerivedGen.List^12757670414100080037.List^12757670414100080037[0(fv^List^12757670414100080037.List^12757670414100080037^lam^0)] List^12757670414100080037^Con^1 - used final order: [#1, #2]
 LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] Z - used final order: []
 LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: [#0]
+LOG deptycheck.derive.least-effort:7: DerivedGen.List^12757670414100080037.List^12757670414100080037[0(fv^List^12757670414100080037.List^12757670414100080037^lam^0)] List^12757670414100080037^Con^0 - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.List^12757670414100080037.List^12757670414100080037[0(fv^List^12757670414100080037.List^12757670414100080037^lam^0)] List^12757670414100080037^Con^1 - used final order: [#1, #2]
 LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FZ - used final order: []
 LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: [#1]
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
@@ -35,14 +35,10 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                  , opts = []
                  , type =
                      mkTy
-                       { name = "<DerivedGen.List^12757670414100080037.List^12757670414100080037>[0]"
+                       { name = "<Prelude.Types.Nat>[]"
                        , type =
                                MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "fv^List^12757670414100080037.List^12757670414100080037^lam^0") (var "Prelude.Types.Nat")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "DerivedGen.List^12757670414100080037.List^12757670414100080037"
-                                   .$ var "fv^List^12757670414100080037.List^12757670414100080037^lam^0")
+                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
                        }
                  })
           , IClaim
@@ -52,10 +48,14 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                  , opts = []
                  , type =
                      mkTy
-                       { name = "<Prelude.Types.Nat>[]"
+                       { name = "<DerivedGen.List^12757670414100080037.List^12757670414100080037>[0]"
                        , type =
                                MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                           .-> MkArg MW ExplicitArg (Just "fv^List^12757670414100080037.List^12757670414100080037^lam^0") (var "Prelude.Types.Nat")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (   var "DerivedGen.List^12757670414100080037.List^12757670414100080037"
+                                   .$ var "fv^List^12757670414100080037.List^12757670414100080037^lam^0")
                        }
                  })
           , IClaim
@@ -134,6 +134,84 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
               ]
           , IDef
               emptyFC
+              "<Prelude.Types.Nat>[]"
+              [    var "<Prelude.Types.Nat>[]" .$ bindVar "^fuel_arg^"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Prelude.Types.Z>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                                      }
+                                })
+                         , IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Prelude.Types.S>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Prelude.Types.Z>>"
+                             [    var "<<Prelude.Types.Z>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Prelude.Types.Z (orders)"))
+                                  .$ (var "Prelude.pure" .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue) .$ var "Prelude.Types.Z")
+                             ]
+                         , IDef
+                             emptyFC
+                             "<<Prelude.Types.S>>"
+                             [    var "<<Prelude.Types.S>>" .$ bindVar "^cons_fuel^"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:3}") implicitFalse
+                                          .=>    var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "Prelude.Types.S" .$ var "{arg:3}")))
+                             ]
+                         ]
+                     , scope =
+                         iCase
+                           { sc = var "^fuel_arg^"
+                           , ty = var "Data.Fuel.Fuel"
+                           , clauses =
+                               [    var "Data.Fuel.Dry"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (dry fuel)"))
+                                    .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^")
+                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
+                                 .=    var "Test.DepTyCheck.Gen.label"
+                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (non-dry fuel)"))
+                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
+                                        .$ (   var "::"
+                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))
+                                            .$ (   var "::"
+                                                .$ (   var "Builtin.MkPair"
+                                                    .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
+                                                    .$ (var "<<Prelude.Types.S>>" .$ var "^sub^fuel_arg^"))
+                                                .$ var "Nil")))
+                               ]
+                           }
+                     }
+              ]
+          , IDef
+              emptyFC
               "<DerivedGen.List^12757670414100080037.List^12757670414100080037>[0]"
               [       var "<DerivedGen.List^12757670414100080037.List^12757670414100080037>[0]"
                    .$ bindVar "^fuel_arg^"
@@ -199,18 +277,18 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.List^12757670414100080037.List^12757670414100080037^Con^1 (orders)"))
                                   .$ (   var ">>="
                                       .$ (var "<Data.Fin.Fin>[0]" .$ var "^outmost-fuel^" .$ var "fv^List^12757670414100080037.List^12757670414100080037^lam^0")
-                                      .$ (    MkArg MW ExplicitArg (Just "{arg:3}") implicitFalse
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:4}") implicitFalse
                                           .=>    var ">>="
                                               .$ (   var "<DerivedGen.List^12757670414100080037.List^12757670414100080037>[0]"
                                                   .$ var "^cons_fuel^"
                                                   .$ var "fv^List^12757670414100080037.List^12757670414100080037^lam^0")
-                                              .$ (    MkArg MW ExplicitArg (Just "{arg:4}") implicitFalse
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:5}") implicitFalse
                                                   .=>    var "Prelude.pure"
                                                       .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
                                                       .$ (   var "DerivedGen.List^12757670414100080037.List^12757670414100080037^Con^1"
                                                           .! ("fv^List^12757670414100080037.List^12757670414100080037^lam^0", implicitTrue)
-                                                          .$ var "{arg:3}"
-                                                          .$ var "{arg:4}"))))
+                                                          .$ var "{arg:4}"
+                                                          .$ var "{arg:5}"))))
                              ]
                          ]
                      , scope =
@@ -246,84 +324,6 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                                     .$ (   var "<<DerivedGen.List^12757670414100080037.List^12757670414100080037^Con^1>>"
                                                         .$ var "^sub^fuel_arg^"
                                                         .$ var "inter^<fv^List^12757670414100080037.List^12757670414100080037^lam^0>"))
-                                                .$ var "Nil")))
-                               ]
-                           }
-                     }
-              ]
-          , IDef
-              emptyFC
-              "<Prelude.Types.Nat>[]"
-              [    var "<Prelude.Types.Nat>[]" .$ bindVar "^fuel_arg^"
-                .= local
-                     { decls =
-                         [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Prelude.Types.Z>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
-                                      }
-                                })
-                         , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Prelude.Types.S>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
-                                      }
-                                })
-                         , IDef
-                             emptyFC
-                             "<<Prelude.Types.Z>>"
-                             [    var "<<Prelude.Types.Z>>" .$ bindVar "^cons_fuel^"
-                               .=    var "Test.DepTyCheck.Gen.label"
-                                  .$ (var "fromString" .$ primVal (Str "Prelude.Types.Z (orders)"))
-                                  .$ (var "Prelude.pure" .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue) .$ var "Prelude.Types.Z")
-                             ]
-                         , IDef
-                             emptyFC
-                             "<<Prelude.Types.S>>"
-                             [    var "<<Prelude.Types.S>>" .$ bindVar "^cons_fuel^"
-                               .=    var "Test.DepTyCheck.Gen.label"
-                                  .$ (var "fromString" .$ primVal (Str "Prelude.Types.S (orders)"))
-                                  .$ (   var ">>="
-                                      .$ (var "<Prelude.Types.Nat>[]" .$ var "^cons_fuel^")
-                                      .$ (    MkArg MW ExplicitArg (Just "{arg:5}") implicitFalse
-                                          .=>    var "Prelude.pure"
-                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                              .$ (var "Prelude.Types.S" .$ var "{arg:5}")))
-                             ]
-                         ]
-                     , scope =
-                         iCase
-                           { sc = var "^fuel_arg^"
-                           , ty = var "Data.Fuel.Fuel"
-                           , clauses =
-                               [    var "Data.Fuel.Dry"
-                                 .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (dry fuel)"))
-                                    .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^")
-                               ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
-                                 .=    var "Test.DepTyCheck.Gen.label"
-                                    .$ (var "fromString" .$ primVal (Str "Prelude.Types.Nat[] (non-dry fuel)"))
-                                    .$ (   var "Test.DepTyCheck.Gen.frequency"
-                                        .$ (   var "::"
-                                            .$ (var "Builtin.MkPair" .$ var "Data.Nat1.one" .$ (var "<<Prelude.Types.Z>>" .$ var "^fuel_arg^"))
-                                            .$ (   var "::"
-                                                .$ (   var "Builtin.MkPair"
-                                                    .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
-                                                    .$ (var "<<Prelude.Types.S>>" .$ var "^sub^fuel_arg^"))
                                                 .$ var "Nil")))
                                ]
                            }

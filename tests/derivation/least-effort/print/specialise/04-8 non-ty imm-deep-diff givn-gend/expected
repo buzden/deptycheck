@@ -104,7 +104,9 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.MkX (orders)"))
                                   .$ (   var ">>="
                                       .$ (   var "the"
-                                          .$ (var "Gen" .$ var "MaybeEmpty" .$ (var "DPair" .$ implicitFalse .$ implicitFalse))
+                                          .$ (   var "Gen"
+                                              .$ var "MaybeEmpty"
+                                              .$ (var "DPair" .$ implicitFalse .$ (MkArg MW ExplicitArg Nothing implicitFalse .=> implicitFalse)))
                                           .$ (   var "map"
                                               .$ (    MkArg MW ExplicitArg (Just "invv") implicitFalse
                                                   .=> iCase
