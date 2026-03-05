@@ -28,15 +28,26 @@ First, let's create a simple data type and a generator for it. This will be the 
 ### Create a new file named `CoverageTutorial.idr`.
 
 ```idris
+import Data.List
+import Data.List.Lazy
 import Test.DepTyCheck.Gen
 import Test.DepTyCheck.Gen.Coverage
 import System.Random.Pure.StdGen
+
+import Control.Monad.Maybe
+import Control.Monad.Random
+import Control.Monad.State
 ```
 
 ### Add the following code to it.
 
 ```idris
 data TrafficLight = Red | Amber | Green
+
+Show TrafficLight where
+  show Red = "Red"
+  show Amber = "Amber"
+  show Green = "Green"
 
 -- A generator that produces a traffic light color
 genTrafficLight : Gen1 TrafficLight
@@ -47,27 +58,7 @@ This generator works, but we have no way of knowing if it's distributing its res
 
 ---
 
-## Step 2: Adding Labels to Track Coverage
-
-The `label` function is the key to measuring coverage. It takes a `String` name and a generator and attaches a counter to that generation path.
-
-### Modify your `genTrafficLight` generator to wrap each color's generator in a `label`.
-
-```idris
--- An instrumented generator that is now tracking coverage for each color.
-genTrafficLight : Gen1 TrafficLight
-genTrafficLight = oneOf
-  [ label "Red"   (pure Red)
-  , label "Amber" (pure Amber)
-  , label "Green" (pure Green)
-  ]
-```
-
-Now, every time this generator runs, it will record which of the three labeled paths was taken. In the next step, we'll see how to collect and display these recorded labels.
-
----
-
-## Step 3: Generating the Coverage Report
+## Step 2: Generating the Coverage Report
 
 To get a full, aggregated coverage report, we need to run the generator many times and combine the results. This is a three-step process:
 
@@ -80,8 +71,8 @@ Here is how to implement this in a `main` function.
 ### Add a `main` function to your `CoverageTutorial.idr` file.
 
 ```idris
-runReport : IO ()
-runReport = do
+runReportWithCoverage : IO ()
+runReportWithCoverage = do
   -- Step 1: Initialize the report template.
   let reportTemplate = initCoverageInfo genTrafficLight
 
@@ -104,7 +95,9 @@ idris2 --build CoverageTutorial.idr
 ./build/exec/CoverageTutorial
 ```
 
-### Check the output. You will see the aggregated coverage report printed to your console. Because we used `oneOf`, the distribution should be very even:
+### Check the output.
+
+You will see the aggregated coverage report printed to your console. Because we used `oneOf`, the distribution should be very even:
 
 ```
 TrafficLight covered fully (1000 times)
@@ -117,7 +110,7 @@ This gives us high confidence that our generator is testing all three `TrafficLi
 
 ---
 
-## Step 4: Debugging with Labels
+## Step 3: Debugging with Labels
 
 Besides aggregated reports, labels are also an invaluable tool for debugging. You can instruct the generator runner to print every label as it's activated. This allows you to trace the execution of a single, complex generation.
 
@@ -130,13 +123,14 @@ This new function will use `pick` and provide the `PrintAllLabels` implementatio
 ```idris
 runDebug : IO ()
 runDebug = do
-  putStrLn "--- Running with PrintAllLabels ---"
-  val <- pick genTrafficLight @{PrintAllLabels}
-  putStrLn $ "Generated: " ++ show val
+  Just v <- runMaybeT {m=IO}
+    $ evalRandomT someStdGen
+    $ evalStateT Z $ unGen {labels = PrintAllLabels} (withCoverage genTrafficLight)
+    | Nothing => putStrLn "couldn't produce a value"
+  putStrLn "Generated withCoverage: \{show v}"
 
-  putStrLn "\n--- Running with IgnoreLabels (the default) ---"
   val <- pick genTrafficLight
-  putStrLn $ "Generated: " ++ show val
+  putStrLn $ "Generated via pick: " ++ show val
 ```
 
 ### Compile and run the file again.
@@ -149,14 +143,13 @@ runDebug = do
 ### Analyze the output. You will see a clear difference:
 
 ```
---- Running with PrintAllLabels ---
-Red
-Generated: Red
-
---- Running with IgnoreLabels (the default) ---
-Generated: Amber
+Main.TrafficLight[?]
+Main.Amber (user-defined)
+Generated withCoverage: Amber
+Generated via pick: Just Green
 ```
-    In the first run, the label `"Red"` was printed to the console the moment the corresponding generator was executed. In the second run, no labels were printed. For a deeply nested generator, this trace allows you to understand exactly which path was taken to produce a specific problematic value.
+
+    In the first run, the label was printed to the console the moment the corresponding generator was executed. In second run, no label were printed. For a deeply nested generator, this trace allows you to understand exactly which path was taken to produce a specific problematic value.
 
 ---
 
