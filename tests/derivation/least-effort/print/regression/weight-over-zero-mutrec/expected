@@ -13,13 +13,6 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.EqSuperBasic[0, 1] EqBasicU - u
                  { rig = MW
                  , vis = Export
                  , opts = []
-                 , type = mkTy {name = "weight^DerivedGen.Ty", type = MkArg MW ExplicitArg Nothing (var "DerivedGen.Ty") .-> var "Data.Nat1.Nat1"}
-                 })
-          , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
                  , type =
                      mkTy
                        { name = "<DerivedGen.EqSuperBasic>[0, 1]"
@@ -32,14 +25,13 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.EqSuperBasic[0, 1] EqBasicU - u
                                .$ (var "DerivedGen.EqSuperBasic" .$ var "{arg:1}" .$ var "{arg:2}")
                        }
                  })
-          , IDef
-              emptyFC
-              "weight^DerivedGen.Ty"
-              [       var "weight^DerivedGen.Ty"
-                   .$ (var "DerivedGen.Arr" .! ("e", implicitTrue) .! ("s", implicitTrue) .! ("t", implicitTrue) .$ implicitTrue)
-                .= var "Data.Nat1.one"
-              , var "weight^DerivedGen.Ty" .$ (var "DerivedGen.Var" .$ implicitTrue) .= var "Data.Nat1.one"
-              ]
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type = mkTy {name = "weight^DerivedGen.Ty", type = MkArg MW ExplicitArg Nothing (var "DerivedGen.Ty") .-> var "Data.Nat1.Nat1"}
+                 })
           , IDef
               emptyFC
               "<DerivedGen.EqSuperBasic>[0, 1]"
@@ -210,6 +202,14 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.EqSuperBasic[0, 1] EqBasicU - u
                                                  .$ var "inter^<{arg:2}>"))
                                          .$ var "Nil"))))
                      }
+              ]
+          , IDef
+              emptyFC
+              "weight^DerivedGen.Ty"
+              [       var "weight^DerivedGen.Ty"
+                   .$ (var "DerivedGen.Arr" .! ("e", implicitTrue) .! ("s", implicitTrue) .! ("t", implicitTrue) .$ implicitTrue)
+                .= var "Data.Nat1.one"
+              , var "weight^DerivedGen.Ty" .$ (var "DerivedGen.Var" .$ implicitTrue) .= var "Data.Nat1.one"
               ]
           ]
       , scope = var "<DerivedGen.EqSuperBasic>[0, 1]" .$ var "^outmost-fuel^" .$ var "outer^<a>" .$ var "outer^<b>"

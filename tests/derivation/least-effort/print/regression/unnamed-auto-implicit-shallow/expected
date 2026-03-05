@@ -12,13 +12,6 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                  { rig = MW
                  , vis = Export
                  , opts = []
-                 , type = mkTy {name = "weight^DerivedGen.X", type = MkArg MW ExplicitArg Nothing (var "DerivedGen.X") .-> var "Data.Nat1.Nat1"}
-                 })
-          , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
                  , type =
                      mkTy
                        { name = "<DerivedGen.Y>[1]"
@@ -46,13 +39,13 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                            .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Builtin.Unit"
                        }
                  })
-          , IDef
-              emptyFC
-              "weight^DerivedGen.X"
-              [ var "weight^DerivedGen.X" .$ var "DerivedGen.Nil" .= var "Data.Nat1.one"
-              ,    var "weight^DerivedGen.X" .$ (var "DerivedGen.(::)" .$ implicitTrue .$ bindVar "arg^1" .@ implicitTrue)
-                .= var "succ" .$ (var "weight^DerivedGen.X" .$ var "arg^1")
-              ]
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type = mkTy {name = "weight^DerivedGen.X", type = MkArg MW ExplicitArg Nothing (var "DerivedGen.X") .-> var "Data.Nat1.Nat1"}
+                 })
           , IDef
               emptyFC
               "<DerivedGen.Y>[1]"
@@ -190,6 +183,13 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                          .$ (var "fromString" .$ primVal (Str "Builtin.Unit[] (non-spending)"))
                          .$ (var "<<Builtin.MkUnit>>" .$ var "^fuel_arg^")
                      }
+              ]
+          , IDef
+              emptyFC
+              "weight^DerivedGen.X"
+              [ var "weight^DerivedGen.X" .$ var "DerivedGen.Nil" .= var "Data.Nat1.one"
+              ,    var "weight^DerivedGen.X" .$ (var "DerivedGen.(::)" .$ implicitTrue .$ bindVar "arg^1" .@ implicitTrue)
+                .= var "succ" .$ (var "weight^DerivedGen.X" .$ var "arg^1")
               ]
           ]
       , scope = var "<DerivedGen.Y>[1]" .$ var "^outmost-fuel^" .$ var "outer^<f>"

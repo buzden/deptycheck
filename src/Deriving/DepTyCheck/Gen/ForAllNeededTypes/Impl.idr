@@ -46,7 +46,7 @@ deriveAll : NamesInfoInTypes => ConsRecs => DeriveBodyForType => DerivationClosu
 deriveAll acc = do
   (toDeriveKnown, toDeriveUnknown) <- get {stateType=(List _, List _)}
   put ([], toDeriveUnknown)
-  derived <- (acc ++) <$> for toDeriveKnown deriveOne
+  derived <- (++ acc) <$> for toDeriveKnown deriveOne
   if not $ null toDeriveKnown
     then assert_total deriveAll derived
     else if null toDeriveUnknown
@@ -102,6 +102,20 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => SortedMap GenSignatu
 
 %hide Data.Vect.Dependent.(<*>)
 
+declName : Decl -> String
+declName $ IClaim $ MkFCVal _ $ MkIClaimData {type = MkTy {ty, _}, _} = show ty
+declName $ IData _ _ _ $ MkData  {n, _} = show n
+declName $ IData _ _ _ $ MkLater {n, _} = show n
+declName $ IDef fc nm cls = ?declName_rhs_2
+declName $ IParameters _ _ [] = "P"
+declName $ IParameters _ _ (d::_) = declName d
+declName $ IRecord _ _ _ _ $ MkRecord {n, _} = show n
+declName $ INamespace _ (MkNS ns) _ = joinBy "." $ reverse ns
+declName $ ITransform _ nm _ _ = show nm
+declName $ IRunElabDecl {} = "Z"
+declName $ ILog {} = "Z"
+declName $ IBuiltin _ _ nm = show nm
+
 export
 runCanonic : DeriveBodyForType => NamesInfoInTypes => ConsRecs =>
              SortedMap ExternalGenSignature Name -> (forall m. DerivationClosure m => m a) -> Elab (a, List Decl)
@@ -112,5 +126,6 @@ runCanonic exts calc = do
                          [| (calc, deriveAll []) |]
                          {stateType=(ListMap GenSignature Name, (List (GenSignature, Name), List (GenSignature, Name)), SortedSet TypeInfo)}
                          {m=Elab}
-  let (defs, bodies) = unzip $ mapMaybe deriveWeightingFun (Prelude.toList weightingFuns) ++ derived
+  let derived = sortBy (compare `on` declName . fst) $ derived ++ mapMaybe deriveWeightingFun (Prelude.toList weightingFuns)
+  let (defs, bodies) = unzip derived
   pure (x, defs ++ bodies)

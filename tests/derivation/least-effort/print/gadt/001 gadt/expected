@@ -12,14 +12,6 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                  , vis = Export
                  , opts = []
                  , type =
-                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
-                 })
-          , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
                      mkTy
                        { name = "<Data.Fin.Fin>[0]"
                        , type =
@@ -28,13 +20,14 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                            .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "Data.Fin.Fin" .$ var "n")
                        }
                  })
-          , IDef
-              emptyFC
-              "weight^Prelude.Types.Nat"
-              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
-              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
-                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
-              ]
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
+                 })
           , IDef
               emptyFC
               "<Data.Fin.Fin>[0]"
@@ -111,6 +104,13 @@ LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: 
                                          .$ (var "<<Data.Fin.FS>>" .$ var "^fuel_arg^" .$ var "inter^<n>"))
                                      .$ var "Nil")))
                      }
+              ]
+          , IDef
+              emptyFC
+              "weight^Prelude.Types.Nat"
+              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
+              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
+                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
               ]
           ]
       , scope = var "<Data.Fin.Fin>[0]" .$ var "^outmost-fuel^" .$ var "outer^<n>"

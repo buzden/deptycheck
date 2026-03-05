@@ -14,17 +14,6 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex[0(sx), 3] There' - used
                  , opts = []
                  , type =
                      mkTy
-                       { name = "weight^DerivedGen.SnocListTyMut"
-                       , type = MkArg MW ExplicitArg Nothing (var "DerivedGen.SnocListTyMut") .-> var "Data.Nat1.Nat1"
-                       }
-                 })
-          , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
                        { name = "<DerivedGen.AtIndex>[0, 3]"
                        , type =
                                MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
@@ -45,13 +34,17 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex[0(sx), 3] There' - used
                                                    .$ var "{arg:1}")))
                        }
                  })
-          , IDef
-              emptyFC
-              "weight^DerivedGen.SnocListTyMut"
-              [ var "weight^DerivedGen.SnocListTyMut" .$ var "DerivedGen.Lin" .= var "Data.Nat1.one"
-              ,    var "weight^DerivedGen.SnocListTyMut" .$ (var "DerivedGen.(:<)" .$ bindVar "arg^0" .$ implicitTrue .$ implicitTrue)
-                .= var "succ" .$ (var "weight^DerivedGen.SnocListTyMut" .$ var "arg^0")
-              ]
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "weight^DerivedGen.SnocListTyMut"
+                       , type = MkArg MW ExplicitArg Nothing (var "DerivedGen.SnocListTyMut") .-> var "Data.Nat1.Nat1"
+                       }
+                 })
           , IDef
               emptyFC
               "<DerivedGen.AtIndex>[0, 3]"
@@ -202,6 +195,13 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex[0(sx), 3] There' - used
                                          .$ (var "<<DerivedGen.There'>>" .$ var "^fuel_arg^" .$ var "inter^<sx>" .$ var "inter^<{arg:1}>"))
                                      .$ var "Nil")))
                      }
+              ]
+          , IDef
+              emptyFC
+              "weight^DerivedGen.SnocListTyMut"
+              [ var "weight^DerivedGen.SnocListTyMut" .$ var "DerivedGen.Lin" .= var "Data.Nat1.one"
+              ,    var "weight^DerivedGen.SnocListTyMut" .$ (var "DerivedGen.(:<)" .$ bindVar "arg^0" .$ implicitTrue .$ implicitTrue)
+                .= var "succ" .$ (var "weight^DerivedGen.SnocListTyMut" .$ var "arg^0")
               ]
           ]
       , scope = var "<DerivedGen.AtIndex>[0, 3]" .$ var "^outmost-fuel^" .$ var "outer^<sx>" .$ var "outer^<mut>"

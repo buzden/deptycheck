@@ -17,15 +17,36 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                  , opts = []
                  , type =
                      mkTy
+                       { name = "<Decls.RegIsType>[0, 2, 3]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Ty")
+                           .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Regs" .$ var "r")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (   var "Builtin.DPair.DPair"
+                                   .$ (var "Data.Fin.Fin" .$ var "r")
+                                   .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.Fin.Fin" .$ var "r")
+                                       .=> var "Decls.RegIsType" .! ("r", var "r") .$ var "{arg:3}" .$ var "{arg:1}" .$ var "{arg:2}"))
+                       }
+                 })
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
                        { name = "<Decls.Expr>[0, 1, 2]"
                        , type =
                                MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
                            .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Regs" .$ var "r")
-                           .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Ty")
+                           .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Decls.Regs" .$ var "r")
+                           .-> MkArg MW ExplicitArg (Just "{arg:5}") (var "Decls.Ty")
                            .->    var "Test.DepTyCheck.Gen.Gen"
                                .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (var "Decls.Expr" .! ("r", var "r") .$ var "{arg:1}" .$ var "{arg:2}")
+                               .$ (var "Decls.Expr" .! ("r", var "r") .$ var "{arg:4}" .$ var "{arg:5}")
                        }
                  })
           , IClaim
@@ -36,31 +57,10 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                  , type =
                      mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
                  })
-          , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Decls.RegIsType>[0, 2, 3]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Decls.Ty")
-                           .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Decls.Regs" .$ var "r")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ (var "Data.Fin.Fin" .$ var "r")
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:5}") (var "Data.Fin.Fin" .$ var "r")
-                                       .=> var "Decls.RegIsType" .! ("r", var "r") .$ var "{arg:5}" .$ var "{arg:3}" .$ var "{arg:4}"))
-                       }
-                 })
           , IDef
               emptyFC
-              "<Decls.Expr>[0, 1, 2]"
-              [       var "<Decls.Expr>[0, 1, 2]"
+              "<Decls.RegIsType>[0, 2, 3]"
+              [       var "<Decls.RegIsType>[0, 2, 3]"
                    .$ bindVar "^fuel_arg^"
                    .$ bindVar "inter^<r>"
                    .$ bindVar "inter^<{arg:1}>"
@@ -74,89 +74,22 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                 , opts = []
                                 , type =
                                     mkTy
-                                      { name = "<<Decls.Read>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Regs" .$ var "r")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Ty")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "Decls.Expr" .! ("r", var "r") .$ var "{arg:1}" .$ var "{arg:2}")
-                                      }
-                                })
-                         , IDef
-                             emptyFC
-                             "<<Decls.Read>>"
-                             [    var "<<Decls.Read>>" .$ bindVar "^cons_fuel^" .$ bindVar "r" .$ bindVar "regs" .$ bindVar "t"
-                               .=    var "Test.DepTyCheck.Gen.label"
-                                  .$ (var "fromString" .$ primVal (Str "Decls.Read (orders)"))
-                                  .$ (   var ">>="
-                                      .$ (var "<Decls.RegIsType>[0, 2, 3]" .$ var "^outmost-fuel^" .$ var "r" .$ var "t" .$ var "regs")
-                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
-                                          .=> iCase
-                                                { sc = var "{lamc:1}"
-                                                , ty = implicitFalse
-                                                , clauses =
-                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "idx" .$ bindVar "{conArg:1}"
-                                                      .=    var "Prelude.pure"
-                                                         .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                                         .$ (   var "Decls.Read"
-                                                             .! ("r", implicitTrue)
-                                                             .! ("regs", implicitTrue)
-                                                             .! ("t", implicitTrue)
-                                                             .$ implicitTrue
-                                                             .@ var "{conArg:1}")
-                                                    ]
-                                                }))
-                             ]
-                         ]
-                     , scope =
-                            var "Test.DepTyCheck.Gen.label"
-                         .$ (var "fromString" .$ primVal (Str "Decls.Expr[0(r), 1, 2] (non-spending)"))
-                         .$ (var "<<Decls.Read>>" .$ var "^fuel_arg^" .$ var "inter^<r>" .$ var "inter^<{arg:1}>" .$ var "inter^<{arg:2}>")
-                     }
-              ]
-          , IDef
-              emptyFC
-              "weight^Prelude.Types.Nat"
-              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
-              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
-                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
-              ]
-          , IDef
-              emptyFC
-              "<Decls.RegIsType>[0, 2, 3]"
-              [       var "<Decls.RegIsType>[0, 2, 3]"
-                   .$ bindVar "^fuel_arg^"
-                   .$ bindVar "inter^<r>"
-                   .$ bindVar "inter^<{arg:3}>"
-                   .$ bindVar "inter^<{arg:4}>"
-                .= local
-                     { decls =
-                         [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
                                       { name = "<<Decls.Here>>"
                                       , type =
                                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
                                           .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Decls.Ty")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Decls.Regs" .$ var "r")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Ty")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Regs" .$ var "r")
                                           .->    var "Test.DepTyCheck.Gen.Gen"
                                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                               .$ (   var "Builtin.DPair.DPair"
                                                   .$ (var "Data.Fin.Fin" .$ var "r")
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:5}") (var "Data.Fin.Fin" .$ var "r")
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.Fin.Fin" .$ var "r")
                                                       .=>    var "Decls.RegIsType"
                                                           .! ("r", var "r")
-                                                          .$ var "{arg:5}"
                                                           .$ var "{arg:3}"
-                                                          .$ var "{arg:4}"))
+                                                          .$ var "{arg:1}"
+                                                          .$ var "{arg:2}"))
                                       }
                                 })
                          , IClaim
@@ -170,18 +103,18 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                       , type =
                                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
                                           .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Decls.Ty")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Decls.Regs" .$ var "r")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Ty")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Regs" .$ var "r")
                                           .->    var "Test.DepTyCheck.Gen.Gen"
                                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                               .$ (   var "Builtin.DPair.DPair"
                                                   .$ (var "Data.Fin.Fin" .$ var "r")
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:5}") (var "Data.Fin.Fin" .$ var "r")
+                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.Fin.Fin" .$ var "r")
                                                       .=>    var "Decls.RegIsType"
                                                           .! ("r", var "r")
-                                                          .$ var "{arg:5}"
                                                           .$ var "{arg:3}"
-                                                          .$ var "{arg:4}"))
+                                                          .$ var "{arg:1}"
+                                                          .$ var "{arg:2}"))
                                       }
                                 })
                          , IDef
@@ -270,18 +203,85 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                      .$ (   var "<<Decls.Here>>"
                                          .$ var "^fuel_arg^"
                                          .$ var "inter^<r>"
-                                         .$ var "inter^<{arg:3}>"
-                                         .$ var "inter^<{arg:4}>"))
+                                         .$ var "inter^<{arg:1}>"
+                                         .$ var "inter^<{arg:2}>"))
                                  .$ (   var "::"
                                      .$ (   var "Builtin.MkPair"
                                          .$ (var "weight^Prelude.Types.Nat" .$ var "inter^<r>")
                                          .$ (   var "<<Decls.There>>"
                                              .$ var "^fuel_arg^"
                                              .$ var "inter^<r>"
-                                             .$ var "inter^<{arg:3}>"
-                                             .$ var "inter^<{arg:4}>"))
+                                             .$ var "inter^<{arg:1}>"
+                                             .$ var "inter^<{arg:2}>"))
                                      .$ var "Nil")))
                      }
+              ]
+          , IDef
+              emptyFC
+              "<Decls.Expr>[0, 1, 2]"
+              [       var "<Decls.Expr>[0, 1, 2]"
+                   .$ bindVar "^fuel_arg^"
+                   .$ bindVar "inter^<r>"
+                   .$ bindVar "inter^<{arg:4}>"
+                   .$ bindVar "inter^<{arg:5}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<Decls.Read>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Decls.Regs" .$ var "r")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:5}") (var "Decls.Ty")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (var "Decls.Expr" .! ("r", var "r") .$ var "{arg:4}" .$ var "{arg:5}")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<Decls.Read>>"
+                             [    var "<<Decls.Read>>" .$ bindVar "^cons_fuel^" .$ bindVar "r" .$ bindVar "regs" .$ bindVar "t"
+                               .=    var "Test.DepTyCheck.Gen.label"
+                                  .$ (var "fromString" .$ primVal (Str "Decls.Read (orders)"))
+                                  .$ (   var ">>="
+                                      .$ (var "<Decls.RegIsType>[0, 2, 3]" .$ var "^outmost-fuel^" .$ var "r" .$ var "t" .$ var "regs")
+                                      .$ (    MkArg MW ExplicitArg (Just "{lamc:1}") implicitFalse
+                                          .=> iCase
+                                                { sc = var "{lamc:1}"
+                                                , ty = implicitFalse
+                                                , clauses =
+                                                    [    var "Builtin.DPair.MkDPair" .$ bindVar "idx" .$ bindVar "{conArg:1}"
+                                                      .=    var "Prelude.pure"
+                                                         .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                         .$ (   var "Decls.Read"
+                                                             .! ("r", implicitTrue)
+                                                             .! ("regs", implicitTrue)
+                                                             .! ("t", implicitTrue)
+                                                             .$ implicitTrue
+                                                             .@ var "{conArg:1}")
+                                                    ]
+                                                }))
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "Decls.Expr[0(r), 1, 2] (non-spending)"))
+                         .$ (var "<<Decls.Read>>" .$ var "^fuel_arg^" .$ var "inter^<r>" .$ var "inter^<{arg:4}>" .$ var "inter^<{arg:5}>")
+                     }
+              ]
+          , IDef
+              emptyFC
+              "weight^Prelude.Types.Nat"
+              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
+              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
+                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
               ]
           ]
       , scope = var "<Decls.Expr>[0, 1, 2]" .$ var "^outmost-fuel^" .$ var "outer^<r>" .$ var "outer^<rs>" .$ var "outer^<t>"

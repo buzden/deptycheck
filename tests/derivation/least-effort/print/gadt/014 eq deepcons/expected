@@ -13,14 +13,6 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[0, 1] Step - used final ord
                  , vis = Export
                  , opts = []
                  , type =
-                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
-                 })
-          , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
                      mkTy
                        { name = "<DerivedGen.LT2>[0, 1]"
                        , type =
@@ -32,13 +24,14 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[0, 1] Step - used final ord
                                .$ (var "DerivedGen.LT2" .$ var "{arg:1}" .$ var "{arg:2}")
                        }
                  })
-          , IDef
-              emptyFC
-              "weight^Prelude.Types.Nat"
-              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
-              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
-                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
-              ]
+          , IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
+                 })
           , IDef
               emptyFC
               "<DerivedGen.LT2>[0, 1]"
@@ -145,6 +138,13 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[0, 1] Step - used final ord
                                              .$ var "inter^<{arg:2}>"))
                                      .$ var "Nil")))
                      }
+              ]
+          , IDef
+              emptyFC
+              "weight^Prelude.Types.Nat"
+              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
+              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
+                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
               ]
           ]
       , scope = var "<DerivedGen.LT2>[0, 1]" .$ var "^outmost-fuel^" .$ var "outer^<a>" .$ var "outer^<b>"
