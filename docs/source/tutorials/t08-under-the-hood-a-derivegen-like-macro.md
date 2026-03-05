@@ -49,6 +49,7 @@ import Deriving.DepTyCheck.Gen.ForOneType.Interface
 import Deriving.DepTyCheck.Gen.ForOneType.Impl
 import Deriving.DepTyCheck.Gen.ForOneTypeConRhs.Interface
 import Deriving.DepTyCheck.Gen.ConsRecs
+import Deriving.DepTyCheck.Gen.Signature
 
 import Test.DepTyCheck.Gen
 import Data.Fuel
@@ -78,7 +79,7 @@ We'll generate `Active` with predefined usernames and `Inactive` with predefined
 
 ```idris
 [CustomStatusGen] DeriveBodyRhsForCon where
-  consGenExpr sig con givs fuel = do
+  consGenExpr sig con givs _ = do
     -- Check which constructor we're generating for
     logMsg "tutorial.consGenExpr" 1 "con.name: \{show con.name}"
     pure $ if (dropNS con.name) == `{Active}
@@ -182,30 +183,132 @@ You'll see both `Active` and `Inactive` constructors (chosen randomly by `MainCo
 
 ---
 
-## Understanding the Architecture
+## Understanding the Partnership
 
-Let's recap what we built:
+You might have noticed something interesting in Step 3: `CustomDerivator`
 
-1.  **Constructor Logic** (`DeriveBodyRhsForCon`): Decides **what arguments** each constructor receives. We used direct generators like `elements` instead of recursive `deriveGen`.
+The `@{CustomStatusGen}` syntax passes our Constructor Expert to `MainCoreDerivator`.
 
-2.  **Type Derivator** (`DeriveBodyForType`): Handles **which constructor** to call and manages fuel. `MainCoreDerivator` does this automatically, choosing randomly between non-recursive constructors.
+Internally, `MainCoreDerivator` does something like this (simplified):
 
-3.  **User API** (`deriveGen`): Combines everything into a usable generator.
+```text
+DeriveBodyRhsForCon => DeriveBodyForType where
+  canonicBody sig n = do
+    -- For EACH constructor, call the Constructor Expert
+    consBodies <- for sig.targetType.cons $ \con =>
+      consGenExpr sig con empty (var "fuel")
+    -- Then choose which one to call (oneOf, frequency, etc.)
+    -- ... fuel management and constructor selection ...
+```
 
-The key insight is that `consGenExpr` generates **code templates**, not values. This code runs at compile time and produces the generator function that runs at runtime.
+This is the delegation pattern in action!
 
 ---
 
-## What About Bias?
+## Step 6: Building a Minimal Type Expert
 
-You might wonder: "What if I want to control **which constructor** is chosen, not just its arguments?"
+Now let's implement our own Type Expert to see the delegation explicitly. We'll create a minimal version that works for non-recursive types like `UserStatus`.
 
-For that, you would need to implement `DeriveBodyForType` directly, with custom logic for constructor selection. This is more advanced - see the `AlternativeCore` module in the test suite for examples like `[CallSelf]` that control fuel-based recursion patterns.
+### Implement EduDerivator
 
-Our approach with `DeriveBodyRhsForCon` is perfect when:
--   You want to customize how constructor arguments are generated
--   You're happy with `MainCoreDerivator`'s default constructor selection
--   You want to integrate external generators or custom logic for specific fields
+```idris
+-- A minimal Type Expert that shows delegation explicitly
+[EduDerivator] DeriveBodyRhsForCon => DeriveBodyForType where
+  canonicBody sig n = do
+    let ctorsUserStatus@[_, _] = sig.targetType.cons
+      | _ => fail "Bad example"
+
+    activeGen <- consGenExpr sig (index 0 ctorsUserStatus) empty (var "fuel")
+    inactiveGen <- consGenExpr sig (index 1 ctorsUserStatus) empty (var "fuel")
+
+    logMsg "tutorial.canonicBody" 1 "activeGen: \{show activeGen}"
+    logMsg "tutorial.canonicBody" 1 "inactiveGen: \{show inactiveGen}"
+
+    pure [ callCanonic sig n (bindVar "fuel") (replicate sig.givenParams.size implicitTrue) .= `(oneOf [~activeGen, ~inactiveGen]) ]
+```
+
+**This is a conceptual example.**
+
+🔍 **Notice:**
+-   The constraint `DeriveBodyRhsForCon =>` means we NEED a Constructor Expert
+-   We explicitly call `consGenExpr` for each constructor
+-   For demonstration purposes of non-recursive types, we just use `oneOf`, so no fuel management needed
+-   `callCanonic` builds the function call: `genName fuel = ...`
+-   This is a simplified version of what `MainCoreDerivator` does
+
+### Use EduDerivator with our Constructor Expert
+
+```idris
+-- Compose EduDerivator with CustomStatusGen
+EduCustomDerivator : DeriveBodyForType
+EduCustomDerivator = EduDerivator @{CustomStatusGen}
+
+-- Generator using our educational derivator
+genUserStatusEdu : Fuel -> Gen MaybeEmpty UserStatus
+genUserStatusEdu = deriveGen @{EduCustomDerivator}
+```
+
+### Test it
+
+```idris
+testEdu : IO ()
+testEdu = do
+  putStrLn "--- Testing EduDerivator ---"
+  for_ (the (List Int) [1..10]) $ \_ => do
+    Just s <- pick (genUserStatusEdu (limit 20))
+      | Nothing => printLn "Generation failed"
+    printLn s
+```
+
+Run the test with:
+
+```bash
+echo -e ':exec testEdu' | rlwrap pack repl ./src/CustomGen.idr
+```
+
+Expected output (same as before, confirming it works):
+
+```
+--- Testing EduDerivator ---
+Active "Bob"
+Inactive "sick"
+Inactive "vacation"
+Active "Charlie"
+Inactive "offline"
+Inactive "vacation"
+Active "Bob"
+Active "Alice"
+Inactive "vacation"
+Inactive "offline"
+```
+
+The output shows both constructors with our custom values, proving our `EduDerivator` correctly delegates to `CustomStatusGen`!
+
+---
+
+## Type Experts: Conclusions
+
+Now you've seen two Type Experts:
+
+1.  **`MainCoreDerivator`** (production): Handles fuel, recursion, weights, GADT indices, and more. Used in normal derivation.
+
+2.  **`EduDerivator`** (educational): Minimal version showing the delegation pattern. Only works for non-recursive types.
+
+---
+
+## Architecture Recap
+
+Let's summarize what we've learned:
+
+1.  **Constructor Expert** (`DeriveBodyRhsForCon`): Controls **what arguments** each constructor receives. Called once per constructor.
+
+2.  **Type Expert** (`DeriveBodyForType`): Controls **which constructor** gets called and manages fuel. Calls Constructor Expert for each constructor.
+
+3.  **Delegation Pattern**: Type Expert calls `consGenExpr` to delegate argument generation to Constructor Expert.
+
+4.  **Composition**: `MainCoreDerivator @{CustomStatusGen}` combines standard type-level logic with custom constructor-level logic.
+
+This two-level architecture makes `DepTyCheck` highly modular: you can customize at either level without affecting the other!
 
 ---
 
