@@ -38,7 +38,7 @@ Continue here after completing the Core Track.
 | 8 | [Under the Hood](t08-under-the-hood-a-derivegen-like-macro.md) |
 | 9 | [Mixing Manual and Automatic](t09-mixing-manual-and-automatic.md) |
 | 10 | [Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md) |
-| 11 | [Real-World Example: DSL ASTs](t11-real-world-example.md) |
+| 11 | [Toy Example: DSL ASTs](t11-toy-example.md) |
 
 **Prerequisites:** Core Track completion
 
@@ -61,7 +61,7 @@ Continue here after completing the Core Track.
 | Build custom derivation strategies | [Tutorial 8](t08-under-the-hood-a-derivegen-like-macro.md) |
 | Use my custom generators with deriveGen | [Tutorial 9](t09-mixing-manual-and-automatic.md) |
 | Generate types with proof arguments | [Tutorial 10](t10-generating-gadts-with-proofs.md) |
-| Generate complete programs for a DSL | [Tutorial 11](t11-real-world-example.md) |
+| Generate complete programs for a DSL | [Tutorial 11](t11-toy-example.md) |
 
 ---
 

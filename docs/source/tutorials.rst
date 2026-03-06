@@ -26,4 +26,4 @@ You can read more in the `original framework <https://diataxis.fr/tutorials/>`_ 
   tutorials/t08-under-the-hood-a-derivegen-like-macro
   tutorials/t09-mixing-manual-and-automatic
   tutorials/t10-generating-gadts-with-proofs
-  tutorials/t11-real-world-example
+  tutorials/t11-toy-example

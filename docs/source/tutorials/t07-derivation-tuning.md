@@ -183,5 +183,5 @@ main_lt = do
 
 *   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t09-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
 *   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md)** to see how `deriveGen` handles GADTs with auto-implicit proof arguments.
-*   **Want to see a real-world example?** Continue to **[Real-World Example: Generating ASTs for a DSL](t11-real-world-example.md)** to build a complete generator for a simple imperative language.
+*   **Want to see a complete example?** Continue to **[Toy Example: Generating ASTs for a DSL](t11-toy-example.md)** to build a complete generator for a simple imperative language.
 *   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t08-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
