@@ -14,26 +14,13 @@ By the end, you will see output like:
 Red : TrafficLight
 ```
 
-**Expected time:** 15-20 minutes
-
 ---
 
 ## Step 1: Install Idris 2
 
 First, you need to install Idris 2. We recommend using [`pack`](https://github.com/stefan-hoeck/idris2-pack/), which manages both the compiler and library dependencies.
 
-**Option A: Using a pre-built distribution** (recommended for beginners)
-
-Download a pre-built distribution from the [Idris 2 releases page](https://github.com/idris-lang/Idris2/releases) and add it to your PATH.
-
-**Option B: Build from source**
-
-```bash
-git clone https://github.com/idris-lang/Idris2.git
-cd Idris2
-make
-sudo make install
-```
+Follow its [installation script](https://github.com/stefan-hoeck/idris2-pack/?tab=readme-ov-file#quick-installation).
 
 **Verify your installation:**
 ```bash
@@ -42,10 +29,10 @@ idris2 --version
 
 Expected output:
 ```
-0.6.x
+0.8.x
 ```
 
-🔍 **Notice:** You need Idris 2 version **0.6.0 or newer** for DepTyCheck to work.
+🔍 **Notice:** You need Idris 2 version **0.8.0 or newer** for DepTyCheck to work.
 
 ---
 
@@ -61,12 +48,6 @@ pack update-db
 ### Install DepTyCheck
 ```bash
 pack install deptycheck
-```
-
-Expected output:
-```
-Installing deptycheck...
-Successfully installed deptycheck
 ```
 
 🔍 **Notice:** This command downloads and builds DepTyCheck. It may take a few minutes the first time.
@@ -87,7 +68,7 @@ package tutorial
 
 version = 0.0.1
 
-sourcedir = src
+sourcedir = .
 builddir = .build
 
 modules = Main
@@ -101,31 +82,27 @@ depends = deptycheck
 
 ## Step 4: Write Your First Generator
 
-### Create the source directory
-```bash
-mkdir src
-```
-
-### Create a file `src/Main.idr` with the following code
+### Create a file `Main.idr` with the following code
 
 ```idris
-
-
-%language ElabReflection
-
-import Data.Fuel
 import Deriving.DepTyCheck.Gen
+import System.Random.Pure.StdGen
 
 data TrafficLight = Red | Yellow | Green
+
+Show TrafficLight where
+  show Red = "Red"
+  show Yellow = "Yellow"
+  show Green = "Green"
 
 genTrafficLight : Fuel -> Gen MaybeEmpty TrafficLight
 genTrafficLight = deriveGen
 
 main : IO ()
 main = do
-  Just light <- pick (genTrafficLight (limit 10))
+  Just light <- pick (genTrafficLight (limit 0))
     | Nothing => putStrLn "Generation failed"
-  putStrLn $ show light ++ " : TrafficLight"
+  printLn light
 ```
 
 🔍 **Notice:**
@@ -155,7 +132,7 @@ pack exec tutorial
 
 Expected output (your result will vary):
 ```
-Red : TrafficLight
+Yellow
 ```
 
 🔍 **Notice:** Run the command multiple times to see different results (Yellow, Green, Red).
@@ -172,13 +149,13 @@ pack repl tutorial
 ```
 
 ### Run the generator
-```idris
-:exec pick (genTrafficLight (limit 10))
+```text
+:exec printLn =<< pick (genTrafficLight (limit 0))
 ```
 
 Expected output:
 ```
-Green : TrafficLight
+Just Green
 ```
 
 ### Run it multiple times to see different colors
