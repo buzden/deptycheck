@@ -1,19 +1,12 @@
 ||| A bridge between a single act of derivation (for a single type) and a user derivation task
 module Deriving.DepTyCheck.Gen.ForAllNeededTypes.Impl
 
-import public Control.Monad.Either
-import public Control.Monad.Reader
 import public Control.Monad.State
 import public Control.Monad.State.Tuple
-import public Control.Monad.Writer
-import public Control.Monad.RWS
 
 import public Data.DPair
-import public Data.List.Map
 import public Data.List.Set
 import public Data.SortedMap
-import public Data.SortedMap.Extra
-import public Data.SortedSet
 
 import public Decidable.Equality
 
@@ -27,7 +20,7 @@ ClosuringContext : (Type -> Type) -> Type
 ClosuringContext m =
   ( MonadState  (ListSet GenSignature) m                                 -- gens already asked to be derived
   , MonadState  (List GenSignature, List GenSignature) m                 -- two queues of gens to be derived, one for known types, one the unknown ones
-  , MonadState  (SortedSet TypeInfo) m                                   -- type names that were asked for deriving their weighting function
+  , MonadState  (ListSet TypeInfo) m                                     -- type names that were asked for deriving their weighting function
   )
 
 nameForGen : GenSignature -> Name
@@ -63,7 +56,7 @@ deriveAll acc = do
       -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
       let genFunClaim = export' name $ canonicSig sig
       (tyWithWeightFuns, genFunBody) <- logBounds Info "deptycheck.derive.type" [sig] $ canonicBody sig name
-      modify $ \old => foldl SortedSet.insert' old tyWithWeightFuns
+      modify $ \old => foldl List.Set.insert' old tyWithWeightFuns
       pure (genFunClaim, def name genFunBody)
 
 DeriveBodyForType => ClosuringContext m => Elaboration m => SortedMap GenSignature (ExternalGenSignature, Name) => DerivationClosure m where
@@ -113,9 +106,9 @@ runCanonic : DeriveBodyForType => NamesInfoInTypes => ConsRecs =>
 runCanonic exts calc = do
   let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
   ((_, _, weightingFuns), (x, derived)) <- runStateT
-                         (empty, (empty, empty), empty @{TypeInfoOrdByName})
+                         (empty, (empty, empty), empty @{TypeInfoEqByName})
                          [| (calc, deriveAll []) |]
-                         {stateType=(ListSet GenSignature, (List GenSignature, List GenSignature), SortedSet TypeInfo)}
+                         {stateType=(ListSet GenSignature, (List GenSignature, List GenSignature), ListSet TypeInfo)}
                          {m=Elab}
   let derived = sortBy (compare `on` declName . fst) $ derived ++ mapMaybe deriveWeightingFun (Prelude.toList weightingFuns)
   let (defs, bodies) = unzip derived
