@@ -52,7 +52,7 @@ Imagine we have a `SpecialString` type that should only ever contain specific, p
 data SpecialString = MkSpecialString String
 
 Show SpecialString where
-  show (MkSpecialString s) = "MkSpecialString \{show s}"
+  show (MkSpecialString s) = "MkSpecialString " ++ show s
 
 -- A handwritten generator for SpecialString
 %hint
@@ -67,7 +67,7 @@ genSpecialString = map MkSpecialString (elements ["admin", "root", "system"])
 data User = MkUser SpecialString Nat
 
 Show User where
-  show (MkUser s i) = "MkUser (\{show s}) \{show i}"
+  show (MkUser s i) = "MkUser (" ++ show s ++ ") " ++ show i
 ```
 
 🔍 **Notice:**

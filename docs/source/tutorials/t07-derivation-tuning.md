@@ -156,7 +156,7 @@ genLtPair : Fuel -> Gen MaybeEmpty LtPair
 genLtPair = deriveGen
 
 Show LtPair where
-  show (MkLtPair n m _) = "MkLtPair \{show n} \{show m} _"
+  show (MkLtPair n m _) = "MkLtPair " ++ show n ++ " " ++ show m ++ " _"
 ```
     - `GenOrderTuning ... where`: We implement the ordering interface for the `MkLtPair` constructor.
     - `deriveFirst _ _ = [`{m}]`: We implement `deriveFirst` to return a list of arguments that must be generated first. Here, we specify the argument named `m` using a name literal `` `{m}``.

@@ -187,7 +187,11 @@ Run it:
 
 ```bash
 echo -e ':exec testBounded' | rlwrap pack repl ./src/Playground.idr
-...
+```
+
+The output might be varied:
+
+```text
 Main> --- Generating BoundedNat with limit'=5 ---
 Generated: 4 (< 5)
 Generated: 1 (< 5)

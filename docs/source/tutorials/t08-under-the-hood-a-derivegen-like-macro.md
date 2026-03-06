@@ -61,8 +61,8 @@ import System.Random.Pure.StdGen
 data UserStatus = Active String | Inactive String
 
 Show UserStatus where
-  show (Active name) = "Active \{show name}"
-  show (Inactive reason) = "Inactive \{show reason}"
+  show (Active name) = "Active " ++ show name
+  show (Inactive reason) = "Inactive " ++ show reason
 ```
 
 Both constructors are non-recursive (only contain `String`), so `MainCoreDerivator` will choose between them randomly. Our custom logic will control the **arguments** they receive.
@@ -81,7 +81,7 @@ We'll generate `Active` with predefined usernames and `Inactive` with predefined
 [CustomStatusGen] DeriveBodyRhsForCon where
   consGenExpr sig con givs _ = do
     -- Check which constructor we're generating for
-    logMsg "tutorial.consGenExpr" 1 "con.name: \{show con.name}"
+    logMsg "tutorial.consGenExpr" 1 $ "con.name: " ++ show con.name
     pure $ if (dropNS con.name) == `{Active}
       then `(Active <$> elements ["Alice", "Bob", "Charlie"])
       else `(Inactive <$> elements ["vacation", "sick", "offline"])
@@ -221,8 +221,8 @@ Now let's implement our own Type Expert to see the delegation explicitly. We'll 
     activeGen <- consGenExpr sig (index 0 ctorsUserStatus) empty (var "fuel")
     inactiveGen <- consGenExpr sig (index 1 ctorsUserStatus) empty (var "fuel")
 
-    logMsg "tutorial.canonicBody" 1 "activeGen: \{show activeGen}"
-    logMsg "tutorial.canonicBody" 1 "inactiveGen: \{show inactiveGen}"
+    logMsg "tutorial.canonicBody" 1 $ "activeGen: " ++ show activeGen
+    logMsg "tutorial.canonicBody" 1 $ "inactiveGen: " ++ show inactiveGen
 
     pure [ callCanonic sig n (bindVar "fuel") (replicate sig.givenParams.size implicitTrue) .= `(oneOf [~activeGen, ~inactiveGen]) ]
 ```

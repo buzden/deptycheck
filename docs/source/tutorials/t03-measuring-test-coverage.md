@@ -127,7 +127,7 @@ runDebug = do
     $ evalRandomT someStdGen
     $ evalStateT Z $ unGen {labels = PrintAllLabels} (withCoverage genTrafficLight)
     | Nothing => putStrLn "couldn't produce a value"
-  putStrLn "Generated withCoverage: \{show v}"
+  putStrLn $ "Generated withCoverage: " ++ show v
 
   val <- pick genTrafficLight
   putStrLn $ "Generated via pick: " ++ show val
