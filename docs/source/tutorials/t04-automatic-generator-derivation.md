@@ -96,7 +96,7 @@ This is a lot of work to get right. Now, let's do it the easy way.
 
 ## Step 2: Automatic Derivation with `deriveGen`
 
-We can replace the manual logic with a single line. But it has some limitations. To make the automagic generation works we need drop off polymorphic parameters:
+We can replace the manual logic with a single line. But it has some limitations. To make the automagic generation works we need to drop off polymorphic parameters:
 
 ```idris
 mutual
@@ -119,7 +119,7 @@ mutual
       show' (x :: xs)  = show x ++ ", " ++ show' xs
 ```
 
-NOTE: The latest version of DepTyCheck supports polymorhic specialization for automatically derived generators, but its support is still experimental.
+NOTE: The latest version of DepTyCheck supports polymorhic specialization for automatically derived generators, but its support is still experimental. Also automagic generator deriving supports only `Gen MaybeEmpty` for now. If you need stricter `Gen NonEmpty`, you still need to do it by your hands.
 
 ### Define the generator
 
