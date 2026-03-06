@@ -57,8 +57,8 @@ DeriveBodyRhsForCon => DeriveBodyForType where
     let Just consRecs = lookupConsWithWeight sig
       | Nothing => fail "INTERNAL ERROR: unknown type for consRecs: \{show sig.targetType.name}"
 
-    -- ask to derive all needed weigthing functions, if any
-    traverse_ needWeightFun $ mapMaybe (usedWeightFun . snd) consRecs
+    -- compute all needed weigthing functions, if any
+    let typesWithWeightFun = mapMaybe (usedWeightFun . snd) consRecs
 
     -- decide how to name a fuel argument on the LHS
     let fuelArg = "^fuel_arg^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
@@ -67,7 +67,7 @@ DeriveBodyRhsForCon => DeriveBodyForType where
     let outmostRHS = fuelDecisionExpr fuelArg $ map @{Compose} weightExpr consRecs
 
     -- return function definition
-    pure [ canonicDefaultLHS' interimNamesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
+    pure $ MkPair typesWithWeightFun [ canonicDefaultLHS' interimNamesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
 
   where
 

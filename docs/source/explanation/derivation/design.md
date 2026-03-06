@@ -8,7 +8,7 @@ import public Deriving.DepTyCheck.Gen
 -- Empty body derivation
 export
 DeriveBodyForType where
-  canonicBody sig n = pure [ callCanonic sig n implicitTrue (replicate _ implicitTrue) .= `(empty) ]
+  canonicBody sig n = pure $ pure [ callCanonic sig n implicitTrue (replicate _ implicitTrue) .= `(empty) ]
 -->
 
 # Design of derivation

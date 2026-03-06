@@ -14,11 +14,11 @@ numberedArgs bind = Fin.tabulate $ (if bind then bindVar else var) . UN . Basic 
 
 export
 [EmptyBody] DeriveBodyForType where
-  canonicBody sig n = pure [ callCanonic sig n implicitTrue irrelevantArgs .= `(empty) ]
+  canonicBody sig n = pure $ pure [ callCanonic sig n implicitTrue irrelevantArgs .= `(empty) ]
 
 export
 [CallSelf] DeriveBodyForType where
-  canonicBody sig n = pure
+  canonicBody sig n = pure $ pure
     [ callCanonic sig n (var `{Dry})                    irrelevantArgs      .= `(empty)
     , callCanonic sig n (var `{More} .$ bindVar "fuel") (numberedArgs True) .= fst !(callGen sig (var "fuel") $ numberedArgs False)
     ]
@@ -58,7 +58,7 @@ Show XS where
 export
 [Ext_XS] DeriveBodyForType where
   canonicBody sig n =
-    pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXS <$> ~(!(callStrGen $ var "fuel"))) ]
+    pure $ pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXS <$> ~(!(callStrGen $ var "fuel"))) ]
 
 --- Two (string) arguments taken from external ---
 
@@ -72,7 +72,7 @@ Show XSS where
 export
 [Ext_XSS] DeriveBodyForType where
   canonicBody sig n =
-    pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSS <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callStrGen $ var "fuel"))) ]
+    pure $ pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSS <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callStrGen $ var "fuel"))) ]
 
 --- Two (string and nat) arguments taken from external ---
 
@@ -86,7 +86,7 @@ Show XSN where
 export
 [Ext_XSN] DeriveBodyForType where
   canonicBody sig n =
-    pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSN <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callNatGen $ var "fuel"))) ]
+    pure $ pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkXSN <$> ~(!(callStrGen $ var "fuel")) <*> ~(!(callNatGen $ var "fuel"))) ]
 
 --- Dependent type's argument + a constructor's argument taken from external ---
 
@@ -101,4 +101,4 @@ export
 export
 [Ext_X'S] DeriveBodyForType where
   canonicBody sig n =
-    pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkX'S <$> ~(!(callStrGen $ var "fuel"))) ]
+    pure $ pure [ callCanonic sig n (bindVar "fuel") irrelevantArgs .= `(MkX'S <$> ~(!(callStrGen $ var "fuel"))) ]

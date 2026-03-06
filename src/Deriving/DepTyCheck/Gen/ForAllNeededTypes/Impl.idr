@@ -60,12 +60,11 @@ deriveAll acc = do
     deriveOne (sig, name) = do
       -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
       let genFunClaim = export' name $ canonicSig sig
-      genFunBody <- logBounds Info "deptycheck.derive.type" [sig] $ def name <$> canonicBody sig name
-      pure (genFunClaim, genFunBody)
+      (tyWithWeightFuns, genFunBody) <- logBounds Info "deptycheck.derive.type" [sig] $ canonicBody sig name
+      modify $ \old => foldl SortedSet.insert' old tyWithWeightFuns
+      pure (genFunClaim, def name genFunBody)
 
 DeriveBodyForType => ClosuringContext m => Elaboration m => SortedMap GenSignature (ExternalGenSignature, Name) => DerivationClosure m where
-
-  needWeightFun = modify . SortedSet.insert
 
   callGen sig fuel values = do
 
@@ -91,7 +90,7 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => SortedMap GenSignatu
       -- remember the task to derive
       modify {stateType=(List _, List _)} $ if isTypeKnown sig.targetType then mapFst $ (::) (sig, name) else mapSnd $ (::) (sig, name)
 
-      -- return the name of the newly derived generator
+      -- return the expession of calling the newly derived generator
       pure $ callCanonic sig name fuel values
 
     -- call the internal gen
@@ -106,7 +105,7 @@ declName : Decl -> String
 declName $ IClaim $ MkFCVal _ $ MkIClaimData {type = MkTy {ty, _}, _} = show ty
 declName $ IData _ _ _ $ MkData  {n, _} = show n
 declName $ IData _ _ _ $ MkLater {n, _} = show n
-declName $ IDef fc nm cls = ?declName_rhs_2
+declName $ IDef _ nm _ = show nm
 declName $ IParameters _ _ [] = "P"
 declName $ IParameters _ _ (d::_) = declName d
 declName $ IRecord _ _ _ _ $ MkRecord {n, _} = show n

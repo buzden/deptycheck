@@ -11,7 +11,6 @@ import public Deriving.DepTyCheck.Gen.Signature
 
 public export
 interface Monad m => DerivationClosure m where
-  needWeightFun : ConsRecs => TypeInfo -> m ()
   callGen : NamesInfoInTypes => ConsRecs =>
             (sig : GenSignature) -> (fuel : TTImp) -> Vect sig.givenParams.size TTImp -> m (TTImp, Maybe (gend ** Vect gend $ Fin gend))
   --                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -20,7 +19,6 @@ interface Monad m => DerivationClosure m where
 
 export
 DerivationClosure m => MonadTrans t => Monad (t m) => DerivationClosure (t m) where
-  needWeightFun = lift . needWeightFun
   callGen sig fuel params = lift $ callGen sig fuel params
 
 -------------------
