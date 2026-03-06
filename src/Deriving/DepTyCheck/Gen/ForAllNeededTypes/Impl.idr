@@ -10,6 +10,7 @@ import public Control.Monad.RWS
 
 import public Data.DPair
 import public Data.List.Map
+import public Data.List.Set
 import public Data.SortedMap
 import public Data.SortedMap.Extra
 import public Data.SortedSet
@@ -24,8 +25,8 @@ import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 
 ClosuringContext : (Type -> Type) -> Type
 ClosuringContext m =
-  ( MonadState  (ListMap GenSignature Name) m                            -- gens already asked to be derived
-  , MonadState  (List (GenSignature, Name), List (GenSignature, Name)) m -- two queues of gens to be derived, one for known types, one the unknown ones
+  ( MonadState  (ListSet GenSignature) m                                 -- gens already asked to be derived
+  , MonadState  (List GenSignature, List GenSignature) m                 -- two queues of gens to be derived, one for known types, one the unknown ones
   , MonadState  (SortedSet TypeInfo) m                                   -- type names that were asked for deriving their weighting function
   )
 
@@ -52,12 +53,13 @@ deriveAll acc = do
     else if null toDeriveUnknown
       then pure derived
       else do
-        (niit, cr) <- updateNamesAndConsRecs $ targetType . fst <$> toDeriveUnknown
+        (niit, cr) <- updateNamesAndConsRecs $ targetType <$> toDeriveUnknown
         put (toDeriveUnknown, [])
         assert_total $ deriveAll @{niit} @{cr} derived
   where
-    deriveOne : (GenSignature, Name) -> m (Decl, Decl)
-    deriveOne (sig, name) = do
+    deriveOne : GenSignature -> m (Decl, Decl)
+    deriveOne sig = do
+      let name = nameForGen sig
       -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
       let genFunClaim = export' name $ canonicSig sig
       (tyWithWeightFuns, genFunBody) <- logBounds Info "deptycheck.derive.type" [sig] $ canonicBody sig name
@@ -74,28 +76,18 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => SortedMap GenSignatu
           logValue Details "deptycheck.derive.closuring.external" [sig] "is used as an external generator" $
             (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
 
-    -- get the expression of calling the internal gen, derive if necessary
-    internalGenCall <- do
-
-      -- look for existing (already derived) internals, use it if exists
-      let Nothing = List.Map.lookup sig !get
-        | Just name => pure $ callCanonic sig name fuel values
-
-      -- nothing found, then derive! acquire the name
-      let name = nameForGen sig
+    -- put to derivation queue if necessary
+    when (not !(gets $ contains sig)) $ do
 
       -- remember that we're responsible for this signature derivation
-      modify $ List.Map.insert sig name
+      modify $ insert sig
 
       -- remember the task to derive
-      modify {stateType=(List _, List _)} $ if isTypeKnown sig.targetType then mapFst $ (::) (sig, name) else mapSnd $ (::) (sig, name)
-
-      -- return the expession of calling the newly derived generator
-      pure $ callCanonic sig name fuel values
+      modify {stateType=(List _, List _)} $ if isTypeKnown sig.targetType then mapFst $ (::) sig else mapSnd $ (::) sig
 
     -- call the internal gen
     logValue DetailedDebug "deptycheck.derive.closuring.internal" [sig] "is used as an internal generator"
-      (internalGenCall, Nothing)
+      (callCanonic sig (nameForGen sig) fuel values, Nothing)
 
 --- Canonic-dischagring function ---
 
@@ -123,7 +115,7 @@ runCanonic exts calc = do
   ((_, _, weightingFuns), (x, derived)) <- runStateT
                          (empty, (empty, empty), empty @{TypeInfoOrdByName})
                          [| (calc, deriveAll []) |]
-                         {stateType=(ListMap GenSignature Name, (List (GenSignature, Name), List (GenSignature, Name)), SortedSet TypeInfo)}
+                         {stateType=(ListSet GenSignature, (List GenSignature, List GenSignature), SortedSet TypeInfo)}
                          {m=Elab}
   let derived = sortBy (compare `on` declName . fst) $ derived ++ mapMaybe deriveWeightingFun (Prelude.toList weightingFuns)
   let (defs, bodies) = unzip derived
