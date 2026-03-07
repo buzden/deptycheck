@@ -1,6 +1,7 @@
 # 2. Handling Emptiness: When a Type Has No Values
 
-In the [first tutorial](t01-generator-monad.md), we used `Gen1`, which is a guarantee—a promise—that a value can always be generated. This works perfectly for types like `Nat` or `String` that always have inhabitants.
+In the [first tutorial](t01-generator-monad.md), we used `Gen1`, which is a guarantee—a promise—that a value can always be generated. This works
+perfectly for types like `Nat` or `String` that always have inhabitants.
 
 But what happens when a type might be **uninhabited** (have no values at all) under certain conditions?
 
@@ -10,11 +11,14 @@ This is a common scenario in dependently-typed programming. A perfect example is
 - `Fin 1` has one inhabitant: `0`.
 - But what about `Fin 0`? It asks for a number in the range `0` to `-1`. There are no such numbers. This type is **uninhabited**.
 
-It is impossible to write a generator that produces a value of type `Fin 0`, because none exist. Our testing library must be able to handle this gracefully. In this tutorial, you will learn how to write safe generators for types that might be empty. You will build a correct generator for `Fin n` and see how to handle its results safely.
+It is impossible to write a generator that produces a value of type `Fin 0`, because none exist. Our testing library must be able to handle this
+gracefully. In this tutorial, you will learn how to write safe generators for types that might be empty. You will build a correct generator for `Fin n`
+and see how to handle its results safely.
 
 ## Prerequisites
 
-This tutorial assumes you have completed [Installation and First Steps](t00-installation-and-setup.md) and the first tutorial, ["The Generator Monad"](t01-generator-monad.md).
+This tutorial assumes you have completed [Installation and First Steps](t00-installation-and-setup.md) and the first tutorial, ["The Generator
+Monad"](t01-generator-monad.md).
 
 ---
 
@@ -32,7 +36,8 @@ import Data.Fin
 import System.Random.Pure.StdGen
 ```
 
-Now, **try to write a `Gen1` generator** for `Fin n`. We can handle the case where `n` is greater than zero, but the `Z` (zero) case presents a major problem.
+Now, **try to write a `Gen1` generator** for `Fin n`. We can handle the case where `n` is greater than zero, but the `Z` (zero) case presents a major
+problem.
 
 ```idris
 -- This is an INTENTIONALLY INCORRECT generator to show the problem
@@ -41,7 +46,8 @@ genFinIncorrect (S k) = FS <$> genFinIncorrect k
 genFinIncorrect Z     = ?wat -- What could we possibly write here?
 ```
 
-We have a problem. In the `(S k)` case, we can walk all possible values of `Fin (S k)` and convert them to `Fin` to create a generator. But in the `Z` case, what can we do?
+We have a problem. In the `(S k)` case, we can walk all possible values of `Fin (S k)` and convert them to `Fin` to create a generator. But in the `Z`
+case, what can we do?
 
 The type is `Gen1 (Fin 0)`, but `Fin 0` has no values. We can't use `pure` because we don't have a value to give it. We're stuck.
 
@@ -82,7 +88,8 @@ The changes are small but critical:
 
 ## Step 3: Running a `Gen0` Generator
 
-Because a `Gen0` generator might not produce a value, we can't use `pick1` (which promises to return one value). Instead, we must use `pick`, which safely handles the possibility of emptiness.
+Because a `Gen0` generator might not produce a value, we can't use `pick1` (which promises to return one value). Instead, we must use `pick`, which
+safely handles the possibility of emptiness.
 
 - `pick1 gen` returns `a`
 - `pick gen` returns `Maybe a`
@@ -111,15 +118,18 @@ Just 2
 Nothing
 ```
 
-First result will be a `Fin 3` value wrapped in a `Just`, because a value could be generated. But for the second we used `empty` in our definition for `genFin Z`, `DepTyCheck` knows this generator can't produce a value, and `pick` safely returns `Nothing`
+First result will be a `Fin 3` value wrapped in a `Just`, because a value could be generated. But for the second we used `empty` in our definition for
+`genFin Z`, `DepTyCheck` knows this generator can't produce a value, and `pick` safely returns `Nothing`
 
-This is the core of safe, dependently-typed testing. The type system allows us to model that some generations are impossible, and the runner (`pick`) allows us to handle those cases gracefully at runtime without any crashes.
+This is the core of safe, dependently-typed testing. The type system allows us to model that some generations are impossible, and the runner (`pick`)
+allows us to handle those cases gracefully at runtime without any crashes.
 
 ## Step 4: Filtering with `suchThat`
 
 A type can also be effectively "empty" if we filter its values so much that none remain. `DepTyCheck` provides `suchThat` for this.
 
-I.e. `g` suchThat `p` takes a generator `g` and a predicate (a function that returns a `Bool`) `p`. It runs the generator `g`, and if the value it produces satisfies `p`, it returns it. If not, the generation fails for that attempt.
+I.e. `g` suchThat `p` takes a generator `g` and a predicate (a function that returns a `Bool`) `p`. It runs the generator `g`, and if the value it
+produces satisfies `p`, it returns it. If not, the generation fails for that attempt.
 
 Because the condition might never be met, `suchThat` always returns a `Gen0`.
 
@@ -162,7 +172,8 @@ Just 2
 Nothing
 ```
 
-This demonstrates another critical aspect of `Gen0`: it allows for speculative generation that might fail, giving you a powerful way to define complex properties.
+This demonstrates another critical aspect of `Gen0`: it allows for speculative generation that might fail, giving you a powerful way to define complex
+properties.
 
 ---
 
@@ -170,4 +181,5 @@ This demonstrates another critical aspect of `Gen0`: it allows for speculative g
 
 Now that you've mastered manual generation for both simple and complex types, it's time to see how `DepTyCheck` can do this work for you automatically.
 
-- **Next Tutorial:** Continue to **[Measuring Your Test Coverage](t03-measuring-test-coverage.md)** to learn how to analyze the quality of your generated data.
+- **Next Tutorial:** Continue to **[Measuring Your Test Coverage](t03-measuring-test-coverage.md)** to learn how to analyze the quality of your
+generated data.

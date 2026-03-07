@@ -1,12 +1,14 @@
 # 8. Generating GADTs with Proof Constraints
 
-In previous tutorials, we used `deriveGen` for regular data types and indexed types like `Vect`. But what about types that carry **proofs** as constructors arguments? Can `deriveGen` handle those?
+In previous tutorials, we used `deriveGen` for regular data types and indexed types like `Vect`. But what about types that carry **proofs** as
+constructors arguments? Can `deriveGen` handle those?
 
 Yes! `deriveGen` is smart enough to automatically satisfy proof constraints during generation.
 
 ## Our Goal
 
-In this tutorial, you will build a generator for a `SortedList` type that is **always sorted by construction**. The type itself carries a proof of sortedness, and `deriveGen` will automatically find valid values that satisfy the proof constraints.
+In this tutorial, you will build a generator for a `SortedList` type that is **always sorted by construction**. The type itself carries a proof of
+sortedness, and `deriveGen` will automatically find valid values that satisfy the proof constraints.
 
 By the end, you will:
 
@@ -27,7 +29,8 @@ import System.Random.Pure.StdGen
 
 ## Step 1: Define a SortedList Type
 
-First, let's define a list type that is guaranteed to be sorted. The key is that the `SCons` constructor requires a proof that adding a new element maintains sortedness.
+First, let's define a list type that is guaranteed to be sorted. The key is that the `SCons` constructor requires a proof that adding a new element
+maintains sortedness.
 
 ```idris
 isSorted : List Nat -> Bool
@@ -51,7 +54,8 @@ The `SCons` constructor has an **auto-implicit** argument `{auto prf : isSorted 
 - The `auto` keyword tells Idris to search for this proof automatically.
 
 > [!NOTE]\
-> The `{auto prf : isSorted ...}` constraint ensures only sorted lists are generated. The `auto` keyword makes Idris search for proof automatically during generation.
+> The `{auto prf : isSorted ...}` constraint ensures only sorted lists are generated. The `auto` keyword makes Idris search for proof automatically
+during generation.
 
 ---
 
@@ -213,7 +217,8 @@ Generated: 3 (< 5)
 Generated: 4 (< 5)
 ```
 
-The `{auto prf : LT n limit}` constraint ensures that only values less than the limit are generated. `deriveGen` will automatically search for valid `n` values.
+The `{auto prf : LT n limit}` constraint ensures that only values less than the limit are generated. `deriveGen` will automatically search for valid `n`
+values.
 
 ---
 
@@ -221,8 +226,10 @@ The `{auto prf : LT n limit}` constraint ensures that only values less than the 
 
 Now that you can generate proof-carrying data, you are ready for more advanced topics:
 
-- **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
-- **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
+- **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how
+`deriveGen` automatically discovers and uses your custom generators.
+- **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)**
+to learn how the derivation engine works.
 
 <!-- idris
 main : IO ()

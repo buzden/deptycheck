@@ -1,6 +1,7 @@
 # DepTyCheck Tutorials
 
-Welcome to the DepTyCheck tutorial series! These tutorials follow the **Diataxis framework** — each lesson is designed to teach you through hands-on experience with concrete, achievable goals.
+Welcome to the DepTyCheck tutorial series! These tutorials follow the **Diataxis framework** — each lesson is designed to teach you through hands-on
+experience with concrete, achievable goals.
 
 ## How to Use These Tutorials
 

@@ -1,6 +1,7 @@
 # Installation and First Steps
 
-Welcome to DepTyCheck! This tutorial will guide you through installing Idris 2 and DepTyCheck, creating your first project, and running a simple generator.
+Welcome to DepTyCheck! This tutorial will guide you through installing Idris 2 and DepTyCheck, creating your first project, and running a simple
+generator.
 
 ## Our Goal
 
@@ -20,7 +21,8 @@ Red : TrafficLight
 
 ## Step 1: Install Idris 2
 
-First, you need to install Idris 2. We recommend using [`pack`](https://github.com/stefan-hoeck/idris2-pack/), which manages both the compiler and library dependencies.
+First, you need to install Idris 2. We recommend using [`pack`](https://github.com/stefan-hoeck/idris2-pack/), which manages both the compiler
+and library dependencies.
 
 Follow its [installation script](https://github.com/stefan-hoeck/idris2-pack/?tab=readme-ov-file#quick-installation).
 
@@ -192,4 +194,5 @@ Just Green
 
 Now that you have a working setup, you are ready to learn the fundamentals of generator creation:
 
-- **Continue to Tutorial 1:** [The Generator Monad](t01-generator-monad.md) to learn how to create generators manually using `pure`, `elements`, `choose`, and other combinators.
+- **Continue to Tutorial 1:** [The Generator Monad](t01-generator-monad.md) to learn how to create generators manually using `pure`, `elements`,
+  `choose`, and other combinators.

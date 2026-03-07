@@ -1,12 +1,16 @@
 # 11. Under the Hood: Building a `deriveGen`-like Macro
 
-In the previous tutorials, we wielded the power of `deriveGen` and even learned how to tune it. In this final, advanced tutorial, we will go behind the curtain to understand how the magic happens. We will demystify `deriveGen` by building our own simplified version from scratch.
+In the previous tutorials, we wielded the power of `deriveGen` and even learned how to tune it. In this final, advanced tutorial, we will go behind the
+curtain to understand how the magic happens. We will demystify `deriveGen` by building our own simplified version from scratch.
 
-> **Disclaimer: This is a very Advanced Tutorial.** We will be interacting directly with the core interfaces of `DepTyCheck`'s derivation engine and using compile-time reflection (`ElabReflection`). This tutorial is for those who are not just users, but are curious about the mechanics of the library itself, or may even wish to contribute.
+> **Disclaimer: This is a very Advanced Tutorial.** We will be interacting directly with the core interfaces of `DepTyCheck`'s derivation engine and
+using compile-time reflection (`ElabReflection`). This tutorial is for those who are not just users, but are curious about the mechanics of the library
+itself, or may even wish to contribute.
 
 ## Our Goal: Understanding Constructor Generation
 
-`deriveGen` automatically generates values for each constructor. But how does it work internally? We will create a custom derivation strategy that shows exactly what arguments each constructor receives.
+`deriveGen` automatically generates values for each constructor. But how does it work internally? We will create a custom derivation strategy that shows
+exactly what arguments each constructor receives.
 
 By building a custom strategy from scratch, you will understand the core components of the `DepTyCheck` engine and how to extend it.
 
@@ -16,7 +20,8 @@ By building a custom strategy from scratch, you will understand the core compone
 
 ### The "Type Expert" (`DeriveBodyForType`)
 
-Its job is to know about a _whole type_. It looks at all the constructors and generates the top-level code that _chooses_ between them. This is where `Fuel` fuel management happens.
+Its job is to know about a _whole type_. It looks at all the constructors and generates the top-level code that _chooses_ between them. This is where
+`Fuel` fuel management happens.
 
 ### The "Constructor Expert" (`DeriveBodyRhsForCon`)
 
@@ -65,13 +70,15 @@ Show UserStatus where
   show (Inactive reason) = "Inactive " ++ show reason
 ```
 
-Both constructors are non-recursive (only contain `String`), so `MainCoreDerivator` will choose between them randomly. Our custom logic will control the **arguments** they receive.
+Both constructors are non-recursive (only contain `String`), so `MainCoreDerivator` will choose between them randomly. Our custom logic will control the
+**arguments** they receive.
 
 ---
 
 ## Step 2: Implement the Constructor Logic
 
-Our task is to write a custom strategy for how constructors generate their arguments. We'll create a named implementation of `DeriveBodyRhsForCon` that gives us full control.
+Our task is to write a custom strategy for how constructors generate their arguments. We'll create a named implementation of `DeriveBodyRhsForCon` that
+gives us full control.
 
 ### Create a custom constructor generator
 
@@ -97,7 +104,8 @@ We'll generate `Active` with predefined usernames and `Inactive` with predefined
 
 This shows the key insight: `consGenExpr` returns **code templates** (TTImp), not values. We're building the generator at compile time!
 
-To watch logging messages you need force Idris2 to recompile the module completely because after the compile time it will no show any logs, for example: `rlwrap pack --extra-args="--log 1" repl ./src/CustomGen.idr`
+To watch logging messages you need force Idris2 to recompile the module completely because after the compile time it will no show any logs, for example:
+`rlwrap pack --extra-args="--log 1" repl ./src/CustomGen.idr`
 
 ---
 
@@ -182,7 +190,8 @@ Inactive "offline"
 Active "Charlie"
 ```
 
-You'll see both `Active` and `Inactive` constructors (chosen randomly by `MainCoreDerivator`), each with our custom predefined values. This proves our custom constructor logic is working!
+You'll see both `Active` and `Inactive` constructors (chosen randomly by `MainCoreDerivator`), each with our custom predefined values. This proves our
+custom constructor logic is working!
 
 ---
 
@@ -210,7 +219,8 @@ This is the delegation pattern in action!
 
 ## Step 6: Building a Minimal Type Expert
 
-Now let's implement our own Type Expert to see the delegation explicitly. We'll create a minimal version that works for non-recursive types like `UserStatus`.
+Now let's implement our own Type Expert to see the delegation explicitly. We'll create a minimal version that works for non-recursive types like
+`UserStatus`.
 
 ### Implement EduDerivator
 
@@ -314,4 +324,5 @@ This two-level architecture makes `DepTyCheck` highly modular: you can customize
 
 ## Path to Contribution
 
-Understanding these internal APIs is the first step to extending `DepTyCheck`. If you find a new, useful derivation pattern or want to optimize certain cases, you now have the foundational knowledge to implement it and contribute back to the project.
+Understanding these internal APIs is the first step to extending `DepTyCheck`. If you find a new, useful derivation pattern or want to optimize certain
+cases, you now have the foundational knowledge to implement it and contribute back to the project.

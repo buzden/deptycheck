@@ -1,15 +1,20 @@
 # 10. Advanced Derivation Tuning
 
-In the last tutorial, we saw how to use `deriveGen` and provide it with custom generators for base types like `String`. However, `DepTyCheck` offers even deeper, more powerful mechanisms for controlling the derivation process for situations where just providing a generator isn't enough.
+In the last tutorial, we saw how to use `deriveGen` and provide it with custom generators for base types like `String`. However, `DepTyCheck` offers
+even deeper, more powerful mechanisms for controlling the derivation process for situations where just providing a generator isn't enough.
 
-> **Disclaimer: This is an Advanced Tutorial.** The tuning mechanism uses some of Idris's more powerful features, specifically compile-time reflection and type class instances. We will walk through it step-by-step, but a full explanation of these concepts is beyond the scope of this tutorial. If you just want to use `deriveGen` with its default settings and provide external generators, you can safely skip this lesson.
+> **Disclaimer: This is an Advanced Tutorial.** The tuning mechanism uses some of Idris's more powerful features, specifically compile-time reflection
+and type class instances. We will walk through it step-by-step, but a full explanation of these concepts is beyond the scope of this tutorial. If you
+just want to use `deriveGen` with its default settings and provide external generators, you can safely skip this lesson.
 
 ## Our Goal
 
 We will tackle two common problems that cannot be solved with external generators alone:
 
-1. Fixing Bias: We will prove that a default generator is biased and then implement the `ProbabilityTuning` interface to change the frequency of a specific constructor.
-2. Fixing Inefficiency: We will show how a naive generator for a constrained type is inefficient and then implement the `GenOrderTuning` interface to guide the derivation logic and make it robust.
+1. Fixing Bias: We will prove that a default generator is biased and then implement the `ProbabilityTuning` interface to change the frequency of a
+specific constructor.
+2. Fixing Inefficiency: We will show how a naive generator for a constrained type is inefficient and then implement the `GenOrderTuning` interface to
+guide the derivation logic and make it robust.
 
 ## Prerequisites
 
@@ -85,7 +90,8 @@ This is the problem we need to solve.
 
 ## Step 2: Probability Tuning
 
-To fix the bias, we must implement the `ProbabilityTuning` interface for the `Directory` constructor. This tells `deriveGen` to override its default weight.
+To fix the bias, we must implement the `ProbabilityTuning` interface for the `Directory` constructor. This tells `deriveGen` to override its default
+weight.
 
 ### Define the implementation
 
@@ -109,9 +115,11 @@ ProbabilityTuning `{DirectoryP}.dataCon where
 ```
 
 - `ProbabilityTuning ... where`: We define a specific implementation of this interface for a constructor.
-- `"Directory".dataCon`: This is a `Name` literal that refers to the `Directory` constructor. Since `Directory` is defined in this same file, we can use the simple name without a module prefix.
+- `"Directory".dataCon`: This is a `Name` literal that refers to the `Directory` constructor. Since `Directory` is defined in this same file, we can use
+the simple name without a module prefix.
 - `isConstructor = itIsConstructor`: This is a required line of reflection boilerplate that confirms we have targeted a valid constructor.
-- `tuneWeight _ = 10`: We implement the `tuneWeight` function. It takes the default weight `_` and we ignore it, always returning our new, higher weight of `10`.
+- `tuneWeight _ = 10`: We implement the `tuneWeight` function. It takes the default weight `_` and we ignore it, always returning our new, higher weight
+of `10`.
 
 ### Re-run the coverage analysis
 
@@ -141,14 +149,16 @@ The distribution will now be much closer to a 50/50 balance, proving we have suc
 
 ## Step 3: Generation Order Tuning
 
-Probability isn't the only thing we can tune. For some dependent types, the _order_ in which arguments are generated is critical for efficiency. Consider a pair `(n, m)` where we require `n < m`.
+Probability isn't the only thing we can tune. For some dependent types, the _order_ in which arguments are generated is critical for efficiency.
+Consider a pair `(n, m)` where we require `n < m`.
 
 ```idris
 data LtPair : Type where
   MkLtPair : (n : Nat) -> (m : Nat) -> (prf : So $ n < m) -> LtPair
 ```
 
-`deriveGen`'s default strategy might randomly pick `n=10` and `m=5`, then fail because it can't prove `10 < 5`. This is very inefficient. We can tell it to generate `m` first, making it much easier to pick a valid `n`.
+`deriveGen`'s default strategy might randomly pick `n=10` and `m=5`, then fail because it can't prove `10 < 5`. This is very inefficient. We can tell it
+to generate `m` first, making it much easier to pick a valid `n`.
 
 ### Define the generator and the tuning implementation in your file
 
@@ -165,11 +175,13 @@ Show LtPair where
 ```
 
 - `GenOrderTuning ... where`: We implement the ordering interface for the `MkLtPair` constructor.
-- `deriveFirst _ _ = [``{m}]`: We implement `deriveFirst` to return a list of arguments that must be generated first. Here, we specify the argument named `m` using a name literal ```{m}`.
+- `deriveFirst _ _ = [``{m}]`: We implement `deriveFirst` to return a list of arguments that must be generated first. Here, we specify the argument
+named `m` using a name literal ```{m}`.
 
 ### Test It
 
-With this instance in scope, `deriveGen` will now follow our instructions. When generating an `LtPair`, it will generate `m` first, and then be smart enough to only generate values for `n` that are less than `m`.
+With this instance in scope, `deriveGen` will now follow our instructions. When generating an `LtPair`, it will generate `m` first, and then be smart
+enough to only generate values for `n` that are less than `m`.
 
 ```idris
 -- A main function to test the LtPair generator
@@ -182,13 +194,18 @@ main_lt = do
   putStrLn $ show finalReport
 ```
 
-You will see that this generator efficiently produces valid pairs like `MkLtPair 5 10 True` every time, without the wasteful failures of the naive approach.
+You will see that this generator efficiently produces valid pairs like `MkLtPair 5 10 True` every time, without the wasteful failures of the naive
+approach.
 
 ---
 
 ## Next Steps
 
-- **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
-- **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles GADTs with auto-implicit proof arguments.
-- **Want to see a complete example?** Continue to **[Toy Example: Generating ASTs for a DSL](t09-toy-example.md)** to build a complete generator for a simple imperative language.
-- **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
+- **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how
+`deriveGen` automatically discovers and uses your custom generators.
+- **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how
+`deriveGen` handles GADTs with auto-implicit proof arguments.
+- **Want to see a complete example?** Continue to **[Toy Example: Generating ASTs for a DSL](t09-toy-example.md)** to build a complete generator for a
+simple imperative language.
+- **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)**
+to learn how the derivation engine works.

@@ -1,17 +1,21 @@
 # 7. Beyond Fuel: A Tutorial on Structural Recursion
 
-In our previous tutorials, we learned that `Fuel` is a crucial safety mechanism. It provides a "generation budget" that prevents `deriveGen` from getting stuck in an infinite loop when generating recursive data.
+In our previous tutorials, we learned that `Fuel` is a crucial safety mechanism. It provides a "generation budget" that prevents `deriveGen` from
+getting stuck in an infinite loop when generating recursive data.
 
-For a simple type like `List`, the rule is easy to understand: every `Cons` call is a recursive step, so it must spend one unit of fuel. But is this always the case? Is every recursive call equally "expensive"?
+For a simple type like `List`, the rule is easy to understand: every `Cons` call is a recursive step, so it must spend one unit of fuel. But is this
+always the case? Is every recursive call equally "expensive"?
 
 ## Our Goal
 
-In this tutorial, you will discover that `deriveGen` is smart enough to identify two different kinds of recursion, with very different performance characteristics. You will write two generators:
+In this tutorial, you will discover that `deriveGen` is smart enough to identify two different kinds of recursion, with very different performance
+characteristics. You will write two generators:
 
 1. A generator for a Peano `Nat` type that strictly obeys the fuel budget.
 2. A generator for the indexed `Fin` type that appears to get "free" recursion, defying the budget.
 
-You will learn why this happens, how to recognize the difference between **`SpendingFuel`** and **`StructurallyDecreasing`** recursion, and how you can design your own types to take advantage of this powerful optimization.
+You will learn why this happens, how to recognize the difference between **`SpendingFuel`** and **`StructurallyDecreasing`** recursion, and how you can
+design your own types to take advantage of this powerful optimization.
 
 ## Prerequisites
 
@@ -21,7 +25,8 @@ You will learn why this happens, how to recognize the difference between **`Spen
 
 ## Step 1: The Standard Case - `SpendingFuel` Recursion
 
-Let's start by examining the type of recursion we are already familiar with. We will create a simple Peano number type, where `deriveGen` must spend fuel on every recursive call to guarantee termination.
+Let's start by examining the type of recursion we are already familiar with. We will create a simple Peano number type, where `deriveGen` must spend
+fuel on every recursive call to guarantee termination.
 
 ### Create a new file named `RecursionTutorial.idr`
 
@@ -56,7 +61,8 @@ genPNat = deriveGen
 
 ### The Experiment
 
-Now, let's write a `main` function to call this generator twice: once with a generous fuel budget (`limit 10`) and once with a very small one (`limit 3`).
+Now, let's write a `main` function to call this generator twice: once with a generous fuel budget (`limit 10`) and once with a very small one (`limit
+3`).
 
 ```idris
 runPeano : IO ()
@@ -88,13 +94,16 @@ PS (PS (PS (PS (PS PZ))))
 PS (PS PZ)
 ```
 
-Notice that the generator with more fuel produced a larger number. The number of `PS` constructors is strictly limited by the fuel you provide. This is because `deriveGen` identifies the `PS` constructor as `SpendingFuel`. For each `PS` it generates, it must consume one unit of fuel from the budget. This is the default, safe behavior for simple recursive types.
+Notice that the generator with more fuel produced a larger number. The number of `PS` constructors is strictly limited by the fuel you provide. This is
+because `deriveGen` identifies the `PS` constructor as `SpendingFuel`. For each `PS` it generates, it must consume one unit of fuel from the budget.
+This is the default, safe behavior for simple recursive types.
 
 ---
 
 ## Step 2: StructurallyDecreasing Recursion
 
-Must `deriveGen` _always_ spend fuel on recursion? No. If it can prove that a recursive call is guaranteed to terminate by its structure alone, it can perform a powerful optimization.
+Must `deriveGen` _always_ spend fuel on recursion? No. If it can prove that a recursive call is guaranteed to terminate by its structure alone, it can
+perform a powerful optimization.
 
 A perfect example is `Fin n`, the type of numbers from `0` to `n-1`.
 
@@ -107,7 +116,8 @@ genFin = deriveGen
 
 ### The Counter-Intuitive Experiment
 
-Now, let's try to generate a `Fin 100`. This would require 100 recursive calls to `FS`. According to our last experiment, this should require at least `limit 100` fuel. But what happens if we only give it `limit 3`?
+Now, let's try to generate a `Fin 100`. This would require 100 recursive calls to `FS`. According to our last experiment, this should require at least
+`limit 100` fuel. But what happens if we only give it `limit 3`?
 
 ```idris
 runFin : IO ()
@@ -134,9 +144,12 @@ This is not magic. `deriveGen` is smart enough to analyze the `Fin` type and its
 
 `FS : Fin k -> Fin (S k)`
 
-It sees that the input `Fin k` is for a type whose index `k` is provably, *structurally smaller* than the output's index `S k`. Because the `Nat` index itself guarantees that the recursion will eventually terminate when it hits `Fin 0`, `deriveGen` does not need to use the `Fuel` parameter as a safety budget. It classifies this kind of recursion as `StructurallyDecreasing`.
+It sees that the input `Fin k` is for a type whose index `k` is provably, *structurally smaller* than the output's index `S k`. Because the `Nat` index
+itself guarantees that the recursion will eventually terminate when it hits `Fin 0`, `deriveGen` does not need to use the `Fuel` parameter as a safety
+budget. It classifies this kind of recursion as `StructurallyDecreasing`.
 
-This optimization allows `deriveGen` to generate values for indexed, recursive data types like `Fin` and `Vect` much more efficiently than it can for simple recursive types like `PNat` or `List`.
+This optimization allows `deriveGen` to generate values for indexed, recursive data types like `Fin` and `Vect` much more efficiently than it can for
+simple recursive types like `PNat` or `List`.
 
 ---
 
@@ -194,7 +207,8 @@ genFin' (S k) fuel = frequency
 >
 > When generating `FS`, we call `genFin' k fuel` — with the **same** fuel value!
 
-Why is this safe? Because the **type index** decreases (`S k` → `k`), guaranteeing termination even without spending fuel. The index itself acts as the termination measure.
+Why is this safe? Because the **type index** decreases (`S k` → `k`), guaranteeing termination even without
+spending fuel. The index itself acts as the termination measure.
 
 ### The Key Difference
 
@@ -205,7 +219,8 @@ Why is this safe? Because the **type index** decreases (`S k` → `k`), guarante
 | **Max generated size** | Limited by fuel | Limited by index |
 | **Examples** | `PNat`, `List a`, `Tree` | `Fin n`, `Vect n a` |
 
-This is the core optimization: when the type system guarantees termination through decreasing indices, `deriveGen` doesn't need to spend fuel. This makes generation of indexed types both faster and capable of producing larger values.
+This is the core optimization: when the type system guarantees termination through decreasing indices, `deriveGen` doesn't need to spend fuel. This
+makes generation of indexed types both faster and capable of producing larger values.
 
 ---
 
@@ -213,6 +228,9 @@ This is the core optimization: when the type system guarantees termination throu
 
 Now that you understand how `deriveGen` handles recursion, you are ready for more advanced topics:
 
-- **Want to fix biased generators?** Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to use `ProbabilityTuning` and `GenOrderTuning` instances.
-- **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
-- **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles auto-implicit proof arguments.
+- **Want to fix biased generators?** Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to use `ProbabilityTuning` and
+`GenOrderTuning` instances.
+- **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how
+`deriveGen` discovers and uses your custom generators.
+- **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how
+`deriveGen` handles auto-implicit proof arguments.

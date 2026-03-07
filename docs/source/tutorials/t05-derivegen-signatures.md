@@ -1,12 +1,14 @@
 # 5. DeriveGen Signatures: Controlling What Gets Generated
 
-In the previous tutorial, we saw how `deriveGen` can automatically create generators. But how do we tell it _what kind_ of data we want? For example, should the length of a `Vect` be given as an argument, or should it be randomly generated?
+In the previous tutorial, we saw how `deriveGen` can automatically create generators. But how do we tell it _what kind_ of data we want? For example,
+should the length of a `Vect` be given as an argument, or should it be randomly generated?
 
 The answer is the function signature. The signature is not just a type; it is a blueprint of your intent that tells `deriveGen` exactly what to do.
 
 ## Our Goal
 
-In this tutorial, we will learn to command `deriveGen` by writing three different function signatures for the `Vect` type. By the end of this tutorial, you will have built:
+In this tutorial, we will learn to command `deriveGen` by writing three different function signatures for the `Vect` type. By the end of this tutorial,
+you will have built:
 
 1. A generator for a `Vect` of a **specific, given** length.
 2. A generator that produces a `Vect` of a **random, generated** length.
@@ -59,15 +61,18 @@ Show (VectString n) where
 
 ---
 
-_Note: For the following steps, you can put all the code in the same `DeriveTutorial.idr` file and temporarily rename the `main` function you want to run as `main` before compiling._
+_Note: For the following steps, you can put all the code in the same `DeriveTutorial.idr` file and temporarily rename the `main` function you want to
+run as `main` before compiling._
 
 ## Step 2: Scenario A - Generating a `Vect` of a Given Length
 
-Our first goal is to create a generator that produces a `Vect` of a specific length that we provide as an argument. To do this, we simply place the argument _before_ the `Fuel` parameter in the signature.
+Our first goal is to create a generator that produces a `Vect` of a specific length that we provide as an argument. To do this, we simply place the
+argument _before_ the `Fuel` parameter in the signature.
 
 **Define the generator**
 
-The signature `(n : Nat) -> Fuel -> Gen MaybeEmpty (Vect n String)` tells `deriveGen`: "You will be _given_ a `Nat` named `n`. Your job is to produce a `Vect` of that exact length."
+The signature `(n : Nat) -> Fuel -> Gen MaybeEmpty (Vect n String)` tells `deriveGen`: "You will be _given_ a `Nat` named `n`. Your job is to produce a
+`Vect` of that exact length."
 
 ```idris
 genVectOfLen : Fuel -> (n : Nat) -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (VectString n)
@@ -103,11 +108,13 @@ By placing `n` before `Fuel`, you have successfully commanded `deriveGen` to use
 
 ## Step 3: Scenario B - Generating a `Vect` of a Random Length
 
-What if we don't want to provide a specific length? What if we want the generator itself to invent a random length? To do this, we use a **dependent pair** in the return type.
+What if we don't want to provide a specific length? What if we want the generator itself to invent a random length? To do this, we use a **dependent
+pair** in the return type.
 
 **Define the generator**
 
-The signature `Fuel -> Gen MaybeEmpty (n ** Vect n String)` tells `deriveGen`: "Your job is to first generate a random `Nat` (which you will call `n`), and then generate a `Vect` of that length. When you are done, give me back both `n` and the `Vect`."
+The signature `Fuel -> Gen MaybeEmpty (n ** Vect n String)` tells `deriveGen`: "Your job is to first generate a random `Nat` (which you will call `n`),
+and then generate a `Vect` of that length. When you are done, give me back both `n` and the `Vect`."
 
 ```idris
 genRandomVect : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (n ** VectString n)
@@ -116,7 +123,8 @@ genRandomVect = deriveGen
 
 **Test It**
 
-This time, when we call the generator, we don't provide a length. The generator will produce a pair containing the length it chose and the vector it created.
+This time, when we call the generator, we don't provide a length. The generator will produce a pair containing the length it chose and the vector it
+created.
 
 ```idris
 runRandomVect : IO ()
@@ -143,13 +151,15 @@ You will see vectors of different, random lengths each time you run it.
 ["d", "e", "f", "g", "h"]
 ```
 
-By moving the parameter `n` from an input to a **generated** part of the output using the `**` syntax, you have completely changed `deriveGen`'s behavior.
+By moving the parameter `n` from an input to a **generated** part of the output using the `**` syntax, you have completely changed `deriveGen`'s
+behavior.
 
 ---
 
 ## Step 4: The Flexible Generator - Combining Patterns
 
-Let's combine the patterns we've learned. Our first generator is flexible enough: it is taking a `Nat` as a _given_ input, but it is also taking an _external generator_ hint for the element type using the `=>` syntax which will be overridden by the following exapmple.
+Let's combine the patterns we've learned. Our first generator is flexible enough: it is taking a `Nat` as a _given_ input, but it is also taking an
+_external generator_ hint for the element type using the `=>` syntax which will be overridden by the following exapmple.
 
 **Test It**
 
@@ -173,7 +183,8 @@ runFlexi = do
 
 ### Compile, run, and observe
 
-You will see a `Vect` of length 7, filled with numbers between 100 and 200, proving that `deriveGen` correctly used both your given length and your external generator.
+You will see a `Vect` of length 7, filled with numbers between 100 and 200, proving that `deriveGen` correctly used both your given length and your
+external generator.
 
 ```text
 --- Generating a Vect of length 7 with overridden Str generator ---
@@ -187,5 +198,7 @@ You will see a `Vect` of length 7, filled with numbers between 100 and 200, prov
 
 Now that you know how to control `deriveGen` through signatures, you are ready for more advanced topics:
 
-- **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel: Structural Recursion](t07-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
-- **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles types like `SortedList`.
+- **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel: Structural Recursion](t07-beyond-fuel.md)** to learn about
+`SpendingFuel` vs `StructurallyDecreasing` recursion.
+- **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how
+`deriveGen` handles types like `SortedList`.

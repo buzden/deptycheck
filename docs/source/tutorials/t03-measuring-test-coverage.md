@@ -1,12 +1,15 @@
 # 3. Measuring Your Test Coverage
 
-In the last tutorials, we learned how to write generators for random data. But how do we know if our random data is _good_? Are we testing all the important cases, or is our generator accidentally biased, leaving critical parts of our code untested?
+In the last tutorials, we learned how to write generators for random data. But how do we know if our random data is _good_? Are we testing all the
+important cases, or is our generator accidentally biased, leaving critical parts of our code untested?
 
-If a generator only ever produces one kind of value, our tests won't find bugs that only appear in other cases. We need a way to measure the quality of our random data.
+If a generator only ever produces one kind of value, our tests won't find bugs that only appear in other cases. We need a way to measure the quality of
+our random data.
 
 ## Our Goal
 
-In this tutorial, you will learn how to add **labels** to your generators to measure your test coverage. You will build a generator for a `TrafficLight` data type, add labels to track each color, and run a test that produces a coverage report, like this:
+In this tutorial, you will learn how to add **labels** to your generators to measure your test coverage. You will build a generator for a `TrafficLight`
+data type, add labels to track each color, and run a test that produces a coverage report, like this:
 
 ```text
 TrafficLight covered fully (1000 times)
@@ -17,7 +20,8 @@ TrafficLight covered fully (1000 times)
 
 ## Prerequisites
 
-This tutorial assumes you have completed [Installation and First Steps](t00-installation-and-setup.md) and the first two tutorials on [basic generation](t01-generator-monad.md) and [emptiness handling](t02-handling-emptiness.md).
+This tutorial assumes you have completed [Installation and First Steps](t00-installation-and-setup.md) and the first two tutorials on [basic
+generation](t01-generator-monad.md) and [emptiness handling](t02-handling-emptiness.md).
 
 ---
 
@@ -62,7 +66,8 @@ This generator works, but we have no way of knowing if it's distributing its res
 
 To get a full, aggregated coverage report, we need to run the generator many times and combine the results. This is a three-step process:
 
-1. Initialize Report: Create an empty `CoverageGenInfo` report. This serves as a template that knows about all the types and constructors in our generator.
+1. Initialize Report: Create an empty `CoverageGenInfo` report. This serves as a template that knows about all the types and constructors in our
+generator.
 2. Collect Data: Run the generator many times and collect the raw `ModelCoverage` (the label counts) from each individual run.
 3. Analyze Results: Fold the collected raw data into the report template to produce the final, printable `CoverageGenInfo`.
 
@@ -119,9 +124,11 @@ This gives us high confidence that our generator is testing all three `TrafficLi
 
 ## Step 3: Debugging with Labels
 
-Besides aggregated reports, labels are also an invaluable tool for debugging. You can instruct the generator runner to print every label as it's activated. This allows you to trace the execution of a single, complex generation.
+Besides aggregated reports, labels are also an invaluable tool for debugging. You can instruct the generator runner to print every label as it's
+activated. This allows you to trace the execution of a single, complex generation.
 
-`DepTyCheck` uses the `CanManageLabels` interface to handle this. By default, the `pick` function we've used before uses the `IgnoreLabels` implementation. But we can provide a different one, `PrintAllLabels`, to change its behavior.
+`DepTyCheck` uses the `CanManageLabels` interface to handle this. By default, the `pick` function we've used before uses the `IgnoreLabels`
+implementation. But we can provide a different one, `PrintAllLabels`, to change its behavior.
 
 ### Add a new `runDebug` function to your file
 
@@ -156,7 +163,8 @@ Generated withCoverage: Amber
 Generated via pick: Just Green
 ```
 
-In the first run, the label was printed to the console the moment the corresponding generator was executed. In second run, no label were printed. For a deeply nested generator, this trace allows you to understand exactly which path was taken to produce a specific problematic value.
+In the first run, the label was printed to the console the moment the corresponding generator was executed. In second run, no label were printed. For a
+deeply nested generator, this trace allows you to understand exactly which path was taken to produce a specific problematic value.
 
 ---
 
