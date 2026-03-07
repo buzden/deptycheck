@@ -88,7 +88,7 @@ PS (PS (PS (PS (PS PZ))))
 PS (PS PZ)
 ```
 
-Notice that the generator with more fuel produced a larger number. The number of `PS` constructors is strictly limited by the fuel you provide. This is because `deriveGen` identifies the `PS` constructor as __`SpendingFuel`__. For each `PS` it generates, it must consume one unit of fuel from the budget. This is the default, safe behavior for simple recursive types.
+Notice that the generator with more fuel produced a larger number. The number of `PS` constructors is strictly limited by the fuel you provide. This is because `deriveGen` identifies the `PS` constructor as `SpendingFuel`. For each `PS` it generates, it must consume one unit of fuel from the budget. This is the default, safe behavior for simple recursive types.
 
 ---
 
@@ -134,7 +134,7 @@ This is not magic. `deriveGen` is smart enough to analyze the `Fin` type and its
 
 `FS : Fin k -> Fin (S k)`
 
-It sees that the input `Fin k` is for a type whose index `k` is provably, *structurally smaller* than the output's index `S k`. Because the `Nat` index itself guarantees that the recursion will eventually terminate when it hits `Fin 0`, `deriveGen` does not need to use the `Fuel` parameter as a safety budget. It classifies this kind of recursion as __`StructurallyDecreasing`__.
+It sees that the input `Fin k` is for a type whose index `k` is provably, *structurally smaller* than the output's index `S k`. Because the `Nat` index itself guarantees that the recursion will eventually terminate when it hits `Fin 0`, `deriveGen` does not need to use the `Fuel` parameter as a safety budget. It classifies this kind of recursion as `StructurallyDecreasing`.
 
 This optimization allows `deriveGen` to generate values for indexed, recursive data types like `Fin` and `Vect` much more efficiently than it can for simple recursive types like `PNat` or `List`.
 

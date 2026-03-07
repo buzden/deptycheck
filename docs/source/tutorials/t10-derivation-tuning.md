@@ -165,7 +165,7 @@ Show LtPair where
 ```
 
 - `GenOrderTuning ... where`: We implement the ordering interface for the `MkLtPair` constructor.
-- `deriveFirst _ _ = [`{m}]`: We implement `deriveFirst` to return a list of arguments that must be generated first. Here, we specify the argument named `m` using a name literal `` `{m}``.
+- `deriveFirst _ _ = [``{m}]`: We implement `deriveFirst` to return a list of arguments that must be generated first. Here, we specify the argument named `m` using a name literal ```{m}`.
 
 ### Test It
 

@@ -142,6 +142,7 @@ genUserProfile = MkProfile <$> elements ["Alice", "Bob", "Charlie"] <*> choose (
 ```
 
 Here's the change:
+
 - `elements ["Alice", "Bob", "Charlie"]` creates a recipe for picking a random name from a list.
 - The `<*>` operator is the key: it lets us combine two recipes. It runs the name recipe and the age recipe, then feeds _both_ results into `MkProfile`.
 

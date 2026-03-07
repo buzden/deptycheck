@@ -69,12 +69,14 @@ genFin Z     = empty
 genFin (S k) = FS <$> elements' (allFins k)
 ```
 
-    The changes are small but critical:
-    - The return type is now `Gen0 (Fin n)`, which signals that the result may be empty.
+The changes are small but critical:
+
+- The return type is now `Gen0 (Fin n)`, which signals that the result may be empty.
 
 > [!NOTE]
 > The `empty` generator fails immediately. Combined with `pick`, it lets you express "try A, and if it fails, try B" logic without explicit branching.
-    - In the `Z` case, we can now simply return `empty`. This correctly tells `DepTyCheck` that the recipe for `Fin 0` produces nothing.
+
+- In the `Z` case, we can now simply return `empty`. This correctly tells `DepTyCheck` that the recipe for `Fin 0` produces nothing.
 
 ---
 
