@@ -72,13 +72,11 @@ Here we do:
 | --- | ---------- |
 | `echo -e` and `\|` | We are going to run Idris2 in REPL mode, pass the input, wait for the output and close |
 | `:exec` | It is actually the Idris2 REPL command to run something in `IO` monad. For `:exec ?wat` the `?wat` is `IO _`. |
-| `printLn =<<` | To run the generator and force `show` some output of the result. `:exec:` itself only runs something in `IO` but drops any result, so
-`:exec pure "something"` would not show you anything. |
+| `printLn =<<` | Runs generator and prints output. `:exec` alone drops results; this shows them. |
 | `pick1 genConstantUser` | _We are very close, that's what is needed._ |
-| `rlwrap` | To be honest for the single run it is not needed but we let it be there for a remind that Idris2 REPL lacks its support out of the box |
+| `rlwrap` | Not strictly needed for single runs, but reminds that Idris2 REPL lacks readline support |
 | `pack` | DepTyCheck depends on a set of libraries, so, `pack` launches `idris2` with the full set of required things |
-| `--extra-args="--no-banner"` | Just a little look & feel improvement to reduce the size of REPL output for every turn. `--extra-args` passes following
-string as options to `idris2` where `--no-banner` disables Idris2 welcome banner to show. |
+| `--extra-args="--no-banner"` | Reduces REPL output noise. Passes flag to hide Idris2 welcome banner |
 | `repl` | It actually instructs `pack` to run `idris2` in REPL mode |
 
 You will see an output, similar to the following:
