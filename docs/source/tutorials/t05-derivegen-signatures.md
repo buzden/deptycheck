@@ -69,17 +69,15 @@ run as `main` before compiling._
 Our first goal is to create a generator that produces a `Vect` of a specific length that we provide as an argument. To do this, we simply place the
 argument _before_ the `Fuel` parameter in the signature.
 
-**Define the generator**
-
 The signature `(n : Nat) -> Fuel -> Gen MaybeEmpty (Vect n String)` tells `deriveGen`: "You will be _given_ a `Nat` named `n`. Your job is to produce a
 `Vect` of that exact length."
+
+Define the generator:
 
 ```idris
 genVectOfLen : Fuel -> (n : Nat) -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (VectString n)
 genVectOfLen = deriveGen
 ```
-
-### Test it
 
 Let's write a `main` function to call our generator, providing `5` as the length.
 
@@ -92,9 +90,9 @@ runVect = do
   printLn v
 ```
 
-### Compile and run
-
 The output will show a `Vect` that always has exactly 5 elements, filled with random strings from the default `String` generator.
+
+Compile and run:
 
 ```text
 --- Generating a Vect of a given length (5) ---
@@ -111,20 +109,20 @@ By placing `n` before `Fuel`, you have successfully commanded `deriveGen` to use
 What if we don't want to provide a specific length? What if we want the generator itself to invent a random length? To do this, we use a **dependent
 pair** in the return type.
 
-**Define the generator**
-
 The signature `Fuel -> Gen MaybeEmpty (n ** Vect n String)` tells `deriveGen`: "Your job is to first generate a random `Nat` (which you will call `n`),
 and then generate a `Vect` of that length. When you are done, give me back both `n` and the `Vect`."
+
+Define the generator:
 
 ```idris
 genRandomVect : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (n ** VectString n)
 genRandomVect = deriveGen
 ```
 
-**Test It**
-
 This time, when we call the generator, we don't provide a length. The generator will produce a pair containing the length it chose and the vector it
 created.
+
+Prepare a test for it:
 
 ```idris
 runRandomVect : IO ()
@@ -137,9 +135,9 @@ runRandomVect = do
     printLn v
 ```
 
-### Compile and run
-
 You will see vectors of different, random lengths each time you run it.
+
+Compile and run:
 
 ```text
 --- Generating a Vect of a random length ---
@@ -161,9 +159,9 @@ behavior.
 Let's combine the patterns we've learned. Our first generator is flexible enough: it is taking a `Nat` as a _given_ input, but it is also taking an
 _external generator_ hint for the element type using the `=>` syntax which will be overridden by the following exapmple.
 
-**Test It**
-
 To call this generator, we must provide both the length `n` and an element generator via the `@` syntax.
+
+Prepare a test for it:
 
 ```idris
 runFlexi : IO ()

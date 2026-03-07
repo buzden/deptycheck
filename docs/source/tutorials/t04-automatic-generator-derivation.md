@@ -72,7 +72,7 @@ genEntryManual (More recFuel) =
   where
 ```
 
-**Test It**
+Prepare a test for it:
 
 ```idris
 runEntryManual : IO ()
@@ -156,9 +156,9 @@ genEntry = deriveGen
 That's it. The `deriveGen` macro will now inspect the `Entry` type and write a generator that handles recursion, fuel, choices, and even attaches a
 generator for `String` from the context. It might also automatically add the coverage labels we learned about in further tutorials!
 
-**Test It**
-
 You can immediately generate a random file system structure.
+
+Prepare a test for it:
 
 ```idris
 runEntryDefault : IO ()
@@ -200,8 +200,6 @@ runEntryWithHint = do
     printLn e
 ```
 
-### Analyze the output
-
 You will see that `deriveGen` still handles the `Directory` and `List` logic automatically, but every `File` now contains one of your hand-picked
 filenames.
 
@@ -237,10 +235,11 @@ genContextAwareFilename path _ =
       then elements ["tutorial.md", "README.md"]
       else elements ["file.txt"]
 ```
-**Test It**
 
 To call `genCtxEntry`, we provide the initial path, and our context-aware generator. The `deriveGen` engine will handle passing the `path` argument down
 to `genContextAwareFilename` during any recursive calls.
+
+Prepare a test for it:
 
 ```idris
 runCtxEntry : IO ()
@@ -251,8 +250,6 @@ runCtxEntry = do
     | Nothing => printLn "Generation Failed"
   printLn e
 ```
-
-### Analyze the output
 
 You will see that files generated have names appropriate for the `src` directory, because our custom generator was called with `path = "src"`.
 

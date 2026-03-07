@@ -9,15 +9,15 @@ We will keep things practical and focus on what you need to get started. You'll 
 
 In this tutorial, we will guide you step by step to create a generator for the following `UserProfile` data type:
 
-    ```idris
-    data UserProfile = MkProfile String Nat
-    ```
+```text
+data UserProfile = MkProfile String Nat
+```
 
 By the end, you will have a working program that produces random user profiles, like this:
 
-    ```idris
-    MkProfile "Alice" 37 : UserProfile
-    ```
+```text
+MkProfile "Alice" 37 : UserProfile
+```
 
 ## Prerequisites
 
@@ -249,7 +249,7 @@ This `do` block is a sequence of dependent instructions:
 named argument because it is used at the type definition of `vectOf`.
 3. `pure (n ** vec)`: The value `3` and the generated vector (e.g., `[True, False, True]`) are bundled into a dependent pair using the `**` constructor.
 
-### Run it in the REPL
+Run it in the REPL:
 
 ```bash
 echo -e ':exec printLn =<< pick1 genDependentVect' |
@@ -284,7 +284,7 @@ genFiveUsers = listOf {length=pure 5} genUserProfile
 The `listOf` function takes a `length` generator (which we provide as a constant `5`), and creates a new recipe that runs the generator how a provided
 `length` generator  generated times.
 
-**Run it in the REPL**
+Run it in the REPL:
 
 ```bash
 echo -e ':exec printLn =<< pick1 genFiveUsers' |

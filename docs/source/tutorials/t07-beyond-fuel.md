@@ -144,7 +144,7 @@ This is not magic. `deriveGen` is smart enough to analyze the `Fin` type and its
 
 `FS : Fin k -> Fin (S k)`
 
-It sees that the input `Fin k` is for a type whose index `k` is provably, *structurally smaller* than the output's index `S k`. Because the `Nat` index
+It sees that the input `Fin k` is for a type whose index `k` is provably, _structurally smaller_ than the output's index `S k`. Because the `Nat` index
 itself guarantees that the recursion will eventually terminate when it hits `Fin 0`, `deriveGen` does not need to use the `Fuel` parameter as a safety
 budget. It classifies this kind of recursion as `StructurallyDecreasing`.
 
