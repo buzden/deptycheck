@@ -3,6 +3,10 @@ build/
 **/tests/**/failures
 **/tests/**/output
 
+# Super-linter
+.mypy_cache
+super-linter-output
+
 # MacOS
 .DS_Store
 .claude
