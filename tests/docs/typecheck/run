@@ -9,34 +9,50 @@ DOCSDIR=../../../docs/source/
 # Generate `src` dir and symlinks to all `*.md` files (upper-case renamed)
 all_modules=$(
 find "$DOCSDIR" -type f -name '*.md' -print | sort | while read r; do
-  # capitalization idea taken from https://stackoverflow.com/questions/27703739/capitalize-words-in-a-bash-variable-using-sed
-  capname=$(echo "${r#$DOCSDIR}" | sed 's/^./\u&/; s|/\(.\)|/\u\1|g; s/-\(.\)/\u\1/g')
+  # Use perl for cross-platform compatibility (MacOS BSD sed doesn't support \u)
+  # Convert explanation/derivation/design/closure-of-gens.md -> Explanation/Derivation/Design/ClosureOfGens.md
+  if command -v perl >/dev/null 2>&1; then
+    # Perl command explanation:
+    #   s/(^|\/)(.)/\1\u\2/g     - Capitalize letter at start (^) or after slash (/)
+    #   s/-(.)/\u\1/g            - Remove dash and capitalize following letter
+    capname=$(echo "${r#$DOCSDIR}" | perl -pe 's/(^|\/)(.)/\1\u\2/g; s/-(.)/\u\1/g')
+  else
+    # Sed command explanation (POSIX):
+    #   s/^./\u&/                - Capitalize first character of string
+    #   s|/\(.\)|/\u\1|g         - Capitalize character after each slash
+    #   s/-\(.\)/\u\1/g          - Capitalize character after each dash
+    # On BSD/macOS sed, \u is literal 'u', producing uexplanation.uderivation...
+    # capitalization idea taken from https://stackoverflow.com/questions/27703739/capitalize-words-in-a-bash-variable-using-sed
+    capname=$(echo "${r#$DOCSDIR}" | sed 's/^./\u&/; s|/\(.\)|/\u\1|g; s/-\(.\)/\u\1/g')
+  fi
 
   localname="src/$capname"
   localdir=$(dirname "$localname")/
 
   mkdir -p "$localdir"
+  # sed 's|[^/]*/|\.\./|g' replaces each directory component with ../
+  # Example: src/Explanation/Derivation/Design/ -> ../../../../
   ln -s "$(echo "$localdir" | sed 's|[^/]*/|\.\./|g')$r" "$localname"
 
+  # Convert path to module name: remove .md extension, replace / with .
+  # Example: Explanation/Derivation/Design/ClosureOfGens.md -> Explanation.Derivation.Design.ClosureOfGens
   modulename=$(echo "${capname%.md}" | sed 's|/|\.|g')
-  echo -n ", $modulename"
+  # Use printf instead of echo -n for POSIX compliance and consistent behavior across shells
+  # printf outputs format string with variables, no trailing newline
+  printf ", %s" "$modulename"          # Accumulate module names for docs.ipkg
 done
 )
 
-# Generate `docs.ipkg` containing all `*.md` files (upper-case renamed)
-[ -n "$all_modules" ] && echo \
-"
+# Use cat with heredoc instead of echo for reliable newline handling and escape sequences
+[ -n "$all_modules" ] && cat > docs.ipkg <<EOF
 package docs
 modules = ${all_modules#, }
 depends = deptycheck
-sourcedir = \"src\"
-" > docs.ipkg
+sourcedir = "src"
+EOF
 
 # Build the docs
 if [ -e docs.ipkg ]; then
   flock "$1" pack -q install-deps docs.ipkg && \
   idris2 --build docs.ipkg
 fi
-
-# Post-cleanup
-rm -rf build src docs.ipkg
