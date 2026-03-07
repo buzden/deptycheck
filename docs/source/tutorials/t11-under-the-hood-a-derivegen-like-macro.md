@@ -1,4 +1,4 @@
-# 8. Under the Hood: Building a `deriveGen`-like Macro
+# 11. Under the Hood: Building a `deriveGen`-like Macro
 
 In the previous tutorials, we wielded the power of `deriveGen` and even learned how to tune it. In this final, advanced tutorial, we will go behind the curtain to understand how the magic happens. We will demystify `deriveGen` by building our own simplified version from scratch.
 
@@ -27,7 +27,7 @@ In this tutorial, we will implement our own Constructor Expert that uses custom 
 ## Prerequisites
 
 -   A good understanding of Idris's interfaces (type classes).
--   Completion of all previous tutorials, especially [Advanced Derivation Tuning](t07-derivation-tuning.md).
+-   Completion of all previous tutorials, especially [Advanced Derivation Tuning](t10-derivation-tuning.md).
 
 ---
 

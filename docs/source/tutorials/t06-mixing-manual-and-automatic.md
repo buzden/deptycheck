@@ -1,4 +1,4 @@
-# 9. Mixing Manual and Automatic Generation
+# 6. Mixing Manual and Automatic Generation
 
 In the [previous tutorial](t05-derivegen-signatures.md), we saw how to control what `deriveGen` generates by crafting function signatures. We also saw how to give it "hints" for primitive types like `String` using the `=>` syntax.
 
@@ -155,6 +155,6 @@ MkUser (MkSpecialString "root") 5
 
 ## Next Steps
 
-*   **Continue to the next tutorial:** [Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md) to see how these techniques apply to even more advanced types with proof constraints.
+*   **Continue to the next tutorial:** [Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md) to see how these techniques apply to even more advanced types with proof constraints.
 *   **Experiment:** Try creating your own custom type with a `%hint` generator and see if `deriveGen` finds it automatically.
 *   **Read more:** Check out the Idris 2 documentation on `%hint` for advanced auto-implicit search patterns.

@@ -1,4 +1,4 @@
-# 10. Generating GADTs with Proof Constraints
+# 8. Generating GADTs with Proof Constraints
 
 In previous tutorials, we used `deriveGen` for regular data types and indexed types like `Vect`. But what about types that carry **proofs** as constructors arguments? Can `deriveGen` handle those?
 
@@ -208,8 +208,8 @@ The `{auto prf : n `LT` limit}` constraint ensures that only values less than th
 
 Now that you can generate proof-carrying data, you are ready for more advanced topics:
 
-*   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t09-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
-*   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t08-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
+*   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
+*   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
 
 <!-- idris
 main : IO ()

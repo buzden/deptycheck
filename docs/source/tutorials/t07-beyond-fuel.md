@@ -1,4 +1,4 @@
-# 6. Beyond Fuel: A Tutorial on Structural Recursion
+# 7. Beyond Fuel: A Tutorial on Structural Recursion
 
 In our previous tutorials, we learned that `Fuel` is a crucial safety mechanism. It provides a "generation budget" that prevents `deriveGen` from getting stuck in an infinite loop when generating recursive data.
 
@@ -202,6 +202,6 @@ This is the core optimization: when the type system guarantees termination throu
 
 Now that you understand how `deriveGen` handles recursion, you are ready for more advanced topics:
 
-*   **Want to fix biased generators?** Continue to **[Derivation Tuning](t07-derivation-tuning.md)** to learn how to use `ProbabilityTuning` and `GenOrderTuning` instances.
-*   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t09-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
-*   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md)** to see how `deriveGen` handles auto-implicit proof arguments.
+*   **Want to fix biased generators?** Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to use `ProbabilityTuning` and `GenOrderTuning` instances.
+*   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
+*   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles auto-implicit proof arguments.

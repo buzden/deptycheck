@@ -186,5 +186,5 @@ You will see a `Vect` of length 7, filled with numbers between 100 and 200, prov
 
 Now that you know how to control `deriveGen` through signatures, you are ready for more advanced topics:
 
-*   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel: Structural Recursion](t06-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
-*   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md)** to see how `deriveGen` handles types like `SortedList`.
+*   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel: Structural Recursion](t07-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
+*   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles types like `SortedList`.

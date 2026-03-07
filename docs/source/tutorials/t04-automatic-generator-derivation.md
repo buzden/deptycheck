@@ -254,5 +254,5 @@ This powerful pattern allows you to create highly flexible generators that adapt
 Now that you know how to automatically generate data and provide hints, you are ready for more advanced topics:
 
 *   **Want to learn how to control what gets generated?** Continue to **[DeriveGen Signatures](t05-derivegen-signatures.md)** to learn how to use given vs generated parameters and dependent pairs in signatures.
-*   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel](t06-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
-*   **How do I fix a biased generator or control generation order?** The default derivation strategy is smart, but sometimes needs more specific guidance. Continue to **[Derivation Tuning](t07-derivation-tuning.md)** to learn how to use `instance` declarations to control constructor probabilities and argument generation order.
+*   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel](t07-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
+*   **How do I fix a biased generator or control generation order?** The default derivation strategy is smart, but sometimes needs more specific guidance. Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to use `instance` declarations to control constructor probabilities and argument generation order.

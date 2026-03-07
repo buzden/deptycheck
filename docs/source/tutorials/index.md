@@ -22,7 +22,10 @@ Everyone should complete this track to master DepTyCheck fundamentals.
 | 3 | [Measuring Coverage](t03-measuring-test-coverage.md) |
 | 4 | [Automatic Derivation](t04-automatic-generator-derivation.md) |
 | 5 | [DeriveGen Signatures](t05-derivegen-signatures.md) |
-| 6 | [Beyond Fuel](t06-beyond-fuel.md) |
+| 6 | [Mixing Manual and Automatic](t06-mixing-manual-and-automatic.md) |
+| 7 | [Beyond Fuel](t07-beyond-fuel.md) |
+| 8 | [Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md) |
+| 9 | [Toy Example: DSL ASTs](t09-toy-example.md) |
 
 **Prerequisites:** Basic Idris 2 knowledge (data types, functions, REPL)
 
@@ -34,11 +37,8 @@ Continue here after completing the Core Track.
 
 | # | Tutorial |
 |---|----------|
-| 7 | [Derivation Tuning](t07-derivation-tuning.md) |
-| 8 | [Under the Hood](t08-under-the-hood-a-derivegen-like-macro.md) |
-| 9 | [Mixing Manual and Automatic](t09-mixing-manual-and-automatic.md) |
-| 10 | [Generating GADTs with Proofs](t10-generating-gadts-with-proofs.md) |
-| 11 | [Toy Example: DSL ASTs](t11-toy-example.md) |
+| 10 | [Derivation Tuning](t10-derivation-tuning.md) |
+| 11 | [Under the Hood](t11-under-the-hood-a-derivegen-like-macro.md) |
 
 **Prerequisites:** Core Track completion
 
@@ -56,12 +56,12 @@ Continue here after completing the Core Track.
 | Check if my generators are biased | [Tutorial 3](t03-measuring-test-coverage.md) |
 | Stop writing generators by hand | [Tutorial 4](t04-automatic-generator-derivation.md) |
 | Control what deriveGen generates | [Tutorial 5](t05-derivegen-signatures.md) |
-| Understand recursion performance | [Tutorial 6](t06-beyond-fuel.md) |
-| Fix biased automatic generators | [Tutorial 7](t07-derivation-tuning.md) |
-| Build custom derivation strategies | [Tutorial 8](t08-under-the-hood-a-derivegen-like-macro.md) |
-| Use my custom generators with deriveGen | [Tutorial 9](t09-mixing-manual-and-automatic.md) |
-| Generate types with proof arguments | [Tutorial 10](t10-generating-gadts-with-proofs.md) |
-| Generate complete programs for a DSL | [Tutorial 11](t11-toy-example.md) |
+| Use my custom generators with deriveGen | [Tutorial 6](t06-mixing-manual-and-automatic.md) |
+| Understand recursion performance | [Tutorial 7](t07-beyond-fuel.md) |
+| Generate types with proof arguments | [Tutorial 8](t08-generating-gadts-with-proofs.md) |
+| Generate complete programs for a DSL | [Tutorial 9](t09-toy-example.md) |
+| Fix biased automatic generators | [Tutorial 10](t10-derivation-tuning.md) |
+| Build custom derivation strategies | [Tutorial 11](t11-under-the-hood-a-derivegen-like-macro.md) |
 
 ---
 

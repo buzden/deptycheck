@@ -21,9 +21,9 @@ You can read more in the `original framework <https://diataxis.fr/tutorials/>`_ 
   tutorials/t03-measuring-test-coverage
   tutorials/t04-automatic-generator-derivation
   tutorials/t05-derivegen-signatures
-  tutorials/t06-beyond-fuel
-  tutorials/t07-derivation-tuning
-  tutorials/t08-under-the-hood-a-derivegen-like-macro
-  tutorials/t09-mixing-manual-and-automatic
-  tutorials/t10-generating-gadts-with-proofs
-  tutorials/t11-toy-example
+  tutorials/t06-mixing-manual-and-automatic
+  tutorials/t07-beyond-fuel
+  tutorials/t08-generating-gadts-with-proofs
+  tutorials/t09-toy-example
+  tutorials/t10-derivation-tuning
+  tutorials/t11-under-the-hood-a-derivegen-like-macro

@@ -1,4 +1,4 @@
-# 11. Toy Example: Generating ASTs for a DSL
+# 9. Toy Example: Generating ASTs for a DSL
 
 In previous tutorials, we learned how to create generators for simple data types and how to combine manual and automatic derivation. Now, let's apply these skills to a real-world scenario: generating **Abstract Syntax Trees (ASTs)** for a simple imperative programming language.
 
@@ -293,9 +293,9 @@ Now that you can generate complex ASTs, you're ready for many other applications
 
 *   **Test an interpreter:** Use your generated PIL programs to test a language interpreter with property-based testing.
 *   **Add more language features:** Extend the language with functions, arrays, or I/O operations.
-*   **Integrate custom generators:** Continue to **[Mixing Manual and Automatic](t09-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
-*   **Control distribution:** Continue to **[Derivation Tuning](t07-derivation-tuning.md)** to learn how to fine-tune constructor probabilities for more realistic program distributions.
-*   **Understand the internals:** Continue to **[Under the Hood](t08-under-the-hood-a-derivegen-like-macro.md)** to see how `deriveGen` works internally.
+*   **Integrate custom generators:** Continue to **[Mixing Manual and Automatic](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
+*   **Control distribution:** Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to fine-tune constructor probabilities for more realistic program distributions.
+*   **Understand the internals:** Continue to **[Under the Hood](t11-under-the-hood-a-derivegen-like-macro.md)** to see how `deriveGen` works internally.
 
 The complete `PILTutorial.idr` file is available for reference. You can find it in the DepTyCheck examples or build it step-by-step following this tutorial.
 
