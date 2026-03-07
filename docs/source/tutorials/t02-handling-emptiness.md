@@ -45,6 +45,9 @@ genFinIncorrect Z     = ?wat -- What could we possibly write here?
 
     The type is `Gen1 (Fin 0)`, but `Fin 0` has no values. We can't use `pure` because we don't have a value to give it. We're stuck.
 
+
+> [!NOTE]
+> The `Gen0` emptiness flag indicates this generator might fail to produce a value. Use it for types that may not have inhabitants (like `Fin 0`).
 This is the problem `DepTyCheck` is designed to solve. We need a way to tell the system that a generator is *intentionally* empty.
 
 ---
@@ -69,6 +72,9 @@ genFin (S k) = FS <$> elements' (allFins k)
 
     The changes are small but critical:
     - The return type is now `Gen0 (Fin n)`, which signals that the result may be empty.
+
+> [!NOTE]
+> The `empty` generator fails immediately. Combined with `pick`, it lets you express "try A, and if it fails, try B" logic without explicit branching.
     - In the `Z` case, we can now simply return `empty`. This correctly tells `DepTyCheck` that the recipe for `Fin 0` produces nothing.
 
 

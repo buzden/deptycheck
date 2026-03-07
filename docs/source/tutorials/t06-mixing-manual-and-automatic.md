@@ -70,10 +70,9 @@ Show User where
   show (MkUser s i) = "MkUser (" ++ show s ++ ") " ++ show i
 ```
 
-🔍 **Notice:**
-
-- Signature `Gen MaybeEmpty SpecialString` (no `Fuel ->`) is used for manually defined generators
-- The `%hint` pragma marks `genSpecialString` for **auto-implicit search** in Idris 2. It makes this function a candidate for automatic insertion - no explicit `@{genSpecialString}` required!
+> [!NOTE]\
+> - Signature `Gen MaybeEmpty SpecialString` (no `Fuel ->`) is used for manually defined generators
+> - The `%hint` pragma marks `genSpecialString` for **auto-implicit search** in Idris 2. It makes this function a candidate for automatic insertion - no explicit `@{genSpecialString}` required!
 
 From Idris 2 docs: `%hint` marks functions for auto search, similar to unnamed type class instances. The compiler prioritizes these hints during unification when explicit arguments are absent.
 
@@ -91,11 +90,10 @@ genUser : Fuel -> (Fuel -> Gen MaybeEmpty SpecialString) => Gen MaybeEmpty User
 genUser = deriveGen
 ```
 
-🔍 **Notice:**
-
-- Automatic derivation by `deriveGen` requires `Fuel ->`
-- The constraint `(Fuel -> Gen MaybeEmpty SpecialString) =>` tells `deriveGen` it needs a generator for `SpecialString`
-- Normally, you'd pass it explicitly: `genUser @{genSpecialString} fuel`. But `%hint` enables automatic resolution - Idris finds and inserts `genSpecialString` automatically!
+> [!NOTE]\
+> - Automatic derivation by `deriveGen` requires `Fuel ->`
+> - The constraint `(Fuel -> Gen MaybeEmpty SpecialString) =>` tells `deriveGen` it needs a generator for `SpecialString`
+> - Normally, you'd pass it explicitly: `genUser @{genSpecialString} fuel`. But `%hint` enables automatic resolution - Idris finds and inserts `genSpecialString` automatically!
 
 ---
 

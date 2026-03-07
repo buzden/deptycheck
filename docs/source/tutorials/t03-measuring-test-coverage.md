@@ -66,6 +66,12 @@ To get a full, aggregated coverage report, we need to run the generator many tim
 2. Collect Data: Run the generator many times and collect the raw `ModelCoverage` (the label counts) from each individual run.
 3. Analyze Results: Fold the collected raw data into the report template to produce the final, printable `CoverageGenInfo`.
 
+> [!NOTE]\
+> Coverage measurement happens in three phases:
+> 1. Generate many samples with different random seeds
+> 2. Track which constructors appear
+> 3. Report how much every constructor had been called
+
 Here is how to implement this in a `main` function.
 
 ### Add a `main` function to your `CoverageTutorial.idr` file.

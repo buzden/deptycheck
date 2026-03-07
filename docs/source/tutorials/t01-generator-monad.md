@@ -50,7 +50,9 @@ genConstantUser : Gen1 UserProfile
 genConstantUser = pure (MkProfile "Alice" 30)
 ```
 
-The `pure` function creates the simplest possible "recipe": one that always returns the exact value you give it. The type `Gen1` means this generator is guaranteed to produce a value.
+
+> [!NOTE]\
+> The `pure` function creates the simplest possible "recipe": one that always returns the exact value you give it. The type `Gen1` means this generator is guaranteed to produce a value.
 
 ### Run your generator.
 
@@ -100,6 +102,9 @@ genRandomAgeUser = MkProfile "Alice" <$> choose (18, 99)
 
 Here's what's new:
 *   `choose (18, 99)` creates a recipe for picking a random number in that range.
+
+> [!NOTE]\
+> The `choose` function randomly picks between two generators with equal probability (50/50). This gives you a simple way to add variation to your generators.
 *   The `<$>` operator takes the result from the recipe on the right (our random number) and feeds it into the function on the left (`MkProfile "Alice"`).
 
 ### Run it multiple times

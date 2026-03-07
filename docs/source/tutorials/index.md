@@ -69,7 +69,8 @@ Continue here after completing the Core Track.
 
 Throughout these tutorials, you will see:
 
-- 🔍 **Notice:** — Important callouts highlighting key concepts
+- > [!NOTE]\
+> — Important callouts highlighting key concepts
 - ```idris``` — Idris code blocks (copy-paste ready)
 - ```bash``` — Terminal commands
 - **Expected output:** — What you should see when running code

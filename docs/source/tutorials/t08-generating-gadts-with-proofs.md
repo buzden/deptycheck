@@ -48,6 +48,9 @@ The `SCons` constructor has an **auto-implicit** argument `{auto prf : isSorted 
 -   To construct an `SCons`, Idris must find a proof that the list is sorted.
 -   The `auto` keyword tells Idris to search for this proof automatically.
 
+> [!NOTE]\
+> The `{auto prf : isSorted ...}` constraint ensures only sorted lists are generated. The `auto` keyword makes Idris search for proof automatically during generation.
+
 ---
 
 ## Step 2: Derive the Generator
@@ -121,6 +124,12 @@ When `deriveGen` encounters `{auto prf : So $ isSorted (x :: toList xs)}`, it:
 1.  **Generates candidates** for `x` from the default `Nat` generator
 2.  **Recursively generates** `xs : SortedList` (which is already sorted by construction)
 3.  **Checks the constraint**: Is `x <= head xs` (or `x` can be anything if `xs` is empty)?
+
+> [!NOTE]\
+> The proof argument guarantees sortedness by construction:
+> - `SNil` is always sorted (base case)
+> - `SCons` requires proof that new element maintains order
+> - Invalid constructions are rejected at compile time
 4.  **Backtracks if needed**: If the constraint fails, it tries another `x`
 
 This is why the generator may be slower for complex constraints — it may need multiple attempts to find valid values.

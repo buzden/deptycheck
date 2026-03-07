@@ -92,7 +92,8 @@ Mul (Lit 2) (Var "z")
 Add (Lit 0) (Add (And (Var "y") (Lit 2)) (And (Lit 2) (Var "counter")))
 ```
 
-🔍 **Notice:** `deriveGen` automatically handles the recursive structure of expressions. The `limit 3` fuel controls the maximum depth of nested expressions.
+> [!NOTE]\
+> `deriveGen` automatically handles the recursive structure of expressions. The `limit 3` fuel controls the maximum depth of nested expressions.
 
 ---
 
@@ -133,10 +134,10 @@ genStmt (More f) = frequency
   ]
 ```
 
-🔍 **Notice:**
--   `genStmt Dry = pure Skip` ensures termination when fuel is exhausted
--   `genStmt f` (less fuel) in recursive calls controls program size
--   `frequency` weights make simple statements more common than complex ones
+> [!NOTE]\
+> - `genStmt Dry = pure Skip` ensures termination when fuel is exhausted
+> - `genStmt f` (less fuel) in recursive calls controls program size
+> - `frequency` weights make simple statements more common than complex ones
 
 ### Test the statement generator:
 
@@ -208,7 +209,8 @@ Expected output:
 MkProgram [Seq (While (Add (Lit 1) (And (Lit 1) (Var "x"))) (While (Var "x") (Skip))) (Assign "temp" (And (And (Var "temp") (Var "y")) (Lit 1))), If (And (Add (Add (Var "x") (Lit 0)) (Lit 1)) (Lit 2)) (Assign "result" (Lt (Lt (Lit 2) (Var "temp")) (Mul (Var "y") (Var "y")))) (While (Var "temp") (Seq (Skip) (Skip))), While (Mul (Var "result") (Mul (Lit 1) (Add (Var "y") (Lit 1)))) (Assign "counter" (Lt (And (Lit 1) (Var "result")) (Lit 0))), Seq (If (And (And (Lit 1) (Var "result")) (Mul (Lit 0) (Lit 1))) (If (Lit 1) (Skip) (Skip)) (While (Lit 0) (Skip))) (If (Mul (Add (Var "x") (Lit 1)) (And (Lit 1) (Var "counter"))) (While (Add (Lit 1) (Lit 1)) (Skip)) (Assign "y" (Add (Lit 1) (Lit 0)))), Assign "temp" (Add (Add (Lit 1) (And (Var "y") (Var "z"))) (And (Lit 1) (Lit 3)))]
 ```
 
-🔍 **Notice:** `listOf {length=pure n} gen` runs the generator `n` times and collects results into a list.
+> [!NOTE]\
+> `listOf {length=pure n} gen` runs the generator `n` times and collects results into a list.
 
 ---
 
@@ -283,7 +285,8 @@ Program with 3 statements
 ...
 ```
 
-🔍 **Notice:** You can use these property checks to ensure your generated programs meet certain criteria for testing compilers or interpreters.
+> [!NOTE]\
+> You can use these property checks to ensure your generated programs meet certain criteria for testing compilers or interpreters.
 
 ---
 

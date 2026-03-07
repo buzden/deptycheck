@@ -32,7 +32,8 @@ Expected output:
 0.8.x
 ```
 
-🔍 **Notice:** You need Idris 2 version **0.8.0 or newer** for DepTyCheck to work.
+> [!NOTE]\
+> You need Idris 2 version **0.8.0 or newer** for DepTyCheck to work.
 
 ---
 
@@ -50,7 +51,8 @@ pack update-db
 pack install deptycheck
 ```
 
-🔍 **Notice:** This command downloads and builds DepTyCheck. It may take a few minutes the first time.
+> [!NOTE]\
+> This command downloads and builds DepTyCheck. It may take a few minutes the first time.
 
 ---
 
@@ -76,7 +78,8 @@ modules = Main
 depends = deptycheck
 ```
 
-🔍 **Notice:** The `depends = deptycheck` line tells Idris to use the DepTyCheck library.
+> [!NOTE]\
+> The `depends = deptycheck` line tells Idris to use the DepTyCheck library.
 
 ---
 
@@ -105,7 +108,7 @@ main = do
   printLn light
 ```
 
-🔍 **Notice:**
+> [!NOTE]\
 -   `%language ElabReflection` enables the metaprogramming features needed for `deriveGen`
 -   `deriveGen` automatically creates a generator for `TrafficLight`
 -   `pick` runs the generator and extracts one value
@@ -135,7 +138,8 @@ Expected output (your result will vary):
 Yellow
 ```
 
-🔍 **Notice:** Run the command multiple times to see different results (Yellow, Green, Red).
+> [!NOTE]\
+> Run the command multiple times to see different results (Yellow, Green, Red).
 
 ---
 

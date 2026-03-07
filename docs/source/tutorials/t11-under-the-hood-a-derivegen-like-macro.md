@@ -87,12 +87,12 @@ We'll generate `Active` with predefined usernames and `Inactive` with predefined
       else `(Inactive <$> elements ["vacation", "sick", "offline"])
 ```
 
-🔍 **Notice:**
--   One named implementation handles **all** constructors for the type
--   We use `con.name` to check which constructor we're generating
--   We don't call `deriveGen` recursively - we generate arguments **directly**
--   `elements` is a generator from `Test.DepTyCheck.Gen` that picks from a list
--   We return Idris code templates using quotation syntax `` `( ... ) ``
+> [!NOTE]\
+> -   One named implementation handles **all** constructors for the type
+> -   We use `con.name` to check which constructor we're generating
+> -   We don't call `deriveGen` recursively - we generate arguments **directly**
+> -   `elements` is a generator from `Test.DepTyCheck.Gen` that picks from a list
+> -   We return Idris code templates using quotation syntax `` `( ... ) ``
 
 This shows the key insight: `consGenExpr` returns **code templates** (TTImp), not values. We're building the generator at compile time!
 
@@ -112,10 +112,10 @@ CustomDerivator : DeriveBodyForType
 CustomDerivator = MainCoreDerivator @{CustomStatusGen}
 ```
 
-🔍 **Notice:**
--   `MainCoreDerivator` adapts `DeriveBodyRhsForCon` → `DeriveBodyForType`
--   The `@{CustomStatusGen}` syntax passes our named implementation
--   `MainCoreDerivator` handles fuel management and constructor selection automatically
+> [!NOTE]\
+> -   `MainCoreDerivator` adapts `DeriveBodyRhsForCon` → `DeriveBodyForType`
+> -   The `@{CustomStatusGen}` syntax passes our named implementation
+>    `MainCoreDerivator` handles fuel management and constructor selection automatically
 
 ---
 
@@ -131,10 +131,10 @@ genUserStatus : Fuel -> Gen MaybeEmpty UserStatus
 genUserStatus = deriveGen @{CustomDerivator}
 ```
 
-🔍 **Notice:**
--   Same signature as any derived generator: `Fuel -> Gen MaybeEmpty UserStatus`
--   We pass our derivator using the `@{...}` syntax
--   No need for a separate "macro" - `deriveGen` works directly!
+> [!NOTE]\
+> -   Same signature as any derived generator: `Fuel -> Gen MaybeEmpty UserStatus`
+> -   We pass our derivator using the `@{...}` syntax
+> -   No need for a separate "macro" - `deriveGen` works directly!
 
 ---
 
@@ -229,12 +229,12 @@ Now let's implement our own Type Expert to see the delegation explicitly. We'll 
 
 **This is a conceptual example.**
 
-🔍 **Notice:**
--   The constraint `DeriveBodyRhsForCon =>` means we NEED a Constructor Expert
--   We explicitly call `consGenExpr` for each constructor
--   For demonstration purposes of non-recursive types, we just use `oneOf`, so no fuel management needed
--   `callCanonic` builds the function call: `genName fuel = ...`
--   This is a simplified version of what `MainCoreDerivator` does
+> [!NOTE]\
+> -   The constraint `DeriveBodyRhsForCon =>` means we NEED a Constructor Expert
+> -   We explicitly call `consGenExpr` for each constructor
+> -   For demonstration purposes of non-recursive types, we just use `oneOf`, so no fuel management needed
+> -   `callCanonic` builds the function call: `genName fuel = ...`
+> -   This is a simplified version of what `MainCoreDerivator` does
 
 ### Use EduDerivator with our Constructor Expert
 
