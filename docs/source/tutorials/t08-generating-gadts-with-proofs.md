@@ -1,6 +1,6 @@
 # 8. Generating GADTs with Proof Constraints
 
-In previous tutorials, we used `deriveGen` for regular data types and indexed types like `Vect`. But what about types that carry __proofs__ as constructors arguments? Can `deriveGen` handle those?
+In previous tutorials, we used `deriveGen` for regular data types and indexed types like `Vect`. But what about types that carry **proofs** as constructors arguments? Can `deriveGen` handle those?
 
 Yes! `deriveGen` is smart enough to automatically satisfy proof constraints during generation.
 
@@ -9,15 +9,16 @@ Yes! `deriveGen` is smart enough to automatically satisfy proof constraints duri
 In this tutorial, you will build a generator for a `SortedList` type that is **always sorted by construction**. The type itself carries a proof of sortedness, and `deriveGen` will automatically find valid values that satisfy the proof constraints.
 
 By the end, you will:
-1.  Define a GADT with a proof argument (`{auto prf : isSorted ...}`)
-2.  Derive a generator with a single `deriveGen` call
-3.  Run the generator and verify that all output is sorted
+
+1. Define a GADT with a proof argument (`{auto prf : isSorted ...}`)
+2. Derive a generator with a single `deriveGen` call
+3. Run the generator and verify that all output is sorted
 
 ## Prerequisites
 
--   Completion of [Tutorial 5: DeriveGen Signatures](t05-derivegen-signatures.md)
--   Understanding of dependent pairs and indexed types
--   Idris2 source file `./src/Playground.idr` with the header:
+- Completion of [Tutorial 5: DeriveGen Signatures](t05-derivegen-signatures.md)
+- Understanding of dependent pairs and indexed types
+- Idris2 source file `./src/Playground.idr` with the header:
 
 ```idris
 import Deriving.DepTyCheck.Gen
@@ -44,9 +45,10 @@ mutual
   toList (SCons x xs) = x :: toList xs
 ```
 
-The `SCons` constructor has an __auto-implicit__ argument `{auto prf : isSorted (x :: toList xs)}`. This means:
--   To construct an `SCons`, Idris must find a proof that the list is sorted.
--   The `auto` keyword tells Idris to search for this proof automatically.
+The `SCons` constructor has an **auto-implicit** argument `{auto prf : isSorted (x :: toList xs)}`. This means:
+
+- To construct an `SCons`, Idris must find a proof that the list is sorted.
+- The `auto` keyword tells Idris to search for this proof automatically.
 
 > [!NOTE]\
 > The `{auto prf : isSorted ...}` constraint ensures only sorted lists are generated. The `auto` keyword makes Idris search for proof automatically during generation.
@@ -65,10 +67,11 @@ genSortedList = deriveGen
 ```
 
 That's it! No manual logic, no special handling for the proof argument. `deriveGen` will:
-1.  Generate a candidate `x : Nat`
-2.  Recursively generate `xs : SortedList`
-3.  Check if `isSorted (x :: toList xs)` can be proven
-4.  If yes, construct the `SCons`; if no, try another `x`
+
+1. Generate a candidate `x : Nat`
+2. Recursively generate `xs : SortedList`
+3. Check if `isSorted (x :: toList xs)` can be proven
+4. If yes, construct the `SCons`; if no, try another `x`
 
 ---
 
@@ -90,47 +93,48 @@ testList = do
 
 ### Compile and run
 
-    ```bash
-    echo -e ':exec testList' | rlwrap pack repl ./src/Playground.idr
-    ```
+```bash
+echo -e ':exec testList' | rlwrap pack repl ./src/Playground.idr
+```
 
 ### Analyze the output
 
-    ```
-    ...
-    Main> --- Generating 5 sorted lists ---
-    Generated: [2, 3, 3, 4, 4]
-    Is sorted: True
-    Generated: [2, 2]
-    Is sorted: True
-    Generated: [3, 4]
-    Is sorted: True
-    Generated: [2]
-    Is sorted: True
-    Generated: [4]
-    Is sorted: True
-    ```
+```text
+...
+Main> --- Generating 5 sorted lists ---
+Generated: [2, 3, 3, 4, 4]
+Is sorted: True
+Generated: [2, 2]
+Is sorted: True
+Generated: [3, 4]
+Is sorted: True
+Generated: [2]
+Is sorted: True
+Generated: [4]
+Is sorted: True
+```
 
-    Every generated list is sorted! `deriveGen` automatically found values of `x` that satisfy the `isSorted` constraint.
+Every generated list is sorted! `deriveGen` automatically found values of `x` that satisfy the `isSorted` constraint.
 
 ---
 
 ## Step 4: Understanding How It Works
 
-How does `deriveGen` solve the proof constraint? The key is in the **search order** and __backtracking__.
+How does `deriveGen` solve the proof constraint? The key is in the **search order** and **backtracking**.
 
 When `deriveGen` encounters `{auto prf : So $ isSorted (x :: toList xs)}`, it:
 
-1.  **Generates candidates** for `x` from the default `Nat` generator
-2.  **Recursively generates** `xs : SortedList` (which is already sorted by construction)
-3.  **Checks the constraint**: Is `x <= head xs` (or `x` can be anything if `xs` is empty)?
+1. **Generates candidates** for `x` from the default `Nat` generator
+2. **Recursively generates** `xs : SortedList` (which is already sorted by construction)
+3. **Checks the constraint**: Is `x <= head xs` (or `x` can be anything if `xs` is empty)?
+4. **Backtracks if needed**: If the constraint fails, it tries another `x`
 
 > [!NOTE]\
 > The proof argument guarantees sortedness by construction:
+>
 > - `SNil` is always sorted (base case)
 > - `SCons` requires proof that new element maintains order
 > - Invalid constructions are rejected at compile time
-4.  **Backtracks if needed**: If the constraint fails, it tries another `x`
 
 This is why the generator may be slower for complex constraints — it may need multiple attempts to find valid values.
 
@@ -209,7 +213,7 @@ Generated: 3 (< 5)
 Generated: 4 (< 5)
 ```
 
-The `{auto prf : n `LT` limit}` constraint ensures that only values less than the limit are generated. `deriveGen` will automatically search for valid `n` values.
+The `{auto prf : LT n limit}` constraint ensures that only values less than the limit are generated. `deriveGen` will automatically search for valid `n` values.
 
 ---
 
@@ -217,8 +221,8 @@ The `{auto prf : n `LT` limit}` constraint ensures that only values less than th
 
 Now that you can generate proof-carrying data, you are ready for more advanced topics:
 
--   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
--   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
+- **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
+- **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
 
 <!-- idris
 main : IO ()

@@ -6,7 +6,7 @@ If a generator only ever produces one kind of value, our tests won't find bugs t
 
 ## Our Goal
 
-In this tutorial, you will learn how to add __labels__ to your generators to measure your test coverage. You will build a generator for a `TrafficLight` data type, add labels to track each color, and run a test that produces a coverage report, like this:
+In this tutorial, you will learn how to add **labels** to your generators to measure your test coverage. You will build a generator for a `TrafficLight` data type, add labels to track each color, and run a test that produces a coverage report, like this:
 
 ```text
 TrafficLight covered fully (1000 times)
@@ -25,7 +25,7 @@ This tutorial assumes you have completed [Installation and First Steps](t00-inst
 
 First, let's create a simple data type and a generator for it. This will be the subject of our coverage analysis.
 
-### Create a new file named `CoverageTutorial.idr`.
+### Create a new file named `CoverageTutorial.idr`
 
 ```idris
 import Data.List
@@ -39,7 +39,7 @@ import Control.Monad.Random
 import Control.Monad.State
 ```
 
-### Add the following code to it.
+### Add the following code to it
 
 ```idris
 data TrafficLight = Red | Amber | Green
@@ -68,13 +68,14 @@ To get a full, aggregated coverage report, we need to run the generator many tim
 
 > [!NOTE]\
 > Coverage measurement happens in three phases:
+>
 > 1. Generate many samples with different random seeds
 > 2. Track which constructors appear
 > 3. Report how much every constructor had been called
 
 Here is how to implement this in a `main` function.
 
-### Add a `main` function to your `CoverageTutorial.idr` file.
+### Add a `main` function to your `CoverageTutorial.idr` file
 
 ```idris
 runReportWithCoverage : IO ()
@@ -94,14 +95,14 @@ runReportWithCoverage = do
   putStrLn $ show finalReport
 ```
 
-### Compile and run your file.
+### Compile and run your file
 
 ```bash
 idris2 --build CoverageTutorial.idr
 ./build/exec/CoverageTutorial
 ```
 
-### Check the output.
+### Check the output
 
 You will see the aggregated coverage report printed to your console. Because we used `oneOf`, the distribution should be very even:
 
@@ -139,14 +140,14 @@ runDebug = do
   putStrLn $ "Generated via pick: " ++ show val
 ```
 
-### Compile and run the file again.
+### Compile and run the file again
 
 ```bash
     idris2 --build CoverageTutorial.idr
     ./build/exec/CoverageTutorial
 ```
 
-### Analyze the output. You will see a clear difference:
+### Analyze the output. You will see a clear difference
 
 ```text
 Main.TrafficLight[?]
@@ -155,7 +156,7 @@ Generated withCoverage: Amber
 Generated via pick: Just Green
 ```
 
-    In the first run, the label was printed to the console the moment the corresponding generator was executed. In second run, no label were printed. For a deeply nested generator, this trace allows you to understand exactly which path was taken to produce a specific problematic value.
+In the first run, the label was printed to the console the moment the corresponding generator was executed. In second run, no label were printed. For a deeply nested generator, this trace allows you to understand exactly which path was taken to produce a specific problematic value.
 
 ---
 
@@ -163,4 +164,4 @@ Generated via pick: Just Green
 
 Now that you can write, run, and measure generators manually, it's time to learn how `DepTyCheck` can do all of this for you automatically.
 
--   **Next Tutorial:** Continue to **[Automatic Generator Derivation](t04-automatic-generator-derivation.md)** to learn how to use `deriveGen`.
+- **Next Tutorial:** Continue to **[Automatic Generator Derivation](t04-automatic-generator-derivation.md)** to learn how to use `deriveGen`.

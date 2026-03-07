@@ -8,9 +8,9 @@ This tutorial is based on **PIL (Primitive Imperative Language)**, a real exampl
 
 In this tutorial, you will build a complete AST generator for a simple imperative language. By the end, you will have:
 
-1.  Defined expression and statement types for the language
-2.  Created both automatic (`deriveGen`) and hand-written generators
-3.  Generated valid random programs with control flow structures
+1. Defined expression and statement types for the language
+2. Created both automatic (`deriveGen`) and hand-written generators
+3. Generated valid random programs with control flow structures
 
 You will see output like:
 
@@ -26,9 +26,9 @@ Seq (Assign "x" (Lit 5)) (If (Add (Var "x") (Lit 3)) (Assign "y" (Lit 10)) Skip)
 
 Let's start with the foundation: arithmetic and logical expressions.
 
-### Create a new file named `PILTutorial.idr`.
+### Create a new file named `PILTutorial.idr`
 
-### Add the basic setup and expression type:
+### Add the basic setup and expression type
 
 ```idris
 import Data.Fuel
@@ -55,7 +55,7 @@ Show Expr where
   show (Lt e1 e2) = "Lt (" ++ show e1 ++ ") (" ++ show e2 ++ ")"
 ```
 
-### Create a simple derived generator with a generator-helper for strings:
+### Create a simple derived generator with a generator-helper for strings
 
 ```idris
 genVarName : Fuel -> Gen MaybeEmpty String
@@ -65,7 +65,7 @@ genExpr : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty Expr
 genExpr = deriveGen
 ```
 
-### Test it:
+### Test it
 
 ```idris
 main : IO ()
@@ -77,7 +77,7 @@ main = do
     printLn e
 ```
 
-### Build and run:
+### Build and run
 
 ```bash
 echo -e ':exec main' | rlwrap pack repl ./PILTutorial.idr
@@ -103,7 +103,7 @@ Add (Lit 0) (Add (And (Var "y") (Lit 2)) (And (Lit 2) (Var "counter")))
 
 Now let's add statements that form complete programs.
 
-### Add the statement type to your file:
+### Add the statement type to your file
 
 ```idris
 -- Statements with control flow
@@ -122,7 +122,7 @@ Show Stmt where
   show (While e1 s1) = "While (" ++ show e1 ++ ") (" ++ show s1 ++ ")"
 ```
 
-### Create a hand-written generator with explicit fuel control:
+### Create a hand-written generator with explicit fuel control
 
 ```idris
 genStmt : Fuel -> Gen MaybeEmpty Stmt
@@ -137,11 +137,12 @@ genStmt (More f) = frequency
 ```
 
 > [!NOTE]\
+>
 > - `genStmt Dry = pure Skip` ensures termination when fuel is exhausted
 > - `genStmt f` (less fuel) in recursive calls controls program size
 > - `frequency` weights make simple statements more common than complex ones
 
-### Test the statement generator:
+### Test the statement generator
 
 ```idris
 main_stmt : IO ()
@@ -176,7 +177,7 @@ Seq (Assign "result" (Var "z")) (While (Add (Add (Var "counter") (And (Lit 3) (L
 
 Now let's generate complete programs with multiple statements.
 
-### Define a Program type and generator:
+### Define a Program type and generator
 
 ```idris
 -- A program is a list of statements
@@ -189,7 +190,7 @@ genProgram : (n : Nat) -> Fuel -> Gen MaybeEmpty Program
 genProgram n fuel = MkProgram <$> listOf {length=pure n} (genStmt fuel)
 ```
 
-### Test program generation:
+### Test program generation
 
 ```idris
 main_program : IO ()
@@ -222,7 +223,7 @@ MkProgram [Seq (While (Add (Lit 1) (And (Lit 1) (Var "x"))) (While (Var "x") (Sk
 
 Let's verify that our generated programs have certain properties.
 
-### Add property checking functions:
+### Add property checking functions
 
 ```idris
 -- Check if a statement contains an assignment
@@ -246,7 +247,7 @@ hasLoop (If _ s1 s2) = hasLoop s1 || hasLoop s2
 hasLoop (While _ _) = True
 ```
 
-### Test properties:
+### Test properties
 
 ```idris
 main_properties : IO ()
@@ -299,10 +300,10 @@ Program with 3 statements
 
 Now that you can generate complex ASTs, you're ready for many other applications:
 
--   **Test an interpreter:** Use your generated PIL programs to test a language interpreter with property-based testing.
--   **Add more language features:** Extend the language with functions, arrays, or I/O operations.
--   **Integrate custom generators:** Continue to **[Mixing Manual and Automatic](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
--   **Control distribution:** Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to fine-tune constructor probabilities for more realistic program distributions.
--   **Understand the internals:** Continue to **[Under the Hood](t11-under-the-hood-a-derivegen-like-macro.md)** to see how `deriveGen` works internally.
+- **Test an interpreter:** Use your generated PIL programs to test a language interpreter with property-based testing.
+- **Add more language features:** Extend the language with functions, arrays, or I/O operations.
+- **Integrate custom generators:** Continue to **[Mixing Manual and Automatic](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
+- **Control distribution:** Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to fine-tune constructor probabilities for more realistic program distributions.
+- **Understand the internals:** Continue to **[Under the Hood](t11-under-the-hood-a-derivegen-like-macro.md)** to see how `deriveGen` works internally.
 
 The complete `PILTutorial.idr` file is available for reference. You can find it in the DepTyCheck examples or build it step-by-step following this tutorial.

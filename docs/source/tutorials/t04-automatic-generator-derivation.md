@@ -8,16 +8,16 @@ This is where `DepTyCheck` shines. It comes with a powerful macro, `deriveGen`, 
 
 In this tutorial, we will use a single, running example—a file system `Entry`—to demonstrate the power of `deriveGen`. We will:
 
-1.  Show how complex a manual generator for `Entry` would be.
-2.  Replace it with a single `deriveGen` call.
-3.  Learn how to provide an **external generator** to produce meaningful filenames.
-4.  Learn how to **pass arguments** to the generator to make it context-aware.
+1. Show how complex a manual generator for `Entry` would be.
+2. Replace it with a single `deriveGen` call.
+3. Learn how to provide an **external generator** to produce meaningful filenames.
+4. Learn how to **pass arguments** to the generator to make it context-aware.
 
 ## Prerequisites
 
--   Completion of [Installation and First Steps](t00-installation-and-setup.md) and the tutorials on [manual generation](t01-generator-monad.md), [emptiness](t02-handling-emptiness.md), and [coverage analysis](t03-measuring-test-coverage.md).
+- Completion of [Installation and First Steps](t00-installation-and-setup.md) and the tutorials on [manual generation](t01-generator-monad.md), [emptiness](t02-handling-emptiness.md), and [coverage analysis](t03-measuring-test-coverage.md).
 
-### Create a new file named `DeriveTutorial.idr`.
+### Create a new file named `DeriveTutorial.idr`
 
 ```idris
 import Deriving.DepTyCheck.Gen -- For the deriveGen macro
@@ -48,6 +48,7 @@ Show EntryManual where
 ```
 
 How would we write a generator for this by hand? It would be complex:
+
 - We would need to accept a `Fuel` parameter to stop recursion.
 - In the `DirectoryManual` case, we'd need to call ourself with less fuel.
 - We'd have to balance the choice between `FileManual` and `DirectoryManual` to get a good distribution.
@@ -67,7 +68,7 @@ genEntryManual (More recFuel) =
   where
 ```
 
-### Test It.
+**Test It**
 
 ```idris
 runEntryManual : IO ()
@@ -120,7 +121,9 @@ mutual
       show' (x :: xs)  = show x ++ ", " ++ show' xs
 ```
 
-NOTE: The latest version of DepTyCheck supports polymorhic specialization for automatically derived generators, but its support is still experimental. Also automagic generator deriving supports only `Gen MaybeEmpty` for now. If you need stricter `Gen NonEmpty`, you still need to do it by your hands.
+> [!NOTE]
+>
+> The latest version of DepTyCheck supports polymorphic specialization for automatically derived generators, but its support is still experimental. Also automagic generator deriving supports only `Gen MaybeEmpty` for now. If you need stricter `Gen NonEmpty`, you still need to do it by your hands.
 
 ### Define the generator
 
@@ -132,7 +135,7 @@ failing "No constructors found for the type `^prim^.String`"
   genEntry = deriveGen
 ```
 
-But honestly DepTyCheck is would decline our example because we need also to pass a generator for strings. It does not present out of the box, so, we need some to add some special stuff around which will be uncovered by further tutorals.
+But honestly DepTyCheck is would decline our example because we need also to pass a generator for strings. It does not present out of the box, so, we need some to add some special stuff around which will be uncovered by further tutorials.
 
 ```idris
 %hint
@@ -145,7 +148,7 @@ genEntry = deriveGen
 
 That's it. The `deriveGen` macro will now inspect the `Entry` type and write a generator that handles recursion, fuel, choices, and even attaches a generator for `String` from the context. It might also automatically add the coverage labels we learned about in further tutorials!
 
-### Test It!
+**Test It**
 
 You can immediately generate a random file system structure.
 
@@ -157,7 +160,7 @@ runEntryDefault = do
   printLn e
 ```
 
-    Running this might produce output like: `Directory [File "a", Directory [File "b"]]`.
+Running this might produce output like: `Directory [File "a", Directory [File "b"]]`.
 
 ---
 
@@ -222,8 +225,7 @@ genContextAwareFilename path _ =
       then elements ["tutorial.md", "README.md"]
       else elements ["file.txt"]
 ```
-
-### Test it!
+**Test It**
 
 To call `genCtxEntry`, we provide the initial path, and our context-aware generator. The `deriveGen` engine will handle passing the `path` argument down to `genContextAwareFilename` during any recursive calls.
 
@@ -237,7 +239,7 @@ runCtxEntry = do
   printLn e
 ```
 
-### Analyze the output.
+### Analyze the output
 
 You will see that files generated have names appropriate for the `src` directory, because our custom generator was called with `path = "src"`.
 
@@ -254,6 +256,6 @@ This powerful pattern allows you to create highly flexible generators that adapt
 
 Now that you know how to automatically generate data and provide hints, you are ready for more advanced topics:
 
--   **Want to learn how to control what gets generated?** Continue to **[DeriveGen Signatures](t05-derivegen-signatures.md)** to learn how to use given vs generated parameters and dependent pairs in signatures.
--   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel](t07-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
--   **How do I fix a biased generator or control generation order?** The default derivation strategy is smart, but sometimes needs more specific guidance. Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to use `instance` declarations to control constructor probabilities and argument generation order.
+- **Want to learn how to control what gets generated?** Continue to **[DeriveGen Signatures](t05-derivegen-signatures.md)** to learn how to use given vs generated parameters and dependent pairs in signatures.
+- **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel](t07-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
+- **How do I fix a biased generator or control generation order?** The default derivation strategy is smart, but sometimes needs more specific guidance. Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to use `instance` declarations to control constructor probabilities and argument generation order.

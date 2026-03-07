@@ -1,6 +1,6 @@
 # 5. DeriveGen Signatures: Controlling What Gets Generated
 
-In the previous tutorial, we saw how `deriveGen` can automatically create generators. But how do we tell it *what kind* of data we want? For example, should the length of a `Vect` be given as an argument, or should it be randomly generated?
+In the previous tutorial, we saw how `deriveGen` can automatically create generators. But how do we tell it _what kind_ of data we want? For example, should the length of a `Vect` be given as an argument, or should it be randomly generated?
 
 The answer is the function signature. The signature is not just a type; it is a blueprint of your intent that tells `deriveGen` exactly what to do.
 
@@ -8,15 +8,15 @@ The answer is the function signature. The signature is not just a type; it is a 
 
 In this tutorial, we will learn to command `deriveGen` by writing three different function signatures for the `Vect` type. By the end of this tutorial, you will have built:
 
-1.  A generator for a `Vect` of a **specific, given** length.
-2.  A generator that produces a `Vect` of a **random, generated** length.
-3.  A flexible generator that takes both a __given__ length and an **external generator** for its elements.
+1. A generator for a `Vect` of a **specific, given** length.
+2. A generator that produces a `Vect` of a **random, generated** length.
+3. A flexible generator that takes both a **given** length and an **external generator** for its elements.
 
 This will give you a deep understanding of how to use signatures to control `deriveGen`.
 
 ## Prerequisites
 
--   All previous tutorials, especially [Measuring Your Test Coverage](t03-measuring-test-coverage.md).
+- All previous tutorials, especially [Measuring Your Test Coverage](t03-measuring-test-coverage.md).
 
 ---
 
@@ -24,9 +24,9 @@ This will give you a deep understanding of how to use signatures to control `der
 
 First, let's create our file and add the necessary imports. We will be using `Vect` throughout this tutorial.
 
-### Create a new file named `DeriveTutorial.idr`.
+### Create a new file named `DeriveTutorial.idr`
 
-### Add the following boilerplate.
+### Add the following boilerplate
 
 This includes the `ElabReflection` pragma and all the modules we will need.
 
@@ -65,7 +65,7 @@ _Note: For the following steps, you can put all the code in the same `DeriveTuto
 
 Our first goal is to create a generator that produces a `Vect` of a specific length that we provide as an argument. To do this, we simply place the argument _before_ the `Fuel` parameter in the signature.
 
-### Define the generator.
+**Define the generator**
 
 The signature `(n : Nat) -> Fuel -> Gen MaybeEmpty (Vect n String)` tells `deriveGen`: "You will be _given_ a `Nat` named `n`. Your job is to produce a `Vect` of that exact length."
 
@@ -74,7 +74,7 @@ genVectOfLen : Fuel -> (n : Nat) -> (Fuel -> Gen MaybeEmpty String) => Gen Maybe
 genVectOfLen = deriveGen
 ```
 
-### Test it.
+### Test it
 
 Let's write a `main` function to call our generator, providing `5` as the length.
 
@@ -105,7 +105,7 @@ By placing `n` before `Fuel`, you have successfully commanded `deriveGen` to use
 
 What if we don't want to provide a specific length? What if we want the generator itself to invent a random length? To do this, we use a **dependent pair** in the return type.
 
-### Define the generator
+**Define the generator**
 
 The signature `Fuel -> Gen MaybeEmpty (n ** Vect n String)` tells `deriveGen`: "Your job is to first generate a random `Nat` (which you will call `n`), and then generate a `Vect` of that length. When you are done, give me back both `n` and the `Vect`."
 
@@ -114,7 +114,7 @@ genRandomVect : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty (n ** 
 genRandomVect = deriveGen
 ```
 
-### Test It
+**Test It**
 
 This time, when we call the generator, we don't provide a length. The generator will produce a pair containing the length it chose and the vector it created.
 
@@ -129,7 +129,7 @@ runRandomVect = do
     printLn v
 ```
 
-### Compile and run.
+### Compile and run
 
 You will see vectors of different, random lengths each time you run it.
 
@@ -143,22 +143,22 @@ You will see vectors of different, random lengths each time you run it.
 ["d", "e", "f", "g", "h"]
 ```
 
-By moving the parameter `n` from an input to a __generated__ part of the output using the `**` syntax, you have completely changed `deriveGen`'s behavior.
+By moving the parameter `n` from an input to a **generated** part of the output using the `**` syntax, you have completely changed `deriveGen`'s behavior.
 
 ---
 
 ## Step 4: The Flexible Generator - Combining Patterns
 
-Let's combine the patterns we've learned. Our first generator is flexible enough: it is taking a `Nat` as a _given_ input, but it is also taking an *external generator* hint for the element type using the `=>` syntax which will be overriden by the following exapmple.
+Let's combine the patterns we've learned. Our first generator is flexible enough: it is taking a `Nat` as a _given_ input, but it is also taking an _external generator_ hint for the element type using the `=>` syntax which will be overridden by the following exapmple.
 
-### Test It
+**Test It**
 
 To call this generator, we must provide both the length `n` and an element generator via the `@` syntax.
 
 ```idris
 runFlexi : IO ()
 runFlexi = do
-  putStrLn "--- Generating a Vect of length 7 with overriden Str generator ---"
+  putStrLn "--- Generating a Vect of length 7 with overridden Str generator ---"
   let myStrGen = \fuel => elements ["A", "B", "C"] -- Our custom generator for the elements
                                                    -- It is created manually, so no need to use `fuel`.
 
@@ -176,7 +176,7 @@ runFlexi = do
 You will see a `Vect` of length 7, filled with numbers between 100 and 200, proving that `deriveGen` correctly used both your given length and your external generator.
 
 ```text
---- Generating a Vect of length 7 with overriden Str generator ---
+--- Generating a Vect of length 7 with overridden Str generator ---
 ["A", "C", "B", "A", "A", "A", "C"]
 ["b", "c", "f", "a", "b", "b", "h"]
 ```
@@ -187,5 +187,5 @@ You will see a `Vect` of length 7, filled with numbers between 100 and 200, prov
 
 Now that you know how to control `deriveGen` through signatures, you are ready for more advanced topics:
 
--   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel: Structural Recursion](t07-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
--   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles types like `SortedList`.
+- **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel: Structural Recursion](t07-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
+- **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles types like `SortedList`.

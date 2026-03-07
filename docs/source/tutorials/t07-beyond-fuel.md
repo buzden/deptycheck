@@ -8,14 +8,14 @@ For a simple type like `List`, the rule is easy to understand: every `Cons` call
 
 In this tutorial, you will discover that `deriveGen` is smart enough to identify two different kinds of recursion, with very different performance characteristics. You will write two generators:
 
-1.  A generator for a Peano `Nat` type that strictly obeys the fuel budget.
-2.  A generator for the indexed `Fin` type that appears to get "free" recursion, defying the budget.
+1. A generator for a Peano `Nat` type that strictly obeys the fuel budget.
+2. A generator for the indexed `Fin` type that appears to get "free" recursion, defying the budget.
 
-You will learn why this happens, how to recognize the difference between __`SpendingFuel`__ and __`StructurallyDecreasing`__ recursion, and how you can design your own types to take advantage of this powerful optimization.
+You will learn why this happens, how to recognize the difference between **`SpendingFuel`** and **`StructurallyDecreasing`** recursion, and how you can design your own types to take advantage of this powerful optimization.
 
 ## Prerequisites
 
--   All previous tutorials, especially [Automatic Generator Derivation](t04-automatic-generator-derivation.md).
+- All previous tutorials, especially [Automatic Generator Derivation](t04-automatic-generator-derivation.md).
 
 ---
 
@@ -36,7 +36,7 @@ import System.Random.Pure.StdGen
 %language ElabReflection
 ```
 
-### Add the following code.
+### Add the following code
 
 This defines our `PNat` (Peano Natural) type and a standard derived generator for it.
 
@@ -54,7 +54,7 @@ genPNat : Fuel -> Gen MaybeEmpty PNat
 genPNat = deriveGen
 ```
 
-### The Experiment.
+### The Experiment
 
 Now, let's write a `main` function to call this generator twice: once with a generous fuel budget (`limit 10`) and once with a very small one (`limit 3`).
 
@@ -72,14 +72,14 @@ runPeano = do
   printLn p_small
 ```
 
-### Compile, run, and observe.
+### Compile, run, and observe
 
 ```bash
 idris2 --build RecursionTutorial.idr
 ./build/exec/RecursionTutorial
 ```
 
-    Your output will be random, but it will follow a strict pattern:
+Your output will be random, but it will follow a strict pattern:
 
 ```text
 --- Generating with a large fuel budget (10) ---
@@ -88,7 +88,7 @@ PS (PS (PS (PS (PS PZ))))
 PS (PS PZ)
 ```
 
-    Notice that the generator with more fuel produced a larger number. The number of `PS` constructors is strictly limited by the fuel you provide. This is because `deriveGen` identifies the `PS` constructor as __`SpendingFuel`__. For each `PS` it generates, it must consume one unit of fuel from the budget. This is the default, safe behavior for simple recursive types.
+Notice that the generator with more fuel produced a larger number. The number of `PS` constructors is strictly limited by the fuel you provide. This is because `deriveGen` identifies the `PS` constructor as __`SpendingFuel`__. For each `PS` it generates, it must consume one unit of fuel from the budget. This is the default, safe behavior for simple recursive types.
 
 ---
 
@@ -98,14 +98,14 @@ Must `deriveGen` _always_ spend fuel on recursion? No. If it can prove that a re
 
 A perfect example is `Fin n`, the type of numbers from `0` to `n-1`.
 
-### Add the `Fin` generator to your `RecursionTutorial.idr` file.
+### Add the `Fin` generator to your `RecursionTutorial.idr` file
 
 ```idris
 genFin : Fuel -> (n : Nat) -> Gen MaybeEmpty (Fin n)
 genFin = deriveGen
 ```
 
-### The Counter-Intuitive Experiment.
+### The Counter-Intuitive Experiment
 
 Now, let's try to generate a `Fin 100`. This would require 100 recursive calls to `FS`. According to our last experiment, this should require at least `limit 100` fuel. But what happens if we only give it `limit 3`?
 
@@ -119,20 +119,22 @@ runFin = do
   printLn fin
 ```
 
-### Run the experiment and observe the surprising result.
+### Run the experiment and observe the surprising result
 
 ```text
     --- Generating a large Fin with a tiny fuel budget (3) ---
     97
 ```
 
-    It works! Even with a tiny fuel budget, it successfully generated a very large `Fin` value. It did not fail or run out of fuel.
+It works! Even with a tiny fuel budget, it successfully generated a very large `Fin` value. It did not fail or run out of fuel.
 
-### The Explanation. This is not magic. `deriveGen` is smart enough to analyze the `Fin` type and its `FS` constructor.
+### The Explanation
 
-    `FS : Fin k -> Fin (S k)`
+This is not magic. `deriveGen` is smart enough to analyze the `Fin` type and its `FS` constructor
 
-    It sees that the input `Fin k` is for a type whose index `k` is provably, *structurally smaller* than the output's index `S k`. Because the `Nat` index itself guarantees that the recursion will eventually terminate when it hits `Fin 0`, `deriveGen` does not need to use the `Fuel` parameter as a safety budget. It classifies this kind of recursion as __`StructurallyDecreasing`__.
+`FS : Fin k -> Fin (S k)`
+
+It sees that the input `Fin k` is for a type whose index `k` is provably, *structurally smaller* than the output's index `S k`. Because the `Nat` index itself guarantees that the recursion will eventually terminate when it hits `Fin 0`, `deriveGen` does not need to use the `Fuel` parameter as a safety budget. It classifies this kind of recursion as __`StructurallyDecreasing`__.
 
 This optimization allows `deriveGen` to generate values for indexed, recursive data types like `Fin` and `Vect` much more efficiently than it can for simple recursive types like `PNat` or `List`.
 
@@ -150,9 +152,8 @@ genSomething Dry      = -- Base case: no fuel, choose non-recursive constructors
 genSomething (More f) = -- Recursive case: spend fuel or use optimization
 ```
 
-
-- When `Fuel` is `Dry`, the generator __must__ choose non-recursive constructors (like `PZ`, `Leaf`, `Nil`)
-- When `Fuel` is `More f`, the generator __can__ choose recursive constructors (like `PS`, `Node`, `Cons`)
+- When `Fuel` is `Dry`, the generator **must** choose non-recursive constructors (like `PZ`, `Leaf`, `Nil`)
+- When `Fuel` is `More f`, the generator **can** choose recursive constructors (like `PS`, `Node`, `Cons`)
 - Each recursive call consumes one unit of `Fuel` (calls with `f` instead of `More f`)
 - This guarantees termination: eventually `Fuel` reaches `Dry` and recursion stops
 
@@ -173,7 +174,9 @@ genPNat' (More f) = frequency
   ]
 ```
 
-__Notice:__ When generating `PS`, we call `genPNat' f` — we pass the __smaller__ fuel value. Each recursive step consumes one unit of fuel.
+> [!NOTE]
+>
+> When generating `PS`, we call `genPNat' f` — we pass the **smaller** fuel value. Each recursive step consumes one unit of fuel.
 
 ### StructurallyDecreasing: Manual Implementation
 
@@ -187,7 +190,9 @@ genFin' (S k) fuel = frequency
   , (1, FS <$> genFin' k fuel) ]   -- Recursive: SAME fuel!
 ```
 
-__Notice:__ When generating `FS`, we call `genFin' k fuel` — with the __same__ fuel value!
+> [!NOTE]
+>
+> When generating `FS`, we call `genFin' k fuel` — with the **same** fuel value!
 
 Why is this safe? Because the **type index** decreases (`S k` → `k`), guaranteeing termination even without spending fuel. The index itself acts as the termination measure.
 
@@ -208,6 +213,6 @@ This is the core optimization: when the type system guarantees termination throu
 
 Now that you understand how `deriveGen` handles recursion, you are ready for more advanced topics:
 
--   **Want to fix biased generators?** Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to use `ProbabilityTuning` and `GenOrderTuning` instances.
--   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
--   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles auto-implicit proof arguments.
+- **Want to fix biased generators?** Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to use `ProbabilityTuning` and `GenOrderTuning` instances.
+- **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
+- **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles auto-implicit proof arguments.

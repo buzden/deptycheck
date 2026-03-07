@@ -13,8 +13,8 @@ We will tackle two common problems that cannot be solved with external generator
 
 ## Prerequisites
 
--   Completion of [Automatic Generator Derivation](t04-automatic-generator-derivation.md).
--   A willingness to engage with some advanced Idris concepts!
+- Completion of [Automatic Generator Derivation](t04-automatic-generator-derivation.md).
+- A willingness to engage with some advanced Idris concepts!
 
 ---
 
@@ -22,7 +22,7 @@ We will tackle two common problems that cannot be solved with external generator
 
 Let's start by defining a simple, recursive data type where the default `deriveGen` strategy will produce a biased result.
 
-### Create a new file named `TuningTutorial.idr`.
+### Create a new file named `TuningTutorial.idr`
 
 ```idris
 import Deriving.DepTyCheck.Gen
@@ -42,7 +42,7 @@ genStr : Gen MaybeEmpty String
 genStr = elements ["a", "b", "c", "d", "f", "g", "h"]
 ```
 
-### Add the following code.
+### Add the following code
 
 ```idris
 mutual
@@ -57,7 +57,7 @@ genEntry : Fuel -> (Fuel -> Gen MaybeEmpty String) => Gen MaybeEmpty Entry
 genEntry = deriveGen
 ```
 
-### Add a coverage analysis `main` function.
+### Add a coverage analysis `main` function
 
 ```idris
 main : IO ()
@@ -69,14 +69,17 @@ main = do
   putStrLn $ show finalReport
 ```
 
-### Analyze the report. The results will be starkly imbalanced because `deriveGen` prefers the non-recursive `File` constructor.
+### Analyze the report
+
+The results will be starkly imbalanced because `deriveGen` prefers the non-recursive `File` constructor
 
 ```text
     Entry covered fully (1000 times)
       - File: covered (909 times)
       - Directory: covered (91 times)
 ```
-    This is the problem we need to solve.
+
+This is the problem we need to solve.
 
 ---
 
@@ -84,7 +87,9 @@ main = do
 
 To fix the bias, we must implement the `ProbabilityTuning` interface for the `Directory` constructor. This tells `deriveGen` to override its default weight.
 
-### Define the implementation. Place this implementation at the top level of your file. It targets the `Directory` constructor by its name.
+### Define the implementation
+
+Place this implementation at the top level of your file. It targets the `Directory` constructor by its name
 
 ```idris
 mutual
@@ -103,10 +108,10 @@ ProbabilityTuning `{DirectoryP}.dataCon where
   tuneWeight _ = 1
 ```
 
-    - `ProbabilityTuning ... where`: We define a specific implementation of this interface for a constructor.
-    - `"Directory".dataCon`: This is a `Name` literal that refers to the `Directory` constructor. Since `Directory` is defined in this same file, we can use the simple name without a module prefix.
-    - `isConstructor = itIsConstructor`: This is a required line of reflection boilerplate that confirms we have targeted a valid constructor.
-    - `tuneWeight _ = 10`: We implement the `tuneWeight` function. It takes the default weight `_` and we ignore it, always returning our new, higher weight of `10`.
+- `ProbabilityTuning ... where`: We define a specific implementation of this interface for a constructor.
+- `"Directory".dataCon`: This is a `Name` literal that refers to the `Directory` constructor. Since `Directory` is defined in this same file, we can use the simple name without a module prefix.
+- `isConstructor = itIsConstructor`: This is a required line of reflection boilerplate that confirms we have targeted a valid constructor.
+- `tuneWeight _ = 10`: We implement the `tuneWeight` function. It takes the default weight `_` and we ignore it, always returning our new, higher weight of `10`.
 
 ### Re-run the coverage analysis
 
@@ -122,7 +127,7 @@ mainP = do
   putStrLn $ show finalReport
 ```
 
-### Analyze the new report.
+### Analyze the new report
 
 The distribution will now be much closer to a 50/50 balance, proving we have successfully tuned the probability.
 
@@ -145,7 +150,7 @@ data LtPair : Type where
 
 `deriveGen`'s default strategy might randomly pick `n=10` and `m=5`, then fail because it can't prove `10 < 5`. This is very inefficient. We can tell it to generate `m` first, making it much easier to pick a valid `n`.
 
-### Define the generator and the tuning implementation in your file.
+### Define the generator and the tuning implementation in your file
 
 ```idris
 GenOrderTuning `{MkLtPair}.dataCon where
@@ -159,10 +164,10 @@ Show LtPair where
   show (MkLtPair n m _) = "MkLtPair " ++ show n ++ " " ++ show m ++ " _"
 ```
 
-    - `GenOrderTuning ... where`: We implement the ordering interface for the `MkLtPair` constructor.
-    - `deriveFirst _ _ = [`{m}]`: We implement `deriveFirst` to return a list of arguments that must be generated first. Here, we specify the argument named `m` using a name literal `` `{m}``.
+- `GenOrderTuning ... where`: We implement the ordering interface for the `MkLtPair` constructor.
+- `deriveFirst _ _ = [`{m}]`: We implement `deriveFirst` to return a list of arguments that must be generated first. Here, we specify the argument named `m` using a name literal `` `{m}``.
 
-### Test It.
+### Test It
 
 With this instance in scope, `deriveGen` will now follow our instructions. When generating an `LtPair`, it will generate `m` first, and then be smart enough to only generate values for `n` that are less than `m`.
 
@@ -177,13 +182,13 @@ main_lt = do
   putStrLn $ show finalReport
 ```
 
-    You will see that this generator efficiently produces valid pairs like `MkLtPair 5 10 True` every time, without the wasteful failures of the naive approach.
+You will see that this generator efficiently produces valid pairs like `MkLtPair 5 10 True` every time, without the wasteful failures of the naive approach.
 
 ---
 
 ## Next Steps
 
--   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
--   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles GADTs with auto-implicit proof arguments.
--   **Want to see a complete example?** Continue to **[Toy Example: Generating ASTs for a DSL](t09-toy-example.md)** to build a complete generator for a simple imperative language.
--   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
+- **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
+- **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles GADTs with auto-implicit proof arguments.
+- **Want to see a complete example?** Continue to **[Toy Example: Generating ASTs for a DSL](t09-toy-example.md)** to build a complete generator for a simple imperative language.
+- **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.

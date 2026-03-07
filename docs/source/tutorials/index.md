@@ -27,7 +27,7 @@ Everyone should complete this track to master DepTyCheck fundamentals.
 | 8 | [Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md) |
 | 9 | [Toy Example: DSL ASTs](t09-toy-example.md) |
 
-__Prerequisites:__ Basic Idris 2 knowledge (data types, functions, REPL)
+**Prerequisites:** Basic Idris 2 knowledge (data types, functions, REPL)
 
 ---
 
@@ -40,7 +40,7 @@ Continue here after completing the Core Track.
 | 10 | [Derivation Tuning](t10-derivation-tuning.md) |
 | 11 | [Under the Hood](t11-under-the-hood-a-derivegen-like-macro.md) |
 
-__Prerequisites:__ Core Track completion
+**Prerequisites:** Core Track completion
 
 ---
 
@@ -69,9 +69,11 @@ __Prerequisites:__ Core Track completion
 
 Throughout these tutorials, you will see:
 
-- > [!NOTE]\
+> [!NOTE]\
+>
 > — Important callouts highlighting key concepts
-- ```idris``` — Idris code blocks (copy-paste ready)
+
+- ```idris``` — Idris code blocks (copypaste ready)
 - ```bash``` — Terminal commands
 - **Expected output:** — What you should see when running code
 - ✅ **Checklist items** — Skills you will acquire

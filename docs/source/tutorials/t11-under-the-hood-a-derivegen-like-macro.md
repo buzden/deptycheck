@@ -16,18 +16,18 @@ By building a custom strategy from scratch, you will understand the core compone
 
 ### The "Type Expert" (`DeriveBodyForType`)
 
-Its job is to know about a *whole type*. It looks at all the constructors and generates the top-level code that _chooses_ between them. This is where `Fuel` fuel management happens.
+Its job is to know about a _whole type_. It looks at all the constructors and generates the top-level code that _chooses_ between them. This is where `Fuel` fuel management happens.
 
 ### The "Constructor Expert" (`DeriveBodyRhsForCon`)
 
-It knows how to build *one specific constructor*. For each constructor, it generates the code that produces the constructor's arguments.
+It knows how to build _one specific constructor_. For each constructor, it generates the code that produces the constructor's arguments.
 
 In this tutorial, we will implement our own Constructor Expert that uses custom logic for generating arguments.
 
 ## Prerequisites
 
--   A good understanding of Idris's interfaces (type classes).
--   Completion of all previous tutorials, especially [Advanced Derivation Tuning](t10-derivation-tuning.md).
+- A good understanding of Idris's interfaces (type classes).
+- Completion of all previous tutorials, especially [Advanced Derivation Tuning](t10-derivation-tuning.md).
 
 ---
 
@@ -65,7 +65,7 @@ Show UserStatus where
   show (Inactive reason) = "Inactive " ++ show reason
 ```
 
-Both constructors are non-recursive (only contain `String`), so `MainCoreDerivator` will choose between them randomly. Our custom logic will control the __arguments__ they receive.
+Both constructors are non-recursive (only contain `String`), so `MainCoreDerivator` will choose between them randomly. Our custom logic will control the **arguments** they receive.
 
 ---
 
@@ -88,11 +88,12 @@ We'll generate `Active` with predefined usernames and `Inactive` with predefined
 ```
 
 > [!NOTE]\
-> -   One named implementation handles __all__ constructors for the type
-> -   We use `con.name` to check which constructor we're generating
-> -   We don't call `deriveGen` recursively - we generate arguments __directly__
-> -   `elements` is a generator from `Test.DepTyCheck.Gen` that picks from a list
-> -   We return Idris code templates using quotation syntax `` `( ... ) ``
+>
+> - One named implementation handles **all** constructors for the type
+> - We use `con.name` to check which constructor we're generating
+> - We don't call `deriveGen` recursively - we generate arguments **directly**
+> - `elements` is a generator from `Test.DepTyCheck.Gen` that picks from a list
+> - We return Idris code templates using quotation syntax `` `( ... ) ``
 
 This shows the key insight: `consGenExpr` returns **code templates** (TTImp), not values. We're building the generator at compile time!
 
@@ -113,9 +114,10 @@ CustomDerivator = MainCoreDerivator @{CustomStatusGen}
 ```
 
 > [!NOTE]\
-> -   `MainCoreDerivator` adapts `DeriveBodyRhsForCon` → `DeriveBodyForType`
-> -   The `@{CustomStatusGen}` syntax passes our named implementation
->    `MainCoreDerivator` handles fuel management and constructor selection automatically
+>
+> - `MainCoreDerivator` adapts `DeriveBodyRhsForCon` → `DeriveBodyForType`
+> - The `@{CustomStatusGen}` syntax passes our named implementation
+> `MainCoreDerivator` handles fuel management and constructor selection automatically
 
 ---
 
@@ -132,9 +134,10 @@ genUserStatus = deriveGen @{CustomDerivator}
 ```
 
 > [!NOTE]\
-> -   Same signature as any derived generator: `Fuel -> Gen MaybeEmpty UserStatus`
-> -   We pass our derivator using the `@{...}` syntax
-> -   No need for a separate "macro" - `deriveGen` works directly!
+>
+> - Same signature as any derived generator: `Fuel -> Gen MaybeEmpty UserStatus`
+> - We pass our derivator using the `@{...}` syntax
+> - No need for a separate "macro" - `deriveGen` works directly!
 
 ---
 
@@ -230,11 +233,12 @@ Now let's implement our own Type Expert to see the delegation explicitly. We'll 
 **This is a conceptual example.**
 
 > [!NOTE]\
-> -   The constraint `DeriveBodyRhsForCon =>` means we NEED a Constructor Expert
-> -   We explicitly call `consGenExpr` for each constructor
-> -   For demonstration purposes of non-recursive types, we just use `oneOf`, so no fuel management needed
-> -   `callCanonic` builds the function call: `genName fuel = ...`
-> -   This is a simplified version of what `MainCoreDerivator` does
+>
+> - The constraint `DeriveBodyRhsForCon =>` means we NEED a Constructor Expert
+> - We explicitly call `consGenExpr` for each constructor
+> - For demonstration purposes of non-recursive types, we just use `oneOf`, so no fuel management needed
+> - `callCanonic` builds the function call: `genName fuel = ...`
+> - This is a simplified version of what `MainCoreDerivator` does
 
 ### Use EduDerivator with our Constructor Expert
 
@@ -290,8 +294,8 @@ The output shows both constructors with our custom values, proving our `EduDeriv
 
 Now you've seen two Type Experts:
 
-1.  __`MainCoreDerivator`__ (production): Handles fuel, recursion, weights, GADT indices, and more. Used in normal derivation.
-2.  __`EduDerivator`__ (educational): Minimal version showing the delegation pattern. Only works for non-recursive types.
+1. **`MainCoreDerivator`** (production): Handles fuel, recursion, weights, GADT indices, and more. Used in normal derivation.
+2. **`EduDerivator`** (educational): Minimal version showing the delegation pattern. Only works for non-recursive types.
 
 ---
 
@@ -299,10 +303,10 @@ Now you've seen two Type Experts:
 
 Let's summarize what we've learned:
 
-1.  **Constructor Expert** (`DeriveBodyRhsForCon`): Controls **what arguments** each constructor receives. Called once per constructor.
-2.  **Type Expert** (`DeriveBodyForType`): Controls **which constructor** gets called and manages fuel. Calls Constructor Expert for each constructor.
-3.  **Delegation Pattern**: Type Expert calls `consGenExpr` to delegate argument generation to Constructor Expert.
-4.  __Composition__: `MainCoreDerivator @{CustomStatusGen}` combines standard type-level logic with custom constructor-level logic.
+1. **Constructor Expert** (`DeriveBodyRhsForCon`): Controls **what arguments** each constructor receives. Called once per constructor.
+2. **Type Expert** (`DeriveBodyForType`): Controls **which constructor** gets called and manages fuel. Calls Constructor Expert for each constructor.
+3. **Delegation Pattern**: Type Expert calls `consGenExpr` to delegate argument generation to Constructor Expert.
+4. **Composition**: `MainCoreDerivator @{CustomStatusGen}` combines standard type-level logic with custom constructor-level logic.
 
 This two-level architecture makes `DepTyCheck` highly modular: you can customize at either level without affecting the other!
 

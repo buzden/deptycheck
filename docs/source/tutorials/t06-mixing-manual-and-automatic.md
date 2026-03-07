@@ -24,9 +24,9 @@ MkUser (MkSpecialString "root") 5
 
 ## Prerequisites
 
--   Completion of [Tutorial 5: DeriveGen Signatures](t05-derivegen-signatures.md)
--   Understanding of the `=>` syntax for explicit generator constraints
--   Idris2 source file `./src/Mixed.idr` with the header:
+- Completion of [Tutorial 5: DeriveGen Signatures](t05-derivegen-signatures.md)
+- Understanding of the `=>` syntax for explicit generator constraints
+- Idris2 source file `./src/Mixed.idr` with the header:
 
 ```idris
 import Test.DepTyCheck.Gen
@@ -43,9 +43,9 @@ import System.Random.Pure.StdGen
 
 Imagine we have a `SpecialString` type that should only ever contain specific, predefined values (e.g., usernames with special privileges). A fully random `String` generator is not appropriate here.
 
-### Create a new file named `Mixed.idr`.
+### Create a new file named `Mixed.idr`
 
-### Define the `SpecialString` type with a `%hint` generator.
+### Define the `SpecialString` type with a `%hint` generator
 
 ```idris
 -- A type that needs special generation
@@ -60,7 +60,7 @@ genSpecialString : Gen MaybeEmpty SpecialString
 genSpecialString = map MkSpecialString (elements ["admin", "root", "system"])
 ```
 
-### Define the `User` type that contains `SpecialString`.
+### Define the `User` type that contains `SpecialString`
 
 ```idris
 -- Standard domain types
@@ -71,6 +71,7 @@ Show User where
 ```
 
 > [!NOTE]\
+>
 > - Signature `Gen MaybeEmpty SpecialString` (no `Fuel ->`) is used for manually defined generators
 > - The `%hint` pragma marks `genSpecialString` for **auto-implicit search** in Idris 2. It makes this function a candidate for automatic insertion - no explicit `@{genSpecialString}` required!
 
@@ -82,7 +83,7 @@ From Idris 2 docs: `%hint` marks functions for auto search, similar to unnamed t
 
 Now, let's define a generator for `User` using `deriveGen`. A `User` contains a `SpecialString` and a `Nat`. `deriveGen` knows how to generate a `Nat` by default. What will it do for `SpecialString`?
 
-### Add the derived generator to `Mixed.idr`.
+### Add the derived generator to `Mixed.idr`
 
 ```idris
 -- Add deriveGen for the User
@@ -91,6 +92,7 @@ genUser = deriveGen
 ```
 
 > [!NOTE]\
+>
 > - Automatic derivation by `deriveGen` requires `Fuel ->`
 > - The constraint `(Fuel -> Gen MaybeEmpty SpecialString) =>` tells `deriveGen` it needs a generator for `SpecialString`
 > - Normally, you'd pass it explicitly: `genUser @{genSpecialString} fuel`. But `%hint` enables automatic resolution - Idris finds and inserts `genSpecialString` automatically!
@@ -101,7 +103,7 @@ genUser = deriveGen
 
 Let's create a main function to see our automatic discovery in action.
 
-### Add a test function to `Mixed.idr`.
+### Add a test function to `Mixed.idr`
 
 ```idris
 main : IO ()
@@ -112,7 +114,7 @@ main = do
   printLn u
 ```
 
-### Compile and run.
+### Compile and run
 
 ```bash
 pack build Mixed && pack exec Mixed
@@ -131,7 +133,7 @@ MkUser (MkSpecialString "root") 5
 
 `Constraint + %hint` approach is recommended for custom types.
 
-__Pattern:__ Mark your generator with `%hint`, add constraint to derived generator:
+**Pattern:** Mark your generator with `%hint`, add constraint to derived generator:
 
   ```idris
   %hint
@@ -143,6 +145,7 @@ __Pattern:__ Mark your generator with `%hint`, add constraint to derived generat
   ```
 
 **Call site:**
+
   ```idris
   pick (genContainer fuel)  -- No @{...} needed!
   ```
@@ -153,6 +156,6 @@ __Pattern:__ Mark your generator with `%hint`, add constraint to derived generat
 
 ## Next Steps
 
--   **Continue to the next tutorial:** [Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md) to see how these techniques apply to even more advanced types with proof constraints.
--   __Experiment:__ Try creating your own custom type with a `%hint` generator and see if `deriveGen` finds it automatically.
--   **Read more:** Check out the Idris 2 documentation on `%hint` for advanced auto-implicit search patterns.
+- **Continue to the next tutorial:** [Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md) to see how these techniques apply to even more advanced types with proof constraints.
+- **Experiment:** Try creating your own custom type with a `%hint` generator and see if `deriveGen` finds it automatically.
+- **Read more:** Check out the Idris 2 documentation on `%hint` for advanced auto-implicit search patterns.

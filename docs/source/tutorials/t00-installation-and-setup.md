@@ -5,9 +5,10 @@ Welcome to DepTyCheck! This tutorial will guide you through installing Idris 2 a
 ## Our Goal
 
 In this tutorial, you will:
-1.  Install Idris 2 and the DepTyCheck library
-2.  Create a project configured with DepTyCheck
-3.  Write and run a generator that produces random `TrafficLight` values
+
+1. Install Idris 2 and the DepTyCheck library
+2. Create a project configured with DepTyCheck
+3. Write and run a generator that produces random `TrafficLight` values
 
 By the end, you will see output like:
 
@@ -116,9 +117,10 @@ main = do
 ```
 
 > [!NOTE]\
--   `%language ElabReflection` enables the metaprogramming features needed for `deriveGen`
--   `deriveGen` automatically creates a generator for `TrafficLight`
--   `pick` runs the generator and extracts one value
+>
+> - `%language ElabReflection` enables the metaprogramming features needed for `deriveGen`
+> - `deriveGen` automatically creates a generator for `TrafficLight`
+> - `pick` runs the generator and extracts one value
 
 ---
 
@@ -178,7 +180,7 @@ Just Green
 
 ### Run it multiple times to see different colors
 
-### Exit the REPL:
+### Exit the REPL
 
 ```text
 :quit
@@ -190,4 +192,4 @@ Just Green
 
 Now that you have a working setup, you are ready to learn the fundamentals of generator creation:
 
--   **Continue to Tutorial 1:** [The Generator Monad](t01-generator-monad.md) to learn how to create generators manually using `pure`, `elements`, `choose`, and other combinators.
+- **Continue to Tutorial 1:** [The Generator Monad](t01-generator-monad.md) to learn how to create generators manually using `pure`, `elements`, `choose`, and other combinators.
