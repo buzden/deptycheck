@@ -191,7 +191,7 @@ runEntryWithHint = do
 
 You will see that `deriveGen` still handles the `Directory` and `List` logic automatically, but every `File` now contains one of your hand-picked filenames.
 
-```
+```text
 --- Generating Entries with a custom String generator ---
 Directory [File "main.idr"]
 File "config.yml"

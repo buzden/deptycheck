@@ -175,10 +175,11 @@ runFlexi = do
 
 You will see a `Vect` of length 7, filled with numbers between 100 and 200, proving that `deriveGen` correctly used both your given length and your external generator.
 
-```
+```text
 --- Generating a Vect of length 7 with overriden Str generator ---
 ["A", "C", "B", "A", "A", "A", "C"]
-["b", "c", "f", "a", "b", "b", "h"]```
+["b", "c", "f", "a", "b", "b", "h"]
+```
 
 ---
 

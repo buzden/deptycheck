@@ -83,7 +83,7 @@ echo -e ':exec main' | rlwrap pack repl ./PILTutorial.idr
 ```
 
 Expected output (will vary):
-```
+```text
 --- Generating random expressions ---
 Lt (Mul (Lt (Var "x") (Var "temp")) (Add (Lit 3) (Lit 1))) (Add (Var "temp") (Lt (Var "result") (Lit 0)))
 Lt (And (Var "counter") (And (Lit 2) (Var "y"))) (And (Lit 1) (Add (Lit 0) (Var "counter")))
@@ -158,7 +158,7 @@ echo -e ':exec main_stmt' | rlwrap pack repl ./PILTutorial.idr
 ```
 
 Expected output:
-```
+```text
 --- Generating random statements ---
 Assign "counter" (Lt (Lit 0) (Lit 4))
 Assign "x" (Lt (Mul (Lt (Var "temp") (Lit 1)) (Lit 2)) (Lt (Var "counter") (And (Add (Var "y") (Lit 2)) (And (Var "counter") (Lit 2)))))
@@ -204,7 +204,7 @@ echo -e ':exec main_program' | rlwrap pack repl ./PILTutorial.idr
 ```
 
 Expected output:
-```
+```text
 --- Generating a random program (5 statements) ---
 MkProgram [Seq (While (Add (Lit 1) (And (Lit 1) (Var "x"))) (While (Var "x") (Skip))) (Assign "temp" (And (And (Var "temp") (Var "y")) (Lit 1))), If (And (Add (Add (Var "x") (Lit 0)) (Lit 1)) (Lit 2)) (Assign "result" (Lt (Lt (Lit 2) (Var "temp")) (Mul (Var "y") (Var "y")))) (While (Var "temp") (Seq (Skip) (Skip))), While (Mul (Var "result") (Mul (Lit 1) (Add (Var "y") (Lit 1)))) (Assign "counter" (Lt (And (Lit 1) (Var "result")) (Lit 0))), Seq (If (And (And (Lit 1) (Var "result")) (Mul (Lit 0) (Lit 1))) (If (Lit 1) (Skip) (Skip)) (While (Lit 0) (Skip))) (If (Mul (Add (Var "x") (Lit 1)) (And (Lit 1) (Var "counter"))) (While (Add (Lit 1) (Lit 1)) (Skip)) (Assign "y" (Add (Lit 1) (Lit 0)))), Assign "temp" (Add (Add (Lit 1) (And (Var "y") (Var "z"))) (And (Lit 1) (Lit 3)))]
 ```
@@ -269,7 +269,7 @@ echo -e ':exec main_properties' | rlwrap pack repl ./PILTutorial.idr
 ```
 
 A sample of the output:
-```
+```text
 --- Checking properties of generated programs ---
 Program with 3 statements
   Has assignment: True
@@ -301,4 +301,3 @@ Now that you can generate complex ASTs, you're ready for many other applications
 *   **Understand the internals:** Continue to **[Under the Hood](t11-under-the-hood-a-derivegen-like-macro.md)** to see how `deriveGen` works internally.
 
 The complete `PILTutorial.idr` file is available for reference. You can find it in the DepTyCheck examples or build it step-by-step following this tutorial.
-

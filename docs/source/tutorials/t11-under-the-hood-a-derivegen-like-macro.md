@@ -160,7 +160,7 @@ echo -e ':exec main' | rlwrap pack repl ./src/CustomGen.idr
 
 Expected output will show both constructors with our custom arguments:
 
-```
+```text
 --- Testing custom derivation ---
 Active "Alice"
 Inactive "vacation"
@@ -268,7 +268,7 @@ echo -e ':exec testEdu' | rlwrap pack repl ./src/CustomGen.idr
 
 Expected output (same as before, confirming it works):
 
-```
+```text
 --- Testing EduDerivator ---
 Active "Bob"
 Inactive "sick"

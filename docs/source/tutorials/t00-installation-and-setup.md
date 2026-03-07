@@ -10,7 +10,7 @@ In this tutorial, you will:
 3.  Write and run a generator that produces random `TrafficLight` values
 
 By the end, you will see output like:
-```
+```text
 Red : TrafficLight
 ```
 
@@ -28,7 +28,7 @@ idris2 --version
 ```
 
 Expected output:
-```
+```text
 0.8.x
 ```
 
@@ -65,7 +65,7 @@ cd deptycheck-tutorial
 ```
 
 ### Create a project file named `tutorial.ipkg`
-```
+```text
 package tutorial
 
 version = 0.0.1
@@ -123,7 +123,7 @@ pack build tutorial
 ```
 
 Expected output:
-```
+```text
 Building tutorial...
 Build succeeded
 ```
@@ -134,7 +134,7 @@ pack exec tutorial
 ```
 
 Expected output (your result will vary):
-```
+```text
 Yellow
 ```
 
@@ -158,7 +158,7 @@ pack repl tutorial
 ```
 
 Expected output:
-```
+```text
 Just Green
 ```
 

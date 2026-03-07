@@ -202,7 +202,7 @@ echo -e ':exec printLn =<< pick1 genUserType' |
 
 Sample output:
 
-```
+```text
 "Guest"
 "Standard"
 ```
@@ -245,7 +245,7 @@ echo -e ':exec printLn =<< pick1 genDependentVect' |
 
 For multiple times the output might be:
 
-```
+```text
 (3 ** [False, False, False])
 (5 ** [True, True, True, True, True])
 (2 ** [True, False])

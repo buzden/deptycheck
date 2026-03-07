@@ -8,7 +8,7 @@ If a generator only ever produces one kind of value, our tests won't find bugs t
 
 In this tutorial, you will learn how to add **labels** to your generators to measure your test coverage. You will build a generator for a `TrafficLight` data type, add labels to track each color, and run a test that produces a coverage report, like this:
 
-```
+```text
 TrafficLight covered fully (1000 times)
   - Red: covered (332 times)
   - Green: covered (334 times)
@@ -105,7 +105,7 @@ idris2 --build CoverageTutorial.idr
 
 You will see the aggregated coverage report printed to your console. Because we used `oneOf`, the distribution should be very even:
 
-```
+```text
 TrafficLight covered fully (1000 times)
   - Red: covered (332 times)
   - Green: covered (334 times)
@@ -148,7 +148,7 @@ runDebug = do
 
 ### Analyze the output. You will see a clear difference:
 
-```
+```text
 Main.TrafficLight[?]
 Main.Amber (user-defined)
 Generated withCoverage: Amber

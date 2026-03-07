@@ -117,7 +117,7 @@ runFin = do
 
 ### Run the experiment and observe the surprising result.
 
-```
+```text
     --- Generating a large Fin with a tiny fuel budget (3) ---
     97
 ```
