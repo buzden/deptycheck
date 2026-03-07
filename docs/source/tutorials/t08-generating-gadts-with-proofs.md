@@ -1,6 +1,6 @@
 # 8. Generating GADTs with Proof Constraints
 
-In previous tutorials, we used `deriveGen` for regular data types and indexed types like `Vect`. But what about types that carry **proofs** as constructors arguments? Can `deriveGen` handle those?
+In previous tutorials, we used `deriveGen` for regular data types and indexed types like `Vect`. But what about types that carry __proofs__ as constructors arguments? Can `deriveGen` handle those?
 
 Yes! `deriveGen` is smart enough to automatically satisfy proof constraints during generation.
 
@@ -44,7 +44,7 @@ mutual
   toList (SCons x xs) = x :: toList xs
 ```
 
-The `SCons` constructor has an **auto-implicit** argument `{auto prf : isSorted (x :: toList xs)}`. This means:
+The `SCons` constructor has an __auto-implicit__ argument `{auto prf : isSorted (x :: toList xs)}`. This means:
 -   To construct an `SCons`, Idris must find a proof that the list is sorted.
 -   The `auto` keyword tells Idris to search for this proof automatically.
 
@@ -117,7 +117,7 @@ testList = do
 
 ## Step 4: Understanding How It Works
 
-How does `deriveGen` solve the proof constraint? The key is in the **search order** and **backtracking**.
+How does `deriveGen` solve the proof constraint? The key is in the **search order** and __backtracking__.
 
 When `deriveGen` encounters `{auto prf : So $ isSorted (x :: toList xs)}`, it:
 
@@ -217,8 +217,8 @@ The `{auto prf : n `LT` limit}` constraint ensures that only values less than th
 
 Now that you can generate proof-carrying data, you are ready for more advanced topics:
 
-*   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
-*   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
+-   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
+-   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
 
 <!-- idris
 main : IO ()

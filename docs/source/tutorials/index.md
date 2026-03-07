@@ -15,7 +15,7 @@ Welcome to the DepTyCheck tutorial series! These tutorials follow the **Diataxis
 Everyone should complete this track to master DepTyCheck fundamentals.
 
 | # | Tutorial |
-|---|----------|
+| - | ---------- |
 | 0 | [Installation and First Steps](t00-installation-and-setup.md) |
 | 1 | [The Generator Monad](t01-generator-monad.md) |
 | 2 | [Handling Emptiness](t02-handling-emptiness.md) |
@@ -27,7 +27,7 @@ Everyone should complete this track to master DepTyCheck fundamentals.
 | 8 | [Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md) |
 | 9 | [Toy Example: DSL ASTs](t09-toy-example.md) |
 
-**Prerequisites:** Basic Idris 2 knowledge (data types, functions, REPL)
+__Prerequisites:__ Basic Idris 2 knowledge (data types, functions, REPL)
 
 ---
 
@@ -36,11 +36,11 @@ Everyone should complete this track to master DepTyCheck fundamentals.
 Continue here after completing the Core Track.
 
 | # | Tutorial |
-|---|----------|
+| -- | ---------- |
 | 10 | [Derivation Tuning](t10-derivation-tuning.md) |
 | 11 | [Under the Hood](t11-under-the-hood-a-derivegen-like-macro.md) |
 
-**Prerequisites:** Core Track completion
+__Prerequisites:__ Core Track completion
 
 ---
 
@@ -48,8 +48,8 @@ Continue here after completing the Core Track.
 
 ### "I want to..."
 
-|      |            |
-|------|------------|
+| | |
+| ------ | ------------ |
 | Install DepTyCheck | [Tutorial 0](t00-installation-and-setup.md) |
 | Generate simple data types | [Tutorial 1](t01-generator-monad.md) |
 | Handle types that might be empty | [Tutorial 2](t02-handling-emptiness.md) |

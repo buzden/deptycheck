@@ -13,6 +13,7 @@ In this tutorial, you will build a complete AST generator for a simple imperativ
 3.  Generated valid random programs with control flow structures
 
 You will see output like:
+
 ```text
 Seq (Assign "x" (Lit 5)) (If (Add (Var "x") (Lit 3)) (Assign "y" (Lit 10)) Skip)
 ```
@@ -83,6 +84,7 @@ echo -e ':exec main' | rlwrap pack repl ./PILTutorial.idr
 ```
 
 Expected output (will vary):
+
 ```text
 --- Generating random expressions ---
 Lt (Mul (Lt (Var "x") (Var "temp")) (Add (Lit 3) (Lit 1))) (Add (Var "temp") (Lt (Var "result") (Lit 0)))
@@ -158,6 +160,7 @@ echo -e ':exec main_stmt' | rlwrap pack repl ./PILTutorial.idr
 ```
 
 Expected output:
+
 ```text
 --- Generating random statements ---
 Assign "counter" (Lt (Lit 0) (Lit 4))
@@ -204,6 +207,7 @@ echo -e ':exec main_program' | rlwrap pack repl ./PILTutorial.idr
 ```
 
 Expected output:
+
 ```text
 --- Generating a random program (5 statements) ---
 MkProgram [Seq (While (Add (Lit 1) (And (Lit 1) (Var "x"))) (While (Var "x") (Skip))) (Assign "temp" (And (And (Var "temp") (Var "y")) (Lit 1))), If (And (Add (Add (Var "x") (Lit 0)) (Lit 1)) (Lit 2)) (Assign "result" (Lt (Lt (Lit 2) (Var "temp")) (Mul (Var "y") (Var "y")))) (While (Var "temp") (Seq (Skip) (Skip))), While (Mul (Var "result") (Mul (Lit 1) (Add (Var "y") (Lit 1)))) (Assign "counter" (Lt (And (Lit 1) (Var "result")) (Lit 0))), Seq (If (And (And (Lit 1) (Var "result")) (Mul (Lit 0) (Lit 1))) (If (Lit 1) (Skip) (Skip)) (While (Lit 0) (Skip))) (If (Mul (Add (Var "x") (Lit 1)) (And (Lit 1) (Var "counter"))) (While (Add (Lit 1) (Lit 1)) (Skip)) (Assign "y" (Add (Lit 1) (Lit 0)))), Assign "temp" (Add (Add (Lit 1) (And (Var "y") (Var "z"))) (And (Lit 1) (Lit 3)))]
@@ -269,6 +273,7 @@ echo -e ':exec main_properties' | rlwrap pack repl ./PILTutorial.idr
 ```
 
 A sample of the output:
+
 ```text
 --- Checking properties of generated programs ---
 Program with 3 statements
@@ -294,10 +299,10 @@ Program with 3 statements
 
 Now that you can generate complex ASTs, you're ready for many other applications:
 
-*   **Test an interpreter:** Use your generated PIL programs to test a language interpreter with property-based testing.
-*   **Add more language features:** Extend the language with functions, arrays, or I/O operations.
-*   **Integrate custom generators:** Continue to **[Mixing Manual and Automatic](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
-*   **Control distribution:** Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to fine-tune constructor probabilities for more realistic program distributions.
-*   **Understand the internals:** Continue to **[Under the Hood](t11-under-the-hood-a-derivegen-like-macro.md)** to see how `deriveGen` works internally.
+-   **Test an interpreter:** Use your generated PIL programs to test a language interpreter with property-based testing.
+-   **Add more language features:** Extend the language with functions, arrays, or I/O operations.
+-   **Integrate custom generators:** Continue to **[Mixing Manual and Automatic](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` discovers and uses your custom generators.
+-   **Control distribution:** Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to fine-tune constructor probabilities for more realistic program distributions.
+-   **Understand the internals:** Continue to **[Under the Hood](t11-under-the-hood-a-derivegen-like-macro.md)** to see how `deriveGen` works internally.
 
 The complete `PILTutorial.idr` file is available for reference. You can find it in the DepTyCheck examples or build it step-by-step following this tutorial.

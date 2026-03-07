@@ -136,7 +136,7 @@ The distribution will now be much closer to a 50/50 balance, proving we have suc
 
 ## Step 3: Generation Order Tuning
 
-Probability isn't the only thing we can tune. For some dependent types, the *order* in which arguments are generated is critical for efficiency. Consider a pair `(n, m)` where we require `n < m`.
+Probability isn't the only thing we can tune. For some dependent types, the _order_ in which arguments are generated is critical for efficiency. Consider a pair `(n, m)` where we require `n < m`.
 
 ```idris
 data LtPair : Type where
@@ -158,6 +158,7 @@ genLtPair = deriveGen
 Show LtPair where
   show (MkLtPair n m _) = "MkLtPair " ++ show n ++ " " ++ show m ++ " _"
 ```
+
     - `GenOrderTuning ... where`: We implement the ordering interface for the `MkLtPair` constructor.
     - `deriveFirst _ _ = [`{m}]`: We implement `deriveFirst` to return a list of arguments that must be generated first. Here, we specify the argument named `m` using a name literal `` `{m}``.
 
@@ -175,13 +176,14 @@ main_lt = do
   let finalReport = registerCoverage allRawCoverage reportTemplate
   putStrLn $ show finalReport
 ```
+
     You will see that this generator efficiently produces valid pairs like `MkLtPair 5 10 True` every time, without the wasteful failures of the naive approach.
 
 ---
 
 ## Next Steps
 
-*   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
-*   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles GADTs with auto-implicit proof arguments.
-*   **Want to see a complete example?** Continue to **[Toy Example: Generating ASTs for a DSL](t09-toy-example.md)** to build a complete generator for a simple imperative language.
-*   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.
+-   **Want to integrate handwritten generators?** Continue to **[Mixing Manual and Automatic Generation](t06-mixing-manual-and-automatic.md)** to see how `deriveGen` automatically discovers and uses your custom generators.
+-   **Want to generate types with proof constraints?** Continue to **[Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md)** to see how `deriveGen` handles GADTs with auto-implicit proof arguments.
+-   **Want to see a complete example?** Continue to **[Toy Example: Generating ASTs for a DSL](t09-toy-example.md)** to build a complete generator for a simple imperative language.
+-   **Want to understand the internals?** Continue to **[Under the Hood: Building a deriveGen-like Macro](t11-under-the-hood-a-derivegen-like-macro.md)** to learn how the derivation engine works.

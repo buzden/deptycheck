@@ -1,12 +1,12 @@
 # 3. Measuring Your Test Coverage
 
-In the last tutorials, we learned how to write generators for random data. But how do we know if our random data is *good*? Are we testing all the important cases, or is our generator accidentally biased, leaving critical parts of our code untested?
+In the last tutorials, we learned how to write generators for random data. But how do we know if our random data is _good_? Are we testing all the important cases, or is our generator accidentally biased, leaving critical parts of our code untested?
 
 If a generator only ever produces one kind of value, our tests won't find bugs that only appear in other cases. We need a way to measure the quality of our random data.
 
 ## Our Goal
 
-In this tutorial, you will learn how to add **labels** to your generators to measure your test coverage. You will build a generator for a `TrafficLight` data type, add labels to track each color, and run a test that produces a coverage report, like this:
+In this tutorial, you will learn how to add __labels__ to your generators to measure your test coverage. You will build a generator for a `TrafficLight` data type, add labels to track each color, and run a test that produces a coverage report, like this:
 
 ```text
 TrafficLight covered fully (1000 times)
@@ -163,4 +163,4 @@ Generated via pick: Just Green
 
 Now that you can write, run, and measure generators manually, it's time to learn how `DepTyCheck` can do all of this for you automatically.
 
-*   **Next Tutorial:** Continue to **[Automatic Generator Derivation](t04-automatic-generator-derivation.md)** to learn how to use `deriveGen`.
+-   **Next Tutorial:** Continue to **[Automatic Generator Derivation](t04-automatic-generator-derivation.md)** to learn how to use `deriveGen`.

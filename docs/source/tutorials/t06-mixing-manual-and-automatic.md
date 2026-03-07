@@ -131,7 +131,7 @@ MkUser (MkSpecialString "root") 5
 
 `Constraint + %hint` approach is recommended for custom types.
 
-**Pattern:** Mark your generator with `%hint`, add constraint to derived generator:
+__Pattern:__ Mark your generator with `%hint`, add constraint to derived generator:
 
   ```idris
   %hint
@@ -153,6 +153,6 @@ MkUser (MkSpecialString "root") 5
 
 ## Next Steps
 
-*   **Continue to the next tutorial:** [Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md) to see how these techniques apply to even more advanced types with proof constraints.
-*   **Experiment:** Try creating your own custom type with a `%hint` generator and see if `deriveGen` finds it automatically.
-*   **Read more:** Check out the Idris 2 documentation on `%hint` for advanced auto-implicit search patterns.
+-   **Continue to the next tutorial:** [Generating GADTs with Proofs](t08-generating-gadts-with-proofs.md) to see how these techniques apply to even more advanced types with proof constraints.
+-   __Experiment:__ Try creating your own custom type with a `%hint` generator and see if `deriveGen` finds it automatically.
+-   **Read more:** Check out the Idris 2 documentation on `%hint` for advanced auto-implicit search patterns.

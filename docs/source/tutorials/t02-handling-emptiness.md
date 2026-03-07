@@ -2,13 +2,13 @@
 
 In the [first tutorial](t01-generator-monad.md), we used `Gen1`, which is a guarantee—a promise—that a value can always be generated. This works perfectly for types like `Nat` or `String` that always have inhabitants.
 
-But what happens when a type might be **uninhabited** (have no values at all) under certain conditions?
+But what happens when a type might be __uninhabited__ (have no values at all) under certain conditions?
 
 This is a common scenario in dependently-typed programming. A perfect example is `Fin n`, the type of natural numbers from `0` up to `n-1`.
 
 - `Fin 3` has three inhabitants: `0`, `1`, and `2`.
 - `Fin 1` has one inhabitant: `0`.
-- But what about `Fin 0`? It asks for a number in the range `0` to `-1`. There are no such numbers. This type is **uninhabited**.
+- But what about `Fin 0`? It asks for a number in the range `0` to `-1`. There are no such numbers. This type is __uninhabited__.
 
 It is impossible to write a generator that produces a value of type `Fin 0`, because none exist. Our testing library must be able to handle this gracefully. In this tutorial, you will learn how to write safe generators for types that might be empty. You will build a correct generator for `Fin n` and see how to handle its results safely.
 
@@ -48,7 +48,7 @@ genFinIncorrect Z     = ?wat -- What could we possibly write here?
 
 > [!NOTE]
 > The `Gen0` emptiness flag indicates this generator might fail to produce a value. Use it for types that may not have inhabitants (like `Fin 0`).
-This is the problem `DepTyCheck` is designed to solve. We need a way to tell the system that a generator is *intentionally* empty.
+This is the problem `DepTyCheck` is designed to solve. We need a way to tell the system that a generator is _intentionally_ empty.
 
 ---
 
@@ -56,8 +56,8 @@ This is the problem `DepTyCheck` is designed to solve. We need a way to tell the
 
 `DepTyCheck` provides two new tools to solve this exact problem:
 
--   **`Gen0 a`**: A type for a generator that *might* produce a value of type `a`. Think of it as a "possibly empty" recipe.
--   **`empty`**: A specific generator of type `Gen0 a` that is *guaranteed* to produce nothing. It's the recipe for an empty set.
+-   __`Gen0 a`__: A type for a generator that _might_ produce a value of type `a`. Think of it as a "possibly empty" recipe.
+-   __`empty`__: A specific generator of type `Gen0 a` that is _guaranteed_ to produce nothing. It's the recipe for an empty set.
 
 Let's use these to fix our incorrect generator.
 
@@ -170,4 +170,4 @@ This demonstrates another critical aspect of `Gen0`: it allows for speculative g
 
 Now that you've mastered manual generation for both simple and complex types, it's time to see how `DepTyCheck` can do this work for you automatically.
 
-*   **Next Tutorial:** Continue to **[Measuring Your Test Coverage](t03-measuring-test-coverage.md)** to learn how to analyze the quality of your generated data.
+-   **Next Tutorial:** Continue to **[Measuring Your Test Coverage](t03-measuring-test-coverage.md)** to learn how to analyze the quality of your generated data.

@@ -54,6 +54,7 @@ How would we write a generator for this by hand? It would be complex:
 - We would need a separate generator for the `String` in `FileManual`.
 
 A sketch might look like this:
+
 ```idris
 -- A complex, manual generator (conceptual)
 genEntryManual : Fuel -> Gen MaybeEmpty EntryManual
@@ -206,7 +207,7 @@ Directory [Directory [File "config.yml"]]
 
 Sometimes, a generator needs more context than `Fuel`. For example, what if we want to generate files with names that are context-dependent, based on their parent directory?
 
-Any arguments that appear in the signature *before* the `Fuel` parameter are treated as regular inputs. `deriveGen` is smart enough to thread these arguments through its recursive calls.
+Any arguments that appear in the signature _before_ the `Fuel` parameter are treated as regular inputs. `deriveGen` is smart enough to thread these arguments through its recursive calls.
 
 ### Write a context-aware `String` generator
 
@@ -253,6 +254,6 @@ This powerful pattern allows you to create highly flexible generators that adapt
 
 Now that you know how to automatically generate data and provide hints, you are ready for more advanced topics:
 
-*   **Want to learn how to control what gets generated?** Continue to **[DeriveGen Signatures](t05-derivegen-signatures.md)** to learn how to use given vs generated parameters and dependent pairs in signatures.
-*   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel](t07-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
-*   **How do I fix a biased generator or control generation order?** The default derivation strategy is smart, but sometimes needs more specific guidance. Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to use `instance` declarations to control constructor probabilities and argument generation order.
+-   **Want to learn how to control what gets generated?** Continue to **[DeriveGen Signatures](t05-derivegen-signatures.md)** to learn how to use given vs generated parameters and dependent pairs in signatures.
+-   **Want to understand how recursion affects generation?** Continue to **[Beyond Fuel](t07-beyond-fuel.md)** to learn about `SpendingFuel` vs `StructurallyDecreasing` recursion.
+-   **How do I fix a biased generator or control generation order?** The default derivation strategy is smart, but sometimes needs more specific guidance. Continue to **[Derivation Tuning](t10-derivation-tuning.md)** to learn how to use `instance` declarations to control constructor probabilities and argument generation order.

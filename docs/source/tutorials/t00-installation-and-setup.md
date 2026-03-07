@@ -10,6 +10,7 @@ In this tutorial, you will:
 3.  Write and run a generator that produces random `TrafficLight` values
 
 By the end, you will see output like:
+
 ```text
 Red : TrafficLight
 ```
@@ -23,11 +24,13 @@ First, you need to install Idris 2. We recommend using [`pack`](https://github.c
 Follow its [installation script](https://github.com/stefan-hoeck/idris2-pack/?tab=readme-ov-file#quick-installation).
 
 **Verify your installation:**
+
 ```bash
 idris2 --version
 ```
 
 Expected output:
+
 ```text
 0.8.x
 ```
@@ -42,11 +45,13 @@ Expected output:
 Now that Idris 2 is installed, let's add the DepTyCheck library.
 
 ### Update the package database
+
 ```bash
 pack update-db
 ```
 
 ### Install DepTyCheck
+
 ```bash
 pack install deptycheck
 ```
@@ -59,12 +64,14 @@ pack install deptycheck
 ## Step 3: Create Your First Project
 
 ### Create a project directory
+
 ```bash
 mkdir deptycheck-tutorial
 cd deptycheck-tutorial
 ```
 
 ### Create a project file named `tutorial.ipkg`
+
 ```text
 package tutorial
 
@@ -118,22 +125,26 @@ main = do
 ## Step 5: Build and Run
 
 ### Build the project
+
 ```bash
 pack build tutorial
 ```
 
 Expected output:
+
 ```text
 Building tutorial...
 Build succeeded
 ```
 
 ### Run the executable
+
 ```bash
 pack exec tutorial
 ```
 
 Expected output (your result will vary):
+
 ```text
 Yellow
 ```
@@ -148,16 +159,19 @@ Yellow
 You can also test your generator interactively:
 
 ### Start the REPL
+
 ```bash
 pack repl tutorial
 ```
 
 ### Run the generator
+
 ```text
 :exec printLn =<< pick (genTrafficLight (limit 0))
 ```
 
 Expected output:
+
 ```text
 Just Green
 ```
@@ -165,6 +179,7 @@ Just Green
 ### Run it multiple times to see different colors
 
 ### Exit the REPL:
+
 ```text
 :quit
 ```
@@ -175,4 +190,4 @@ Just Green
 
 Now that you have a working setup, you are ready to learn the fundamentals of generator creation:
 
-*   **Continue to Tutorial 1:** [The Generator Monad](t01-generator-monad.md) to learn how to create generators manually using `pure`, `elements`, `choose`, and other combinators.
+-   **Continue to Tutorial 1:** [The Generator Monad](t01-generator-monad.md) to learn how to create generators manually using `pure`, `elements`, `choose`, and other combinators.
