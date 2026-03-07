@@ -7,6 +7,7 @@ whitelist = [ "deptycheck-docs"
             , "pil-fun"
             , "pil-dyn"
             , "super-linter-run"
+            , "super-linter-fix"
             ]
 
 #######################
@@ -38,6 +39,11 @@ ipkg = "docs.ipkg"
 type = "local"
 path = ".linters"
 ipkg = "super-linter-run.ipkg"
+
+[custom.all.super-linter-fix]
+type = "local"
+path = ".linters"
+ipkg = "super-linter-fix.ipkg"
 
 ################
 ### Examples ###
