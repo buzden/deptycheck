@@ -26,11 +26,11 @@ data SupportedLanguage = Scala3
 public export
 data ScalaCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type where
   IsNotInfix : ScalaCondition funSig False b
-  MoreThanOneArg : So (funSig.From.length >= 1) -> ScalaCondition funSig isInfix b
+  MoreThanOneArg : So ((length funSig.From) >= 1) -> ScalaCondition funSig isInfix b
 
 public export
 data IdrisCondition : FunSig -> (isInfix : Bool) -> (isPure : Bool) -> Type where
-  IsInfix : (a : Ty ** b : Ty ** to : MaybeTy ** funSig === ([<a, b] ==> to)) -> (isPure : Bool) -> IdrisCondition funSig True isPure
+  IsInfix : (a : Ty ** b : Ty ** to : Maybe Ty ** funSig === ([<a, b] ==> to)) -> (isPure : Bool) -> IdrisCondition funSig True isPure
   NotInfix : (isPure : Bool) -> IdrisCondition funSig False isPure
 
 public export
@@ -57,13 +57,13 @@ data UniqNames : (l : SupportedLanguage) -> (funs : Funs) -> (vars : Vars) -> Ty
             {default False isInfix : Bool} -> {default False isPure : Bool} ->
             (languageCondition : LanguageToCondition l fun isInfix isPure) =>
             UniqNames l (funs:<fun) vars
-  NewVar  : (ss : UniqNames l funs vars) => (s : String) -> (0 _ : NameIsNew l funs vars ss s) => UniqNames l funs ((:<) vars var mut)
+  NewVar  : (ss : UniqNames l funs vars) => (s : String) -> (0 _ : NameIsNew l funs vars ss s) => UniqNames l funs ((:<) vars (var, mut))
 
 data NameIsNew : (l : SupportedLanguage) -> (funs : Funs) -> (vars : Vars) -> UniqNames l funs vars -> String -> Type where
   E : NameIsNew l [<] [<] Empty x
   J : (0 _ : So $ x /= s) -> NameIsNew l funs vars ss x -> NameIsNew l funs vars (JustNew @{ss} s @{sub}) x
   F : (0 _ : So $ x /= s) -> NameIsNew l funs vars ss x -> NameIsNew l (funs:<fun) vars (NewFun @{ss} {isInfix} {isPure} s @{sub} @{infixCond}) x
-  V : (0 _ : So $ x /= s) -> NameIsNew l funs vars ss x -> NameIsNew l funs ((:<) vars var mut) (NewVar @{ss} s @{sub}) x
+  V : (0 _ : So $ x /= s) -> NameIsNew l funs vars ss x -> NameIsNew l funs ((:<) vars (var, mut)) (NewVar @{ss} s @{sub}) x
 
 public export
 interface NamesRestrictions where
@@ -116,7 +116,7 @@ newVars : NamesRestrictions =>
           Fuel ->
           (newNames : Gen0 String) ->
           (extraVars : _) -> UniqNames l funs vars ->
-          Gen0 (UniqNames l funs (vars ++ extraVars), Vect extraVars.length (String, Ty))
+          Gen0 (UniqNames l funs (SnocListTyMut.(++) vars extraVars), Vect (SnocList.length extraVars) (String, Ty))
 newVars _  _ [<] names = pure (names, [])
 newVars fl newNames (vs:<v) names = do
   (names', vts) <- newVars fl newNames vs names
