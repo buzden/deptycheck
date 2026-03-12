@@ -1,18 +1,11 @@
 ||| A bridge between a single act of derivation (for a single type) and a user derivation task
 module Deriving.DepTyCheck.Gen.ForAllNeededTypes.Impl
 
-import public Control.Monad.Either
-import public Control.Monad.Reader
 import public Control.Monad.State
-import public Control.Monad.State.Tuple
-import public Control.Monad.Writer
-import public Control.Monad.RWS
 
 import public Data.DPair
-import public Data.List.Map
+import public Data.List.Set
 import public Data.SortedMap
-import public Data.SortedMap.Extra
-import public Data.SortedSet
 
 import public Decidable.Equality
 
@@ -24,9 +17,8 @@ import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 
 ClosuringContext : (Type -> Type) -> Type
 ClosuringContext m =
-  ( MonadState  (ListMap GenSignature Name) m                            -- gens already asked to be derived
-  , MonadState  (List (GenSignature, Name), List (GenSignature, Name)) m -- two queues of gens to be derived, one for known types, one the unknown ones
-  , MonadState  (SortedSet TypeInfo) m                                   -- type names that were asked for deriving their weighting function
+  ( ListSet GenSignature                                                 -- gens already asked to be derived
+  , MonadState  (ListSet GenSignature, ListSet GenSignature) m           -- two queues of gens to be derived, one for known types, one the unknown ones
   )
 
 nameForGen : GenSignature -> Name
@@ -41,31 +33,30 @@ lookupLengthChecked intSig m = lookup intSig m >>= \(extSig, name) => (name,) <$
                                     Yes prf => Just $ Element extSig prf
                                     No _    => Nothing
 
-deriveAll : NamesInfoInTypes => ConsRecs => DeriveBodyForType => DerivationClosure m => ClosuringContext m => Elaboration m =>
-            List (Decl, Decl) -> m $ List (Decl, Decl)
-deriveAll acc = do
-  (toDeriveKnown, toDeriveUnknown) <- get {stateType=(List _, List _)}
-  put ([], toDeriveUnknown)
-  derived <- (++ acc) <$> for toDeriveKnown deriveOne
+deriveAll : NamesInfoInTypes => ConsRecs => (cc : ClosuringContext m) => DeriveBodyForType => DerivationClosure m => Elaboration m =>
+            ListSet TypeInfo -> List (Decl, Decl) -> m (ListSet TypeInfo, List (Decl, Decl))
+deriveAll weightFunTys decls {cc=(alreadyDerived, _)}= do
+  (toDeriveKnown, toDeriveUnknown) <- mapHom ((`difference` alreadyDerived) . normalise) <$> get {stateType=(ListSet _, ListSet _)}
+  put (empty, toDeriveUnknown)
+  (weightFunTys, decls) <- bimap (foldl insert' weightFunTys . join) (decls ++) . unzip <$> for (toList toDeriveKnown) deriveOne
   if not $ null toDeriveKnown
-    then assert_total deriveAll derived
+    then assert_total $ deriveAll {cc=(alreadyDerived `union` toDeriveKnown, %search)} weightFunTys decls
     else if null toDeriveUnknown
-      then pure derived
+      then pure (weightFunTys, decls)
       else do
-        (niit, cr) <- updateNamesAndConsRecs $ targetType . fst <$> toDeriveUnknown
-        put (toDeriveUnknown, [])
-        assert_total $ deriveAll @{niit} @{cr} derived
+        (niit, cr) <- updateNamesAndConsRecs $ targetType <$> toList toDeriveUnknown
+        put (toDeriveUnknown, empty)
+        assert_total $ deriveAll @{niit} @{cr} {cc=(alreadyDerived `union` toDeriveUnknown, %search)} weightFunTys decls
   where
-    deriveOne : (GenSignature, Name) -> m (Decl, Decl)
-    deriveOne (sig, name) = do
+    deriveOne : GenSignature -> m (List TypeInfo, Decl, Decl)
+    deriveOne sig = do
+      let name = nameForGen sig
       -- derive declaration and body for the asked signature. It's important to call it AFTER update of the map in the state to not to cycle
       let genFunClaim = export' name $ canonicSig sig
-      genFunBody <- logBounds Info "deptycheck.derive.type" [sig] $ def name <$> canonicBody sig name
-      pure (genFunClaim, genFunBody)
+      (tyWithWeightFuns, genFunBody) <- logBounds Info "deptycheck.derive.type" [sig] $ canonicBody sig name
+      pure (tyWithWeightFuns, genFunClaim, def name genFunBody)
 
 DeriveBodyForType => ClosuringContext m => Elaboration m => SortedMap GenSignature (ExternalGenSignature, Name) => DerivationClosure m where
-
-  needWeightFun = modify . SortedSet.insert
 
   callGen sig fuel values = do
 
@@ -75,28 +66,15 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => SortedMap GenSignatu
           logValue Details "deptycheck.derive.closuring.external" [sig] "is used as an external generator" $
             (callExternalGen extSig name (var outmostFuelArg) $ rewrite lenEq in values, Just (_ ** extSig.gendOrder))
 
-    -- get the expression of calling the internal gen, derive if necessary
-    internalGenCall <- do
-
-      -- look for existing (already derived) internals, use it if exists
-      let Nothing = List.Map.lookup sig !get
-        | Just name => pure $ callCanonic sig name fuel values
-
-      -- nothing found, then derive! acquire the name
-      let name = nameForGen sig
-
-      -- remember that we're responsible for this signature derivation
-      modify $ List.Map.insert sig name
+    -- put to derivation queue if necessary
+    when (not $ List.Set.contains sig %search) $ do
 
       -- remember the task to derive
-      modify {stateType=(List _, List _)} $ if isTypeKnown sig.targetType then mapFst $ (::) (sig, name) else mapSnd $ (::) (sig, name)
-
-      -- return the name of the newly derived generator
-      pure $ callCanonic sig name fuel values
+      modify $ if isTypeKnown sig.targetType then mapFst $ normalise . List.Set.insert sig else mapSnd $ normalise . List.Set.insert sig
 
     -- call the internal gen
     logValue DetailedDebug "deptycheck.derive.closuring.internal" [sig] "is used as an internal generator"
-      (internalGenCall, Nothing)
+      (callCanonic sig (nameForGen sig) fuel values, Nothing)
 
 --- Canonic-dischagring function ---
 
@@ -106,7 +84,7 @@ declName : Decl -> String
 declName $ IClaim $ MkFCVal _ $ MkIClaimData {type = MkTy {ty, _}, _} = show ty
 declName $ IData _ _ _ $ MkData  {n, _} = show n
 declName $ IData _ _ _ $ MkLater {n, _} = show n
-declName $ IDef fc nm cls = ?declName_rhs_2
+declName $ IDef _ nm _ = show nm
 declName $ IParameters _ _ [] = "P"
 declName $ IParameters _ _ (d::_) = declName d
 declName $ IRecord _ _ _ _ $ MkRecord {n, _} = show n
@@ -121,10 +99,10 @@ runCanonic : DeriveBodyForType => NamesInfoInTypes => ConsRecs =>
              SortedMap ExternalGenSignature Name -> (forall m. DerivationClosure m => m a) -> Elab (a, List Decl)
 runCanonic exts calc = do
   let exts = SortedMap.fromList $ exts.asList <&> \namedSig => (fst $ internalise $ fst namedSig, namedSig)
-  ((_, _, weightingFuns), (x, derived)) <- runStateT
-                         (empty, (empty, empty), empty @{TypeInfoOrdByName})
-                         [| (calc, deriveAll []) |]
-                         {stateType=(ListMap GenSignature Name, (List (GenSignature, Name), List (GenSignature, Name)), SortedSet TypeInfo)}
+  (x, weightingFuns, derived) <- evalStateT
+                         (empty, empty)
+                         [| (calc, deriveAll (empty @{TypeInfoEqByName}) []) |]
+                         {stateType=(ListSet GenSignature, ListSet GenSignature)}
                          {m=Elab}
   let derived = sortBy (compare `on` declName . fst) $ derived ++ mapMaybe deriveWeightingFun (Prelude.toList weightingFuns)
   let (defs, bodies) = unzip derived

@@ -11,4 +11,7 @@ import public Deriving.DepTyCheck.Gen.Signature
 
 public export
 interface DeriveBodyForType where
-  canonicBody : DerivationClosure m => Elaboration m => NamesInfoInTypes => ConsRecs => GenSignature -> Name -> m $ List Clause
+  canonicBody : DerivationClosure m => Elaboration m => NamesInfoInTypes => ConsRecs => GenSignature -> Name -> m (List TypeInfo, List Clause)
+  --                                                                                                               ^^^^^^^^^^^^^
+  --                                                                                                                    /
+  --                                                                                                    used types with weight functions

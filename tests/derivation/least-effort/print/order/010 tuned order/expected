@@ -4,11 +4,11 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Y[] MkYSimple - user-imposed: [
 LOG deptycheck.derive.least-effort:7: DerivedGen.Y[] MkYSimple - used final order: [#0 (n), #2 (a), #1 (bef), #3 (aft)]
 LOG deptycheck.derive.least-effort:7: DerivedGen.Y[] MkYComplex - user-imposed: [#5 (a)]
 LOG deptycheck.derive.least-effort:7: DerivedGen.Y[] MkYComplex - used final order: [#0, #2 (x), #4 (v), #5 (a), #1 (n), #3 (bef), #6 (aft)]
-LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FZ - used final order: []
-LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: [#1]
-LOG deptycheck.derive.least-effort:7: DerivedGen.X[0] MkX - used final order: []
 LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] Z - used final order: []
 LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: [#0]
+LOG deptycheck.derive.least-effort:7: DerivedGen.X[0] MkX - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FZ - used final order: []
+LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: [#1]
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> local
       { decls =

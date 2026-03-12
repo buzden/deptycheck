@@ -5,9 +5,9 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[0(n), 1] X0 - used final orde
 LOG deptycheck.derive.least-effort:7: DerivedGen.X[0(n), 1] X2 - used final order: []
 LOG deptycheck.derive.least-effort:7: DerivedGen.Y[] Y0 - used final order: [#0 (bs), #1 (i)]
 LOG deptycheck.derive.least-effort:7: DerivedGen.Y[] Y2 - used final order: [#0 (bs)]
+LOG deptycheck.derive.least-effort:7: DerivedGen.BS[0(n)] MkBS - used final order: []
 LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FZ - used final order: []
 LOG deptycheck.derive.least-effort:7: Data.Fin.Fin[0(n)] FS - used final order: [#1]
-LOG deptycheck.derive.least-effort:7: DerivedGen.BS[0(n)] MkBS - used final order: []
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
 .=> local
       { decls =
