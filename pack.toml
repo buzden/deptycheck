@@ -3,7 +3,12 @@
 ################
 
 [install]
-whitelist = [ "deptycheck-docs", "pil-fun", "pil-dyn" ]
+whitelist = [ "deptycheck-docs"
+            , "pil-fun"
+            , "pil-dyn"
+            , "super-linter-run"
+            , "super-linter-fix"
+            ]
 
 #######################
 ### Elab-util-extra ###
@@ -29,6 +34,16 @@ test = "tests/tests.ipkg"
 type = "local"
 path = "docs"
 ipkg = "docs.ipkg"
+
+[custom.all.super-linter-run]
+type = "local"
+path = ".linters"
+ipkg = "super-linter-run.ipkg"
+
+[custom.all.super-linter-fix]
+type = "local"
+path = ".linters"
+ipkg = "super-linter-fix.ipkg"
 
 ################
 ### Examples ###
