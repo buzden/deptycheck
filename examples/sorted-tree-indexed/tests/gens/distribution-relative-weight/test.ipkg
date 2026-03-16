@@ -1,0 +1,5 @@
+package test
+
+main = CheckDistribution
+
+depends = deptycheck, sorted-tree-indexed, summary-stat
