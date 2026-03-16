@@ -276,7 +276,7 @@ specialiseIfNeeded :
   (sig : GenSignature) ->
   (fuel : TTImp) ->
   Vect sig.givenParams.size TTImp ->
-  m $ Maybe (List Decl, TypeInfo, TTImp)
+  m $ Maybe TTImp
 specialiseIfNeeded sig fuel givenParamValues = do
   logPoint DetailedDebug "deptycheck.util.specialisation" [sig] "Checking specialisation need for \{show givenParamValues}..."
   -- Check if there are any given type args, if not return Nothing
@@ -358,4 +358,4 @@ specialiseIfNeeded sig fuel givenParamValues = do
             case invv of
               ~(mkDPairHelper generateds bindVar (bindVar "inv")) =>
                   ~(mkDPairHelper generateds var `(cast @{~(var $ inSameNS specTy.name "mToP")} inv))) ~inv)
-  pure $ Just (specDecls, specTy, inv)
+  pure $ Just inv

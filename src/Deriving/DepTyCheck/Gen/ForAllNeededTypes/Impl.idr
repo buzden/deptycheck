@@ -73,9 +73,14 @@ DeriveBodyForType => ClosuringContext m => Elaboration m => SortedMap GenSignatu
     -- check if internal generator asked for is for a primitive type
     when (isTypeInfoPrim sig.targetType) $
       fail "Cannot derive generator for the primitive type \{show $ extractTargetTyExpr sig.targetType}, use external instead"
+    notfound <- pure $ id $ not $ List.Set.contains sig %search
+
+    sinRet : Maybe TTImp <- if notfound then assert_total specialiseIfNeeded sig fuel values else pure Nothing
+    let Nothing = sinRet
+      | Just me => pure (me, Nothing)
 
     -- remember the task to derive, if necessary
-    when (not $ List.Set.contains sig %search) $ do
+    when notfound $ do
       modify $ if isTypeKnown sig.targetType then mapFst $ normalise . List.Set.insert sig else mapSnd $ normalise . List.Set.insert sig
 
     -- call the internal gen
