@@ -18,9 +18,6 @@ record CallGen where
 export
 [PrintDC]
 Monad m => Elaboration m => DerivationClosure m where
-  needWeightFun ti = do
-    logMsg "" 0 "needWeightFun \{show ti}"
-    pure ()
   callGen sig fuel params = do
     logPoint Warning "deptycheck.test.utils.specialise" [sig] "CallGen params: \{show params}"
     pure (`(_), Nothing)
@@ -28,7 +25,6 @@ Monad m => Elaboration m => DerivationClosure m where
 export
 [WriterDC]
 Monad m => Elaboration m => MonadWriter (Maybe CallGen) m => DerivationClosure m where
-  needWeightFun ti = pure ()
   callGen sig fuel params = do
     tell $ Just $ MkCallGen sig fuel params
     pure (`(?dc_return), Nothing)
@@ -78,14 +74,13 @@ runSIN namesInfo declareSpec e = do
   r <- specialiseIfNeeded (MkGenSignature ti givenSet) `(?fuel) givenVals
   case r of
     Nothing => logMsg "" 0 "sIN returned nothing."
-    Just (sdecls, stype, retExpr) => do
-      if declareSpec then declare sdecls else pure ()
+    Just _ => pure ()
 
 export
 runSIN' :
   Elaboration m =>
   MonadWriter (Maybe CallGen) m =>
-  Maybe NamesInfoInTypes -> Bool -> TTImp -> m $ Maybe (TTImp, TypeInfo)
+  Maybe NamesInfoInTypes -> Bool -> TTImp -> m $ Maybe TTImp
 runSIN' namesInfo declareSpec e = do
   e <- expandNames e
   logPoint Warning "deptycheck.test.utils.specialise" [] "Expanded e: \{show e}"
@@ -111,17 +106,11 @@ runSIN' namesInfo declareSpec e = do
   let dc = WriterDC @{%search}
 
   _ <- getConsRecs
-  r <- specialiseIfNeeded (MkGenSignature ti givenSet) `(?fuel) givenVals
-  case r of
-    Nothing => pure Nothing
-    Just (sdecls, stype, retExpr) => do
-      when declareSpec $ declare sdecls
-      pure $ Just (retExpr, stype)
-
+  specialiseIfNeeded (MkGenSignature ti givenSet) `(?fuel) givenVals
 
 export
 runSIN'' :
   Elaboration m =>
-  Maybe NamesInfoInTypes -> Bool -> TTImp -> m (Maybe (TTImp, TypeInfo), Maybe CallGen)
+  Maybe NamesInfoInTypes -> Bool -> TTImp -> m (Maybe TTImp, Maybe CallGen)
 runSIN'' namesInfo declareSpec e =
   runWriterT {w=Maybe CallGen} {m} $ runSIN' namesInfo declareSpec e

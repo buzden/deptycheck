@@ -9,7 +9,7 @@ import Shared
 
 
 %runElab do
-  (Just (_, ti), _) <- runSIN'' Nothing False `(List Nat)
+  (Just ti, _) <- runSIN'' Nothing False `(List Nat)
     | _  => fail "Didn't generate a specialised type!"
   logMsg "" 0 $ show ti.name
   specNIIT <- getNamesInfoInTypes ti
