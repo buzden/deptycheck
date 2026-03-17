@@ -1,6 +1,6 @@
 module DerivedGen
 
-import RunDerivedGen
+import Deriving.DepTyCheck.Gen
 
 import public Data.Fin
 import Data.Fuel
@@ -16,6 +16,8 @@ import Deriving.DepTyCheck.Gen
 
 %default total
 
+%language ElabReflection
+
 public export
 Regs : Nat -> Type
 Regs n = Vect n $ Maybe Bool
@@ -28,15 +30,4 @@ public export
 data SimpleExpr : Regs r -> Bool -> Type where
   Read    : (idx : Fin r) -> RegIsType idx t regs => SimpleExpr regs t
 
-Show (AtIndex f v t) where
-  showPrec d $ Here = "Here"
-  showPrec d $ There x = showCon d "There" $ showArg x
-
-Show (SimpleExpr regs b) where
-  showPrec d $ Read idx @{rit} = showCon d "Read" $ showArg idx ++ showArg "@{\{show rit}}"
-
-checkedGen : Fuel -> (r : Nat) -> (t : Bool) -> Gen MaybeEmpty (a : Regs r ** SimpleExpr a t)
-checkedGen = deriveGen
-
-main : IO Unit
-main = runGs [ G (\f => checkedGen f 3 True) ]
+%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $ Fuel -> (r : Nat) -> (t : Bool) -> Gen MaybeEmpty (a : Regs r ** SimpleExpr a t)
