@@ -11,6 +11,7 @@ import Deriving.Show
 import Language.Reflection
 import Language.Reflection.Expr
 import Language.Reflection.Syntax
+import Language.Reflection.Logging
 
 %language ElabReflection
 
@@ -292,14 +293,14 @@ emptyLeaves : (dg : DependencyGraph) -> FinSet dg.freeVars
 emptyLeaves dg = intersection dg.empties $ leaves dg
 
 ||| List all the free variables without a value in order of dependency
-flattenEmpties : (dg : DependencyGraph) -> SnocList $ Fin dg.freeVars
+flattenEmpties : Monad m => (dg : DependencyGraph) -> m $ SnocList $ Fin dg.freeVars
 flattenEmpties dg = flattenEmpties' dg [<]
   where
-    flattenEmpties' : (dg : DependencyGraph) -> SnocList (Fin dg.freeVars) -> SnocList $ Fin dg.freeVars
+    flattenEmpties' : (dg : DependencyGraph) -> SnocList (Fin dg.freeVars) -> m $ SnocList $ Fin dg.freeVars
     flattenEmpties' dg@(MkDG {freeVars, fvData, fvDeps, empties, nameToId, holeToId}) ctx = do
-      let els = emptyLeaves dg
+      els <- pure $ id $ emptyLeaves dg
       let False = null els
-      | _ => ctx
+      | _ => pure ctx
       -- Now els is a non-empty subset of dg.empties
       flattenEmpties'
         -- `assert_smaller dg` is a workaround for a non-working `assert_smaller empties`
@@ -324,12 +325,12 @@ filterEmpty = foldl myfun []
 
 ||| Calculate UnificationResult (var-to-value mappings and empty leaf dependency order)
 export
-finalizeDG : (task : UnificationTask) -> (dg : DependencyGraph) -> UnificationResult
+finalizeDG : Monad m => MonadLog m => (task : UnificationTask) -> (dg : DependencyGraph) -> m UnificationResult
 finalizeDG task dg = do
-  let fvOrder = flattenEmpties dg
-  let urList = filterEmpty dg.fvData
-  let (lhsRL, rhsRL) = List.splitAt task.lfv urList
-  MkUR
+  fvOrder <- flattenEmpties dg
+  urList <- pure $ id $ filterEmpty dg.fvData
+  (lhsRL, rhsRL) <- pure $ id $ List.splitAt task.lfv urList
+  pure $ MkUR
     { task
     , uniDg = dg
     , lhsResult = fromList lhsRL
