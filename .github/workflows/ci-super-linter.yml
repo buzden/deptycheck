@@ -17,6 +17,8 @@ on:
 permissions:
   contents: read
   statuses: write
+  # issues and pull-requests permissions to write results as pull request comments
+  issues: write
   pull-requests: write
 
 concurrency:
