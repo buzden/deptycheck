@@ -50,3 +50,12 @@ extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Double" ) [
 extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "%World" ) [] [] = primVal $ PrT WorldType
 extractTargetTyExpr $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic "Type"   ) [] [] = type
 extractTargetTyExpr ti = var ti.name
+
+export
+isTypeInfoPrim : TypeInfo -> Bool
+isTypeInfoPrim $ MkTypeInfo (NS (MkNS ["^prim^"]) $ UN $ Basic s) [] [] = True
+isTypeInfoPrim _ = False
+--isTypeInfoPrim = not . isVar . extractTragetTyExpr
+
+0 isTypeInfoPrim_correct : (s : String) -> isTypeInfoPrim (primTypeInfo s) = True
+isTypeInfoPrim_correct s = Refl
