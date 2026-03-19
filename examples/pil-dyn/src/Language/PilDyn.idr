@@ -2,6 +2,8 @@ module Language.PilDyn
 
 import public Data.Fin
 import Data.String
+import public Data.Vect
+import public Data.Vect.AtIndex
 
 import Decidable.Equality
 
@@ -22,43 +24,12 @@ DecEq Ty where
   decEq B I = No $ \Refl impossible
 
 public export
-data MaybeTy = Nothing | Just Ty
-
-export
-Injective PilDyn.Just where
-  injective Refl = Refl
-
-export
-DecEq MaybeTy where
-  decEq Nothing Nothing = Yes Refl
-  decEq (Just x) (Just y) = decEqCong $ decEq x y
-  decEq Nothing (Just _) = No $ \Refl impossible
-  decEq (Just _) Nothing = No $ \Refl impossible
-
-namespace Regs
-  public export
-  data Regs : Nat -> Type where
-    Nil  : Regs 0
-    (::) : MaybeTy -> Regs n -> Regs $ S n
-
-export
-Biinjective Regs.(::) where
-  biinjective Refl = (Refl, Refl)
-
-export
-DecEq (Regs n) where
-  decEq [] [] = Yes Refl
-  decEq (x::xs) (y::ys) = decEqCong2 (decEq x y) (decEq xs ys)
+Regs : Nat -> Type
+Regs n = Vect n $ Maybe Ty
 
 public export
-update : Fin r -> MaybeTy -> Regs r -> Regs r
-update FZ     t (x::xs) = t :: xs
-update (FS i) t (x::xs) = x :: update i t xs
-
-public export
-data RegIsType : Fin r -> Ty -> Regs r -> Type where
-  Here  : RegIsType FZ t (Just t :: rest)
-  There : RegIsType i t rest -> RegIsType (FS i) t (reg :: rest)
+RegIsType : Fin r -> Ty -> Regs r -> Type
+RegIsType fn t rs = AtIndex fn rs (Just t)
 
 -------------------
 --- Expressions ---
@@ -119,7 +90,7 @@ data LinBlock : (ins, outs : Regs r) -> Type where
 
   Assign : (target : Fin r) ->
            (expr : Expr ins t) ->
-           (cont : LinBlock (update target (Just t) ins) outs) ->
+           (cont : LinBlock (replaceAt target (Just t) ins) outs) ->
            LinBlock ins outs
 
 --- Linear block DSL ---
@@ -131,7 +102,7 @@ data Assignment : (target : _) -> (ins : _) -> (t : _) -> Type where
 export infix 2 #=
 
 public export %inline
-(>>) : Assignment target ins t -> LinBlock (update target (Just t) ins) outs -> LinBlock ins outs
+(>>) : Assignment target ins t -> LinBlock (replaceAt target (Just t) ins) outs -> LinBlock ins outs
 target #= expr >> cont = Assign target expr cont
 
 export
@@ -153,7 +124,7 @@ Interpolation Ty where
   interpolate B = "B"
 
 export
-Interpolation MaybeTy where
+Interpolation (Maybe Ty) where
   interpolate $ Just t = "\{t}"
   interpolate Nothing  = "?"
 
