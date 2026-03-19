@@ -136,7 +136,7 @@ automagic generator deriving supports only `Gen MaybeEmpty` for now. If you need
 Our first naive attempt to use `deriveGen` might be the following:
 
 ```idris
-failing "No constructors found for the type `^prim^.String`"
+failing "Cannot derive generator for the primitive type String, use external instead"
   genEntry : Fuel -> Gen MaybeEmpty Entry
   genEntry = deriveGen
 ```
