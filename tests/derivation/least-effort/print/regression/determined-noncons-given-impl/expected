@@ -58,22 +58,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.NT[0(ar), 1(cfg), 2] NTF - used
                              "<<DerivedGen.NTF>>"
                              [       var "<<DerivedGen.NTF>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (   var "DerivedGen.MkNA"
-                                      .$ (   var "DerivedGen.case block in "f""
-                                          .$ bindVar "{cfg:1}"
-                                          .$ bindVar "nz"
-                                          .$ bindVar "{k:1}"
-                                          .$ (var "Data.Nat.modNatNZ" .$ bindVar "{k:1}" .$ bindVar "{cfg:1}" .$ bindVar "nz"))
-                                      .! ( "curTotLTE"
-                                         ,    var "Data.Nat.reflexive"
-                                           .! ( "x"
-                                              ,    var "DerivedGen.case block in "f""
-                                                .$ bindVar "{cfg:1}"
-                                                .$ bindVar "nz"
-                                                .$ bindVar "{k:1}"
-                                                .$ (var "Data.Nat.modNatNZ" .$ bindVar "{k:1}" .$ bindVar "{cfg:1}" .$ bindVar "nz")
-                                              )
-                                         ))
+                                  .$ (var "DerivedGen.MkNA" .$ implicitTrue .! ("curTotLTE", implicitTrue))
                                   .$ bindVar "{cfg:1}"
                                   .$ (var "DerivedGen.F" .! ("c", implicitTrue) .! ("nz", bindVar "nz") .! ("k", bindVar "{k:1}"))
                                .=    var "Test.DepTyCheck.Gen.label"

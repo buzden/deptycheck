@@ -1,6 +1,5 @@
 module Deriving.DepTyCheck.Util.DeepConsApp
 
-import public Control.Monad.Error.Interface
 import public Control.Monad.Writer.Interface
 
 import public Data.Fin.Split
@@ -61,13 +60,12 @@ MaybeConsDetermInfo False = Unit
 ||| It returns correct bind expression only when all given bind names are different.
 export
 analyseDeepConsApp : NamesInfoInTypes =>
-                     MonadError String m =>
-                     MonadWriter (List Name) m => -- a redundant thing, allowing, however, returning this list even on errors
+                     MonadWriter (List String) m =>
                      (collectConsDetermInfo : Bool) ->
                      (freeNames : SortedSet Name) ->
                      (analysedExpr : TTImp) ->
                      m $ DeepConsAnalysisRes collectConsDetermInfo
-analyseDeepConsApp ccdi freeNames = isD where
+analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
 
   isD : TTImp -> m $ DeepConsAnalysisRes ccdi
   isD e = do
@@ -76,24 +74,24 @@ analyseDeepConsApp ccdi freeNames = isD where
     let (IVar _ lhsName, args) = unAppAny e
       | (IType {}   , _) => pure $ noFree e
       | (IPrimVal {}, _) => pure $ noFree e
-      | _ => throwError "not an application to a variable"
+      | _ => bad "not an application to a variable"
 
     -- Check if this is a free name
     let False = contains lhsName freeNames
       | True => if null args
-                  then do tell [lhsName]; pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
-                  else throwError "applying free name to some arguments"
+                  then pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
+                  else bad "applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
     let Just con = lookupCon lhsName
-      | Nothing => if ccdi then throwError "name `\{lhsName}` is not a constructor" else pure $ noFree implicitTrue
+      | Nothing => bad "name `\{lhsName}` is not a constructor"
 
     -- Acquire type-determination info, if needed
     typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
     let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := typeDetermInfo
 
     let Just typeDetermInfo = reorder typeDetermInfo
-      | Nothing => throwError "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
+      | Nothing => bad "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
 
     -- Analyze deeply all the arguments
     deepArgs <- for (args.asVect `zip` typeDetermInfo) $
@@ -108,6 +106,11 @@ analyseDeepConsApp ccdi freeNames = isD where
     where
       noFree : TTImp -> DeepConsAnalysisRes ccdi
       noFree e = if ccdi then ([] ** const e) else []
+
+      bad : String -> m $ DeepConsAnalysisRes ccdi
+      bad msg = tell [msg] $> noFree implicitTrue
+        -- well, returning `implicitTrue` may be too kinda lazy, maybe, we should return `e` itself, maybe dotted;
+        -- but we need to work with variables determination correctly -- they mustn't be deceqed further down
 
       mergeApp : (ccdi : _) -> DeepConsAnalysisRes ccdi -> (AnyApp, DeepConsAnalysisRes ccdi) -> DeepConsAnalysisRes ccdi
       mergeApp False namesL (_, namesR) = namesL ++ namesR
