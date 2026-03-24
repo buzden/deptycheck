@@ -73,7 +73,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.B[0(n), 1(x), 2] B2 - used fina
                              "<<DerivedGen.B1>>"
                              [       var "<<DerivedGen.B1>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (var "Prelude.Types.plus" .$ bindVar "a" .$ bindVar "b")
+                                  .$ implicitTrue
                                   .$ (var "Prelude.Types.S" .$ bindVar "{x:1}")
                                   .$ (var "DerivedGen.A1" .! ("x", implicitTrue) .$ bindVar "a" .$ bindVar "b")
                                .=    var "Test.DepTyCheck.Gen.label"
@@ -88,9 +88,7 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.B[0(n), 1(x), 2] B2 - used fina
                              "<<DerivedGen.B2>>"
                              [       var "<<DerivedGen.B2>>"
                                   .$ bindVar "^cons_fuel^"
-                                  .$ (   var "Prelude.Types.plus"
-                                      .$ (var "Prelude.Types.plus" .$ bindVar "a" .$ bindVar "b")
-                                      .$ (var "Prelude.Types.S" .$ (var "Prelude.Types.S" .$ var "Prelude.Types.Z")))
+                                  .$ implicitTrue
                                   .$ (var "Prelude.Types.S" .$ bindVar "{x:2}")
                                   .$ (var "DerivedGen.A2" .! ("x", implicitTrue) .$ bindVar "a" .$ bindVar "b")
                                .=    var "Test.DepTyCheck.Gen.label"

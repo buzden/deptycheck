@@ -234,7 +234,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                              [       var "<<DerivedGen.CPEmpty>>"
                                   .$ bindVar "^cons_fuel^"
                                   .$ bindVar "ms"
-                                  .$ (var "DerivedGen.FinsList.Nil" .! ("n", var "DerivedGen.ModuleSig..length" .$ bindVar "ms"))
+                                  .$ (var "DerivedGen.FinsList.Nil" .! ("n", implicitTrue))
                                   .$ (var "DerivedGen.FinsList.Nil" .! ("n", var "Prelude.Types.Z"))
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.CPEmpty (orders)"))
@@ -250,14 +250,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: 
                                   .$ bindVar "^cons_fuel^"
                                   .$ bindVar "ms"
                                   .$ bindVar "subMs"
-                                  .$ (   var "DerivedGen.FinsList.(::)"
-                                      .! ( "n"
-                                         ,    var "DerivedGen.FinsList..length"
-                                           .! ("n", var "DerivedGen.ModuleSig..length" .$ bindVar "ms")
-                                           .$ bindVar "subMs"
-                                         )
-                                      .$ bindVar "subMF"
-                                      .$ bindVar "restFins")
+                                  .$ (var "DerivedGen.FinsList.(::)" .! ("n", implicitTrue) .$ bindVar "subMF" .$ bindVar "restFins")
                                .=    var "Test.DepTyCheck.Gen.label"
                                   .$ (var "fromString" .$ primVal (Str "DerivedGen.CPCons (orders)"))
                                   .$ (   var ">>="

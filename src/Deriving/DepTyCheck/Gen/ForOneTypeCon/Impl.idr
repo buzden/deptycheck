@@ -50,13 +50,14 @@ canonicConsBody sig name con = do
   --   - (maybe, deeply) constructor call (need to match)
   --   - function call on a free param (need to use "inverted function" filtering trick)
   --   - something else (cannot manage yet, unless it is fully determined by other given arguments)
-  let deepConsApps : Vect _ $ Either (String, TTImp, List Name) _ := sig.givenParams.asVect <&> \idx => do
+  let deepConsApps : Vect _ (DeepConsAnalysisRes True, Maybe String, TTImp) := sig.givenParams.asVect <&> \idx => do
     let argExpr = conRetTypeArg idx
-    let (ei, fns) = runWriter $ runEitherT {e=String} {m=Writer _} $ analyseDeepConsApp True conArgNames argExpr
-    flip mapFst ei $ \err =>
-      ("Argument #\{show idx} of \{show con.name} with given type arguments [\{showGivens sig}] is not supported, " ++
-       "argument expression: \{show argExpr}, reason: \{err}", argExpr, fns)
-  let allAppliedFreeNames = foldMap (SortedSet.fromList . either (snd . snd) (map fst . fst)) deepConsApps
+    let (fns, errs) = runWriter {w=List String} $ analyseDeepConsApp True conArgNames argExpr
+    let err = if null errs then Nothing else Just $
+      "Argument #\{show idx} of \{show con.name} with given type arguments [\{showGivens sig}] is not supported, " ++
+      "argument expression: \{show argExpr}, reason(s): \{joinBy "; " errs}"
+    (fns, err, argExpr)
+  let allAppliedFreeNames = foldMap (SortedSet.fromList . map fst . fst . fst) deepConsApps
   let bindAppliedFreeNames : TTImp -> TTImp
       bindAppliedFreeNames orig@(IVar _ n) = if contains n allAppliedFreeNames then bindVar n else orig
       --                              /---------------------------------------------^^^^^^^
@@ -64,9 +65,9 @@ canonicConsBody sig name con = do
       -- and the compiler turns unnecessary `IBindVar`s into `IVar`s by itself
       bindAppliedFreeNames x = x
   deepConsApps <- for deepConsApps $ \case
-    Right x => pure x
-    Left (err, argExpr, fns) => if null $ (allVarNames' argExpr `intersection` conArgNames) `difference` allAppliedFreeNames
-      then pure (filter (contains' conArgNames) fns <&> (, neutral) ** const $ mapTTImp bindAppliedFreeNames argExpr)
+    (x, Nothing, _) => pure x
+    (x, Just err, argExpr) => if null $ (allVarNames' argExpr `intersection` conArgNames) `difference` allAppliedFreeNames
+      then pure x
       else failAt conFC err
 
   -- Acquire LHS bind expressions for the given parameters

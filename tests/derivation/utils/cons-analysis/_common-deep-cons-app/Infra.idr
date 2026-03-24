@@ -2,6 +2,7 @@ module Infra
 
 import public ConsApps
 
+import Control.Monad.Identity
 import public Control.Monad.Writer
 
 import Deriving.DepTyCheck.Util.DeepConsApp
@@ -21,8 +22,8 @@ printDeepConsApp freeNames tyExpr = do
     | Left (n, alts) => logMsg "deptycheck.deep-cons-app" 0 "fail: name \{n} is not unique, alternatives: \{show alts}"
   logSugaredTerm "deptycheck.deep-cons-app" 0 "resolved expression" tyExpr
   logMsg         "deptycheck.deep-cons-app" 0 "------------------------"
-  let Right ((appliedNames ** bindExprF), _) = runWriterT {m=Either String} {w=List Name} $ analyseDeepConsApp True (fromList freeNames) tyExpr
-    | Left err => logMsg "deptycheck.deep-cons-app" 0 "not a (deep) constructor application, reason: \{err}"
+  let ((appliedNames ** bindExprF), []) = runWriter {w=List String} $ analyseDeepConsApp True (fromList freeNames) tyExpr
+    | (_, errs) => logMsg "deptycheck.deep-cons-app" 0 "not a (deep) constructor application, reason: \{joinBy "; " errs}"
   let appliedNames = fst <$> appliedNames.asVect
   logMsg         "deptycheck.deep-cons-app" 0 "applied names:   \{show appliedNames}"
   let bindExpr = bindExprF $ \idx => bindVar $ UN $ Basic $ show (index idx appliedNames) ++ show idx
