@@ -84,8 +84,16 @@ analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
                   else bad "applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
-    let Just (conArgs, conType) = lookupCon lhsName <&> \con => (con.args, con.type)
-      | Nothing => bad "name `\{lhsName}` is not a constructor"
+    Right (isRealCon, conArgs, conType) <- case lookupCon lhsName of
+      Just con => pure $ Right (True, con.args, con.type)
+      Nothing => case lookup lhsName freeNames of
+        Just ty => pure $ Right (False, unPi ty)
+        Nothing => case !(getType lhsName) of
+          [] => pure $ Left "unknown name \{lhsName}"
+          [(_, ty)] => pure $ Right (False, unPi ty)
+          _ => pure $ Left "ambiguous name \{lhsName}"
+      | Left err => bad err
+--      | Nothing => bad "name `\{lhsName}` is not a constructor"
 
     -- Acquire type-determination info, if needed
     typeDetermInfo : Vect conArgs.length $ MaybeConsDetermInfo ccdi <-
