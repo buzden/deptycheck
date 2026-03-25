@@ -11,10 +11,17 @@ import public Data.Vect.Ex
 
 import public Language.Reflection.Compat.TypeInfo
 
+import Deriving.Show
+
 %default total
+%language ElabReflection
 
 public export
 data ConsDetermInfo = DeterminedByType | NotDeterminedByType
+
+export %hint
+ShowConsDetermInfo : Show ConsDetermInfo
+ShowConsDetermInfo = %runElab derive
 
 export
 Cast Bool ConsDetermInfo where
