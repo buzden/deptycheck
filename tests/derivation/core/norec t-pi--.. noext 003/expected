@@ -3,5 +3,5 @@
 Error: While processing right hand side of checkedGen. Error during reflection: While processing right hand side of $resolved1,<Builtin.Equal>[0, 1, 2, 3]. While processing right hand side of $resolved1,<Builtin.Equal>[0, 1, 2, 3],<<Builtin.Refl>>. Can't find an implementation for DecEq Type.
 
 Deriving.DepTyCheck.Gen.ForOneTypeCon.Impl:1
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

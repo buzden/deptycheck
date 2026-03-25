@@ -17,7 +17,7 @@ import Deriving.Show
 %language ElabReflection
 
 public export
-data ConsDetermInfo = DeterminedByType | NotDeterminedByType
+data ConsDetermInfo = DeterminedByType | NotDeterminedByType | MustDecEqWith TTImp
 
 export %hint
 ShowConsDetermInfo : Show ConsDetermInfo
@@ -32,9 +32,12 @@ export
 Cast ConsDetermInfo Bool where
   cast DeterminedByType    = True
   cast NotDeterminedByType = False
+  cast $ MustDecEqWith {}  = False
 
 export
 Semigroup ConsDetermInfo where
+  x@(MustDecEqWith {}) <+> _ = x
+  _ <+> x@(MustDecEqWith {}) = x
   DeterminedByType <+> DeterminedByType = DeterminedByType
   NotDeterminedByType <+> x = x
   x <+> NotDeterminedByType = x
