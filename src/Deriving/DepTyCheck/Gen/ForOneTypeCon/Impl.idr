@@ -50,13 +50,13 @@ canonicConsBody sig name con = do
   --   - (maybe, deeply) constructor call (need to match)
   --   - function call on a free param (need to use "inverted function" filtering trick)
   --   - something else (cannot manage yet, unless it is fully determined by other given arguments)
-  let deepConsApps : Vect _ (DeepConsAnalysisRes True, Maybe String, TTImp) := sig.givenParams.asVect <&> \idx => do
+  deepConsApps : Vect _ (DeepConsAnalysisRes True, Maybe String, TTImp) <- for sig.givenParams.asVect $ \idx => do
     let argExpr = conRetTypeArg idx
-    let (fns, errs) = runWriter {w=List String} $ analyseDeepConsApp True conArgNames argExpr
+    (fns, errs) <- runWriterT {m} {w=List String} $ analyseDeepConsApp True conArgNames argExpr
     let err = if null errs then Nothing else Just $
       "Argument #\{show idx} of \{show con.name} with given type arguments [\{showGivens sig}] is not supported, " ++
       "argument expression: \{show argExpr}, reason(s): \{joinBy "; " errs}"
-    (fns, err, argExpr)
+    pure (fns, err, argExpr)
   let allAppliedFreeNames = foldMap (SortedSet.fromList . map fst . fst . fst) deepConsApps
   let bindAppliedFreeNames : TTImp -> TTImp
       bindAppliedFreeNames orig@(IVar _ n) = if contains n allAppliedFreeNames then bindVar n else orig

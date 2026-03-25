@@ -60,6 +60,7 @@ MaybeConsDetermInfo False = Unit
 ||| It returns correct bind expression only when all given bind names are different.
 export
 analyseDeepConsApp : NamesInfoInTypes =>
+                     Elaboration m =>
                      MonadWriter (List String) m =>
                      (collectConsDetermInfo : Bool) ->
                      (freeNames : SortedMap Name TTImp) -> -- names and their types
