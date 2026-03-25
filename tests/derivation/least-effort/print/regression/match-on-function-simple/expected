@@ -56,16 +56,41 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0(rc), 1, 2] MkY - used final
                          , IDef
                              emptyFC
                              "<<DerivedGen.MkY>>"
-                             [       var "<<DerivedGen.MkY>>"
-                                  .$ bindVar "^cons_fuel^"
-                                  .$ bindVar "{rc:1}"
-                                  .$ (var "DerivedGen.MkX" .! ("rc", implicitTrue) .$ implicitTrue)
-                                  .$ bindVar "x"
-                               .=    var "Test.DepTyCheck.Gen.label"
-                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.MkY (orders)"))
-                                  .$ (   var "Prelude.pure"
-                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
-                                      .$ (var "DerivedGen.MkY" .! ("{rc:1}", implicitTrue) .! ("x", var "x")))
+                             [ withClause
+                                 { lhs =
+                                        var "<<DerivedGen.MkY>>"
+                                     .$ bindVar "^cons_fuel^"
+                                     .$ bindVar "{rc:1}"
+                                     .$ (var "DerivedGen.MkX" .! ("rc", implicitTrue) .$ bindVar "to_be_deceqed^^DerivedGen.F.f0")
+                                     .$ bindVar "x"
+                                 , rig = MW
+                                 , wval =
+                                        var "Decidable.Equality.decEq"
+                                     .$ var "to_be_deceqed^^DerivedGen.F.f0"
+                                     .$ (var "DerivedGen.F.f" .! ("rc", var "{rc:1}") .$ var "x")
+                                 , prf = Nothing
+                                 , flags = []
+                                 , clauses =
+                                     [       var "<<DerivedGen.MkY>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ bindVar "{rc:1}"
+                                          .$ (var "DerivedGen.MkX" .! ("rc", implicitTrue) .$ implicitTrue)
+                                          .$ bindVar "x"
+                                          .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                       .=    var "Test.DepTyCheck.Gen.label"
+                                          .$ (var "fromString" .$ primVal (Str "DerivedGen.MkY (orders)"))
+                                          .$ (   var "Prelude.pure"
+                                              .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                              .$ (var "DerivedGen.MkY" .! ("{rc:1}", implicitTrue) .! ("x", var "x")))
+                                     ,       var "<<DerivedGen.MkY>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ bindVar "{rc:1}"
+                                          .$ (var "DerivedGen.MkX" .! ("rc", implicitTrue) .$ bindVar "to_be_deceqed^^DerivedGen.F.f0")
+                                          .$ bindVar "x"
+                                          .$ (var "Prelude.No" .$ implicitTrue)
+                                       .= var "empty"
+                                     ]
+                                 }
                              , var "<<DerivedGen.MkY>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
                              ]
                          ]

@@ -75,19 +75,25 @@ canonicConsBody sig name con = do
   -- Determine pairs of names which should be `decEq`'ed
   let getAndInc : forall m. MonadState Nat m => m Nat
       getAndInc = get <* modify S
+  let deceqedName : forall m. MonadState Nat m => Name -> m Name
+      -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
+      deceqedName name = pure $ UN $ Basic $ "to_be_deceqed^^" ++ show name ++ show !getAndInc
   ((givenConArgs, decEqedNames, _), bindExprs) <-
-    runStateT (empty, empty, 0) {stateType=(SortedSet Name, SortedSet (Name, Name), Nat)} {m} $
+    runStateT (empty, [], 0) {stateType=(SortedSet Name, List (Either TTImp Name, Name), Nat)} {m} $
       for deepConsApps $ \(appliedNames ** bindExprF) => do
         renamedAppliedNames <- for appliedNames.asVect $ \(name, typeDetermined) =>
-          if cast typeDetermined
-            then pure $ const implicitTrue -- no need to match type-determined parameter by hand
-            else if SortedSet.contains name !get
-            then do
-              -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-              let substName = UN $ Basic $ "to_be_deceqed^^" ++ show name ++ show !getAndInc
-              modify $ SortedSet.insert (name, substName)
-              pure $ \alreadyMatchedRenames => bindVar $ if contains substName alreadyMatchedRenames then name else substName
-            else modify (SortedSet.insert name) $> const (bindVar name)
+          case typeDetermined of
+            DeterminedByType => pure $ const implicitTrue -- no need to match type-determined parameter by hand
+            NotDeterminedByType => if SortedSet.contains name !get
+              then do
+                substName <- deceqedName name
+                modify $ (::) (Right name, substName)
+                pure $ \alreadyMatchedRenames => bindVar $ if contains substName alreadyMatchedRenames then name else substName
+              else modify (SortedSet.insert name) $> const (bindVar name)
+            MustDecEqWith e => do
+              substName <- deceqedName name
+              modify $ (::) (Left e, substName)
+              pure $ \alreadyMatchedRenames => if contains substName alreadyMatchedRenames then {- e -} implicitTrue else bindVar substName
         let _ : Vect appliedNames.length $ SortedSet Name -> TTImp = renamedAppliedNames
         pure $ \alreadyMatchedRenames => bindExprF $ \idx => index idx renamedAppliedNames $ alreadyMatchedRenames
   let bindExprs = \alreadyMatchedRenames => bindExprs <&> \f => f alreadyMatchedRenames
@@ -109,12 +115,12 @@ canonicConsBody sig name con = do
 
         step : (withlhs : Vect sig.givenParams.asList.length TTImp -> TTImp) ->
                (alreadyMatchedRenames : SortedSet Name) ->
-               (left : List (Name, Name)) ->
+               (left : List (Either TTImp Name, Name)) ->
                Clause
         step withlhs matched [] = PatClause EmptyFC .| withlhs (bindExprs matched) .| rhs
         step withlhs matched ((orig, renam)::rest) =
           WithClause EmptyFC (withlhs $ bindExprs matched) MW
-            `(Decidable.Equality.decEq ~(var renam) ~(var orig))
+            `(Decidable.Equality.decEq ~(var renam) ~(either id var orig))
             Nothing []
             [ -- happy case
               step ((.$ `(Prelude.Yes Builtin.Refl)) . withlhs) (insert renam matched) rest
@@ -123,12 +129,15 @@ canonicConsBody sig name con = do
             ]
 
         -- Order pairs by the first element like they are present in the constructor's signature
-        orderLikeInCon : Foldable f => f (Name, Name) -> List (Name, Name)
+        orderLikeInCon : Foldable f => f (Either TTImp Name, Name) -> List (Either TTImp Name, Name)
         orderLikeInCon = do
           let conArgNames = mapMaybe Arg.name con.args
           let conNameToIdx : SortedMap _ $ Fin conArgNames.length := fromList $ mapI conArgNames $ flip (,)
-          let [AsInCon] Ord (Name, Name) where
-                compare (origL, renL) (origR, renR) = comparing (lookup' conNameToIdx) origL origR <+> compare renL renR
+          let [AsInCon] Ord (Either TTImp Name, Name) where
+                compare (Left _, _) (Right _, _) = LT
+                compare (Right _, _) (Left _, _) = GT
+                compare (Right origL, renL) (Right origR, renR) = comparing (lookup' conNameToIdx) origL origR <+> compare renL renR
+                compare (Left _, renL) (Left _, renR) = compare renL renR
           Prelude.toList . foldl SortedSet.insert' (empty @{AsInCon})
 
   -- Form the declaration cases of a function generating values of particular constructor

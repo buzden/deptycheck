@@ -24,4 +24,5 @@ Show (Y f a b) where
 main : IO ()
 main = runGs
   [ G $ \fl => checkedGen fl 5 oneF (MkX 0) (MkX 3)
+  , G $ \fl => checkedGen fl 5 oneF (MkX 3) (MkX 3)
   ]

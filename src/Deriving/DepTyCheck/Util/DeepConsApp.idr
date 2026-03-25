@@ -96,7 +96,6 @@ analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
           [(_, ty)] => pure $ Right (False, unPi ty)
           _ => pure $ Left "ambiguous name \{lhsName}"
       | Left err => bad err
---      | Nothing => bad "name `\{lhsName}` is not a constructor"
 
     -- Acquire type-determination info, if needed
     typeDetermInfo : Vect conArgs.length $ MaybeConsDetermInfo ccdi <-
@@ -106,14 +105,21 @@ analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
       | Nothing => bad "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
 
     -- Analyze deeply all the arguments
-    deepArgs <- for (args.asVect `zip` typeDetermInfo) $
+    deepArgs : Vect _ (AnyApp, DeepConsAnalysisRes ccdi) <- for (args.asVect `zip` typeDetermInfo) $
       \(anyApp, typeDetermined) => do
         subResult <- isD $ assert_smaller e $ getExpr anyApp
         let subResult = if ccdi then mapSnd (<+> typeDetermined) `mapLstDPair` subResult else subResult
         pure (anyApp, subResult)
 
-    -- Collect all the applied names and form proper application expression with binding variables
-    pure $ foldl (mergeApp _) (noFree $ var lhsName) deepArgs
+    let False = isRealCon
+      -- Collect all the applied names and form proper application expression with binding variables
+      | True => pure $ foldl (mergeApp _) (noFree $ var lhsName) deepArgs
+
+    -- Analyse if we can safely match this expression on `_`
+    let False = if ccdi then all (all (not . cast . snd) . fst . snd) deepArgs else False
+      | True => bad "name `\{lhsName}` is not a constructor"
+
+    pure $ if ccdi then ([(lhsName, MustDecEqWith e)] ** \f => f FZ) else []
 
     where
       noFree : TTImp -> DeepConsAnalysisRes ccdi
