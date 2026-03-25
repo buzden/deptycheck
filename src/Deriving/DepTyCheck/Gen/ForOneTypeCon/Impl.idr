@@ -42,7 +42,7 @@ canonicConsBody sig name con = do
       conRetTypeArg idx = index' conRetTypeArgs $ rewrite conRetTypeArgsLengthCorrect in idx
 
   -- Determine names of the arguments of the constructor (as a function)
-  let conArgNames = fromList $ argName' <$> con.args
+  let conArgNames = fromList $ con.args <&> \arg => (argName' arg, arg.type)
 
   -- For given arguments, determine whether they are
   --   - just a free name
@@ -64,6 +64,7 @@ canonicConsBody sig name con = do
       -- `bindVar` instead of `var` here is because this expression can be earlier than the real binding, thus undeclared,
       -- and the compiler turns unnecessary `IBindVar`s into `IVar`s by itself
       bindAppliedFreeNames x = x
+  let conArgNames = keySet conArgNames
   deepConsApps <- for deepConsApps $ \case
     (x, Nothing, _) => pure x
     (x, Just err, argExpr) => if null $ (allVarNames' argExpr `intersection` conArgNames) `difference` allAppliedFreeNames

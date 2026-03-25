@@ -22,7 +22,7 @@ printDeepConsApp freeNames tyExpr = do
     | Left (n, alts) => logMsg "deptycheck.deep-cons-app" 0 "fail: name \{n} is not unique, alternatives: \{show alts}"
   logSugaredTerm "deptycheck.deep-cons-app" 0 "resolved expression" tyExpr
   logMsg         "deptycheck.deep-cons-app" 0 "------------------------"
-  let ((appliedNames ** bindExprF), []) = runWriter {w=List String} $ analyseDeepConsApp True (fromList freeNames) tyExpr
+  let ((appliedNames ** bindExprF), []) = runWriter {w=List String} $ analyseDeepConsApp True (fromList $ (, implicitTrue) <$> freeNames) tyExpr
     | (_, errs) => logMsg "deptycheck.deep-cons-app" 0 "not a (deep) constructor application, reason: \{joinBy "; " errs}"
   let appliedNames = fst <$> appliedNames.asVect
   logMsg         "deptycheck.deep-cons-app" 0 "applied names:   \{show appliedNames}"

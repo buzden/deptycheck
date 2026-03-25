@@ -62,7 +62,7 @@ export
 analyseDeepConsApp : NamesInfoInTypes =>
                      MonadWriter (List String) m =>
                      (collectConsDetermInfo : Bool) ->
-                     (freeNames : SortedSet Name) ->
+                     (freeNames : SortedMap Name TTImp) -> -- names and their types
                      (analysedExpr : TTImp) ->
                      m $ DeepConsAnalysisRes collectConsDetermInfo
 analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
@@ -77,7 +77,7 @@ analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
       | _ => bad "not an application to a variable"
 
     -- Check if this is a free name
-    let False = contains lhsName freeNames
+    let False = isJust $ lookup lhsName freeNames
       | True => if null args
                   then pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
                   else bad "applying free name to some arguments"
@@ -126,9 +126,9 @@ analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
       ||| Determines which constructor's arguments would be definitely determined by fully known result type.
       typeDeterminedArgs : (con : Con) -> m $ Vect con.args.length ConsDetermInfo
       typeDeterminedArgs con = do
-        let conArgNames = fromList $ mapI con.args $ \idx, arg => (argName' arg, idx)
-        determined <- analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
-        let determined = mapMaybe (lookup' conArgNames) determined
+        let conArgNames = fromList $ mapI con.args $ \idx, arg => (argName' arg, arg.type, idx)
+        determined <- analyseDeepConsApp False (fst <$> conArgNames) con.type
+        let determined = mapMaybe (map snd . lookup' conArgNames) determined
         pure $ map cast $ presenceVect $ fromList determined
 
       reorder : {formalArgs : List Arg} -> {apps : List AnyApp} -> Vect formalArgs.length a -> Maybe $ Vect apps.length a
