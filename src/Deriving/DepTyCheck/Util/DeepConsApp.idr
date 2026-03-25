@@ -90,12 +90,12 @@ analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
                   else bad "applying free name to some arguments"
 
     -- Check that this is an application to a constructor's name
-    let Just con = lookupCon lhsName
+    let Just (conArgs, conType) = lookupCon lhsName <&> \con => (con.args, con.type)
       | Nothing => bad "name `\{lhsName}` is not a constructor"
 
     -- Acquire type-determination info, if needed
-    typeDetermInfo <- if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs con else pure neutral
-    let _ : Vect con.args.length (MaybeConsDetermInfo ccdi) := typeDetermInfo
+    typeDetermInfo : Vect conArgs.length $ MaybeConsDetermInfo ccdi <-
+      if ccdi then assert_total {- `ccdi` is `True` here when `False` inside -} $ typeDeterminedArgs conArgs conType else pure neutral
 
     let Just typeDetermInfo = reorder typeDetermInfo
       | Nothing => bad "INTERNAL ERROR: cannot reorder formal determ info along with a call to a constructor"
@@ -131,10 +131,10 @@ analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
       mapLstDPair f (lst ** d) = (map f lst ** rewrite lengthMap {f} lst in d)
 
       ||| Determines which constructor's arguments would be definitely determined by fully known result type.
-      typeDeterminedArgs : (con : Con) -> m $ Vect con.args.length ConsDetermInfo
-      typeDeterminedArgs con = do
-        let conArgNames = fromList $ mapI con.args $ \idx, arg => (argName' arg, idx)
-        determined <- analyseDeepConsApp False (SortedSet.keySet conArgNames) con.type
+      typeDeterminedArgs : (args : List Arg) -> (type : TTImp) -> m $ Vect args.length ConsDetermInfo
+      typeDeterminedArgs args type = do
+        let conArgNames = fromList $ mapI args $ \idx, arg => (argName' arg, idx)
+        determined <- analyseDeepConsApp False (SortedSet.keySet conArgNames) type
         let determined = mapMaybe (lookup' conArgNames) determined
         pure $ map cast $ presenceVect $ fromList determined
 
