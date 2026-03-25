@@ -87,11 +87,11 @@ analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
       | (IPrimVal {}, _) => pure $ noFree e
       | _ => bad "not an application to a variable"
 
-    -- Check if this is a free name
-    let False = isJust $ lookup lhsName freeNames
-      | True => if null args
+    -- Manage non-application expressions
+    let False = null args
+      | True => if isJust $ lookup lhsName freeNames
                   then pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
-                  else bad "applying free name to some arguments"
+                  else bad "applying non-free name to no arguments"
 
     -- Check that this is an application to a constructor's name
     Right (isRealCon, conArgs, conType) <- case lookupCon lhsName of
