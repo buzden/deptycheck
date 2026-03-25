@@ -376,7 +376,7 @@ deriveGenFor a = do
 ||| Caution! When `logDerivation` is set to `True`, this function would change the global logging state
 ||| and wouldn't turn it back.
 export
-deriveGenPrinter : {default True printTTImp : _} -> {default True logDerivation : _} -> DeriveBodyForType => Type -> Elab Unit
+deriveGenPrinter : {default True printTTImp : _} -> {default True logDerivation : _} -> DeriveBodyForType => (0 a : Type) -> Elab Unit
 deriveGenPrinter ty = do
   ty <- quote ty
   when logDerivation $ declare `[%logging "deptycheck.derive.print" 5; %logging "deptycheck.derive.least-effort" 7]
