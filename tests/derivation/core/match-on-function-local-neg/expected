@@ -1,0 +1,25 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+Error: While processing right hand side of checkedGen. Sorry, I can't find any elaboration which works. All errors:
+Possible error:
+    Error during reflection: Unsupported constructor DerivedGen.MkY with given type arguments [0(rc), 2, 3] since it contains an undetermined non-constructor expression `f x` as a given
+
+    DerivedGen:1
+     09 | data X : Nat -> Type where
+     10 |   MkX  : Fin rc -> X rc
+     11 |
+     12 | data Y : (f : X rc -> Fin rc) -> X rc -> X rc -> Type where
+     13 |   MkY : Y f (MkX (f x)) x
+                  ^^^^^^^^^^^^^^^^^
+
+Possible error:
+    Error during reflection: No arguments in the generator function signature, at least a fuel argument must be present
+
+    DerivedGen:2
+     12 | data Y : (f : X rc -> Fin rc) -> X rc -> X rc -> Type where
+     13 |   MkY : Y f (MkX (f x)) x
+     14 |
+     15 | checkedGen : Fuel -> (rc : Nat) -> (r1, r2 : X rc) -> Gen MaybeEmpty (f ** Y f r1 r2)
+     16 | checkedGen = deriveGen @{MainCoreDerivator @{LeastEffort}}
+                       ^^^^^^^^^
+
