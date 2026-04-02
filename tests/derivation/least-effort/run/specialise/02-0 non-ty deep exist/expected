@@ -1,0 +1,25 @@
+1/2: Building RunDerivedGen (RunDerivedGen.idr)
+2/2: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.util.specialisation:10: Prelude.Basics.List[0] Declared specialised type DerivedGen.List^12757670414100080037.List^12757670414100080037: Prelude.Basics.List (Data.Fin.Fin lam^0)
+Generated values:
+-----
+-----
+MkX [4, 14, 7, 9, 15, 1, 5, 7, 12]
+-----
+MkX [5, 10, 10, 3, 1, 6, 6, 3, 0, 2, 7, 1, 9, 6, 10, 6]
+-----
+MkX [11, 15, 15, 14, 1, 16, 12, 2, 8, 13, 14, 12, 12, 4, 1, 1, 2, 9, 15, 16]
+-----
+MkX [16, 2, 11, 6, 12, 15, 1]
+-----
+MkX [0, 2, 0, 4, 4, 1, 4, 3, 1, 0, 3]
+-----
+MkX []
+-----
+MkX [1, 18, 1, 18, 12, 3]
+-----
+MkX [0, 2, 2, 2, 0, 1, 2, 1, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 0]
+-----
+MkX [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+-----
+MkX []
