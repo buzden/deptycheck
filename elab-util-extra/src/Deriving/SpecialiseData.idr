@@ -180,12 +180,6 @@ applyArgAliases (x :: xs) @{_ :: _} ys ins = do
 prependS : String -> Name -> Name
 prependS s n = UN $ Basic $ s ++ show n
 
-||| Given a list of arguments, generate a list of aliases for them
-transformArgNames' : (f : Name -> Name) -> (as : List Arg) -> (0 _ : All IsNamedArg as) => List (Name, Name)
-transformArgNames' _ [] = []
-transformArgNames' f (x :: xs) @{_ :: _} =
-  (argName x, f $ Expr.argName x) :: transformArgNames' f xs
-
 ||| Given a list of arguments, generate a list of aliased arguments
 ||| and a list of aliases
 transformArgNames :
@@ -194,7 +188,7 @@ transformArgNames :
   (0 _ : All IsNamedArg as) =>
   (Subset (List Arg) (All IsNamedArg), List (Name, Name))
 transformArgNames f as = do
-  let aliases = transformArgNames' f as
+  let aliases = pushIn as %search <&> \(x `Element` xN) => (argName x, f $ Expr.argName x @{xN})
   (applyArgAliases as aliases empty, aliases)
 
 ||| Make an argument omega implicit if it is explicit
@@ -213,7 +207,7 @@ makeTypeArgM0 a = { count := if a.type == `(Type) then M0 else a.count } a
 tupleOfN : Nat -> TTImp -> TTImp
 tupleOfN 0 _ = `(Unit)
 tupleOfN 1 t = t
-tupleOfN (S n) t = `(MkPair ~(t) ~(tupleOfN n t))
+tupleOfN (S n) t = `(MkPair ~t ~(tupleOfN n t))
 
 ||| Assemble a TTImp of a tuple from a list of `TTImp`s
 tupleOf : List TTImp -> TTImp
@@ -248,18 +242,6 @@ hideExplicitArgs xs = hideExplicitArg <$> xs `Element` hideExplicitArgPreservesN
 ||| Make all arguments in list implicit
 makeArgsImplicit : (xs : List Arg) -> (0 _ : All IsNamedArg xs) => Subset (List Arg) (All IsNamedArg)
 makeArgsImplicit xs = makeImplicit <$> xs `Element` makeImplicitPreservesNames xs
-
-||| Create a binding application of aliased arguments
-||| binding everything to `(_)
-aliasedAppBind : SnocList (Name, Name) -> TTImp -> TTImp
-aliasedAppBind [<] t = t
-aliasedAppBind (xs :< (n, an)) t = aliasedAppBind xs t .! (an, `(_))
-
-
-||| Create a non-binding application of aliased arguments
-aliasedApp : SnocList (Name, Name) -> TTImp -> TTImp
-aliasedApp [<] t = t
-aliasedApp (xs :< (n, an)) t = aliasedApp xs t .! (n, var an)
 
 ---------------------
 --- TASK ANALYSIS ---
@@ -390,36 +372,49 @@ namespace ConInvoke
     TTImp
   (.apply) con f vals = reAppAny (var con.name) $ con.args.appsWith f vals @{conArgsNamed}
 
-||| List + List.All to Vect + Vect.All
-allL2V : (l : List t) -> (0 pr : All p l) => Subset (Vect (length l) t) (All p)
-allL2V [] = Element [] []
-allL2V (x :: xs) @{p :: ps} = do
-  let Element xs' ps' = allL2V xs @{ps}
-  Element (x :: xs') (p :: ps')
+namespace VectAll
+  ||| Proof that Vect.All works over Vect.snoc
+  export
+  0 snoc: All p prev -> p new -> All p (Data.Vect.snoc prev new)
+  snoc [] y = [y]
+  snoc (y :: ys) z = y :: snoc ys z
 
-||| Proof that Vect.All works over Vect.snoc
-0 snocAll : {0 prev : Vect _ _} -> All pred prev -> (new : Arg) -> pred new -> All pred (snoc prev new)
-snocAll [] new y = [y]
-snocAll (y :: ys) new z = y :: snocAll ys new z
+  ||| List + List.All to Vect + Vect.All
+  export
+  fromListAll : (l : List t) -> (0 pr : All p l) => Subset (Vect (length l) t) (All p)
+  fromListAll [] = Element [] []
+  fromListAll (x :: xs) @{p :: ps} = do
+    let Element xs' ps' = fromListAll xs @{ps}
+    Element (x :: xs') (p :: ps')
 
-||| Proof that List.All works over List.snoc
-0 snocAllL : {0 prev : List _} -> All pred prev -> (new : Arg) -> pred new -> All pred (snoc prev new)
-snocAllL [] new y = [y]
-snocAllL (y :: ys) new z = y :: snocAllL ys new z
+namespace ListAll
+  ||| Proof that List.All works over List.snoc
+  export
+  0 snoc : All p prev -> p new -> All p (Data.List.snoc prev new)
+  snoc [] y = [y]
+  snoc (y :: ys) z = y :: snoc ys z
 
-||| SnocList + SnocList.All to List + List.All
-snocAll2L : (sl : SnocList Arg) -> (0 _ : All pred sl) -> Subset (List Arg) (All pred)
-snocAll2L [<] [<] = Element [] []
-snocAll2L (sx :< x) (sy :< y) = do
-  let Element xs ys = snocAll2L sx sy
-  Element (snoc xs x) (snocAllL ys x y)
+namespace SnocListAll
+  ||| SnocList + SnocList.All to List + List.All
+  export
+  toListAll : (sl : SnocList Arg) -> (0 _ : All p sl) -> Subset (List Arg) (All p)
+  toListAll [<] [<] = Element [] []
+  toListAll (sx :< x) (sy :< y) = do
+    let Element xs ys = toListAll sx sy
+    Element (snoc xs x) (snoc ys y)
 
+||| Internal state of recursion search algorithm
 record RecursionSearchState where
   constructor MkRSS
-  castRenames : SortedMap Name TTImp
+  ||| Accumulated transformation to cast from argument type to specialised type
+  mToPRenames : SortedMap Name TTImp
+  ||| Accumulated transformation to cast from specialised type to argument type
   pToMRenames : SortedMap Name TTImp
+  ||| SnocList containing recursiveness of previous arguments
   areArgsRecursive : SnocList Bool
+  ||| The pre-baked arguments to run unification with.
   argsForUnifier : Subset (Vect (length areArgsRecursive) Arg) (All IsNamedArg)
+  ||| Accumulated arguments to be used in specialised constructor
   argsOutput : Subset (SnocList Arg) (All IsNamedArg)
 
 ||| Specialistaion-related constructor argument metadata
@@ -541,8 +536,8 @@ parameters (t : SpecTask)
   ||| Run unification for a given polymorphic constructor
   unifyCon : MonadLog m => (unifier : CanUnify m) => (con : Con) -> (0 conN : ConArgsNamed con) => m UnificationVerdict
   unifyCon con = logBounds Debug "specialiseData.unifyCon" [t.polyTy, con] $ do
-    let Element ca _ = allL2V con.args @{conArgsNamed}
-    let Element ta _ = allL2V t.tqArgs @{t.tqArgsNamed}
+    let Element ca _ = fromListAll con.args @{conArgsNamed}
+    let Element ta _ = fromListAll t.tqArgs @{t.tqArgsNamed}
     let uniTask =
       MkUniTask {lfv=_} ca con.type
                 {rfv=_} ta t.fullInvocation
@@ -589,9 +584,9 @@ parameters (t : SpecTask)
             cRenames
             pToMRenames
             (areArgsRec :< False)
-            (Element (snoc argsForUni thisArg) (snocAll %search thisArg thisArgNamed))
+            (Element (snoc argsForUni thisArg) (snoc %search thisArgNamed))
             (Element (argsOut :< outArg) (%search :< outArgNamed))
-    let Element ta _ = allL2V t.tqArgs @{t.tqArgsNamed}
+    let Element ta _ = fromListAll t.tqArgs @{t.tqArgsNamed}
     let uniTask = MkUniTask {lfv=_} argsForUni thisArg.type {rfv=_} ta t.fullInvocation
     ur <- unify uniTask
     case ur of
@@ -611,7 +606,7 @@ parameters (t : SpecTask)
             (insert (argName thisArg) `(~mToPImpl ~(var $ argName thisArg)) cRenames)
             (insert (argName thisArg) `(~pToMImpl ~(var $ argName thisArg)) pToMRenames)
             (areArgsRec :< True)
-            (Element (snoc argsForUni thisArg) (snocAll %search thisArg thisArgNamed))
+            (Element (snoc argsForUni thisArg) (snoc %search thisArgNamed))
             (Element (argsOut :< outArg) (%search :< outArgNamed))
       _ => do
         let outPiInfo = substituteVariables cRenames <$> thisArg.piInfo
@@ -623,7 +618,7 @@ parameters (t : SpecTask)
             cRenames
             pToMRenames
             (areArgsRec :< False)
-            (Element (snoc argsForUni thisArg) (snocAll %search thisArg thisArgNamed))
+            (Element (snoc argsForUni thisArg) (snoc %search thisArgNamed))
             (Element (argsOut :< outArg) (%search :< outArgNamed))
 
   ||| Generate a specialised constructor
@@ -649,7 +644,7 @@ parameters (t : SpecTask)
     let n = if params.eraseConNames then fromString "\{t.resultName}^Con^\{show cIdx}" else dropNS pCon.name
     rssRhs <- foldlM checkArgRecursion (MkRSS empty empty [<] (Element [] []) (Element [<] [<])) specArgs
     let (MkRSS mToPRenames pToMRenames argsAreRecursive' _ (Element outArgs' outArgsNamed')) = rssRhs
-    let Element outArgs outArgsNamed = snocAll2L outArgs' outArgsNamed'
+    let Element outArgs outArgsNamed = toListAll outArgs' outArgsNamed'
     let conMeta = MkCMeta (MkAMeta <$> toList argsAreRecursive') mToPRenames pToMRenames
     pure $ (MkCon
       { name = inGenNS t $ n
