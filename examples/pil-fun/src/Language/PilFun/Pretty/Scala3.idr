@@ -21,7 +21,7 @@ printTy : Ty -> Doc opts
 printTy Int'  = "Int"
 printTy Bool' = "Boolean"
 
-printMaybeTy : MaybeTy -> Doc opts
+printMaybeTy : Maybe Ty -> Doc opts
 printMaybeTy Nothing   = "Unit"
 printMaybeTy $ Just ty = printTy ty
 
