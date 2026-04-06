@@ -130,14 +130,6 @@ interface NamespaceProvider (0 m : Type -> Type) where
   constructor MkNSProvider
   provideNS : m Namespace
 
--- export
--- %defaulthint
--- CurrentNS : Elaboration m => NamespaceProvider m
--- CurrentNS = MkNSProvider $ do
---     NS nsn _ <- inCurrentNS ""
---     | _ => fail "Internal error: inCurrentNS did not return NS"
---     pure nsn
-
 export
 Monad m => MonadTrans t => NamespaceProvider m => NamespaceProvider (t m) where
   provideNS = lift provideNS
@@ -223,6 +215,7 @@ tupleOfN 0 _ = `(Unit)
 tupleOfN 1 t = t
 tupleOfN (S n) t = `(MkPair ~(t) ~(tupleOfN n t))
 
+||| Assemble a TTImp of a tuple from a list of `TTImp`s
 tupleOf : List TTImp -> TTImp
 tupleOf [] = `(())
 tupleOf [x] = x
@@ -274,11 +267,7 @@ aliasedApp (xs :< (n, an)) t = aliasedApp xs t .! (n, var an)
 
 ||| Given a list of arguments and a sorted set of names,
 ||| assert that every argument's name is in that set
-checkArgsUse :
-  MonadError SpecialisationError m =>
-  List Arg ->
-  SortedSet Name ->
-  m ()
+checkArgsUse : MonadError SpecialisationError m => List Arg -> SortedSet Name -> m ()
 checkArgsUse [] _ = pure ()
 checkArgsUse (x :: xs) t = do
   let Just n = x.name
@@ -287,6 +276,7 @@ checkArgsUse (x :: xs) t = do
     then checkArgsUse xs t
     else throwError UnusedVarError
 
+||| Remove named and auto-implicit applications of holes
 cleanupHoleAutoImplicitsImpl : TTImp -> TTImp
 cleanupHoleAutoImplicitsImpl (IAutoApp _ x (Implicit _ _)) = x
 cleanupHoleAutoImplicitsImpl (INamedApp _ x _ (Implicit _ _)) = x
@@ -400,25 +390,25 @@ namespace ConInvoke
     TTImp
   (.apply) con f vals = reAppAny (var con.name) $ con.args.appsWith f vals @{conArgsNamed}
 
+||| List + List.All to Vect + Vect.All
 allL2V : (l : List t) -> (0 pr : All p l) => Subset (Vect (length l) t) (All p)
 allL2V [] = Element [] []
 allL2V (x :: xs) @{p :: ps} = do
   let Element xs' ps' = allL2V xs @{ps}
   Element (x :: xs') (p :: ps')
 
-0 snocLengthEqS : (prev : List a) -> (new : a) -> length (snoc prev new) = S (length prev)
-snocLengthEqS [] _ = Refl
-snocLengthEqS (x :: xs) y = rewrite snocLengthEqS xs y in Refl
-
-0 snocAll : {0 prev : Vect _ _} -> All IsNamedArg prev -> (new : Arg) -> IsNamedArg new -> All IsNamedArg (snoc prev new)
+||| Proof that Vect.All works over Vect.snoc
+0 snocAll : {0 prev : Vect _ _} -> All pred prev -> (new : Arg) -> pred new -> All pred (snoc prev new)
 snocAll [] new y = [y]
 snocAll (y :: ys) new z = y :: snocAll ys new z
 
-0 snocAllL : {0 prev : List _} -> All IsNamedArg prev -> (new : Arg) -> IsNamedArg new -> All IsNamedArg (snoc prev new)
+||| Proof that List.All works over List.snoc
+0 snocAllL : {0 prev : List _} -> All pred prev -> (new : Arg) -> pred new -> All pred (snoc prev new)
 snocAllL [] new y = [y]
 snocAllL (y :: ys) new z = y :: snocAllL ys new z
 
-snocAll2L : (sl : SnocList Arg) -> (0 _ : All IsNamedArg sl) -> Subset (List Arg) (All IsNamedArg)
+||| SnocList + SnocList.All to List + List.All
+snocAll2L : (sl : SnocList Arg) -> (0 _ : All pred sl) -> Subset (List Arg) (All pred)
 snocAll2L [<] [<] = Element [] []
 snocAll2L (sx :< x) (sy :< y) = do
   let Element xs ys = snocAll2L sx sy
@@ -432,47 +422,51 @@ record RecursionSearchState where
   argsForUnifier : Subset (Vect (length areArgsRecursive) Arg) (All IsNamedArg)
   argsOutput : Subset (SnocList Arg) (All IsNamedArg)
 
+||| Specialistaion-related constructor argument metadata
 record ArgMeta where
   constructor MkAMeta
-  isResursiveArg : Bool
+  ||| The argument's type can be substituted by specialised type invocation
+  isRecursiveArg : Bool
 
--- Workaround for possible compiler bug
-isRA : ArgMeta -> Bool
-isRA (MkAMeta True) = True
-isRA (MkAMeta False) = False
-
+||| Specialisation-related constructor metadat
 record ConMeta where
   constructor MkCMeta
+  ||| Metadata for each argument
   argMeta : List ArgMeta
+  ||| Replacements to transform original argument's type to specialised type
   mToPRenames : SortedMap Name TTImp
+  ||| Replacement to transform specialised type to original argument's type
   pToMRenames : SortedMap Name TTImp
 
 hasRecursiveArgs : ConMeta -> Bool
-hasRecursiveArgs = any isRA . argMeta
+hasRecursiveArgs = any isRecursiveArg . argMeta
 
 countRecursiveArgs : ConMeta -> Nat
-countRecursiveArgs = count isRA . argMeta
+countRecursiveArgs = count isRecursiveArg  . argMeta
 
 recursiveArgNames : Con -> ConMeta -> List Name
 recursiveArgNames con meta = do
-  let recursiveArgPairs = List.filter (isRA . snd) $ zip con.args meta.argMeta
+  let recursiveArgPairs = List.filter (isRecursiveArg . snd) $ zip con.args meta.argMeta
   fromMaybe "" . name . fst <$> recursiveArgPairs
 
+||| Specialisation-related type metadata
 record TypeMeta where
   constructor MkTyMeta
+  ||| Specialisation-related metadata for each constructor
   conMeta : List ConMeta
 
-amrContent : Arg -> ArgMeta -> (Name -> Name) -> TTImp
-amrContent a (MkAMeta False) _ = `(_)
-amrContent a (MkAMeta True) alias = bindVar $ alias $ fromMaybe "" a.name
+||| Generate a constructor binding where only recursive arguments are bound.
+||| Said arguments are also aliased via `alias` function.
+bindConRecArgsAliased : Con -> ConMeta -> (Name -> Name) -> TTImp
+bindConRecArgsAliased con meta alias =
+  reAppAny (var con.name) $ processArg <$> zip con.args meta.argMeta
+  where
+  maybeBind : Arg -> ArgMeta -> TTImp
+  maybeBind a am = if isRecursiveArg am then bindVar $ alias $ fromMaybe "" a.name else `(_)
 
-argMaybeRecursive : (Name -> Name) -> (Arg, ArgMeta) -> AnyApp
-argMaybeRecursive alias (a@(MkArg count ExplicitArg name type), am) = PosApp $ amrContent a am alias
-argMaybeRecursive alias (a@(MkArg count _ name type), am) = NamedApp (fromMaybe "" name) $ amrContent a am alias
-
-conOnlyRecursivesAliased : Con -> ConMeta -> (Name -> Name) -> TTImp
-conOnlyRecursivesAliased con meta alias =
-  reAppAny (var con.name) $ argMaybeRecursive alias <$> zip con.args meta.argMeta
+  processArg : (Arg, ArgMeta) -> AnyApp
+  processArg (a@(MkArg _ ExplicitArg _ _), am) = PosApp $ maybeBind a am
+  processArg (a, am) = NamedApp (fromMaybe "" a.name) $ maybeBind a am
 
 parameters (t : SpecTask)
   ---------------------------
@@ -545,12 +539,7 @@ parameters (t : SpecTask)
   -------------------------------
 
   ||| Run unification for a given polymorphic constructor
-  unifyCon :
-    MonadLog m =>
-    (unifier : CanUnify m) =>
-    (con : Con) ->
-    (0 conN : ConArgsNamed con) =>
-    m UnificationVerdict
+  unifyCon : MonadLog m => (unifier : CanUnify m) => (con : Con) -> (0 conN : ConArgsNamed con) => m UnificationVerdict
   unifyCon con = logBounds Debug "specialiseData.unifyCon" [t.polyTy, con] $ do
     let Element ca _ = allL2V con.args @{conArgsNamed}
     let Element ta _ = allL2V t.tqArgs @{t.tqArgsNamed}
@@ -567,10 +556,7 @@ parameters (t : SpecTask)
   ---------------------------------
 
   ||| Generate argument of a specified constructor
-  mkSpecArg :
-    (ur : UnificationResult) ->
-    Fin (ur.uniDg.freeVars) ->
-    (Subset Arg IsNamedArg)
+  mkSpecArg : (ur : UnificationResult) -> Fin (ur.uniDg.freeVars) -> Subset Arg IsNamedArg
   mkSpecArg ur fvId = do
     let fvData = index fvId ur.uniDg.fvData
     let fromLambda = finToNat fvId >= ur.task.lfv
@@ -582,13 +568,14 @@ parameters (t : SpecTask)
   getVar (IVar _ n) = Just n
   getVar _ = Nothing
 
-  findRecursiveApps :
+  ||| Check if a given argument is "recursive" (i.e. its type can be replaced with invocation of specialised type)
+  checkArgRecursion :
     Monad m =>
     CanUnify m =>
     MonadLog m =>
     NamesInfoInTypes =>
     RecursionSearchState -> Subset Arg IsNamedArg -> m RecursionSearchState
-  findRecursiveApps rss (Element thisArg thisArgNamed) = do
+  checkArgRecursion rss (Element thisArg thisArgNamed) = do
     let (MkRSS cRenames pToMRenames areArgsRec (Element argsForUni _) (Element argsOut _)) = rss
     let (aLhs, aa) = unAppAny thisArg.type
     let True = (length aa /= 0) || (isJust $ lookupType =<< getVar aLhs)
@@ -660,14 +647,14 @@ parameters (t : SpecTask)
     let typeArgs = newArgs.appsWith var ur.fullResult
     let tyRet = reAppAny (var t.resultName) typeArgs
     let n = if params.eraseConNames then fromString "\{t.resultName}^Con^\{show cIdx}" else dropNS pCon.name
-    rssRhs <- foldlM findRecursiveApps (MkRSS empty empty [<] (Element [] []) (Element [<] [<])) specArgs
-    let (MkRSS cRename pToMRenames argsAreRecursive' _ (Element outArgs' outArgsNamed')) = rssRhs
+    rssRhs <- foldlM checkArgRecursion (MkRSS empty empty [<] (Element [] []) (Element [<] [<])) specArgs
+    let (MkRSS mToPRenames pToMRenames argsAreRecursive' _ (Element outArgs' outArgsNamed')) = rssRhs
     let Element outArgs outArgsNamed = snocAll2L outArgs' outArgsNamed'
-    let conMeta = MkCMeta (MkAMeta <$> toList argsAreRecursive') cRename pToMRenames
+    let conMeta = MkCMeta (MkAMeta <$> toList argsAreRecursive') mToPRenames pToMRenames
     pure $ (MkCon
       { name = inGenNS t $ n
       , args = outArgs
-      , type = substituteVariables cRename tyRet
+      , type = substituteVariables mToPRenames tyRet
       } `Element` TheyAreNamed outArgsNamed, conMeta)
 
   ||| Generate a specialised type
@@ -898,8 +885,8 @@ parameters (t : SpecTask)
   ||| Generate a left-hand-side for recursive argument with-clauses
   mkInitialLhs : Con -> ConMeta -> TTImp
   mkInitialLhs con meta = do
-    let lhsCon = conOnlyRecursivesAliased con meta $ prependS "lhs^"
-    let rhsCon = conOnlyRecursivesAliased con meta $ prependS "rhs^"
+    let lhsCon = bindConRecArgsAliased con meta $ prependS "lhs^"
+    let rhsCon = bindConRecArgsAliased con meta $ prependS "rhs^"
     var "castInjImpl" .! ("castInj^x", lhsCon) .! ("castInj^y", rhsCon) .$ bindVar "prf"
 
   ||| Wrap a clause in with-clauses for all given names
