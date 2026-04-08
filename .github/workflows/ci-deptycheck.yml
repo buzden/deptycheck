@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
 
@@ -73,7 +73,7 @@ jobs:
       - name: Tar the `pack` dir
         run: .github/tar-pack save-pack "${{ env.pack_dir_file }}"
       - name: Save state of `pack`
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pack-dir
           path: ${{ env.pack_dir_file }}
@@ -84,11 +84,11 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore state of `pack`
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: pack-dir
       - name: Untar the `pack` dir
@@ -101,7 +101,7 @@ jobs:
       - name: Tar the `pack` dir
         run: .github/tar-pack save-pack "${{ env.pack_dir_file }}"
       - name: Save built thirdparties
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: built-thirdparties
           path: ${{ env.pack_dir_file }}
@@ -119,11 +119,11 @@ jobs:
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built thirdparties
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: built-thirdparties
       - name: Untar the `pack` dir
@@ -143,11 +143,11 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built thirdparties
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: built-thirdparties
       - name: Untar the `pack` dir
@@ -161,7 +161,7 @@ jobs:
       - name: Tar built TTC files
         run: find "$(pwd)" -name '*.tt[cm]' | .github/tar-pack save-stdin "${{ env.pack_dir_file }}"
       - name: Save built DepTyCheck
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: built-deptycheck
           path: ${{ env.pack_dir_file }}
@@ -176,7 +176,7 @@ jobs:
     runs-on: ubuntu-latest
     container: sphinxdoc/sphinx:latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Install dependencies
@@ -197,7 +197,7 @@ jobs:
       test-sets: ${{ steps.get-test-sets.outputs.test-sets }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Get test sets
@@ -227,11 +227,11 @@ jobs:
         test_set: ${{ fromJSON(needs.get-test-sets.outputs.test-sets) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir
@@ -257,7 +257,7 @@ jobs:
       examples: ${{ steps.get-examples.outputs.examples }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Get examples
@@ -286,11 +286,11 @@ jobs:
     env:
       EXAMPLE_NAME: ${{ matrix.example }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: built-deptycheck
       - name: Untar the `pack` dir

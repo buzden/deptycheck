@@ -95,7 +95,7 @@ There is a list of changes ordered by increasing impact on derivation time.
 
 1. Adding a pair of types
 2. Adding a given to the derivation task
-3. Adding conctructor to the generated type
+3. Adding constructor to the generated type
 4. Adding an argument to some constructor of the generated type
 
 There's one more detail. The values that index types also affect the derivation time.
