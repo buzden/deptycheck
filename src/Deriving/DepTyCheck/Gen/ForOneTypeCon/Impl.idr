@@ -58,12 +58,6 @@ canonicConsBody sig name con = do
       "argument expression: \{show argExpr}, reason(s): \{joinBy "; " errs}"
     (fns, err, argExpr)
   let allAppliedFreeNames = foldMap (SortedSet.fromList . map fst . fst . fst) deepConsApps
-  let bindAppliedFreeNames : TTImp -> TTImp
-      bindAppliedFreeNames orig@(IVar _ n) = if contains n allAppliedFreeNames then bindVar n else orig
-      --                              /---------------------------------------------^^^^^^^
-      -- `bindVar` instead of `var` here is because this expression can be earlier than the real binding, thus undeclared,
-      -- and the compiler turns unnecessary `IBindVar`s into `IVar`s by itself
-      bindAppliedFreeNames x = x
   deepConsApps <- for deepConsApps $ \case
     (x, Nothing, _) => pure x
     (x, Just err, argExpr) => if null $ (allVarNames' argExpr `intersection` conArgNames) `difference` allAppliedFreeNames
