@@ -36,8 +36,9 @@ Cast ConsDetermInfo Bool where
 
 export
 Semigroup ConsDetermInfo where
-  x@(MustDecEqWith {}) <+> _ = x
-  _ <+> x@(MustDecEqWith {}) = x
+  x@(MustDecEqWith {}) <+> MustDecEqWith {} = x
+  MustDecEqWith {} <+> DeterminedByType = DeterminedByType
+  DeterminedByType <+> MustDecEqWith {} = DeterminedByType
   DeterminedByType <+> DeterminedByType = DeterminedByType
   NotDeterminedByType <+> x = x
   x <+> NotDeterminedByType = x
