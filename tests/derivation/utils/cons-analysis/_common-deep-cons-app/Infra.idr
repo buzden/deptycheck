@@ -5,6 +5,8 @@ import public ConsApps
 import Control.Monad.Identity
 import public Control.Monad.Writer
 
+import Data.Alternative
+
 import Deriving.DepTyCheck.Util.DeepConsApp
 
 %language ElabReflection
@@ -24,6 +26,10 @@ printDeepConsApp freeNames tyExpr = do
   logMsg         "deptycheck.deep-cons-app" 0 "------------------------"
   let ((appliedNames ** bindExprF), []) = runWriter {w=List String} $ analyseDeepConsApp True (fromList freeNames) tyExpr
     | (_, errs) => logMsg "deptycheck.deep-cons-app" 0 "not a (deep) constructor application, reason: \{joinBy "; " errs}"
+  let Nothing = foldAlt' appliedNames $ \case
+                  (_, MustDecEqWith e) => Just "not a (deep) constructor application, match on non-cons expression `\{show e}`"
+                  _                    => Nothing
+    | Just err => logMsg "deptycheck.deep-cons-app" 0 err
   let appliedNames = fst <$> appliedNames.asVect
   logMsg         "deptycheck.deep-cons-app" 0 "applied names:   \{show appliedNames}"
   let bindExpr = bindExprF $ \idx => bindVar $ UN $ Basic $ show (index idx appliedNames) ++ show idx

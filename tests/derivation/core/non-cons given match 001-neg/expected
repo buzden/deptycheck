@@ -1,6 +1,6 @@
 1/2: Building RunDerivedGen (RunDerivedGen.idr)
 2/2: Building DerivedGen (DerivedGen.idr)
-Error: While processing right hand side of checkedGen. Error during reflection: Argument #0 of DerivedGen.X2 with given type arguments [0] is not supported, argument expression: DerivedGen.boolToNat x, reason(s): name `DerivedGen.boolToNat` is not a constructor
+Error: While processing right hand side of checkedGen. Error during reflection: Unsupported constructor DerivedGen.X2 with given type arguments [0] since it contains an undetermined non-constructor expression `DerivedGen.boolToNat x` as a given
 
 DerivedGen:1
  12 |

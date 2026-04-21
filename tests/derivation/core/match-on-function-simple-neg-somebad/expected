@@ -2,7 +2,7 @@
 2/2: Building DerivedGen (DerivedGen.idr)
 Error: While processing right hand side of checkedGen. Sorry, I can't find any elaboration which works. All errors:
 Possible error:
-    Error during reflection: Argument #1 of DerivedGen.MkY with given type arguments [0(rc), 1, 2] is not supported, argument expression: DerivedGen.MkX {rc = {rc:1}} (DerivedGen.F.f {rc = {rc:1}} y) (DerivedGen.F.g {rc = {rc:1}} x), reason(s): name `DerivedGen.F.f` is not a constructor; name `DerivedGen.F.g` is not a constructor
+    Error during reflection: Unsupported constructor DerivedGen.MkY with given type arguments [0(rc), 1, 2] since it contains an undetermined non-constructor expression `DerivedGen.F.f {rc = {rc:1}} y` as a given
 
     DerivedGen:1
      18 |   g : X rc -> Fin rc
