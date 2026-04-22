@@ -281,7 +281,7 @@ export
 argDeps : (args : List Arg) -> ArgDeps args.length
 argDeps args = do
   let nameToIndices = SortedMap.fromList $ mapI args $ \i, arg => (argName' arg, Fin.Set.singleton i)
-  let args = Vect.fromList args <&> \arg => allVarNames arg.type |> map (fromMaybe empty . lookup' nameToIndices)
+  let args = Vect.fromList args <&> \arg => allVarNames arg.type <&> fromMaybe empty . lookup' nameToIndices
   flip upmapI args $ \i, deps => flip concatMap deps $ \candidates =>
     maybe empty singleton $ last' $ mapMaybe tryToFit $ Fin.Set.toList candidates
 
