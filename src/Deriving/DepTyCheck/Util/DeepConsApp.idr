@@ -34,6 +34,12 @@ Cast ConsDetermInfo Bool where
   cast NotDeterminedByType = False
   cast $ MustDecEqWith {}  = False
 
+public export
+determineMustDecEqs : ConsDetermInfo -> ConsDetermInfo
+determineMustDecEqs DeterminedByType    = DeterminedByType
+determineMustDecEqs NotDeterminedByType = NotDeterminedByType
+determineMustDecEqs $ MustDecEqWith {}  = DeterminedByType
+
 export
 Semigroup ConsDetermInfo where
   x@(MustDecEqWith {}) <+> MustDecEqWith {} = x

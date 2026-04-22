@@ -44,6 +44,9 @@ canonicConsBody sig name con = do
   -- Determine names of the arguments of the constructor (as a function)
   let conArgNames = fromList $ argName' <$> con.args
 
+  -- Determine which arguments are already determined by types of givens
+  let depOfGivs = dependeesOfGivens sig
+
   -- For given arguments, determine whether they are
   --   - just a free name
   --   - repeated name of another given parameter (need for `decEq`)
@@ -57,7 +60,9 @@ canonicConsBody sig name con = do
     when (not $ null errs) $ failAt conFC $
       "Argument #\{show idx} of \{show con.name} with given type arguments [\{showGivens sig}] is not supported, " ++
       "argument expression: \{show argExpr}, reason(s): \{joinBy "; " errs}"
-    pure fns
+    -- Clean up `MustDecEqWith`s if this argument is determined by givens' types
+    pure $ if not $ contains idx depOfGivs then fns else case fns of
+      (lst ** f) => (map determineMustDecEqs <$> lst ** rewrite lengthMap {f=map determineMustDecEqs} lst in f)
   let allAppliedFreeNames = foldMap (SortedSet.fromList . map fst . fst) deepConsApps
   let badDecEqExpr : ConsDetermInfo -> Maybe TTImp
       badDecEqExpr (MustDecEqWith e) = whenT (not $ null $ (allVarNames' e `intersection` conArgNames) `difference` allAppliedFreeNames) e
