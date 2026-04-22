@@ -5,46 +5,46 @@ LOG deptycheck.deep-cons-app:0: given free names:    []
 LOG deptycheck.deep-cons-app:0: original expression: XX (Rigt Unit)
 LOG deptycheck.deep-cons-app:0: resolved expression: XX (Rigt ())
 LOG deptycheck.deep-cons-app:0: ------------------------
-LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `Rigt` is not a constructor
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, match on non-cons expression `Rigt Builtin.Unit`
 LOG deptycheck.deep-cons-app:0: 
 LOG deptycheck.deep-cons-app:0: given free names:    [a]
 LOG deptycheck.deep-cons-app:0: original expression: XX (Rigt a)
 LOG deptycheck.deep-cons-app:0: resolved expression: XX (Rigt a)
 LOG deptycheck.deep-cons-app:0: ------------------------
-LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `Rigt` is not a constructor
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, match on non-cons expression `Rigt a`
 LOG deptycheck.deep-cons-app:0: 
 LOG deptycheck.deep-cons-app:0: given free names:    []
 LOG deptycheck.deep-cons-app:0: original expression: XX (Rigt MkUnit)
 LOG deptycheck.deep-cons-app:0: resolved expression: XX (Rigt ())
 LOG deptycheck.deep-cons-app:0: ------------------------
-LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `Rigt` is not a constructor
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, match on non-cons expression `Rigt Builtin.MkUnit`
 LOG deptycheck.deep-cons-app:0: 
 LOG deptycheck.deep-cons-app:0: given free names:    []
 LOG deptycheck.deep-cons-app:0: original expression: XX (Rigt [])
 LOG deptycheck.deep-cons-app:0: resolved expression: XX (Rigt [])
 LOG deptycheck.deep-cons-app:0: ------------------------
-LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `Rigt` is not a constructor
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, match on non-cons expression `Rigt Prelude.Nil`
 LOG deptycheck.deep-cons-app:0: 
 LOG deptycheck.deep-cons-app:0: given free names:    [n, a, b]
 LOG deptycheck.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S m)) `MC` MM))))
 LOG deptycheck.deep-cons-app:0: resolved expression: XX (Left (1 `MC` (2 `MC` (S (S (S m)) `MC` MM))))
 LOG deptycheck.deep-cons-app:0: ------------------------
-LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `m` is not a constructor
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, match on non-cons expression `m`
 LOG deptycheck.deep-cons-app:0: 
 LOG deptycheck.deep-cons-app:0: given free names:    []
 LOG deptycheck.deep-cons-app:0: original expression: XX (Left (S Z `MC` (S (S Z) `MC` (S (S (S Z)) `MC` MX))))
 LOG deptycheck.deep-cons-app:0: resolved expression: XX (Left (1 `MC` (2 `MC` (3 `MC` MX))))
 LOG deptycheck.deep-cons-app:0: ------------------------
-LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `MX` is not a constructor
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, match on non-cons expression `MX`
 LOG deptycheck.deep-cons-app:0: 
 LOG deptycheck.deep-cons-app:0: given free names:    [n, a, b]
 LOG deptycheck.deep-cons-app:0: original expression: XX (Left (a `MC` (b `MC` (c `MC` MM))))
 LOG deptycheck.deep-cons-app:0: resolved expression: XX (Left (a `MC` (b `MC` (c `MC` MM))))
 LOG deptycheck.deep-cons-app:0: ------------------------
-LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `c` is not a constructor
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, match on non-cons expression `c`
 LOG deptycheck.deep-cons-app:0: 
 LOG deptycheck.deep-cons-app:0: given free names:    [n, a, b]
 LOG deptycheck.deep-cons-app:0: original expression: XX (Left (a `MC` (Z `MC` (c `MC` MM))))
 LOG deptycheck.deep-cons-app:0: resolved expression: XX (Left (a `MC` (0 `MC` (c `MC` MM))))
 LOG deptycheck.deep-cons-app:0: ------------------------
-LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `c` is not a constructor
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, match on non-cons expression `c`

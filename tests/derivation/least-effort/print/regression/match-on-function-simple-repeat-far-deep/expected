@@ -1,0 +1,173 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (rc : Nat) -> (r1 : X rc) -> (r2 : X (S rc)) -> (r3 : X rc) -> Gen MaybeEmpty (Y r1 r2 r3)
+LOG deptycheck.derive.least-effort:7: DerivedGen.Y[0(rc), 1, 2, 3] MkY - used final order: []
+    MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
+.=> MkArg MW ExplicitArg (Just "outer^<rc>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<r1>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<r2>") implicitTrue
+.=> MkArg MW ExplicitArg (Just "outer^<r3>") implicitTrue
+.=> local
+      { decls =
+          [ IClaim
+              (MkIClaimData
+                 { rig = MW
+                 , vis = Export
+                 , opts = []
+                 , type =
+                     mkTy
+                       { name = "<DerivedGen.Y>[0, 1, 2, 3]"
+                       , type =
+                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                           .-> MkArg MW ExplicitArg (Just "rc") (var "Prelude.Types.Nat")
+                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.X" .$ var "rc")
+                           .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.X" .$ (var "Prelude.Types.S" .$ var "rc"))
+                           .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.X" .$ var "rc")
+                           .->    var "Test.DepTyCheck.Gen.Gen"
+                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                               .$ (var "DerivedGen.Y" .! ("rc", var "rc") .$ var "{arg:1}" .$ var "{arg:2}" .$ var "{arg:3}")
+                       }
+                 })
+          , IDef
+              emptyFC
+              "<DerivedGen.Y>[0, 1, 2, 3]"
+              [       var "<DerivedGen.Y>[0, 1, 2, 3]"
+                   .$ bindVar "^fuel_arg^"
+                   .$ bindVar "inter^<rc>"
+                   .$ bindVar "inter^<{arg:1}>"
+                   .$ bindVar "inter^<{arg:2}>"
+                   .$ bindVar "inter^<{arg:3}>"
+                .= local
+                     { decls =
+                         [ IClaim
+                             (MkIClaimData
+                                { rig = MW
+                                , vis = Export
+                                , opts = []
+                                , type =
+                                    mkTy
+                                      { name = "<<DerivedGen.MkY>>"
+                                      , type =
+                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                          .-> MkArg MW ExplicitArg (Just "rc") (var "Prelude.Types.Nat")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.X" .$ var "rc")
+                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.X" .$ (var "Prelude.Types.S" .$ var "rc"))
+                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "DerivedGen.X" .$ var "rc")
+                                          .->    var "Test.DepTyCheck.Gen.Gen"
+                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                              .$ (   var "DerivedGen.Y"
+                                                  .! ("rc", var "rc")
+                                                  .$ var "{arg:1}"
+                                                  .$ var "{arg:2}"
+                                                  .$ var "{arg:3}")
+                                      }
+                                })
+                         , IDef
+                             emptyFC
+                             "<<DerivedGen.MkY>>"
+                             [ withClause
+                                 { lhs =
+                                        var "<<DerivedGen.MkY>>"
+                                     .$ bindVar "^cons_fuel^"
+                                     .$ bindVar "{k:1}"
+                                     .$ (   var "DerivedGen.MkX"
+                                         .! ("rc", implicitTrue)
+                                         .$ bindVar "to_be_deceqed^^{DerivedGen.F.f {rc = {k:1}} x:0}0")
+                                     .$ (   var "DerivedGen.MkX"
+                                         .! ("rc", var "Prelude.Types.S" .$ implicitTrue)
+                                         .$ (   var "Data.Fin.FS"
+                                             .! ("k", implicitTrue)
+                                             .$ bindVar "to_be_deceqed^^{DerivedGen.F.f {rc = {k:1}} x:0}1"))
+                                     .$ bindVar "x"
+                                 , rig = MW
+                                 , wval =
+                                        var "Decidable.Equality.decEq"
+                                     .$ var "to_be_deceqed^^{DerivedGen.F.f {rc = {k:1}} x:0}0"
+                                     .$ (var "DerivedGen.F.f" .! ("rc", var "{k:1}") .$ var "x")
+                                 , prf = Nothing
+                                 , flags = []
+                                 , clauses =
+                                     [ withClause
+                                         { lhs =
+                                                var "<<DerivedGen.MkY>>"
+                                             .$ bindVar "^cons_fuel^"
+                                             .$ bindVar "{k:1}"
+                                             .$ (var "DerivedGen.MkX" .! ("rc", implicitTrue) .$ implicitTrue)
+                                             .$ (   var "DerivedGen.MkX"
+                                                 .! ("rc", var "Prelude.Types.S" .$ implicitTrue)
+                                                 .$ (   var "Data.Fin.FS"
+                                                     .! ("k", implicitTrue)
+                                                     .$ bindVar "to_be_deceqed^^{DerivedGen.F.f {rc = {k:1}} x:0}1"))
+                                             .$ bindVar "x"
+                                             .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                         , rig = MW
+                                         , wval =
+                                                var "Decidable.Equality.decEq"
+                                             .$ var "to_be_deceqed^^{DerivedGen.F.f {rc = {k:1}} x:0}1"
+                                             .$ (var "DerivedGen.F.f" .! ("rc", var "{k:1}") .$ var "x")
+                                         , prf = Nothing
+                                         , flags = []
+                                         , clauses =
+                                             [       var "<<DerivedGen.MkY>>"
+                                                  .$ bindVar "^cons_fuel^"
+                                                  .$ bindVar "{k:1}"
+                                                  .$ (var "DerivedGen.MkX" .! ("rc", implicitTrue) .$ implicitTrue)
+                                                  .$ (   var "DerivedGen.MkX"
+                                                      .! ("rc", var "Prelude.Types.S" .$ implicitTrue)
+                                                      .$ (var "Data.Fin.FS" .! ("k", implicitTrue) .$ implicitTrue))
+                                                  .$ bindVar "x"
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                               .=    var "Test.DepTyCheck.Gen.label"
+                                                  .$ (var "fromString" .$ primVal (Str "DerivedGen.MkY (orders)"))
+                                                  .$ (   var "Prelude.pure"
+                                                      .! ("f", var "Test.DepTyCheck.Gen.Gen" .$ implicitTrue)
+                                                      .$ (var "DerivedGen.MkY" .! ("{k:1}", implicitTrue) .! ("x", var "x")))
+                                             ,       var "<<DerivedGen.MkY>>"
+                                                  .$ bindVar "^cons_fuel^"
+                                                  .$ bindVar "{k:1}"
+                                                  .$ (var "DerivedGen.MkX" .! ("rc", implicitTrue) .$ implicitTrue)
+                                                  .$ (   var "DerivedGen.MkX"
+                                                      .! ("rc", var "Prelude.Types.S" .$ implicitTrue)
+                                                      .$ (   var "Data.Fin.FS"
+                                                          .! ("k", implicitTrue)
+                                                          .$ bindVar "to_be_deceqed^^{DerivedGen.F.f {rc = {k:1}} x:0}1"))
+                                                  .$ bindVar "x"
+                                                  .$ (var "Prelude.Yes" .$ var "Builtin.Refl")
+                                                  .$ (var "Prelude.No" .$ implicitTrue)
+                                               .= var "empty"
+                                             ]
+                                         }
+                                     ,       var "<<DerivedGen.MkY>>"
+                                          .$ bindVar "^cons_fuel^"
+                                          .$ bindVar "{k:1}"
+                                          .$ (   var "DerivedGen.MkX"
+                                              .! ("rc", implicitTrue)
+                                              .$ bindVar "to_be_deceqed^^{DerivedGen.F.f {rc = {k:1}} x:0}0")
+                                          .$ (   var "DerivedGen.MkX"
+                                              .! ("rc", var "Prelude.Types.S" .$ implicitTrue)
+                                              .$ (   var "Data.Fin.FS"
+                                                  .! ("k", implicitTrue)
+                                                  .$ bindVar "to_be_deceqed^^{DerivedGen.F.f {rc = {k:1}} x:0}1"))
+                                          .$ bindVar "x"
+                                          .$ (var "Prelude.No" .$ implicitTrue)
+                                       .= var "empty"
+                                     ]
+                                 }
+                             , var "<<DerivedGen.MkY>>" .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .$ implicitTrue .= var "empty"
+                             ]
+                         ]
+                     , scope =
+                            var "Test.DepTyCheck.Gen.label"
+                         .$ (var "fromString" .$ primVal (Str "DerivedGen.Y[0(rc), 1, 2, 3] (non-spending)"))
+                         .$ (   var "<<DerivedGen.MkY>>"
+                             .$ var "^fuel_arg^"
+                             .$ var "inter^<rc>"
+                             .$ var "inter^<{arg:1}>"
+                             .$ var "inter^<{arg:2}>"
+                             .$ var "inter^<{arg:3}>")
+                     }
+              ]
+          ]
+      , scope = var "<DerivedGen.Y>[0, 1, 2, 3]" .$ var "^outmost-fuel^" .$ var "outer^<rc>" .$ var "outer^<r1>" .$ var "outer^<r2>" .$ var "outer^<r3>"
+      }
+

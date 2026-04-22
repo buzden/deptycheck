@@ -34,10 +34,17 @@ Cast ConsDetermInfo Bool where
   cast NotDeterminedByType = False
   cast $ MustDecEqWith {}  = False
 
+public export
+determineMustDecEqs : ConsDetermInfo -> ConsDetermInfo
+determineMustDecEqs DeterminedByType    = DeterminedByType
+determineMustDecEqs NotDeterminedByType = NotDeterminedByType
+determineMustDecEqs $ MustDecEqWith {}  = DeterminedByType
+
 export
 Semigroup ConsDetermInfo where
-  x@(MustDecEqWith {}) <+> _ = x
-  _ <+> x@(MustDecEqWith {}) = x
+  x@(MustDecEqWith {}) <+> MustDecEqWith {} = x
+  MustDecEqWith {} <+> DeterminedByType = DeterminedByType
+  DeterminedByType <+> MustDecEqWith {} = DeterminedByType
   DeterminedByType <+> DeterminedByType = DeterminedByType
   NotDeterminedByType <+> x = x
   x <+> NotDeterminedByType = x
@@ -87,14 +94,12 @@ analyseDeepConsApp ccdi freeNames = pass . map (, nub) . isD where
       | _ => bad "not an application to a variable"
 
     -- Check if this is a free name
-    let False = contains lhsName freeNames
-      | True => if null args
-                  then pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
-                  else bad "applying free name to some arguments"
+    let False = contains lhsName freeNames && null args
+      | True => pure $ if ccdi then ([(lhsName, neutral)] ** \f => f FZ) else [lhsName]
 
     -- Check that this is an application to a constructor's name
     let Just (conArgs, conType) = lookupCon lhsName <&> \con => (con.args, con.type)
-      | Nothing => bad "name `\{lhsName}` is not a constructor"
+      | Nothing => pure $ if ccdi then ([(MN (show e) 0, MustDecEqWith e)] ** \f => f FZ) else []
 
     -- Acquire type-determination info, if needed
     typeDetermInfo : Vect conArgs.length $ MaybeConsDetermInfo ccdi <-

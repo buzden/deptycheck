@@ -47,7 +47,7 @@ LOG deptycheck.deep-cons-app:0: given free names:    [a, x, xs, y, ys]
 LOG deptycheck.deep-cons-app:0: original expression: Split (x :: (xs ++ (y :: ys)))
 LOG deptycheck.deep-cons-app:0: resolved expression: Split (x :: (xs ++ (y :: ys)))
 LOG deptycheck.deep-cons-app:0: ------------------------
-LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, reason: name `Prelude.Types.List.(++)` is not a constructor
+LOG deptycheck.deep-cons-app:0: not a (deep) constructor application, match on non-cons expression `Prelude.Types.List.(++) {a = a} xs (Prelude.Basics.(::) {a = a} y ys)`
 LOG deptycheck.deep-cons-app:0: 
 LOG deptycheck.deep-cons-app:0: given free names:    [a, x]
 LOG deptycheck.deep-cons-app:0: original expression: x = x

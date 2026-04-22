@@ -55,6 +55,16 @@ Eq GenSignature where (==) = (==) `on` characteristics
 public export
 Ord GenSignature where compare = comparing characteristics
 
+||| Set of type arguments for which there exists a given argument depending on it
+-- This is very similar to `dependees` function from libs, but is takes into account the difference between given and non-given arguments.
+-- Maybe, that function should be generalised and this one to be reimplemented through the generalised one.
+export
+dependeesOfGivens : (sig : GenSignature) -> FinSet sig.targetType.args.length
+dependeesOfGivens sig = do
+  let nameToIndex = SortedMap.fromList $ mapI sig.targetType.args $ \i, arg => (argName' arg, i)
+  let varsInGivens = concatMap (\idx => allVarNames' $ type $ index' sig.targetType.args idx) sig.givenParams
+  fromList $ mapMaybe (lookup' nameToIndex) $ Prelude.toList varsInGivens
+
 appFuel : (topmost : Name) -> (fuel : TTImp) -> TTImp
 appFuel = app . var
 
