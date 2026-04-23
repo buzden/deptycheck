@@ -1,0 +1,3 @@
+package super-linter-fix
+
+prebuild = "FIX_MARKDOWN=true FIX_NATURAL_LANGUAGE=true FIX_SPELL_CODESPELL=true ./super-linter.sh"
