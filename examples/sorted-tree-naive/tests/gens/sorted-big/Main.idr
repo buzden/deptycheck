@@ -10,10 +10,11 @@ import System.Random.Pure.StdGen
 
 main : IO ()
 main = do
-  let vals = unGenTryN 10 someStdGen $ genSortedBinTree1 $ limit 4
-  Lazy.for_ vals $ \(mi ** ma ** tree) => do
+  let vals = unGenTryN 10 someStdGen $ genSortedBinTree $ limit 5
+  Lazy.for_ vals $ \tree => do
     putStrLn "--------------"
     let list = toList tree
-    putStrLn "min: \{mi}, max: \{ma}, length: \{length list}"
+    putStrLn "length: \{length list}"
+    putStrLn "tree:\n\{tree}"
     putStrLn "as list: \{show list}"
     putStrLn "sorted: \{show $ sorted list}"

@@ -8,6 +8,7 @@ sourcedir = "src"
 builddir = ".build"
 
 depends = deptycheck
+        , prettier
 
 modules = Data.SortedBinTree
         , Data.SortedBinTree.Gen

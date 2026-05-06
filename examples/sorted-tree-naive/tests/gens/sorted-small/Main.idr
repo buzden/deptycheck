@@ -15,5 +15,6 @@ main = do
     putStrLn "--------------"
     let list = toList tree
     putStrLn "length: \{length list}"
+    putStrLn "tree:\n\{tree}"
     putStrLn "as list: \{show list}"
     putStrLn "sorted: \{show $ sorted list}"
