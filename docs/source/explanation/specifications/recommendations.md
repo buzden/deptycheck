@@ -1,3 +1,10 @@
+<!-- idris
+import Data.Fuel
+
+import Test.DepTyCheck.Gen
+import Deriving.DepTyCheck.Gen
+-->
+
 # Practical recommendations
 
 This is a collection of principles,
@@ -140,6 +147,51 @@ There might be some other benefits to each of the representations, and this shou
 Unlike with resulting type, DepTyCheck allows use of functions in indices of arguments of a constructor.
 However, it seems like the performance of derivation is poor.
 It would be useful to compare both derivation and runtime performance of specifications that use functions vs. type-level encoding.
+
+## Type level functions vs. indexed data type
+
+Due to existing limitations, DepTyCheck doesn't analyze function bodies.
+So type-level functions can't be used inside the type for which a generator is derived.
+Consider the following example:
+
+```idris
+data Opt = A | B
+
+data SomeA : Type where
+  MkSA : SomeA
+
+data SomeB : Type where
+  MkSB : SomeB
+
+namespace Bad
+
+  SomeFor : Opt -> Type
+  SomeFor A = SomeA
+  SomeFor B = SomeB
+
+  data Result : Opt -> Type where
+    MkRes : (p1 : SomeFor o) -> (p2 : SomeFor o) -> Result o
+
+  failing
+    genResult : Fuel -> (o : Opt) -> Gen MaybeEmpty $ Result o
+    genResult = deriveGen
+```
+
+A workaround is to rewrite `SomeFor` as an equivalent indexed data type, where each defining clause becomes a constructor:
+
+```idris
+namespace Good
+
+  data SomeFor : Opt -> Type where
+    MkA : SomeA -> SomeFor A
+    MkB : SomeB -> SomeFor B
+
+  data Result : Opt -> Type where
+    MkC : (p1 : SomeFor o) -> (p2 : SomeFor o) -> Result o
+
+  genResult : Fuel -> (o : Opt) -> Gen MaybeEmpty $ Result o
+  genResult = deriveGen
+```
 
 ## Other thoughts and questions
 
