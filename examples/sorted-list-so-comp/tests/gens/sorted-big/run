@@ -1,0 +1,6 @@
+rm -rf build
+
+flock "$1" pack -q install-deps test.ipkg && \
+pack run test.ipkg
+
+rm -rf build
