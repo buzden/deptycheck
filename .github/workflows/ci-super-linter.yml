@@ -16,10 +16,6 @@ on:
 
 permissions:
   contents: read
-  statuses: write
-  # issues and pull-requests permissions to write results as pull request comments
-  issues: write
-  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}@${{ github.ref }}
@@ -28,6 +24,12 @@ concurrency:
 jobs:
   build:
     name: Lint Code Base
+    permissions:
+      contents: read
+      statuses: write
+      # issues and pull-requests permissions to write results as pull request comments
+      issues: write
+      pull-requests: write
     # Disable PR from the same repo
     if: github.event_name != 'pull_request' ||
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
@@ -59,6 +61,7 @@ jobs:
           # Disable Biome
           VALIDATE_BIOME_FORMAT: false
           VALIDATE_BIOME_LINT: false
+
   shellcheck-extra:
     name: ShellCheck non-standard shell file names
     runs-on: ubuntu-latest
@@ -76,12 +79,13 @@ jobs:
           # Find .editorconfig section header that mentions *.sh
           header=$(grep -F '*.sh' .editorconfig)
 
-          # Get comma-separated patterns.
+          # Get comma-separated patterns
           patterns=${header#\[\{}
           patterns=${patterns%\}\]}
 
-          # Build `-name p1 -o -name p2 ...`.
+          # Build `-name p1 -o -name p2 ...`
           args=$(python3 -c "import sys; print(' -o '.join(f'-name {p}' for p in sys.argv[1].split(',')))" "$patterns")
 
-          # Run shellcheck on matching files.
+          # Run shellcheck on matching files
+          # shellcheck disable=SC2086  # word splitting intended to split string into separate find args
           find . -type f \( $args \) -exec shellcheck --shell=sh -S warning {} +
