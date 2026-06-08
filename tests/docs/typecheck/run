@@ -9,8 +9,8 @@ DOCSDIR=../../../docs/source/
 # Generate `src` dir and symlinks to all `*.md` files (upper-case renamed)
 all_modules=$(
 find "$DOCSDIR" -type f -name '*.md' -print | sort | while read r; do
-  # capitalization idea taken from https://stackoverflow.com/questions/27703739/capitalize-words-in-a-bash-variable-using-sed
-  capname=$(echo "${r#$DOCSDIR}" | sed 's/^./\u&/; s|/\(.\)|/\u\1|g; s/-\(.\)/\u\1/g')
+  # reference/users/gen-monad.md -> Reference/Users/GenMonad.md
+  capname=$(echo "${r#$DOCSDIR}" | python3 -c "import re;print(re.sub(r'(^|/|-)(.)',lambda m:('' if m[1]=='-' else m[1])+m[2].upper(),input()))")
 
   localname="src/$capname"
   localdir=$(dirname "$localname")/
@@ -19,7 +19,7 @@ find "$DOCSDIR" -type f -name '*.md' -print | sort | while read r; do
   ln -s "$(echo "$localdir" | sed 's|[^/]*/|\.\./|g')$r" "$localname"
 
   modulename=$(echo "${capname%.md}" | sed 's|/|\.|g')
-  echo -n ", $modulename"
+  printf '%s' ", $modulename"
 done
 )
 

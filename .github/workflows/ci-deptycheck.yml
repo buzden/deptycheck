@@ -240,6 +240,10 @@ jobs:
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
 
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
       - name: Run tests for ${{ matrix.test_set }}
         run: pack test deptycheck "${TEST_SET}"
         env:
