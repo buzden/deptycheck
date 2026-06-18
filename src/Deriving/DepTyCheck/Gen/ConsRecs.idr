@@ -89,6 +89,16 @@ record ConsRecs where
 Semigroup ConsRecs where
   MkConsRecs cw <+> MkConsRecs cw' = MkConsRecs $ cw `mergeLeft` cw'
 
+------------------------------
+--- Special weighted types ---
+------------------------------
+
+||| A map from a type to a name of weight function for this type
+SpecialWeightFuns : SortedMap TypeInfo Name
+SpecialWeightFuns = fromList @{TypeInfoOrdByName}
+  [ (getInfo `{Nat}, "liftNatWeight")
+  ]
+
 -------------------------------------
 --- Getting (deriving) `ConsRecs` ---
 -------------------------------------
@@ -99,7 +109,7 @@ removeNamedApps = mapTTImp $ \case INamedApp _ lhs _ _ => lhs; e => e
 workaroundFromNat = mapTTImp $ \e => case fst $ unAppAny e of IVar _ `{Data.Nat1.FromNat} => removeNamedApps e; _ => e
 
 weightFunName : TypeInfo -> Name
-weightFunName ty = fromString "weight^\{show ty.name}"
+weightFunName ty = fromMaybe .| fromString "weight^\{show ty.name}" .| lookup ty SpecialWeightFuns
 
 -- this is a workaround for Idris compiler bug #2983
 export
@@ -139,6 +149,11 @@ leftDepth = go 1 where
   go : Nat1 -> Fuel -> Nat1
   go n Dry      = n
   go n (More x) = go (succ n) x
+
+-- TODO to think of better placement for this function; this anyway is intended to be called from the derived code.
+public export
+liftNatWeight : Nat -> Nat1
+liftNatWeight n = fromNat $ S n
 
 -- This function is moved out from `getConsRecs` to reduce the closure of the returned function
 finCR : NamesInfoInTypes =>
@@ -214,7 +229,7 @@ lookupConsWithWeight @{MkConsRecs crs} sig = do
 
 export
 deriveWeightingFun : ConsRecs => TypeInfo -> Maybe (Decl, Decl)
-deriveWeightingFun @{MkConsRecs crs} ti = lookup ti.name crs >>= deriveW
+deriveWeightingFun @{MkConsRecs crs} ti = whenTs .| isNothing (lookup ti SpecialWeightFuns) .| lookup ti.name crs >>= deriveW
 
 export
 isTypeKnown : ConsRecs => TypeInfo -> Bool

@@ -23,14 +23,6 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (n : Nat) -> (a : Type) -> 
                                .$ (var "Data.Vect.Vect" .$ var "len" .$ var "elem")
                        }
                  })
-          , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
-                 })
           , IDef
               emptyFC
               "<Data.Vect.Vect>[0, 1]"
@@ -95,17 +87,10 @@ LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (n : Nat) -> (a : Type) -> 
                                      .$ (var "<<Data.Vect.Nil>>" .$ var "^fuel_arg^" .$ var "inter^<len>" .$ var "inter^<elem>"))
                                  .$ (   var "::"
                                      .$ (   var "Builtin.MkPair"
-                                         .$ (var "weight^Prelude.Types.Nat" .$ var "inter^<len>")
+                                         .$ (var "liftNatWeight" .$ var "inter^<len>")
                                          .$ (var "<<Data.Vect.(::)>>" .$ var "^fuel_arg^" .$ var "inter^<len>" .$ var "inter^<elem>"))
                                      .$ var "Nil")))
                      }
-              ]
-          , IDef
-              emptyFC
-              "weight^Prelude.Types.Nat"
-              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
-              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
-                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
               ]
           ]
       , scope = var "<Data.Vect.Vect>[0, 1]" .$ var "^outmost-fuel^" .$ var "outer^<n>" .$ var "outer^<a>"

@@ -87,14 +87,6 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                            .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
                        }
                  })
-          , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
-                 })
           , IDef
               emptyFC
               "<Data.List.Covering.BitMask.Index.AtIndex>[0, 2, 3]"
@@ -251,7 +243,7 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                          .$ var "inter^<{arg:2}>"))
                                  .$ (   var "::"
                                      .$ (   var "Builtin.MkPair"
-                                         .$ (var "weight^Prelude.Types.Nat" .$ var "inter^<n>")
+                                         .$ (var "liftNatWeight" .$ var "inter^<n>")
                                          .$ (   var "<<Data.List.Covering.BitMask.Index.There>>"
                                              .$ var "^fuel_arg^"
                                              .$ var "inter^<n>"
@@ -389,7 +381,7 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                          .$ var "inter^<{arg:5}>"))
                                  .$ (   var "::"
                                      .$ (   var "Builtin.MkPair"
-                                         .$ (var "weight^Prelude.Types.Nat" .$ var "inter^<n>")
+                                         .$ (var "liftNatWeight" .$ var "inter^<n>")
                                          .$ (   var "<<Data.List.Covering.BitMask.Index.Continue>>"
                                              .$ var "^fuel_arg^"
                                              .$ var "inter^<n>"
@@ -652,13 +644,6 @@ LOG deptycheck.derive.least-effort:7: Data.List.Covering.BitMask.Index.AllBitsAr
                                ]
                            }
                      }
-              ]
-          , IDef
-              emptyFC
-              "weight^Prelude.Types.Nat"
-              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
-              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
-                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
               ]
           ]
       , scope = var "<Data.List.Covering.CoveringSequence>[0, 1]" .$ var "^outmost-fuel^" .$ var "outer^<n>" .$ var "outer^<bs>"

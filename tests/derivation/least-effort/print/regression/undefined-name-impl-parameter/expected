@@ -49,14 +49,6 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                .$ (var "Decls.Expr" .! ("r", var "r") .$ var "{arg:4}" .$ var "{arg:5}")
                        }
                  })
-          , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
-                 })
           , IDef
               emptyFC
               "<Decls.RegIsType>[0, 2, 3]"
@@ -207,7 +199,7 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                                          .$ var "inter^<{arg:2}>"))
                                  .$ (   var "::"
                                      .$ (   var "Builtin.MkPair"
-                                         .$ (var "weight^Prelude.Types.Nat" .$ var "inter^<r>")
+                                         .$ (var "liftNatWeight" .$ var "inter^<r>")
                                          .$ (   var "<<Decls.There>>"
                                              .$ var "^fuel_arg^"
                                              .$ var "inter^<r>"
@@ -275,13 +267,6 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                          .$ (var "fromString" .$ primVal (Str "Decls.Expr[0(r), 1, 2] (non-spending)"))
                          .$ (var "<<Decls.Read>>" .$ var "^fuel_arg^" .$ var "inter^<r>" .$ var "inter^<{arg:4}>" .$ var "inter^<{arg:5}>")
                      }
-              ]
-          , IDef
-              emptyFC
-              "weight^Prelude.Types.Nat"
-              [ var "weight^Prelude.Types.Nat" .$ var "Prelude.Types.Z" .= var "Data.Nat1.one"
-              ,    var "weight^Prelude.Types.Nat" .$ (var "Prelude.Types.S" .$ bindVar "arg^0")
-                .= var "succ" .$ (var "weight^Prelude.Types.Nat" .$ var "arg^0")
               ]
           ]
       , scope = var "<Decls.Expr>[0, 1, 2]" .$ var "^outmost-fuel^" .$ var "outer^<r>" .$ var "outer^<rs>" .$ var "outer^<t>"
