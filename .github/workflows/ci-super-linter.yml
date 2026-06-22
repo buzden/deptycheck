@@ -22,6 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
   build:
     name: Lint Code Base
     permissions:
@@ -45,10 +46,18 @@ jobs:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
 
       - name: Lint Code Base
+        #############################################################
+        ## Version below must be in sync with `.gitlab/master.yml` ##
+        #############################################################
         uses: super-linter/super-linter/slim@4ce20838b8ab83717e78138c5b3a1407148e0918 # v8.7.0
         env:
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          ######################################################################
+          ## Config below must be in sync with `.github/workflows/master.yml` ##
+          ######################################################################
+
           IGNORE_GENERATED_FILES: true
           SAVE_SUPER_LINTER_SUMMARY: true # Required for generating linting reports in PR
 
@@ -73,19 +82,4 @@ jobs:
 
       - name: ShellCheck
         shell: bash
-        run: |
-          set -e
-
-          # Find .editorconfig section header that mentions *.sh
-          header=$(grep -F '*.sh' .editorconfig)
-
-          # Get comma-separated patterns
-          patterns=${header#\[\{}
-          patterns=${patterns%\}\]}
-
-          # Build `-name p1 -o -name p2 ...`
-          args=$(python3 -c "import sys; print(' -o '.join(f'-name {p}' for p in sys.argv[1].split(',')))" "$patterns")
-
-          # Run shellcheck on matching files
-          # shellcheck disable=SC2086  # word splitting intended to split string into separate find args
-          find . -type f \( $args \) -exec shellcheck --shell=sh -S warning {} +
+        run: .github/linters/do-shell-check.sh

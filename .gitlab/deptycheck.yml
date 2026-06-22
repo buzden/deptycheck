@@ -25,6 +25,7 @@ pack:prepare:
 
 stages:
   - deptycheck:build
+  - elab-util-extra:test
   - examples
   - deptycheck:test
 
@@ -36,6 +37,13 @@ thirdparties:build:
     - pack install-deps deptycheck
     - pack install summary-stat # for distr tests
       # TODO to compute test dependencies when we have special mini-test libs
+
+elab-util-extra:test:
+  stage: elab-util-extra:test
+  needs:
+    - thirdparties:build
+  script:
+    - pack test elab-util-extra
 
 deptycheck:build:
   stage: deptycheck:build
@@ -53,6 +61,7 @@ deptycheck:test:
     matrix:
       - TEST_SET: [ TEST_SETS ]
   script:
+    - apt-get -qq update && apt-get -qqy install python3
     - pack test deptycheck "$TEST_SET"
 
 example:build-and-test:
