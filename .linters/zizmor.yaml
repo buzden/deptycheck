@@ -1,5 +1,7 @@
 ---
 rules:
+  # Allow referencing actions by tags instead of commit SHAs
   unpinned-uses:
-    # Allow referencing actions by tags instead of commit SHAs
+    disable: true
+  unpinned-images:
     disable: true
