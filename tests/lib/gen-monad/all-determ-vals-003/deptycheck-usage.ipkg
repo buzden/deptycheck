@@ -1,0 +1,7 @@
+package deptycheck-usage
+
+depends = deptycheck
+
+main = Run
+
+executable = deptycheck-usage-example
