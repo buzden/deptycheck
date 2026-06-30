@@ -305,6 +305,16 @@ mkOneOf {em=MaybeEmpty} xs =
 --- Running generators ---
 --------------------------
 
+||| Returns a lazy list of all values that this generator can generate, except for those values which use raw generators, like `choose` or `chooseAny`.
+export
+allDetermValues : Gen em a -> LazyList a
+allDetermValues Empty          = []
+allDetermValues $ Pure x       = [x]
+allDetermValues $ Raw {}       = [] -- here we take only determinicstic values, no raw gens
+allDetermValues $ OneOf gs     = toLazyList (unGenAlts gs) >>= \(_, g) => allDetermValues $ assert_smaller gs g
+allDetermValues $ Bind {}      = [] -- here we take only determinicstic values, no raw gens
+allDetermValues $ Labelled _ g = allDetermValues g
+
 --- Non-empty generators ---
 
 export
