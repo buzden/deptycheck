@@ -810,6 +810,15 @@ withDeepAlts depth a b = oneOf $ deepAlternativesOf depth a ++ deepAlternativesO
 --- Filtering ---
 -----------------
 
+||| A function that behaves for `Gen0` like `guard` function for `Alternative`.
+|||
+||| It can be used as a handy way to filter directly in do-notation.
+||| Generally, try to avoid direct filterings since they can lead to very ineffective generation.
+public export
+guard : Bool -> Gen0 ()
+guard True  = pure ()
+guard False = empty
+
 export
 mapMaybe : (a -> Maybe b) -> Gen em a -> Gen0 b
 mapMaybe f g = maybe empty pure . f =<< relax g
