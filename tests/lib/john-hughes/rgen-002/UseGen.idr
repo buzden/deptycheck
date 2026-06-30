@@ -10,10 +10,6 @@ import System.Random.Pure.StdGen
 
 %cg chez lazy=weakMemo
 
-guard : Bool -> Gen0 ()
-guard True  = pure ()
-guard False = empty
-
 fun : Gen0 $ List Int
 fun = do
   let nums = elements [1 .. 100]

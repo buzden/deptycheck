@@ -10,7 +10,7 @@ gen : Gen MaybeEmpty (Nat, Nat)
 gen = do
   a <- elements [1 .. 100]
   b <- elements [1 .. 100]
-  if a == b then pure () else empty
+  guard $ a == b
   pure (a, b)
 
 main : IO Unit
