@@ -51,12 +51,20 @@ jobs:
       - name: No-op step
         run: echo "This job exists only for validation."
 
-  ################
-  # Preparations #
-  ################
+  ############################
+  # Build DepTyCheck library #
+  ############################
 
-  prepare-pack:
-    name: Prepare `pack`
+  deptycheck-build-lib:
+    name: Build the lib
+    needs: validate_trigger
+    uses: DepTyCheck/idris2-actions/.github/workflows/build-and-test.yml@master
+    with:
+      ipkg_path: deptycheck.ipkg
+      run_tests: false
+
+  thirdparties-build:
+    name: Build thirdparties
     needs: validate_trigger
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
@@ -69,30 +77,6 @@ jobs:
       - name: Switch to appropriate `pack` collection
         run: pack switch "$( if [[ '${{ github.event_name }}' == 'schedule' ]]; then echo HEAD; else ./.pack-collection; fi )"
       - run: ./.patch-chez-gc-handler idris2
-
-      - name: Tar the `pack` dir
-        run: .github/tar-pack save-pack "${{ env.pack_dir_file }}"
-      - name: Save state of `pack`
-        uses: actions/upload-artifact@v7
-        with:
-          name: pack-dir
-          path: ${{ env.pack_dir_file }}
-
-  thirdparties-build:
-    name: Build thirdparties
-    needs: prepare-pack
-    runs-on: ubuntu-latest
-    container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
-      - name: Restore state of `pack`
-        uses: actions/download-artifact@v7
-        with:
-          name: pack-dir
-      - name: Untar the `pack` dir
-        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
 
       - run: pack install-deps deptycheck
       - run: pack install summary-stat # for distr tests
@@ -112,38 +96,12 @@ jobs:
 
   elab-util-extra-test:
     name: Test elab-util-extra
-    needs:
-      - prepare-pack
-      - thirdparties-build
+    needs: thirdparties-build
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
-      - name: Restore built thirdparties
-        uses: actions/download-artifact@v6
-        with:
-          name: built-thirdparties
-      - name: Untar the `pack` dir
-        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
-
-      - run: pack test elab-util-extra
-
-  ############################
-  # Build DepTyCheck library #
-  ############################
-
-  deptycheck-build-lib:
-    name: Build the lib
-    needs:
-      - prepare-pack
-      - thirdparties-build
-    runs-on: ubuntu-latest
-    container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    steps:
-      - uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built thirdparties
@@ -153,18 +111,7 @@ jobs:
       - name: Untar the `pack` dir
         run: .github/tar-pack restore "${{ env.pack_dir_file }}"
 
-      - run: pack build deptycheck
-      - run: pack install deptycheck
-
-      - name: Tar the `pack` dir
-        run: .github/tar-pack save-pack "${{ env.pack_dir_file }}"
-      - name: Tar built TTC files
-        run: find "$(pwd)" -name '*.tt[cm]' | .github/tar-pack save-stdin "${{ env.pack_dir_file }}"
-      - name: Save built DepTyCheck
-        uses: actions/upload-artifact@v7
-        with:
-          name: built-deptycheck
-          path: ${{ env.pack_dir_file }}
+      - run: pack test elab-util-extra
 
   ###########################
   # Build DepTyCheck's docs #
@@ -214,7 +161,6 @@ jobs:
   deptycheck-test:
     name: Test the lib
     needs:
-      - prepare-pack
       - deptycheck-build-lib
       - get-test-sets
     runs-on: ubuntu-latest
@@ -231,11 +177,13 @@ jobs:
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v7
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@master
         with:
-          name: built-deptycheck
-      - name: Untar the `pack` dir
-        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
+          package: ${{ needs.deptycheck-build-lib.outputs.package }}
+          mode: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants)[0].mode }}
+          project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
+
+      - run: pack install summary-stat # for distr tests
 
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
@@ -278,7 +226,6 @@ jobs:
   examples-build:
     name: Build and test examples
     needs:
-      - prepare-pack
       - deptycheck-build-lib
       - get-examples
     runs-on: ubuntu-latest
@@ -294,11 +241,11 @@ jobs:
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built DepTyCheck
-        uses: actions/download-artifact@v7
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@master
         with:
-          name: built-deptycheck
-      - name: Untar the `pack` dir
-        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
+          package: ${{ needs.deptycheck-build-lib.outputs.package }}
+          mode: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants)[0].mode }}
+          project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
 
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
