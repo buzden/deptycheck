@@ -28,9 +28,6 @@ defaults:
   run:
     shell: bash
 
-env:
-  pack_dir_file: pack-dir.tar
-
 # TODO to reduce duplication, e.g. by using https://docs.github.com/en/actions/using-workflows/reusing-workflows
 
 jobs:
@@ -63,53 +60,66 @@ jobs:
       ipkg_path: deptycheck.ipkg
       run_tests: false
 
-  thirdparties-build:
-    name: Build thirdparties
-    needs: validate_trigger
+  install-extra-deps:
+    name: Install extra deps (${{ matrix.variant.mode }})
+    needs: deptycheck-build-lib
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants) }}
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
 
-      - run: pack update-db
-      - name: Switch to appropriate `pack` collection
-        run: pack switch "$( if [[ '${{ github.event_name }}' == 'schedule' ]]; then echo HEAD; else ./.pack-collection; fi )"
-      - run: ./.patch-chez-gc-handler idris2
+      - name: Restore built DepTyCheck
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@master
+        with:
+          package: ${{ needs.deptycheck-build-lib.outputs.package }}
+          mode: ${{ matrix.variant.mode }}
+          project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
 
-      - run: pack install-deps deptycheck
       - run: pack install summary-stat # for distr tests
              # TODO to compute test dependencies when we have special mini-test libs
 
-      - name: Tar the `pack` dir
-        run: .github/tar-pack save-pack "${{ env.pack_dir_file }}"
-      - name: Save built thirdparties
-        uses: actions/upload-artifact@v7
+      - name: Upload state with extra deps
+        uses: DepTyCheck/idris2-actions/.github/actions/upload-pack-state@master
         with:
-          name: built-thirdparties
-          path: ${{ env.pack_dir_file }}
+          package: ${{ needs.deptycheck-build-lib.outputs.package }}
+          mode: ${{ matrix.variant.mode }}
+          suffix: extra-deps
+          project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
+          build_dir: ${{ needs.deptycheck-build-lib.outputs.build_dir }}
 
   ########################
   # Test elab-util-extra #
   ########################
 
   elab-util-extra-test:
-    name: Test elab-util-extra
-    needs: thirdparties-build
+    name: Test elab-util-extra (${{ matrix.variant.mode }})
+    needs:
+      - deptycheck-build-lib
+      - install-extra-deps
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
-      - name: Restore built thirdparties
-        uses: actions/download-artifact@v7
+      - name: Restore state with extra deps
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@master
         with:
-          name: built-thirdparties
-      - name: Untar the `pack` dir
-        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
+          package: ${{ needs.deptycheck-build-lib.outputs.package }}
+          mode: ${{ matrix.variant.mode }}
+          suffix: extra-deps
+          project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
 
       - run: pack test elab-util-extra
 
@@ -159,9 +169,10 @@ jobs:
           ) >> "$GITHUB_OUTPUT"
 
   deptycheck-test:
-    name: Test the lib
+    name: Test the lib (${{ matrix.variant.mode }})
     needs:
       - deptycheck-build-lib
+      - install-extra-deps
       - get-test-sets
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
@@ -170,20 +181,20 @@ jobs:
     strategy:
       fail-fast: false # all test cases are more or less independent
       matrix:
+        variant: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants) }}
         test_set: ${{ fromJSON(needs.get-test-sets.outputs.test-sets) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
-      - name: Restore built DepTyCheck
+      - name: Restore state with extra deps
         uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@master
         with:
           package: ${{ needs.deptycheck-build-lib.outputs.package }}
-          mode: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants)[0].mode }}
+          mode: ${{ matrix.variant.mode }}
+          suffix: extra-deps
           project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
-
-      - run: pack install summary-stat # for distr tests
 
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
@@ -224,7 +235,7 @@ jobs:
           ) >> "$GITHUB_OUTPUT"
 
   examples-build:
-    name: Build and test examples
+    name: Build and test examples (${{ matrix.variant.mode }})
     needs:
       - deptycheck-build-lib
       - get-examples
@@ -233,6 +244,7 @@ jobs:
     strategy:
       fail-fast: false # all test cases are more or less independent
       matrix:
+        variant: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants) }}
         example: ${{ fromJSON(needs.get-examples.outputs.examples) }}
     env:
       EXAMPLE_NAME: ${{ matrix.example }}
@@ -244,7 +256,7 @@ jobs:
         uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@master
         with:
           package: ${{ needs.deptycheck-build-lib.outputs.package }}
-          mode: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants)[0].mode }}
+          mode: ${{ matrix.variant.mode }}
           project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
 
       - name: Sleep a random bit
