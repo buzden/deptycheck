@@ -55,7 +55,7 @@ jobs:
   deptycheck-build-lib:
     name: Build the lib
     needs: validate_trigger
-    uses: DepTyCheck/idris2-actions/.github/workflows/build-and-test.yml@master
+    uses: DepTyCheck/idris2-actions/.github/workflows/build-and-test.yml@v1
     with:
       ipkg_path: deptycheck.ipkg
       run_tests: false
@@ -75,7 +75,7 @@ jobs:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
 
       - name: Restore built DepTyCheck
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@master
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@v1
         with:
           package: ${{ needs.deptycheck-build-lib.outputs.package }}
           mode: ${{ matrix.variant.mode }}
@@ -85,7 +85,7 @@ jobs:
              # TODO to compute test dependencies when we have special mini-test libs
 
       - name: Upload state with extra deps
-        uses: DepTyCheck/idris2-actions/.github/actions/upload-pack-state@master
+        uses: DepTyCheck/idris2-actions/.github/actions/upload-pack-state@v1
         with:
           package: ${{ needs.deptycheck-build-lib.outputs.package }}
           mode: ${{ matrix.variant.mode }}
@@ -114,7 +114,7 @@ jobs:
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore state with extra deps
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@master
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@v1
         with:
           package: ${{ needs.deptycheck-build-lib.outputs.package }}
           mode: ${{ matrix.variant.mode }}
@@ -189,7 +189,7 @@ jobs:
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore state with extra deps
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@master
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@v1
         with:
           package: ${{ needs.deptycheck-build-lib.outputs.package }}
           mode: ${{ matrix.variant.mode }}
@@ -253,7 +253,7 @@ jobs:
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built DepTyCheck
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@master
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@v1
         with:
           package: ${{ needs.deptycheck-build-lib.outputs.package }}
           mode: ${{ matrix.variant.mode }}
