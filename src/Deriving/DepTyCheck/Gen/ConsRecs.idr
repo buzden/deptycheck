@@ -153,7 +153,8 @@ leftDepth = go 1 where
 -- TODO to think of better placement for this function; this anyway is intended to be called from the derived code.
 public export
 liftNatWeight : Nat -> Nat1
-liftNatWeight n = fromNat $ S n
+liftNatWeight Z       = fromNat 1
+liftNatWeight n@(S _) = fromNat n
 
 -- This function is moved out from `getConsRecs` to reduce the closure of the returned function
 finCR : NamesInfoInTypes =>
