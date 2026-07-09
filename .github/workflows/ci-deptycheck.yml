@@ -242,7 +242,7 @@ jobs:
   examples-build:
     name: Build and test examples
     needs:
-      - deptycheck-build-lib
+      - install-extra-deps
       - get-examples
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
@@ -256,10 +256,10 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
-      - name: Restore built DepTyCheck
+      - name: Restore state with extra deps
         uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
+          state: ${{ needs.install-extra-deps.outputs.pack_state }}
 
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
