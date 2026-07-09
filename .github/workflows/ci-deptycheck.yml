@@ -63,7 +63,14 @@ jobs:
 
       - name: Select pack collection
         id: collection
-        run: echo "pack_collections=[\"$(if [[ '${{ github.event_name }}' == 'schedule' ]]; then echo HEAD; else ./.pack-collection; fi)\"]" >> "$GITHUB_OUTPUT"
+        run: |
+          if [[ '${{ github.event_name }}' == 'schedule' ]]; then
+            COLLECTION="HEAD"
+          else
+            COLLECTION=$(./.pack-collection)
+          fi
+
+          echo "pack_collections=[\"$COLLECTION\"]" >> "$GITHUB_OUTPUT"
 
   ############################
   # Build DepTyCheck library #
