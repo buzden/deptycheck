@@ -48,48 +48,62 @@ jobs:
       - name: No-op step
         run: echo "This job exists only for validation."
 
+  get-pack-collection:
+    name: Select pack collection
+    needs: validate_trigger
+    runs-on: ubuntu-latest
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    outputs:
+      pack_collections: ${{ steps.collection.outputs.pack_collections }}
+    steps:
+      - uses: actions/checkout@v6
+        if: github.event_name != 'schedule'
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
+
+      - name: Select pack collection
+        id: collection
+        run: echo "pack_collections=[\"$(if [[ '${{ github.event_name }}' == 'schedule' ]]; then echo HEAD; else ./.pack-collection; fi)\"]" >> "$GITHUB_OUTPUT"
+
   ############################
   # Build DepTyCheck library #
   ############################
 
   deptycheck-build-lib:
     name: Build the lib
-    needs: validate_trigger
+    needs: get-pack-collection
     uses: DepTyCheck/idris2-actions/.github/workflows/build-and-test.yml@v1
     with:
-      ipkg_path: deptycheck.ipkg
+      pack_collections: ${{ needs.get-pack-collection.outputs.pack_collections }}
       run_tests: false
 
   install-extra-deps:
-    name: Install extra deps (${{ matrix.variant.mode }})
+    name: Install extra deps
     needs: deptycheck-build-lib
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    strategy:
-      fail-fast: false
-      matrix:
-        variant: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants) }}
+    outputs:
+      pack_state: ${{ steps.upload-pack-state.outputs.state }}
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
 
       - name: Restore built DepTyCheck
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@v1
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          package: ${{ needs.deptycheck-build-lib.outputs.package }}
-          mode: ${{ matrix.variant.mode }}
-          project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
+          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
 
       - run: pack install summary-stat # for distr tests
              # TODO to compute test dependencies when we have special mini-test libs
 
       - name: Upload state with extra deps
+        id: upload-pack-state
         uses: DepTyCheck/idris2-actions/.github/actions/upload-pack-state@v1
         with:
           package: ${{ needs.deptycheck-build-lib.outputs.package }}
-          mode: ${{ matrix.variant.mode }}
-          suffix: extra-deps
+          collection: ${{ fromJSON(needs.deptycheck-build-lib.outputs.collections)[0] }}
+          label: extra-deps
           project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
           build_dir: ${{ needs.deptycheck-build-lib.outputs.build_dir }}
 
@@ -98,28 +112,21 @@ jobs:
   ########################
 
   elab-util-extra-test:
-    name: Test elab-util-extra (${{ matrix.variant.mode }})
+    name: Test elab-util-extra
     needs:
       - deptycheck-build-lib
       - install-extra-deps
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    strategy:
-      fail-fast: false
-      matrix:
-        variant: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore state with extra deps
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@v1
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          package: ${{ needs.deptycheck-build-lib.outputs.package }}
-          mode: ${{ matrix.variant.mode }}
-          suffix: extra-deps
-          project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
+          state: ${{ needs.install-extra-deps.outputs.pack_state }}
 
       - run: pack test elab-util-extra
 
@@ -169,19 +176,16 @@ jobs:
           ) >> "$GITHUB_OUTPUT"
 
   deptycheck-test:
-    name: Test the lib (${{ matrix.variant.mode }})
+    name: Test the lib
     needs:
       - deptycheck-build-lib
       - install-extra-deps
       - get-test-sets
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    env:
-      NUM_THREADS: 2
     strategy:
       fail-fast: false # all test cases are more or less independent
       matrix:
-        variant: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants) }}
         test_set: ${{ fromJSON(needs.get-test-sets.outputs.test-sets) }}
     steps:
       - name: Checkout
@@ -189,12 +193,9 @@ jobs:
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore state with extra deps
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@v1
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          package: ${{ needs.deptycheck-build-lib.outputs.package }}
-          mode: ${{ matrix.variant.mode }}
-          suffix: extra-deps
-          project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
+          state: ${{ needs.install-extra-deps.outputs.pack_state }}
 
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
@@ -235,7 +236,7 @@ jobs:
           ) >> "$GITHUB_OUTPUT"
 
   examples-build:
-    name: Build and test examples (${{ matrix.variant.mode }})
+    name: Build and test examples
     needs:
       - deptycheck-build-lib
       - get-examples
@@ -244,7 +245,6 @@ jobs:
     strategy:
       fail-fast: false # all test cases are more or less independent
       matrix:
-        variant: ${{ fromJSON(needs.deptycheck-build-lib.outputs.variants) }}
         example: ${{ fromJSON(needs.get-examples.outputs.examples) }}
     env:
       EXAMPLE_NAME: ${{ matrix.example }}
@@ -253,11 +253,9 @@ jobs:
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore built DepTyCheck
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-cache@v1
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          package: ${{ needs.deptycheck-build-lib.outputs.package }}
-          mode: ${{ matrix.variant.mode }}
-          project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
+          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
 
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
