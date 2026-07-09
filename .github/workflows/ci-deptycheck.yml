@@ -120,9 +120,7 @@ jobs:
 
   elab-util-extra-test:
     name: Test elab-util-extra
-    needs:
-      - deptycheck-build-lib
-      - install-extra-deps
+    needs: install-extra-deps
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
@@ -185,7 +183,6 @@ jobs:
   deptycheck-test:
     name: Test the lib
     needs:
-      - deptycheck-build-lib
       - install-extra-deps
       - get-test-sets
     runs-on: ubuntu-latest
