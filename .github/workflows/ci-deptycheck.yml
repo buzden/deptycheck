@@ -103,7 +103,7 @@ jobs:
 
       - run: pack install summary-stat # for distr tests
              # TODO to compute test dependencies when we have special mini-test libs
-
+      - run: sleep 2 # avoid such error during next step. tar: /root/.cache/pack: file changed as we read it
       - name: Upload state with extra deps
         id: upload-pack-state
         uses: DepTyCheck/idris2-actions/.github/actions/upload-pack-state@master
