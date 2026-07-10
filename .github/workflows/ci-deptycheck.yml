@@ -79,7 +79,7 @@ jobs:
   deptycheck-build-lib:
     name: Build the lib
     needs: get-pack-collection
-    uses: DepTyCheck/idris2-actions/.github/workflows/build-and-test.yml@master
+    uses: DepTyCheck/idris2-actions/.github/workflows/build-and-test.yml@v1
     with:
       pack_collections: ${{ needs.get-pack-collection.outputs.pack_collections }}
       run_tests: false
@@ -97,16 +97,16 @@ jobs:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
 
       - name: Restore built DepTyCheck
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@master
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
           state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
 
       - run: pack install summary-stat # for distr tests
              # TODO to compute test dependencies when we have special mini-test libs
-      - run: sleep 2 # avoid such error during next step. tar: /root/.cache/pack: file changed as we read it
+
       - name: Upload state with extra deps
         id: upload-pack-state
-        uses: DepTyCheck/idris2-actions/.github/actions/upload-pack-state@master
+        uses: DepTyCheck/idris2-actions/.github/actions/upload-pack-state@v1
         with:
           package: ${{ needs.deptycheck-build-lib.outputs.package }}
           collection: ${{ fromJSON(needs.deptycheck-build-lib.outputs.collections)[0] }}
@@ -129,7 +129,7 @@ jobs:
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore state with extra deps
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@master
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
           state: ${{ needs.install-extra-deps.outputs.pack_state }}
 
@@ -197,7 +197,7 @@ jobs:
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore state with extra deps
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@master
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
           state: ${{ needs.install-extra-deps.outputs.pack_state }}
 
@@ -257,7 +257,7 @@ jobs:
         with:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Restore state with extra deps
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@master
+        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
           state: ${{ needs.install-extra-deps.outputs.pack_state }}
 
