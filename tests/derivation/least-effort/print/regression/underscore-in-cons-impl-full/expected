@@ -7,22 +7,24 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.IsFS[0(n), 1] ItIsFS - used fin
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.IsFS>[0, 1]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fin.Fin" .$ var "n")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (var "DerivedGen.IsFS" .! ("n", var "n") .$ var "{arg:1}")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.IsFS>[0, 1]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fin.Fin" .$ var "n")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (var "DerivedGen.IsFS" .! ("n", var "n") .$ var "{arg:1}")
+                          }
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.IsFS>[0, 1]"
@@ -30,22 +32,24 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.IsFS[0(n), 1] ItIsFS - used fin
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.ItIsFS>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fin.Fin" .$ var "n")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "DerivedGen.IsFS" .! ("n", var "n") .$ var "{arg:1}")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.ItIsFS>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Data.Fin.Fin" .$ var "n")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "DerivedGen.IsFS" .! ("n", var "n") .$ var "{arg:1}")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.ItIsFS>>"

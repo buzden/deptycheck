@@ -10,57 +10,63 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Z[0(n), 1] Go - used final orde
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.Z>[0, 1]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.Z>[0, 1]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}")
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.Z>[0]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ (var "DerivedGen.Y" .$ var "n")
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
-                                       .=> var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}"))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.Z>[0]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ (var "DerivedGen.Y" .$ var "n")
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
+                                          .=> var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}"))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.X>[0]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (var "DerivedGen.X" .$ var "{arg:2}")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.X>[0]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (var "DerivedGen.X" .$ var "{arg:2}")
+                          }
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.Z>[0, 1]"
@@ -68,39 +74,43 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Z[0(n), 1] Go - used final orde
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Start>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Start>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}")
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Go>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Go>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.Start>>"
@@ -180,43 +190,47 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Z[0(n), 1] Go - used final orde
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Start>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ (var "DerivedGen.Y" .$ var "n")
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
-                                                      .=> var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Start>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ (var "DerivedGen.Y" .$ var "n")
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
+                                                         .=> var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}"))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Go>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ (var "DerivedGen.Y" .$ var "n")
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
-                                                      .=> var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Go>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ (var "DerivedGen.Y" .$ var "n")
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Y" .$ var "n")
+                                                         .=> var "DerivedGen.Z" .! ("n", var "n") .$ var "{arg:1}"))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.Start>>"
@@ -304,21 +318,23 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Z[0(n), 1] Go - used final orde
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.MkX>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "DerivedGen.X" .$ var "{arg:2}")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.MkX>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "DerivedGen.X" .$ var "{arg:2}")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.MkX>>"

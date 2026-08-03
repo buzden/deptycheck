@@ -8,27 +8,29 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Each[0(arity), 1(m), 2(vals)] N
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.Each>[0, 1, 2]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "arity") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "m") (var "DerivedGen.C")
-                           .-> MkArg
-                                 MW
-                                 ExplicitArg
-                                 (Just "vals")
-                                 (var "Data.Vect.Vect" .$ var "arity" .$ (var "Data.Fin.Fin" .$ (var "DerivedGen.C..len" .$ var "m")))
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (var "DerivedGen.Each" .! ("arity", var "arity") .$ var "m" .$ var "vals")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.Each>[0, 1, 2]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "arity") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "m") (var "DerivedGen.C")
+                              .-> MkArg
+                                    MW
+                                    ExplicitArg
+                                    (Just "vals")
+                                    (var "Data.Vect.Vect" .$ var "arity" .$ (var "Data.Fin.Fin" .$ (var "DerivedGen.C..len" .$ var "m")))
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (var "DerivedGen.Each" .! ("arity", var "arity") .$ var "m" .$ var "vals")
+                          }
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.Each>[0, 1, 2]"
@@ -36,27 +38,29 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Each[0(arity), 1(m), 2(vals)] N
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Next>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "arity") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "m") (var "DerivedGen.C")
-                                          .-> MkArg
-                                                MW
-                                                ExplicitArg
-                                                (Just "vals")
-                                                (var "Data.Vect.Vect" .$ var "arity" .$ (var "Data.Fin.Fin" .$ (var "DerivedGen.C..len" .$ var "m")))
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "DerivedGen.Each" .! ("arity", var "arity") .$ var "m" .$ var "vals")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Next>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "arity") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "m") (var "DerivedGen.C")
+                                             .-> MkArg
+                                                   MW
+                                                   ExplicitArg
+                                                   (Just "vals")
+                                                   (var "Data.Vect.Vect" .$ var "arity" .$ (var "Data.Fin.Fin" .$ (var "DerivedGen.C..len" .$ var "m")))
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "DerivedGen.Each" .! ("arity", var "arity") .$ var "m" .$ var "vals")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.Next>>"

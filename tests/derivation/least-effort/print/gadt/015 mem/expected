@@ -8,43 +8,47 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex[0(sx), 3] There' - used
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.AtIndex>[0, 3]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "sx") (var "DerivedGen.SnocListTyMut")
-                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Mut")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ (var "DerivedGen.IndexIn" .$ var "sx")
-                                   .$ (    MkArg MW ExplicitArg (Just "idx") (var "DerivedGen.IndexIn" .$ var "sx")
-                                       .=>    var "Builtin.DPair.DPair"
-                                           .$ var "DerivedGen.Ty"
-                                           .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
-                                               .=>    var "DerivedGen.AtIndex"
-                                                   .! ("sx", var "sx")
-                                                   .$ var "idx"
-                                                   .$ var "{arg:2}"
-                                                   .$ var "{arg:1}")))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.AtIndex>[0, 3]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "sx") (var "DerivedGen.SnocListTyMut")
+                              .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Mut")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ (var "DerivedGen.IndexIn" .$ var "sx")
+                                      .$ (    MkArg MW ExplicitArg (Just "idx") (var "DerivedGen.IndexIn" .$ var "sx")
+                                          .=>    var "Builtin.DPair.DPair"
+                                              .$ var "DerivedGen.Ty"
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
+                                                  .=>    var "DerivedGen.AtIndex"
+                                                      .! ("sx", var "sx")
+                                                      .$ var "idx"
+                                                      .$ var "{arg:2}"
+                                                      .$ var "{arg:1}")))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "weight^DerivedGen.SnocListTyMut"
-                       , type = MkArg MW ExplicitArg Nothing (var "DerivedGen.SnocListTyMut") .-> var "Data.Nat1.Nat1"
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "weight^DerivedGen.SnocListTyMut"
+                          , type = MkArg MW ExplicitArg Nothing (var "DerivedGen.SnocListTyMut") .-> var "Data.Nat1.Nat1"
+                          }
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.AtIndex>[0, 3]"
@@ -52,59 +56,63 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex[0(sx), 3] There' - used
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Here'>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "sx") (var "DerivedGen.SnocListTyMut")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Mut")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ (var "DerivedGen.IndexIn" .$ var "sx")
-                                                  .$ (    MkArg MW ExplicitArg (Just "idx") (var "DerivedGen.IndexIn" .$ var "sx")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ var "DerivedGen.Ty"
-                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
-                                                              .=>    var "DerivedGen.AtIndex"
-                                                                  .! ("sx", var "sx")
-                                                                  .$ var "idx"
-                                                                  .$ var "{arg:2}"
-                                                                  .$ var "{arg:1}")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Here'>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "sx") (var "DerivedGen.SnocListTyMut")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Mut")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ (var "DerivedGen.IndexIn" .$ var "sx")
+                                                     .$ (    MkArg MW ExplicitArg (Just "idx") (var "DerivedGen.IndexIn" .$ var "sx")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ var "DerivedGen.Ty"
+                                                             .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
+                                                                 .=>    var "DerivedGen.AtIndex"
+                                                                     .! ("sx", var "sx")
+                                                                     .$ var "idx"
+                                                                     .$ var "{arg:2}"
+                                                                     .$ var "{arg:1}")))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.There'>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "sx") (var "DerivedGen.SnocListTyMut")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Mut")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ (var "DerivedGen.IndexIn" .$ var "sx")
-                                                  .$ (    MkArg MW ExplicitArg (Just "idx") (var "DerivedGen.IndexIn" .$ var "sx")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ var "DerivedGen.Ty"
-                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
-                                                              .=>    var "DerivedGen.AtIndex"
-                                                                  .! ("sx", var "sx")
-                                                                  .$ var "idx"
-                                                                  .$ var "{arg:2}"
-                                                                  .$ var "{arg:1}")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.There'>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "sx") (var "DerivedGen.SnocListTyMut")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.Mut")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ (var "DerivedGen.IndexIn" .$ var "sx")
+                                                     .$ (    MkArg MW ExplicitArg (Just "idx") (var "DerivedGen.IndexIn" .$ var "sx")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ var "DerivedGen.Ty"
+                                                             .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Ty")
+                                                                 .=>    var "DerivedGen.AtIndex"
+                                                                     .! ("sx", var "sx")
+                                                                     .$ var "idx"
+                                                                     .$ var "{arg:2}"
+                                                                     .$ var "{arg:1}")))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.Here'>>"

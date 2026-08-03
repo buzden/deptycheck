@@ -8,23 +8,25 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.NT[0(ar), 1(cfg), 2] NTF - used
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.NT>[0, 1, 2]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "ar") (var "DerivedGen.NA")
-                           .-> MkArg MW ExplicitArg (Just "cfg") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.N" .$ var "cfg" .$ var "ar")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (var "DerivedGen.NT" .! ("ar", var "ar") .! ("cfg", var "cfg") .$ var "{arg:1}")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.NT>[0, 1, 2]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "ar") (var "DerivedGen.NA")
+                              .-> MkArg MW ExplicitArg (Just "cfg") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.N" .$ var "cfg" .$ var "ar")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (var "DerivedGen.NT" .! ("ar", var "ar") .! ("cfg", var "cfg") .$ var "{arg:1}")
+                          }
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.NT>[0, 1, 2]"
@@ -36,23 +38,25 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.NT[0(ar), 1(cfg), 2] NTF - used
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.NTF>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "ar") (var "DerivedGen.NA")
-                                          .-> MkArg MW ExplicitArg (Just "cfg") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.N" .$ var "cfg" .$ var "ar")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "DerivedGen.NT" .! ("ar", var "ar") .! ("cfg", var "cfg") .$ var "{arg:1}")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.NTF>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "ar") (var "DerivedGen.NA")
+                                             .-> MkArg MW ExplicitArg (Just "cfg") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.N" .$ var "cfg" .$ var "ar")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "DerivedGen.NT" .! ("ar", var "ar") .! ("cfg", var "cfg") .$ var "{arg:1}")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.NTF>>"

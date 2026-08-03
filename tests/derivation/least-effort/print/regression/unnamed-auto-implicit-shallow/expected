@@ -8,44 +8,50 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.Y>[1]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.X")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ var "Builtin.Unit"
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Builtin.Unit")
-                                       .=> var "DerivedGen.Y" .$ var "{arg:2}" .$ var "{arg:1}"))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.Y>[1]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.X")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ var "Builtin.Unit"
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Builtin.Unit")
+                                          .=> var "DerivedGen.Y" .$ var "{arg:2}" .$ var "{arg:1}"))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Builtin.Unit>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Builtin.Unit"
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Builtin.Unit>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Builtin.Unit"
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type = mkTy {name = "weight^DerivedGen.X", type = MkArg MW ExplicitArg Nothing (var "DerivedGen.X") .-> var "Data.Nat1.Nat1"}
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type = mkTy {name = "weight^DerivedGen.X", type = MkArg MW ExplicitArg Nothing (var "DerivedGen.X") .-> var "Data.Nat1.Nat1"}
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.Y>[1]"
@@ -53,43 +59,47 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.A>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.X")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Builtin.Unit"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Builtin.Unit")
-                                                      .=> var "DerivedGen.Y" .$ var "{arg:2}" .$ var "{arg:1}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.A>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.X")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Builtin.Unit"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Builtin.Unit")
+                                                         .=> var "DerivedGen.Y" .$ var "{arg:2}" .$ var "{arg:1}"))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.B>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.X")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Builtin.Unit"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Builtin.Unit")
-                                                      .=> var "DerivedGen.Y" .$ var "{arg:2}" .$ var "{arg:1}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.B>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "DerivedGen.X")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Builtin.Unit"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Builtin.Unit")
+                                                         .=> var "DerivedGen.Y" .$ var "{arg:2}" .$ var "{arg:1}"))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.A>>"
@@ -157,18 +167,20 @@ LOG deptycheck.derive.least-effort:7: Builtin.Unit[] MkUnit - used final order: 
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Builtin.MkUnit>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Builtin.Unit"
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Builtin.MkUnit>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Builtin.Unit"
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Builtin.MkUnit>>"

@@ -12,26 +12,28 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[] Step - used final order: 
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.LT2>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ var "Prelude.Types.Nat"
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
-                                       .=>    var "Builtin.DPair.DPair"
-                                           .$ var "Prelude.Types.Nat"
-                                           .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                               .=> var "DerivedGen.LT2" .$ var "{arg:2}" .$ var "{arg:3}")))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.LT2>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ var "Prelude.Types.Nat"
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                          .=>    var "Builtin.DPair.DPair"
+                                              .$ var "Prelude.Types.Nat"
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                                  .=> var "DerivedGen.LT2" .$ var "{arg:2}" .$ var "{arg:3}")))
+                          }
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.LT2>[]"
@@ -39,47 +41,51 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.LT2[] Step - used final order: 
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Base>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ var "Prelude.Types.Nat"
-                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                                              .=> var "DerivedGen.LT2" .$ var "{arg:2}" .$ var "{arg:3}")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Base>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ var "Prelude.Types.Nat"
+                                                             .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                                                 .=> var "DerivedGen.LT2" .$ var "{arg:2}" .$ var "{arg:3}")))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Step>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ var "Prelude.Types.Nat"
-                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                                              .=> var "DerivedGen.LT2" .$ var "{arg:2}" .$ var "{arg:3}")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Step>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ var "Prelude.Types.Nat"
+                                                             .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                                                 .=> var "DerivedGen.LT2" .$ var "{arg:2}" .$ var "{arg:3}")))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.Base>>"
