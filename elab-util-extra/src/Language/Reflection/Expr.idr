@@ -152,6 +152,70 @@ public export %inline
 reAppAny : Foldable f => TTImp -> f AnyApp -> TTImp
 reAppAny = foldl reAppAny1
 
+----------------------------------------------------------------------------
+--- Facilities for managing argument values in function application expr ---
+----------------------------------------------------------------------------
+
+||| All argument values applied in an expression
+|||
+||| Used for convenience when traversing given arguments and their types
+public export
+record AllApps where
+  constructor MkAllApps
+  explicitArgs : List TTImp
+  autoArgs : List TTImp
+  namedArgs : SortedMap Name TTImp
+
+||| Insert an `AnyApp` into `AllApps`
+public export
+addApp : AnyApp -> AllApps -> AllApps
+addApp (PosApp s) = {explicitArgs $= (s ::)}
+addApp (NamedApp nm s) = {namedArgs $= insert nm s}
+addApp (AutoApp s) = {autoArgs $= (s ::)}
+addApp (WithApp s) = {explicitArgs $= (s ::)}
+
+||| Make an `AllApps` out of a list of `AnyApp`
+|||
+||| Used in conjunction with `unAppAny`
+public export
+mkAllApps : List AnyApp -> AllApps
+mkAllApps laa = foldl (flip addApp) (MkAllApps [] [] empty) $ reverse laa
+
+||| Pop a value from `AllApps` by argument name
+|||
+||| The argument/value is returned from `AllApps`
+public export
+popNamed : Maybe Name -> AllApps -> (Maybe TTImp, AllApps)
+popNamed Nothing ap = (Nothing, ap)
+popNamed (Just x) ap =
+  case lookup x ap.namedArgs of
+    Nothing => (Nothing, ap)
+    Just t => (Just t, {namedArgs $= delete x} ap)
+
+||| Pop an argument value from `AllApps`, returning Nothing if no value is given
+|||
+||| The argument/value is returned from `AllApps`
+public export
+popArgVal : Arg -> AllApps -> (Maybe TTImp, AllApps)
+popArgVal (MkArg _ ImplicitArg name _) ap = popNamed name ap
+popArgVal (MkArg _ ExplicitArg name _) (MkAllApps (x :: xs) autoArgs namedArgs) = (Just x, MkAllApps xs autoArgs namedArgs)
+popArgVal (MkArg _ ExplicitArg name _) ap = popNamed name ap
+popArgVal (MkArg _ AutoImplicit name _) (MkAllApps explicitArgs (x :: xs) namedArgs) = (Just x, MkAllApps explicitArgs xs namedArgs)
+popArgVal (MkArg _ AutoImplicit name _) ap = popNamed name ap
+popArgVal (MkArg _ (DefImplicit x) Nothing _) ap = (Just x, ap)
+popArgVal (MkArg _ (DefImplicit x) (Just n) _) ap =
+  case lookup n ap.namedArgs of
+    Nothing => (Just x, ap)
+    Just t => (Just t , {namedArgs $= delete n} ap)
+
+||| Extract given values of arguments from `AllApps`
+public export
+popArgVals : List Arg -> AllApps -> List (Maybe TTImp)
+popArgVals [] aa = []
+popArgVals (x :: xs) aa = do
+  let (mr, aa) = popArgVal x aa
+  mr :: popArgVals xs aa
+
 ---------------------------------------
 --- Building of special expressions ---
 ---------------------------------------
