@@ -11,52 +11,58 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Decls.RegIsType>[0, 2, 3]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Ty")
-                           .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Regs" .$ var "r")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ (var "Data.Fin.Fin" .$ var "r")
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.Fin.Fin" .$ var "r")
-                                       .=> var "Decls.RegIsType" .! ("r", var "r") .$ var "{arg:3}" .$ var "{arg:1}" .$ var "{arg:2}"))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Decls.RegIsType>[0, 2, 3]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Ty")
+                              .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Regs" .$ var "r")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ (var "Data.Fin.Fin" .$ var "r")
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.Fin.Fin" .$ var "r")
+                                          .=> var "Decls.RegIsType" .! ("r", var "r") .$ var "{arg:3}" .$ var "{arg:1}" .$ var "{arg:2}"))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Decls.Expr>[0, 1, 2]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Decls.Regs" .$ var "r")
-                           .-> MkArg MW ExplicitArg (Just "{arg:5}") (var "Decls.Ty")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (var "Decls.Expr" .! ("r", var "r") .$ var "{arg:4}" .$ var "{arg:5}")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Decls.Expr>[0, 1, 2]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Decls.Regs" .$ var "r")
+                              .-> MkArg MW ExplicitArg (Just "{arg:5}") (var "Decls.Ty")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (var "Decls.Expr" .! ("r", var "r") .$ var "{arg:4}" .$ var "{arg:5}")
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
+                    }
+              }
           , IDef
               emptyFC
               "<Decls.RegIsType>[0, 2, 3]"
@@ -68,55 +74,59 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Decls.Here>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Ty")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Regs" .$ var "r")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ (var "Data.Fin.Fin" .$ var "r")
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.Fin.Fin" .$ var "r")
-                                                      .=>    var "Decls.RegIsType"
-                                                          .! ("r", var "r")
-                                                          .$ var "{arg:3}"
-                                                          .$ var "{arg:1}"
-                                                          .$ var "{arg:2}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Decls.Here>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Ty")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Regs" .$ var "r")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ (var "Data.Fin.Fin" .$ var "r")
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.Fin.Fin" .$ var "r")
+                                                         .=>    var "Decls.RegIsType"
+                                                             .! ("r", var "r")
+                                                             .$ var "{arg:3}"
+                                                             .$ var "{arg:1}"
+                                                             .$ var "{arg:2}"))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Decls.There>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Ty")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Regs" .$ var "r")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ (var "Data.Fin.Fin" .$ var "r")
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.Fin.Fin" .$ var "r")
-                                                      .=>    var "Decls.RegIsType"
-                                                          .! ("r", var "r")
-                                                          .$ var "{arg:3}"
-                                                          .$ var "{arg:1}"
-                                                          .$ var "{arg:2}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Decls.There>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Decls.Ty")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Decls.Regs" .$ var "r")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ (var "Data.Fin.Fin" .$ var "r")
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Data.Fin.Fin" .$ var "r")
+                                                         .=>    var "Decls.RegIsType"
+                                                             .! ("r", var "r")
+                                                             .$ var "{arg:3}"
+                                                             .$ var "{arg:1}"
+                                                             .$ var "{arg:2}"))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Decls.Here>>"
@@ -227,23 +237,25 @@ LOG deptycheck.derive.least-effort:7: Decls.RegIsType[0(r), 2, 3] There - used f
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Decls.Read>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Decls.Regs" .$ var "r")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:5}") (var "Decls.Ty")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "Decls.Expr" .! ("r", var "r") .$ var "{arg:4}" .$ var "{arg:5}")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Decls.Read>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Decls.Regs" .$ var "r")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:5}") (var "Decls.Ty")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "Decls.Expr" .! ("r", var "r") .$ var "{arg:4}" .$ var "{arg:5}")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Decls.Read>>"

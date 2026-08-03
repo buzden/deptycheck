@@ -24,196 +24,220 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Data.Nat.LTE>[0]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ var "Prelude.Types.Nat"
-                                   .$ (MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat") .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Data.Nat.LTE>[0]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ var "Prelude.Types.Nat"
+                                      .$ (MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat") .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Data.Nat.LTE>[0, 1]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
-                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Data.Nat.LTE>[0, 1]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
+                              .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Data.SortedBinTree.SortedBinTree.AllLT>[0, 1]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Data.SortedBinTree.SortedBinTree.AllLT>[0]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ var "Data.SortedBinTree.SortedBinTree"
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
-                                       .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}"))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Data.SortedBinTree.SortedBinTree.AllLT>[0]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ var "Data.SortedBinTree.SortedBinTree"
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                          .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}"))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Data.SortedBinTree.SortedBinTree.AllGT>[0, 1]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Data.SortedBinTree.SortedBinTree.AllGT>[0]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ var "Data.SortedBinTree.SortedBinTree"
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
-                                       .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}"))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Data.SortedBinTree.SortedBinTree.AllGT>[0]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ var "Data.SortedBinTree.SortedBinTree"
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                          .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}"))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Data.SortedBinTree.SortedBinTree.AllLT>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ var "Prelude.Types.Nat"
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                                       .=>    var "Builtin.DPair.DPair"
-                                           .$ var "Data.SortedBinTree.SortedBinTree"
-                                           .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
-                                               .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Data.SortedBinTree.SortedBinTree.AllLT>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ var "Prelude.Types.Nat"
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                          .=>    var "Builtin.DPair.DPair"
+                                              .$ var "Data.SortedBinTree.SortedBinTree"
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                                  .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Data.SortedBinTree.SortedBinTree.AllGT>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ var "Prelude.Types.Nat"
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                       .=>    var "Builtin.DPair.DPair"
-                                           .$ var "Data.SortedBinTree.SortedBinTree"
-                                           .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
-                                               .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Data.SortedBinTree.SortedBinTree.AllGT>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ var "Prelude.Types.Nat"
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                          .=>    var "Builtin.DPair.DPair"
+                                              .$ var "Data.SortedBinTree.SortedBinTree"
+                                              .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                                  .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Data.SortedBinTree.SortedBinTree>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Data.SortedBinTree.SortedBinTree"
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Data.SortedBinTree.SortedBinTree>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Data.SortedBinTree.SortedBinTree"
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Prelude.Types.Nat>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Prelude.Types.Nat>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "weight^Data.SortedBinTree.SortedBinTree"
-                       , type = MkArg MW ExplicitArg Nothing (var "Data.SortedBinTree.SortedBinTree") .-> var "Data.Nat1.Nat1"
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "weight^Data.SortedBinTree.SortedBinTree"
+                          , type = MkArg MW ExplicitArg Nothing (var "Data.SortedBinTree.SortedBinTree") .-> var "Data.Nat1.Nat1"
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type = mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type = mkTy {name = "weight^Prelude.Types.Nat", type = MkArg MW ExplicitArg Nothing (var "Prelude.Types.Nat") .-> var "Data.Nat1.Nat1"}
+                    }
+              }
           , IDef
               emptyFC
               "<Data.Nat.LTE>[0]"
@@ -221,41 +245,45 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.Nat.LTEZero>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat") .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.Nat.LTEZero>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat") .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.Nat.LTESucc>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat") .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.Nat.LTESucc>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat") .=> var "Data.Nat.LTE" .$ var "n" .$ var "m"))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Data.Nat.LTEZero>>"
@@ -317,39 +345,43 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.Nat.LTEZero>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.Nat.LTEZero>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.Nat.LTESucc>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.Nat.LTESucc>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "n") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "m") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "Data.Nat.LTE" .$ var "n" .$ var "m")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Data.Nat.LTEZero>>"
@@ -401,39 +433,43 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
@@ -511,43 +547,47 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Data.SortedBinTree.SortedBinTree"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
-                                                      .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Data.SortedBinTree.SortedBinTree"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                                         .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}"))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Data.SortedBinTree.SortedBinTree"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
-                                                      .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Data.SortedBinTree.SortedBinTree"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                                         .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}"))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
@@ -656,39 +696,43 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
@@ -766,43 +810,47 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Data.SortedBinTree.SortedBinTree"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
-                                                      .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Data.SortedBinTree.SortedBinTree"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                                         .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}"))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Data.SortedBinTree.SortedBinTree"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
-                                                      .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Data.SortedBinTree.SortedBinTree"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                                         .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}"))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
@@ -913,47 +961,51 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ var "Data.SortedBinTree.SortedBinTree"
-                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
-                                                              .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ var "Data.SortedBinTree.SortedBinTree"
+                                                             .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                                                 .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ var "Data.SortedBinTree.SortedBinTree"
-                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
-                                                              .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.NodeLT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Types.Nat")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ var "Data.SortedBinTree.SortedBinTree"
+                                                             .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Data.SortedBinTree.SortedBinTree")
+                                                                 .=> var "Data.SortedBinTree.SortedBinTree.AllLT" .$ var "{arg:1}" .$ var "{arg:2}")))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Data.SortedBinTree.SortedBinTree.EmptyLT>>"
@@ -1067,47 +1119,51 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ var "Data.SortedBinTree.SortedBinTree"
-                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
-                                                              .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ var "Data.SortedBinTree.SortedBinTree"
+                                                             .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                                                 .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ var "Data.SortedBinTree.SortedBinTree"
-                                                          .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
-                                                              .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.SortedBinTree.NodeGT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:3}") (var "Prelude.Types.Nat")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ var "Data.SortedBinTree.SortedBinTree"
+                                                             .$ (    MkArg MW ExplicitArg (Just "{arg:4}") (var "Data.SortedBinTree.SortedBinTree")
+                                                                 .=> var "Data.SortedBinTree.SortedBinTree.AllGT" .$ var "{arg:3}" .$ var "{arg:4}")))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Data.SortedBinTree.SortedBinTree.EmptyGT>>"
@@ -1221,35 +1277,39 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.Empty>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ var "Data.SortedBinTree.SortedBinTree"
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.Empty>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ var "Data.SortedBinTree.SortedBinTree"
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Data.SortedBinTree.Node>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ var "Data.SortedBinTree.SortedBinTree"
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Data.SortedBinTree.Node>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ var "Data.SortedBinTree.SortedBinTree"
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Data.SortedBinTree.Empty>>"
@@ -1327,31 +1387,35 @@ LOG deptycheck.derive.least-effort:7: Data.Nat.LTE[0(n), 1(m)] LTESucc - used fi
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Prelude.Types.Z>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Prelude.Types.Z>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Prelude.Types.S>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Prelude.Types.S>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Types.Nat"
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Prelude.Types.Z>>"

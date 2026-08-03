@@ -6,33 +6,35 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] XF - used final order: []
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.X>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ var "Prelude.Basics.Bool"
-                                   .$ (    MkArg MW ExplicitArg (Just "b") (var "Prelude.Basics.Bool")
-                                       .=>    var "Builtin.DPair.DPair"
-                                           .$ (var "Builtin.(===)" .! ("a", var "Prelude.Basics.Bool") .$ var "b" .$ var "Prelude.Basics.True")
-                                           .$ (    MkArg
-                                                     MW
-                                                     ExplicitArg
-                                                     (Just "{arg:1}")
-                                                     (   var "Builtin.(===)"
-                                                      .! ("a", var "Prelude.Basics.Bool")
-                                                      .$ var "b"
-                                                      .$ var "Prelude.Basics.True")
-                                               .=> var "DerivedGen.X" .$ var "b" .$ var "{arg:1}")))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.X>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ var "Prelude.Basics.Bool"
+                                      .$ (    MkArg MW ExplicitArg (Just "b") (var "Prelude.Basics.Bool")
+                                          .=>    var "Builtin.DPair.DPair"
+                                              .$ (var "Builtin.(===)" .! ("a", var "Prelude.Basics.Bool") .$ var "b" .$ var "Prelude.Basics.True")
+                                              .$ (    MkArg
+                                                        MW
+                                                        ExplicitArg
+                                                        (Just "{arg:1}")
+                                                        (   var "Builtin.(===)"
+                                                         .! ("a", var "Prelude.Basics.Bool")
+                                                         .$ var "b"
+                                                         .$ var "Prelude.Basics.True")
+                                                  .=> var "DerivedGen.X" .$ var "b" .$ var "{arg:1}")))
+                          }
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.X>[]"
@@ -40,67 +42,71 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] XF - used final order: []
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.XT>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Basics.Bool"
-                                                  .$ (    MkArg MW ExplicitArg (Just "b") (var "Prelude.Basics.Bool")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ (   var "Builtin.(===)"
-                                                              .! ("a", var "Prelude.Basics.Bool")
-                                                              .$ var "b"
-                                                              .$ var "Prelude.Basics.True")
-                                                          .$ (    MkArg
-                                                                    MW
-                                                                    ExplicitArg
-                                                                    (Just "{arg:1}")
-                                                                    (   var "Builtin.(===)"
-                                                                     .! ("a", var "Prelude.Basics.Bool")
-                                                                     .$ var "b"
-                                                                     .$ var "Prelude.Basics.True")
-                                                              .=> var "DerivedGen.X" .$ var "b" .$ var "{arg:1}")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.XT>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Basics.Bool"
+                                                     .$ (    MkArg MW ExplicitArg (Just "b") (var "Prelude.Basics.Bool")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ (   var "Builtin.(===)"
+                                                                 .! ("a", var "Prelude.Basics.Bool")
+                                                                 .$ var "b"
+                                                                 .$ var "Prelude.Basics.True")
+                                                             .$ (    MkArg
+                                                                       MW
+                                                                       ExplicitArg
+                                                                       (Just "{arg:1}")
+                                                                       (   var "Builtin.(===)"
+                                                                        .! ("a", var "Prelude.Basics.Bool")
+                                                                        .$ var "b"
+                                                                        .$ var "Prelude.Basics.True")
+                                                                 .=> var "DerivedGen.X" .$ var "b" .$ var "{arg:1}")))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.XF>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Basics.Bool"
-                                                  .$ (    MkArg MW ExplicitArg (Just "b") (var "Prelude.Basics.Bool")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ (   var "Builtin.(===)"
-                                                              .! ("a", var "Prelude.Basics.Bool")
-                                                              .$ var "b"
-                                                              .$ var "Prelude.Basics.True")
-                                                          .$ (    MkArg
-                                                                    MW
-                                                                    ExplicitArg
-                                                                    (Just "{arg:1}")
-                                                                    (   var "Builtin.(===)"
-                                                                     .! ("a", var "Prelude.Basics.Bool")
-                                                                     .$ var "b"
-                                                                     .$ var "Prelude.Basics.True")
-                                                              .=> var "DerivedGen.X" .$ var "b" .$ var "{arg:1}")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.XF>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Basics.Bool"
+                                                     .$ (    MkArg MW ExplicitArg (Just "b") (var "Prelude.Basics.Bool")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ (   var "Builtin.(===)"
+                                                                 .! ("a", var "Prelude.Basics.Bool")
+                                                                 .$ var "b"
+                                                                 .$ var "Prelude.Basics.True")
+                                                             .$ (    MkArg
+                                                                       MW
+                                                                       ExplicitArg
+                                                                       (Just "{arg:1}")
+                                                                       (   var "Builtin.(===)"
+                                                                        .! ("a", var "Prelude.Basics.Bool")
+                                                                        .$ var "b"
+                                                                        .$ var "Prelude.Basics.True")
+                                                                 .=> var "DerivedGen.X" .$ var "b" .$ var "{arg:1}")))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.XT>>"
