@@ -172,7 +172,7 @@ addApp : AnyApp -> AllApps -> AllApps
 addApp (PosApp s) = {explicitArgs $= (s ::)}
 addApp (NamedApp nm s) = {namedArgs $= insert nm s}
 addApp (AutoApp s) = {autoArgs $= (s ::)}
-addApp (WithApp s) = {explicitArgs $= (s ::)}
+addApp (WithApp s) = id
 
 ||| Make an `AllApps` out of a list of `AnyApp`
 |||
