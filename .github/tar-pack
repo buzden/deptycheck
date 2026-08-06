@@ -38,7 +38,7 @@ pack_dirs() {
 case "$CMD" in
   save-pack) pack_dirs | tar -uvf "$ARCHIVE_FILE" --exclude=".git" --exclude="git" --files-from /dev/stdin ;;
   save-stdin) tar -uvf "$ARCHIVE_FILE" --files-from /dev/stdin ;;
-  restore) tar -xvf "$ARCHIVE_FILE" --one-top-level=/ --touch ;;
+  restore) tar -xvf "$ARCHIVE_FILE" -C / --touch ;;
   *)
     echo "Bad command '$CMD'" >&2
     print_usage
