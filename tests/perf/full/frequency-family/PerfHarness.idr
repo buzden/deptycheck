@@ -1,0 +1,1 @@
+../../_common/PerfHarness.idr
