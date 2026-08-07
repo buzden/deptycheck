@@ -185,35 +185,37 @@ mkAllApps laa = foldl (flip addApp) (MkAllApps [] [] empty) $ reverse laa
 |||
 ||| The argument/value is returned from `AllApps`
 public export
-popNamed : Maybe Name -> AllApps -> (Maybe TTImp, AllApps)
-popNamed Nothing ap = (Nothing, ap)
+popNamed : Maybe Name -> AllApps -> Maybe (TTImp, AllApps)
+popNamed Nothing ap = Nothing
 popNamed (Just x) ap =
   case lookup x ap.namedArgs of
-    Nothing => (Nothing, ap)
-    Just t => (Just t, {namedArgs $= delete x} ap)
+    Nothing => Nothing
+    Just t => Just (t, {namedArgs $= delete x} ap)
 
 ||| Pop an argument value from `AllApps`, returning Nothing if no value is given
 |||
 ||| The argument/value is returned from `AllApps`
 public export
-popArgVal : Arg -> AllApps -> (Maybe TTImp, AllApps)
+popArgVal : Arg -> AllApps -> Maybe (TTImp, AllApps)
 popArgVal (MkArg _ ImplicitArg name _) ap = popNamed name ap
-popArgVal (MkArg _ ExplicitArg name _) (MkAllApps (x :: xs) autoArgs namedArgs) = (Just x, MkAllApps xs autoArgs namedArgs)
+popArgVal (MkArg _ ExplicitArg name _) (MkAllApps (x :: xs) autoArgs namedArgs) = Just (x, MkAllApps xs autoArgs namedArgs)
 popArgVal (MkArg _ ExplicitArg name _) ap = popNamed name ap
-popArgVal (MkArg _ AutoImplicit name _) (MkAllApps explicitArgs (x :: xs) namedArgs) = (Just x, MkAllApps explicitArgs xs namedArgs)
+popArgVal (MkArg _ AutoImplicit name _) (MkAllApps explicitArgs (x :: xs) namedArgs) = Just (x, MkAllApps explicitArgs xs namedArgs)
 popArgVal (MkArg _ AutoImplicit name _) ap = popNamed name ap
-popArgVal (MkArg _ (DefImplicit x) Nothing _) ap = (Just x, ap)
+popArgVal (MkArg _ (DefImplicit x) Nothing _) ap = Just (x, ap)
 popArgVal (MkArg _ (DefImplicit x) (Just n) _) ap =
   case lookup n ap.namedArgs of
-    Nothing => (Just x, ap)
-    Just t => (Just t , {namedArgs $= delete n} ap)
+    Nothing => Just (x, ap)
+    Just t => Just (t , {namedArgs $= delete n} ap)
 
 ||| Extract given values of arguments from `AllApps`
 public export
 popArgVals : List Arg -> AllApps -> List (Maybe TTImp)
 popArgVals [] aa = []
 popArgVals (x :: xs) aa = do
-  let (mr, aa) = popArgVal x aa
+  let pav = popArgVal x aa
+  let mr = fst <$> pav
+  let aa = fromMaybe aa $ snd <$> pav
   mr :: popArgVals xs aa
 
 ---------------------------------------
