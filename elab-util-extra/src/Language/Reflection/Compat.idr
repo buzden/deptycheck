@@ -10,6 +10,8 @@ import public Data.List1
 import public Data.String
 import public Data.Vect
 
+import public Deriving.Show
+
 import public Language.Reflection
 import Language.Reflection.Expr
 import Language.Reflection.Logging
@@ -17,6 +19,8 @@ import public Language.Reflection.Syntax
 import public Language.Reflection.Syntax.Ops
 
 %default total
+
+%language ElabReflection
 
 --------------------------------------------------------------------------------
 --          General Types
@@ -29,6 +33,22 @@ record Con where
   name : Name
   args : List Arg
   type : TTImp
+
+export %hint
+countShow : Show Count
+countShow = %runElab derive
+
+export %hint
+piInfoShow : Show a => Show (PiInfo a)
+piInfoShow = %runElab derive
+
+export %hint
+argShow : Show Arg
+argShow = %runElab derive
+
+export %hint
+conShow : Show Con
+conShow = %runElab derive
 
 ||| Tries to lookup a constructor by name.
 export
@@ -61,6 +81,10 @@ record TypeInfo where
 export
 LogPosition TypeInfo where
   logPosition = show . name
+
+export %hint
+tiShow : Show TypeInfo
+tiShow = %runElab derive
 
 ||| Tries to get information about the data type specified
 ||| by name. The name need not be fully qualified, but
