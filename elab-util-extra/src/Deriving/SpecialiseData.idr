@@ -1108,11 +1108,19 @@ parameters (t : SpecTask)
   --- SPECIALISED TYPE DECLARATION ---
   ------------------------------------
 
+  (.declNoNS) : TypeInfo -> Decl
+  (.declNoNS) ti =
+    iData Public tyName tySig [] conITys
+    where
+      tyName = snd $ unNS ti.name
+      tySig = piAll type ti.args
+      conITys = (.iTy) <$> ti.cons
+
   ||| Generate declarations for given task, unification results, and specialised type
   specDecls : MonadLog m => UniResults -> (mt : TypeInfo) -> (0 _ : AllTyArgsNamed mt) => TypeMeta -> m $ List Decl
   specDecls uniResults specTy specMeta = do
     let specTySig = mkSpecTySig
-    let specTyDecl = specTy.decl
+    let specTyDecl = specTy.declNoNS
     logPoint DetailedDebug "specialiseData.specDecls.specTy.sig" [specTy] $ show mkSpecTySig
     logPoint DetailedDebug "specialiseData.specDecls.specTy" [specTy] $ show specTyDecl
     let mToPImplClaim = mkMToPImplClaim

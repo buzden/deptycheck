@@ -24,9 +24,8 @@ typeCon ti = MkCon ti.name ti.args type
 export
 (.decl) : TypeInfo -> Decl
 (.decl) ti =
-  iData Public tyName tySig [] conITys
+  iData Public ti.name tySig [] conITys
   where
-    tyName = snd $ unNS ti.name
     tySig = piAll type ti.args
     conITys = (.iTy) <$> ti.cons
 
