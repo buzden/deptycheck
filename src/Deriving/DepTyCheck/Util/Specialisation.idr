@@ -19,60 +19,6 @@ import public Data.Hashable.Base
 
 %default total
 
-||| All argument values applied in an expression
-|||
-||| Used for convenience when traversing given arguments and their types
-record AllApps where
-  constructor MkAllApps
-  explicitArgs : List TTImp
-  autoArgs : List TTImp
-  namedArgs : SortedMap Name TTImp
-
-||| Insert an `AnyApp` into `AllApps`
-addApp' : AnyApp -> AllApps -> AllApps
-addApp' (PosApp s) = {explicitArgs $= (s ::)}
-addApp' (NamedApp nm s) = {namedArgs $= insert nm s}
-addApp' (AutoApp s) = {autoArgs $= (s ::)}
-addApp' (WithApp s) = {explicitArgs $= (s ::)}
-
-||| Make an `AllApps` out of a list of `AnyApp`
-|||
-||| Used in conjunction with `unAppAny`
-mkAllApps : List AnyApp -> AllApps
-mkAllApps laa = foldl (flip addApp') (MkAllApps [] [] empty) $ reverse laa
-
-||| Pop a value from `AllApps` by argument name
-|||
-||| The argument/value is returned from `AllApps`
-getNamed : Maybe Name -> AllApps -> (Maybe TTImp, AllApps)
-getNamed Nothing ap = (Nothing, ap)
-getNamed (Just x) ap =
-  case lookup x ap.namedArgs of
-    Nothing => (Nothing, ap)
-    Just t => (Just t, {namedArgs $= delete x} ap)
-
-||| Pop an argument value from `AllApps`, returning Nothing if no value is given
-|||
-||| The argument/value is returned from `AllApps`
-getGiven : Arg -> AllApps -> (Maybe TTImp, AllApps)
-getGiven (MkArg _ ImplicitArg name _) ap = getNamed name ap
-getGiven (MkArg _ ExplicitArg name _) (MkAllApps (x :: xs) autoArgs namedArgs) = (Just x, MkAllApps xs autoArgs namedArgs)
-getGiven (MkArg _ ExplicitArg name _) ap = getNamed name ap
-getGiven (MkArg _ AutoImplicit name _) (MkAllApps explicitArgs (x :: xs) namedArgs) = (Just x, MkAllApps explicitArgs xs namedArgs)
-getGiven (MkArg _ AutoImplicit name _) ap = getNamed name ap
-getGiven (MkArg _ (DefImplicit x) Nothing _) ap = (Just x, ap)
-getGiven (MkArg _ (DefImplicit x) (Just n) _) ap =
-  case lookup n ap.namedArgs of
-    Nothing => (Just x, ap)
-    Just t => (Just t , {namedArgs $= delete n} ap)
-
-||| Extract given values of arguments from `AllApps`
-getGivens : List Arg -> AllApps -> List (Maybe TTImp)
-getGivens [] aa = []
-getGivens (x :: xs) aa = do
-  let (mr, aa) = getGiven x aa
-  mr :: getGivens xs aa
-
 allQImpl : Monad m => NamesInfoInTypes => TTImp -> m TTImp -> m TTImp
 allQImpl pi@(IPi _ _ _ _ _ _) r = r
 allQImpl app@(IApp _ _ _) r = do
@@ -137,7 +83,7 @@ getGivens' t = do
     | _ => Nothing
   let Just tyInfo = lookupType tyName
     | _ => Nothing
-  Just $ map (uncurry MkGenArg) $ zip tyInfo.args $ getGivens tyInfo.args (mkAllApps aTerms)
+  Just $ map (uncurry MkGenArg) $ zip tyInfo.args $ popArgVals tyInfo.args (mkAllApps aTerms)
 
 ||| Assemble a list of arguments and their given values from `callGen` inputs
 mkArgs :
@@ -186,7 +132,7 @@ processArg sig argIdx ga with (ga.given)
           | [] => do
             logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga] "Given a type invocation w/o arguments, specialising"
             pure (x, [])
-        let givens = map (uncurry MkGenArg) $ zip tyInfo.args $ getGivens tyInfo.args (mkAllApps appTerms)
+        let givens = map (uncurry MkGenArg) $ zip tyInfo.args $ popArgVals tyInfo.args (mkAllApps appTerms)
         logPoint DetailedDebug "deptycheck.util.specialisation" [sig, ga]
           "Given a type invocation, traversing arguments: \{show $ map (fromMaybe "" . name . arg) givens}"
         map (mapFst $ reAppAny appLhs) $ processArgs' sig argIdx $ takeWhile (.isGiven) givens
