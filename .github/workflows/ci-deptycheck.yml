@@ -77,42 +77,13 @@ jobs:
   ############################
 
   deptycheck-build-lib:
-    name: Build the lib
+    name: Build DepTyCheck
     needs: get-pack-collection
     uses: DepTyCheck/idris2-actions/.github/workflows/build-and-test.yml@v1
     with:
       pack_collections: ${{ needs.get-pack-collection.outputs.pack_collections }}
       run_tests: false
-
-  install-extra-deps:
-    name: Install extra deps
-    needs: deptycheck-build-lib
-    runs-on: ubuntu-latest
-    container: ghcr.io/stefan-hoeck/idris2-pack:latest
-    outputs:
-      pack_state: ${{ steps.upload-pack-state.outputs.state }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
-
-      - name: Restore built DepTyCheck
-        uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
-        with:
-          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
-
-      - run: pack install summary-stat # for distr tests
-             # TODO to compute test dependencies when we have special mini-test libs
-
-      - name: Upload state with extra deps
-        id: upload-pack-state
-        uses: DepTyCheck/idris2-actions/.github/actions/upload-pack-state@v1
-        with:
-          package: ${{ needs.deptycheck-build-lib.outputs.package }}
-          collection: ${{ fromJSON(needs.deptycheck-build-lib.outputs.collections)[0] }}
-          label: extra-deps
-          project_dir: ${{ needs.deptycheck-build-lib.outputs.project_dir }}
-          build_dir: ${{ needs.deptycheck-build-lib.outputs.build_dir }}
+      pack_extras: summary-stat
 
   ########################
   # Test elab-util-extra #
@@ -120,7 +91,7 @@ jobs:
 
   elab-util-extra-test:
     name: Test elab-util-extra
-    needs: install-extra-deps
+    needs: deptycheck-build-lib # depends on deptycheck-build-lib to share pack state with other jobs, not because deptycheck itself is required
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
     steps:
@@ -131,7 +102,7 @@ jobs:
       - name: Restore state with extra deps
         uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          state: ${{ needs.install-extra-deps.outputs.pack_state }}
+          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
 
       - run: pack test elab-util-extra
 
@@ -181,9 +152,9 @@ jobs:
           ) >> "$GITHUB_OUTPUT"
 
   deptycheck-test:
-    name: Test the lib
+    name: Test DepTyCheck
     needs:
-      - install-extra-deps
+      - deptycheck-build-lib
       - get-test-sets
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
@@ -199,7 +170,7 @@ jobs:
       - name: Restore state with extra deps
         uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          state: ${{ needs.install-extra-deps.outputs.pack_state }}
+          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
 
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
@@ -242,7 +213,7 @@ jobs:
   examples-build:
     name: Build and test examples
     needs:
-      - install-extra-deps
+      - deptycheck-build-lib
       - get-examples
     runs-on: ubuntu-latest
     container: ghcr.io/stefan-hoeck/idris2-pack:latest
@@ -259,7 +230,7 @@ jobs:
       - name: Restore state with extra deps
         uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          state: ${{ needs.install-extra-deps.outputs.pack_state }}
+          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
 
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
