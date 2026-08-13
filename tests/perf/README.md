@@ -7,9 +7,6 @@ but the verdict is produced by a statistical procedure rather than by
 evaluation, so it is worth explaining what that procedure is and why it is the
 right one.
 
-Everything measured here comes from the investigation in
-`deptycheck_investigation_unified.md`; section references below point into it.
-
 ## The problem
 
 A GitHub-hosted runner is a shared virtual machine of unknown speed, with
