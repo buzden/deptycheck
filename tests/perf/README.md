@@ -148,7 +148,7 @@ demands.
 **An improvement fails too.** `faster than expected` is a failure, and that is
 intended: a complexity improvement is a change in documented behaviour, and the
 range has to be re-blessed just as a golden file does. If the upstream fix for
-the singleton `oneOf` lands, `perf/quick/oneof-recursion-edge` goes red, and
+the singleton `oneOf` lands, `perf/oneof-recursion-edge` goes red, and
 that is how you find out it worked.
 
 ### Why the expectation is an interval and not a point
@@ -288,35 +288,42 @@ lower one.
 
 | test | subject | grid | from §11 | measured | half-width | expected |
 | --- | --- | --- | --- | --- | --- | --- |
-| `quick/hand-written-linear` | `genXByHand` | 512–16384 | 0.99 | 1.009 | 0.009 | 0.55–1.55 |
-| `quick/hand-written-linear` | `genXMap` | 512–16384 | 1.09 | 1.005 | 0.013 | 0.55–1.55 |
-| `quick/hand-written-linear` | `genXAp` | 512–16384 | 1.11 | 1.009 | 0.007 | 0.55–1.55 |
-| `quick/oneof-placement` | `genXOneOfOffEdge` | 512–16384 | 0.92 | 0.885 | 0.060 | 0.55–1.55 |
-| `quick/oneof-placement` | `genXOneOfInBase` | 512–16384 | 0.97 | 1.032 | 0.024 | 0.55–1.55 |
-| `quick/oneof-recursion-edge` | `genXOneOf1` | 128–2896 | 2.15 | 2.409 | 0.114 | 1.65–2.95 |
-| `quick/oneof-arity-two` | `genXOneOf2` | 16–512 | 2.89 | 3.316 | 0.289 | 2.30–4.20 |
-| `quick/derived-x` | `genX` (fuel 0) | 128–2896 | 2.15 | 2.233 | 0.105 | 1.65–2.95 |
-| `quick/derived-natlist` | `genNatList` (fuel 0) | 256–4096 | 2.08 | 2.326 | 0.078 | 1.60–2.95 |
-| `quick/derived-natlist` | `genNatList` (fuel 3) | 16–512 | 2.84 | 3.079 | 0.319 | 2.05–4.10 |
-| `quick/derived-natlist` | `genDegenerateLists` | 512–16384 | 1.05 | 1.062 | 0.024 | 0.55–1.55 |
-| `full/oneof-arity-three` | `genXOneOf3` | 32–362 | 3.26 | 3.469 | 0.216 | 2.60–4.20 |
-| `full/frequency-family` | `genXFreq1` | 128–2896 | 2.12 | 2.336 | 0.093 | 1.65–2.95 |
-| `full/frequency-family` | `genXFreq2Const` | 16–362 | 2.90 | 3.205 | 0.290 | 2.25–4.20 |
-| `full/frequency-family` | `genXFreq2Weighted` | 16–362 | 2.79 | 3.024 | 0.236 | 2.25–4.20 |
+| `hand-written-linear` | `genXByHand` | 512–16384 | 0.99 | 1.009 | 0.009 | 0.55–1.55 |
+| `hand-written-linear` | `genXMap` | 512–16384 | 1.09 | 1.005 | 0.013 | 0.55–1.55 |
+| `hand-written-linear` | `genXAp` | 512–16384 | 1.11 | 1.009 | 0.007 | 0.55–1.55 |
+| `oneof-placement` | `genXOneOfOffEdge` | 512–16384 | 0.92 | 0.885 | 0.060 | 0.55–1.55 |
+| `oneof-placement` | `genXOneOfInBase` | 512–16384 | 0.97 | 1.032 | 0.024 | 0.55–1.55 |
+| `oneof-recursion-edge` | `genXOneOf1` | 128–2896 | 2.15 | 2.409 | 0.114 | 1.65–2.95 |
+| `oneof-arity-two` | `genXOneOf2` | 16–512 | 2.89 | 3.316 | 0.289 | 2.30–4.20 |
+| `derived-x` | `genX` (fuel 0) | 128–2896 | 2.15 | 2.233 | 0.105 | 1.65–2.95 |
+| `derived-natlist` | `genNatList` (fuel 0) | 256–4096 | 2.08 | 2.326 | 0.078 | 1.60–2.95 |
+| `derived-natlist` | `genNatList` (fuel 3) | 16–512 | 2.84 | 3.079 | 0.319 | 2.05–4.10 |
+| `derived-natlist` | `genDegenerateLists` | 512–16384 | 1.05 | 1.062 | 0.024 | 0.55–1.55 |
+| `oneof-arity-three` | `genXOneOf3` | 32–362 | 3.26 | 3.469 | 0.216 | 2.60–4.20 |
+| `frequency-family` | `genXFreq1` | 128–2896 | 2.12 | 2.336 | 0.093 | 1.65–2.95 |
+| `frequency-family` | `genXFreq2Const` | 16–362 | 2.90 | 3.205 | 0.290 | 2.25–4.20 |
+| `frequency-family` | `genXFreq2Weighted` | 16–362 | 2.79 | 3.024 | 0.236 | 2.25–4.20 |
 
 The `measured` column is one run on an Apple M4 Max, five passes per point, the
 same hardware the investigation used. It is not a GitHub runner, and the constant
 factors will not transfer — but the exponents should, and that is the claim the
-design rests on. **The first nightly run is the one that confirms it.** If a
+design rests on. **The first run on a hosted runner is the one that confirms
+it.** If a
 subject reads more than about one half-width away from the value above on a
 hosted runner, re-centre its range on what the runner actually measures and record
 that here.
 
-`quick` runs on every push and pull request; `full` runs nightly and on
-`workflow_dispatch`. The extended tier adds no mechanism the quick tier does not
-already cover — arity three confirms the degree has stopped growing, and the
-`frequency` family confirms that weights change the distribution and not the
-complexity — so it is not worth several minutes on every push.
+Every directory runs on every push and pull request. There is no slow tier: CI
+gives each directory a runner of its own, so they run concurrently and the suite
+costs the wall-clock of its slowest member — `derived-natlist`, at about 80 s of
+measurement — rather than the sum. `oneof-arity-three` and `frequency-family`
+were nightly-only until the per-directory times were measured and turned out to
+be 28 s and 33 s, comfortably inside that.
+
+Those two do add the least: arity three confirms the degree has stopped growing,
+and the `frequency` family confirms that weights change the distribution and not
+the complexity. What they catch is those confirmations *decoupling* from the
+subjects they track.
 
 ## Failure triage
 

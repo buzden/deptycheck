@@ -68,11 +68,11 @@ deptycheck:prepare-pipeline:
           sort | uniq | awk 'ORS=", "' | head -c -2
       )"
       # One entry per test directory rather than per directory of tests, so that
-      # each measured subject gets a runner to itself.
+      # each measured subject gets a runner to itself. They run concurrently, so
+      # the whole suite costs the wall-clock of its slowest member.
     - >
       PERF_SETS="$(
         find tests/perf/ -type f,l -name run | grep -v '/_' |
-          { if [[ "$CI_PIPELINE_SOURCE" == 'schedule' ]]; then cat; else grep -v '^tests/perf/full/'; fi; } |
           sed -e 's|^tests/|"|' -e 's|/run$|"|' |
           sort | uniq | awk 'ORS=", "' | head -c -2
       )"

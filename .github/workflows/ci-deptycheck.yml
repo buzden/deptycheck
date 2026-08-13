@@ -260,7 +260,9 @@ jobs:
   #
   # Unlike the functional test sets, one matrix entry is one test directory
   # rather than one directory of tests. That is deliberate: each subject then
-  # gets a runner to itself, so no two measurements ever share a machine.
+  # gets a runner to itself, so no two measurements ever share a machine. It is
+  # also why every directory runs on every push: they run concurrently, so the
+  # whole suite costs the wall-clock of its slowest member and nothing more.
 
   get-perf-sets:
     name: Acquire performance test sets
@@ -275,16 +277,10 @@ jobs:
           persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
       - name: Get performance test sets
         id: get-perf-sets
-        env:
-          # The extended tier costs several minutes more and covers no mechanism
-          # that the quick tier does not already cover, so it runs nightly and on
-          # demand rather than on every push.
-          extended: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
         run: |
           (
           echo -n "perf-sets=["
           find tests/perf/ -type f,l -name run | grep -v '/_' | \
-            { if [[ "${extended}" == 'true' ]]; then cat; else grep -v '^tests/perf/full/'; fi; } | \
             sed -e 's|^tests/|"|' -e 's|/run$|"|' | \
             sort | uniq | awk 'ORS=", "' | head -c -2
           echo "]"

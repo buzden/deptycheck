@@ -22,6 +22,5 @@ main = goldenRunner $
   -- These take minutes and want the machine to themselves; CI gives each one a
   -- runner of its own. See `perf/README.md` before reading anything into a
   -- failure.
-  , "Performance: complexity classes" `atDir` "perf/quick"
-  , "Performance: complexity classes, extended" `atDir` "perf/full"
+  , "Performance: complexity classes" `atDir` "perf"
   ]
