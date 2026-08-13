@@ -10,8 +10,6 @@ import Deriving.DepTyCheck.Gen
 
 %default total
 
-%language ElabReflection
-
 public export
 data NatList : Nat -> Type where
   Nil  : NatList 0

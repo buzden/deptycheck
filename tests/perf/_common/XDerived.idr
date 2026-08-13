@@ -10,8 +10,6 @@ import Deriving.DepTyCheck.Gen
 
 %default total
 
-%language ElabReflection
-
 export
 genX : Fuel -> (n : Nat) -> Gen MaybeEmpty (X n)
 genX = deriveGen
