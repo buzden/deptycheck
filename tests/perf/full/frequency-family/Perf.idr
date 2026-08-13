@@ -19,15 +19,15 @@ import XGens
 
 %default total
 
-||| Tracks `oneOf` with one alternative, so this band is deliberately the same
+||| Tracks `oneOf` with one alternative, so this range is deliberately the same
 ||| as `oneof-recursion-edge`'s.
-single : Band
-single = MkBand 1.65 2.95
+single : ExpectedRange
+single = MkExpectedRange 1.65 2.95
 
-||| One band covers the constant-weight and the recomputed-weight case, since
+||| One range covers the constant-weight and the recomputed-weight case, since
 ||| the point of the pair is that they agree.
-double : Band
-double = MkBand 2.25 4.20
+double : ExpectedRange
+double = MkExpectedRange 2.25 4.20
 
 main : IO ()
 main = runSubjects

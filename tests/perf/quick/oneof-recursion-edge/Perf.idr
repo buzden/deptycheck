@@ -22,9 +22,9 @@ import XGens
 ||| 0.13. Both edges are four or more half-widths away. The lower one is still
 ||| far above the 1.0 that a fix specialising a singleton `oneOf` would produce;
 ||| the upper one excludes the behaviour of two live alternatives.
-band : Band
-band = MkBand 1.65 2.95
+expected : ExpectedRange
+expected = MkExpectedRange 1.65 2.95
 
 main : IO ()
 main = runSubjects
-  [ MkSubject "genXOneOf1" (sqrt2Grid 14 23) band $ \n => depth <$> genXOneOf1 n ]
+  [ MkSubject "genXOneOf1" (sqrt2Grid 14 23) expected $ \n => depth <$> genXOneOf1 n ]

@@ -1,5 +1,5 @@
 ||| Estimation of the exponent of a power law, with a confidence interval, and a
-||| verdict on whether that exponent still lies in an expected band.
+||| verdict on whether that exponent still lies in its expected range.
 |||
 ||| Why the exponent and not the time. A CI runner is a shared virtual machine,
 ||| so its speed relative to any other runner is an unknown factor `c`. Under
@@ -133,33 +133,33 @@ estimate points = case sort $ mapMaybe pairSlope $ allPairs points of
 ||| These are range-local exponents, not asymptotic ones. For the expensive
 ||| generators the range affordable on CI stops well before the exponent
 ||| settles --- the investigation's section 7.4 shows `oneOf` with two
-||| alternatives still climbing at n = 256 --- so each band is calibrated
+||| alternatives still climbing at n = 256 --- so each one is calibrated
 ||| against what the current implementation shows *over that subject's own
 ||| grid*, and the grid is pinned as part of the test.
 public export
-record Band where
-  constructor MkBand
+record ExpectedRange where
+  constructor MkExpectedRange
   lo, hi : Double
 
 export
-Interpolation Band where
-  interpolate b = "[\{show b.lo}, \{show b.hi}]"
+Interpolation ExpectedRange where
+  interpolate r = "[\{show r.lo}, \{show r.hi}]"
 
 ||| Widest interval we are still willing to draw a conclusion from: as wide as
-||| the band it is being compared against, and no wider.
+||| the expected range it is being compared against, and no wider.
 |||
 ||| Without a guard of this kind a measurement with no power at all would report
 ||| a pass, which is the standard way a performance gate rots into decoration.
-||| Scaling it to the band rather than fixing it at a constant is what makes it a
-||| statement about resolution: an interval as wide as the band is one where an
-||| exponent sitting dead centre could still reach outside it, and where an
+||| Scaling it to the range rather than fixing it at a constant is what makes it
+||| a statement about resolution: an interval as wide as the range is one where
+||| an exponent sitting dead centre could still reach outside it, and where an
 ||| exponent a whole class away could still overlap it. Below that width, the
 ||| measurement resolves the exponent finely enough for the question being asked
 ||| --- and the question is narrower for the subjects whose reference exponent is
-||| known more precisely, which is exactly when the band is narrow.
+||| known more precisely, which is exactly when the range is narrow.
 public export
-resolution : Band -> Double
-resolution b = (b.hi - b.lo) / 2
+resolution : ExpectedRange -> Double
+resolution r = (r.hi - r.lo) / 2
 
 public export
 data Verdict = AsExpected | Faster | Slower | TooNoisy
@@ -171,18 +171,18 @@ Interpolation Verdict where
   interpolate Slower     = "complexity class changed: slower than expected"
   interpolate TooNoisy   = "inconclusive: interval too wide to decide"
 
-||| A subject fails only when its interval lies wholly outside its band, that
-||| is, only on positive evidence that the exponent moved. Noise widens the
-||| interval, and a wide interval reports `TooNoisy`, never a change --- so this
-||| suite cannot fail because a runner had a bad minute, only because the
-||| complexity did change.
+||| A subject fails only when its interval lies wholly outside its expected
+||| range, that is, only on positive evidence that the exponent moved. Noise
+||| widens the interval, and a wide interval reports `TooNoisy`, never a change
+||| --- so this suite cannot fail because a runner had a bad minute, only
+||| because the complexity did change.
 |||
 ||| Note that `Faster` fails too. An improvement is a change in documented
-||| behaviour and has to be acknowledged by widening or moving the band, in the
+||| behaviour and has to be acknowledged by widening or moving the range, in the
 ||| same way a golden test has to be re-blessed.
 export
-verdictOf : Band -> Estimate -> Verdict
-verdictOf band e = if e.halfWidth > resolution band then TooNoisy
-                   else if e.upper < band.lo         then Faster
-                   else if e.lower > band.hi         then Slower
-                   else AsExpected
+verdictOf : ExpectedRange -> Estimate -> Verdict
+verdictOf r e = if e.halfWidth > resolution r then TooNoisy
+                else if e.upper < r.lo        then Faster
+                else if e.lower > r.hi        then Slower
+                else AsExpected

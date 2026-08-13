@@ -14,12 +14,12 @@ import XGens
 
 %default total
 
-||| Higher than the two-alternative band although the asymptotic exponents are
+||| Higher than the two-alternative range although the asymptotic exponents are
 ||| equal, because over a short low-n range the constant factor is still being
 ||| absorbed into the slope.
-band : Band
-band = MkBand 2.60 4.20
+expected : ExpectedRange
+expected = MkExpectedRange 2.60 4.20
 
 main : IO ()
 main = runSubjects
-  [ MkSubject "genXOneOf3" (sqrt2Grid 10 17) band $ \n => depth <$> genXOneOf3 n ]
+  [ MkSubject "genXOneOf3" (sqrt2Grid 10 17) expected $ \n => depth <$> genXOneOf3 n ]

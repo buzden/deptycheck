@@ -24,15 +24,15 @@ import NatListGens
 
 ||| Measures 2.33, half-width about 0.08. Coincides with `derived-x`, which is
 ||| what makes the fuel-0 case legible as the same phenomenon.
-noBranching : Band
-noBranching = MkBand 1.60 2.95
+noBranching : ExpectedRange
+noBranching = MkExpectedRange 1.60 2.95
 
 ||| As with `oneof-arity-two` this is a range-local exponent: the asymptotic
-||| value is about 3.6, reached only past the top of this grid. What the band has
-||| to discriminate against below is branching ceasing to cost anything extra,
-||| which over this range would read about 1.6.
-branching : Band
-branching = MkBand 2.05 4.10
+||| value is about 3.6, reached only past the top of this grid. What this range
+||| has to discriminate against below is branching ceasing to cost anything
+||| extra, which over this grid would read about 1.6.
+branching : ExpectedRange
+branching = MkExpectedRange 2.05 4.10
 
 main : IO ()
 main = runSubjects

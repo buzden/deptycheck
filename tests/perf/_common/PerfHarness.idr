@@ -31,11 +31,11 @@ record Subject where
   constructor MkSubject
   ||| Appears in the golden output, so keep it stable.
   name : String
-  ||| Sizes to measure at. Pinned as part of the test, because `band` is
+  ||| Sizes to measure at. Pinned as part of the test, because `expected` is
   ||| calibrated over exactly these sizes.
-  grid : List Nat
-  ||| Exponent expected over `grid`.
-  band : Band
+  sizes : List Nat
+  ||| Exponent expected over `sizes`.
+  expected : ExpectedRange
   ||| Generates a value of the given size and reduces it to a number.
   |||
   ||| The reduction must walk the whole value. It is the only thing that forces
@@ -69,16 +69,16 @@ public export
 linearGrid : List Nat
 linearGrid = sqrt2Grid 18 28
 
-||| The band shared by every subject expected to stay linear.
+||| The expected range shared by every subject expected to stay linear.
 |||
 ||| Calibrated on the investigation's data, where these generators measure
 ||| between 0.92 and 1.11 over `linearGrid` with a confidence half-width of
-||| about 0.16. The band leaves three to four half-widths of margin on each
+||| about 0.16. The range leaves three to four half-widths of margin on each
 ||| side, and excludes by a wide margin the quadratic behaviour that a `oneOf`
 ||| appearing on one of these recursion edges would produce.
 public export
-linear : Band
-linear = MkBand 0.55 1.55
+linear : ExpectedRange
+linear = MkExpectedRange 0.55 1.55
 
 --- Timing a batch ---
 
@@ -193,20 +193,20 @@ logPoints = map $ \(n, ns) => MkLogPoint (log $ cast n) (log ns)
 ||| budget is spent.
 |||
 ||| The stopping rule reads only the *width* of the interval, never where it sits
-||| relative to the band. That distinction is the whole point: stopping on width
+||| relative to the range. That distinction is the whole point: stopping on width
 ||| is fixed-precision sampling and leaves the significance level alone, whereas
 ||| stopping on the outcome --- "keep sampling until it passes" --- would inflate
 ||| the false-negative rate without bound.
 measure : Subject -> IO Measurement
 measure s = do
-    plan <- for s.grid $ \n => (n,) <$> calibrate s n
+    plan <- for s.sizes $ \n => (n,) <$> calibrate s n
     (firstPass, missed) <- onePass s 1 plan
     go (maxPasses `minus` 1) plan $ MkMeasurement firstPass 1 missed
 
   where
     precise : Measurement -> Bool
     precise m = m.passes >= minPasses &&
-                maybe False (\e => e.halfWidth <= resolution s.band) (estimate $ logPoints m.points)
+                maybe False (\e => e.halfWidth <= resolution s.expected) (estimate $ logPoints m.points)
 
     go : (budget : Nat) -> List (Nat, Nat) -> Measurement -> IO Measurement
     go Z     _    m = pure m
@@ -248,11 +248,11 @@ verdictLine s m est = "\{s.name}: \{outcome}" where
   outcome : String
   outcome = if m.misses > 0
               then "invalid: generator produced no value"
-              else maybe "inconclusive: no usable points" (interpolate . verdictOf s.band) est
+              else maybe "inconclusive: no usable points" (interpolate . verdictOf s.expected) est
 
 diagnose : Subject -> Measurement -> Maybe Estimate -> IO ()
 diagnose s m est = do
-  note "# \{s.name}: \{show m.passes} passes, \{show m.misses} misses, band \{s.band}"
+  note "# \{s.name}: \{show m.passes} passes, \{show m.misses} misses, expected \{s.expected}"
   note $ maybe "#   exponent: no estimate" (\e => "#   exponent \{e}") est
   for_ m.points $ \(n, ns) => note "#   n=\{show n} \{show ns} ns/sample"
 
@@ -263,7 +263,7 @@ rows s m est = m.points <&> \(n, ns) =>
               , maybe "" (\e => show e.exponent) est
               , maybe "" (\e => show e.lower) est
               , maybe "" (\e => show e.upper) est
-              , show s.band.lo, show s.band.hi
+              , show s.expected.lo, show s.expected.hi
               ]
 
 ||| Measures every subject, prints one verdict line per subject to standard
@@ -280,5 +280,5 @@ runSubjects subjects = do
     putStrLn $ verdictLine s m est
     pure $ rows s m est
   ignore $ writeFile "perf-data.tsv" $ unlines $
-    "subject\tn\tns_per_sample\tpasses\texponent\tci_lo\tci_hi\tband_lo\tband_hi" ::
+    "subject\tn\tns_per_sample\tpasses\texponent\tci_lo\tci_hi\texpected_lo\texpected_hi" ::
     "# machine_index_ns\t\{show index}" :: concat measured

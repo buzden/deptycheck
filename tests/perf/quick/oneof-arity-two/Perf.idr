@@ -6,12 +6,12 @@
 ||| So this subject is what tells us whether "branching exists" still sets the
 ||| degree.
 |||
-||| Note that the band is a range-local exponent, not the asymptotic one. The
-||| investigation reads about 3.7 asymptotically, but only past n = 512, where a
-||| single sample already costs seconds; over the grid that is affordable on CI
-||| the exponent is still climbing and measures about 2.9. Widening the grid
+||| Note that the expected range is a range-local exponent, not the asymptotic
+||| one. The investigation reads about 3.7 asymptotically, but only past n = 512,
+||| where a single sample already costs seconds; over the grid that is affordable
+||| on CI the exponent is still climbing and measures about 2.9. Widening the grid
 ||| upward would change the expected value, which is why the grid is pinned here
-||| together with the band.
+||| together with the range.
 module Perf
 
 import PerfHarness
@@ -26,9 +26,9 @@ import XGens
 ||| class measures about 1.7 over this range, so it is still detected with room
 ||| to spare. Nothing sits above this class, so the upper edge is set purely for
 ||| margin --- the discriminating edge is the lower one.
-band : Band
-band = MkBand 2.30 4.20
+expected : ExpectedRange
+expected = MkExpectedRange 2.30 4.20
 
 main : IO ()
 main = runSubjects
-  [ MkSubject "genXOneOf2" (sqrt2Grid 8 18) band $ \n => depth <$> genXOneOf2 n ]
+  [ MkSubject "genXOneOf2" (sqrt2Grid 8 18) expected $ \n => depth <$> genXOneOf2 n ]

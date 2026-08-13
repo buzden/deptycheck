@@ -21,13 +21,13 @@ import XDerived
 ||| Measures 2.26 over this grid, with a confidence half-width of about 0.10 ---
 ||| the same value, to within scatter, as a single hand-written `oneOf` on the
 ||| recursion edge, which is the investigation's central quantitative claim. Keep
-||| this band and `oneof-recursion-edge`'s in step: if they ever stop agreeing,
+||| this range and `oneof-recursion-edge`'s in step: if they ever stop agreeing,
 ||| the two have decoupled and that is worth knowing.
-band : Band
-band = MkBand 1.65 2.95
+expected : ExpectedRange
+expected = MkExpectedRange 1.65 2.95
 
 main : IO ()
 main = runSubjects
-  [ MkSubject "genX (derived, fuel 0)" (sqrt2Grid 14 23) band $
+  [ MkSubject "genX (derived, fuel 0)" (sqrt2Grid 14 23) expected $
       \n => depth <$> genX (limit 0) n
   ]
