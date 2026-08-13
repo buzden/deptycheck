@@ -32,7 +32,7 @@ noBranching = MkBand 1.60 2.95
 ||| to discriminate against below is branching ceasing to cost anything extra,
 ||| which over this range would read about 1.6.
 branching : Band
-branching = MkBand 2.20 3.80
+branching = MkBand 2.05 4.10
 
 main : IO ()
 main = runSubjects

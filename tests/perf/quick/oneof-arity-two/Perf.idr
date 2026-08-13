@@ -24,9 +24,10 @@ import XGens
 ||| the affordable range; the grid is carried up to n = 512, which costs a couple
 ||| of minutes but is what buys the lever arm. A drop to the single-alternative
 ||| class measures about 1.7 over this range, so it is still detected with room
-||| to spare.
+||| to spare. Nothing sits above this class, so the upper edge is set purely for
+||| margin --- the discriminating edge is the lower one.
 band : Band
-band = MkBand 2.30 3.95
+band = MkBand 2.30 4.20
 
 main : IO ()
 main = runSubjects

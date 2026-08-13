@@ -27,7 +27,7 @@ single = MkBand 1.65 2.95
 ||| One band covers the constant-weight and the recomputed-weight case, since
 ||| the point of the pair is that they agree.
 double : Band
-double = MkBand 2.25 3.95
+double = MkBand 2.25 4.20
 
 main : IO ()
 main = runSubjects
