@@ -102,7 +102,8 @@ jobs:
       - name: Restore state with extra deps
         uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }} # There is always one element in pack_states (either HEAD or ./.pack-collection)
+          # There is always one element in pack_states (either HEAD or ./.pack-collection)
+          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
 
       - run: pack test elab-util-extra
 
@@ -170,7 +171,8 @@ jobs:
       - name: Restore state with extra deps
         uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }} # There is always one element in pack_states (either HEAD or ./.pack-collection)
+          # There is always one element in pack_states (either HEAD or ./.pack-collection)
+          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
 
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
@@ -230,7 +232,8 @@ jobs:
       - name: Restore state with extra deps
         uses: DepTyCheck/idris2-actions/.github/actions/restore-pack-state@v1
         with:
-          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }} # There is always one element in pack_states (either HEAD or ./.pack-collection)
+          # There is always one element in pack_states (either HEAD or ./.pack-collection)
+          state: ${{ fromJSON(needs.deptycheck-build-lib.outputs.pack_states)[0] }}
 
       - name: Sleep a random bit
         run: sleep "$(shuf -i 0-10 -n 1)"
