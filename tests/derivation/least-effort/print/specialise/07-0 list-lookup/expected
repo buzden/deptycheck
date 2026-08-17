@@ -8,46 +8,50 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Lookup^7730538649293255048.Look
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048>[0, 1]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0") (var "Prelude.Basics.Bool")
-                           .-> MkArg
-                                 MW
-                                 ExplicitArg
-                                 (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
-                                 (   var "Prelude.Basics.List"
-                                  .$ (   var "Builtin.Pair"
-                                      .$ var "Prelude.Basics.Bool"
-                                      .$ (   var "Builtin.Pair"
-                                          .$ var "Prelude.Basics.Bool"
-                                          .$ (var "Builtin.Pair" .$ var "Prelude.Basics.Bool" .$ var "Prelude.Basics.Bool"))))
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048"
-                                   .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0"
-                                   .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048>[0, 1]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0") (var "Prelude.Basics.Bool")
+                              .-> MkArg
+                                    MW
+                                    ExplicitArg
+                                    (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
+                                    (   var "Prelude.Basics.List"
+                                     .$ (   var "Builtin.Pair"
+                                         .$ var "Prelude.Basics.Bool"
+                                         .$ (   var "Builtin.Pair"
+                                             .$ var "Prelude.Basics.Bool"
+                                             .$ (var "Builtin.Pair" .$ var "Prelude.Basics.Bool" .$ var "Prelude.Basics.Bool"))))
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048"
+                                      .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0"
+                                      .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.UseLookup>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "DerivedGen.UseLookup"
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.UseLookup>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "DerivedGen.UseLookup"
+                          }
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048>[0, 1]"
@@ -58,61 +62,65 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Lookup^7730538649293255048.Look
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048^Con^0>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0") (var "Prelude.Basics.Bool")
-                                          .-> MkArg
-                                                MW
-                                                ExplicitArg
-                                                (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
-                                                (   var "Prelude.Basics.List"
-                                                 .$ (   var "Builtin.Pair"
-                                                     .$ var "Prelude.Basics.Bool"
-                                                     .$ (   var "Builtin.Pair"
-                                                         .$ var "Prelude.Basics.Bool"
-                                                         .$ (var "Builtin.Pair" .$ var "Prelude.Basics.Bool" .$ var "Prelude.Basics.Bool"))))
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048"
-                                                  .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0"
-                                                  .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048^Con^0>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0") (var "Prelude.Basics.Bool")
+                                             .-> MkArg
+                                                   MW
+                                                   ExplicitArg
+                                                   (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
+                                                   (   var "Prelude.Basics.List"
+                                                    .$ (   var "Builtin.Pair"
+                                                        .$ var "Prelude.Basics.Bool"
+                                                        .$ (   var "Builtin.Pair"
+                                                            .$ var "Prelude.Basics.Bool"
+                                                            .$ (var "Builtin.Pair" .$ var "Prelude.Basics.Bool" .$ var "Prelude.Basics.Bool"))))
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048"
+                                                     .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0"
+                                                     .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048^Con^1>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0") (var "Prelude.Basics.Bool")
-                                          .-> MkArg
-                                                MW
-                                                ExplicitArg
-                                                (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
-                                                (   var "Prelude.Basics.List"
-                                                 .$ (   var "Builtin.Pair"
-                                                     .$ var "Prelude.Basics.Bool"
-                                                     .$ (   var "Builtin.Pair"
-                                                         .$ var "Prelude.Basics.Bool"
-                                                         .$ (var "Builtin.Pair" .$ var "Prelude.Basics.Bool" .$ var "Prelude.Basics.Bool"))))
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048"
-                                                  .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0"
-                                                  .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048^Con^1>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0") (var "Prelude.Basics.Bool")
+                                             .-> MkArg
+                                                   MW
+                                                   ExplicitArg
+                                                   (Just "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
+                                                   (   var "Prelude.Basics.List"
+                                                    .$ (   var "Builtin.Pair"
+                                                        .$ var "Prelude.Basics.Bool"
+                                                        .$ (   var "Builtin.Pair"
+                                                            .$ var "Prelude.Basics.Bool"
+                                                            .$ (var "Builtin.Pair" .$ var "Prelude.Basics.Bool" .$ var "Prelude.Basics.Bool"))))
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048"
+                                                     .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^0"
+                                                     .$ var "fv^Lookup^7730538649293255048.Lookup^7730538649293255048^lam^1")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.Lookup^7730538649293255048.Lookup^7730538649293255048^Con^0>>"
@@ -289,18 +297,20 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Lookup^7730538649293255048.Look
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.UL>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "DerivedGen.UseLookup"
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.UL>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "DerivedGen.UseLookup"
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.UL>>"

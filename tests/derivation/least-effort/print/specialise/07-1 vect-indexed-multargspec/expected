@@ -18,115 +18,125 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525>[0, 3]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
-                           .-> MkArg
-                                 MW
-                                 ExplicitArg
-                                 (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")
-                                 (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
-                                   .$ (    MkArg
-                                             MW
-                                             ExplicitArg
-                                             (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1")
-                                             (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
-                                       .=>    var "Builtin.DPair.DPair"
-                                           .$ (   var "Data.Vect.Vect"
-                                               .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                               .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
-                                           .$ (    MkArg
-                                                     MW
-                                                     ExplicitArg
-                                                     (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2")
-                                                     (   var "Data.Vect.Vect"
-                                                      .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                      .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
-                                               .=>    var "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525"
-                                                   .! ( "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                      , var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                      )
-                                                   .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1"
-                                                   .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2"
-                                                   .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525>[0, 3]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
+                              .-> MkArg
+                                    MW
+                                    ExplicitArg
+                                    (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")
+                                    (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                      .$ (    MkArg
+                                                MW
+                                                ExplicitArg
+                                                (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1")
+                                                (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                          .=>    var "Builtin.DPair.DPair"
+                                              .$ (   var "Data.Vect.Vect"
+                                                  .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                  .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
+                                              .$ (    MkArg
+                                                        MW
+                                                        ExplicitArg
+                                                        (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2")
+                                                        (   var "Data.Vect.Vect"
+                                                         .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                         .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
+                                                  .=>    var "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525"
+                                                      .! ( "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                         , var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                         )
+                                                      .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1"
+                                                      .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2"
+                                                      .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186>[0]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186"
-                                   .$ var "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0")
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186>[0]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186"
+                                      .$ var "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0")
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.SimpleExpr>[0, 2]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                           .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Basics.Bool")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ (var "DerivedGen.Regs" .$ var "r")
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Regs" .$ var "r")
-                                       .=> var "DerivedGen.SimpleExpr" .! ("r", var "r") .$ var "{arg:2}" .$ var "{arg:1}"))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.SimpleExpr>[0, 2]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Basics.Bool")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ (var "DerivedGen.Regs" .$ var "r")
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Regs" .$ var "r")
+                                          .=> var "DerivedGen.SimpleExpr" .! ("r", var "r") .$ var "{arg:2}" .$ var "{arg:1}"))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ var "DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926"
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ var "DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926"
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<Prelude.Basics.Bool>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Basics.Bool"
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<Prelude.Basics.Bool>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Basics.Bool"
+                          }
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525>[0, 3]"
@@ -137,95 +147,99 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525^Con^0>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
-                                          .-> MkArg
-                                                MW
-                                                ExplicitArg
-                                                (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")
-                                                (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
-                                                  .$ (    MkArg
-                                                            MW
-                                                            ExplicitArg
-                                                            (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1")
-                                                            (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ (   var "Data.Vect.Vect"
-                                                              .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                              .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
-                                                          .$ (    MkArg
-                                                                    MW
-                                                                    ExplicitArg
-                                                                    (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2")
-                                                                    (   var "Data.Vect.Vect"
-                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                                     .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
-                                                              .=>    var "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525"
-                                                                  .! ( "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                                     , var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                                     )
-                                                                  .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1"
-                                                                  .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2"
-                                                                  .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525^Con^0>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
+                                             .-> MkArg
+                                                   MW
+                                                   ExplicitArg
+                                                   (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")
+                                                   (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                                     .$ (    MkArg
+                                                               MW
+                                                               ExplicitArg
+                                                               (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1")
+                                                               (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ (   var "Data.Vect.Vect"
+                                                                 .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                 .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
+                                                             .$ (    MkArg
+                                                                       MW
+                                                                       ExplicitArg
+                                                                       (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2")
+                                                                       (   var "Data.Vect.Vect"
+                                                                        .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                        .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
+                                                                 .=>    var "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525"
+                                                                     .! ( "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                        , var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                        )
+                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1"
+                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2"
+                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525^Con^1>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
-                                          .-> MkArg
-                                                MW
-                                                ExplicitArg
-                                                (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")
-                                                (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
-                                                  .$ (    MkArg
-                                                            MW
-                                                            ExplicitArg
-                                                            (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1")
-                                                            (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
-                                                      .=>    var "Builtin.DPair.DPair"
-                                                          .$ (   var "Data.Vect.Vect"
-                                                              .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                              .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
-                                                          .$ (    MkArg
-                                                                    MW
-                                                                    ExplicitArg
-                                                                    (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2")
-                                                                    (   var "Data.Vect.Vect"
-                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                                     .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
-                                                              .=>    var "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525"
-                                                                  .! ( "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                                     , var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                                     )
-                                                                  .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1"
-                                                                  .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2"
-                                                                  .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525^Con^1>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
+                                             .-> MkArg
+                                                   MW
+                                                   ExplicitArg
+                                                   (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")
+                                                   (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                                     .$ (    MkArg
+                                                               MW
+                                                               ExplicitArg
+                                                               (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1")
+                                                               (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                                         .=>    var "Builtin.DPair.DPair"
+                                                             .$ (   var "Data.Vect.Vect"
+                                                                 .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                 .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
+                                                             .$ (    MkArg
+                                                                       MW
+                                                                       ExplicitArg
+                                                                       (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2")
+                                                                       (   var "Data.Vect.Vect"
+                                                                        .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                        .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
+                                                                 .=>    var "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525"
+                                                                     .! ( "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                        , var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                        )
+                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1"
+                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2"
+                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525^Con^0>>"
@@ -344,39 +358,43 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186^Con^0>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186"
-                                                  .$ var "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186^Con^0>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186"
+                                                     .$ var "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0")
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186^Con^1>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186"
-                                                  .$ var "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0")
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186^Con^1>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186"
+                                                     .$ var "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0")
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186^Con^0>>"
@@ -458,25 +476,27 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Read>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
-                                          .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Basics.Bool")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ (var "DerivedGen.Regs" .$ var "r")
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Regs" .$ var "r")
-                                                      .=> var "DerivedGen.SimpleExpr" .! ("r", var "r") .$ var "{arg:2}" .$ var "{arg:1}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Read>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> MkArg MW ExplicitArg (Just "r") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "{arg:1}") (var "Prelude.Basics.Bool")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ (var "DerivedGen.Regs" .$ var "r")
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "DerivedGen.Regs" .$ var "r")
+                                                         .=> var "DerivedGen.SimpleExpr" .! ("r", var "r") .$ var "{arg:2}" .$ var "{arg:1}"))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.Read>>"
@@ -544,35 +564,39 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926^Con^0>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ var "DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926"
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926^Con^0>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ var "DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926"
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926^Con^1>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ var "DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926"
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926^Con^1>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ var "DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926"
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926^Con^0>>"
@@ -616,31 +640,35 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Prelude.Basics.False>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Basics.Bool"
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Prelude.Basics.False>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Basics.Bool"
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<Prelude.Basics.True>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Basics.Bool"
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<Prelude.Basics.True>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .-> var "Test.DepTyCheck.Gen.Gen" .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty" .$ var "Prelude.Basics.Bool"
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<Prelude.Basics.False>>"

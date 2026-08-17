@@ -14,46 +14,50 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Vect^120651999565177027.Vect^12
 .=> local
       { decls =
           [ IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.Vect^120651999565177027.Vect^120651999565177027>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ var "Prelude.Types.Nat"
-                                   .$ (    MkArg
-                                             MW
-                                             ExplicitArg
-                                             (Just "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0")
-                                             (var "Prelude.Types.Nat")
-                                       .=>    var "DerivedGen.Vect^120651999565177027.Vect^120651999565177027"
-                                           .$ var "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0"))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.Vect^120651999565177027.Vect^120651999565177027>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ var "Prelude.Types.Nat"
+                                      .$ (    MkArg
+                                                MW
+                                                ExplicitArg
+                                                (Just "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0")
+                                                (var "Prelude.Types.Nat")
+                                          .=>    var "DerivedGen.Vect^120651999565177027.Vect^120651999565177027"
+                                              .$ var "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0"))
+                          }
+                    }
+              }
           , IClaim
-              (MkIClaimData
-                 { rig = MW
-                 , vis = Export
-                 , opts = []
-                 , type =
-                     mkTy
-                       { name = "<DerivedGen.X>[]"
-                       , type =
-                               MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                           .->    var "Test.DepTyCheck.Gen.Gen"
-                               .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                               .$ (   var "Builtin.DPair.DPair"
-                                   .$ var "Prelude.Types.Nat"
-                                   .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
-                                       .=> var "DerivedGen.X" .$ var "{arg:2}"))
-                       }
-                 })
+              { claim =
+                  MkIClaimData
+                    { rig = MW
+                    , vis = Export
+                    , opts = []
+                    , type =
+                        mkTy
+                          { name = "<DerivedGen.X>[]"
+                          , type =
+                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                              .->    var "Test.DepTyCheck.Gen.Gen"
+                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                  .$ (   var "Builtin.DPair.DPair"
+                                      .$ var "Prelude.Types.Nat"
+                                      .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                          .=> var "DerivedGen.X" .$ var "{arg:2}"))
+                          }
+                    }
+              }
           , IDef
               emptyFC
               "<DerivedGen.Vect^120651999565177027.Vect^120651999565177027>[]"
@@ -61,51 +65,55 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Vect^120651999565177027.Vect^12
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Vect^120651999565177027.Vect^120651999565177027^Con^0>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (    MkArg
-                                                            MW
-                                                            ExplicitArg
-                                                            (Just "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0")
-                                                            (var "Prelude.Types.Nat")
-                                                      .=>    var "DerivedGen.Vect^120651999565177027.Vect^120651999565177027"
-                                                          .$ var "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Vect^120651999565177027.Vect^120651999565177027^Con^0>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (    MkArg
+                                                               MW
+                                                               ExplicitArg
+                                                               (Just "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0")
+                                                               (var "Prelude.Types.Nat")
+                                                         .=>    var "DerivedGen.Vect^120651999565177027.Vect^120651999565177027"
+                                                             .$ var "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0"))
+                                         }
+                                   }
+                             }
                          , IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.Vect^120651999565177027.Vect^120651999565177027^Con^1>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (    MkArg
-                                                            MW
-                                                            ExplicitArg
-                                                            (Just "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0")
-                                                            (var "Prelude.Types.Nat")
-                                                      .=>    var "DerivedGen.Vect^120651999565177027.Vect^120651999565177027"
-                                                          .$ var "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.Vect^120651999565177027.Vect^120651999565177027^Con^1>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (    MkArg
+                                                               MW
+                                                               ExplicitArg
+                                                               (Just "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0")
+                                                               (var "Prelude.Types.Nat")
+                                                         .=>    var "DerivedGen.Vect^120651999565177027.Vect^120651999565177027"
+                                                             .$ var "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0"))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.Vect^120651999565177027.Vect^120651999565177027^Con^0>>"
@@ -181,23 +189,25 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Vect^120651999565177027.Vect^12
                 .= local
                      { decls =
                          [ IClaim
-                             (MkIClaimData
-                                { rig = MW
-                                , vis = Export
-                                , opts = []
-                                , type =
-                                    mkTy
-                                      { name = "<<DerivedGen.MkX>>"
-                                      , type =
-                                              MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                          .->    var "Test.DepTyCheck.Gen.Gen"
-                                              .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                              .$ (   var "Builtin.DPair.DPair"
-                                                  .$ var "Prelude.Types.Nat"
-                                                  .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
-                                                      .=> var "DerivedGen.X" .$ var "{arg:2}"))
-                                      }
-                                })
+                             { claim =
+                                 MkIClaimData
+                                   { rig = MW
+                                   , vis = Export
+                                   , opts = []
+                                   , type =
+                                       mkTy
+                                         { name = "<<DerivedGen.MkX>>"
+                                         , type =
+                                                 MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
+                                             .->    var "Test.DepTyCheck.Gen.Gen"
+                                                 .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
+                                                 .$ (   var "Builtin.DPair.DPair"
+                                                     .$ var "Prelude.Types.Nat"
+                                                     .$ (    MkArg MW ExplicitArg (Just "{arg:2}") (var "Prelude.Types.Nat")
+                                                         .=> var "DerivedGen.X" .$ var "{arg:2}"))
+                                         }
+                                   }
+                             }
                          , IDef
                              emptyFC
                              "<<DerivedGen.MkX>>"
