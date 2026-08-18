@@ -216,10 +216,12 @@ solveDG :
   (dg : DependencyGraph) ->
   m DependencyGraph
 solveDG dg = do
-  let cs = canSub dg
+  -- This monadic bind is here due to over-normalisation during elaborator script execution causing bad elaborator performance
+  cs <- pure $ id $ canSub dg
   let False = null cs
   | _ => pure dg
-  ds <- pure $ doSub dg cs
+  -- This monadic bind is here due to over-normalisation during elaborator script execution causing bad elaborator performance
+  ds <- pure $ id $ doSub dg cs
   -- DG <= DS because cs is non-empty, and every doSub may shrink the set of possibly substitutable variables
   -- If doSub can't shrink it, the dependency graph stays the same
   if ds == dg
@@ -356,7 +358,7 @@ unifyWithCompiler task = do
   let err = pure {f=Elab} $ Left $ Just CatastrophicError
   rr <- try ret err
   dg <- liftEither rr
-  ur <- pure $ finalizeDG task dg
+  ur <- finalizeDG task dg
   logPoint DetailedDebug "unifyWithCompiler" [] "Unification result: \{show ur}"
   pure ur
 
@@ -369,7 +371,7 @@ unifyWithCompiler' :
   m $ UnificationResult
 unifyWithCompiler' task = do
   dg <- unify' task
-  pure $ finalizeDG task dg
+  finalizeDG task dg
 
 export
 [UnifyWithCompiler]
