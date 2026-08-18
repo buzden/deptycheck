@@ -8,8 +8,8 @@ import Language.Reflection.TTImp
 import Language.Reflection.TT
 import Language.Reflection.Util
 import Control.Monad.Identity
-import Control.Monad.Reader
-import Control.Monad.Reader.Tuple
+import public Control.Monad.Reader -- public due to compiler bug #2439
+import public Control.Monad.Reader.Tuple -- public due to compiler bug #2439
 import Control.Monad.State
 
 %default total
