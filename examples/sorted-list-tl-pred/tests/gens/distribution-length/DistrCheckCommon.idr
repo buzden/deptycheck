@@ -1,1 +1,1 @@
-../_common/DistrCheckCommon.idr
+../../../../../tests/lib/distribution/_common/DistrCheckCommon.idr
