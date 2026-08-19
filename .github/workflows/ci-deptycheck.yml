@@ -146,7 +146,7 @@ jobs:
         run: |
           (
           echo -n "test-sets=["
-          find tests/ -type f,l -name run | grep -v '/_' | \
+          find tests/ -type f,l -name run | grep -v '/_' | grep -v '^tests/perf/' | \
             sed -e 's|^tests/|"|' -e 's|\(.*\)distribution/\([^-]*\)-[^/]*/run|\1distribution/\2-"|' -e 's|/[^/]*/run$|"|' | \
             sort | uniq | awk 'ORS=", "' | head -c -2
           echo "]"
@@ -185,6 +185,106 @@ jobs:
         run: pack test deptycheck "${TEST_SET}"
         env:
           TEST_SET: ${{ matrix.test_set }}
+
+  ##############################
+  # Measure DepTyCheck's perf. #
+  ##############################
+
+  # These tests assert on the *complexity class* of a generator, never on a time.
+  # A slope of `log T` against `log n` does not depend on how fast the runner is,
+  # which is what makes the measurement survive GitHub's infrastructure; see
+  # `tests/perf/README.md` for the whole argument.
+  #
+  # Unlike the functional test sets, one matrix entry is one test directory
+  # rather than one directory of tests. That is deliberate: each subject then
+  # gets a runner to itself, so no two measurements ever share a machine. It is
+  # also why every directory runs on every push: they run concurrently, so the
+  # whole suite costs the wall-clock of its slowest member and nothing more.
+
+  get-perf-sets:
+    name: Acquire performance test sets
+    needs: validate_trigger
+    runs-on: ubuntu-latest
+    outputs:
+      perf-sets: ${{ steps.get-perf-sets.outputs.perf-sets }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
+      - name: Get performance test sets
+        id: get-perf-sets
+        run: |
+          (
+          echo -n "perf-sets=["
+          find tests/perf/ -type f,l -name run | grep -v '/_' | \
+            sed -e 's|^tests/|"|' -e 's|/run$|"|' | \
+            sort | uniq | awk 'ORS=", "' | head -c -2
+          echo "]"
+          ) >> "$GITHUB_OUTPUT"
+
+  deptycheck-perf-test:
+    name: Measure ${{ matrix.perf_set }}
+    needs:
+      - prepare-pack
+      - deptycheck-build-lib
+      - get-perf-sets
+    runs-on: ubuntu-latest
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    env:
+      # A second test running beside the first would appear in the first one's
+      # times as noise, so the pool must not be run in parallel with itself.
+      NUM_THREADS: 1
+      perf_set: ${{ matrix.perf_set }}
+    strategy:
+      fail-fast: false # every subject is measured independently of the others
+      matrix:
+        perf_set: ${{ fromJSON(needs.get-perf-sets.outputs.perf-sets) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false # https://docs.zizmor.sh/audits/#artipacked
+      - name: Restore built DepTyCheck
+        uses: actions/download-artifact@v7
+        with:
+          name: built-deptycheck
+      - name: Untar the `pack` dir
+        run: .github/tar-pack restore "${{ env.pack_dir_file }}"
+
+      - name: Sleep a random bit
+        run: sleep "$(shuf -i 0-10 -n 1)"
+
+      - name: Measure ${{ matrix.perf_set }}
+        run: pack test deptycheck "${perf_set}"
+
+      - name: Name the measurement artifact
+        id: artifact-name
+        if: ${{ !cancelled() }}
+        run: echo "name=perf-data-${perf_set//\//-}" >> "$GITHUB_OUTPUT"
+
+      # The verdict is in the job's status; these are the numbers behind it. They
+      # are reported and never asserted on, because a constant factor measured on
+      # one runner is not comparable with one measured on another. Watching them
+      # over time is still the cheapest way to notice a constant-factor change.
+      - name: Report the measurements
+        if: ${{ !cancelled() }}
+        run: |
+          {
+            echo "### ${perf_set}"
+            echo
+            echo '```'
+            cat "tests/${perf_set}/perf-data.tsv" 2> /dev/null || echo 'no measurements were produced'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save the measurements
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.artifact-name.outputs.name }}
+          path: tests/${{ matrix.perf_set }}/perf-data.tsv
+          if-no-files-found: warn
 
   #################
   # Test examples #

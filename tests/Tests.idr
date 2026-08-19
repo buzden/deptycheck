@@ -19,4 +19,8 @@ main = goldenRunner $
     ]
   , "Derivation: core" `atDir` "derivation/core"
   , "Derivation: distribution" `atDir` "derivation/distribution"
+  -- These take minutes and want the machine to themselves; CI gives each one a
+  -- runner of its own. See `perf/README.md` before reading anything into a
+  -- failure.
+  , "Performance: complexity classes" `atDir` "perf"
   ]
