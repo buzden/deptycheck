@@ -8,5 +8,6 @@ import Deriving.DepTyCheck.Gen
 
 %logging "deptycheck.derive" 5
 %logging "deptycheck.derive.least-effort" 7
+%logging "deptycheck.util" 20
 
 Language.PilFun.genStmts = deriveGen

@@ -1,1 +1,2 @@
-1/1: Building Test (Test.idr)
+1/2: Building Shared (Shared.idr)
+2/2: Building Test (Test.idr)

@@ -1,0 +1,14 @@
+1/2: Building Shared (Shared.idr)
+2/2: Building Test (Test.idr)
+LOG deptycheck.test.utils.specialise:0:  Expanded e: Test.X Prelude.Types.Nat Data.Fin.Fin
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Checking specialisation need for [Prelude.Types.Nat, Data.Fin.Fin]...
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] (t := Prelude.Types.Nat) Given a type invocation w/o arguments, specialising
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] ({arg:1} := Data.Fin.Fin) Given a type invocation w/o arguments, specialising
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Task before normalisation: Test.X Prelude.Types.Nat Data.Fin.Fin
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] NormaliseTask returned: lambdaTy = Type;
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1]                         lambdaBody = Test.X Prelude.Types.Nat Data.Fin.Fin;
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type name: X^8135581006587252120.X^8135581006587252120
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Specialised type not found, deriving...
+LOG deptycheck.util.specialisation:20: Test.X[0(t), 1] Derived Test.X^8135581006587252120.X^8135581006587252120
+LOG deptycheck.util.specialisation:10: Test.X[0(t), 1] Declared specialised type Test.X^8135581006587252120.X^8135581006587252120: Test.X Prelude.Types.Nat Data.Fin.Fin
+LOG deptycheck.test.utils.specialise:0: Test.X^8135581006587252120.X^8135581006587252120[] CallGen params: []

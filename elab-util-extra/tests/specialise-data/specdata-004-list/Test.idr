@@ -4,7 +4,7 @@ import Shared
 
 %language ElabReflection
 
-%runElab specialiseData' "MyList" $ \a => List a
+%runElab specialiseDataLam' "MyList" $ \a => List a
 
 --- The variable assignment is a workaround for https://github.com/idris-lang/Idris2/issues/3651
 l0' = %runElab verifySpecialisation (List Nat) (MyList Nat)

@@ -49,6 +49,7 @@ Show (AtIndex idx ty mut) where
   show _ = "indeed"
 
 %hide Prelude.Basics.(:<)
+%hide Data.SnocVect.(:<)
 
 main : IO ()
 main = runGs
