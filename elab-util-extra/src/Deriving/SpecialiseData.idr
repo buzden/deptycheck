@@ -6,7 +6,7 @@ import Data.DPair
 import Data.Either
 import Data.Fin.Set
 import Data.List
-import public Data.List.Map -- workaround for compiler bug
+import public Data.List.Map -- workaround for compiler bug #2439
 import Data.List.Quantifiers
 import Data.List1
 import Data.Maybe
@@ -23,12 +23,12 @@ import Deriving.Show
 import public Language.Mk
 import Language.Reflection.Compat
 import Language.Reflection.Compat.Constr
-import public Language.Reflection.Compat.TypeInfo -- workaround for compiler bug
+import public Language.Reflection.Compat.TypeInfo -- workaround for compiler bug #2439
 import Language.Reflection.Expr
 import Language.Reflection.Syntax
 import Language.Reflection.Logging
 import public Language.Reflection.Unify.Interface
-import public Language.Reflection.VarSubst -- workaround for compiler bug
+import public Language.Reflection.VarSubst -- workaround for compiler bug #2439
 import Syntax.IHateParens
 
 %language ElabReflection
@@ -65,9 +65,9 @@ export
 showSE : Show SpecialisationError
 showSE = %runElab derive
 
--------------------------------
---- SPECIALISAION TASK TYPE ---
--------------------------------
+--------------------------------
+--- SPECIALISATION TASK TYPE ---
+--------------------------------
 
 ||| Specialisation task
 record SpecTask where
@@ -423,7 +423,7 @@ record ArgMeta where
   ||| The argument's type can be substituted by specialised type invocation
   isRecursiveArg : Bool
 
-||| Specialisation-related constructor metadat
+||| Specialisation-related constructor metadata
 record ConMeta where
   constructor MkCMeta
   ||| Metadata for each argument
