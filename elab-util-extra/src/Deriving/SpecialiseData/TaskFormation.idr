@@ -119,3 +119,32 @@ argsToSpecTask :
   List GenArg ->
   m (TTImp, List Arg, List $ Maybe TTImp)
 argsToSpecTask dec tyName ga = bimap (reAppAny $ IVar EmptyFC tyName) unGA <$> processArgs dec tyName 0 ga
+
+allAppsToGenArgs : List Arg -> AllApps -> List GenArg
+allAppsToGenArgs [] aa = []
+allAppsToGenArgs (x :: xs) aa = do
+  let pav = popArgVal x aa
+  let mr = fst <$> pav
+  let aa = fromMaybe aa $ snd <$> pav
+  MkGenArg x mr :: allAppsToGenArgs xs aa
+
+export
+exprToSpecTask :
+  MonadLog m =>
+  NamesInfoInTypes =>
+  (GenArg -> (ArgDecision, String)) ->
+  TTImp ->
+  m (TTImp, List Arg, List $ Maybe TTImp)
+exprToSpecTask dec expr = do
+  let (appHead, appTerms) = unAppAny expr
+  let (IVar _ tyName) = appHead
+    | _ => logValue DetailedDebug "specialiseData.taskFormation" []
+              "Head of expression is not a variable: \{show appHead}"
+              (expr, [], [])
+  let (Just tyInfo) = lookupType tyName
+    | _ => logValue DetailedDebug "specialiseData.taskFormation" []
+              "\{tyName} is not a global type"
+              (expr, [], [])
+  let allApps = mkAllApps appTerms
+  let genArgs = allAppsToGenArgs tyInfo.args allApps
+  argsToSpecTask dec tyName genArgs
