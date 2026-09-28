@@ -83,7 +83,7 @@ processArg :
   GenArg ->
   m (TTImp, List GenArg)
 
-processArgs' :
+processArgs :
   MonadLog m =>
   NamesInfoInTypes =>
   (GenArg -> (ArgDecision, String)) ->
@@ -91,30 +91,31 @@ processArgs' :
   Nat ->
   List GenArg ->
   m (List AnyApp, List GenArg)
-processArgs' dec tyName k [] = pure ([], [])
-processArgs' dec tyName k (x :: xs) = do
+processArgs dec tyName k [] = pure ([], [])
+processArgs dec tyName k (x :: xs) = do
   (aT, l) <- assert_total $ processArg dec tyName k x
-  (recAA, l') <- processArgs' dec tyName (k + length l) xs
+  (recAA, l') <- processArgs dec tyName (k + length l) xs
   pure (appArg x.arg aT :: recAA, l ++ l')
 
-processArg dec tyName argIdx ga with (specDecideArg ga)
-  processArg dec tyName argIdx ga | (Passthrough, s) =
-    logValue DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
-      "\{s}, passing through" $ singleArg argIdx ga
-  processArg dec tyName argIdx ga | (SpecLit x, s) =
-    logValue DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
-      "\{s}, specialising" (x, Prelude.Nil)
-  processArg dec tyName argIdx ga | (SpecRec n givens, s) = do
-    logPoint DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
-          "\{s}, traversing arguments: \{show $ map (fromMaybe "" . name . arg) givens}"
-    map (mapFst $ reAppAny (IVar EmptyFC n)) $ processArgs' dec n argIdx $ takeWhile (.isGiven) givens
+processArg dec tyName argIdx ga =
+  case dec ga of
+    (Passthrough, s) =>
+      logValue DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
+        "\{s}, passing through" $ singleArg argIdx ga
+    (SpecLit x, s) =>
+      logValue DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
+        "\{s}, specialising" (x, [])
+    (SpecRec n givens, s) => do
+      logPoint DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
+        "\{s}, traversing arguments: \{show $ map (fromMaybe "" . name . arg) givens}"
+      map (mapFst $ reAppAny (IVar EmptyFC n)) $ processArgs dec n argIdx $ takeWhile (.isGiven) givens
 
-public export
-processArgs :
+export
+argsToSpecTask :
   MonadLog m =>
   NamesInfoInTypes =>
   (GenArg -> (ArgDecision, String)) ->
   Name ->
   List GenArg ->
   m (TTImp, List Arg, List $ Maybe TTImp)
-processArgs dec tyName ga = bimap (reAppAny $ IVar EmptyFC tyName) unGA <$> processArgs' dec tyName 0 ga
+argsToSpecTask dec tyName ga = bimap (reAppAny $ IVar EmptyFC tyName) unGA <$> processArgs dec tyName 0 ga

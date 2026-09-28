@@ -143,7 +143,7 @@ specialiseIfNeeded sig fuel givenParamValues = do
         "Not found any type arguments that can be specialised upon, specialisation impossible."
         Nothing
   -- Generate specialisation rhs, arguments, and given values
-  (lambdaRet, fvArgs, givenSubst) <- processArgs specDecideArg sig.targetType.name genArgs
+  (lambdaRet, fvArgs, givenSubst) <- argsToSpecTask specDecideArg sig.targetType.name genArgs
   let preNorm = foldr lam lambdaRet fvArgs
   logPoint DetailedDebug "deptycheck.derive.specialisation" [sig] "Task before normalisation: \{show preNorm}"
   -- Normalise the specialisation lambda
