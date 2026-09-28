@@ -100,13 +100,13 @@ processArgs dec tyName k (x :: xs) = do
 processArg dec tyName argIdx ga =
   case dec ga of
     (Passthrough, s) =>
-      logValue DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
+      logValue DetailedDebug "specialiseData.taskFormation" [tyName, ga]
         "\{s}, passing through" $ singleArg argIdx ga
     (SpecLit x, s) =>
-      logValue DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
+      logValue DetailedDebug "specialiseData.taskFormation" [tyName, ga]
         "\{s}, specialising" (x, [])
     (SpecRec n givens, s) => do
-      logPoint DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
+      logPoint DetailedDebug "specialiseData.taskFormation" [tyName, ga]
         "\{s}, traversing arguments: \{show $ map (fromMaybe "" . name . arg) givens}"
       map (mapFst $ reAppAny (IVar EmptyFC n)) $ processArgs dec n argIdx $ takeWhile (.isGiven) givens
 
