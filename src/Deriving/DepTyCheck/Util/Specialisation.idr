@@ -93,14 +93,50 @@ singleArg n (MkGenArg a v) = do
   let n : Name = fromString "lam^\{show n}"
   (IVar EmptyFC n, [MkGenArg (MkArg a.count a.piInfo (Just n) $ allQuestions a.type) v])
 
+data ArgDecision = Passthrough | SpecLit TTImp | SpecRec Name (List GenArg)
+
+specDecideArg : NamesInfoInTypes => GenArg -> (ArgDecision, String)
+specDecideArg ga with (ga.given)
+  specDecideArg ga | Nothing = (Passthrough, "No given value")
+  specDecideArg ga | Just x = do
+    let (appLhs, appTerms) = unAppAny x
+    let IVar _ tyName = appLhs
+      | IPrimVal _ (PrT _) => (SpecLit x, "Given a primitive type invocation")
+      | _ => (Passthrough, "Given value head is not a variable")
+    case lookupType tyName of
+      Just tyInfo => case appTerms of
+        [] => (SpecLit x, "Given a type invocation w/o arguments")
+        _ => do
+          let givens = map (uncurry MkGenArg) $ zip tyInfo.args $ popArgVals tyInfo.args (mkAllApps appTerms)
+          (SpecRec tyName givens, "Given a type invocation")
+      Nothing =>
+        ( Passthrough
+        , if (snd (unPi ga.arg.type) == `(Type))
+            then "Given a non-global type expr"
+            else "Given a non-type expr")
+
 processArg : MonadLog m => NamesInfoInTypes => Name -> Nat -> GenArg -> m (TTImp, List GenArg)
+processArg' : MonadLog m => NamesInfoInTypes => Name -> Nat -> GenArg -> m (TTImp, List GenArg)
 
 processArgs' : MonadLog m => NamesInfoInTypes => Name -> Nat -> List GenArg -> m (List AnyApp, List GenArg)
 processArgs' tyName k [] = pure ([], [])
 processArgs' tyName k (x :: xs) = do
-  (aT, l) <- assert_total $ processArg tyName k x
+  (aT, l) <- assert_total $ processArg' tyName k x
   (recAA, l') <- processArgs' tyName (k + length l) xs
   pure (appArg x.arg aT :: recAA, l ++ l')
+
+processArg' tyName argIdx ga with (specDecideArg ga)
+  processArg' tyName argIdx ga | (Passthrough, s) =
+    logValue DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
+      "\{s}, passing through" $ singleArg argIdx ga
+  processArg' tyName argIdx ga | (SpecLit x, s) =
+    logValue DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
+      "\{s}, specialising" (x, Prelude.Nil)
+  processArg' tyName argIdx ga | (SpecRec n givens, s) = do
+    logPoint DetailedDebug "deptycheck.derive.specialisation" [tyName, ga]
+          "\{s}, traversing arguments: \{show $ map (fromMaybe "" . name . arg) givens}"
+    map (mapFst $ reAppAny (IVar EmptyFC n)) $ processArgs' n argIdx $ takeWhile (.isGiven) givens
+
 
 processArg tyName argIdx ga with (ga.given)
   processArg tyName argIdx ga | Nothing =
