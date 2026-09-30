@@ -53,6 +53,10 @@ singleArg n (MkGenArg a v) = do
 public export
 data ArgDecision = Passthrough | SpecLit TTImp | SpecRec Name (List GenArg)
 
+isPassthrough : ArgDecision -> Bool
+isPassthrough Passthrough = True
+isPassthrough _ = False
+
 export
 specDecideArg : NamesInfoInTypes => GenArg -> (ArgDecision, String)
 specDecideArg ga with (ga.given)
@@ -134,17 +138,21 @@ exprToSpecTask :
   NamesInfoInTypes =>
   (GenArg -> (ArgDecision, String)) ->
   TTImp ->
-  m (TTImp, List Arg, List $ Maybe TTImp)
+  m $ Maybe (TTImp, List Arg, List $ Maybe TTImp)
 exprToSpecTask dec expr = do
   let (appHead, appTerms) = unAppAny expr
   let (IVar _ tyName) = appHead
     | _ => logValue DetailedDebug "specialiseData.taskFormation" []
               "Head of expression is not a variable: \{show appHead}"
-              (expr, [], [])
+              Nothing
   let (Just tyInfo) = lookupType tyName
     | _ => logValue DetailedDebug "specialiseData.taskFormation" []
               "\{tyName} is not a global type"
-              (expr, [], [])
+              Nothing
   let allApps = mkAllApps appTerms
   let genArgs = allAppsToGenArgs tyInfo.args allApps
-  argsToSpecTask dec tyName genArgs
+  let False = all isPassthrough $ fst . dec <$> genArgs
+    | True => logValue DetailedDebug "specialiseData.taskFormation" []
+                "No non-passthrough arguments!"
+                Nothing
+  Just <$> argsToSpecTask dec tyName genArgs
