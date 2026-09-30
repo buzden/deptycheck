@@ -20,7 +20,18 @@ depends = collection-utils
         , mtl-tuple-impls
 
 modules = Deriving.SpecialiseData
+        , Deriving.SpecialiseData.Codegen
+        , Deriving.SpecialiseData.Codegen.Cast
+        , Deriving.SpecialiseData.Codegen.Claims
+        , Deriving.SpecialiseData.Codegen.InterfaceImpls
+        , Deriving.SpecialiseData.Codegen.Type
+        , Deriving.SpecialiseData.Common
+        , Deriving.SpecialiseData.Helpers
+        , Deriving.SpecialiseData.QuantifiersExt
+        , Deriving.SpecialiseData.Task
         , Deriving.SpecialiseData.TaskFormation
+        , Deriving.SpecialiseData.TypeInfoExt
+        , Deriving.SpecialiseData.Unification
         , Language.Reflection.Compat
         , Language.Reflection.Compat.Constr
         , Language.Reflection.Compat.TypeInfo
