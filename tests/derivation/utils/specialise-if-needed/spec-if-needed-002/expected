@@ -1,13 +1,13 @@
 1/1: Building Test (Test.idr)
 LOG deptycheck.test.utils.specialise:0:  Expanded e: Test.X Prelude.Types.Nat Prelude.Types.S
 LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Checking specialisation need for [Prelude.Types.Nat, Prelude.Types.S]...
-LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] (t := Prelude.Types.Nat) Given a type invocation w/o arguments, specialising
-LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] ({arg:1} := Prelude.Types.S) Given a non-type expr, passing through
+LOG specialiseData.taskFormation:20: Test.X (t := Prelude.Types.Nat) Given a type invocation w/o arguments, specialising
+LOG specialiseData.taskFormation:20: Test.X ({arg:1} := Prelude.Types.S) Given a non-type expr, passing through
 LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Task before normalisation: \ lam^0 => Test.X Prelude.Types.Nat lam^0
 LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] NormaliseTask returned: lambdaTy = (lam^0 : ({arg:2} : Prelude.Types.Nat) -> Prelude.Types.Nat) -> Type;
 LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1]                         lambdaBody = \ lam^0 => Test.X Prelude.Types.Nat lam^0;
-LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Specialised type name: X^17811957646955735153.X^17811957646955735153
+LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Specialised type name: X^5795598176726955658.X^5795598176726955658
 LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Specialised type not found, deriving...
-LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Derived Test.X^17811957646955735153.X^17811957646955735153
-LOG deptycheck.derive.specialisation:10: Test.X[0(t), 1] Declared specialised type Test.X^17811957646955735153.X^17811957646955735153: Test.X Prelude.Types.Nat lam^0
-LOG deptycheck.test.utils.specialise:0: Test.X^17811957646955735153.X^17811957646955735153[0(fv^X^17811957646955735153.X^17811957646955735153^lam^0)] CallGen params: [Prelude.Types.S]
+LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Derived Test.X^5795598176726955658.X^5795598176726955658
+LOG deptycheck.derive.specialisation:10: Test.X[0(t), 1] Declared specialised type Test.X^5795598176726955658.X^5795598176726955658: Test.X Prelude.Types.Nat lam^0
+LOG deptycheck.test.utils.specialise:0: Test.X^5795598176726955658.X^5795598176726955658[0(fv^X^5795598176726955658.X^5795598176726955658^lam^0)] CallGen params: [Prelude.Types.S]

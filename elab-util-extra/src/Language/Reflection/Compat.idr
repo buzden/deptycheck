@@ -5,6 +5,7 @@
 ||| This copying is done with the permission of Stefan Höck, the author and copyright holder of the `elab-util` library.
 module Language.Reflection.Compat
 
+import public Data.Alternative -- From Data.List.Ex, needed for LogPosition Con to work
 import public Data.List.Quantifiers
 import public Data.List1
 import public Data.String

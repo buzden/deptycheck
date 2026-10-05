@@ -20,6 +20,7 @@ depends = collection-utils
         , mtl-tuple-impls
 
 modules = Deriving.SpecialiseData
+        , Deriving.SpecialiseData.TaskFormation
         , Language.Reflection.Compat
         , Language.Reflection.Compat.Constr
         , Language.Reflection.Compat.TypeInfo

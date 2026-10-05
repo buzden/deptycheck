@@ -12,51 +12,14 @@ import public Data.SortedSet
 import public Deriving.DepTyCheck.Gen.ForOneType.Interface
 
 import public Deriving.SpecialiseData
+import public Deriving.SpecialiseData.TaskFormation
+
 import public Language.Reflection.Unify
 
 import public Data.Hashable
 import public Data.Hashable.Base
 
 %default total
-
-allQImpl : Monad m => NamesInfoInTypes => TTImp -> TTImp -> m TTImp
-allQImpl (IPi {}) r = pure r
-allQImpl (IApp {}) (IApp _ (Implicit {}) _) = pure `(?)
-allQImpl (IApp {}) r@(IApp {}) = pure r
-allQImpl (IApp {}) _ = pure `(?)
-allQImpl v@(IVar _ n) _ =
-  case lookupType n of
-    Just _ => pure v
-    Nothing => pure `(?)
-allQImpl _ _ = pure `(?)
-
-||| Replace every non-function sub-expression with a question mark
-|||
-||| (x -> (y -> z) -> q) becomes (? -> (? -> ?) -> ?)
-allQuestions : NamesInfoInTypes => TTImp -> TTImp
-allQuestions t = runIdentity $ mapMTTImp' allQImpl t
-
-||| An abstract "argument" of a generator
-|||
-||| Consists of a type constructor's argument and a possible given value
-record GenArg where
-  constructor MkGenArg
-  arg : Arg
-  given : Maybe TTImp
-
-LogPosition GenArg where
-  logPosition (MkGenArg a Nothing) = "\{fromMaybe "<unnamed arg>" a.name}"
-  logPosition (MkGenArg a $ Just t) = "(\{fromMaybe "<unnamed arg>" a.name} := \{show t})"
-
-unGA : List GenArg -> (List Arg, List (Maybe TTImp))
-unGA [] = ([], [])
-unGA (x :: xs) = let (ys, zs) = unGA xs in (x.arg :: ys, x.given :: zs)
-
-(.isGenerated) : GenArg -> Bool
-(.isGenerated) = isNothing . given
-
-(.isGiven) : GenArg -> Bool
-(.isGiven) = isJust . given
 
 ||| Determine if the argument should be specialised or passed through
 (.isPassthrough) : Elaboration m => GenArg -> m Bool
@@ -87,66 +50,6 @@ mkArgs sig ((i1, x) :: xs) g@((i2, y) :: ys) =
   if i1 == i2
     then MkGenArg x (Just y) :: mkArgs sig xs ys
     else MkGenArg x Nothing  :: mkArgs sig xs g
-
-singleArg : NamesInfoInTypes => Nat -> GenArg -> (TTImp, List GenArg)
-singleArg n (MkGenArg a v) = do
-  let n : Name = fromString "lam^\{show n}"
-  (IVar EmptyFC n, [MkGenArg (MkArg a.count a.piInfo (Just n) $ allQuestions a.type) v])
-
-processArg : MonadLog m => NamesInfoInTypes => GenSignature -> Nat -> GenArg -> m (TTImp, List GenArg)
-
-processArgs' : MonadLog m => NamesInfoInTypes => GenSignature -> Nat -> List GenArg -> m (List AnyApp, List GenArg)
-processArgs' sig k [] = pure ([], [])
-processArgs' sig k (x :: xs) = do
-  (aT, l) <- assert_total $ processArg sig k x
-  (recAA, l') <- processArgs' sig (k + length l) xs
-  pure (appArg x.arg aT :: recAA, l ++ l')
-
-processArg sig argIdx ga with (ga.given)
-  processArg sig argIdx ga | Nothing =
-    logValue DetailedDebug "deptycheck.derive.specialisation" [sig, ga]
-      "No given value, passing through"
-      $ singleArg argIdx ga
-  processArg sig argIdx ga | Just x = do
-    let (appLhs, appTerms) = unAppAny x
-    let IVar _ tyName = appLhs
-      | IPrimVal _ (PrT _) =>
-        logValue DetailedDebug "deptycheck.derive.specialisation" [sig, ga]
-          "Given a primitive type invocation, specialising"
-          (x, [])
-      | _ =>
-        logValue DetailedDebug "deptycheck.derive.specialisation" [sig, ga]
-          "Given value head is not a variable, passing through"
-          $ singleArg argIdx ga
-    case lookupType tyName of
-      Just tyInfo => do
-        let (_ :: _) = appTerms
-          | [] =>
-            logValue DetailedDebug "deptycheck.derive.specialisation" [sig, ga]
-              "Given a type invocation w/o arguments, specialising"
-              (x, [])
-        let givens = map (uncurry MkGenArg) $ zip tyInfo.args $ popArgVals tyInfo.args (mkAllApps appTerms)
-        logPoint DetailedDebug "deptycheck.derive.specialisation" [sig, ga]
-          "Given a type invocation, traversing arguments: \{show $ map (fromMaybe "" . name . arg) givens}"
-        map (mapFst $ reAppAny appLhs) $ processArgs' sig argIdx $ takeWhile (.isGiven) givens
-      Nothing => do
-        if (snd (unPi ga.arg.type) == `(Type))
-          then
-            logValue DetailedDebug "deptycheck.derive.specialisation" [sig, ga]
-              "Given a non-global type expr, passing through"
-              $ singleArg argIdx ga
-          else
-            logValue DetailedDebug "deptycheck.derive.specialisation" [sig, ga]
-              "Given a non-type expr, passing through"
-              $ singleArg argIdx ga
-
-processArgs :
-  MonadLog m =>
-  NamesInfoInTypes =>
-  (sig : GenSignature) ->
-  List GenArg ->
-  m (TTImp, List Arg, List $ Maybe TTImp)
-processArgs sig ga = bimap (reAppAny $ IVar EmptyFC sig.targetType.name) unGA <$> processArgs' sig 0 ga
 
 ||| Given a set of given argument indices, convert a list of their values into a vector that can be fed to `callGen`
 |||
@@ -240,7 +143,7 @@ specialiseIfNeeded sig fuel givenParamValues = do
         "Not found any type arguments that can be specialised upon, specialisation impossible."
         Nothing
   -- Generate specialisation rhs, arguments, and given values
-  (lambdaRet, fvArgs, givenSubst) <- processArgs sig genArgs
+  (lambdaRet, fvArgs, givenSubst) <- argsToSpecTask specDecideArg sig.targetType.name genArgs
   let preNorm = foldr lam lambdaRet fvArgs
   logPoint DetailedDebug "deptycheck.derive.specialisation" [sig] "Task before normalisation: \{show preNorm}"
   -- Normalise the specialisation lambda

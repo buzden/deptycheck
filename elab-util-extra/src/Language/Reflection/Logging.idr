@@ -12,6 +12,10 @@ public export
 interface LogPosition a where
   logPosition : a -> String
 
+export
+LogPosition Name where
+  logPosition = show
+
 public export
 data LogPositions : Type where
   Nil  : LogPositions
