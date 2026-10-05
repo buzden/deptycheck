@@ -3,7 +3,7 @@ module Deriving.SpecialiseData.TaskFormation
 import public Language.Reflection
 import public Language.Reflection.Syntax
 import public Language.Reflection.Compat.TypeInfo
-import public Language.Reflection.Logging
+import public Language.Reflection.Logging -- workaround for idris-lang/Idris2#2439
 
 allQImpl : Monad m => NamesInfoInTypes => TTImp -> TTImp -> m TTImp
 allQImpl (IPi {}) r = pure r
@@ -23,12 +23,12 @@ allQuestions : NamesInfoInTypes => TTImp -> TTImp
 allQuestions t = runIdentity $ mapMTTImp' allQImpl t
 
 ||| Information about a generator's argument extracted from GenSignature
-|||
-||| Consists of a type constructor's argument (`arg`) and a `Maybe` describing its potential given value (`given`)
 public export
 record GenArg where
   constructor MkGenArg
+  ||| Formal argument beloging to a type constructor
   arg : Arg
+  ||| Value of the actual/given argument (if present)
   given : Maybe TTImp
 
 export
