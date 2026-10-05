@@ -12,7 +12,7 @@ public export
 interface LogPosition a where
   logPosition : a -> String
 
-public export
+export
 LogPosition Name where
   logPosition = show
 

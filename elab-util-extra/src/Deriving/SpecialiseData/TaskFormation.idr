@@ -1,7 +1,7 @@
 module Deriving.SpecialiseData.TaskFormation
 
 import public Language.Reflection
-import public Language.Reflection.Compat
+import public Language.Reflection.Syntax
 import public Language.Reflection.Compat.TypeInfo
 import public Language.Reflection.Logging
 
@@ -22,15 +22,16 @@ allQImpl _ _ = pure `(?)
 allQuestions : NamesInfoInTypes => TTImp -> TTImp
 allQuestions t = runIdentity $ mapMTTImp' allQImpl t
 
-||| An abstract "argument" of a generator
+||| Information about a generator's argument extracted from GenSignature
 |||
-||| Consists of a type constructor's argument and a possible given value
+||| Consists of a type constructor's argument (`arg`) and a `Maybe` describing its potential given value (`given`)
 public export
 record GenArg where
   constructor MkGenArg
   arg : Arg
   given : Maybe TTImp
 
+export
 LogPosition GenArg where
   logPosition (MkGenArg a Nothing) = "\{fromMaybe "<unnamed arg>" a.name}"
   logPosition (MkGenArg a $ Just t) = "(\{fromMaybe "<unnamed arg>" a.name} := \{show t})"
