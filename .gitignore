@@ -2,3 +2,4 @@ build/
 .build/
 **/tests/**/failures
 **/tests/**/output
+**/tests/perf/**/perf-data.tsv
