@@ -1,7 +1,7 @@
 module Deriving.SpecialiseData.Task
 
 import public Control.Monad.Error.Interface
-import public Data.DPair
+import public Data.DPair -- workaround for idris-lang/Idris2#2439
 import Deriving.SpecialiseData.Common
 import Deriving.SpecialiseData.Helpers
 import Deriving.SpecialiseData.TypeInfoExt

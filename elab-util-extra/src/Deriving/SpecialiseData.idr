@@ -20,15 +20,15 @@ import Data.Vect.Quantifiers
 import public Decidable.Decidable -- workaround for idris-lang/Idris2#2439
 import public Decidable.Equality -- workaround for idris-lang/Idris2#2439
 import Deriving.Show
-import public Deriving.SpecialiseData.Codegen
+import public Deriving.SpecialiseData.Codegen -- workaround for idris-lang/Idris2#2439
 import public Deriving.SpecialiseData.Common
-import public Deriving.SpecialiseData.Helpers
-import public Deriving.SpecialiseData.QuantifiersExt
-import public Deriving.SpecialiseData.Task
-import public Deriving.SpecialiseData.TaskFormation
-import public Deriving.SpecialiseData.TypeInfoExt
-import public Deriving.SpecialiseData.Unification
-import public Language.Mk
+import public Deriving.SpecialiseData.Helpers -- workaround for idris-lang/Idris2#2439
+import public Deriving.SpecialiseData.QuantifiersExt -- workaround for idris-lang/Idris2#2439
+import public Deriving.SpecialiseData.Task -- workaround for idris-lang/Idris2#2439
+import public Deriving.SpecialiseData.TaskFormation -- workaround for idris-lang/Idris2#2439
+import public Deriving.SpecialiseData.TypeInfoExt -- workaround for idris-lang/Idris2#2439
+import public Deriving.SpecialiseData.Unification -- workaround for idris-lang/Idris2#2439
+import public Language.Mk -- used in generated code
 import Language.Reflection.Compat
 import Language.Reflection.Compat.Constr
 import public Language.Reflection.Compat.TypeInfo -- workaround for idris-lang/Idris2#2439

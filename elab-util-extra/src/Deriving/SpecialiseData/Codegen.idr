@@ -1,13 +1,13 @@
 module Deriving.SpecialiseData.Codegen
 
-import public Data.DPair
+import public Data.DPair -- workaround for idris-lang/Idris2#2439
 import Data.Fin
 import Data.SnocList
 import Data.SnocList.Quantifiers
-import public Deriving.SpecialiseData.Codegen.Type
-import public Deriving.SpecialiseData.Codegen.Cast
-import public Deriving.SpecialiseData.Codegen.Claims
-import public Deriving.SpecialiseData.Codegen.InterfaceImpls
+import public Deriving.SpecialiseData.Codegen.Type -- workaround for idris-lang/Idris2#2439
+import public Deriving.SpecialiseData.Codegen.Cast -- workaround for idris-lang/Idris2#2439
+import public Deriving.SpecialiseData.Codegen.Claims -- workaround for idris-lang/Idris2#2439
+import public Deriving.SpecialiseData.Codegen.InterfaceImpls -- workaround for idris-lang/Idris2#2439
 import Deriving.SpecialiseData.Common
 import Deriving.SpecialiseData.Helpers
 import Deriving.SpecialiseData.QuantifiersExt

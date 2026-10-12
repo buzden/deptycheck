@@ -1,6 +1,6 @@
 module Deriving.SpecialiseData.Codegen.Type
 
-import public Data.DPair
+import public Data.DPair -- workaround for idris-lang/Idris2#2439
 import Data.Fin
 import Data.SnocList
 import Data.SnocList.Quantifiers
@@ -14,7 +14,7 @@ import Deriving.SpecialiseData.Unification
 import Language.Reflection.Compat
 import Language.Reflection.Expr
 import public Language.Reflection.Unify
-import public Language.Reflection.VarSubst
+import public Language.Reflection.VarSubst -- workaround for idris-lang/Idris2#2439
 
 -----------------------------------
 --- SPECIALISED TYPE GENERATION ---

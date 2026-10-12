@@ -1,6 +1,6 @@
 module Deriving.SpecialiseData.QuantifiersExt
 
-import public Data.DPair
+import public Data.DPair -- workaround for idris-lang/Idris2#2439
 import Data.List
 import Data.List.Quantifiers
 import Data.Vect

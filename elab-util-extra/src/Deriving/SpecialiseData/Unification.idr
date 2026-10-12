@@ -1,6 +1,6 @@
 module Deriving.SpecialiseData.Unification
 
-import public Data.DPair
+import public Data.DPair -- workaround for idris-lang/Idris2#2439
 import Deriving.SpecialiseData.Task
 import Deriving.SpecialiseData.Helpers
 import Deriving.SpecialiseData.QuantifiersExt
