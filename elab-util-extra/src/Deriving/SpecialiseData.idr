@@ -2,11 +2,11 @@ module Deriving.SpecialiseData
 
 import Control.Monad.Either
 import Control.Monad.Trans
-import public Data.DPair
+import public Data.DPair -- workaround for idris-lang/Idris2#2439
 import Data.Either
 import Data.Fin.Set
 import Data.List
-import public Data.List.Map -- workaround for compiler bug #2439
+import public Data.List.Map -- workaround for idris-lang/Idris2#2439
 import Data.List.Quantifiers
 import Data.List1
 import Data.Maybe
@@ -17,11 +17,10 @@ import Data.SortedMap.Dependent
 import Data.SortedSet
 import Data.Vect
 import Data.Vect.Quantifiers
-import public Decidable.Decidable
-import public Decidable.Equality
+import public Decidable.Decidable -- workaround for idris-lang/Idris2#2439
+import public Decidable.Equality -- workaround for idris-lang/Idris2#2439
 import Deriving.Show
 import public Deriving.SpecialiseData.Codegen
-import public Deriving.SpecialiseData.Codegen.Type
 import public Deriving.SpecialiseData.Common
 import public Deriving.SpecialiseData.Helpers
 import public Deriving.SpecialiseData.QuantifiersExt
@@ -32,12 +31,12 @@ import public Deriving.SpecialiseData.Unification
 import public Language.Mk
 import Language.Reflection.Compat
 import Language.Reflection.Compat.Constr
-import public Language.Reflection.Compat.TypeInfo -- workaround for compiler bug #2439
+import public Language.Reflection.Compat.TypeInfo -- workaround for idris-lang/Idris2#2439
 import public Language.Reflection.Expr
 import Language.Reflection.Syntax
 import Language.Reflection.Logging
 import public Language.Reflection.Unify.Interface
-import public Language.Reflection.VarSubst -- workaround for compiler bug #2439
+import public Language.Reflection.VarSubst -- workaround for idris-lang/Idris2#2439
 import Syntax.IHateParens
 
 %language ElabReflection
