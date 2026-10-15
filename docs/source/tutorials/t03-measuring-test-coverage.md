@@ -27,7 +27,7 @@ generation](t01-generator-monad.md) and [emptiness handling](t02-handling-emptin
 
 ## Step 1: Creating a Generator to Test
 
-First, let's create a simple data type and a generator for it. This will be the subject of our coverage analysis.
+First, let's create a simple datatype and a generator for it. This will be the subject of our coverage analysis.
 
 ### Create a new file named `CoverageTutorial.idr`
 
@@ -79,9 +79,7 @@ Coverage measurement happens in three phases:
 3. Report how much every constructor had been called
 ```
 
-Here is how to implement this in a `main` function.
-
-### Add a `main` function to your `CoverageTutorial.idr` file
+### Add a function to your `CoverageTutorial.idr` file
 
 ```idris
 runReportWithCoverage : IO ()
@@ -101,11 +99,10 @@ runReportWithCoverage = do
   putStrLn $ show finalReport
 ```
 
-### Compile and run your file
+### Run your file
 
 ```bash
-idris2 --build CoverageTutorial.idr
-./build/exec/CoverageTutorial
+echo -e ':exec runReportWithCoverage' | pack --extra-args="--no-banner" repl src/CoverageTutorial.idr
 ```
 
 ### Check the output
@@ -133,39 +130,35 @@ implementation. But we can provide a different one, `PrintAllLabels`, to change 
 
 ### Add a new `runDebug` function to your file
 
-This new function will use `pick` and provide the `PrintAllLabels` implementation via the `@{}` syntax.
+This new function will use `pick` and provide the `PrintAllLabels` implementation as an implicit argument.
 
 ```idris
 runDebug : IO ()
 runDebug = do
-  Just v <- runMaybeT {m=IO}
-    $ evalRandomT someStdGen
-    $ evalStateT Z $ unGen {labels = PrintAllLabels} (withCoverage genTrafficLight)
-    | Nothing => putStrLn "couldn't produce a value"
-  putStrLn $ "Generated withCoverage: " ++ show v
-
   val <- pick genTrafficLight
   putStrLn $ "Generated via pick: " ++ show val
+
+  val <- evalRandomT !initSeed $ unGen' {labels = PrintAllLabels} (withCoverage genTrafficLight)
+  putStrLn $ "Generated withCoverage: " ++ show val
 ```
 
-### Compile and run the file again
+### Run the file again
 
 ```bash
-    idris2 --build CoverageTutorial.idr
-    ./build/exec/CoverageTutorial
+echo -e ':exec runDebug' | pack --extra-args="--no-banner" repl src/CoverageTutorial.idr
 ```
 
-### Analyze the output. You will see a clear difference
+### Analyze the output
 
 ```text
+Generated via pick: Just Amber
 Main.TrafficLight[?]
-Main.Amber (user-defined)
-Generated withCoverage: Amber
-Generated via pick: Just Green
+Main.Green (user-defined)
+Generated withCoverage: Just Green
 ```
 
-In the first run, the label was printed to the console the moment the corresponding generator was executed. In second run, no label were printed. For a
-deeply nested generator, this trace allows you to understand exactly which path was taken to produce a specific problematic value.
+In the first run no label was printed. In the second run the label was printed to the console the moment the corresponding generator was executed. For a
+deeply nested generator this trace allows you to understand exactly which path was taken to produce a specific problematic value.
 
 ---
 

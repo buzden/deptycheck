@@ -3,12 +3,12 @@
 In the previous tutorials, we showed how to write generators by hand. This is fine for simple types, but quickly becomes tedious and error-prone for
 complex, recursive data structures.
 
-This is where `DepTyCheck` shines. It comes with a powerful macro, `deriveGen`, that inspects your data type at compile-time and automatically writes a
+This is where `DepTyCheck` shines. It comes with a powerful macro, `deriveGen`, that inspects your datatype at compile-time and automatically writes a
 high-quality generator for it, handling recursion and constraints for you.
 
 ## Our Goal
 
-In this tutorial, we will use a single, running example—a file system `Entry`—to demonstrate the power of `deriveGen`. We will:
+In this tutorial, we will use a single, running example—a filesystem `Entry`—to demonstrate the power of `deriveGen`. We will:
 
 1. Show how complex a manual generator for `Entry` would be.
 2. Replace it with a single `deriveGen` call.
@@ -30,18 +30,11 @@ import Test.DepTyCheck.Gen
 import System.Random.Pure.StdGen
 ```
 
-We need the `%language ElabReflection` pragma to enable compile-time elaboration which will automatically write code for defined generators by their
-types.
-
-```idris
-%language ElabReflection
-```
-
 ---
 
 ## Step 1: The Burden of Manual Derivation
 
-Let's start with a recursive data type for a file system entry.
+Let's start with a recursive datatype for a filesystem entry.
 
 ```idris
 data EntryManual = FileManual String | DirectoryManual (List EntryManual)
@@ -69,7 +62,6 @@ genEntryManual (More recFuel) =
     [ (1, FileManual <$> elements ["file1", "file2"]) -- some string generator
     , (1, DirectoryManual <$> (listOf (genEntryManual recFuel)) ) -- recursive call
     ]
-  where
 ```
 
 Prepare a test for it:
@@ -128,7 +120,7 @@ mutual
 
 ```{note}
 The latest version of DepTyCheck supports polymorphic specialization for automatically derived generators, but its support is still experimental. Also
-automagic generator deriving supports only `Gen MaybeEmpty` for now. If you need stricter `Gen NonEmpty`, you still need to do it by your hands.
+automagic generator deriving supports only `Gen MaybeEmpty` for now. If you need stricter `Gen NonEmpty`, you still need to do it by hand.
 ```
 
 ### Define the generator
@@ -141,8 +133,8 @@ failing "Cannot derive generator for the primitive type String, use external ins
   genEntry = deriveGen
 ```
 
-But honestly DepTyCheck is would decline our example because we need also to pass a generator for strings. It does not present out of the box, so, we
-need some to add some special stuff around which will be uncovered by further tutorials.
+But DepTyCheck would decline our example because we also need to pass a generator for strings. It is not present out of the box, so we
+need some way to add some special stuff around which will be uncovered by further tutorials.
 
 ```idris
 %hint
@@ -156,7 +148,7 @@ genEntry = deriveGen
 That's it. The `deriveGen` macro will now inspect the `Entry` type and write a generator that handles recursion, fuel, choices, and even attaches a
 generator for `String` from the context. It might also automatically add the coverage labels we learned about in further tutorials!
 
-You can immediately generate a random file system structure.
+You can immediately generate a random filesystem structure.
 
 Prepare a test for it:
 
@@ -236,7 +228,7 @@ genContextAwareFilename path _ =
       else elements ["file.txt"]
 ```
 
-To call `genCtxEntry`, we provide the initial path, and our context-aware generator. The `deriveGen` engine will handle passing the `path` argument down
+To call `genEntry`, we provide the initial path, and our context-aware generator. The `deriveGen` engine will handle passing the `path` argument down
 to `genContextAwareFilename` during any recursive calls.
 
 Prepare a test for it:

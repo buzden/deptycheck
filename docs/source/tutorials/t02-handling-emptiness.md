@@ -110,7 +110,7 @@ run = do
 Run it
 
 ```bash
-echo -e ':exec run' | rlwrap pack repl ./src/CustomGen.idr
+echo -e ':exec run' | pack --extra-args="--no-banner" repl src/EmptyTutorial.idr
 ```
 
 You will see something like that:
@@ -130,7 +130,7 @@ allows us to handle those cases gracefully at runtime without any crashes.
 
 A type can also be effectively "empty" if we filter its values so much that none remain. `DepTyCheck` provides `suchThat` for this.
 
-I.e. `g` suchThat `p` takes a generator `g` and a predicate (a function that returns a `Bool`) `p`. It runs the generator `g`, and if the value it
+I.e. `g suchThat p` takes a generator `g` and a predicate (a function that returns a `Bool`) `p`. It runs the generator `g`, and if the value it
 produces satisfies `p`, it returns it. If not, the generation fails for that attempt.
 
 Because the condition might never be met, `suchThat` always returns a `Gen0`.
@@ -164,7 +164,7 @@ runSuchThat = do
 Run it
 
 ```bash
-echo -e ':exec runSuchThat' | rlwrap pack repl ./src/CustomGen.idr
+echo -e ':exec runSuchThat' | pack --extra-args="--no-banner" repl src/EmptyTutorial.idr
 ```
 
 You will see something like that:

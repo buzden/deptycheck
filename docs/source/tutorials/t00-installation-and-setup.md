@@ -46,40 +46,27 @@ You need Idris 2 version **0.8.0 or newer** for DepTyCheck to work.
 
 ## Step 2: Create Your First Project
 
-### Create a project directory
+### Create a project with `pack`
 
 ```bash
-mkdir deptycheck-tutorial
+pack new bin deptycheck-tutorial
 cd deptycheck-tutorial
 ```
 
-### Create a project file named `tutorial.ipkg`
+### Add `deptycheck` as a dependency
+
+Open `deptycheck-tutorial.ipkg` and add `deptycheck` to the `depends` list:
 
 ```text
-package tutorial
-
-version = 0.0.1
-langversion >= 0.8.0
-
-sourcedir = "."
-builddir = ".build"
-
-modules = Main
-main = Main
-executable = tutorial
-
+-- packages to add to search path
 depends = deptycheck
-```
-
-```{note}
-The `depends = deptycheck` line tells Idris to use the DepTyCheck library.
 ```
 
 ---
 
 ## Step 3: Write Your First Generator
 
-### Create a file `Main.idr` with the following code
+### Edit `src/Main.idr` with the following code
 
 ```idris
 import Deriving.DepTyCheck.Gen
@@ -103,7 +90,6 @@ main = do
 ```
 
 ```{note}
-- `%language ElabReflection` enables the metaprogramming features needed for `deriveGen`
 - `deriveGen` automatically creates a generator for `TrafficLight`
 - `pick` runs the generator and extracts one value
 ```
@@ -123,10 +109,10 @@ pack build
 ### Run the executable
 
 ```bash
-pack run tutorial.ipkg
+pack run
 ```
 
-Expected output (your result will vary):
+Expected output (your result may vary):
 
 ```text
 Yellow
@@ -138,7 +124,7 @@ Run the command multiple times to see different results (Yellow, Green, Red).
 
 ---
 
-## Step 4: Try It in the REPL (Optional)
+## Step 5: Try It in the REPL (Optional)
 
 You can also test your generator interactively.
 
@@ -147,13 +133,12 @@ You can also test your generator interactively.
 Pass the Main module name to preload it:
 
 ```bash
-rlwrap pack repl ./Main.idr
+pack repl src/Main.idr
 ```
 
 ```{note}
-- `%language ElabReflection` enables the metaprogramming features needed for `deriveGen`
-- `deriveGen` automatically creates a generator for `TrafficLight`
-- `pick` runs the generator and extracts one value
+If you have `rlwrap` installed, you can instead run `pack --rlwrap repl src/Main.idr` or even add `repl.rlwrap = true` to your `pack.toml`
+to enable command history and other `readline` features.
 ```
 
 ### Run the generator
@@ -162,13 +147,11 @@ rlwrap pack repl ./Main.idr
 :exec printLn =<< pick (genTrafficLight (limit 0))
 ```
 
-Expected output:
+Expected output (your result may vary):
 
 ```text
 Just Green
 ```
-
-### Run it multiple times to see different colors
 
 ### Exit the REPL
 
