@@ -3,7 +3,7 @@
 In the [previous tutorial](t05-derivegen-signatures.md), we saw how to control what `deriveGen` generates by crafting function signatures. We also saw
 how to give it "hints" for primitive types like `String` using the `=>` syntax.
 
-But what if you have a custom data type that needs a special, handwritten generator? `DepTyCheck` provides a powerful, "magic" feature: if you define a
+But what if you have a custom datatype that needs a special, handwritten generator? `DepTyCheck` provides a powerful, "magic" feature: if you define a
 generator for a type, `deriveGen` will automatically find it and use it.
 
 ## Our Goal
@@ -15,12 +15,6 @@ In this tutorial, you will:
 3. See `deriveGen` automatically find and use your generator without explicit passing
 4. Compare implicit (`%hint`) vs explicit (`@{...}`) generator passing
 
-You will see output like:
-
-```text
---- Testing mixed generation ---
-MkUser (MkSpecialString "root") 5
-```
 
 ---
 
@@ -28,16 +22,6 @@ MkUser (MkSpecialString "root") 5
 
 - Completion of [Tutorial 5: DeriveGen Signatures](t05-derivegen-signatures.md)
 - Understanding of the `=>` syntax for explicit generator constraints
-- Idris2 source file `./src/Mixed.idr` with the header:
-
-```idris
-import Test.DepTyCheck.Gen
-import Data.Fuel
-import Deriving.DepTyCheck.Gen
-import System.Random.Pure.StdGen
-
-%language ElabReflection
-```
 
 ---
 
@@ -47,6 +31,13 @@ Imagine we have a `SpecialString` type that should only ever contain specific, p
 random `String` generator is not appropriate here.
 
 ### Create a new file named `Mixed.idr`
+```idris
+import Test.DepTyCheck.Gen
+import Data.Fuel
+import Deriving.DepTyCheck.Gen
+import System.Random.Pure.StdGen
+
+```
 
 ### Define the `SpecialString` type with a `%hint` generator
 
@@ -122,13 +113,12 @@ main = do
   printLn u
 ```
 
-### Compile and run
-
+### Run
 ```bash
-pack build Mixed && pack exec Mixed
+echo -e ':exec main' | pack --extra-args="--no-banner" repl src/Mixed.idr
 ```
 
-Expected output (will vary):
+Expected output (your result may vary):
 
 ```text
 --- Testing mixed generation ---
@@ -139,7 +129,7 @@ MkUser (MkSpecialString "root") 5
 
 ## When to Use %hint?
 
-`Constraint + %hint` approach is recommended for custom types.
+`Constraint + %hint` approach is recommended for custom types, when there is only one sensible default way to generate values.
 
 **Pattern:** Mark your generator with `%hint`, add constraint to derived generator:
 

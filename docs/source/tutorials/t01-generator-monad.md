@@ -23,7 +23,7 @@ MkProfile "Alice" 37 : UserProfile
 
 This tutorial assumes you have completed [Installation and First Steps](t00-installation-and-setup.md) and have a working Idris 2 installation with
 DepTyCheck
-configured for your `tutorial.ipkg`.
+configured for your `deptycheck-tutorial.ipkg`.
 
 ---
 
@@ -31,16 +31,15 @@ configured for your `tutorial.ipkg`.
 
 Let's start by creating a generator that always produces the _same_ value. This will confirm our setup is working.
 
-### Create a new file named `Tutorial.idr`
+### Create a new file named `GeneratorTutorial.idr`
 
 ```idris
 import Test.DepTyCheck.Gen
 import Data.Vect
 
-%language ElabReflection
 ```
 
-### Add the following code to it. We'll define our data type and import the necessary `DepTyCheck` modules
+### Add the following code to it. We'll define our datatype and import the necessary `DepTyCheck` modules
 
 ```idris
 data UserProfile = MkProfile String Nat
@@ -60,11 +59,11 @@ is guaranteed to produce a value.
 
 ### Run your generator
 
-To test your first generator lets do the following:
+To test your first generator let's do the following:
 
 ```bash
 echo -e ':exec printLn =<< pick1 genConstantUser' |
-    rlwrap pack --extra-args="--no-banner" repl ./Tutorial.idr
+    pack --extra-args="--no-banner" repl src/GeneratorTutorial.idr
 ```
 
 Here we do:
@@ -75,7 +74,6 @@ Here we do:
 | `:exec` | It is actually the Idris2 REPL command to run something in `IO` monad. For `:exec ?wat` the `?wat` is `IO _`. |
 | `printLn =<<` | Runs generator and prints output. `:exec` alone drops results; this shows them. |
 | `pick1 genConstantUser` | _We are very close, that's what is needed._ |
-| `rlwrap` | Not strictly needed for single runs, but reminds that Idris2 REPL lacks readline support |
 | `pack` | DepTyCheck depends on a set of libraries, so, `pack` launches `idris2` with the full set of required things |
 | `--extra-args="--no-banner"` | Reduces REPL output noise. Passes flag to hide Idris2 welcome banner |
 | `repl` | It actually instructs `pack` to run `idris2` in REPL mode |
@@ -106,23 +104,18 @@ Here's what's new:
 
 - `choose (18, 99)` creates a recipe for picking a random number in that range.
 
-```{note}
-The `choose` function randomly picks between two generators with equal probability (50/50). This gives you a simple way to add variation to your
-generators.
-```
-
 - The `<$>` operator takes the result from the recipe on the right (our random number) and feeds it into the function on the left (`MkProfile "Alice"`).
 
 ### Run it multiple times
 
 ```bash
 echo -e ':exec printLn =<< pick1 genRandomAgeUser' |
-    rlwrap pack --extra-args="--no-banner" repl ./Tutorial.idr
+    pack --extra-args="--no-banner" repl src/GeneratorTutorial.idr
 ```
 
 ```bash
 echo -e ':exec printLn =<< pick1 genRandomAgeUser' |
-    rlwrap pack --extra-args="--no-banner" repl ./Tutorial.idr
+    pack --extra-args="--no-banner" repl src/GeneratorTutorial.idr
 ```
 
 This time, you'll see a different result with each run:
@@ -157,12 +150,12 @@ Here's the change:
 
 ```bash
 echo -e ':exec printLn =<< pick1 genUserProfile' |
-    rlwrap pack --extra-args="--no-banner" repl ./Tutorial.idr
+    pack --extra-args="--no-banner" repl src/GeneratorTutorial.idr
 ```
 
 ```bash
 echo -e ':exec printLn =<< pick1 genUserProfile' |
-    rlwrap pack --extra-args="--no-banner" repl ./Tutorial.idr
+    pack --extra-args="--no-banner" repl src/GeneratorTutorial.idr
 ```
 
 You'll now see completely random user profiles!
@@ -201,12 +194,12 @@ has a 4/5 chance and "Premium" has a 1/5 chance.
 
 ```bash
 echo -e ':exec printLn =<< pick1 genRole' |
-    rlwrap pack --extra-args="--no-banner" repl ./Tutorial.idr
+    pack --extra-args="--no-banner" repl src/GeneratorTutorial.idr
 ```
 
 ```bash
 echo -e ':exec printLn =<< pick1 genUserType' |
-    rlwrap pack --extra-args="--no-banner" repl ./Tutorial.idr
+    pack --extra-args="--no-banner" repl src/GeneratorTutorial.idr
 ```
 
 Sample output:
@@ -231,7 +224,7 @@ exactly `n` elements. The type `Vect n Bool` depends directly on the value `n`.
 This is called **dependent generation**. We must first generate `n`, and _then_ use that value to create a generator for a vector of that specific type.
 We use `do` notation for this.
 
-### Add this generator to `Tutorial.idr`. It will create a dependent pair `(n ** Vect n Bool)`
+### Add this generator to `GeneratorTutorial.idr`. It will create a dependent pair `(n ** Vect n Bool)`
 
 ```idris
 -- A generator for a dependent pair: a random length `n` and a vector of that length
@@ -253,7 +246,7 @@ Run it in the REPL:
 
 ```bash
 echo -e ':exec printLn =<< pick1 genDependentVect' |
-    rlwrap pack --extra-args="--no-banner" repl ./Tutorial.idr
+    pack --extra-args="--no-banner" repl src/GeneratorTutorial.idr
 ```
 
 For multiple times the output might be:
@@ -273,7 +266,7 @@ valid data for complex, dependent types.
 
 Finally, let's generate a list of test users. You can use the `listOf` combinator to run your generator multiple times and collect the results.
 
-### Add one last generator to your `Tutorial.idr` file
+### Add one last generator to your `GeneratorTutorial.idr` file
 
 ```idris
 -- A generator that produces a list of 5 random user profiles
@@ -281,14 +274,13 @@ genFiveUsers : Gen1 (List UserProfile)
 genFiveUsers = listOf {length=pure 5} genUserProfile
 ```
 
-The `listOf` function takes a `length` generator (which we provide as a constant `5`), and creates a new recipe that runs the generator how a provided
-`length` generator  generated times.
+The `listOf` function takes a `length` generator (which we provide as a constant `5`) and a value generator, which is run the corresponding generated amount of times.
 
 Run it in the REPL:
 
 ```bash
 echo -e ':exec printLn =<< pick1 genFiveUsers' |
-    rlwrap pack --extra-args="--no-banner" repl ./Tutorial.idr
+    pack --extra-args="--no-banner" repl src/GeneratorTutorial.idr
 ```
 
 The output will be a list of five unique, randomly-generated users:

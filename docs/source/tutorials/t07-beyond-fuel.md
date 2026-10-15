@@ -38,7 +38,6 @@ import Data.Fin
 import Test.DepTyCheck.Gen
 import System.Random.Pure.StdGen
 
-%language ElabReflection
 ```
 
 ### Add the following code
@@ -49,7 +48,7 @@ This defines our `PNat` (Peano Natural) type and a standard derived generator fo
 data PNat = PZ | PS PNat
 
 Show PNat where
-  show n = show (the Integer (pnatToInteger n))
+  show n = show $ pnatToInteger n
     where
       pnatToInteger : PNat -> Integer
       pnatToInteger PZ = 0
@@ -61,7 +60,7 @@ genPNat = deriveGen
 
 ### The Experiment
 
-Now, let's write a `main` function to call this generator twice: once with a generous fuel budget (`limit 10`) and once with a very small one (`limit
+Now, let's write a function to call this generator twice: once with a generous fuel budget (`limit 10`) and once with a very small one (`limit
 3`).
 
 ```idris
@@ -78,20 +77,18 @@ runPeano = do
   printLn p_small
 ```
 
-### Compile, run, and observe
-
+### Run and observe
 ```bash
-idris2 --build RecursionTutorial.idr
-./build/exec/RecursionTutorial
+echo -e ':exec runPeano' | pack --extra-args="--no-banner" repl src/RecursionTutorial.idr
 ```
 
 Your output will be random, but it will follow a strict pattern:
 
 ```text
 --- Generating with a large fuel budget (10) ---
-PS (PS (PS (PS (PS PZ))))
+5
 --- Generating with a small fuel budget (3) ---
-PS (PS PZ)
+2
 ```
 
 Notice that the generator with more fuel produced a larger number. The number of `PS` constructors is strictly limited by the fuel you provide. This is
@@ -114,7 +111,7 @@ genFin : Fuel -> (n : Nat) -> Gen MaybeEmpty (Fin n)
 genFin = deriveGen
 ```
 
-### The Counter-Intuitive Experiment
+### The Counterintuitive Experiment
 
 Now, let's try to generate a `Fin 100`. This would require 100 recursive calls to `FS`. According to our last experiment, this should require at least
 `limit 100` fuel. But what happens if we only give it `limit 3`?
@@ -132,8 +129,8 @@ runFin = do
 ### Run the experiment and observe the surprising result
 
 ```text
-    --- Generating a large Fin with a tiny fuel budget (3) ---
-    97
+--- Generating a large Fin with a tiny fuel budget (3) ---
+97
 ```
 
 It works! Even with a tiny fuel budget, it successfully generated a very large `Fin` value. It did not fail or run out of fuel.
@@ -182,7 +179,7 @@ For a type like `PNat`, the generated code looks like this:
 genPNat' : Fuel -> Gen MaybeEmpty PNat
 genPNat' Dry      = pure PZ  -- Must choose non-recursive constructor
 genPNat' (More f) = frequency
-  [ (1, pure PZ)           -- Non-recursive option
+  [ (1, pure PZ)            -- Non-recursive option
   , (1, PS <$> genPNat' f)  -- Recursive: spends fuel (calls with f, not More f)
   ]
 ```

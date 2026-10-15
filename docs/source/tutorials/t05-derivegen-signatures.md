@@ -26,11 +26,7 @@ This will give you a deep understanding of how to use signatures to control `der
 
 First, let's create our file and add the necessary imports. We will be using `Vect` throughout this tutorial.
 
-### Create a new file named `DeriveTutorial.idr`
-
-### Add the following boilerplate
-
-This includes the `ElabReflection` pragma and all the modules we will need.
+### Create a new file named `DeriveSigTutorial.idr`
 
 ```idris
 import Deriving.DepTyCheck.Gen
@@ -39,8 +35,6 @@ import Data.Fuel
 
 import Test.DepTyCheck.Gen
 import System.Random.Pure.StdGen
-
-%language ElabReflection
 
 %hint
 genStr : Fuel -> Gen MaybeEmpty String
@@ -61,15 +55,12 @@ Show (VectString n) where
 
 ---
 
-_Note: For the following steps, you can put all the code in the same `DeriveTutorial.idr` file and temporarily rename the `main` function you want to
-run as `main` before compiling._
-
 ## Step 2: Scenario A - Generating a `Vect` of a Given Length
 
 Our first goal is to create a generator that produces a `Vect` of a specific length that we provide as an argument. To do this, we simply place the
-argument _before_ the `Fuel` parameter in the signature.
+argument _after_ the `Fuel` parameter in the signature.
 
-The signature `(n : Nat) -> Fuel -> Gen MaybeEmpty (Vect n String)` tells `deriveGen`: "You will be _given_ a `Nat` named `n`. Your job is to produce a
+The signature `Fuel -> (n : Nat) -> Gen MaybeEmpty (Vect n String)` tells `deriveGen`: "You will be _given_ a `Nat` named `n`. Your job is to produce a
 `Vect` of that exact length."
 
 Define the generator:
@@ -79,7 +70,7 @@ genVectOfLen : Fuel -> (n : Nat) -> (Fuel -> Gen MaybeEmpty String) => Gen Maybe
 genVectOfLen = deriveGen
 ```
 
-Let's write a `main` function to call our generator, providing `5` as the length.
+Let's write a `runVect` function to call our generator, providing `5` as the length.
 
 ```idris
 runVect : IO ()
@@ -100,7 +91,7 @@ Compile and run:
 The length is: 5
 ```
 
-By placing `n` before `Fuel`, you have successfully commanded `deriveGen` to use it as a fixed input.
+By placing `n` after `Fuel`, you have successfully commanded `deriveGen` to use it as a fixed input.
 
 ---
 
@@ -157,7 +148,7 @@ behavior.
 ## Step 4: The Flexible Generator - Combining Patterns
 
 Let's combine the patterns we've learned. Our first generator is flexible enough: it is taking a `Nat` as a _given_ input, but it is also taking an
-_external generator_ hint for the element type using the `=>` syntax which will be overridden by the following exapmple.
+_external generator_ hint for the element type using the `=>` syntax which will be overridden by the following example.
 
 To call this generator, we must provide both the length `n` and an element generator via the `@` syntax.
 
