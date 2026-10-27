@@ -1,12 +1,13 @@
+||| Logic for generating cast functions and proofs over them
 module Deriving.SpecialiseData.Codegen.Cast
 
 import Deriving.SpecialiseData.Common
 import Deriving.SpecialiseData.Helpers
-import Deriving.SpecialiseData.QuantifiersExt
 import Deriving.SpecialiseData.Task
 import Deriving.SpecialiseData.TaskFormation
-import Deriving.SpecialiseData.TypeInfoExt
 import Deriving.SpecialiseData.Unification
+import Deriving.SpecialiseData.Utils.Quantifiers
+import Deriving.SpecialiseData.Utils.TypeInfo
 import Language.Reflection.Compat
 import Language.Reflection.Expr
 import Language.Reflection.VarSubst

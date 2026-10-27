@@ -1,3 +1,4 @@
+||| Types and functions reused inside different specialiser modules
 module Deriving.SpecialiseData.Helpers
 
 import Language.Reflection.Compat
@@ -68,6 +69,7 @@ bindConRecArgsAliased con meta alias =
 ||| Make an argument omega implicit if it is explicit
 export
 hideExplicitArg : Arg -> Arg
+--                           v Using $= here doesn't compile
 hideExplicitArg a = { piInfo := if a.piInfo == ExplicitArg then ImplicitArg else a.piInfo } a
 
 ||| Make a type argument zero-count

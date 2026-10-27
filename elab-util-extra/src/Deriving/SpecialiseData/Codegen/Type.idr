@@ -1,3 +1,4 @@
+||| Logic for generating the specialised type itself
 module Deriving.SpecialiseData.Codegen.Type
 
 import public Data.DPair -- workaround for idris-lang/Idris2#2439
@@ -6,11 +7,11 @@ import Data.SnocList
 import Data.SnocList.Quantifiers
 import Deriving.SpecialiseData.Common
 import Deriving.SpecialiseData.Helpers
-import Deriving.SpecialiseData.QuantifiersExt
 import Deriving.SpecialiseData.Task
 import Deriving.SpecialiseData.TaskFormation
-import Deriving.SpecialiseData.TypeInfoExt
 import Deriving.SpecialiseData.Unification
+import Deriving.SpecialiseData.Utils.Quantifiers
+import Deriving.SpecialiseData.Utils.TypeInfo
 import Language.Reflection.Compat
 import Language.Reflection.Expr
 import public Language.Reflection.Unify

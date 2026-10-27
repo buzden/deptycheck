@@ -1,10 +1,11 @@
+||| Specialisation task type and functions using it
 module Deriving.SpecialiseData.Task
 
 import public Control.Monad.Error.Interface
 import public Data.DPair -- workaround for idris-lang/Idris2#2439
 import Deriving.SpecialiseData.Common
 import Deriving.SpecialiseData.Helpers
-import Deriving.SpecialiseData.TypeInfoExt
+import Deriving.SpecialiseData.Utils.TypeInfo
 import Language.Reflection.Compat
 import public Language.Reflection.Compat.TypeInfo
 import Language.Reflection.Expr

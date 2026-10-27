@@ -1,4 +1,5 @@
-module Deriving.SpecialiseData.QuantifiersExt
+||| Utility functions for manipulating collection quantifiers
+module Deriving.SpecialiseData.Utils.Quantifiers
 
 import public Data.DPair -- workaround for idris-lang/Idris2#2439
 import Data.List

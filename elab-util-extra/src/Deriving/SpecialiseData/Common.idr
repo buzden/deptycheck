@@ -1,3 +1,5 @@
+||| Types/interfaces featured in the specialisation API
+||| and implementations for them
 module Deriving.SpecialiseData.Common
 
 import Deriving.Show

@@ -1,4 +1,5 @@
-module Deriving.SpecialiseData.TypeInfoExt
+||| Specialiser-specific extension functions for TypeInfo, Con, and Arg
+module Deriving.SpecialiseData.Utils.TypeInfo
 
 import Language.Reflection.Compat
 import Language.Reflection.Expr
@@ -18,7 +19,7 @@ import Language.Reflection.Expr
 ||| with arguments retrieved from the map if present or generated with `fallback`
 export
 (.appsWith) :
-  (args: List Arg) ->
+  (args : List Arg) ->
   (0 _ : All IsNamedArg args) =>
   (fallback : Name -> TTImp) ->
   (argValues : SortedMap Name TTImp) ->
@@ -38,8 +39,7 @@ namespace TypeInfoInvoke
     (fallback : Name -> TTImp) ->
     (argValues : SortedMap Name TTImp) ->
     TTImp
-  (.apply) t f vals = do
-    reAppAny (var t.name) $ t.args.appsWith @{tiN.tyArgsNamed} f vals
+  (.apply) t f vals = reAppAny (var t.name) $ t.args.appsWith @{tiN.tyArgsNamed} f vals
 
 namespace ConInvoke
   ||| Returns a full application of the given constructor

@@ -1,3 +1,4 @@
+||| Logic for constructing specialisation tasks. Not part of the specialiser proper (yet).
 module Deriving.SpecialiseData.TaskFormation
 
 import public Language.Reflection
