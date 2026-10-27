@@ -14,8 +14,8 @@ import Deriving.SpecialiseData.Utils.Quantifiers
 import Deriving.SpecialiseData.Utils.TypeInfo
 import Language.Reflection.Compat
 import Language.Reflection.Expr
+import public Language.Reflection.Expr.VarSubst -- workaround for idris-lang/Idris2#2439
 import public Language.Reflection.Unify
-import public Language.Reflection.VarSubst -- workaround for idris-lang/Idris2#2439
 
 -----------------------------------
 --- SPECIALISED TYPE GENERATION ---

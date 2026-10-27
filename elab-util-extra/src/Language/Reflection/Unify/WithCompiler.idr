@@ -12,10 +12,10 @@ import Data.SortedMap
 import public Decidable.Equality  -- public due to compiler bug #2439
 import Language.Reflection
 import public Language.Reflection.Expr  -- public due to compiler bug #2439
+import Language.Reflection.Expr.VarSubst
 import public Language.Reflection.Logging  -- public due to compiler bug #2439
 import Language.Reflection.Syntax
 import public Language.Reflection.Unify.Interface -- public due to compiler bug #2439
-import Language.Reflection.VarSubst
 
 %default total
 

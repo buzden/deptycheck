@@ -10,7 +10,7 @@ import Deriving.SpecialiseData.Utils.Quantifiers
 import Deriving.SpecialiseData.Utils.TypeInfo
 import Language.Reflection.Compat
 import Language.Reflection.Expr
-import Language.Reflection.VarSubst
+import Language.Reflection.Expr.VarSubst
 
 ------------------------------------
 --- SPEC TO POLY CAST DERIVATION ---
