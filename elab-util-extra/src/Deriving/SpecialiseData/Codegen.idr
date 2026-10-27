@@ -18,8 +18,8 @@ import Deriving.SpecialiseData.Utils.Quantifiers
 import Deriving.SpecialiseData.Utils.TypeInfo
 import Language.Reflection.Compat
 import Language.Reflection.Expr
+import Language.Reflection.Expr.VarSubst
 import Language.Reflection.Unify
-import Language.Reflection.VarSubst
 
   ------------------------------------
   --- SPECIALISED TYPE DECLARATION ---

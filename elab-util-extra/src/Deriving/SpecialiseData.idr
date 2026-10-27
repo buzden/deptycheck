@@ -33,10 +33,10 @@ import Language.Reflection.Compat
 import Language.Reflection.Compat.Constr
 import public Language.Reflection.Compat.TypeInfo -- workaround for idris-lang/Idris2#2439
 import public Language.Reflection.Expr
+import public Language.Reflection.Expr.VarSubst -- workaround for idris-lang/Idris2#2439
 import Language.Reflection.Syntax
 import Language.Reflection.Logging
 import public Language.Reflection.Unify.Interface
-import public Language.Reflection.VarSubst -- workaround for idris-lang/Idris2#2439
 import Syntax.IHateParens
 
 %language ElabReflection

@@ -9,7 +9,7 @@ import Deriving.SpecialiseData.Utils.TypeInfo
 import Language.Reflection.Compat
 import public Language.Reflection.Compat.TypeInfo
 import Language.Reflection.Expr
-import Language.Reflection.VarSubst
+import Language.Reflection.Expr.VarSubst
 
 --------------------------------
 --- SPECIALISATION TASK TYPE ---

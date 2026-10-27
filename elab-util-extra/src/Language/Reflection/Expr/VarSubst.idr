@@ -1,4 +1,4 @@
-module Language.Reflection.VarSubst
+module Language.Reflection.Expr.VarSubst
 
 import Data.SortedSet
 import Data.SortedMap
