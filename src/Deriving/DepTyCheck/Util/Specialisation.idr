@@ -112,6 +112,56 @@ isMetaOrImplicit (IHole _ _) = True
 isMetaOrImplicit (Implicit _ _) = True
 isMetaOrImplicit _ = False
 
+assertArgHasVal : Elaboration m => Maybe TTImp -> m TTImp
+assertArgHasVal Nothing =
+  failAt EmptyFC "INTERNAL ERROR: argsToSpecTask invariant broken in getSpecTypeInvocation: all spec argument must have values"
+assertArgHasVal (Just x) = pure x
+
+export
+getSpecTypeInvocation :
+  Elaboration m =>
+  NamesInfoInTypes =>
+  TTImp ->
+  m (Maybe TTImp)
+getSpecTypeInvocation argTy = do
+  logPoint DetailedDebug "deptycheck.derive.specialisation" [] "Getting specialised invocation for \{show argTy}"
+  let (tyLhs, tyArgs) = unApp argTy
+  let (IVar _ tyName) = tyLhs
+    | _ => pure Nothing
+  let (Just tyInfo) = lookupType tyName
+    | _ => pure Nothing
+  let gargs = (\(a, b) => MkGenArg a (Just b)) <$> zip tyInfo.args tyArgs
+  let hasMetavarArgs = any (\a => isMetaOrImplicit $ snd $ unPi a.type) tyInfo.args
+  when hasMetavarArgs $ do
+    logPoint Warning "deptycheck.derive.specialisation" []
+      "Type \{tyInfo.name} contains arguments with metavariables in head position. This may interfere with specialisation need checking."
+    logPoint Warning "deptycheck.derive.specialisation" [] "Arguments of \{tyInfo.name}: \{show tyInfo.args}."
+    warnAt EmptyFC
+      "Type \{tyInfo.name} contains arguments with metavariables in head position. This may interfere with specialisation need checking."
+  -- Check if there are any given type args, if not return Nothing
+  let True = any (\a => snd (unPi a.type) == `(Type)) tyInfo.args
+    | False =>
+      logValue DetailedDebug "deptycheck.derive.specialisation" []
+        "Not found any given type args, specialisation not needed."
+        Nothing
+  -- Check if all of the generated type's constructors are visible, if not return Nothing
+  True <- allConstructorsVisible tyInfo
+    | False =>
+      logValue DetailedDebug "deptycheck.derive.specialisation" []
+        "\{tyInfo.name} has invisible constructors, specialisation impossible."
+        Nothing
+  -- Check if all arguments are passthrough
+  False <- all id <$> traverse (.isPassthrough) gargs
+    | True =>
+      logValue DetailedDebug "deptycheck.derive.specialisation" []
+        "Not found any type arguments that can be specialised upon, specialisation impossible."
+        Nothing
+
+  (st, stArgs, stArgVals) <- argsToSpecTask specDecideArg tyInfo.name gargs
+  stRealVals <- traverse assertArgHasVal stArgVals
+  pure $ Just $ foldl app `(?placeholder) stRealVals
+
+
 export
 specialiseIfNeeded :
   Elaboration m =>
