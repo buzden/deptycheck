@@ -107,6 +107,11 @@ inSameNS : (nsSource: Name) -> Name -> Name
 inSameNS (NS ns _) n = NS ns n
 inSameNS _ n = n
 
+isMetaOrImplicit : TTImp -> Bool
+isMetaOrImplicit (IHole _ _) = True
+isMetaOrImplicit (Implicit _ _) = True
+isMetaOrImplicit _ = False
+
 export
 specialiseIfNeeded :
   Elaboration m =>
@@ -119,6 +124,15 @@ specialiseIfNeeded :
   m $ Maybe TTImp
 specialiseIfNeeded sig fuel givenParamValues = do
   logPoint DetailedDebug "deptycheck.derive.specialisation" [sig] "Checking specialisation need for \{show givenParamValues}..."
+  let hasMetavarArgs = any (\a => isMetaOrImplicit $ snd $ unPi a.type) $
+          index' sig.targetType.args <$> Prelude.toList sig.givenParams
+  when hasMetavarArgs $ do
+    logPoint Warning "deptycheck.derive.specialisation" [sig]
+      "Type \{sig.targetType.name} contains arguments with metavariables in head position. This may interfere with specialisation need checking."
+    logPoint Warning "deptycheck.derive.specialisation" [sig] "Arguments of \{sig.targetType.name}: \{show sig.targetType.args}."
+    warnAt EmptyFC
+      "Type \{sig.targetType.name} contains arguments with metavariables in head position. This may interfere with specialisation need checking."
+
   -- Check if there are any given type args, if not return Nothing
   let True = any (\a => snd (unPi a.type) == `(Type)) $ index' sig.targetType.args <$> Prelude.toList sig.givenParams
     | False =>
