@@ -126,11 +126,12 @@ specialiseIfNeeded sig fuel givenParamValues = do
   logPoint DetailedDebug "deptycheck.derive.specialisation" [sig] "Checking specialisation need for \{show givenParamValues}..."
   let hasMetavarArgs = any (\a => isMetaOrImplicit $ snd $ unPi a.type) $
           index' sig.targetType.args <$> Prelude.toList sig.givenParams
-  if hasMetavarArgs then do
+  when hasMetavarArgs $ do
     logPoint Warning "deptycheck.derive.specialisation" [sig]
       "Type \{sig.targetType.name} contains arguments with metavariables in head position. This may interfere with specialisation need checking."
     logPoint Warning "deptycheck.derive.specialisation" [sig] "Arguments of \{sig.targetType.name}: \{show sig.targetType.args}."
-    else pure ()
+    warnAt EmptyFC
+      "Type \{sig.targetType.name} contains arguments with metavariables in head position. This may interfere with specialisation need checking."
 
   -- Check if there are any given type args, if not return Nothing
   let True = any (\a => snd (unPi a.type) == `(Type)) $ index' sig.targetType.args <$> Prelude.toList sig.givenParams
