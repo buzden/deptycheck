@@ -1,0 +1,6 @@
+1/1: Building Test (Test.idr)
+LOG deptycheck.test.utils.specialise:0:  Expanded e: Data.List1.List1 Builtin.Unit
+LOG deptycheck.derive.specialisation:20: Data.List1.List1[0(a)] Checking specialisation need for [Builtin.Unit]...
+LOG deptycheck.derive.specialisation:0: Data.List1.List1[0(a)] Type Data.List1.List1 contains arguments with metavariables in head position. This may interfere with specialisation need checking.
+LOG deptycheck.derive.specialisation:0: Data.List1.List1[0(a)] Arguments of Data.List1.List1: [MkArg MW ExplicitArg (Just a) ?].
+LOG deptycheck.derive.specialisation:20: Data.List1.List1[0(a)] Not found any given type args, specialisation not needed.
