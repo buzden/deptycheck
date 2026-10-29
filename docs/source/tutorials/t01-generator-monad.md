@@ -274,7 +274,8 @@ genFiveUsers : Gen1 (List UserProfile)
 genFiveUsers = listOf {length=pure 5} genUserProfile
 ```
 
-The `listOf` function takes a `length` generator (which we provide as a constant `5`) and a value generator, which is run the corresponding generated amount of times.
+The `listOf` function takes a `length` generator (which we provide as a constant `5`) and a value generator,
+which is run the corresponding generated amount of times.
 
 Run it in the REPL:
 

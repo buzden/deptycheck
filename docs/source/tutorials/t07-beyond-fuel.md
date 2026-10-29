@@ -78,6 +78,7 @@ runPeano = do
 ```
 
 ### Run and observe
+
 ```bash
 echo -e ':exec runPeano' | pack --extra-args="--no-banner" repl src/RecursionTutorial.idr
 ```

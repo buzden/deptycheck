@@ -15,7 +15,6 @@ In this tutorial, you will:
 3. See `deriveGen` automatically find and use your generator without explicit passing
 4. Compare implicit (`%hint`) vs explicit (`@{...}`) generator passing
 
-
 ---
 
 ## Prerequisites
@@ -31,6 +30,7 @@ Imagine we have a `SpecialString` type that should only ever contain specific, p
 random `String` generator is not appropriate here.
 
 ### Create a new file named `Mixed.idr`
+
 ```idris
 import Test.DepTyCheck.Gen
 import Data.Fuel
@@ -114,6 +114,7 @@ main = do
 ```
 
 ### Run
+
 ```bash
 echo -e ':exec main' | pack --extra-args="--no-banner" repl src/Mixed.idr
 ```
