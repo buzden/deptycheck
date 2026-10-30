@@ -8,5 +8,4 @@ main = goldenRunner $
   , "Getting argument dependencies" `atDir` "arg-deps"
   , "Analysing involved types"      `atDir` "involved-types"
   , "Compiler-driven unification"   `atDir` "unify-with-compiler"
-  , "Specialise data"               `atDir` "specialise-data"
   ]

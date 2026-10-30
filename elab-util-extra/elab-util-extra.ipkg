@@ -15,24 +15,9 @@ depends = collection-utils
         , elab-pretty
         , elab-util
         , fin-lizzie
-        , i-hate-parens
-        , mk
         , mtl-tuple-impls
 
-modules = Deriving.SpecialiseData
-        , Deriving.SpecialiseData.Codegen
-        , Deriving.SpecialiseData.Codegen.Cast
-        , Deriving.SpecialiseData.Codegen.Claims
-        , Deriving.SpecialiseData.Codegen.InterfaceImpls
-        , Deriving.SpecialiseData.Codegen.Type
-        , Deriving.SpecialiseData.Common
-        , Deriving.SpecialiseData.Helpers
-        , Deriving.SpecialiseData.Task
-        , Deriving.SpecialiseData.TaskFormation
-        , Deriving.SpecialiseData.Unification
-        , Deriving.SpecialiseData.Utils.Quantifiers
-        , Deriving.SpecialiseData.Utils.TypeInfo
-        , Language.Reflection.Compat
+modules = Language.Reflection.Compat
         , Language.Reflection.Compat.Constr
         , Language.Reflection.Compat.TypeInfo
         , Language.Reflection.Expr

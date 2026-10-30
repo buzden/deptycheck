@@ -1,5 +1,0 @@
-[custom.all.test-shared]
-type = "local"
-path = "_shared"
-ipkg = "test-shared.ipkg"
-

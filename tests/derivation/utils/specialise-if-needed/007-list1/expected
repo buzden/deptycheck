@@ -1,13 +1,11 @@
 1/1: Building Test (Test.idr)
 LOG deptycheck.test.utils.specialise:0:  Expanded e: Data.List1.List1 Builtin.Unit
 LOG deptycheck.derive.specialisation:20: Data.List1.List1[0(a)] Checking specialisation need for [Builtin.Unit]...
-LOG deptycheck.derive.specialisation:0: Data.List1.List1[0(a)] Type Data.List1.List1 contains arguments with metavariables in head position. This may interfere with specialisation need checking.
-LOG deptycheck.derive.specialisation:0: Data.List1.List1[0(a)] Arguments of Data.List1.List1: [MkArg MW ExplicitArg (Just a) ?].
-LOG deptycheck.derive.specialisation:20: Data.List1.List1[0(a)] Not found any given type args, specialisation not needed.
-Warning: Type Data.List1.List1 contains arguments with metavariables in head position. This may interfere with specialisation need checking.
-
-Test:1
- 13 | %runElab do
- 14 |   (_, _) <- runSIN'' Nothing False `(List1 Unit)
- 15 |   pure ()
-
+LOG specialiseData.taskFormation:20: Data.List1.List1 (a := Builtin.Unit) Given a type invocation w/o arguments, specialising
+LOG deptycheck.derive.specialisation:20: Data.List1.List1[0(a)] Task before normalisation: Data.List1.List1 Builtin.Unit
+LOG deptycheck.derive.specialisation:20: Data.List1.List1[0(a)] NormaliseTask returned: lambdaTy = Type;
+LOG deptycheck.derive.specialisation:20: Data.List1.List1[0(a)]                         lambdaBody = Data.List1.List1 Builtin.Unit;
+LOG deptycheck.derive.specialisation:20: Data.List1.List1[0(a)] Specialised type name: List1^156854539702124179.List1^156854539702124179
+LOG deptycheck.derive.specialisation:20: Data.List1.List1[0(a)] Specialised type not found, deriving...
+LOG deptycheck.derive.specialisation:20: Data.List1.List1[0(a)] Derived Test.List1^156854539702124179.List1^156854539702124179
+LOG deptycheck.derive.specialisation:10: Data.List1.List1[0(a)] Declared specialised type Test.List1^156854539702124179.List1^156854539702124179: Data.List1.List1 Builtin.Unit
