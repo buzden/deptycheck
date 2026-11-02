@@ -154,7 +154,7 @@ hasNameInsideDeep @{tyi} nm = hasInside empty . allVarNames where
     assert_total $ hasInside (insert curr visited) (new ++ rest)
 
 export
-isRecursive : NamesInfoInTypes => (con : Con) -> {default Nothing containingType : Maybe TypeInfo} -> Bool
+isRecursive : NamesInfoInTypes => {default Nothing containingType : Maybe TypeInfo} -> (con : Con) -> Bool
 isRecursive con = case the (Maybe TypeInfo) $ containingType <|> typeByCon con of
   Just containingType => any (hasNameInsideDeep containingType.name) $ conSubexprs con
   Nothing             => False
@@ -163,6 +163,10 @@ isRecursive con = case the (Maybe TypeInfo) $ containingType <|> typeByCon con o
 export
 isRecursiveConstructor : NamesInfoInTypes => Name -> Maybe Bool
 isRecursiveConstructor @{tyi} n = lookup' tyi.cons n <&> \(ty, con) => isRecursive {containingType=Just ty} con
+
+export
+areMutuallyRecursive : NamesInfoInTypes => (oty, ity : TypeInfo) -> Bool
+areMutuallyRecursive oty ity = any (isRecursive {containingType = Just oty}) ity.cons
 
 export
 enrichNamesInfoInTypes : Elaboration m => List TypeInfo -> NamesInfoInTypes -> m NamesInfoInTypes
