@@ -12,10 +12,9 @@ import System.Random.Pure.StdGen
 %default total
 
 find : LazyList (Vect n SignificantBounds) -> Maybe $ Vect n SignificantBounds
-find [] = Nothing
-find (x::xs) = case force xs of
-                 [] => Just x
-                 xs => if all isOk x then Just x else assert_total $ find xs
+find []            = Nothing
+find (x::Delay []) = Just x
+find (x::Delay xs) = if all isOk x then Just x else find xs
 
 verdict : (a -> Maybe b) -> Vect n (CoverageTest b) -> Gen em a -> Maybe $ Vect n SignificantBounds
 verdict f conds = find . mapMaybe sequence . checkCoverageConditions conds . mapMaybe f . unGenTryN 10000000 someStdGen
