@@ -3,6 +3,7 @@ module Deriving.DepTyCheck.Gen.Tuning
 import public Data.Nat1
 
 import public Language.Reflection.Compat.Constr
+import public Language.Reflection.Expr
 
 import public Syntax.IHateParens.List
 
@@ -53,5 +54,17 @@ namespace Probability
 
   public export
   interface ProbabilityTuning (0 n : Name) where
+    constructor MkProbabilityTuning
     0 isConstructor : (con : IsConstructor n ** GenuineProof con)
     tuneWeight : Nat1 -> Nat1
+
+  export
+  tuneProbability : {default Public visibility : Visibility} -> (conName : Name) -> (tuning : Nat1 -> Nat1) -> Elab ()
+  tuneProbability conName tuning = do
+    let implName = UN $ Basic "\{show conName}^probability^tuning"
+    tuning <- cleanupNamedHoles <$> quote tuning
+    conName <- cleanupNamedHoles <$> quote conName
+    declare
+      [ interfaceHint visibility implName `(Deriving.DepTyCheck.Gen.Tuning.Probability.ProbabilityTuning ~conName)
+      , def implName $ pure $ var implName .= `(MkProbabilityTuning (itIsConstructor {n = ~conName}) ~tuning)
+      ]
