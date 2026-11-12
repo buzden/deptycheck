@@ -1,0 +1,14 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+Error: Error during reflection: While processing right hand side of CC^probability^tuning. Sorry, I can't find any elaboration which works. All errors:
+Possible error:
+    Error during reflection: Not found data constructor `CC`
+
+    Deriving.DepTyCheck.Gen.Tuning:1
+                                                                               ^^^^^^^^^^^^^^^
+
+Possible error:
+    Error during reflection: Can't reify as Name, value is not an NDCon internally
+
+    Deriving.DepTyCheck.Gen.Tuning:1
+                                                                               ^^^^^^^^^^^^^^^
+
