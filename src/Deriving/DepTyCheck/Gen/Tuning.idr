@@ -58,14 +58,24 @@ namespace Probability
     0 isConstructor : (con : IsConstructor n ** GenuineProof con)
     tuneWeight : Nat1 -> Nat1
 
-  export
-  tuneProbability : {default Public visibility : Visibility} -> (conName : Name) -> (tuning : Nat1 -> Nat1) -> Elab ()
-  tuneProbability conName tuning = do
+  workConName : Name -> Elab (Name, TTImp)
+  workConName conName = do
     conName <- dataCon conName
-    let implName = UN $ Basic "\{show conName}^probability^tuning"
+    (conName,) . cleanupNamedHoles <$> quote conName
+
+  export
+  tuneProbability : {default Public visibility : Visibility} -> (con : a) -> (tuning : Nat1 -> Nat1) -> Elab ()
+  tuneProbability con tuning = do
     tuning <- cleanupNamedHoles <$> quote tuning
-    conName <- cleanupNamedHoles <$> quote conName
+    conExpr <- cleanupNamedHoles <$> quote con
+    (conName, conNameExpr) : (Name, TTImp) <- case conExpr of
+      IVar _ conName => workConName conName
+      IPrimVal _ (Str conNameStr) => workConName $ fromString conNameStr
+      _ => case !(catch $ check {expected = Name} conExpr) of
+             Just conName => workConName conName
+             Nothing => failAt (getFC conExpr) "Must be a constructor expression or constructor's name, got \{show conExpr}"
+    let implName = UN $ Basic "\{show conName}^probability^tuning"
     declare
-      [ interfaceHint visibility implName `(Deriving.DepTyCheck.Gen.Tuning.Probability.ProbabilityTuning ~conName)
-      , def implName $ pure $ var implName .= `(MkProbabilityTuning (itIsConstructor {n = ~conName}) ~tuning)
+      [ interfaceHint visibility implName `(Deriving.DepTyCheck.Gen.Tuning.Probability.ProbabilityTuning ~conNameExpr)
+      , def implName $ pure $ var implName .= `(MkProbabilityTuning (itIsConstructor {n = ~conNameExpr}) ~tuning)
       ]
