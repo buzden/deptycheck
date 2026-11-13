@@ -52,9 +52,16 @@ argName' = stname . (.name)
 
 export
 cleanupNamedHoles : TTImp -> TTImp
-cleanupNamedHoles = mapTTImp $ \case
-  IHole {} => implicitFalse
-  e        => e
+cleanupNamedHoles = mapTTImp substHoles . mapTTImp cleanApps where
+                    -- There are two traversals because the second one contains a subexpr of the first, so they interfere.
+  cleanApps : TTImp -> TTImp
+  cleanApps $ IAutoApp  _ e   $ IHole {} = e
+  cleanApps $ INamedApp _ e _ $ IHole {} = e
+  cleanApps e = e
+
+  substHoles : TTImp -> TTImp
+  substHoles $ IHole {} = implicitFalse
+  substHoles e = e
 
 ||| Run `cleanupNamedHoles` over all `Arg`'s `TTImp`s
 public export
