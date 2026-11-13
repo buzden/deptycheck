@@ -5,16 +5,13 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.X[] B - used final order: [#0]
 LOG deptycheck.derive.least-effort:7: DerivedGen.X[] C - used final order: []
 LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] Z - used final order: []
 LOG deptycheck.derive.least-effort:7: Prelude.Types.Nat[] S - used final order: [#0]
-Error: Error during reflection: While processing right hand side of CC^probability^tuning. Sorry, I can't find any elaboration which works. All errors:
-Possible error:
-    Error during reflection: Not found data constructor `CC`
+Error: Error during reflection: Not found data constructor `CC`
 
-    Deriving.DepTyCheck.Gen.Tuning:1
-                                                                               ^^^^^^^^^^^^^^^
-
-Possible error:
-    Error during reflection: Can't reify as Name, value is not an NDCon internally
-
-    Deriving.DepTyCheck.Gen.Tuning:1
-                                                                               ^^^^^^^^^^^^^^^
+DerivedGen:1
+ 10 |
+ 11 | data X = A | B Nat | C
+ 12 |
+ 13 | %runElab tuneProbability "A".dataCon (*2)
+ 14 | %runElab tuneProbability `{CC} (const 4)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
