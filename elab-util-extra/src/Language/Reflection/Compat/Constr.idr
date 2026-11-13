@@ -71,6 +71,7 @@ namespace ConArg
 
 --- Getting full names of a data constructor ---
 
+export
 dataCon : Name -> Elab Name
 dataCon n = do
   [n] <- mapMaybe id <$> (traverse isAccessibleDataCon =<< getInfo n)

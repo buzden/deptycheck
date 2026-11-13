@@ -1,0 +1,11 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+Error: Error during reflection: Not found data constructor `X`
+
+DerivedGen:1
+ 10 |
+ 11 | data X = A | B | C
+ 12 |
+ 13 | %runElab tuneProbability "A" (*2)
+ 14 | %runElab tuneProbability `{X} (const 4)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+

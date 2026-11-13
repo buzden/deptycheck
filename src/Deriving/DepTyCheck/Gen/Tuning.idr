@@ -61,6 +61,7 @@ namespace Probability
   export
   tuneProbability : {default Public visibility : Visibility} -> (conName : Name) -> (tuning : Nat1 -> Nat1) -> Elab ()
   tuneProbability conName tuning = do
+    conName <- dataCon conName
     let implName = UN $ Basic "\{show conName}^probability^tuning"
     tuning <- cleanupNamedHoles <$> quote tuning
     conName <- cleanupNamedHoles <$> quote conName
