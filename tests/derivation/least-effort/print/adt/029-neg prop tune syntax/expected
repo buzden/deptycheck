@@ -1,0 +1,15 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+LOG deptycheck.derive.print:5: type: (arg : Fuel) -> Gen MaybeEmpty X
+LOG deptycheck.derive.least-effort:7: DerivedGen.X[] A - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.X[] B - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.X[] C - used final order: []
+Error: Error during reflection: Not found data constructor `X`
+
+DerivedGen:1
+ 10 |
+ 11 | data X = A | B | C
+ 12 |
+ 13 | %runElab tuneProbability "A" (*2)
+ 14 | %runElab tuneProbability `{X} (const 4)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
