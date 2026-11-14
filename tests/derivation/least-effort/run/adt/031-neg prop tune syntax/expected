@@ -1,0 +1,11 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+Error: Error during reflection: Must be a constructor expression or constructor's name, got DerivedGen.B (Prelude.Types.S (Prelude.Types.S (Prelude.Types.S (Prelude.Types.S Prelude.Types.Z))))
+
+DerivedGen:1
+ 10 |
+ 11 | data X = A | B Nat | C
+ 12 |
+ 13 | %runElab tuneProbability A (*2)
+ 14 | %runElab tuneProbability (B 4) (const 4)
+                                ^^^
+
