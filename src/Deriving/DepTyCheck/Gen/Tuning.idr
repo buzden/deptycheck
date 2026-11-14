@@ -58,6 +58,8 @@ namespace Probability
     0 isConstructor : (con : IsConstructor n ** GenuineProof con)
     tuneWeight : Nat1 -> Nat1
 
+  --- Single-argument variant ---
+
   workConName : Name -> Elab (Name, TTImp)
   workConName conName = do
     conName <- dataCon conName
@@ -75,7 +77,28 @@ namespace Probability
              Just conName => workConName conName
              Nothing => failAt (getFC conExpr) "Must be a constructor expression or constructor's name, got \{show conExpr}"
     let implName = UN $ Basic "\{show conName}^probability^tuning"
+    [] <- getType implName
+      | _::_ => failAt (getFC conExpr) "Probability tuning for constructor \{show conName} is already defined"
     declare
       [ interfaceHint visibility implName `(Deriving.DepTyCheck.Gen.Tuning.Probability.ProbabilityTuning ~conNameExpr)
       , def implName $ pure $ var implName .= `(MkProbabilityTuning (itIsConstructor {n = ~conNameExpr}) ~tuning)
       ]
+
+  --- Multi-argument variant ---
+
+  export
+  interface TuneProbabilityArgs r where
+    doTuneProbabilities : Visibility -> Elab () -> r
+
+  export
+  TuneProbabilityArgs (Elab ()) where
+    doTuneProbabilities _ = id
+
+  export
+  TuneProbabilityArgs r => TuneProbabilityArgs ((con : a) -> (tuning : Nat1 -> Nat1) -> r) where
+    doTuneProbabilities visibility acc con tuning = doTuneProbabilities visibility $
+      acc >> tuneProbability {visibility} con tuning
+
+  export
+  tuneProbabilities : {default Public visibility : Visibility} -> TuneProbabilityArgs r => r
+  tuneProbabilities = doTuneProbabilities visibility $ pure ()
