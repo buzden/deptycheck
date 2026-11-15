@@ -65,9 +65,11 @@ for i in "$@"; do
   printf "generating main file... "
   {
     sed -E \
+      -e '/import Deriving\.Show/d' \
+      -e '/%language ElabReflection/d' \
       -e 's/import RunDerivedGen/import Deriving.DepTyCheck.Gen/' \
       -e 's/(%default total)/\1\n\n%language ElabReflection/' \
-      -e '/Show|checkedGen/,$d' \
+      -e '/Show |checkedGen/,$d' \
       "$i/DerivedGen.idr"
     sed -nE 's/checkedGen :/%runElab deriveGenPrinter @{MainCoreDerivator @{LeastEffort}} $/p' "$i/DerivedGen.idr"
   } > "$TARGET/DerivedGen.idr"

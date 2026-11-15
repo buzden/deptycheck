@@ -1,0 +1,11 @@
+1/1: Building DerivedGen (DerivedGen.idr)
+Error: Error during reflection: Probability tuning for constructor DerivedGen.A is already defined
+
+DerivedGen:1
+ 12 |
+ 13 | %runElab tuneProbabilities
+ 14 |   A (*2)
+ 15 |   B (const 4)
+ 16 |   A (*2)
+        ^
+
