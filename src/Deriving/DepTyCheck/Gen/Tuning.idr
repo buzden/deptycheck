@@ -89,6 +89,33 @@ namespace Probability
     conName <- dataCon conName
     (conName,) . cleanupNamedHoles <$> quote conName
 
+  ||| A function for tuning probability of a particular constructor relative to the default value or giving an absolute value.
+  |||
+  ||| This function takes a constructor to tweak and a function taking a default weight of a constuctor returning a final one.
+  ||| Typical usage, considering that we want to have constructor `B` fire twice as often as the others, is the following.
+  |||
+  ||| ```idris
+  ||| data X = A | B | C
+  |||
+  ||| %runElab tuneProbability B (*2)
+  ||| ```
+  |||
+  ||| One can use both constructor itself, or its name, e.g.
+  ||| ```idris
+  ||| %runElab tuneProbability B (*2)
+  ||| -- or --
+  ||| %runElab tuneProbability "B" (*2)
+  ||| -- or --
+  ||| %runElab tuneProbability `{B} (*2)
+  ||| ```
+  |||
+  ||| Each variant is fine, but, surely, only one is allowed for each constructor.
+  |||
+  ||| Please notice that this tuning will be actually used in derivation only when the result of this function
+  ||| (which is an implementation of a special interface called `ProbabilityTuning`)
+  ||| is visible at the site of calling to derivation.
+  |||
+  ||| Please also notice that the body of the given function must be computable *at compile-time* at the site of call to derivation.
   export
   tuneProbability : {default Public visibility : Visibility} -> (con : a) -> (tuning : Nat1 -> Nat1) -> Elab ()
   tuneProbability con tuning = do
@@ -123,6 +150,20 @@ namespace Probability
     doTuneProbabilities visibility acc con tuning = doTuneProbabilities visibility $
       acc >> tuneProbability {visibility} con tuning
 
+  ||| A function for tuning probabilities of several constructors relative.
+  |||
+  ||| This function takes constructors to tweak and functions taking a default weight of a constuctor returning a final one.
+  ||| Typical usage, considering that we want to have constructor `B` fire twice as often, and `C` thrice as often as the other, is the following.
+  |||
+  ||| ```idris
+  ||| data X = A | B | C
+  |||
+  ||| %runElab tuneProbabilities
+  |||   B (*2)
+  |||   C (*3)
+  ||| ```
+  |||
+  ||| Please refer to notices in the documentation of a function `tuneProbability`, they apply here too.
   export
   tuneProbabilities : {default Public visibility : Visibility} -> TuneProbabilityArgs r => r
   tuneProbabilities = doTuneProbabilities visibility $ pure ()
