@@ -35,10 +35,34 @@ namespace GenOrder
   |||   X1 : (n, m : Nat) -> n `LT` m => X n m
   |||   X2 : X n n
   |||
-  ||| GenOrderTuning "X".dataCon where
+  ||| GenOrderTuning "X1".dataCon where
   |||   isConstructor = itIsConstructor
   |||   deriveFirst gt gc = [`{m}, 2] -- 2 is the `LT` argument
   ||| ```
+  |||
+  ||| ---
+  |||
+  ||| This interface can be used for fine tuning when derivator could determine order not optimally.
+  ||| For example, consider the following type:
+  |||
+  ||| ```idris
+  ||| data Y : Type where
+  |||   MkY : (first : Z (f n) a b) -> (second : Z (f n) b c) -> Y
+  ||| ```
+  |||
+  ||| If for some reason we know that argument `b` is better to be generated with the argument `second` rather than with the argument `first`,
+  ||| we can implement the following tuning for `MkY`:
+  |||
+  ||| ```idris
+  ||| GenOrderTuning "MkY".dataCon where
+  |||   isConstructor = itIsConstructor
+  |||   deriveFirst _ _ = [`{second}]
+  ||| ```
+  |||
+  ||| Please notice that there is no need to mention argument `first`,
+  ||| and argument `n` before argument `second` despite it is needed for its generation.
+  ||| Derivator will automatically understand arguments really needed to be generated before the given in by the `deriveFirst` function,
+  ||| and after that it will decide the order of the rest arguments using its usual algorithm.
   public export
   interface GenOrderTuning (0 n : Name) where
     isConstructor : (con : IsConstructor n ** GenuineProof con)
