@@ -284,23 +284,6 @@ namespace OneOf
   altsNonEmptyTrue {em=NonEmpty}   = NT
   altsNonEmptyTrue {em=MaybeEmpty} = Sx
 
-mkOneOfMaybeEmpty : (xs : LazyLst altsNe (Nat1, Lazy (Gen alem a))) ->
-                    (0 _ : All IsNonEmpty $ unpackTaggedLazy xs) =>
-                    Gen0 a
-mkOneOfMaybeEmpty []                  = Empty
-mkOneOfMaybeEmpty (x :: xs) @{_ :: _} = OneOf $ MkGenAlts $ x :: xs
-
-mkOneOf : {em : _} ->
-          (0 _ : alem `NoWeaker` em) =>
-          (0 _ : AltsNonEmpty altsNe em) =>
-          LazyLst altsNe (Nat1, Lazy (Gen alem a)) ->
-          Gen em a
-mkOneOf {em=NonEmpty} @{nw} @{NT} xs with 0 (nonEmptyIsMaximal nw)
-  _ | Refl = OneOf @{allTrue isNonEmptyGen1} $ MkGenAlts xs
-mkOneOf {em=MaybeEmpty} xs =
-  mkOneOfMaybeEmpty (mapMaybeTaggedLazy nonEmpty xs)
-    @{allMapMaybeJustTaggedLazy {f=nonEmpty} $ \_, _ => nonEmptyNonEmpty}
-
 --------------------------
 --- Running generators ---
 --------------------------
@@ -387,6 +370,27 @@ pickTryN n g = initSeed <&> \s => head' (withIndex $ unGenTryN n s g) >>= \(i, x
 --      Current `unGenTryN` should be changed returning `LazyList (a, g)` and
 --      new `unGen` should be implemented trying `retry` times from config using this (`g` must be stored to restore correct state of seed).
 
+-------------------------
+--- Even more utility ---
+-------------------------
+
+mkOneOfMaybeEmpty : (xs : LazyLst altsNe (Nat1, Lazy (Gen alem a))) ->
+                    (0 _ : All IsNonEmpty $ unpackTaggedLazy xs) =>
+                    Gen0 a
+mkOneOfMaybeEmpty []                  = Empty
+mkOneOfMaybeEmpty (x :: xs) @{_ :: _} = OneOf $ MkGenAlts $ x :: xs
+
+mkOneOf : {em : _} ->
+          (0 _ : alem `NoWeaker` em) =>
+          (0 _ : AltsNonEmpty altsNe em) =>
+          LazyLst altsNe (Nat1, Lazy (Gen alem a)) ->
+          Gen em a
+mkOneOf {em=NonEmpty} @{nw} @{NT} xs with 0 (nonEmptyIsMaximal nw)
+  _ | Refl = OneOf @{allTrue isNonEmptyGen1} $ MkGenAlts xs
+mkOneOf {em=MaybeEmpty} xs =
+  mkOneOfMaybeEmpty (mapMaybeTaggedLazy nonEmpty xs)
+    @{allMapMaybeJustTaggedLazy {f=nonEmpty} $ \_, _ => nonEmptyNonEmpty}
+
 ---------------------------------------
 --- Standard combination interfaces ---
 ---------------------------------------
@@ -401,6 +405,7 @@ Applicative RawGen where
   MkRawGen x <*> MkRawGen y = MkRawGen $ x <*> y
 
 --- `Gen` ---
+
 export
 Functor (Gen em)
 0 mapNonEmpty : {g : Gen iem a} -> IsNonEmpty g => IsNonEmpty $ f <$> g
