@@ -378,7 +378,7 @@ mkOneOfMaybeEmpty : (xs : LazyLst altsNe (Nat1, Lazy (Gen alem a))) ->
                     (0 _ : All IsNonEmpty $ unpackTaggedLazy xs) =>
                     Gen0 a
 mkOneOfMaybeEmpty []                  = Empty
-mkOneOfMaybeEmpty (x :: xs) @{_ :: _} = OneOf $ MkGenAlts $ x :: xs
+mkOneOfMaybeEmpty (x :: xs) @{_ :: _} = Raw $ MkRawGen $ unGen1 $ OneOf @{%search} @{believe_me NN} $ MkGenAlts $ x :: xs
 
 mkOneOf : {em : _} ->
           (0 _ : alem `NoWeaker` em) =>
