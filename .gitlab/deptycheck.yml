@@ -64,6 +64,29 @@ deptycheck:test:
     - apt-get -qq update && apt-get -qqy install python3
     - pack test deptycheck "$TEST_SET"
 
+# These tests assert on the complexity class of a generator, never on a time: the
+# slope of `log T` against `log n` does not depend on how fast the runner is.
+# See `tests/perf/README.md`. `NUM_THREADS: 1` is not an optimisation choice ---
+# a second test running beside the first would appear in the first one's times.
+deptycheck:perf:
+  stage: deptycheck:test
+  needs:
+    - deptycheck:build
+  parallel:
+    matrix:
+      - PERF_SET: [ PERF_SETS ]
+  variables:
+    NUM_THREADS: 1
+  script:
+    - pack test deptycheck "$PERF_SET" || FAILED=1
+    - cat "tests/$PERF_SET/perf-data.tsv" || true
+    - exit "${FAILED:-0}"
+  artifacts:
+    when: always
+    paths:
+      - "tests/perf/**/perf-data.tsv"
+    expire_in: 30 days
+
 example:build-and-test:
   stage: examples
   needs:

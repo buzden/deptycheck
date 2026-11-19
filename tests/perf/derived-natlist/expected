@@ -1,0 +1,3 @@
+genNatList (derived, fuel 0): ok
+genNatList (derived, fuel 3): ok
+genDegenerateLists: ok

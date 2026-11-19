@@ -1,0 +1,15 @@
+# Performance tests measure a complexity class, so nothing else may be running
+# on the machine: the CI workflow gives this pool NUM_THREADS=1 and a runner of
+# its own. Locally, expect noisier intervals if the machine is busy.
+#
+# Only the verdict lines reach stdout, where the golden runner compares them
+# against `expected`. Every number goes to stderr and to `perf-data.tsv`, and
+# neither is compared -- so the test is reproducible although the measurement
+# is not.
+
+rm -rf build
+
+flock "$1" pack -q install-deps perf.ipkg && \
+pack -q exec Perf.idr
+
+rm -rf build
