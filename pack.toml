@@ -15,7 +15,17 @@ path = "elab-util-extra"
 ipkg = "elab-util-extra.ipkg"
 test = "tests/tests.ipkg"
 
-##################
+[custom.all.specialise-data]
+type = "local"
+path = "../idris2-specialise-data"
+ipkg = "specialise-data.ipkg"
+test = "tests/tests.ipkg"
+
+[idris2]
+url = "https://github.com/spcfox/Idris2"
+commit = "e41f1841aad9963f97b80b725fd8da129f20def7"
+
+#################
 ### DepTyCheck ###
 ##################
 
