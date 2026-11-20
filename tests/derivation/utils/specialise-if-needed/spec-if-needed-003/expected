@@ -6,7 +6,7 @@ LOG specialiseData.taskFormation:20: Test.X ({arg:1} := Data.Fin.Fin) Given a ty
 LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Task before normalisation: Test.X Prelude.Types.Nat Data.Fin.Fin
 LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] NormaliseTask returned: lambdaTy = Type;
 LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1]                         lambdaBody = Test.X Prelude.Types.Nat Data.Fin.Fin;
-LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Specialised type name: X^8135581006587252120.X^8135581006587252120
+LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Specialised type name: X^8135581006587252120
 LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Specialised type not found, deriving...
 LOG deptycheck.derive.specialisation:20: Test.X[0(t), 1] Derived Test.X^8135581006587252120.X^8135581006587252120
 LOG deptycheck.derive.specialisation:10: Test.X[0(t), 1] Declared specialised type Test.X^8135581006587252120.X^8135581006587252120: Test.X Prelude.Types.Nat Data.Fin.Fin
