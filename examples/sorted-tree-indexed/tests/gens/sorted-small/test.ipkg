@@ -1,0 +1,6 @@
+package a-test
+
+depends = sorted-tree-indexed
+
+executable = a-test
+main = Main
