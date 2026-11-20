@@ -49,13 +49,23 @@ DeriveBodyRhsForCon => DeriveBodyForType where
     -- generate claims for generators per constructors
     let consClaims = sig.targetType.cons <&> \con => export' (consGenName con) (canonicSig sig)
 
-    -- derive bodies for generators per constructors
+    -- derive bodies for generators per constructors, along with their calls of the derived generator
     consBodies <- for sig.targetType.cons $ \con => logBounds Info "deptycheck.derive.consBody" [sig, con] $
-      canonicConsBody sig (consGenName con) con <&> def (consGenName con)
+      canonicConsBody sig (consGenName con) con <&> \(clauses, selfCalls) => (def (consGenName con) clauses, con.name, selfCalls)
 
     -- calculate which constructors are recursive and spend fuel, and which are not
     let Just consRecs = lookupConsWithWeight sig
       | Nothing => fail "INTERNAL ERROR: unknown type for consRecs: \{show sig.targetType.name}"
+
+    -- make non-fuel-spending constructors spend fuel, if otherwise they could call the derived generator infinitely
+    -- the monadic bind is used in order not to evaluate the list each time it is used
+    nonSpending <- pure $ mapMaybe (\(con, w) => whenT (isJust $ usedWeightFun w) con.name) consRecs
+    nonSpendingSelfCalls <- for nonSpending $ \conName => do
+      let Just selfCalls = lookup conName $ snd <$> consBodies
+        | Nothing => fail "INTERNAL ERROR: no derived body for the constructor \{show conName}"
+      pure (conName, selfCalls)
+    needFuel <- needFuelToTerminate nonSpendingSelfCalls
+    let consRecs = consRecs <&> \(con, w) => (con, if elem con.name needFuel then asFuelSpending w else w)
 
     -- compute all needed weigthing functions, if any
     let typesWithWeightFun = mapMaybe (usedWeightFun . snd) consRecs
@@ -67,7 +77,7 @@ DeriveBodyRhsForCon => DeriveBodyForType where
     let outmostRHS = fuelDecisionExpr fuelArg $ map @{Compose} weightExpr consRecs
 
     -- return function definition
-    pure $ MkPair typesWithWeightFun [ canonicDefaultLHS' interimNamesWrapper sig n fuelArg .= local (consClaims ++ consBodies) outmostRHS ]
+    pure $ MkPair typesWithWeightFun [ canonicDefaultLHS' interimNamesWrapper sig n fuelArg .= local (consClaims ++ map fst consBodies) outmostRHS ]
 
   where
 
