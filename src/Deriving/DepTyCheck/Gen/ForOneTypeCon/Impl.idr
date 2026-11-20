@@ -19,9 +19,15 @@ isSimpleBindVar : TTImp -> Bool
 isSimpleBindVar $ IBindVar {} = True
 isSimpleBindVar _             = False
 
+||| Remembers signatures and given arguments of all generators asked to be called
+[RememberingCalls] DerivationClosure m => DerivationClosure (StateT (List (GenSignature, List TTImp)) m) where
+  callGen sig fuel params = modify ((sig, toList params) ::) *> lift (callGen sig fuel params)
+
+||| Derives clauses of a generator of the given constructor, along with all calls of the generator with the given signature
+||| done in these clauses, in the form taken by `needFuelToTerminate`.
 export
 canonicConsBody : DeriveBodyRhsForCon => DerivationClosure m => Elaboration m => NamesInfoInTypes => ConsRecs =>
-                  GenSignature -> Name -> Con -> m $ List Clause
+                  GenSignature -> Name -> Con -> m (List Clause, List (List TTImp, List $ Maybe TTImp))
 canonicConsBody sig name con = do
 
   -- Get file position of the constructor definition (for better error reporting)
@@ -142,9 +148,26 @@ canonicConsBody sig name con = do
 
   -- Form the declaration cases of a function generating values of particular constructor
   let fuelArg = "^cons_fuel^" -- I'm using a name containing chars that cannot be present in the code parsed from the Idris frontend
-  pure $
+
+  -- Derive the body of the happy case, remembering all generators called in it
+  let deriveHappyCaseBody : DerivationClosure (StateT (List (GenSignature, List TTImp)) m) => StateT (List (GenSignature, List TTImp)) m TTImp
+      deriveHappyCaseBody = consGenExpr sig con .| fromList givenConArgs .| var fuelArg
+  (genCalls, happyCaseBody) <- runStateT [] $ deriveHappyCaseBody @{RememberingCalls}
+
+  -- Acquire given type arguments in calls of the generator being derived
+  -- When `decEq`s are used, the calls are inside `with` blocks, which take variables of the patterns of given type arguments;
+  -- thus the totality checker relates to the given type arguments only those arguments of the calls that are such variables,
+  -- or that are the expression checked by `decEq`, when this check is the only one.
+  let relatedToGivens : TTImp -> Bool
+      relatedToGivens arg = null decEqedNames || (fst <$> decEqedNames) == [Left arg] || case arg of
+                              IVar _ n => contains n conArgNames
+                              _        => False
+  let selfCalls = flip List.mapMaybe genCalls $ \(calledSig, givenArgs) => toMaybe (calledSig == sig) $
+                    (conRetTypeArg <$> sig.givenParams.asList, givenArgs <&> \arg => toMaybe (relatedToGivens arg) arg)
+
+  pure $ (, selfCalls) $
     -- Happy case, given arguments conform out constructor's GADT indices
-    [ deceqise (callCanonic sig name $ bindVar fuelArg) !(consGenExpr sig con .| fromList givenConArgs .| var fuelArg) ]
+    [ deceqise (callCanonic sig name $ bindVar fuelArg) happyCaseBody ]
     ++ if all isSimpleBindVar $ bindExprs SortedSet.empty then [] {- do not produce dead code if the happy case handles everything already -} else
       -- The rest case, if given arguments do not conform to the current constructor then return empty generator
       [ callCanonic sig name implicitTrue (replicate _ implicitTrue) .= `(empty) ]
