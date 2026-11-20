@@ -2,14 +2,14 @@
 LOG deptycheck.derive.print:5: type: (arg : Fuel) -> (r : Nat) -> (t : Bool) -> Gen MaybeEmpty (a : Regs r ** SimpleExpr a t)
 LOG deptycheck.derive.least-effort:7: DerivedGen.SimpleExpr[0(r), 2] Read - used final order: [#4]
 LOG deptycheck.derive.specialisation:10: Data.Vect.AtIndex.AtIndex[0(type), 1(n), 4(x)] Declared specialised type DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525: Data.Vect.AtIndex.AtIndex {type = Prelude.Types.Maybe Prelude.Basics.Bool} {n = lam^0} lam^1 lam^2 lam^3
-LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525[0(fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0), 3(fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3)] Here - used final order: [#2 (xs)]
+LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525[0(fv^AtIndex^2737362274073714525^lam^0), 3(fv^AtIndex^2737362274073714525^lam^3)] Here - used final order: [#2 (xs)]
 LOG deptycheck.derive.specialisation:10: Data.Vect.Vect[0(len), 1(elem)] Declared specialised type DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186: Data.Vect.Vect lam^0 (Prelude.Types.Maybe Prelude.Basics.Bool)
-LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525[0(fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0), 3(fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3)] There - used final order: [#5 (later), #1 (y)]
+LOG deptycheck.derive.least-effort:7: DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525[0(fv^AtIndex^2737362274073714525^lam^0), 3(fv^AtIndex^2737362274073714525^lam^3)] There - used final order: [#5 (later), #1 (y)]
 LOG deptycheck.derive.specialisation:10: Prelude.Types.Maybe[0(ty)] Declared specialised type DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926: Prelude.Types.Maybe Prelude.Basics.Bool
 LOG deptycheck.derive.least-effort:7: DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926[] Nothing - used final order: []
 LOG deptycheck.derive.least-effort:7: DerivedGen.Maybe^2151327891283438926.Maybe^2151327891283438926[] Just - used final order: [#0 (x)]
-LOG deptycheck.derive.least-effort:7: DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186[0(fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0)] Nil - used final order: []
-LOG deptycheck.derive.least-effort:7: DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186[0(fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0)] (::) - used final order: [#1 (x), #2 (xs)]
+LOG deptycheck.derive.least-effort:7: DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186[0(fv^Vect^15780912604163783186^lam^0)] Nil - used final order: []
+LOG deptycheck.derive.least-effort:7: DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186[0(fv^Vect^15780912604163783186^lam^0)] (::) - used final order: [#1 (x), #2 (xs)]
 LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] False - used final order: []
 LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final order: []
     MkArg MW ExplicitArg (Just "^outmost-fuel^") (var "Data.Fuel.Fuel")
@@ -28,39 +28,33 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                           { name = "<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525>[0, 3]"
                           , type =
                                   MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                              .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
-                              .-> MkArg
-                                    MW
-                                    ExplicitArg
-                                    (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")
-                                    (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
+                              .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525^lam^3") (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
                               .->    var "Test.DepTyCheck.Gen.Gen"
                                   .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                   .$ (   var "Builtin.DPair.DPair"
-                                      .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                      .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525^lam^0")
                                       .$ (    MkArg
                                                 MW
                                                 ExplicitArg
-                                                (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1")
-                                                (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                                (Just "fv^AtIndex^2737362274073714525^lam^1")
+                                                (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525^lam^0")
                                           .=>    var "Builtin.DPair.DPair"
                                               .$ (   var "Data.Vect.Vect"
-                                                  .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                  .$ var "fv^AtIndex^2737362274073714525^lam^0"
                                                   .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
                                               .$ (    MkArg
                                                         MW
                                                         ExplicitArg
-                                                        (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2")
+                                                        (Just "fv^AtIndex^2737362274073714525^lam^2")
                                                         (   var "Data.Vect.Vect"
-                                                         .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                         .$ var "fv^AtIndex^2737362274073714525^lam^0"
                                                          .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
                                                   .=>    var "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525"
-                                                      .! ( "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                         , var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                         )
-                                                      .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1"
-                                                      .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2"
-                                                      .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")))
+                                                      .! ("fv^AtIndex^2737362274073714525^lam^0", var "fv^AtIndex^2737362274073714525^lam^0")
+                                                      .$ var "fv^AtIndex^2737362274073714525^lam^1"
+                                                      .$ var "fv^AtIndex^2737362274073714525^lam^2"
+                                                      .$ var "fv^AtIndex^2737362274073714525^lam^3")))
                           }
                     }
               }
@@ -75,11 +69,10 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                           { name = "<DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186>[0]"
                           , type =
                                   MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                              .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
+                              .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
                               .->    var "Test.DepTyCheck.Gen.Gen"
                                   .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                  .$ (   var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186"
-                                      .$ var "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0")
+                                  .$ (var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186" .$ var "fv^Vect^15780912604163783186^lam^0")
                           }
                     }
               }
@@ -142,8 +135,8 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
               "<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525>[0, 3]"
               [       var "<DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525>[0, 3]"
                    .$ bindVar "^fuel_arg^"
-                   .$ bindVar "inter^<fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0>"
-                   .$ bindVar "inter^<fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3>"
+                   .$ bindVar "inter^<fv^AtIndex^2737362274073714525^lam^0>"
+                   .$ bindVar "inter^<fv^AtIndex^2737362274073714525^lam^3>"
                 .= local
                      { decls =
                          [ IClaim
@@ -157,39 +150,33 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                          { name = "<<DerivedGen.AtIndex^2737362274073714525.Here>>"
                                          , type =
                                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                             .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
-                                             .-> MkArg
-                                                   MW
-                                                   ExplicitArg
-                                                   (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")
-                                                   (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
+                                             .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525^lam^3") (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
                                              .->    var "Test.DepTyCheck.Gen.Gen"
                                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                                  .$ (   var "Builtin.DPair.DPair"
-                                                     .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                                     .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525^lam^0")
                                                      .$ (    MkArg
                                                                MW
                                                                ExplicitArg
-                                                               (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1")
-                                                               (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                                               (Just "fv^AtIndex^2737362274073714525^lam^1")
+                                                               (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525^lam^0")
                                                          .=>    var "Builtin.DPair.DPair"
                                                              .$ (   var "Data.Vect.Vect"
-                                                                 .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                 .$ var "fv^AtIndex^2737362274073714525^lam^0"
                                                                  .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
                                                              .$ (    MkArg
                                                                        MW
                                                                        ExplicitArg
-                                                                       (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2")
+                                                                       (Just "fv^AtIndex^2737362274073714525^lam^2")
                                                                        (   var "Data.Vect.Vect"
-                                                                        .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                        .$ var "fv^AtIndex^2737362274073714525^lam^0"
                                                                         .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
                                                                  .=>    var "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525"
-                                                                     .! ( "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                                        , var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                                        )
-                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1"
-                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2"
-                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")))
+                                                                     .! ("fv^AtIndex^2737362274073714525^lam^0", var "fv^AtIndex^2737362274073714525^lam^0")
+                                                                     .$ var "fv^AtIndex^2737362274073714525^lam^1"
+                                                                     .$ var "fv^AtIndex^2737362274073714525^lam^2"
+                                                                     .$ var "fv^AtIndex^2737362274073714525^lam^3")))
                                          }
                                    }
                              }
@@ -204,39 +191,33 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                          { name = "<<DerivedGen.AtIndex^2737362274073714525.There>>"
                                          , type =
                                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                             .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
-                                             .-> MkArg
-                                                   MW
-                                                   ExplicitArg
-                                                   (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")
-                                                   (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
+                                             .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525^lam^0") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "fv^AtIndex^2737362274073714525^lam^3") (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool")
                                              .->    var "Test.DepTyCheck.Gen.Gen"
                                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                                  .$ (   var "Builtin.DPair.DPair"
-                                                     .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                                     .$ (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525^lam^0")
                                                      .$ (    MkArg
                                                                MW
                                                                ExplicitArg
-                                                               (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1")
-                                                               (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0")
+                                                               (Just "fv^AtIndex^2737362274073714525^lam^1")
+                                                               (var "Data.Fin.Fin" .$ var "fv^AtIndex^2737362274073714525^lam^0")
                                                          .=>    var "Builtin.DPair.DPair"
                                                              .$ (   var "Data.Vect.Vect"
-                                                                 .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                 .$ var "fv^AtIndex^2737362274073714525^lam^0"
                                                                  .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
                                                              .$ (    MkArg
                                                                        MW
                                                                        ExplicitArg
-                                                                       (Just "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2")
+                                                                       (Just "fv^AtIndex^2737362274073714525^lam^2")
                                                                        (   var "Data.Vect.Vect"
-                                                                        .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
+                                                                        .$ var "fv^AtIndex^2737362274073714525^lam^0"
                                                                         .$ (var "Prelude.Types.Maybe" .$ var "Prelude.Basics.Bool"))
                                                                  .=>    var "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525"
-                                                                     .! ( "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                                        , var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0"
-                                                                        )
-                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^1"
-                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^2"
-                                                                     .$ var "fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3")))
+                                                                     .! ("fv^AtIndex^2737362274073714525^lam^0", var "fv^AtIndex^2737362274073714525^lam^0")
+                                                                     .$ var "fv^AtIndex^2737362274073714525^lam^1"
+                                                                     .$ var "fv^AtIndex^2737362274073714525^lam^2"
+                                                                     .$ var "fv^AtIndex^2737362274073714525^lam^3")))
                                          }
                                    }
                              }
@@ -316,32 +297,32 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                     .$ (   var "fromString"
                                         .$ primVal
                                              (Str
-                                                "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525[0(fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0), 3(fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3)] (dry fuel)"))
+                                                "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525[0(fv^AtIndex^2737362274073714525^lam^0), 3(fv^AtIndex^2737362274073714525^lam^3)] (dry fuel)"))
                                     .$ (   var "<<DerivedGen.AtIndex^2737362274073714525.Here>>"
                                         .$ var "^fuel_arg^"
-                                        .$ var "inter^<fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0>"
-                                        .$ var "inter^<fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3>")
+                                        .$ var "inter^<fv^AtIndex^2737362274073714525^lam^0>"
+                                        .$ var "inter^<fv^AtIndex^2737362274073714525^lam^3>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (   var "fromString"
                                         .$ primVal
                                              (Str
-                                                "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525[0(fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0), 3(fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3)] (non-dry fuel)"))
+                                                "DerivedGen.AtIndex^2737362274073714525.AtIndex^2737362274073714525[0(fv^AtIndex^2737362274073714525^lam^0), 3(fv^AtIndex^2737362274073714525^lam^3)] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
                                                 .$ var "Data.Nat1.one"
                                                 .$ (   var "<<DerivedGen.AtIndex^2737362274073714525.Here>>"
                                                     .$ var "^fuel_arg^"
-                                                    .$ var "inter^<fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0>"
-                                                    .$ var "inter^<fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3>"))
+                                                    .$ var "inter^<fv^AtIndex^2737362274073714525^lam^0>"
+                                                    .$ var "inter^<fv^AtIndex^2737362274073714525^lam^3>"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
                                                     .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                     .$ (   var "<<DerivedGen.AtIndex^2737362274073714525.There>>"
                                                         .$ var "^sub^fuel_arg^"
-                                                        .$ var "inter^<fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^0>"
-                                                        .$ var "inter^<fv^AtIndex^2737362274073714525.AtIndex^2737362274073714525^lam^3>"))
+                                                        .$ var "inter^<fv^AtIndex^2737362274073714525^lam^0>"
+                                                        .$ var "inter^<fv^AtIndex^2737362274073714525^lam^3>"))
                                                 .$ var "Nil")))
                                ]
                            }
@@ -352,7 +333,7 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
               "<DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186>[0]"
               [       var "<DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186>[0]"
                    .$ bindVar "^fuel_arg^"
-                   .$ bindVar "inter^<fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0>"
+                   .$ bindVar "inter^<fv^Vect^15780912604163783186^lam^0>"
                 .= local
                      { decls =
                          [ IClaim
@@ -366,11 +347,10 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                          { name = "<<DerivedGen.Vect^15780912604163783186.Nil>>"
                                          , type =
                                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                             .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
                                              .->    var "Test.DepTyCheck.Gen.Gen"
                                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                                 .$ (   var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186"
-                                                     .$ var "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0")
+                                                 .$ (var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186" .$ var "fv^Vect^15780912604163783186^lam^0")
                                          }
                                    }
                              }
@@ -385,11 +365,10 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                          { name = "<<DerivedGen.Vect^15780912604163783186.(::)>>"
                                          , type =
                                                  MkArg MW ExplicitArg Nothing (var "Data.Fuel.Fuel")
-                                             .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
+                                             .-> MkArg MW ExplicitArg (Just "fv^Vect^15780912604163783186^lam^0") (var "Prelude.Types.Nat")
                                              .->    var "Test.DepTyCheck.Gen.Gen"
                                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
-                                                 .$ (   var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186"
-                                                     .$ var "fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0")
+                                                 .$ (var "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186" .$ var "fv^Vect^15780912604163783186^lam^0")
                                          }
                                    }
                              }
@@ -431,28 +410,27 @@ LOG deptycheck.derive.least-effort:7: Prelude.Basics.Bool[] True - used final or
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (   var "fromString"
                                         .$ primVal
-                                             (Str
-                                                "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186[0(fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0)] (dry fuel)"))
-                                    .$ (var "<<DerivedGen.Vect^15780912604163783186.Nil>>" .$ var "^fuel_arg^" .$ var "inter^<fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0>")
+                                             (Str "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186[0(fv^Vect^15780912604163783186^lam^0)] (dry fuel)"))
+                                    .$ (var "<<DerivedGen.Vect^15780912604163783186.Nil>>" .$ var "^fuel_arg^" .$ var "inter^<fv^Vect^15780912604163783186^lam^0>")
                                ,    var "Data.Fuel.More" .$ bindVar "^sub^fuel_arg^"
                                  .=    var "Test.DepTyCheck.Gen.label"
                                     .$ (   var "fromString"
                                         .$ primVal
                                              (Str
-                                                "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186[0(fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0)] (non-dry fuel)"))
+                                                "DerivedGen.Vect^15780912604163783186.Vect^15780912604163783186[0(fv^Vect^15780912604163783186^lam^0)] (non-dry fuel)"))
                                     .$ (   var "Test.DepTyCheck.Gen.frequency"
                                         .$ (   var "::"
                                             .$ (   var "Builtin.MkPair"
                                                 .$ var "Data.Nat1.one"
                                                 .$ (   var "<<DerivedGen.Vect^15780912604163783186.Nil>>"
                                                     .$ var "^fuel_arg^"
-                                                    .$ var "inter^<fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0>"))
+                                                    .$ var "inter^<fv^Vect^15780912604163783186^lam^0>"))
                                             .$ (   var "::"
                                                 .$ (   var "Builtin.MkPair"
                                                     .$ (var "Deriving.DepTyCheck.Gen.ConsRecs.leftDepth" .$ var "^sub^fuel_arg^")
                                                     .$ (   var "<<DerivedGen.Vect^15780912604163783186.(::)>>"
                                                         .$ var "^sub^fuel_arg^"
-                                                        .$ var "inter^<fv^Vect^15780912604163783186.Vect^15780912604163783186^lam^0>"))
+                                                        .$ var "inter^<fv^Vect^15780912604163783186^lam^0>"))
                                                 .$ var "Nil")))
                                ]
                            }

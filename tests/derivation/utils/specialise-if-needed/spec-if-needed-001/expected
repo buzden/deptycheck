@@ -6,7 +6,7 @@ LOG specialiseData.taskFormation:20: Data.Vect.Vect (elem := Prelude.Types.Nat) 
 LOG deptycheck.derive.specialisation:20: Data.Vect.Vect[1(elem)] Task before normalisation: \ lam^0 => Data.Vect.Vect lam^0 Prelude.Types.Nat
 LOG deptycheck.derive.specialisation:20: Data.Vect.Vect[1(elem)] NormaliseTask returned: lambdaTy = (lam^0 : Prelude.Types.Nat) -> Type;
 LOG deptycheck.derive.specialisation:20: Data.Vect.Vect[1(elem)]                         lambdaBody = \ lam^0 => Data.Vect.Vect lam^0 Prelude.Types.Nat;
-LOG deptycheck.derive.specialisation:20: Data.Vect.Vect[1(elem)] Specialised type name: Vect^9686363643684445030.Vect^9686363643684445030
+LOG deptycheck.derive.specialisation:20: Data.Vect.Vect[1(elem)] Specialised type name: Vect^9686363643684445030
 LOG deptycheck.derive.specialisation:20: Data.Vect.Vect[1(elem)] Specialised type not found, deriving...
 LOG deptycheck.derive.specialisation:20: Data.Vect.Vect[1(elem)] Derived Test.Vect^9686363643684445030.Vect^9686363643684445030
 LOG deptycheck.derive.specialisation:10: Data.Vect.Vect[1(elem)] Declared specialised type Test.Vect^9686363643684445030.Vect^9686363643684445030: Data.Vect.Vect lam^0 Prelude.Types.Nat

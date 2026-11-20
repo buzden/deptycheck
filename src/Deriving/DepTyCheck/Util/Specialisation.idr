@@ -81,7 +81,7 @@ specTaskToName t = do
          (IVar _ n) => show $ snd $ unNS n
          x => show x
   hash <- pure $ show $ hash t
-  pure $ fromString "\{vname}^\{hash}.\{vname}^\{hash}"
+  pure $ fromString "\{vname}^\{hash}"
 
 nameUnambigAndVis : Elaboration m => Name -> m Bool
 nameUnambigAndVis n = do

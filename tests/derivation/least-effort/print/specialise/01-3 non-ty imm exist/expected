@@ -28,13 +28,9 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Vect^120651999565177027.Vect^12
                                   .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                   .$ (   var "Builtin.DPair.DPair"
                                       .$ var "Prelude.Types.Nat"
-                                      .$ (    MkArg
-                                                MW
-                                                ExplicitArg
-                                                (Just "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0")
-                                                (var "Prelude.Types.Nat")
+                                      .$ (    MkArg MW ExplicitArg (Just "fv^Vect^120651999565177027^lam^0") (var "Prelude.Types.Nat")
                                           .=>    var "DerivedGen.Vect^120651999565177027.Vect^120651999565177027"
-                                              .$ var "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0"))
+                                              .$ var "fv^Vect^120651999565177027^lam^0"))
                           }
                     }
               }
@@ -74,13 +70,9 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Vect^120651999565177027.Vect^12
                                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                                  .$ (   var "Builtin.DPair.DPair"
                                                      .$ var "Prelude.Types.Nat"
-                                                     .$ (    MkArg
-                                                               MW
-                                                               ExplicitArg
-                                                               (Just "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0")
-                                                               (var "Prelude.Types.Nat")
+                                                     .$ (    MkArg MW ExplicitArg (Just "fv^Vect^120651999565177027^lam^0") (var "Prelude.Types.Nat")
                                                          .=>    var "DerivedGen.Vect^120651999565177027.Vect^120651999565177027"
-                                                             .$ var "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0"))
+                                                             .$ var "fv^Vect^120651999565177027^lam^0"))
                                          }
                                    }
                              }
@@ -99,13 +91,9 @@ LOG deptycheck.derive.least-effort:7: DerivedGen.Vect^120651999565177027.Vect^12
                                                  .$ var "Test.DepTyCheck.Gen.Emptiness.MaybeEmpty"
                                                  .$ (   var "Builtin.DPair.DPair"
                                                      .$ var "Prelude.Types.Nat"
-                                                     .$ (    MkArg
-                                                               MW
-                                                               ExplicitArg
-                                                               (Just "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0")
-                                                               (var "Prelude.Types.Nat")
+                                                     .$ (    MkArg MW ExplicitArg (Just "fv^Vect^120651999565177027^lam^0") (var "Prelude.Types.Nat")
                                                          .=>    var "DerivedGen.Vect^120651999565177027.Vect^120651999565177027"
-                                                             .$ var "fv^Vect^120651999565177027.Vect^120651999565177027^lam^0"))
+                                                             .$ var "fv^Vect^120651999565177027^lam^0"))
                                          }
                                    }
                              }
