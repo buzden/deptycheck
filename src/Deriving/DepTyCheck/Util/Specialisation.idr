@@ -16,9 +16,6 @@ import public Deriving.SpecialiseData.TaskFormation
 
 import public Language.Reflection.Unify
 
-import public Data.Hashable
-import public Data.Hashable.Base
-
 %default total
 
 ||| Determine if the argument should be specialised or passed through
@@ -70,18 +67,6 @@ genGivens l = do
   let s = SortedSet.fromList l2
   let gv = formGivenVals s l1
   (s ** gv)
-
--- Using the monadic trick makes the performance *much* better.
-specTaskToName : Monad m => TTImp -> m Name
-specTaskToName t = do
-  let (_, lamBody) = unLambda t
-  let (callee, _) = unAppAny lamBody
-  let vname =
-    case callee of
-         (IVar _ n) => show $ snd $ unNS n
-         x => show x
-  hash <- pure $ show $ hash t
-  pure $ fromString "\{vname}^\{hash}"
 
 nameUnambigAndVis : Elaboration m => Name -> m Bool
 nameUnambigAndVis n = do
