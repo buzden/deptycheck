@@ -28,7 +28,8 @@ import public Syntax.IHateParens.Function
 public export
 data RecWeightInfo : Type where
   SpendingFuel : ((leftFuelVarName : Name) -> TTImp) -> RecWeightInfo
-  StructurallyDecreasing : (decrTy : TypeInfo) -> (wExpr : TTImp) -> RecWeightInfo
+  ||| Along with the weight, contains a weight expression for the case when the constructor needs to spend fuel after all
+  StructurallyDecreasing : (decrTy : TypeInfo) -> (wExpr : TTImp) -> (spendingFuelWExpr : (leftFuelVarName : Name) -> TTImp) -> RecWeightInfo
 
 public export
 record ConWeightInfo where
@@ -152,7 +153,8 @@ finCR (MkTyConsRec ti wTyArgs cons) givenTyArgs = do
     let directRecConArgArgs = flip mapMaybe con.args $ \conArg => case unAppAny conArg.type of (conArgTy, conArgArgs) => do
                                 toMaybe (getAppVar conArgTy == Just ti.name) conArgArgs
     -- default behaviour, spend fuel, weight proportional to fuel
-    fromMaybe (SpendingFuel $ wMod . app `(Deriving.DepTyCheck.Gen.ConsRecs.leftDepth) . var) $ do
+    let spendingFuelWExpr = wMod . app `(Deriving.DepTyCheck.Gen.ConsRecs.leftDepth) . var
+    fromMaybe (SpendingFuel spendingFuelWExpr) $ do
     -- work only with given args
     -- fail-fast if no given weightable args
     guard $ not $ null wTyArgs
@@ -167,7 +169,7 @@ finCR (MkTyConsRec ti wTyArgs cons) givenTyArgs = do
       foldAlt' directRecConArgArgs $ \conArgArgs => do
         getAt wTyArg conArgArgs >>= getAppVar . getExpr >>= \arg => toMaybe .| contains arg freeNamesLessThanOrig .|
           var (weightFunName weightTy) .$ var (interimNamesWrapper weightArgName)
-    pure $ StructurallyDecreasing decrTy $ wMod weightExpr
+    pure $ StructurallyDecreasing decrTy (wMod weightExpr) spendingFuelWExpr
 
 weightableTyArgs : (consRecs : SortedMap Name (TypeInfo, List ConRec)) -> (ti : TypeInfo) -> SortedMap (Fin ti.args.length) (TypeInfo, Name)
 weightableTyArgs consRecs ti = fromList $ flip List.mapMaybe ti.args.withIdx $ \(idx, ar) =>
@@ -228,3 +230,112 @@ updateNamesAndConsRecs @{niit} @{crs} tis = do
   newNiit <- logBounds Trace "deptycheck.derive.namesInfo.update" [] $ enrichNamesInfoInTypes tis niit
   newCr <- logBounds Trace "deptycheck.derive.consRec.update" [] $ map (crs <+>) $ getConsRecsFor @{newNiit} $ fromList $ tis <&> \ti => (ti.name, ti)
   pure (newNiit, newCr)
+
+-----------------------------------------------------
+--- Termination of non-fuel-spending constructors ---
+-----------------------------------------------------
+
+-- Size changes of arguments in a call of a function done by this function itself, see `selfCallSizeChanges` below
+SelfCall : Type
+SelfCall = List $ List $ Maybe Bool
+
+-- Tells how the second expression relates to the first one structurally, in the way the totality checker does it:
+-- `Just True` is for being smaller, `Just False` is for being the same, `Nothing` is for unknown.
+-- Arguments of the same data constructor are compared only up to the given depth, like the totality checker does.
+sizeChange : NamesInfoInTypes => (depth : Nat) -> (from, to : TTImp) -> Maybe Bool
+sizeChange depth from to = do
+  let (fromFun, fromArgs) = mapSnd (map getExpr) $ unAppAny from
+  let (toFun, toArgs) = mapSnd (map getExpr) $ unAppAny to
+  -- an expression is the same as itself and as its application to more arguments, since the totality checker compares
+  -- an application by its function; arguments are compared by their positions, which is enough for normalised types of constructors
+  if toFun == fromFun && length fromArgs <= length toArgs && all (uncurry (==)) (fromArgs `zip` toArgs) then Just False else do
+  -- only data constructors are looked into, since matching on a type constructor does not make its arguments smaller
+  let IVar _ con = fromFun
+    | _ => Nothing
+  guard $ isJust (lookupCon con) && isNothing (lookupType con)
+  -- an expression which is not bigger than an argument of a data constructor is smaller than the whole application
+  -- (this and the next recursive calls are total since they are done for arguments of the given application)
+  if any (\fromArg => isJust $ assert_total $ sizeChange (pred depth) fromArg to) fromArgs then Just True else do
+  -- an application of the same data constructor is smaller when none of its arguments is of unknown size and some of them is smaller
+  let S depth = depth
+    | Z => Nothing
+  guard $ toFun == fromFun && length toArgs == length fromArgs
+  changes <- for (fromArgs `zip` toArgs) $ \(fromArg, toArg) => assert_total $ sizeChange depth fromArg toArg
+  toMaybe (any id changes) True
+
+-- Tells how arguments change in a call of a function done by this function itself.
+-- For each argument of the caller (the outer list) and for each argument of the callee (the inner lists),
+-- `Just True` is for the callee's one being structurally smaller, `Just False` is for being the same, `Nothing` is for unknown.
+-- Arguments of the callee which are `Nothing` are those that cannot be related to arguments of the caller.
+selfCallSizeChanges : NamesInfoInTypes => (callerArgs : List TTImp) -> (calleeArgs : List $ Maybe TTImp) -> SelfCall
+selfCallSizeChanges callerArgs calleeArgs = callerArgs <&> \callerArg => calleeArgs <&> (>>= sizeChange totalityDepth callerArg) where
+  -- the default value of `%totality_depth` of the compiler is assumed, since the actual value is not available
+  totalityDepth : Nat
+  totalityDepth = 5
+
+-- NOTE: Monadic binds of pure values are used below in order not to evaluate these values each time they are used.
+
+-- Drops all rows that decrease in a lexicographic order of columns, the order is the same for all dropped rows; returns rows that are left.
+-- A column is the next one in the order when no left row is unknown in it; then all rows that are smaller in this column are dropped.
+-- At least one row is dropped on each step, so the count of rows is enough steps; this argument makes the function total.
+dropDecreasing : Monad m => (steps : Nat) -> List (a, List $ Maybe Bool) -> m $ List (a, List $ Maybe Bool)
+dropDecreasing Z         rows = pure rows
+dropDecreasing (S steps) rows = do
+  let col : Nat -> List $ Maybe Bool
+      col idx = rows <&> join . getAt idx . snd
+  let cols = finToNat <$> List.allFins (maybe 0 (length . snd) $ head' rows)
+  Just idx <- pure $ List.find (\idx => all isJust (col idx) && any (== Just True) (col idx)) cols
+    | Nothing => pure rows
+  rows <- pure $ filter ((/= Just True) . join . getAt idx . snd) rows
+  dropDecreasing steps rows
+
+-- Checks the size-change termination principle for a function calling itself with given changes of its arguments:
+-- each idempotent composition of the calls must have an argument which is strictly decreasing.
+-- When there are too many different compositions, the answer is negative, to be on the safe side.
+sizeChangeTerminating : Monad m => (calls : List SelfCall) -> m Bool
+sizeChangeTerminating calls = go maxCompositions [] calls where
+  maxCompositions : Nat
+  maxCompositions = 32
+  compose : (first, second : SelfCall) -> SelfCall
+  compose first second = first <&> \fromCaller => transpose second <&> \toCallee =>
+                           foldl max Nothing $ zipWith (\x, y => (\a, b => a || b) <$> x <*> y) fromCaller toCallee
+  nonDecreasing : SelfCall -> Bool
+  nonDecreasing call = all (\(idx, changes) => getAt (finToNat idx) changes /= Just (Just True)) call.withIdx
+  -- each round gives at least one new composition, so the count of rounds is limited by the limit of compositions too
+  go : (rounds : Nat) -> (old, new : List SelfCall) -> m Bool
+  go _          _   []  = pure True
+  go Z          _   _   = pure False
+  go (S rounds) old new = do
+    False <- pure $ any (\call => nonDecreasing call && compose call call == call) new || length old + length new > maxCompositions
+      | True => pure False
+    old <- pure $ old ++ new
+    new <- pure $ filter (not . flip elem old) $ nub [| compose new calls |]
+    go rounds old new
+
+||| Tells which of given non-fuel-spending constructors need to spend fuel, since otherwise calls of the generator done by them
+||| can be non-terminating. Each constructor goes with all calls of the same generator done by it; each call is a pair
+||| of expressions of given type arguments in the constructor's result type and of ones in the call;
+||| a `Nothing` among the latter is for an argument which the totality checker cannot relate to arguments of the caller.
+export
+needFuelToTerminate : NamesInfoInTypes => Monad m => List (Name, List (List TTImp, List $ Maybe TTImp)) -> m $ List Name
+needFuelToTerminate consCalls = do
+  cons <- pure $ consCalls <&> mapSnd (map $ uncurry selfCallSizeChanges)
+  -- calls decreasing in a single lexicographic order of given type arguments are terminating, only changes of the same arguments matter here
+  rows <- pure $ nub $ cons >>= \(con, selfCalls) => selfCalls <&> \selfCall =>
+            (con, selfCall.withIdx <&> \(idx, changes) => join $ getAt (finToNat idx) changes)
+  notOrdered <- pure $ nub $ fst <$> !(dropDecreasing (length rows) rows)
+  let False = null notOrdered
+    | True => pure []
+  -- calls of the rest constructors still can be terminating due to changes between different arguments;
+  -- they must terminate both for each constructor separately and for all non-fuel-spending constructors together
+  let callsOf : (Name -> Bool) -> List SelfCall
+      callsOf p = nub $ cons >>= \(con, selfCalls) => if p con then selfCalls else []
+  nonTerminating <- map (map fst . filter (not . snd)) $ for notOrdered $ \con => (con,) <$> sizeChangeTerminating !(pure $ callsOf (== con))
+  allTerminating <- sizeChangeTerminating !(pure $ callsOf $ not . flip elem nonTerminating)
+  pure $ if allTerminating then nonTerminating else notOrdered
+
+||| Makes a non-fuel-spending constructor to be a fuel-spending one
+export
+asFuelSpending : ConWeightInfo -> ConWeightInfo
+asFuelSpending $ MkConWeightInfo $ Right $ StructurallyDecreasing {spendingFuelWExpr, _} = MkConWeightInfo $ Right $ SpendingFuel spendingFuelWExpr
+asFuelSpending w = w
