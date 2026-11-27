@@ -152,6 +152,7 @@ specialiseIfNeeded sig fuel givenParamValues = do
   -- Generate specialised type name
   specName <- specTaskToName lambdaBody
   logPoint DetailedDebug "deptycheck.derive.specialisation" [sig] "Specialised type name: \{show specName}"
+  logPoint Details "deptycheck.derive.specialisation" [sig] "Specialising \{show specName}: \{show lambdaBody}"
   -- Check if `NamesInfoInTypes` contains specialised type
   (specTy, specDecls) : (TypeInfo, List Decl) <- case lookupType specName of
     -- If not, try looking it up via elaborator
